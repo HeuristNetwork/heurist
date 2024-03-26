@@ -723,7 +723,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     }else if($dt_type=='date'){
                         $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
                     }else if($dt_type=="file"){
-                        $value = self::__get_file_name($detail['dtl_UploadedFileID']);
+                        $value = self::__get_file_name(intval($detail['dtl_UploadedFileID']));
                     }else if($dt_type=='freetext' || $dt_type=='blocktext'){
                         list(, $value) = extractLangPrefix($detail['dtl_Value']); // remove possible language prefix
                     }else{
@@ -1089,7 +1089,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     $fld_value = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id); //recursion        
                     array_push($res, $fld_value);
                 }
-                return implode(", ", $res);
+                $res = implode(", ", $res);
             }else{
                 
                     if($mode==1){
@@ -1105,8 +1105,11 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     }
 
                     $s2 = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id);
-                    if(is_array($s2)) return $s2; //error
-                    return $s1. $fullstop_concat .$s2; //recursion;                
+                    if(is_array($s2)){
+                        $res = $s2; //error  
+                    } else {
+                        $res = $s1. $fullstop_concat .$s2; //recursion;                    
+                    }
             }
             
             

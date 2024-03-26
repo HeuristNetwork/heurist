@@ -128,7 +128,7 @@ separate term and each of these values with comma or tab.
         </div>
         <div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     </div>
-    <fieldset style="padding-top:1em;">
+    <fieldset style="padding-top:1em;"><legend style="display:none"></legend>
             <div>
                 <label for="csv_delimiter">Field separator:</label>
                 <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
@@ -169,7 +169,7 @@ separate term and each of these values with comma or tab.
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(Term label is required)</p>
     </div>
-    <fieldset style="padding-top:1em;" class="trm_import">
+    <fieldset style="padding-top:1em;" class="trm_import"><legend style="display:none"></legend>
            
             <div>
                 <label style="color:red">Term (Label)</label><br>
@@ -194,8 +194,7 @@ separate term and each of these values with comma or tab.
     </fieldset> 
 
     <fieldset style="padding-top:1em;display:none" class="trm_translation">
-           
-            <label>Define field for reference</label>
+            <legend>Define field for reference</legend>
             <div>
                 <label>Term (Label)</label><br>
                 <select id="field_ref_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">

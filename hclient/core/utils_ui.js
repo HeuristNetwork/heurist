@@ -276,13 +276,6 @@ window.hWin.HEURIST4.ui = {
             }
             
             
-        }else  if(false && !$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
-           
-                for (var key in topOptions)
-                if(!window.hWin.HEURIST4.util.isempty(topOptions[key])){
-                        window.hWin.HEURIST4.ui.addoption(selObj, key, topOptions[key], false);
-                }
-            
         }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions = '  ';  // <blank>
             window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
@@ -1008,7 +1001,7 @@ window.hWin.HEURIST4.ui = {
                         topOptions.push({key:groupID, title:name});
                 }
             }
-            topOptions.push({key:0, title:'──────────',disabled:true});
+            topOptions.push({key:'', title:'──────────',disabled:true});
             
             groups = window.hWin.HAPI4.sysinfo.db_usergroups;
             
@@ -1955,7 +1948,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
-                        + '<img src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
+                        + '<img alt src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
@@ -2086,7 +2079,7 @@ window.hWin.HEURIST4.ui = {
             
             var bele = ele.find('.btn-rel');
             
-            $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+            $('<img alt src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
                             + top.HAPI4.iconBaseURL + '1\');"/>'
             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
             
@@ -2184,7 +2177,7 @@ window.hWin.HEURIST4.ui = {
                 
                 if(info['relation_recID']>0){
             
-                    $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                    $('<img alt src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
                             + top.HAPI4.iconBaseURL + info['rec_RecTypeID'] + '\');"/>'
                             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(btn_edit);
             
@@ -2726,10 +2719,9 @@ window.hWin.HEURIST4.ui = {
             }else if( actionName=='thematicMapping'){
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
-                scripts.push( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
+                scripts.unshift( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
             }
             
-            //load missed javascripts
             $.getMultiScripts(scripts)
             .done(function() {
                 // all done
@@ -2740,7 +2732,6 @@ window.hWin.HEURIST4.ui = {
             }).always(function() {
                 // always called, both on success and error
             });
-            
         }
     },    
     
@@ -2996,7 +2987,7 @@ window.hWin.HEURIST4.ui = {
         
         if(doNotStartAgain===true) {
             window.hWin.HEURIST4.wait_terminated = true;
-            window.hWin.HEURIST4.ui.wait_ms == 0;
+            window.hWin.HEURIST4.ui.wait_ms = 0;
             return;   
         }
 
@@ -3415,7 +3406,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     var icon_url = item.element.attr( "icon-url" );
     if(icon_url){
     
-        $('<span style="float:left;padding-right:2px"><img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        $('<span style="float:left;padding-right:2px"><img alt src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
           .prependTo( wrapper );    
 
@@ -3486,7 +3477,7 @@ $.fn.sideFollow = function(dtime) {
     var originalTop =  parseInt(floating.attr('data-top'));
     if(!(originalTop>=0)) originalTop = 180;
 
-    dtime ? dtime = dtime : dtime = 1000;
+    dtime = dtime ?dtime :1000;
 
     goFollow();
 

@@ -182,13 +182,6 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         +     recTitle 
         + '</div>';
 
-        
-        if(false && this.options.edit_mode=='popup'){ //action button in reclist
-            html = html
-            + this._defineActionButton({key:'info',label:'Info', title:'', icon:'ui-icon-info'}, null,'icon_text')
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
-        }
-        
 
         return html+'</div>';
         

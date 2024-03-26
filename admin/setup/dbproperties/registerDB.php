@@ -162,7 +162,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             
                 $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
 ?>
-    <fieldset>
+    <fieldset><legend style="display:none"></legend>
     
     <div>
         <div class="header"><label>Database:</label></div>
@@ -212,7 +212,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
                    <input type="hidden" name="sa_protected" value="<?=$sysadmin_protection?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-<fieldset style="padding-right:30px">
+<fieldset style="padding-right:30px"><legend style="display:none"></legend>
 
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Registration URL:</label></div>
@@ -423,7 +423,7 @@ function registerDatabase() {
                         
                         $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
  ?>                  
- <fieldset>
+ <fieldset><legend style="display:none"></legend>
                         <div><div class='header'>Database:</div>
                         <div class='text'><?php echo HEURIST_DBNAME;?></div></div>
                         

@@ -341,8 +341,8 @@ class DbUsrTags extends DbEntityBase
         $rec_RecTypeID = @$this->data['rec_RecTypeID'];
         if($rec_RecTypeID>0){ 
             $assignIDs = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
-                .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID);
-                
+                .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID, 'intval');
+            $assignIDs = prepareIds($assignIDs);   
             if($assignIDs==null || count($assignIDs)==0){             
                 $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                 return false;
@@ -387,7 +387,7 @@ class DbUsrTags extends DbEntityBase
 
             
         }else { //assign by default
-            $mode=='assign';
+            $mode = 'assign';
         }
         
         //create new assignments

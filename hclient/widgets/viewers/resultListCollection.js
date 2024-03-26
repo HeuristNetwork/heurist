@@ -64,24 +64,8 @@ $.widget( "heurist.resultListCollection", {
         this._initBtn('Clear');
         //this._initBtn('List');
         
-        if(false && this.options.action_mode=='map'){
-
-            var btn = $('<button>',{
-                text: window.hWin.HR(this.options.action_Label), 
-            }).button()
-            .css({'font-weight':'bold', 'font-style':'italic', 'margin-right':'10px',
-                'background':'lightgray'}) //padding:'10px', 'font-size':'1.2em'
-            .appendTo( this.element );
-            
-            this['btn_'+name] = btn;
-                
-            this._on( this['btn_'+name], {
-                    click : this.createMapSpace
-                });
-        }else{
-            this._initBtn('Action');    
-            if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
-        }
+        this._initBtn('Action');    
+        if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
         
         this.divMainMenuItems.menu();
         
@@ -174,11 +158,8 @@ $.widget( "heurist.resultListCollection", {
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
-
-        if(window.hWin.HAPI4.has_access()){
-        }else{
-        }
     },
+    
     //
     // custom, widget-specific, cleanup.
     _destroy: function() {

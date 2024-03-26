@@ -118,10 +118,10 @@ title: "Overview"
                 selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
                 renderNode: function(event, data) {
                     
-                    if(true || data.has_access){
+                        //if(data.has_access){}
                         var item = data.node;
                         _defineActionIcons( item );
-                    }
+                    
                 },
                 extensions:["edit", "dnd"],
                 dnd:{

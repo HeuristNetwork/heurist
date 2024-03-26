@@ -124,13 +124,15 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-    print "<!DOCTYPE html>\n";
+?>
+<!DOCTYPE html>
+<?php    
 }
 ?>
-<html>
+<html lang="en">
 <head>
 
-<title><?=(@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE ?></title>
+<title><?php echo (@$_REQUEST['db']?htmlspecialchars($_REQUEST['db']):'').'. '.HEURIST_TITLE; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
@@ -150,8 +152,10 @@ if(defined('IS_INDEX_PAGE')){
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
 if($allowGoogleAnalytics && !$isLocalHost) {
-    if (strpos('HeuristRef.Net', $_SERVER["SERVER_NAME"]===0) 
-        || strpos('heuristref', $_SERVER["SERVER_NAME"])===0) {// Operating on Heurist reference server
+    $host = strtolower($_SERVER["SERVER_NAME"]);
+    
+    if (strpos('heuristref.net', $host===0) 
+        || strpos('heuristref', $host)===0) {// Operating on Heurist reference server
         ?>     
         <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>

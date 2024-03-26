@@ -139,7 +139,7 @@ ini_set('max_execution_time', 0);
             if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
                 
                 $sText = 'Target database '.HEURIST_DBNAME;
-                $sText .= ("\n".'Source database '.@$_REQUEST["databaseID"]);
+                $sText .= ("\n".'Source database '.intval(@$_REQUEST["databaseID"]));
                 $sText .= ("\n".count($response['report']['broken_terms']).' terms were not imported.');
                 foreach($response['report']['broken_terms'] as $idx => $term){
                     $sText .= ("\n".print_r($term, true));
@@ -154,7 +154,7 @@ ini_set('max_execution_time', 0);
             if(@$response['report'] && $response['report']['rectypes']){
 
                 $sText = 'Target database '.HEURIST_DBNAME;
-                $sText .= ("<br>".'Source database '.@$_REQUEST["databaseID"]);
+                $sText .= ("<br>".'Source database '.intval(@$_REQUEST["databaseID"]));
                 $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
                         .$response['report']['rectypes'].'</table>');
                         

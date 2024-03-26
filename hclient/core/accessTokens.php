@@ -30,7 +30,7 @@ if (is_file($parentIni)){
     include_once($parentIni);
 }
 
-echo ' var accessToken_MapBox="'.$accessToken_MapBox.'",';
+echo 'var accessToken_MapBox="'.$accessToken_MapBox.'",';
 echo 'accessToken_MapTiles="'.$accessToken_MapTiles.'",';
 echo 'accessToken_GoogleAPI="'.$accessToken_GoogleAPI.'",';
 echo 'accessToken_GeonamesAPI="'.$accessToken_GeonamesAPI.'";';

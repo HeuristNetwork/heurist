@@ -166,7 +166,7 @@
                         "dty_Type":"freetext",
                         "dty_Size":250,
                         "rst_DisplayWidth":100,
-                        "rst_DisplayName": "Personal Nakala API key",
+                        "rst_DisplayName": "General Nakala API key",
                         "rst_DisplayHelpText": "Retrieved from Nakala website. My Profile &gt; My API key"
                     }
                 }

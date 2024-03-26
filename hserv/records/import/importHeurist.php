@@ -560,7 +560,7 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
         //$mysqli = self::$system->get_mysqli();           
 
         //2. save encoded image as file and register it
-        $entity = new DbRecUploadedFiles(self::$system, null);
+        $entity = new DbRecUploadedFiles(self::$system);
         $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID); //it returns ulf_ID
         if( is_bool($ulf_ID) && !$ulf_ID ){
             return false;
@@ -793,7 +793,7 @@ EOD;
         $def_rst  = $defs['rectypes']['typedefs'];
         $idx_parent = $def_rst['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
         
-        $file_entity = new DbRecUploadedFiles(self::$system, null);
+        $file_entity = new DbRecUploadedFiles(self::$system);
         $file_entity->setNeedTransaction(false);
         
         $records = $data['heurist']['records']; //records to be imported
@@ -1117,7 +1117,10 @@ EOD;
                        }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
                        
                             //download to scratch folder
-                            $tmp_file = HEURIST_SCRATCH_DIR.$value['ulf_OrigFileName'];
+                            
+                            $tmp_file = tempnam(HEURIST_SCRATCH_DIR, '_temp_');
+                            $newfilename = USanitize::sanitizeFileName($value['ulf_OrigFileName']);
+                            
                             //source on the same server as target
                             if(strpos($source_url, HEURIST_SERVER_URL)===0 && @$value['fullPath'])
                             {
@@ -1138,8 +1141,10 @@ EOD;
                             }
 
                             //register imported image
-                            if(file_exists($tmp_file))
-                                $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, null); //it returns ulf_ID
+                            if(file_exists($tmp_file)){
+                                $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, $newfilename); //it returns ulf_ID
+                            }
+                                
                                 
                        }else if($dbsource_is_same) {
                                                

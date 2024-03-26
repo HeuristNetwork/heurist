@@ -596,7 +596,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             window.hWin.HAPI4.checkImage(that._entityName, trmid, 'icon', function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
 
-                                    let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon');
+                                    let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
                                     content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
                                 }
 
@@ -1082,8 +1082,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
             sHint = sHint + '"';
 
-            let recIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
-            
+            let recIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', null, null, true);
+
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
             +sLabel+'&nbsp;&nbsp;'
@@ -1092,7 +1092,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             var html_thumb = '';
             
-            var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+            var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', null, null, true);
 
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                     +recThumb+'&quot;);opacity:1;top:45px;"></div>';
@@ -1211,11 +1211,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else if(this.options.auxilary=='term'){
 
                 //Show grayed arrows next to terms with child terms or on the same level as a term with child terms    
-                if(record_divs.find('.has_child_terms').length == 0){
+                //if(record_divs.find('.has_child_terms').length == 0){
                     //record_divs.find('.no_child_terms').css('visibility', 'hidden');
-                }else{
+                //}else{
 
-                    // Artem: code is remarked dur it causes huge workload if vocabulary has more then 100 terms
+                    // Artem: code is remarked due it causes huge workload if vocabulary has more then 100 terms
                     // Besides it seems senceless. It just hides edit button for children terms
                     /*
                     $.each(record_divs, function(idx, term_div){
@@ -1235,7 +1235,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         }
                     });
                     */
-                }
+                //}
             }
         }
     },
@@ -1439,12 +1439,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 dlg.dialog('option', 'title', s);
             }
 
+            let $trm_image = this._editing.getFieldByName('trm_Thumb');
             if(this._currentEditID<0){
                 //assign vocabulary or parent id for new term only
                 ele = this._editing.getFieldByName('trm_ParentTermID');
                 ele.editing_input('setValue', this.options.trm_ParentTermID>0
                     ?this.options.trm_ParentTermID
                     :this.options.trm_VocabularyID, true);
+            }else if(this.options.select_mode == 'manager' && $trm_image.parents('div.ui-accordion:first').length > 0){
+                // Expand 'more...' accordion if there is a term image
+                window.hWin.HAPI4.checkImage('defTerms', this._currentEditID, 'thumb', function(response){
+                    if(response.data=='ok'){
+                        $trm_image.parents('div.ui-accordion:first').accordion('option', 'active', 0);
+                    }
+                });
             }
             this.options.trm_ParentTermID = -1;
 

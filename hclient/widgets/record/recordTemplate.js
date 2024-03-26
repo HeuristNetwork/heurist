@@ -147,11 +147,10 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             this.element.find('#postform').attr('action', url);
             this.element.find('#postform').submit();
                 
-            if(mode==1){ //open in new window
-                
-            }else{ //download
-                
-            }     
+            //if(mode==1){ //open in new window
+            //}else{ //download
+            //}     
+            
             /*
                 var that = this;                                                
                 

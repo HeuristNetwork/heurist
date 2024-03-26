@@ -47,21 +47,20 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
     _forceClose: false, // skip saving additional mapping and close dialog
 
-    _servers: {
-        'pactols': {title: 'pactols.frantiq.fr', uri: 'https://pactols.frantiq.fr/opentheso/openapi/v1/concept/{TH_ID}/search?'},
-        'huma-num': {title: 'opentheso.huma-num.fr', uri: 'https://opentheso.huma-num.fr/opentheso/openapi/v1/concept/{TH_ID}/search?'}
-    },
+    _servers: {},
 
-    _thesauruses: { // retrieved from php
-        'pactols': [],
-        'huma-num': []
-    },
+    _thesauruses: {},
+
+    _collections: {},
 
     _sel_elements: {
         'server': null,
         'theso': null,
-        'lang': null
+        'lang': null,
+        'group': null
     }, // important select elements
+
+    _refreshCollections: false,
 
     //  
     // invoked from _init after loading of html content
@@ -71,7 +70,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         //this.element => dialog inner content
         //this._as_dialog => dialog container
 
-        var that = this;
+        const that = this;
 
         // Extra field styling
         this.element.find('#frm-search .header').css({width: '125px', 'min-width': '125px', display: 'inline-block'});
@@ -131,13 +130,14 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         this._sel_elements = {
             server: this.element.find('#inpt_server'),
             theso: this.element.find('#inpt_theso'),
-            lang: this.element.find('#inpt_lang')
+            lang: this.element.find('#inpt_lang'),
+            group: this.element.find('#inpt_group')
         };
 
-        // ----- THESAURUS SELECT -----
+        // ----- SERVER SELECT -----
         let request = {
             serviceType: 'opentheso',
-            service: 'opentheso_get_thesauruses'
+            service: 'opentheso_get_servers'
         };
 
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
@@ -149,31 +149,41 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                 return;
             }
 
-            // Store response
+            that._servers = response.data;
+            let options = [];
             for(const server in that._servers){
 
-                const theso = Object.hasOwn(response, server) ? response[server] : [];
-                let options = [];
-
-                for(const key in theso){
-                    options.push({key: key, title: theso[key]});
-                }
-
-                that._thesauruses[server] = options;
+                let url = new URL(that._servers[server]);
+                that._servers[server] = { title: url.hostname, uri: url.href };
+                options.push({key: server, title: that._servers[server]['title']});
             }
+            window.hWin.HEURIST4.ui.fillSelector(that._sel_elements['server'][0], options);
+            window.hWin.HEURIST4.ui.initHSelect(that._sel_elements['server'], false, null, {
+                onSelectMenu: () => { that._displayThesauruses(); }
+            });
 
-            // Update select
-            that._displayThesauruses();
+            that._updateThesauruses();
         });
 
-        // ----- SERVER SELECT -----
-        let options = [];
-        for(const server in this._servers){
-            options.push({key: server, title: this._servers[server]['title']});
-        }
-        window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['server'][0], options);
-        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['server'], false, null, {
-            onSelectMenu: () => { that._displayThesauruses(); }
+        this._on(this._sel_elements['server'], {
+            change: this._displayThesauruses
+        });
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving servers...</span>');
+
+        // ----- THESO SELECT -----
+        this._on(this._sel_elements['theso'], {
+            change: function(){
+                this._refreshCollections = true;
+                this._displayCollections();
+            }
+        });
+
+        // ----- GROUP SELECT -----
+        this._on(this._sel_elements['group'], {
+            change: function(){
+                this.element.find('#btn_cnlGroups').show();
+            }
         });
 
         // ----- LANGUAGE SELECT -----
@@ -182,9 +192,94 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         this.tabs_container = this.element.find('#tabs-cont').tabs();
         this.element.find('#inpt_search').trigger('focus');
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
+        // ----- REFRESH BUTTONS -----
+        this._on(this.element.find('#btn_refTheso').button({showLabel: false, icon: 'ui-icon-refresh'}), {
+            click: function(){
+                this._updateThesauruses(true);
+            }
+        });
+        this._on(this.element.find('#btn_refGroups').button({showLabel: false, icon: 'ui-icon-refresh'}), {
+            click: function(){
+                this._updateCollections(true);
+            }
+        });
+
+        // ----- CANCEL BUTTON -----
+        this._on(this.element.find('#btn_cnlGroups').button({showLabel: false, icon: 'ui-icon-cancel'}).hide(), {
+            click: function(){
+                this._sel_elements['group'].val([]);
+                this.element.find('#btn_cnlGroups').hide();
+            }
+        })
 
         return this._super();
+    },
+
+    /**
+     * Retrieve thesauruses for selected server
+     * 
+     * @param {bool} is_refresh - Update list from opentheso server
+     * 
+     * @returns void
+     */
+    _updateThesauruses: function(is_refresh = false){
+
+        const that = this;
+
+        let ser_id = this._sel_elements['server'].val();
+
+        let request = {
+            service: 'opentheso_get_thesauruses',
+            serviceType: 'opentheso',
+            params: {
+                servers: is_refresh ? ser_id : null,
+                refresh: is_refresh ? 1 : 0
+            }
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
+
+            if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                // display error and show the textbox instead
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+
+                return;
+            }
+
+            for(const server in that._servers){
+
+                const theso = Object.hasOwn(response, server) ? response[server] : [];
+                let options = [];
+
+                if(!Object.hasOwn(that._collections, server)){
+                    that._collections[ser_id] = {};
+                }
+
+                for(const key in theso){
+                    options.push({key: key, title: theso[key]['name']});
+
+                    if(!Object.hasOwn(that._collections[ser_id], key)){
+                        that._collections[ser_id][key] = [];
+                    }
+
+                    if(theso[key]['groups'].length > 0){
+                        for(const g_key in theso[key]['groups']){
+                            that._collections[server][key].push({key: g_key, title: theso[key]['groups'][g_key]});
+                        }
+                    }else if(!is_refresh){
+                        that._refreshCollections = true;
+                    }
+                }
+
+                that._thesauruses[server] = options;
+            }
+
+            that._displayThesauruses();
+        });
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving thesauruses...</span>');
     },
     
     /**
@@ -212,6 +307,98 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
         window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['theso'][0], options);
         window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['theso'], true);
+
+        this._sel_elements['theso'].trigger('change');
+    },
+
+    /**
+     * Retrieve collections for current thesaurus
+     * 
+     * @param {bool} is_refresh - Update list from opentheso server
+     * 
+     * @returns void
+     */
+    _updateCollections: function(is_refresh = false){
+
+        const that = this;
+
+        let ser_id = this._sel_elements['server'].val();
+        let th_id = this._sel_elements['theso'].val();
+
+        if(window.hWin.HEURIST4.util.isempty(th_id)){
+            return;
+        }
+
+        let request = {
+            service: 'opentheso_get_collections', // requested metadata
+            serviceType: 'opentheso', // requesting service
+            params: {
+                server: ser_id,
+                thesaurus: th_id,
+                refresh: is_refresh === true ? 1 : 0
+            }
+        };
+
+        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack(that.element);
+            that._refreshCollections = false;
+
+            if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                // display error and show the textbox instead
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+
+                return;
+            }
+
+            // Process group response
+            let options = [];
+            for(const group_id in response.groups){
+                options.push({key: group_id, title: response.groups[group_id]});
+            }
+            that._collections[ser_id][th_id] = options; // cache collection details
+
+            that._displayCollections();
+        });
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Retrieving available collections...</span>');
+    },
+
+    /**
+     * Update multi-select with collections for current theso
+     * 
+     * @returns void
+     */
+    _displayCollections: function(){
+
+        if(!this._sel_elements || !this._sel_elements['group']){
+            return;
+        }
+
+        this._sel_elements['group'].empty(); // remove previous options
+
+        let server = this._sel_elements['server'].val();
+        let theso = this._sel_elements['theso'].val();
+        let options = this._collections[server][theso];
+
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(options)){
+
+            if(this._refreshCollections){ // update groups
+                this._updateCollections(true);
+                return;
+            }
+
+            options = [{key: '', title: 'No groups available'}];
+        }
+        this._refreshCollections = false;
+
+        window.hWin.HEURIST4.ui.fillSelector(this._sel_elements['group'][0], options);
+        window.hWin.HEURIST4.ui.initHSelect(this._sel_elements['group'], true);
+
+        let length = options.length > 0 ? options.length : 3;
+        this._sel_elements['group'].attr('size', length);
+
+        this._sel_elements['group'].find('option').css('padding', '5px 10px');
     },
     
     /**
@@ -413,7 +600,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             return;
         }
 
-        sURL = sURL.replace('{TH_ID}', th_id);
+        // Add thesaurus
+        sURL += `concept/${th_id}/search?`;
 
         // Add search
         sURL += 'q=' + encodeURIComponent(search);
@@ -425,8 +613,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
             sURL += '&lang=' + language;
         }
         // Add groupings
-        if(!window.hWin.HEURIST4.util.isempty(grouping)){
-            sURL += '&group=' + grouping.replace(' ', '');
+        if(!window.hWin.HEURIST4.util.isempty(grouping) && !window.hWin.HEURIST4.util.isempty(grouping[0])){
+            sURL += '&group=' + grouping.join(',');
         }
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Performing search...</span>'); // show loading cover
@@ -434,7 +622,8 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         // for record_lookup.php
         var request = {
             service: sURL, // request url
-            serviceType: 'opentheso' // requesting service, otherwise no
+            serviceType: 'opentheso', // requesting service, otherwise no
+            preferred_lang: window.hWin.HEURIST4.util.isempty(language) || language.length != 2 ? 'fr' : language
         };
         // calls /heurist/hserv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){

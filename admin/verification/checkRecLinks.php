@@ -63,27 +63,27 @@ if($is_included){
         $query = 'SELECT count(rec_ID) FROM Records '
                 .'where rec_RecTypeID='.RT_RELATION
                 .' and rec_FlagTemporary=0';
-        $cnt_relationships = mysql__select_value($mysqli, $query);
+        $cnt_relationships = intval(mysql__select_value($mysqli, $query));
 
         //count of missed relations in recLinks                    
         $query = 'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
                 .'where rec_RecTypeID='.RT_RELATION
                 .' and rec_FlagTemporary=0 and rl_RelationID is null';
-        $missed_relationships = mysql__select_value($mysqli, $query);
+        $missed_relationships = intval(mysql__select_value($mysqli, $query));
         
 
         //count of links
         $query = 'SELECT count(dtl_ID) FROM Records, recDetails, defDetailTypes '
                 .' where rec_ID=dtl_RecID and dtl_DetailTypeID=dty_ID and dty_Type="resource"'
                 .' and rec_FlagTemporary=0';
-        $cnt_links = mysql__select_value($mysqli, $query);
+        $cnt_links = intval(mysql__select_value($mysqli, $query));
 
         //count of missed links
         $query = 'SELECT count(dtl_ID) FROM Records, defDetailTypes, recDetails left join recLinks on dtl_ID=rl_DetailID'
                 .' where rec_RecTypeID!='.RT_RELATION
                 .' and rec_ID=dtl_RecID and dtl_DetailTypeID=dty_ID and dty_Type="resource"'
                 .' and rec_FlagTemporary=0 and rl_DetailID is null';
-        $missed_links = mysql__select_value($mysqli, $query);
+        $missed_links = intval(mysql__select_value($mysqli, $query));
             
             
         print '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'

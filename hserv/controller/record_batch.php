@@ -80,8 +80,9 @@
 
             $res = $dbRecDetails->changeUrlToFileInBatch();
             
-        }else if(@$_REQUEST['a'] == 'local_to_repository'){
-
+        }else if(@$_REQUEST['a'] == 'local_to_repository'){ 
+            // load several  files (linked to set of records) ext.repository - from recordAction
+            // see also upload_file_nakala in usr_info
             $res = $dbRecDetails->uploadFileToRepository();
 
         }else if(@$_REQUEST['a'] == 'reset_thumbs'){

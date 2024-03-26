@@ -148,7 +148,7 @@ function executeSmartyTemplate($system, $params){
 // xml or text/xml        
     $is_headless = @$params['snippet']==1; //former $is_snippet_output
     if(array_key_exists("mode", $params) && $params["mode"]){
-        $outputmode = htmlspecialchars($params["mode"]);
+        $outputmode = preg_replace('/[^a-z]/', "", $params["mode"]);//for snyk
     }
     if($outputmode!='js' && $outputmode!='html'){
         $is_headless = true;            
@@ -567,7 +567,6 @@ function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
 
             if(empty($str_replace)){
                 $str_replace = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID=$id");
-                $str_replace = $str_replace;
             }
 
             $tpl_source = str_replace($match, $str_replace, $tpl_source);
@@ -1110,7 +1109,8 @@ function save_report_into_file($tpl_source){
 
                 $url = htmlspecialchars(HEURIST_FILESTORE_URL . 'generated-reports/' . $file_name);
                 ?>
-                <html>
+                <!DOCTYPE>
+                <html lang="en">
                 <head>
                     <meta http-equiv="content-type" content="text/html; charset=utf-8">
                     <link rel="stylesheet" type="text/css" href="../../h4styles.css">
@@ -1161,7 +1161,7 @@ function save_report_into_file($tpl_source){
                 Javascript wrap:<br>
                 <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2px; font-family: times; font-size: 10px;"
                     id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" rows="5" cols="150">
-                    <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
+                    <script type="text/javascript" src="<?php echo $surl;?>&mode=js"></script><noscript><iframe title width="80%" height="70%" frameborder="0" src="<?php echo $surl;?>"></iframe></noscript>
                 </textarea>
                 <?php
                 echo "</p></body></html>";
@@ -1497,7 +1497,7 @@ function smarty_error_output($system, $error_msg){
     }
  
     if($outputmode=='js'){
-        $error_msg = add_javascript_wrap4($error_msg, null);
+        $error_msg = add_javascript_wrap4($error_msg);
     }
 
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file

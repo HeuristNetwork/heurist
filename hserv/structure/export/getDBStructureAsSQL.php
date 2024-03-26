@@ -167,11 +167,6 @@ do_print_table('DEF CROSSWALK','defCrosswalk');
 do_print_table('DEF URL PREFIXES','defURLPrefixes');
 
 // ------------------------------------------------------------------------------------------
-// defLanguages
-
-do_print_table('DEF LANGUAGE','defLanguages');
-
-// ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin
 
 if (!$includeUgrps) {

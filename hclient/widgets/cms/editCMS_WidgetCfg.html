@@ -28,7 +28,7 @@
 -->
 <div style="top:0px;font-size:0.9em;padding: 1em;">
 
-    <fieldset style="padding:0;line-height:20px" class="cms-widget-config">
+    <fieldset style="padding:0;line-height:20px" class="cms-widget-config"><legend style="display:none"></legend>
 
         <ul id="tab-headers">
             <li><a href="#setup">Setup</a></li>
@@ -52,7 +52,7 @@
 
         <div id="setup"> <!-- Widget settings -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultList">
 
@@ -300,7 +300,7 @@
 
         <div id="controls"> <!-- Specific control options -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultList">
 
@@ -513,7 +513,7 @@
 
         <div id="tools"> <!-- Tools for custom report widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultListExt">
 
@@ -586,7 +586,7 @@
 
         <div id="layers"> <!-- Maps widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_Map">
 
@@ -701,7 +701,7 @@
 
         <div id="infobox"> <!-- Record / Report popup -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_Map">
 
@@ -758,7 +758,7 @@
 
         <div id="image_blog"> <!-- Result list image and blog controls -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultList">
 
@@ -778,9 +778,9 @@
                         <label>Popup dimensions: </label>
                     </div>
 
-                    <label>&nbsp;&nbsp;&nbsp;<span id="pw_label">Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
+                    <label>&nbsp;&nbsp;&nbsp;<span>Width:</span> <input name="dialog_width" maxlength="3" size="3" value="300"></label>&nbsp;
                     <select name="dialog_hunit"><option value="px">px</option><option value="%">%</option></select>
-                    <label>&nbsp;<span id="ph_label">Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
+                    <label>&nbsp;<span>Height:</span> <input name="dialog_height" maxlength="3" size="3" value="400"></label>&nbsp;
                     <select name="dialog_wunit"><option value="px">px</option><option value="%">%</option></select>
 
                 </div>
@@ -832,7 +832,7 @@
 
         <div id="story"> <!-- Story map -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_StoryMap">
 
@@ -877,13 +877,35 @@
 
                 </div>
 
+                <div class="heurist_StoryMap">
+
+                    <div class="header header_wide">
+                        <label>Map symbology:</label>
+                    </div>
+
+                    <input id="def_map_symbology" name="def_map_symbology" class="text ui-widget-content ui-corner-all"/>
+
+                </div>
+
+                <div class="heurist_StoryMap">
+
+                    <div class="header header_wide">
+                        <label>Story element symbology:</label>
+                    </div>
+
+                    <input id="def_story_symbology" name="def_story_symbology" class="text ui-widget-content ui-corner-all"/>
+
+                    <i class="help-text-block">This is overridden by any animation defined within<br>the story element's record</i>
+
+                </div>
+                
             </fieldset>
 
         </div>
 
         <div id="story_overview"> <!-- Story map, overview and end page -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_StoryMap">
 
@@ -947,7 +969,7 @@
 
         <div id="filters"> <!-- Simple filter widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_SearchInput">
 
@@ -1043,7 +1065,7 @@
 
         <div id="svs_filters"> <!-- Saved filters widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_SearchTree"  style="padding-top:10px">
                     <!-- Allowed groups -->
@@ -1127,7 +1149,7 @@
 
         <div id="datatable"> <!-- Data tables widgets -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultListDataTable">
 
@@ -1168,7 +1190,7 @@
 
         <div id="add_rec"> <!-- Add record widget -->
             
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_recordAddButton">
 
@@ -1201,7 +1223,7 @@
 
         <div id="nav"> <!-- Navigation widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_Navigation">
 
@@ -1256,7 +1278,7 @@
 
         <div id="email"> <!-- Email form widget -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_emailForm">
 
@@ -1287,7 +1309,7 @@
         </div>
         <div id="texts"> <!-- Messages -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_StoryMap">
 
@@ -1374,7 +1396,7 @@
         </div>
         <div id="connections"> <!-- General widget details; i.e. Search group id, linked map, widget id -->
 
-            <fieldset>
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_Map">
 

@@ -68,8 +68,10 @@ if($is_included){
         exit;
     }
 ?>    
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <title><?php echo HEURIST_TITLE; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>
@@ -99,9 +101,9 @@ $missed_folders = array();
 foreach ($databases as $idx=>$db_name){
 
     //mysql__usedatabase($mysqli, $db_name);
-    $db_name = str_replace('`','',$db_name);
-    $db_name2 = $mysqli->real_escape_string('hdb_'.$db_name);
-    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_name2.'`.recUploadedFiles '
+    $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
+    
+    $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_name.'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';
                     
     $res2 = $mysqli->query($query2);

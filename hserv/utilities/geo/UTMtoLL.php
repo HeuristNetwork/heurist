@@ -39,9 +39,9 @@ function ToLL($north, $east, $utmZone, $hemisphere)
   $Mu1 = $M1 / ( $SemiMajor * (1 - $EccSq/4.0 - 3.0*$EccSq*$EccSq/64.0 - 5.0*$EccSq*$EccSq*$EccSq/256.0) );
 
   $Phi1 = $Mu1 + (3.0*$E1/2.0 - 27.0*$E13/32.0) * sin(2.0*$Mu1);
-    + (21.0*$E12/16.0 - 55.0*$E14/32.0)           * sin(4.0*$Mu1);
-    + (151.0*$E13/96.0)                          * sin(6.0*$Mu1);
-    + (1097.0*$E14/512.0)                        * sin(8.0*$Mu1);
+  //  + (21.0*$E12/16.0 - 55.0*$E14/32.0)           * sin(4.0*$Mu1);
+  //  + (151.0*$E13/96.0)                          * sin(6.0*$Mu1);
+  //  + (1097.0*$E14/512.0)                        * sin(8.0*$Mu1);
 
   $sin2phi1 = sin($Phi1) * sin($Phi1);
   $Rho1 = ($SemiMajor * (1.0-$EccSq) ) / pow(1.0-$EccSq*$sin2phi1,1.5);

@@ -75,8 +75,8 @@ if($res){
             $ids = array();
             $titles = array();
         }
-        $ids[]  = $row[0];
-        $vals[] = $row[2];
+        $ids[]  = intval($row[0]);
+        $vals[] = intval($row[2]);
         //$titles[] = $row[0].'  '.$row[2].'  '.$row[3];
     }
     $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);    

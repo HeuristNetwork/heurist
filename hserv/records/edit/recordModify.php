@@ -559,12 +559,16 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $new_swf_stage = 0; 
     $swf_emails = null;
     $stage_field_idx = -1;
+    $is_new_record = $is_insert || $is_save_new_record;
     if($record['FlagTemporary']!=1 && $system->defineConstant('DT_WORKFLOW_STAGE')){
         
-        if($modeImport>0 && $system->defineConstant('TRM_SWF_IMPORT')){
+        if($modeImport > 0 && $system->defineConstant('TRM_SWF_IMPORT')){
             //hardcoded term id for "import" stage
-            $new_swf_stage = TRM_SWF_IMPORT;
-            
+
+            $recID = abs(intval(@$record['ID']));
+            $existing_swf = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $recID AND dtl_DetailTypeID = " . DT_WORKFLOW_STAGE);
+
+            $new_swf_stage = !$existing_swf ? TRM_SWF_IMPORT : 0;
         }else{
             foreach ($detailValues as $idx=>$values) {
                 if($values['dtl_DetailTypeID']==DT_WORKFLOW_STAGE){
@@ -581,7 +585,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             // set $record onwership and visibility 
             // and assign $record['swf'] = true, to avoid recordCanChangeOwnerwhipAndAccess
             // returns array( new_value, curr_value, emails )
-            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage, $is_insert || $is_save_new_record);
+            $swf_res = recordWorkFlowStage($system, $record, $new_swf_stage, $is_new_record);
             
             $new_swf_stage = @$swf_res['new_value'];
             if($new_swf_stage==0){ //not allowed - keep old stage
@@ -829,18 +833,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     {
         $mysqli->query('set @suppress_update_trigger=1');
 
-        if(true){
-            recordUpdateCalcFields( $system, $recID, $rectype );  //update calculated fields in this record
+        recordUpdateCalcFields( $system, $recID, $rectype );  //update calculated fields in this record
             
-            //check that this record my affect other records with calculated fields
-            //1. cfn_RecTypeIDs -> cfn_ID
-            //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
-            $aff_rectypes = findAffectedCalcFields( $system, $rectype );
-            if(is_array($aff_rectypes) && count($aff_rectypes)>0){
-                recordUpdateCalcFields( $system, null, $aff_rectypes);    
-            }
-            
-        }
+        //check that this record my affect other records with calculated fields
+        //1. cfn_RecTypeIDs -> cfn_ID
+        //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
+        //it may consume waste of time findAndUpdateAffectedCalcFields( $system, $rectype );
 
         removeReverseChildToParentPointer($system, $recID, $rectype);    
 
@@ -919,7 +917,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
     
 
-    return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle, 'affectedRty'=>$rectype); 
+    return array("status"=>HEURIST_OK, "data"=> intval($recID), 'rec_Title'=>$newTitle, 'affectedRty'=>$rectype); 
     //, 'counts'=>$rty_counts
     /*
     $response = array("status"=>HEURIST_OK,
@@ -1105,8 +1103,8 @@ function recordDelete($system, $recids, $need_transaction=true,
 function recordGetIncrementedValue($system, $params){
 
 
-    $rt_ID = @$params["rtyID"];
-    $dt_ID = @$params["dtyID"];
+    $rt_ID = intval(@$params["rtyID"]);
+    $dt_ID = intval(@$params["dtyID"]);
 
     if($rt_ID>0 && $dt_ID>0){
 
@@ -1246,7 +1244,7 @@ function recordUpdateOwnerAccess($system, $params){
         if($rec_RecTypeID>0){ 
             $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
-
+            $recids = prepareIds($recids); //for snyk
             if(!is_array($recids) || count($recids)==0){             
                 return $system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
             }
@@ -1414,6 +1412,13 @@ $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels
 */
 function deleteOneRecord($system, $id, $rectype){
 
+    
+    $id = intval($id);
+    
+    if(!($id>0)){
+        return array("error" => 'Record id parameter is not defined or wrong');
+    }
+    
     $bkmk_count = 0;
     $rels_count = 0;
     $deleted = array();  //ids of deleted records
@@ -1422,7 +1427,7 @@ function deleteOneRecord($system, $id, $rectype){
 
     //get list if child records
     $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
-    .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
+    .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.intval($rectype);
     $child_records = mysql__select_list2($mysqli, $query);
     if(is_array($child_records) && count($child_records)>0){
         $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
@@ -1610,11 +1615,12 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
 
         $mysqli = $system->get_mysqli();
 
-        $recids = mysql__select_list2($mysqli, $query);
+        $recids = mysql__select_list2($mysqli, $query, 'intval');
 
         $query = 'DELETE FROM recDetails WHERE dtl_Value='.$parent_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
 
         if(is_array($recids) && count($recids)>0){
+            $recids = prepareIds($recids); //redundant for snyk
             $query = $query.' AND dtl_RecID NOT IN ('.implode(',',$recids).')';
         }
 
@@ -1833,7 +1839,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 // 1. cfn_RecTypeIDs -> cfn_ID
 // 2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID 
 //
-function findAffectedCalcFields( $system, $rty_ID ){
+function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
     
     $mysqli = $system->get_mysqli();
 
@@ -1972,7 +1978,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             $rows = null;
             $mode = null;
             if($record_ids=='*'){
-                $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)';                
+                $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.intval($rty_ID).') AND (NOT rec_FlagTemporary)';                
                 $rows = $mysqli->query($query);
                 //$mode = 'string:';
             }else if (count($record_ids)>1){
@@ -1989,13 +1995,13 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 if($record_ids=='*'){
                      $row = $rows->fetch_row();
                      if($row){
-                         $recID = $row[0];
+                         $recID = intval($row[0]);
                      }else{
                          break;
                      }
                 }else{
                     if(is_array($record_ids) && $idx<count($record_ids)){
-                         $recID = $record_ids[$idx];
+                         $recID = intval($record_ids[$idx]);
                          $idx++;
                     }else{
                          break;
@@ -2562,14 +2568,10 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                         $err_msg = 'Value is empty';  
                     }else{
                         
-                        if(true){ 
-                            
-                            $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
+                        $dtl_Value = Temporal::getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails );
                         
-                        
+/* Use old plain temporals                     
                         }else{
-                            // Use old plain temporals
-                            
                             //yesterday, today, tomorrow, now
                             $sdate = strtolower(super_trim($dtl_Value));
                             if($sdate=='today'){
@@ -2602,6 +2604,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                                 }
                             }
                         }
+*/                        
                     }
                     break;
                 case "float":
@@ -2687,7 +2690,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                         if(!is_a($tmp_file,'stdClass')){
                             $err_msg = is_array($tmp_file) ?$tmp_file['error'] :('System message: '.$tmp_file);
                         }else{
-                            $entity = new DbRecUploadedFiles($system, null);
+                            $entity = new DbRecUploadedFiles($system);
 
                             $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
 
@@ -2702,8 +2705,8 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
 
                         if($err_msg!=''){
                             //send email to heurist team about fail generation from url
-                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'The thumbnailer fails to return an image '.$system->dbname(),
-                                'The thumbnailer fails to return an image '.$record['URL'].'. '.$err_msg);      
+                            $msg = 'The thumbnailer fails to return an image '.$record['URL'].'. '.$err_msg;
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'The thumbnailer fails to return an image '.$system->dbname(), $msg);      
                             $err_msg = '';
                             $dtl_Value = '';
                             $isValid = 'ignore';
@@ -2718,7 +2721,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     }else if(is_string($dtl_Value)){  //this is base64 encoded image
 
                         //save encoded image as file and register it
-                        $entity = new DbRecUploadedFiles($system, null);
+                        $entity = new DbRecUploadedFiles($system);
                         $dtl_UploadedFileID = $entity->registerImage($dtl_Value, 'map_snapshot_'.$recID); //it returns ulf_ID
                         if( is_bool($dtl_UploadedFileID) && !$dtl_UploadedFileID ){
                             $dtl_UploadedFileID = -1; //fail
@@ -2748,7 +2751,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     //note geoType can be not defined - detect it from dtl_Geo
                     list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
                     if($dtl_Value===false){
-                        $err_msg = $geoValue; 
+                        $err_msg = $dtl_Geo; 
                         $isValid = ($validation_mode==0)?'ignore':false;
                         if(!$isValid && $modeImport == 1){
                             $dval['dtl_Value'] = $values[$eltID];
@@ -2977,7 +2980,7 @@ function recordDuplicate($system, $id){
     
     $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
     //$owner = $row[0];
-    $recTypeID = $row[1];
+    $recTypeID = intval($row[1]);
     if (!is_numeric($new_owner) || !(intval($new_owner)>=0)){   //current user is not member of current group
         $new_owner = $currentUserId;
         //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
@@ -3041,13 +3044,15 @@ function recordDuplicate($system, $id){
                 if($res['status']==HEURIST_OK){
                     $new_val = $res['result'];
 
-                    $query = 'UPDATE recDetails set dtl_Value="'
-                    .$mysqli->real_escape_string( $new_val )
-                    .'" where dtl_RecID='.$new_id
+                    $query = 'UPDATE recDetails set dtl_Value=?'
+                    .' where dtl_RecID='.$new_id
                     //.' and dtl_Value='.$id   //old record id
                     .' and dtl_DetailTypeID='.$dty_ID;
 
-                    $res = $mysqli->query($query);
+                    $res = mysql__exec_param_query($mysqli, $query, array('s', $new_val));
+                    
+                    // .$mysqli->real_escape_string( $new_val )
+                    // $res = $mysqli->query($query);
                     if(!$res){
                         $error = 'database error - ' .$mysqli->error;
                         break;
@@ -3128,9 +3133,9 @@ function recordDuplicate($system, $id){
 
             if($res && @$res['status']==HEURIST_OK){
 
-                $new_rel_recid = @$res['data']['added'];
+                $new_rel_recid = intval(@$res['data']['added']);
 
-                if($new_rel_recid){
+                if($new_rel_recid>0){
 
                     //change reference to old record id to new one
                     $query = 'UPDATE recDetails set dtl_Value='.$new_id
@@ -3341,7 +3346,7 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     
     if($new_value>0 && @$record['FlagTemporary']!=1){
     
-        $recID = intval(@$record['ID']);    
+        $recID = intval(@$record['ID']);
         $recID = abs($recID);
   
         

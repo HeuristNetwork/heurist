@@ -41,44 +41,7 @@ $.widget( "heurist.lookupConfig", {
         onClose:null       
     },
 
-    _urls: {
-        tlcmap: {
-            lookup: 'https://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London',
-            service: 'https://ghap.tlcmap.org/places?containsname=London&searchausgaz=on&searchncg=on&searchpublicdatasets=on'
-        },
-        geoName: {
-            lookup: `http://api.geonames.org/searchJSON?username=${accessToken_GeonamesAPI}&maxRows=10&q=London`,
-            service: 'https://www.geonames.org/search.html?q=London&country='
-        },
-        postalCodeSearch: {
-            lookup: `http://api.geonames.org/postalCodeLookupJSON?username=${accessToken_GeonamesAPI}&maxRows=10&placename=London`,
-            service: 'https://www.geonames.org/postalcode-search.html?q=London&country='
-        },
-        bnfLibrary: {
-            lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(bib.anywhere any "Vincent")')}`,
-            service: 'https://catalogue.bnf.fr/rechercher.do?motRecherche=Vincent&critereRecherche=0&depart=0&facetteModifiee=ok'
-        },
-        bnfLibraryAut: {
-            lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(aut.anywhere any "Vincent")')}`,
-            service: 'https://catalogue.bnf.fr/resultats-auteur.do?nomAuteur=Vincent&filtre=1&pageRech=rau'
-        },
-        nomisma: {
-            lookup: {
-                getMints: 'https://nomisma.org/apis/getMints?id=denarius',
-                getHoards: 'https://nomisma.org/apis/getHoards?id=denarius',
-                getFindspots: 'https://nomisma.org/apis/getFindspots?id=denarius'
-            },
-            service: 'https://nomisma.org/browse?q=denarius'
-        },
-        nakala: {
-            lookup: 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15',
-            service: 'https://nakala.fr/search/?q=Literature'
-        },
-        nakala_author: {
-            lookup: 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15',
-            service: 'https://nakala.fr/'
-        }
-    },
+    _urls: null,
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     
@@ -110,6 +73,45 @@ $.widget( "heurist.lookupConfig", {
     //  load configuration and call _initControls
     //
     _init: function() {
+
+        this._urls = {
+            tlcmap: {
+                lookup: 'https://tlcmap.org/ghap/search?format=csv&paging=10&fuzzyname=London',
+                service: 'https://ghap.tlcmap.org/places?containsname=London&searchausgaz=on&searchncg=on&searchpublicdatasets=on'
+            },
+            geoName: {
+                lookup: `http://api.geonames.org/searchJSON?username=${accessToken_GeonamesAPI}&maxRows=10&q=London`,
+                service: 'https://www.geonames.org/search.html?q=London&country='
+            },
+            postalCodeSearch: {
+                lookup: `http://api.geonames.org/postalCodeLookupJSON?username=${accessToken_GeonamesAPI}&maxRows=10&placename=London`,
+                service: 'https://www.geonames.org/postalcode-search.html?q=London&country='
+            },
+            bnfLibrary: {
+                lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(bib.anywhere any "Vincent")')}`,
+                service: 'https://catalogue.bnf.fr/rechercher.do?motRecherche=Vincent&critereRecherche=0&depart=0&facetteModifiee=ok'
+            },
+            bnfLibraryAut: {
+                lookup: `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=unimarcxchange&maximumRecords=10&startRecord=1&query=${encodeURIComponent('(aut.anywhere any "Vincent")')}`,
+                service: 'https://catalogue.bnf.fr/resultats-auteur.do?nomAuteur=Vincent&filtre=1&pageRech=rau'
+            },
+            nomisma: {
+                lookup: {
+                    getMints: 'https://nomisma.org/apis/getMints?id=denarius',
+                    getHoards: 'https://nomisma.org/apis/getHoards?id=denarius',
+                    getFindspots: 'https://nomisma.org/apis/getFindspots?id=denarius'
+                },
+                service: 'https://nomisma.org/browse?q=denarius'
+            },
+            nakala: {
+                lookup: 'https://api.nakala.fr/search?q=Literature&fq=scope%3Ddatas&order=relevance&page=1&size=15',
+                service: 'https://nakala.fr/search/?q=Literature'
+            },
+            nakala_author: {
+                lookup: 'https://api.nakala.fr/authors/search?q=John&order=asc&page=1&limit=15',
+                service: 'https://nakala.fr/'
+            }
+        };
         
         this._available_services = window.hWin.HAPI4.sysinfo['services_list'];
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
@@ -730,7 +732,7 @@ $.widget( "heurist.lookupConfig", {
             tbl.empty();
 
             $.each(this._current_cfg.fields, function(field, code){
-                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"/></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
+                $('<tr><td>'+field+'</td><td><select data-field="'+field+'"></select></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
             });
 
             var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
@@ -770,7 +772,7 @@ $.widget( "heurist.lookupConfig", {
 
         if(this._current_cfg==null){
             
-            this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"/>Select a service to edit or click the assign button');
+            this.element.find('#service_name').html('<span class="ui-icon ui-icon-arrowthick-1-w"></span>Select a service to edit or click the assign button');
             this.element.find('#service_config').hide();
             
         }else{
@@ -1306,10 +1308,11 @@ $.widget( "heurist.lookupConfig", {
             for(j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
+                    break;
                 }
             }
 
-            s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
+            var s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     + $Db.rty(cfg.rty_ID, 'rty_Name');
             s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
 

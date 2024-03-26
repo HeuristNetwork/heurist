@@ -128,11 +128,11 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         //compose database name
         $uName = '';
         if(@$_REQUEST['uname']){
-            $uName = trim(htmlspecialchars(@$_REQUEST['uname'])).'_';
+            $uName = trim(preg_replace('/[^a-zA-Z0-9_]/', "", @$_REQUEST['uname'])).'_'; //for snyk            
             if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
         }
         
-        $database_name = $uName . trim(htmlspecialchars($_REQUEST['dbname']));
+        $database_name = $uName . trim(preg_replace('/[^a-zA-Z0-9_]/', "", $_REQUEST['dbname']));
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
         if(strlen($database_name_full)>64){

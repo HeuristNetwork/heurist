@@ -19,6 +19,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 define('PDIR','../../');  //need for proper path to js and css    
+define('MANAGER_REQUIRED', 1);   
 
 require_once 'initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
@@ -28,11 +29,11 @@ if(isset($_POST['data'])) {
     $data = json_decode($_POST['data']);
     $response = "";
 
-    $subject = filter_var($data->subject);  // Email subject
-    $header = filter_var($data->header);    // Email header
+    $subject = htmlspecialchars(filter_var($data->subject));  // Email subject
+    $header =  htmlspecialchars(filter_var($data->header));    // Email header
     foreach($data->emails as $email) {
         // Determine message & recipients
-        $message = filter_var($email->message);       // Email message
+        USanitize::purifyHTML($email->message);       // Email message
         $recipients = $email->recipients; // One or more e-mail adresses
         foreach($recipients as $recipient) {
             // Check if the e-mail address is valid
@@ -53,7 +54,8 @@ if(isset($_POST['data'])) {
 
 // GET REQUEST
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Bulk email sender</title>
@@ -64,6 +66,9 @@ if(isset($_POST['data'])) {
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+  <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+  <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 
   <style>
     #btn_redo {
@@ -82,7 +87,7 @@ if(isset($_POST['data'])) {
 
 <body class="ui-heurist-bg-light" onload="setup()">
 
-    <fieldset style="font-size:0.8em">
+    <fieldset style="font-size:0.8em"><legend style="display:none"></legend>
 
         <span id="selected-records"></span>
 
@@ -159,8 +164,6 @@ if(isset($_POST['data'])) {
         var text_types = ["freetext", "blocktext"]; // Text only types for the dropdowns
         var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"]; // All types that can be selected from the dropdown
         var definitions; // Record type field definitions
-       // var rectype_index = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_Type; // Record type index in object
-        var type_index = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type; // Field type index in object
         var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
         var recordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids);
         var records = recordset.getRecords(); // Array of record objects
@@ -180,13 +183,15 @@ if(isset($_POST['data'])) {
         function determineOptions(types) {
             // Determine options
             var options = [];
-            for(var d in definitions) { // Go through each field for the first record type
-                var field = definitions[d];
+            // Go through each field for the first record type
+            definitions.each2(function(dty_ID, detail){ 
+                    
+                var field_type = $Db.dty(dty_ID, 'dty_Type');
                 // Appropriate type check
-                if(types.indexOf(field[type_index]) >= 0) { // Check if this field is allowed
-                    options.push({name: field[0], value: d});
+                if(types.indexOf(field_type) >= 0) { // Check if this field is allowed
+                    options.push({name: detail['rst_DisplayName'], value: dty_ID});
                 }
-            }
+            });
 
             // Sort alphabetically
             options.sort(function(a, b) {
@@ -231,7 +236,7 @@ if(isset($_POST['data'])) {
             // Determine record type of first record
             //this.record = records.getFirstRecord(); // Reference to first record; 
             var rectype = recordset.fld(first_record, 'rec_RecTypeID'); // Record type of first record
-            definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
+            definitions = $Db.rst(rectype);
 
             // TEXT ONLY DROPDOWNS
             var text_options = determineOptions(text_types);
@@ -272,7 +277,6 @@ if(isset($_POST['data'])) {
 
          // Determines the actual record value at the given index
         function getValue(record, type, index) {
-
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
                 return record.d[index]; 
@@ -319,10 +323,11 @@ if(isset($_POST['data'])) {
             // Replace hashtags by actual content
             for(var i=0; i<dropdowns.length; i++) {
                 // Index selected in the dropdown
-                var index = $(dropdowns[i]).val();   // field type index
+                var dty_ID = $(dropdowns[i]).val();   // field type index
                 var value = "?";
-                if(index && index > 0) {
-                    value = getValue(record, fields[index][type_index], index); // Record value at the given index
+                if(dty_ID && dty_ID > 0) {
+                    var field_type = $Db.dty(dty_ID, 'dty_Type');
+                    value = getValue(record, field_type, dty_ID); // Record value at the given index
                 }
 
                 // Regex
@@ -340,7 +345,7 @@ if(isset($_POST['data'])) {
             var buttonText = $("#prepare > span").text();// stupid check by button text!!!!!
 
             var details = getSelectedFieldTypeIds();
-            if(details!='' && !this.record.d){
+            if(details!='' && !this.record){ // && !this.record.d
                 //load details if required
                  var request = request = {q: 'ids:'+ids.join(','), w: 'all', detail:details };
                  
@@ -381,7 +386,7 @@ if(isset($_POST['data'])) {
                     var emailIndex = $("#email").val();  // Dropdown index
 
                     if(emailIndex>0){
-                        var emailType = definitions[emailIndex][type_index];  // Field type
+                        var emailType = $Db.dty(emailIndex, 'dty_Type');
                         email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
                         if(!top.HEURIST4.util.isArrayNotEmpty(email.recipients)) email.recipients = [];
 
@@ -399,7 +404,9 @@ if(isset($_POST['data'])) {
                 data.emails.push(owner);
 
                 // Send data to PHP file, everything is checked server-sided
-                $.post("send_email.php", {data: JSON.stringify(data)}, function(response) {
+                $.post("send_email.php", {
+                    db: window.hWin.HAPI4.database,
+                    data: JSON.stringify(data)}, function(response) {
                     window.hWin.HEURIST4.msg.showMsgDlg(response);
                 }).fail(function(jqXHR, textStatus, errorThrown) {
                     window.hWin.HEURIST4.msg.showMsgDlg(jqXHR.status + " --> " + jqXHR.responseText);

@@ -630,8 +630,11 @@ class DbUtils {
 
             //get owner info
             $owner_user = user_getDbOwner($mysqli);
+            
+            //set it to false to check archiving only
+            $real_delete_database = true;
 
-            if(true){ //TEMP
+            if($real_delete_database){
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
 
@@ -717,37 +720,44 @@ class DbUtils {
             if($dump_options==null){
                 $dump_options = array(
                         'add-drop-table' => true,
-                        'skip-triggers' => false,
-                        'single-transaction' => false, //was true till 2024-02-16
+                        'single-transaction' => true, //was true till 2024-02-16
                         'add-drop-trigger' => true,
                         //'databases' => true,
+                        'skip-triggers' =>true,
+                        'skip-dump-date' => true,
+                        //'routines' =>true,
+                        'quick' =>true,
+                        'no-create-db' =>true,
                         'add-drop-database' => true);
                         
                 //do not archive sysArchive and import tables??
-                        
+
                         
             }else{
                 //$dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false);
             }
 
-            //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :0;
+            //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :2;
 
-            if($dbScriptMode==2){
-                if(!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
-                    $dbScriptMode = 0;  
+            if($dbScriptMode==2){  //use native mysqldump
+                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+
+                    $msg = 'The path to mysqldump has not been correctly specified. '
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+                    
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                    if($verbose) echo '<br>'.$msg;
+                    return false;
                 }
-            }else if($dbScriptMode==1){
-                $dbScriptMode = 0; //disabled 
-            }else{
+            }else{ //use php library
                 $dbScriptMode = 0;
             }
             
-            //2023-12-01 - only default mode 
-            $dbScriptMode = 0; 
+            if($verbose){
+                echo 'dump mode: '.$dbScriptMode.'<br>';
+            }
             
-            //remarked to avoid security report alert 
-/*
             if($dbScriptMode==2){ // use mysql native mysqldump utility via shell
             
                 $tables = array();
@@ -759,13 +769,15 @@ class DbUtils {
                         if(is_array($val) && count($val)>0){
                             $tables = $val;    
                         }
-                    }else if($val==true){
+                    }else if($val===true){
                         $options = $options .' --'.$opt;
+                    }else if($val!==false){
+                        $options = $options .' --'.$opt.'='.$val;
                     }
                 }
                 
                 if(count($tables)>0){
-                    $tables = '--tables '.implode(' ', $tables);
+                    $tables = implode(' ', $tables); //'--tables '.
                 }else{
                     $tables = '';
                 }
@@ -773,30 +785,34 @@ class DbUtils {
                 //--log-error=mysqldump_error.log -h {$server_name}
                 //--hex-blob --routines --skip-lock-tables 
                 //-u ".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD."
-                $return = null;
+                $res2 = null;
                 
                 //https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html
                 // use mysql_config_editor to store authentication credentials 
                 // in an obfuscated login path file named .mylogin.cnf. 
-                
-                
-                $cmd = escapeshellarg(HEURIST_DB_MYSQLDUMP)
-                ." --login-path=local {$database_name_full} {$options} {$tables} > " 
-                .$database_dumpfile;
 
+
+                $cmd = escapeshellcmd(HEURIST_DB_MYSQLDUMP);
+                if(strpos(HEURIST_DB_MYSQLDUMP,' ')>0){
+                    $cmd = '"'.$cmd.'"';
+                }
+                
+
+                $cmd = $cmd
+                ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
+                //." --login-path=local 
+                ." {$options} ".escapeshellarg($database_name_full)
+                ." {$tables} > ".$database_dumpfile;
+                
                 $arr_out = array();
                 
-                exec($cmd, $arr_out, $return);
-                
-                
-//echo 'return '.$return;                
-//echo print_r($arr_out,true)."\n\n";
+                exec($cmd, $arr_out, $res2);
 
-                if($return !== 0) {
+                if($res2 !== 0) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
                     $msg = "mysqldump for ".htmlspecialchars($database_name_full)
-                                ." failed with a return code of {$return}";
+                                ." failed with a return code of {$res2}";
                     if($verbose) echo '<br>'.$msg;
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
@@ -808,92 +824,16 @@ class DbUtils {
                     //echo "- $message\n\n";
                     
                     return false;
+                }else if($verbose){
+                    echo 'MySQL Dump completed<br>';                
                 }
                             
             
             }
-            else 
-*/            
-            if($dbScriptMode==1){//NOT USED
-                //create dump manually - all tables without triggers
-                $file = fopen($database_dumpfile, "a+");
-                if(!$file){
-                    $msg = 'Unable to open dump file '.htmlspecialchars($file);
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
-                    if($verbose) echo '<br>'.$msg;
-                    return false;
-                }
-                
-                
-                // SQL settings
-                $settings = "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n
-                /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;\n
-                /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;\n
-                /*!40101 SET NAMES utf8mb4 */;\n
-                /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;\n
-                /*!40103 SET TIME_ZONE='+00:00' */;\n
-                /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;\n
-                /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n
-                /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;\n
-                /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;\n";
-                fwrite($file, $settings);
-
-                // Dump all tables of the database
-                $tables = $mysqli->query("SHOW TABLES");
-                if($tables){
-                    // Start to dump all tables
-                    while ($table = $tables->fetch_row()) {
-                        $table = $table[0];
-
-                        // Select everything in the table
-                        $result = $mysqli->query('SELECT * FROM '.$table);
-                        $num_fields = mysqli_field_count($mysqli);
-
-                        // Drop table sql
-                        $output = "\n\nDROP TABLE IF EXISTS `".$table.'`;';
-
-                        // Create table sql
-                        $row2 = mysqli_fetch_row($mysqli->query('SHOW CREATE TABLE '.$table));
-                        $output.= $row2[1].";\n\n";
-
-                        // Insert values sql
-                        $output .= '/*!40000 ALTER TABLE '.$table.' DISABLE KEYS */;';
-                        for ($i = 0; $i < $num_fields; $i++) {
-                            while($row = $result->fetch_row()) {
-                                $output.= 'INSERT INTO '.$table.' VALUES(';
-                                for($j=0; $j<$num_fields; $j++) {
-                                    $row[$j] = addslashes($row[$j]);
-                                    $row[$j] = str_replace("\n","\\n",$row[$j]);
-
-                                    if (isset($row[$j])) {
-                                        $output.= '"'.$row[$j].'"' ;
-                                    } else {
-                                        $output.= '""';
-                                    }
-
-                                    if ($j<($num_fields-1)) {
-                                        $output.= ',';
-                                    }
-                                }
-                                $output.= ");\n";
-                            }
-                        }
-                        $output .= '/*!40000 ALTER TABLE '.$table.' ENABLE KEYS */;';
-
-                        // Write table sql to file
-                        $output.="\n\n\n";
-                        fwrite($file, $output);
-                    }
-                }
-
-                fwrite($file, "SET FOREIGN_KEY_CHECKS=1;\n");
-                fwrite($file, "SET sql_mode = 'TRADITIONAL';\n");
-                
-                // Close file
-                fclose($file);
+            else{ //USE 3d Party php MySQLdump lib
             
-            }
-            else{ //DEFAULT MODE - USE 3d Party php MySQLdump lib
+                if(@$dump_options['quick']){ unset($dump_options['quick']); }
+                if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }
                 
                 try{
                     $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
@@ -948,7 +888,9 @@ class DbUtils {
                 $system->addError(HEURIST_SYSTEM_CONFIG, 
                         'Template database structure file '.$templateFileName.' not found');
                 return false;
-            }            
+            }   
+            
+            list($database_name_full, $database_name) = mysql__get_names( $database_name_full );         
 
             //create empty database
             if(!DbUtils::databaseCreate($database_name_full)){
@@ -1136,7 +1078,9 @@ class DbUtils {
             $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
         }
 */
-    if(false){ //since 2023-06-02 this folder is not created
+    //since 2023-06-02 documentation_and_templates is not created
+    /*
+    if(false){ 
         if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
             
             folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
@@ -1144,6 +1088,7 @@ class DbUtils {
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
     }
+    */
 
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
@@ -1298,7 +1243,6 @@ class DbUtils {
             
                 // Remove initial values from empty target database
                 $mysqli->query('delete from sysIdentification where 1');
-                $mysqli->query('delete from defLanguages where 1');
                 
                 if(!$isCloneTemplate){
                     $mysqli->query('delete from sysUsrGrpLinks where 1');

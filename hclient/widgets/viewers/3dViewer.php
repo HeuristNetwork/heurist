@@ -34,7 +34,6 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 @todo id - record with 3object media
 
 */
-if(true){
 
 $is_not_inited = true;
 $db = @$_REQUEST['db'];
@@ -163,11 +162,6 @@ if($is_not_inited){
     include_once ERROR_REDIR;
     exit;
 }
-
-}
-
-
-
 
 //$url = EDIR."models/car.glb";
 //$url = EDIR."models/solids.obj";

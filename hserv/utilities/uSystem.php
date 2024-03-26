@@ -81,7 +81,8 @@ class USystem {
         }else{
 
             // server name or IP address of your Web server, null will pull SERVER_NAME from the request header
-            if (true){ //always detatect dynamically  !@$serverName) {
+            $always_detect = true;
+            if ($always_detect){ //always detect dynamically  !@$serverName) {
                 if(@$_SERVER["SERVER_NAME"]){
                     
                     $host_params['server_name'] = $_SERVER["SERVER_NAME"] . 

@@ -64,6 +64,6 @@ if(@$_REQUEST['upload_subfolder']){
 //    $options['upload_dir'] = $_REQUEST['upload_folder'];   
 //}
 
-require('UploadHandler.php');
+require_once 'UploadHandler.php';
 $upload_handler = new UploadHandler($options);
 

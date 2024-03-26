@@ -9,7 +9,7 @@
             <select id="thematic_maps_list" size="5" style="width:290px;margin:5px"></select>
         </div>
     
-        <fieldset style="display:inline-block">
+        <fieldset style="display:inline-block"><legend style="display:none"></legend>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
                 <div class="header">
                     <label for="tm_name">Thematic map title:</label>
@@ -80,7 +80,7 @@
 
 <div id="divAutoRanges" style="display: none; background:white">
         <!-- for numeric and dates -->
-        <fieldset style="display:inline-block" class="numeric date">
+        <fieldset style="display:inline-block" class="numeric date"><legend style="display:none"></legend>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">
                 <div class="header">
                     <label for="int_count">Intervals count:</label>
@@ -140,7 +140,7 @@
             </div>
         </fieldset>
         <!-- for enums -->
-        <fieldset style="display:none" class="enum">
+        <fieldset style="display:none" class="enum"><legend style="display:none"></legend>
             <div style="padding: 0.2em; width: 100%; line-height:2" class="input">                   
                 <label><input type="radio" checked id="enum_db" name="enum_mode"/>Use actual values from database</label>
                 <label><input type="radio" id="enum_all" name="enum_mode"/>Use all terms</label>

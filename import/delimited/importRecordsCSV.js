@@ -2659,7 +2659,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                         + '(determined by the first line of the file) = '
                                         + response.data['col_count']
                                         //+ '. Either change parse parameters or correct source data'
-                                        '. Check that the field and line separators have been correctly set, then click Analyse data again';
++'. Check that the field and line separators have been correctly set, then click Analyse data again';
+
                             $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
 
                             tbl  = $('<table><tr><th>Line#</th><th>Field count</th><th>Raw data</th></tr>')
@@ -3148,11 +3149,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 }
             
             
-            if(false && sWarning){
-                window.hWin.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
-            }else{
-                __doMatchingStart();
-            }
+            //if(false && sWarning){
+            //    window.hWin.HEURIST4.msg.showMsgDlg(sWarning, __doMatchingStart, {title:'Confirmation',yes:'Proceed',no:'Cancel'});
+            //}else
+            __doMatchingStart();
+            
 
        function __doMatchingStart(){    
          
@@ -4475,11 +4476,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if(!window.hWin.HEURIST4.util.isempty(lbl)){
 
                 //verify duplication in parent term and if already added
-                if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
+                /*if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
                 {
                     skip_dup++;
                     continue;
-                }
+                }*/
 
 
                 if(lbl.indexOf('.')<0 && lbl.length>500){
@@ -4824,8 +4825,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $("#selImportId-button").css('width', sw);   
             }
             imp_ID = 0;
-        }else if(page==1){
-            $('#divStep2').find('fieldset').show();
+            //$('#divStep2').find('fieldset').show();
         }else if(page>2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();

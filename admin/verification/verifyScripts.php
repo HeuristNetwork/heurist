@@ -279,8 +279,10 @@ function findMissedTermLinks() {
     $db3_with_terms = array();
     
     foreach ($databases as $idx=>$db_name){
+        
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);
 
-        $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
+        $query = "SELECT sys_dbSubVersion from `$db_name`.sysIdentification";
         $ver = mysql__select_value($mysqli, $query);
         
         if(false && $ver<3){
@@ -300,13 +302,13 @@ function findMissedTermLinks() {
         }else{
             
             
-            $query = 'select count(*) from '.$db_name.'.defDetailTypes where '
+            $query = "select count(*) from `$db_name`.defDetailTypes where "
             .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; 
             //dty_Type="enum" OR dty_Type="relmarker" OR  OR dty_Type="relationtype"
             $value = mysql__select_value($mysqli, $query);
             if($value>0){
 
-                $query = 'select dty_ID, dty_Name, dty_JsonTermIDTree from '.$db_name.'.defDetailTypes where '
+                $query = "select dty_ID, dty_Name, dty_JsonTermIDTree from `$db_name`.defDetailTypes where "
                 .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; // OR dty_Type="relationtype"
                 $value = mysql__select_all($mysqli, $query);
                 
@@ -314,7 +316,7 @@ function findMissedTermLinks() {
                     $db2_with_terms[$db_name] = $value;
                 }else{
                     if(@$_REQUEST["fix"]==1){
-                        $query = 'UPDATE '.$db_name.'.defDetailTypes SET dty_JsonTermIDTree="" where (dty_Type="relationtype")';
+                        $query = "UPDATE `$db_name`.defDetailTypes SET dty_JsonTermIDTree='' WHERE (dty_Type='relationtype')";
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
@@ -424,15 +426,16 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             } 
                 
             $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
-                .$db_name.'.defTerms where trm_ID='.$fields[2];
+                .$db_name.'.defTerms where trm_ID='.intval($fields[2]);
             $vocab = mysql__select_row($mysqli, $query);
             if($vocab){
                 if(!($vocab[2]==$v_code[0] && $vocab[3]==$v_code[1])){
                     print '<div>'.htmlspecialchars($vocab[1].' NEED CHANGE VOCAB CCODES '.$vocab[2].'-'.$vocab[3]).'</div>';
                     
                     if(@$_REQUEST["fix"]==1){
-                        $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.$v_code[0].', trm_IDInOriginatingDB='
-                            .$v_code[1].' where trm_ID='.$fields[2];
+                        $query = 'UPDATE '.$db_name.'.defTerms SET trm_OriginatingDBID='.intval($v_code[0])
+                            .', trm_IDInOriginatingDB='.intval($v_code[1])
+                            .' where trm_ID='.intval($fields[2]);
                         $mysqli->query($query);
                         if($mysqli->error){
                             print '<div style="color:red">'.$mysqli->error.'</div>';                    
@@ -443,7 +446,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 }
                 //find terms
                 $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
-                .$db_name.'.defTerms, '.$db_name.'.defTermsLinks WHERE trm_ID=trl_TermID AND trl_ParentID='.$vocab[0];
+                .$db_name.'.defTerms, '.$db_name.'.defTermsLinks WHERE trm_ID=trl_TermID AND trl_ParentID='.intval($vocab[0]);
                 $terms = mysql__select_all($mysqli, $query);
                 print '<table style="font-size:smaller">';
                 foreach($terms as $term){
@@ -456,7 +459,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             } 
         }else{
             $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
-                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.$f_code[0].' AND dty_IDInOriginatingDB='.$f_code[1];
+                .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
                 print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';                    
@@ -635,11 +638,15 @@ function __setTermYesNo(){
         $vocab = getLocalCode(99, 5445);
         
 // get all enum fields        
-        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"');
+        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"'); //, 'intval' snyk does not see it
+        $enums = prepareIds($enums);
         $enums = 'dtl_DetailTypeID IN ('.implode(',',$enums).')';
         
         if($yes_1>0){
 //replace 99-544x to 2-53x in recDetails
+            $yes_0 = intval($yes_0);
+            $yes_1 = intval($yes_1);
+            $vocab = intval($vocab);
             if($yes_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$yes_0.' WHERE dtl_Value='.$yes_1.' AND '.$enums;
                 $mysqli->query($query);
@@ -652,7 +659,7 @@ function __setTermYesNo(){
                     $mysqli->query($query);
                 }
     //remove old term                            
-                $query = 'DELETE FROM defTerms WHERE trm_ID='.$yes_1;
+                $query = 'DELETE FROM defTerms WHERE trm_ID='.intval($yes_1);
                 $mysqli->query($query);
                 
                 
@@ -670,6 +677,10 @@ function __setTermYesNo(){
         
         if($no_1>0){
 //replace 99-544x to 2-53x in recDetails
+            $no_0 = intval($no_0);
+            $no_1 = intval($no_1);
+            $vocab = intval($vocab);
+
             if($no_0>0){
                 $query = 'UPDATE recDetails SET dtl_Value='.$no_0.' WHERE dtl_Value='.$no_1.' AND '.$enums;
                 $mysqli->query($query);
@@ -842,7 +853,7 @@ function __renameField39(){
         
         mysql__usedatabase($mysqli, $db_name);
         
-        $dty_ID = getDtyLocalCode(2, 39);
+        $dty_ID = intval(getDtyLocalCode(2, 39));
         
         if($dty_ID>0){
             
@@ -1200,10 +1211,10 @@ function __updateDatabases_To_V14($db_process){
 
         //statistics
         $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value!=""';
-        $cnt_dates = mysql__select_value($mysqli, $query);
+        $cnt_dates = intval(mysql__select_value($mysqli, $query));
 
         $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "|VER=1%"';
-        $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
+        $cnt_fuzzy_dates = intval(mysql__select_value($mysqli, $query));
         
         $cnt_index = 0;
         $cnt_fuzzy_dates2 = 0;
@@ -1216,10 +1227,10 @@ function __updateDatabases_To_V14($db_process){
         
         if($ver['sys_dbSubSubVersion']>12){
             $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
-            $cnt_index = mysql__select_value($mysqli, $query);
+            $cnt_index = intval(mysql__select_value($mysqli, $query));
 
             $query = 'SELECT count(dtl_ID) FROM recDetails, defDetailTypes  WHERE dtl_DetailTypeID=dty_ID AND dty_Type="date" AND dtl_Value LIKE "%estMinDate%"';
-            $cnt_fuzzy_dates2 = mysql__select_value($mysqli, $query);
+            $cnt_fuzzy_dates2 = intval(mysql__select_value($mysqli, $query));
             
             print '<br>'.htmlspecialchars($db_name).'  v.'.$ver['sys_dbSubSubVersion'].'  '.$cnt_dates
                 .($cnt_dates<>$cnt_index?'<span style="color:red">':'<span>')
@@ -1476,8 +1487,8 @@ $html_to_hex = array(
 */    
     $cnt = 0;
     $missed = array();     //dty_Type="freetext" OR blocktext
-    $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"');
-   
+    $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"','intval');
+    $txt_field_types = prepareIds($txt_field_types); //snyk does see intval in previous function  
    
     $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');
     $keep_autocommit = mysql__begin_transaction($mysqli);    
@@ -1514,8 +1525,11 @@ $html_to_hex = array(
 
             //3. List unrecognized
             if($m2!=$row[1]){
+                // remove remarks to see raw output
+                /*  remarked due snyk security report
                 print $row[3].' '.$row[0].'<xmp>'.$row[1].'</xmp>';
                 print '<xmp>'.$m2.'</xmp>';
+                */
                 $cnt++;
                 //if($cnt>1000) break;
             }
@@ -1574,15 +1588,15 @@ function __findRDF(){
         
         mysql__usedatabase($mysqli, $db_name);
         
-        $r1 = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes');
-        $d1 = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes');
+        $r1 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes'));
+        $d1 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes'));
         //$s1 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure');
-        $t1 = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms');
+        $t1 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms'));
         
-        $r2 = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null');
-        $d2 = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null');
+        $r2 = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes where rty_ReferenceURL!="" and rty_ReferenceURL is not null'));
+        $d2 = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes where dty_SemanticReferenceURL!="" and dty_SemanticReferenceURL is not null'));
         //$s2 = mysql__select_value($mysqli, 'select count(rst_ID) from defRecStructure where rst_SemanticReferenceURL!="" and rst_SemanticReferenceURL is not null');
-        $t2 = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null');
+        $t2 = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms where trm_SemanticReferenceURL!="" and trm_SemanticReferenceURL is not null'));
 
         if($r2>0 && $d2>1){
             if($r2/$r1>0.2 || $d2>50){
@@ -1591,13 +1605,13 @@ function __findRDF(){
                 $s = 'normal';
             }
             
-            $rec_cnt2 = mysql__select_value($mysqli, 'select count(rec_ID) from Records, defRecTypes '
-                .'where rty_ID=rec_RecTypeID and rty_ReferenceURL!=""');
+            $rec_cnt2 = intval(mysql__select_value($mysqli, 'select count(rec_ID) from Records, defRecTypes '
+                .'where rty_ID=rec_RecTypeID and rty_ReferenceURL!=""'));
 
-            $rec_cnt1 = mysql__select_value($mysqli, 'select count(rec_ID) from Records');
+            $rec_cnt1 = intval(mysql__select_value($mysqli, 'select count(rec_ID) from Records'));
                 
-            $dtl_cnt = mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
-                .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""');
+            $dtl_cnt = intval(mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
+                .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""'));
             
             echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";     //$s1/$s2 
         }

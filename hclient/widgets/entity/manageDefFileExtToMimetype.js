@@ -105,12 +105,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         }
         
         html = html + recTitle + '</div>';
-        
+
+        /*        
         if(false && this.options.edit_mode=='popup'){ //action button in reclist
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
         }
+        */
         
 
         return html+'</div>';

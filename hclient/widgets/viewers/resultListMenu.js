@@ -48,14 +48,14 @@ $.widget( "heurist.resultListMenu", {
             .appendTo(this.element);
 
         this._initMenu('Selected');
-        this._initMenu('Collected');
+        this._initMenu('Collected','Collect');
         this._initMenu('Recode');
-        this._initMenu('Shared');
+        this._initMenu('Shared','Share');
         if(this.options.resultList){
             this._initMenu('Reorder');  
             this.options.search_realm = this.options.resultList.resultList('option', 'search_realm');
         } 
-        //this._initMenu('Experimental',0);
+        //this._initMenu('Experimental','',0);
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
@@ -213,7 +213,10 @@ $.widget( "heurist.resultListMenu", {
         this.divMainMenuItems.remove();
     },
 
-    _initMenu: function(name, competency_level){
+    //
+    //
+    //
+    _initMenu: function(name, menu_label, competency_level){
 
         var that = this;
         var myTimeoutId = -1;
@@ -240,7 +243,7 @@ $.widget( "heurist.resultListMenu", {
 
         var link = $('<a href="#"'
                 +(this.options.is_h6style?' style="padding-right:22px !important"':'')
-                +'>'+window.hWin.HR(name)+'</a>')
+                +'>'+window.hWin.HR(menu_label?menu_label:name)+'</a>')
         //,{});
         
         if(this.options.is_h6style){
@@ -287,6 +290,12 @@ $.widget( "heurist.resultListMenu", {
         
             this['menu_'+name] = $('<ul>')                               //add to avoid cache in devtime '?t='+(new Date().getTime())
             .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListMenu'+name+'.html', function(){  
+                
+                let content = that['menu_'+name].find('ul');
+                if(content.length>0){
+                    that['menu_'+name].html(content.html());
+                }
+                
                 that['menu_'+name].addClass('menu-or-popup')
                 .css('position','absolute')
                 .appendTo( that.document.find('body') )
@@ -687,8 +696,8 @@ $.widget( "heurist.resultListMenu", {
     //
     collectionRender: function(_collection) {
         
-        this.menu_Collected_link.html( window.hWin.HR('Collected')
-                + (_collection && _collection.length>0?':'+_collection.length:'') 
+        this.menu_Collected_link.html( 
+                (_collection && _collection.length>0?(window.hWin.HR('Collected')+':'+_collection.length):window.hWin.HR('Collect')) 
                 + '<span class="ui-icon ui-icon-carat-d" style="right: 2px; left: unset;">');
     },
 

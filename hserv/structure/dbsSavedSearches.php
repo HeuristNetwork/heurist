@@ -98,11 +98,13 @@
         }
         
         $ugrID = prepareIds($ugrID,true);
-        
+
+        $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.implode(',', $ugrID).')';
+
         if($keep_order){
             $order = array();
-            $query = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.implode(',', $ugrID).')';
-            $res = $mysqli->query($query);
+            $query2 = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.implode(',', $ugrID).')';
+            $res = $mysqli->query($query2);
             if($res){
                 while ($row = $res->fetch_row()) {
                      $treedata = json_decode($row[0],true);
@@ -112,12 +114,10 @@
                      
                 }
             }
-        }
-        
-        $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.implode(',', $ugrID).')';
 
-        if($keep_order && count($order)>0){
-            $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
+            if(count($order)>0){
+                $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
+            }
         }
 
         $res = $mysqli->query($query);
@@ -153,7 +153,7 @@
             }
             else if (is_array($value) && @$value['key']>0 && @$value['folder']!==true)
             {
-                array_push($order, $value['key']);
+                array_push($order, intval($value['key']));
             }
         }
     }

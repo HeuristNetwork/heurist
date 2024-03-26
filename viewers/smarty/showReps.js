@@ -278,7 +278,7 @@ function ShowReps( is_snippet_editor ) {
 
         }else{
             return; //use global recordset only
-            squery = _getQueryAndTemplate(template_file, false); //NOT USED
+            //squery = _getQueryAndTemplate(template_file, false); //NOT USED
         }
 
         if(_facet_value){
@@ -922,16 +922,17 @@ function ShowReps( is_snippet_editor ) {
         $('#selInsertPattern').parent().hide();
         $('#btnSaveAs').hide();
         $('#btnSave').attr('title','');
+        $('#lblFormula').show();
         
         if(onChangeEvent){
             $('.rtt-tree').css({top:'60px'});
             $('#btnSaveAs').parent().hide();
             $('#templateCode').css({'bottom':'50%', top:'10px'});
-            $('#lblFormula').show();
             $('#divHelpLink').hide();
             $('#templateTree').css({'padding-top':'0px'});
             $('#rectype_selector').parent().css({'margin-top':'0px'});
         }else{
+            $('#lblFormula').css({top:'20px'});
             $('.rtt-tree').css({top:'85px'});
         }
         
@@ -1651,7 +1652,7 @@ this_id       : "term"
                 
                 _varname = '';
                 
-                if(false && _nodep.data.varname){
+                if(false){ // && _nodep.data.varname
                     _varname = _nodep.data.varname;
                 }else
                 {

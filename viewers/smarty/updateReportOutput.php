@@ -116,29 +116,33 @@ function doReport($system, $update_mode, $format, $row){
     
     $res = 1;    
 
+    /* not allows due to security reasons
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
-		if(substr($dir,-1)!="/") $dir = $dir."/";
+        $dir = USanitize::sanitizePath($dir);
 	}else{
-		$dir = $system->getSysDir('generated-reports');
-        if(!folderCreate($dir, true)){
-            die('Failed to create folder for generated reports');
-        }   
-	}
+    */
+	$dir = $system->getSysDir('generated-reports');
+    if(!folderCreate($dir, true)){
+        die('Failed to create folder for generated reports');
+    }   
+	
     
     if($format==null){
-        $format = $row['rps_URL'];
-        if(strpos($format,'&mode=')!==false){
+        if(strpos(@$row['rps_URL'],'&mode=')!==false){
             $params = array();
-            parse_str($format, $params);
-            $format = $params['mode'];
+            parse_str($row['rps_URL'], $params);
+            $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']); //for snyk    
+        }else{
+            $format = null;
         }
     }
-    if(!preg_match('/html|js|txt|csv|xml|json|css/',$format)){
+    if($format==null || !preg_match('/html|js|txt|csv|xml|json|css/',$format)){
         $format = 'html'; //default
     }
 
 	$filename = basename(($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template']);
+    $filename = USanitize::sanitizeFileName($filename);
 
 	$outputfile = $dir.$filename;
 

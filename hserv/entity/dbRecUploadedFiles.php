@@ -43,15 +43,8 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     // constructor - load configuration from json file
     //    
-    function __construct( $system, $data ) {
-        
-       if($data==null){
-           $data = array();
-       } 
-       if(!@$data['entity']){
-           $data['entity'] = 'recUploadedFiles';
-       }
-        
+    public function __construct( $system, $data=null ) {
+
        parent::__construct( $system, $data );
        
        $this->error_ext = 'Error inserting file metadata or unable to recognise uploaded file format. '
@@ -338,7 +331,7 @@ class DbRecUploadedFiles extends DbEntityBase
         
         if($ret){
             
-            $fieldvalues = $this->data['fields'];
+            $fieldvalues = $this->data['fields']; //current record
             
             /*
             if(!@$fieldvalues['ulf_OrigFileName']){
@@ -1110,10 +1103,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         continue;   
                     }
 
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
-                             .$mysqli->real_escape_string($res[0]).'"'
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
                              .$where_ids;
-                    $res = $mysqli->query($query);
+                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
 
                     $dups_ids = array();
                     while ($remote_id = $res->fetch_row()) {
@@ -1174,17 +1166,19 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         if(file_exists($res_fullpath)){
                             $f_size = filesize($res_fullpath);
                             $f_md5 = md5_file($res_fullpath);
+                            
+                            $file_id = intval($file_dtls['ulf_ID']);
 
                             $is_unique = true;
                             foreach ($dups_files as $ulf_ID => $file_arr){ 
                                 if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
                                     $is_unique = false;
-                                    $dups_files[$ulf_ID]['dups'][] = intval($file_dtls['ulf_ID']);
+                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
                                     break;
                                 }
                             }
                             if($is_unique){
-                                $dups_files[$file_dtls['ulf_ID']] = array('path'=>$res_fullpath, 'md5'=>$f_md5, 'size'=>$f_size, 'dups'=>array());
+                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath, 
                             }
                         }
                     }
@@ -1252,10 +1246,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if(!empty($extra_desc)){
-                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description ="'
-                                . $mysqli->real_escape_string($extra_desc) 
-                                .'" WHERE ulf_ID=' . intval($ulf_ID);
-                        $mysqli->query($upd_query);
+                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description=? '
+                                    .' WHERE ulf_ID=' . intval($ulf_ID);
+                        mysql__exec_param_query($mysqli, $upd_query, array('s', $extra_desc));
                     }
                 }
 
@@ -1624,7 +1617,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $res = mysql__insertupdate($this->system->get_mysqli(), 'recUploadedFiles', 'ulf', $file_details);
 
                     if($res != $ulf_row['ulf_ID']){
-                        array_push($ret, 'An error occurred while attempting to update file record #' . $ulf_ID);
+                        array_push($ret, 'An error occurred while attempting to update file record #' . intval($ulf_row['ulf_ID']));
                     }else{
                         array_push($ret, 'File details updated');
                     }
@@ -1828,8 +1821,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 if(isset($file->thumbnailName)){
                     $ret['ulf_TempFileThumb'] = $file->thumbnailName;
                 }
-                
-                //!!!!! ,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
                 
         }else{
         

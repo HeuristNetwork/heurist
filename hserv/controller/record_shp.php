@@ -260,35 +260,22 @@ use Shapefile\ShapefileReader;
                     }//for records                    
  
                     fwrite($fd, ']');
-                    if(true){
+                    $is_compressed = true;
                         
-                        if(true){                    
-                            $output = gzencode(file_get_contents($tmp_destination), 6); 
-                            header('Content-Encoding: gzip');
-                        }else{
-                            $output = file_get_contents($tmp_destination);
-                        }
-                        fclose($fd);
-                        
-                        header( 'Content-Type: application/json');    
-                        //header('Content-Length: ' . strlen($output));
-                        unlink($tmp_destination);
-                        
-                        echo $output; 
-                        unset($output);   
-                    
+                    if($is_compressed){                    
+                        $output = gzencode(file_get_contents($tmp_destination), 6); 
+                        header('Content-Encoding: gzip');
                     }else{
-
-                        fclose($fd);
-                        unlink($tmp_destination);
-                        $json = json_encode($json);
-                        header('Content-Type: application/json');
-                        //header('Content-Type: application/vnd.geo+json');
-                        //header('Content-Disposition: attachment; filename=output.json');
-                        header('Content-Length: ' . strlen($json));
-                        exit($json);
-                    
+                        $output = file_get_contents($tmp_destination);
                     }
+                    fclose($fd);
+                    
+                    header( 'Content-Type: application/json');    
+                    //header('Content-Length: ' . strlen($output));
+                    unlink($tmp_destination);
+                    
+                    echo $output; 
+                    unset($output);   
                     
 
                 } catch (ShapeFileException $e) {

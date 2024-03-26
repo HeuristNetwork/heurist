@@ -297,12 +297,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     // cant remove group with assigned fields
     //     
     _deleteAndClose: function(unconditionally){
-
+/*
         if(false && this._getField('rtg_RtCount')>0){
             window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
             return;                
         }
-    
+*/    
         if(unconditionally===true){
             this._super(); 
             

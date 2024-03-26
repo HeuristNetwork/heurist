@@ -795,7 +795,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                     title = this.full_keywords_list[id];
                 }
 
-                if(this.assoc_keywords.length < 0){ // don't need to check, if there are no associated keywords
+                if(this.assoc_keywords.length < 1){ // don't need to check, if there are no associated keywords
                     this.assoc_keywords.push([id, 1, title]);
                     continue;
                 }

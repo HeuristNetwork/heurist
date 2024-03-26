@@ -107,13 +107,19 @@ if(!$error){
         if(is_array($listpaths) && count($listpaths)>0){
 
             $fileinfo = $listpaths[0]; //
-            $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+            $filepath = USanitize::sanitizePath($fileinfo['fullPath']);  //concat(ulf_FilePath,ulf_FileName as fullPath
             $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
             $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
             $sourceType = $fileinfo['ulf_PreferredSource']; //not used
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
+            $fileParams = $fileinfo['ulf_Parameters']; // external repository service id
+            if($fileParams!=null && !empty($fileParams)){
+                $fileParams = json_decode($fileParams, true);
+            }
+                
+            
             $params = null;
             
             if( @$_REQUEST['mode']=='page')     //return full page with embed player
@@ -129,7 +135,8 @@ if(!$error){
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.htmlspecialchars($db).'&file='.$fileid.'&size='.$size;
                 
                     ?>
-                    <html xmlns="http://www.w3.org/1999/xhtml">
+                    <!DOCTYPE>
+                    <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <head>
                             <title>Heurist mediaplayer</title>
                             <base href="<?php echo HEURIST_BASE_URL;?>">
@@ -159,6 +166,7 @@ if(!$error){
             {
 
                 $filepath = resolveFilePath( $filepath );
+                $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
                 
                 if( @$_REQUEST['mode']=='metaonly'){ //get width and height for image file
 
@@ -169,7 +177,7 @@ if(!$error){
                     downloadFileWithMetadata($system, $fileinfo, $_REQUEST['metadata']);
                 
                 }else
-                if(file_exists($filepath)){
+                if(file_exists($filepath) && !is_dir($filepath)){
                     
                     //fix issue if original name does not have ext
                     if(@$_REQUEST['embedplayer']!=1){
@@ -222,10 +230,12 @@ if(!$error){
                     if(@$_REQUEST['mode']=='url'){
            
                         //if it does not start with http - this is relative path             
-                        if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
+                        if(strpos($originalFileName,'_tiled')===0 ||
+                          !(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
                             
+                            $path = USanitize::sanitizePath( $external_url );
                             //check presence of mbtiles file within folder
-                            $path = HEURIST_TILESTACKS_DIR.$external_url;
+                            $path = HEURIST_TILESTACKS_DIR.$path;
                             if(is_dir($path)){
                                 $recs = folderContent($path, 'mbtiles');
                                 if($recs['count']>0){
@@ -258,6 +268,18 @@ if(!$error){
                         
                         
                     }else{
+                        //modify $external_url or perform authorization to external repository here 
+                        // @todo
+                        //if(is_array($fileParams) && @$fileParams['repository']){
+                        //    $service_id = $fileParams['repository'];
+                        //    $credentials = user_getRepositoryCredentials2($system, $service_id);
+                        //    if($credentials!=null){
+                        //           @$credentials[$service_id]['params']['writeApiKey']    
+                        //           @$credentials[$service_id]['params']['readApiKey']
+                        //    }
+                        //}
+                        
+                        
                         header('Location: '.$external_url);  //redirect to URL (external)    
                     }
                     

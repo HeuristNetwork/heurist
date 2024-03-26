@@ -39,6 +39,8 @@
     $dbname = @$_REQUEST['db'];
     $error = System::dbname_check($dbname);
 
+    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname); //for snyk    
+    
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;
@@ -544,7 +546,7 @@
                     $sp = $_REQUEST['saml_entity'];
                     
                     //check saml session
-                    require (dirname(__FILE__).'/../utilities/utils_saml.php');
+                    require_once dirname(__FILE__).'/../utilities/utils_saml.php';
                     
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     
@@ -673,8 +675,12 @@
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 
-            }else if($action == 'upload_file_nakala'){
+            }else if($action == 'upload_file_nakala'){ //@todo - move to separate controller
 
+                // load ONE file to ext.repository - from manageRecUploadedFiles
+                // see also local_to_repository in record_batch
+            
+            
                 // Prepare parameters
                 $params = array();
 
@@ -761,13 +767,13 @@
                 if($system->get_system('sys_NakalaKey')){
                     $params['api_key'] = $system->get_system('sys_NakalaKey');
                 }else{
-                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > Personal Nakala API Key');
+                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > General Nakala API key');
                 }
 
                 $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
 
                 // Upload file
-                $res = uploadFileToNakala($system, $params);
+                $res = uploadFileToNakala($system, $params); //from record edit - define file field
 
                 if($res !== false){
                     // delete local file after upload

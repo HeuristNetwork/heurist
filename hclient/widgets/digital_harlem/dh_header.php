@@ -41,7 +41,11 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     $is_inited = true;
 }
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>DigitalHarlem</title>
+    </head>
     <body>
         <div id="topstuff">
 
@@ -108,7 +112,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                             if($appcode>0){
                                 //detect app
                                 $list = mysql__select_list($system->get_mysqli(), 'recDetails', 'dtl_Value', 
-                                    'dtl_recID='.$row["id"].' and dtl_DetailTypeID=154'); //dev:145  prod:154
+                                    'dtl_recID='.intval($row["id"]).' and dtl_DetailTypeID=154'); //dev:145  prod:154
                                 $classes = '';    
                                 $isNotFound = true;
                                 if(is_array($list))

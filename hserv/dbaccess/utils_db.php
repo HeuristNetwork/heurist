@@ -237,14 +237,14 @@
 
         if($res){
             while ($row = $res->fetch_row()) {
-                $database  = $mysqli->real_escape_string($row[0]);
-                $test = strpos($database, $prefix);
+                $test = strpos($row[0], $prefix);
                 if ($test === 0) {
+                    $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);  //for snyk
                     if ($isFilter) {
                         if ($role == 'user') {
-                            $query = "select ugr_ID from " . $database . ".sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
+                            $query = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         } else if ($role == 'admin') {
-                            $query = "select ugr_ID from " . $database . ".sysUGrps, " . $database .".sysUsrGrpLinks".
+                            $query = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
                             " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
                             " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         }
@@ -494,22 +494,27 @@
         //in our scheme first column is always id (primary key)
         array_shift($columns);
         
+        $columns3 = array();
+        foreach($columns as $idx=>$column){
+            $columns3[] = '`'.preg_replace('/[^a-zA-Z0-9_]/', "", $column).'`';  //for snyk
+        }
+        
         if($idfield!=null && $newid!=null){
             
-            $idx = array_search($idfield, $columns);
-            $columns2 = $columns;
-            $columns2[$idx] = $newid;
+            $idx = array_search($idfield, $columns3);
+            $columns2 = $columns3;
+            $columns2[$idx] = intval($newid);
             $columns2 = implode(',',$columns2);
             
         }else{
-            $columns2 = implode(',',$columns);
+            $columns2 = implode(',',$columns3);
         }
         
-        $where = ' where '.$idfield.'='.$oldid;
+        $where = " where `$idfield`=".intval($oldid);
         
-        $columns = implode(',',$columns);
+        $columns3 = implode(',',$columns3);
         //
-        $query = 'INSERT INTO '.$table.' ('.$columns.') SELECT '.$columns2.' FROM '.$table.' '.$where;
+        $query = "INSERT INTO `$table` ($columns3) SELECT $columns2 FROM `$table`".$where;
     //print $query.'<br>';    
         
         $res = $mysqli->query($query);
@@ -608,17 +613,17 @@
             }else{
                 //check insert or update
                 $res = mysql__select_value($mysqli, 
-                    "SELECT $primary_field FROM $table_name WHERE $primary_field=?", array('s', $recID));
+                    "SELECT `$primary_field` FROM `$table_name` WHERE `$primary_field`=?", array('s', $rec_ID));
                 $isinsert = ($res==null);
             }
         }
 
 
         if($isinsert){
-            $query = "INSERT into $table_name (";
+            $query = "INSERT into `$table_name` (";
             $query2 = ') VALUES (';
         }else{
-            $query = "UPDATE $table_name set ";
+            $query = "UPDATE `$table_name` set ";
         }
 
         $params = array();
@@ -635,6 +640,8 @@
                 continue;
             }
 
+            $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);  //for snyk
+            
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
                     if($allow_insert_with_newid){
@@ -643,7 +650,7 @@
                         continue;     
                     }
                 }
-                $query = $query.$fieldname.', ';
+                $query = $query."`$fieldname`, ";
                 
                 if($fieldname=='dtl_Geo'){
                     $query2 = $query2.'ST_GeomFromText(?), ';
@@ -658,7 +665,7 @@
                 if($fieldname=='dtl_Geo'){
                     $query = $query.'dtl_Geo=ST_GeomFromText(?), ';
                 }else{
-                    $query = $query.$fieldname.'=?, ';
+                    $query = $query."`$fieldname`=?, ";
                 }
             }
 
@@ -735,16 +742,16 @@
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
         
         $result = false;
+        
+        $is_insert = (strpos(strtoupper($query), 'INSERT')===0);
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
-                
-                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
-                
+                $result = true;
             } else {
                 $result = $mysqli->error;
                 if ($result == '') {
-                   $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                   $result = true;
                 }
             }
         }else{        
@@ -756,12 +763,20 @@
                 if(!$stmt->execute()){
                     $result = $mysqli->error;
                 }else{
-                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    $result = true;
                 }
                 $stmt->close();
             }else{
                 $result = $mysqli->error;
             }
+        }
+        
+        if($result===true && $return_affected_rows){
+            if($is_insert){
+                $result = $mysqli->insert_id;
+            }else{
+                $result = $mysqli->affected_rows;
+            }    
         }
 
         return $result;
@@ -795,8 +810,8 @@
         $res = false;
     
         
-        //0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :0;
+        //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
         
         //all scripts are in admin/setup/dbcreate
         if($script_file = basename($script_file)){
@@ -807,13 +822,19 @@
             $res = 'Unable to find sql script '.htmlspecialchars($script_file);
         }else{
             
-            if($dbScriptMode==2 && !(defined('HEURIST_DB_MYSQLPATH') && file_exists(HEURIST_DB_MYSQLPATH))){
-                $dbScriptMode = 0;  
-            }else if($dbScriptMode==1 && !USystem::isMemoryAllowed(filesize($script_file))){
+            if($dbScriptMode==2){
+                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+                
+                    $msg = 'The path to mysql executable has not been correctly specified. '
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+
+                    return array(HEURIST_SYSTEM_CONFIG, $msg);
+                }                
+            }else {
                 $dbScriptMode = 0;
             }
             
-            $dbScriptMode = 0; //disable all others
+            //$dbScriptMode = 0; //disable all others
             
             if($dbScriptMode==2){
                 //shell script - server admin must specify "local" login-path with mysql_config_editor 
@@ -822,20 +843,25 @@
                 $arr_out = array();
                 $res2 = null;
                 
-                /* remarked temporary to avoid security warnings
-                $cmd = HEURIST_DB_MYSQLPATH." --login-path=local -D"
-                        .escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
-                        
-                $output2 = exec($cmd, $arr_out, $res2);
+                $cmd = escapeshellcmd(HEURIST_DB_MYSQLPATH);
+                if(strpos(HEURIST_DB_MYSQLPATH,' ')>0){
+                    $cmd = '"'.$cmd.'"';
+                }
+                
+                /* remarked temporary to avoid security warnings */
+                $cmd = $cmd         //." --login-path=local "
+                ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
+                ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1'; 
+                
+                exec($cmd, $arr_out, $res2);
 
                 if ($res2 != 0 ) {
-                    $error = 'Error: '.print_r($arr_out, true);
-                    //echo($output2);
+                    $error = 'Error: '.print_r($res2, true);
                 }else{
                     $res = true;
                 }
-                */
-            }else if($dbScriptMode==1){
+                
+            /*}else if($dbScriptMode==1){ //DISABLED
                 //internal routine
                 $script_content = file_get_contents($script_file);
 
@@ -870,7 +896,7 @@
                 if($mysqli2!=null){
                     $mysqli2->close();
                 }
-
+            */
             }else{ //3d party function that uses PDO  - DEFAULT
                 
                 if(!function_exists('execute_db_script')){
@@ -1178,7 +1204,8 @@
                                 $row2 = $res2->fetch_row();
                                 if(($row2[0]=='' && $row2[1]=='') || ($row2[0]=='0' && $row2[1]=='0')){
                                     //fails extraction estMinDate, estMaxDate
-                                    $error = 'Empty min, max dates. Min:"'.$min.'" Max:"'.$max.'". Query:'.$query;
+                                    $error = 'Empty min, max dates. Min:"'.
+                                        htmlspecialchars($row2[0].'" Max:"'.$row2[1]).'". Query:'.$query;
                                 }else{
             //4. Keep old plain string temporal object in backup table 
                                     if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
@@ -1194,10 +1221,12 @@
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
                                     if($dtl_Value != $dtl_NewValue_for_update){
-                                        $query = 'UPDATE recDetails SET dtl_Value="'.
-                                                $mysqli->real_escape_string($dtl_NewValue_for_update).'" WHERE dtl_ID='.$dtl_ID;
-                                        $mysqli->query($query);
-                                        if(!($mysqli->affected_rows>=0)){
+                                        $query = 'UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?';
+                                        
+                                        $affected = mysql__exec_param_query($mysqli, $query, 
+                                                        array('si',$dtl_NewValue_for_update, $dtl_ID),true);
+                                        
+                                        if(!($affected>=0)){
                                             //fails update recDetails
                                             $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
                                             $isok = false;
@@ -1251,7 +1280,8 @@
                         } 
                         
                         if($need_populate && $error){ //verbose output
-                            $report[] = 'Rec# '.$dtl_RecID.'  '.$dtl_Value.' '.(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'').' '.$error;
+                            $report[] = 'Rec# '.$dtl_RecID.'  '.htmlspecialchars($dtl_Value.' '
+                                    .(($dtl_Value!=$dtl_NewValue)?$dtl_NewValue:'')).' '.$error;
                         }
                         
                     }
@@ -1421,7 +1451,7 @@
             $values[$idx] = $mysqli->real_escape_string($v);
         }
     }
-
+    
     //
     // $rec_IDs - may by csv string or array 
     // returns array of integers
@@ -1762,6 +1792,7 @@
             //$db_name = HEURIST_DBNAME_FULL;
             $db_name = ''; //$query = ;
         }else{
+            $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
             $db_name = "`$db_name`.";
         }
     

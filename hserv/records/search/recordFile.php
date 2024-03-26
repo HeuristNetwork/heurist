@@ -237,11 +237,17 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         if(is_string($file_ids[0]) && strlen($file_ids[0])>15){
             
             $query = 'ulf_ObfuscatedFileID';
-            if(count($file_ids)>1){
-                escapeValues($mysqli, $file_ids);
-                $query = $query.' in ("'.implode('","', $file_ids).'")';
+
+            $filed_ids2 = array();            
+            foreach($file_ids as $idx=>$v){
+                $filed_ids2[] = preg_replace('/[^a-z0-9]/', "", $v);//for snyk
+            }
+            
+            if(count($filed_ids2)>1){
+                //escapeValues($mysqli, $file_ids);
+                $query = $query.' in ("'.implode('","', $filed_ids2).'")';
             }else{
-                $query = $query.' = "'.$mysqli->real_escape_string($file_ids[0]).'"';
+                $query = $query.' = "'.$filed_ids2[0].'"';
             }
             
         }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){
@@ -263,7 +269,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
         .'fxm_MimeType, ulf_PreferredSource, ulf_OrigFileName, ulf_FileSizeKB,'
         .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added, ulf_MimeExt,'
-        .' ulf_Caption, ulf_Copyright, ulf_Copyowner'
+        .' ulf_Caption, ulf_Copyright, ulf_Copyowner, ulf_Parameters'
         //.($all_fields?', ulf_Thumbnail':'') we don't store thumbnail in database anymore
         .' from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
@@ -360,6 +366,8 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
     
     if($fileid){
 
+        $fileid = preg_replace('/[^a-z0-9]/', "", $fileid);//for snyk
+        
         $thumbfile = 'ulf_'.$fileid.'.png'; // ulf_[obfuscation].png
 
         if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
@@ -504,7 +512,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             list($dim, $range) = explode('=', $range);
             list($range_min,$range_max) = explode('-', $range);
             $range_min = intval($range_min);
-            $range_max = intval($range_maxs);
+            $range_max = intval($range_max);
         }        
 
         header('Content-Description: File Transfer');
@@ -556,18 +564,21 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                 readfile($filename);  //if less than 10MB download at once  
             }else{
                 $handle = fopen($filename, "rb");
-                if($range_max>0){
-                    if($range_min>0) fseek($handle,$range_min);
-                    $chunk = fread($handle, $range_max-$range_min+1);
-                    //echo unpack("c2/n",$chunk); 
-                    echo $chunk; 
-                    //fread($handle, $range_max-$range_min+1);  //by chunks
+                if($handle!==false){
+                    if($range_max>0){
+                        if($range_min>0) fseek($handle,$range_min);
+                        $chunk = fread($handle, $range_max-$range_min+1);
+                        //echo unpack("c2/n",$chunk); 
+                        echo $chunk; 
+                        //fread($handle, $range_max-$range_min+1);  //by chunks
+                    }else{
+                        while (!feof($handle)) {
+                            echo fread($handle, 1000);  //by chunks
+                        }            
+                    }
                 }else{
-                    while (!feof($handle)) {
-                        echo fread($handle, 1000);  //by chunks
-                    }            
+                    error_log('file not found: '.htmlspecialchars($filename));
                 }
-                
             }
         }
     }
@@ -618,14 +629,15 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     }    
     
     
-    $need_remove_tmpfile = false;
+    $_tmpfile = null;
     
     if($is_local){
         
     }else if($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
-        $need_remove_tmpfile = true;
-        $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
-        saveURLasFile($external_url, $filepath); //save to temp in scratch folder
+        
+        $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
+        $filepath = $_tmpfile;
+        saveURLasFile($external_url, $_tmpfile); //save to temp in scratch folder
     }
     
     $file_zip = $downloadFileName.'.zip';
@@ -644,7 +656,9 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip->close();
     
     //remove temp file
-    if($need_remove_tmpfile) unlink($filepath);
+    if($_tmpfile!=null) {
+        unlink($_tmpfile);   
+    }
     
     //donwload
     $contentDispositionField = 'Content-Disposition: attachment; '
@@ -1230,6 +1244,30 @@ function filestoreGetUsageByScan($system){
     return $sz1+$sz2;
 }
 
+function filestoreGetUsageByFolders($system){
+
+    $mediaFolders = $system->get_system('sys_MediaFolders'); 
+    if($mediaFolders==null || $mediaFolders == ''){ //not defined
+        $mediaFolders = 'uploaded_files';
+    }
+    $mediaFolders = explode(';', $mediaFolders); // get an array of folders
+    $dirs = array();
+    
+    foreach ($mediaFolders as $dir){
+        if( $dir && $dir!="*") {
+            $dir2 = $dir;
+            $dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$dir);
+            if($dir){
+                $dirs[$dir2] = folderSize2($dir);
+            }
+        }
+    }
+
+    $dirs['file_uploads'] = folderSize2(HEURIST_FILES_DIR);
+    $dirs['uploaded_tilestacks'] = folderSize2(HEURIST_TILESTACKS_DIR);
+    
+    return $dirs;
+}
 
 /**
 * Calculates disk usage for file_uploads and uploaded_tilestacks folders
@@ -1244,5 +1282,4 @@ function filestoreGetUsageByDb($system){
     
     return $res;
 }
-
 ?>

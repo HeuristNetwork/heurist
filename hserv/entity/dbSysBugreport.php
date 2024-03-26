@@ -129,7 +129,7 @@ class DbSysBugreport extends DbEntityBase
 
         //add current system information into message
         $ext_info = array();
-        array_push($ext_info, "    Browser information: ".$_SERVER['HTTP_USER_AGENT']);
+        array_push($ext_info, "    Browser information: ".htmlspecialchars($_SERVER['HTTP_USER_AGENT']));
 
         //add current heurist information into message
         array_push($ext_info, "   Heurist url: ".HEURIST_BASE_URL.'?db='.HEURIST_DBNAME);
@@ -186,10 +186,10 @@ class DbSysBugreport extends DbEntityBase
                 }
             }
         }
-        
+
         if(sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
                 $bug_title, 
-                (true?$sMessage:$message),  //since 02 Dec 2021 we sent human readable message
+                $sMessage,   //since 02 Dec 2021 we sent human readable message     
                 $filename, true)){
             return array(1); //fake rec id
         }else{

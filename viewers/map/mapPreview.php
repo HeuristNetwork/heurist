@@ -446,7 +446,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     <input size="60" id="mapspace_name"/>
                     <button id="save-button">Save Map</button>
                 </div>
-                <iframe id="checklogin" style="width:10px !important; height:10px !important"></iframe>
+                <iframe title="login" id="checklogin" style="width:10px !important; height:10px !important"></iframe>
             </div>
             <div class="ent_content_full" id="map_container" style="top:60px">
                 <div id="map_digitizer"></div>

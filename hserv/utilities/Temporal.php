@@ -91,7 +91,7 @@ class Temporal {
     );
 
 
-    function __construct( $date, $is_for_search=false ) {
+    public function __construct( $date, $is_for_search=false ) {
         $this->setValue($date, $is_for_search);
     }    
 
@@ -161,9 +161,9 @@ class Temporal {
 
                 if($date['timestamp']['type']=='c'){ //radiometric/carbon
 
-                    if(@$timespan['timestamp']['deviation_negative'] && !@$timespan['timestamp']['deviation_positive']){
+                    if(@$date['timestamp']['deviation_negative'] && !@$date['timestamp']['deviation_positive']){
                         $profile = 2; //slow start
-                    }else if(!@$timespan['timestamp']['deviation_negative'] && @$timespan['timestamp']['deviation_positive']){
+                    }else if(!@$date['timestamp']['deviation_negative'] && @$date['timestamp']['deviation_positive']){
                         $profile = 3; //slow finish    
                     }else{
                         $profile = 1; //central
@@ -252,13 +252,15 @@ class Temporal {
                             }
                         }
                     }
-                }else if(preg_match('/before|bef\.|bef|avant|after|post|aft\.|aft|après/i',$value) || preg_match('/^\d{4}-$/i', $value)){
+                }else if(preg_match('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)/i',$value) 
+                      || preg_match('/^\d{4}-$/i', $value))
+                {
                     if(preg_match('/^\d{4}-$/i', $value)){
                         preg_match_all('/^\d{4}-$/i', $value, $matches);     
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                     }else{
-                        preg_match_all('/before|bef\.|bef|avant|after|post|aft\.|aft|après\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|[-|\w+|\s]+$/i', $value, $matches);     
                     }
 
 
@@ -370,7 +372,7 @@ class Temporal {
 
                         $values = explode('±', $value);
                         $period = $values[1];
-                        if(preg_match('/years|months|days/',$period)){
+                        if(preg_match('/(years|months|days)/',$period)){
                             $period = str_replace('years','Y',$period);
                             $period = str_replace('months','M',$period);
                             $period = str_replace('days','D',$period);
@@ -383,7 +385,7 @@ class Temporal {
                         }else if(strpos($period,'day')!==false){
                             $period = 'P1D';
                         }
-                        if(!preg_match('/Y|M|D$/i',$period)){
+                        if(!preg_match('/[Y|M|D]$/i',$period)){
                             $period = $period.'Y'; //year by default
                         }
                         $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
@@ -941,7 +943,7 @@ class Temporal {
                 }
             }
 
-            if(true){
+            //left pad hours, minutes and seconds
                 if($has_time){
                     if(!@$date['hour']) {
                         $date['hour'] = 0;
@@ -957,9 +959,6 @@ class Temporal {
                         $res = $res.':'.str_pad(strval($date['second']),2,'0',STR_PAD_LEFT);
                     }
                 }
-            }else{   
-                $res = $res.' '.@$date['hour'].':'.@$date['minute'].':'.@$date['second'];
-            }
 
 
             if($isbce){
@@ -1178,7 +1177,7 @@ class Temporal {
     }
 
     //
-    // Finds difference between two dates in years, month, days
+    // Finds difference between two dates in years, months, days
     //
     public static function getPeriod($date1, $date2){
 
@@ -1210,14 +1209,14 @@ class Temporal {
                 $early = new DateTime($dt1);
                 $early->setTime(0, 0);
             }catch(Exception $e){
-                $system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
+                //$system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
             }
             try{
                 $dt2 = Temporal::dateToISO($dt2);
                 $latest = new DateTime($dt2);
                 $latest->setTime(0, 0);
             }catch(Exception $e){
-                $system->addError(HEURIST_INVALID_REQUEST, "An invalid latest date has been provided, " . $e->errorMessage());
+                //$system->addError(HEURIST_INVALID_REQUEST, "An invalid latest date has been provided, " . $e->errorMessage());
             }
 
             if(!$early || !$latest){
@@ -1228,7 +1227,7 @@ class Temporal {
 
                 $middle_day = date('Y-m-d', (strtotime($dt2) + strtotime($dt1)) / 2);
 
-                $res = array("days" => $diff->format('%d'), "months" => $diff->format('%M'), "years" => $diff->format('%y'), "middle" => $middle_day);
+                $res = array("days" => $diff->format('%d'), "months" => $diff->format('%M'), "years" => $diff->format('%y'), "middle" => $middle_day, 'fulldays' => $diff->days);
             }else{
                 $res = false;
             }

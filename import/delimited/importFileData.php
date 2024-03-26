@@ -126,7 +126,7 @@
     				<div id="btnParseData" style="margin-top: 10px;">Analyse</div>
     			</div>
 
-    			<fieldset style="padding-top:1em;">
+    			<fieldset style="padding-top:1em;"><legend style="display:none"></legend>
 
     				<div>
     					<label for="csv_delimiter">Field separator:</label>
@@ -155,7 +155,7 @@
 					<p><b>Step 3</b></p>
 				</div>
 
-				<fieldset style="padding-top:1em;">
+				<fieldset style="padding-top:1em;"><legend style="display:none"></legend>
 
 					<p style="margin: 0px 0px 10px;">Select field assignment<br>(ID and Descriptor fields)</p>
 

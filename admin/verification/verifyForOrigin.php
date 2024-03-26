@@ -27,12 +27,14 @@
     */
     if(!@$_REQUEST['db']) $_REQUEST['db'] = 'Heurist_Bibliographic';
 
-    
     if(@$_REQUEST['verbose']!=1){
         
         define('OWNER_REQUIRED',1);   
         require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
         // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
+        require_once 'verifyValue.php';
+        require_once 'verifyFieldTypes.php';
+    
 ?>  
 <!DOCTYPE html>
 <html lang="en">
@@ -141,7 +143,7 @@
         foreach($rty_IDs as $rty_ID){
             $code = $rty_Codes[$rty_ID];
             if(!@$rty_CodesToCheck[$code]){ //not already was in previous database
-                array_push($rty_IDs_ToCheck, $rty_ID); 
+                array_push($rty_IDs_ToCheck, intval($rty_ID)); 
                 array_push($rty_CodesToCheck, $code); 
             }
        }
@@ -236,6 +238,8 @@
         $trm_Codes2 =  mysql__select_assoc2($mysqli,'SELECT trm_ID, CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB) as trm_Code FROM defTerms');
         
 
+        $stmt = $mysqli->prepare('select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name=?');
+        
         //loop by rectypes        
         foreach ($rty_CodesToCheck as $index=>$rty_Code){
    
@@ -248,16 +252,24 @@
             //check for unexpected concept code by name
             $rty_Name = @$rty_Names[$rty_Code];
             if($rty_Name==null){
-                $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code $rty_Code not found in original database</p>";
+                $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code ".htmlspecialchars($rty_Code)
+                        ." not found in original database</p>";
             }else{
-                $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
-                .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
-                $res = $mysqli->query($query);
+                $res = false;
+
+                call_user_func_array(array($stmt, 'bind_param'), referenceValues(array('s',$rty_Name)));
+                if($stmt->execute()){
+                    $res = $stmt->get_result();
+                }
+                //$query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
+                //$res = $mysqli->query($query);
+                
                 if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
                 $row = $res->fetch_assoc();
                 if($row){
                     if($row[0]!=$db_id || $row[1]!=$orig_id){
-                       $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
+                       $msg_error = $msg_error."<p style='padding-left:20px'>name = ".htmlspecialchars($rty_Name)
+                        ." : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
                     }
                 }
             }
@@ -267,7 +279,7 @@
             .'dty_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree '
             .'from defRecStructure, defDetailTypes, defRecTypes '
             .'where rty_ID=rst_RecTypeID AND dty_ID=rst_DetailTypeID AND rty_OriginatingDBID='
-            .$db_id.' AND rty_IDInOriginatingDB='.$orig_id;
+            .intval($db_id).' AND rty_IDInOriginatingDB='.intval($orig_id);
         
             $res = $mysqli->query($query);
             if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
@@ -345,7 +357,7 @@
                         $red_color = '>';
                     }
                 
-                    array_push($missing, '<i'.$red_color.$f_code.'  '.$f_name.'</i>');
+                    array_push($missing, '<i'.$red_color.htmlspecialchars($f_code.'  '.$f_name).'</i>');
                 }
             }
             if(count($missing)>0){
@@ -358,7 +370,7 @@
                     $missing2 = array();
                     foreach($codes as $rty_code){
                         if(!is_array(@$constraints2[$dty_Code]) || array_search($rty_code, $constraints2[$dty_Code])===false){ //not found or unconstrained
-                            array_push($missing, $rty_code.'  '.@$rty_Names[$rty_code] );
+                            array_push($missing, htmlspecialchars($rty_code.'  '.@$rty_Names[$rty_code]) );
                         }
                         if(!@$fileds_missed_rectypes[$rty_code] && array_search($rty_code, $rty_Codes2)===false){
                             $fileds_missed_rectypes[$rty_code] = $rty_code.'  '.htmlspecialchars(@$rty_Names[$rty_code]);
@@ -366,7 +378,8 @@
                         }
                     }        
                     if(count($missing)>0){
-                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' '.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
+                                    .' '.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .': missing constraint record types '.implode(',',$missing).'</p>';
                     }
                     /*
@@ -404,7 +417,8 @@
                         }
                     }
                     if(@$fileds_differ_terms[$dty_Code]){
-                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code.' <i>'.$fields[$rty_Code][$dty_Code]
+                       $msg_error = $msg_error."<p style='padding-left:40px'>field ".$dty_Code
+                                    .' <i>'.htmlspecialchars($fields[$rty_Code][$dty_Code])
                                     .'</i>: missing terms (see below)</p>';
                     }
                     

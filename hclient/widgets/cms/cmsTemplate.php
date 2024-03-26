@@ -71,7 +71,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title><?php print htmlspecialchars(strip_tags($website_title_translated));?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -243,7 +244,7 @@ if($isWebPage){ //set in websiteRecord.php
             style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
         </div>
         <div id="main-recordview" style="height:100%;<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
-                <iframe style="overflow:none !important;width:100% !important;"></iframe>
+                <iframe title="container" style="overflow:none !important;width:100% !important;"></iframe>
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php

@@ -126,7 +126,6 @@ function hMultiSelect(){
         	return 0;
         }
 
-        return 0;
 	}
 
 	/*

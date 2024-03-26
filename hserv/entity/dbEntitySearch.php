@@ -32,7 +32,7 @@ class DbEntitySearch
     //structure
     private $fields = array();
     
-    function __construct( $system, $fields ) {
+    public function __construct( $system, $fields ) {
        $this->system = $system;
        $this->fields = $fields;
     }
@@ -492,7 +492,7 @@ class DbEntitySearch
                         if($multiLangs!=null && count($order)==1){
                             
                             $query = 'SELECT trn_Code, trn_Source, trn_LanguageCode, trn_Translation FROM defTranslations '
-                            .'WHERE trn_Code = '.$order[0]   //'IN ('.implode(',',$order).') '
+                            .'WHERE trn_Code = '.intval($order[0])   //'IN ('.implode(',',$order).') '
                             .' AND trn_Source IN ("'.implode('","', $multiLangs).'")';
                             
                             $res = $mysqli->query($query);

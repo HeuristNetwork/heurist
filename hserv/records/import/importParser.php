@@ -121,7 +121,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     
     $handle = @fopen($upload_file_name, "r");
     if (!$handle) {
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);                          return false;
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);
         return false;
     }
 
@@ -278,7 +278,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     if($limit==0){ //if limit no defined prepare data and write into temp csv file
         //get filename for prepared filename with converted dates and removed spaces
-        $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCH_DIR
+        //    $encoded_filename = basename($encoded_filename);
+        $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', "prepared");  //basename($encoded_filename)
         if (!is_writable($prepared_filename)) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot save prepared data: '.$prepared_filename);                
             return false;
@@ -760,9 +761,10 @@ private static function _saveEncodedFilename($encoded_filename){
             if(is_array($filenames) && count($filenames)>0){
                 //cleanup
                 foreach ($filenames as $fname){
-                    if(file_exists($fname)){ //&& in HEURIST_SCRATCH_DIR
+                    $fname = USanitize::sanitizePath($fname);
+                    if(strpos($fname, HEURIST_SCRATCH_DIR)===0 && file_exists($fname)){ 
                         unlink($fname);
-                     }
+                    }
                 }
                 $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
                 $mysqli->query($query);
@@ -787,7 +789,8 @@ private static function _saveEncodedFilename($encoded_filename){
         
 private static function _getEncodedFilename($encoded_filename_id){
     $mysqli = self::$system->get_mysqli();
-    $encoded_filename = mysql__select_value($mysqli, 'SELECT imp_filename FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id));
+    $encoded_filename = mysql__select_value($mysqli, 
+        'SELECT imp_filename FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id));
     return $encoded_filename;
 }
 

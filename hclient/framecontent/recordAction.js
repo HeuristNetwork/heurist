@@ -49,9 +49,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         init_scope_type = _scope_type,
         init_field_type = _field_type,
         init_field_value = _field_value,
-        repositories = ['Nakala'], // list of repositories
+        //repositories = ['Nakala'], // list of repositories - RETRIEVED FROM SERVER SIDE
         _allow_empty_replace = false,
-        _default_exceptions = []; // array of default exceptions for case conversions
+        _default_exceptions = [], // array of default exceptions for case conversions
+        _check_field_repeat = false; // check if the field to be used is repeatable
 
 
     /*
@@ -97,6 +98,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //}
     }
 
+    //
+    // Retrieve license types from Nakala
+    //
     function _popuplateNakalaLicense(){
 
         let $sel_license = $('#sel_license');
@@ -408,7 +412,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<div class="heurist-helper1 style="padding: 0.2em 0px;">Looks for existing uploaded files based solely on name, and uses these rather than fetching a new copy. This will produce unwanted results if the names are re-used eg. in different folders.'
                 +'</div></div>').appendTo($fieldset);            
             
-        }else if(action_type=='local_to_repository'){
+        }else if(action_type=='local_to_repository'){ //upload local file to external repository (Nakala)
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_repository">Repository</label></div>'
@@ -426,24 +430,40 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 + '<div class="heurist-helper1 style="padding: 0.2em 0px;">Delete locally stored file(s) after successfully uploading to repository</div>'
             + '</div>').appendTo($fieldset);
 
+            
             if($fieldset.find('#sel_repository').length != 0){
-                let $sel_repos = $fieldset.find('#sel_repository');
-                for (let i = 0; i < repositories.length; i++) {
-                    var repo_name = repositories[i];
-                    window.hWin.HEURIST4.ui.addoption($sel_repos[0], repo_name, repo_name);
-                }
-                $sel_repos.on('change', () => {
-                    let repo = $sel_repos.val();
-                    switch (repo) {
-                        case 'Nakala':
-                            $('#sel_license').parent().show();
-                            _popuplateNakalaLicense();
-                            break;
+                
+            window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list'}, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var repositories = window.hWin.HEURIST4.util.isJSON(response.data);
                     
-                        default:
-                            return;
+                    //service_id, service_label, usr_ID, usr_Name
+
+                    let $sel_repos = $fieldset.find('#sel_repository');
+                    for (let i = 0; i < repositories.length; i++) {
+                        var repo = repositories[i];
+                        var repo_name = repo[1];
+                        var usr_name = repo[3];
+                        //usr_name = window.hWin.HAPI4.SystemMgr.getUserNameLocal(repo[2]);    
+                        
+                        window.hWin.HEURIST4.ui.addoption($sel_repos[0], 
+                                repo[0], 
+                                repo_name+' > '+usr_name);
                     }
-                });
+                    $sel_repos.on('change', () => {
+                        let repo = $sel_repos.val();
+                        if(repo.indexOf('nakala')===0){
+                                $('#sel_license').parent().show();
+                                _popuplateNakalaLicense();
+                        }
+                    });
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+            
+            
             }
         }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', window.hWin.HR('Value to remove'), init_field_value);
@@ -542,6 +562,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
           
             window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);
+
+            _check_field_repeat = true;
         }
 
     }
@@ -788,7 +810,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     request['delete_file'] = 1;
                 }
 
-                if(request['repository'] == 'Nakala'){
+                if(request['repository'].indexOf('nakala')===0){
                     request['license'] = $('#sel_license').val();
                     if(window.hWin.HEURIST4.util.isempty(request['license'])){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
@@ -839,6 +861,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 
             }
 
+            if(_check_field_repeat && _check_field_repeatability()){
+                return;
+            }
+
         }
 
         var scope_type = selectRecordScope.val();
@@ -882,9 +908,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _startAction_continue(request)
         }
     }
-        
 
-        
     /*
     * recIDs - list of records IDS to be processed
     * rtyID - optional filter by record type
@@ -1008,6 +1032,74 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     }
 
+    /**
+     * Check if current record type + base field is repeatable; currently for bulk translating
+     * 
+     * @returns {bool} - true on success, false on failure
+     */
+    function _check_field_repeatability(){
+
+        let rty_ID = selectRecordScope.val();
+        if(!$.isNumeric(rty_ID)){ // multiple rectypes
+            return false;
+        }
+
+        let dty_ID = $('#sel_fieldtype').val();
+        if($Db.rst(rty_ID, dty_ID, 'rst_MaxValues') != 1){
+            return false;
+        }
+
+        // Warn about repeating fields
+        let $dlg = null;
+        let msg = `To avoid issues with editing the affected records in the future, we first recommend making the field "${$Db.rst(rty_ID, dty_ID, 'rst_DisplayName')}" repeatable.<br><br>Would you like to make the field repeatable?`;
+
+        let btns = {};
+
+        btns[window.hWin.HR('Yes')] = function(){
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Updating field definition...');
+
+            let fields = {
+                'rst_DetailTypeID': dty_ID,
+                'rst_RecTypeID': rty_ID,
+                'rst_MaxValues': 0
+            };
+
+            let request = {
+                a: 'save',
+                entity: 'defRecStructure',
+                fields: fields,
+                request_id: window.hWin.HEURIST4.util.random()
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                $dlg.dialog('close');
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst', _startAction);
+            });
+        };
+
+        btns[window.hWin.HR('No, and continue with recode')] = function(){
+            $dlg.dialog('close');
+            _check_field_repeat = false;
+            _startAction();
+        };
+
+        btns[window.hWin.HR('Cancel')] = function(){
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Field repeatability', yes: window.hWin.HR('Yes'), no: window.hWin.HR('No, and continue with recode'), cancel: window.hWin.HR('Cancel')}, {default_palette_class: 'ui-heurist-design'});
+
+        return true;
+    }
 
     //public members
     var that = {

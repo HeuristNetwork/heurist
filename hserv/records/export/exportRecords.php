@@ -65,7 +65,7 @@ abstract class ExportRecords {
 //
 //
 //  
-function __construct( $system ) {
+public function __construct( $system ) {
     $this->setSession($system);
 }  
     
@@ -80,7 +80,7 @@ private function initialize()
     global $system;
     $this->system  = $system;
     $this->mysqli = $system->get_mysqli();
-    $this->$initialized = true;
+    $this->initialized = true;
 }
 
 //
@@ -89,7 +89,7 @@ private function initialize()
 public function setSession($system){
     $this->system  = $system;
     $this->mysqli = $system->get_mysqli();
-    $this->$initialized = true;
+    $this->initialized = true;
 }
 
 //
@@ -303,12 +303,6 @@ public function output($data, $params){
         
         
     }//while records
-    
-    if($is_tlc_export){ // && $idx==count($this->records)
-        //calculate extent of mapdocument - last record
-        $this->records[] = self::_calculateSummaryExtent($this->maplayer_extents, true);
-        $is_tlc_export = false; //avoid infinite loop
-    }
     
     //CLOSE brackets ----------------------------------------
     $this->_outputFooter();

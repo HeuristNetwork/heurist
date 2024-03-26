@@ -952,7 +952,7 @@ $.widget( "heurist.mainMenu6", {
         }
 
         let $favourite_container = this.menues.explore.find('ul.favourite-filters');
-        if($favourite_container.length < 0){
+        if($favourite_container.length==0){
             return;
         }
 
@@ -1207,7 +1207,7 @@ $.widget( "heurist.mainMenu6", {
     _switch_SvsList: function( mode ){
         
         return;//2020-12-15
-        
+/* disabled 2020-12-15        
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
             this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),1);
         }
@@ -1241,6 +1241,7 @@ $.widget( "heurist.mainMenu6", {
         }
         
         this.svs_list.show();
+*/        
     },
 
     //
@@ -1711,7 +1712,7 @@ $.widget( "heurist.mainMenu6", {
         
         //IJ 2020-11-13 always show in explore menu only
         return;
-        
+/* DISABLED 2020-11-13 always show in explore menu only        
         var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
         
         
@@ -1746,13 +1747,7 @@ $.widget( "heurist.mainMenu6", {
         var cont = this.divMainMenu.find('#filter_by_groups');
         cont.children().remove(); //.not(':first')
         $(s).appendTo(cont);
-
-        /*        
-        window.hWin.HEURIST4.filters.getFiltersTree( function(data){
-            window.hWin.HAPI4.currentUser.ugr_SvsTreeData = data; 
-        });
-        */
-        
+*/
     },
 
     //
@@ -1826,12 +1821,7 @@ $.widget( "heurist.mainMenu6", {
                 if(is_mouseleave){
                     that._resetCloseTimers();
                     return; //prevent close on mouse out
-                    
-                    if(that._explorer_menu_locked) return;
-                    that._myTimeoutId2 = setTimeout(function(){ //delay on close
-                            that._closeExploreMenuPopup();
-                            that._collapseMainMenuPanel();
-                    }, that._delayOnCollapse_ExploreMenu);
+
                 }else if(is_locked=='close'){
                     that.coverAll.hide();                 
                     //that._resetCloseTimers();

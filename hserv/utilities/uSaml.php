@@ -23,7 +23,7 @@
 $saml_script = '/var/simplesamlphp/lib/_autoload.php';
 $is_debug = true;
 if(file_exists($saml_script)){
-    require($saml_script);    
+    require_once $saml_script;    
     $is_debug = false;
 }
 
@@ -52,9 +52,15 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
     if($is_debug){
         if(!@$_REQUEST['auth'] && $require_auth){ //fake/debug authorization
                 ?>
-                <html>
+                <!DOCTYPE>
+                <html lang="en">
+                    <head>
+                        <title>Heurist external authentification</title>
+                    </head>
+                    <body>
                     <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
                     <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.htmlspecialchars($dbname); ?>">LOGIN</a>
+                    </body>
                 </html>
                 <?php
                 exit;

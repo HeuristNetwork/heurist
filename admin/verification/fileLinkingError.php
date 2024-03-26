@@ -79,8 +79,10 @@ $mysqli = $system->get_mysqli();
         $counter++;
         
         print "<h2>".htmlspecialchars($db)."</h2>";
+
+    $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
             
-    $query1 = "SELECT * from ".$db.".recUploadedFiles"; // get a list of all the files
+    $query1 = "SELECT * from `$db`.recUploadedFiles"; // get a list of all the files
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
@@ -109,7 +111,7 @@ $mysqli = $system->get_mysqli();
             }
             
             //missed link from recDetails - orphaned files       
-            $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
+            $query2 = "SELECT dtl_RecID from `$db`.recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
@@ -182,7 +184,7 @@ $mysqli = $system->get_mysqli();
                                     'ulf_FilePath'=>@$res['ulf_FilePath'],
                                     'res_relative'=>$relative_path
                                     );
-                    }
+                    }                   
                     }                    
                 } 
             }
@@ -190,83 +192,7 @@ $mysqli = $system->get_mysqli();
     }//while
             
             if (count(@$files_orphaned)>0 || count(@$files_notfound)>0 || count(@$files_path_to_correct)>0){
-            if (false){ 
-                ?>
-                <script>
-                    function markAllMissed(){
-                                                
-                        var cbs = document.getElementsByName('fnf');
-                        if (!cbs  ||  ! cbs instanceof Array)
-                            return false;
-                        
-                        var cball = document.getElementById('fnf_all');    
-                        for (var i = 0; i < cbs.length; i++) {
-                            cbs[i].checked = cball.checked;
-                        }
-                    }
-                    function repairBrokenPaths(){
-                        
-                        function _callback(context){
-                            if(window.hWin.HEURIST4.util.isempty(context) || window.hWin.HEURIST4.util.isempty(context['result'])){
-                                window.hWin.HEURIST4.msg.showMsgErr(null);
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgDlg(context['result']);
-                            }
-                        }
 
-                        var dt2 = {"orphaned":[
-                            <?php
-                            
-                            $pref = '';
-                            foreach ($files_orphaned as $row) { //to remove
-                                print htmlspecialchars($pref.'['.$row['ulf_ID'].','.$row['isfound'].']');
-                                $pref = ',';
-                            }
-                            
-                            print '],"notfound":[';
-                            $pref = '';
-                            //to remove from recDetails and recUplodedFiles
-                            foreach ($files_notfound as $row) { 
-                                print htmlspecialchars($pref.$row['ulf_ID']);
-                                $pref = ',';
-                            }
-                            print '],"fixpath":[';
-                            $pref = '';
-                            
-                            foreach ($files_path_to_correct as $row) {
-                                print htmlspecialchars($pref.$row['ulf_ID']);
-                                $pref = ',';
-                            }
-                        ?>]};
-                        
-                        var dt = {orphaned:[],fixpath:[],notfound:[]};
-                        if(document.getElementById('do_orphaned') 
-                                && document.getElementById('do_orphaned').checked){
-                            dt['orphaned'] = dt2['orphaned'];
-                        }
-                        if(document.getElementById('do_fixpath')
-                                && document.getElementById('do_fixpath').checked){
-                            dt['fixpath'] = dt2['fixpath'];
-                        }
-                        var i;
-                        for (i=0;i<dt2['notfound'].length;i++){
-                            if(document.getElementById('fnf'+dt2['notfound'][i]).checked)
-                                    dt.notfound.push(dt2['notfound'][i]);
-                        }
-                        
-                        //var str = JSON.stringify(dt);
-
-                        var baseurl = "<?=HEURIST_BASE_URL?>admin/verification/repairUploadedFiles.php";
-                        var callback = _callback;
-                        var request = {db:'<?= HEURIST_DBNAME?>', data:dt};
-                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);       
-                        
-                        document.getElementById('page-inner').style.display = 'none';
-                    }
-                </script>
-
-                <?php
-                }   
                 if(count($files_orphaned)>0){
                 ?>
                     <h3>Orphaned files</h3>
@@ -342,11 +268,6 @@ $mysqli = $system->get_mysqli();
                     <?php
                 }
                 print '<hr>';
-                }
-                if(false){
-                ?>
-                To fix the inconsistencies, please click here: <button onclick="repairBrokenPaths()">Repair selected</button><br>
-                <?php
                 }
             }else{
                 print "<br><p><br></p><h3>All uploaded file entries are valid</h3>";

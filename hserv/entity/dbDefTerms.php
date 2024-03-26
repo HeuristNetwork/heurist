@@ -570,10 +570,21 @@ class DbDefTerms extends DbEntityBase
                     
                     $thumb_file_name = @$record['trm_Thumb'];
                     //rename it to recID.png
-                    if($thumb_file_name){
+                    if($thumb_file_name == 'delete'){
+
+                        $thumb = parent::getEntityImagePath($trm_ID, 'thumb', HEURIST_DBNAME, 'png');
+                        $icon = parent::getEntityImagePath($trm_ID, 'icon', HEURIST_DBNAME, 'png');
+
+                        if(!empty($thumb) && file_exists($thumb)){
+                            unlink($thumb);
+                        }
+                        if(!empty($icon) && file_exists($icon)){
+                            unlink($icon);
+                        }
+
+                    }elseif($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
-                    
                     
                     $inverse_termid = @$record['trm_InverseTermId'];
                     $inverse_termid_old = @$record['old_inverse_id'];
@@ -1204,6 +1215,7 @@ class DbDefTerms extends DbEntityBase
         }
             
         if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+            $check_dty_IDs = prepareIds($check_dty_IDs); //for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
             $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
                 .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) AND '

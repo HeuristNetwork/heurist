@@ -23,6 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+// @todo - get rid global variables ie $mysqli
+
 require_once dirname(__FILE__).'/composeSqlOld.php';
 
 /*
@@ -559,7 +561,7 @@ class HQuery {
     var $fixed_sortorder = null;
 
 
-    function __construct($level, $query_json, $search_domain=null, $currUserID=null) {
+    public function __construct($level, $query_json, $search_domain=null, $currUserID=null) {
 
         $this->level = $level;
         $this->search_domain = $search_domain;
@@ -574,7 +576,7 @@ class HQuery {
         }
     }
 
-    function makeSQL(){
+    public function makeSQL(){
 
         global $publicOnly, $wg_ids, $is_admin; //, $mysqli, $use_user_wss;
 
@@ -689,7 +691,7 @@ class HQuery {
     // sort phrases must be on top level array - all others will be ignored
     // {"sort":"rt"}
     //
-    function extractSortPharses( $query_json ){
+    private function extractSortPharses( $query_json ){
         
         $this->sort_phrases = array();
         
@@ -715,7 +717,7 @@ class HQuery {
     //
     // {"sort":"f:233"}  {"sort":"-title"}  {"sort":"set:4,5,1"}  
     //    
-    function createSortClause() {
+    private function createSortClause() {
         
         global $mysqli;
         
@@ -890,7 +892,7 @@ class HLimb {
     //besides  not,any
     //
 
-    function __construct(&$parent, $conjunction, $query_json) {
+    public function __construct(&$parent, $conjunction, $query_json) {
 
         $this->parent = &$parent;
         $this->conjunction = $conjunction;
@@ -922,7 +924,7 @@ class HLimb {
     }
 
     
-    function setRelationPrefix($val){
+    public function setRelationPrefix($val){
         foreach ($this->limbs as $ind=>$limb){
             $res = $limb->setRelationPrefix($val);
         }
@@ -930,7 +932,7 @@ class HLimb {
     //
     // fills $tables and $where_clause
     //
-    function makeSQL(){
+    public function makeSQL(){
         global $rty_id_relation;
 
         $cnj = $this->allowed[$this->conjunction];
@@ -995,7 +997,7 @@ class HLimb {
         return $res;        
     }
 
-    function addTable($table){
+    public function addTable($table){
         if($table){
             if(is_array($table)){
                 $this->tables = array_merge($this->tables, $table);
@@ -1083,7 +1085,7 @@ class HPredicate {
     */
 
 
-    function __construct(&$parent, $key, $value, $index_of_predicate) 
+    public function __construct(&$parent, $key, $value, $index_of_predicate) 
     {
         global $dty_id_relation_type;
 
@@ -1127,7 +1129,7 @@ class HPredicate {
             if(is_array($value) &&  count($value)>0 && 
                 !(is_numeric(@$value[0]) || is_string(@$value[0])) )
             { //subqueries
-                //special bahvior for relation - extract reltypes and record ids
+                //special behavior for relation - extract reltypes and record ids
                 $p_type = strtolower($this->pred_type);
                 if($p_type=='related' ||
                    $p_type=='related_to' || $p_type=='relatedto' || $p_type=='rt' ||
@@ -1225,19 +1227,22 @@ class HPredicate {
 
     }
     
-    function getTopLevelQuery(){
+    //
+    // not used 
+    //
+    private function getTopLevelQuery(){
         if($this->parent->level==0){
             return $this->parent;
         }else{
-            return getTopLevelQuery($parent->parent);
+            return $this->parent->getTopLevelQuery();
         }
     }
     
-    function setRelationPrefix($val){
+    public function setRelationPrefix($val){
         $this->relation_prefix = $val;
     }
 
-    function makeSQL(){
+    public function makeSQL(){
 
         global $mysqli, $top_query;
 
@@ -1398,7 +1403,7 @@ class HPredicate {
 
     }
 
-    function cleanQuotedValue($val) {
+    private function cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
             if ($val[strlen($val)-1] == '"')
                 $val = substr($val, 1, -1);
@@ -1413,7 +1418,7 @@ class HPredicate {
     //
     //
     //
-    function predicateSpatial(){
+    private function predicateSpatial(){
         
         $p = "rd".$this->qlevel.".";
         $p = "";
@@ -1436,7 +1441,7 @@ class HPredicate {
     //
     //
     //
-    function predicateField(){
+    private function predicateField(){
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
 
@@ -1697,7 +1702,7 @@ class HPredicate {
     //
     //
     //
-    function predicateAnyField(){
+    private function predicateAnyField(){
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
         
@@ -1794,7 +1799,7 @@ class HPredicate {
     //
     //
     //
-    function predicateRecIds(){
+    private function predicateRecIds(){
 
         global $top_query, $params_global;
         $not_nested = (@$params_global['nested']===false);
@@ -1841,7 +1846,7 @@ class HPredicate {
     //
     //
     //
-    function predicateBookmarked(){
+    private function predicateBookmarked(){
         
         $where = '';
         $this->field_type = "link";
@@ -1878,7 +1883,7 @@ class HPredicate {
     //
     //
     //
-    function predicateKeywords(){
+    private function predicateKeywords(){
         
         $this->field_type = "link";
         $p = $this->qlevel;
@@ -1978,7 +1983,7 @@ class HPredicate {
     /**
     * find records that have pointers to specified records
     */
-    function predicateLinkedTo(){
+    private function predicateLinkedTo(){
     
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
@@ -2092,7 +2097,7 @@ class HPredicate {
     /**
     * find records that have pointers to specified records
     */
-    function predicateLinkedFrom(){
+    private function predicateLinkedFrom(){
         
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
@@ -2182,7 +2187,7 @@ class HPredicate {
     * 
     * $this->field_id - relation type (term id)
     */
-    function predicateRelated(){
+    private function predicateRelated(){
 
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
@@ -2233,15 +2238,37 @@ class HPredicate {
         
         $where = '';
         
+        $where_reverce_reltypes = '';
+        $where_direct_reltypes = '';
+        
         if(is_array($this->relation_types)&& count($this->relation_types)>0){
+
+            //reverse                        
+            $inverse_reltype_ids = getTermInverseAll($mysqli, $this->relation_types );
+            if(count($inverse_reltype_ids)>0){
+                
+                $where_reverce_reltypes = "($rl.rl_RelationTypeID " .(count($inverse_reltype_ids)>1
+                            ?' IN ('.implode(',',$inverse_reltype_ids).')'
+                            :'='.$inverse_reltype_ids[0])
+                            .') AND '; 
+                
+            }
             
+            //direct
             $this->relation_types = array_merge($this->relation_types, 
                             getTermChildrenAll($mysqli, $this->relation_types));
             
-            $where = $where . "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
+            $where_direct_reltypes = "($rl.rl_RelationTypeID " .(count($this->relation_types)>1
                         ?' IN ('.implode(',',$this->relation_types).')'
                         :'='.$this->relation_types[0])
-                        .') AND ';    
+                        .') AND ';
+                        
+            if($where_reverce_reltypes==''){
+                $where = $where_direct_reltypes;
+                $where_direct_reltypes = '';
+            }
+                         
+                        
             
         }else{
             $where = $where . "$rl.rl_RelationID is not null AND";
@@ -2257,8 +2284,8 @@ class HPredicate {
         
         $where = $where
         //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
-         ." ((r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val
-            .") OR (r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';
+         ." (($where_direct_reltypes r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val                   //direct
+            .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';       //reverse
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
@@ -2276,7 +2303,7 @@ class HPredicate {
     * "rf":245 - related from record id 245
     * {"rf:245":[{"t":4},{"r":6421}]}   related from organization(t:4) with reltype id 6421
     */
-    function predicateRelatedDirect($is_reverse){
+    private function predicateRelatedDirect($is_reverse){
 
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
@@ -2419,7 +2446,7 @@ class HPredicate {
     /**
     * find records that any links (both pointers and relations) to specified records
     */
-    function predicateLinks(){
+    private function predicateLinks(){
         
         global $top_query, $params_global, $mysqli;
         $not_nested = (@$params_global['nested']===false);
@@ -2467,8 +2494,8 @@ class HPredicate {
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
-
-    function isDateTime() {
+    /// not used 
+    private function isDateTime() {
 
         $timestamp0 = null;
         $timestamp1 = null;
@@ -2499,7 +2526,7 @@ class HPredicate {
     //
     //
     //
-    function makeDateClause_ForHeaderField() {
+    private function makeDateClause_ForHeaderField() {
 
         if (strpos($this->value,"<>") || strpos($this->value,"/")) {
 
@@ -2568,7 +2595,7 @@ class HPredicate {
                 {"f:1113":"=1400,1500"}  start of range in db is 1400 and end of range in db equals to 1500
         FALL IN/OVERLAP is default comparison.    
     */
-    function makeDateClause() {
+    private function makeDateClause() {
         
         if($this->isEmptyValue()){ // {"f:10":"NULL"}
             return 'NULL';
@@ -2647,7 +2674,7 @@ class HPredicate {
     /*
       is search for empty or null value
     */
-    function isEmptyValue(){
+    private function isEmptyValue(){
                                             //$this->value=='' ||
         return !is_array($this->value) && ( strtolower($this->value)=='null' || strtolower($this->value)=='-null'); // {"f:18":"NULL"}
     }
@@ -2658,7 +2685,7 @@ class HPredicate {
     * 
     * @param mixed $value
     */
-    function getUserIds($value){
+    private function getUserIds($value){
         global $mysqli, $currUserID;
         
         $values = explode(',',$value);
@@ -2681,7 +2708,7 @@ class HPredicate {
     /**
     * Returns value with compare operator
     */
-    function getFieldValue(){
+    private function getFieldValue(){
 
         global $mysqli, $params_global, $currUserID;
         
@@ -3089,7 +3116,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
     // check existanse of full text index and creates it
     // return true - if index is missed or its creation is in progress
     //
-    function checkFullTextIndex(){
+    private function checkFullTextIndex(){
         global $mysqli;
         
         if($this->pred_type=='title' || $this->field_id=='title'){

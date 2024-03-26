@@ -275,6 +275,8 @@ class DbDefDetailTypes extends DbEntityBase
                     $curr_vocab_id = mysql__select_value($mysqli,
                         'SELECT dty_JsonTermIDTree FROM '.$this->config['tableName'].' WHERE dty_ID='.
                             $this->records[$idx]['dty_ID']);
+                    $curr_vocab_id = intval($curr_vocab_id);
+                    
                     if($curr_vocab_id>0 && $curr_vocab_id!=$this->records[$idx]['dty_JsonTermIDTree']){
                         //is going to be changed
                         $children = getTermChildrenAll($mysqli, $curr_vocab_id, true);
@@ -402,7 +404,7 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            $defTerms = new DbDefTerms($this->system, array('entity'=>'defTerms')); // to create new vocabs
+            $defTerms = new DbDefTerms($this->system); // to create new vocabs
             $new_vocabs = array();
 
             $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "enum" ORDER BY vcg_Order';
@@ -614,7 +616,10 @@ class DbDefDetailTypes extends DbEntityBase
 
         return $ret;
     }
-
+    
+    //
+    //
+    //
     public function counts(){
 
         $mysqli = $this->system->get_mysqli();

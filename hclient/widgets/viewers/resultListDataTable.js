@@ -188,10 +188,9 @@ that._dout('myOnShowEvent');
     },
     
     _dout: function(msg){
-        return;
-        if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
-            console.log(msg);
-        }
+        //if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
+        //    console.log(msg);
+        //}
     },
     
 

@@ -243,7 +243,9 @@
         "term_desc": "",
         "term_uri": "",
         "term_code": "",
-        "term_translations": ""
+        "term_translations": "",
+        "geopoint": "",
+        "editor_notes": ""
     }
 }
 ]

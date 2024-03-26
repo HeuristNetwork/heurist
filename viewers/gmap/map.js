@@ -1121,7 +1121,7 @@ if(_mapdata.limit_warning){
                     }
                     
 
-                    if(false && dataset.mapenabled>0){
+                    if(false){ // && dataset.mapenabled>0
                         tmap.datasets.main.hide();
                         tmap.datasets.main.show();
                     }else if (!__startup_mapdocument) { //zoom to whole world
@@ -1383,13 +1383,10 @@ if(_mapdata.limit_warning){
                      switch(this.title){
                       case 'Stop drawing':
                         return 'Drag the map or select / get information about an object on the map';
-                          break;
                       case 'Draw a rectangle':
                         return 'Select objects within a rectangle. Hold down Ctrl to add to current selection';
-                          break;
                       case 'Draw a shape':
                         return 'Select objects within a polygon - double click to finish the polygon';
-                          break;
                       default:return this.title;
                      }
 

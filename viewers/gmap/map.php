@@ -317,8 +317,6 @@ $system->defineConstants();
         });
 
         <?php
-        if(true){ // defined('RT_MAP_LAYER') && RT_MAP_LAYER>0 && defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
-
             function checkRt($rt){
                 global $rtDefines;
                 if(defined($rt) && constant($rt)>0){
@@ -365,7 +363,7 @@ $system->defineConstants();
             $items = $items.'<li rtid="'.checkRt('RT_GEOTIFF_SOURCE').'"><a href="#">GeoTiff</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_TILED_IMAGE_SOURCE').'"><a href="#">Tiled image</a></li>';
             $items = $items.'<li rtid="'.checkRt('RT_QUERY_SOURCE').'"><a href="#">Query layer</a></li>';
-            ?>
+        ?>
             $("#btnMapRefresh").button({ showLabel:false, icon:"ui-icon-arrowrefresh-1-e" })
             .on('click', refreshMapDocument );
             $("#btnMapNew").button({ showLabel:false, icon: "ui-map-document" })
@@ -405,13 +403,6 @@ $system->defineConstants();
 
 
             $("#mapToolbar").controlgroup();
-            <?php } else { ?>
-            $("#mapSelector").hide();
-            $("#mapToolbar").hide();
-            <?php
-        }
-        ?>
-
 
     }
     
@@ -660,7 +651,7 @@ $system->defineConstants();
     </div>
 
     <div id="layer-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
-        <fieldset>
+        <fieldset><legend style="display:none"></legend>
             <div>
                 <!-- What would you like to call<br>the new map layer -->
                 <div class="header"><label for="layer_name">Name for map layer:</label></div>

@@ -355,7 +355,7 @@
         
         $dir = realpath($dir);
         
-        if($dir!==false && file_exists($dir)){
+        if($dir!==false && file_exists($dir) && is_dir($dir)===true){
         
             $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
             foreach ($arr as $each) {
@@ -385,7 +385,7 @@
                 $os        = strtoupper(substr(PHP_OS, 0, 3));
                 // If on a Unix Host (Linux, Mac OS)
                 if ($os !== 'WIN') {
-                    $cmd = ('/usr/bin/du -sb ' . $dir); //escapeshellcmd
+                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir); 
                     $io = popen($cmd, 'r');
                     if ($io !==false) {
                         $totalSize = intval(fgets($io, 80));
@@ -458,7 +458,7 @@
      * @param boolean $ignoreEmpty Do not add empty directories to the tree
      * @return array
      */
-    function folderTree($dir, $params, $is_system=false)
+    function folderTree($dir, $params)
     {
         if($dir==null){
             $dir = HEURIST_FILESTORE_DIR;
@@ -489,7 +489,7 @@
                 //(@$params['is_system']==true) || 
                 //$params['is_system'] = $is_system;
                 
-                $tree = folderTree($node->getPathname(), $params, $is_system);
+                $tree = folderTree($node->getPathname(), $params);
                 if (!$ignoreEmpty || count($tree)) {
                     
                     if($isFancy){

@@ -30,10 +30,12 @@ class DbUsrRecPermissions extends DbEntityBase
     private $is_table_exists = false; 
     
     public function init(){
+    
+        $mysqli = $this->system->get_mysqli();
+        
+        $this->is_table_exists = hasTable($mysqli, 'sysImportFiles');
         
         if(!$this->is_table_exists){
-        
-            $mysqli = $this->system->get_mysqli();
         
             $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
               ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
@@ -44,15 +46,12 @@ class DbUsrRecPermissions extends DbEntityBase
               //."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
             .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
         
-            if (!$mysqli->query($query)) {
-                $this->is_table_exists = false;
-            }else{
+            if ($mysqli->query($query)) {
                 $this->is_table_exists = true;
             }
         
             $query = 'DROP INDEX IF EXISTS rcp_composite_key ON usrRecPermissions';
             $res = $mysqli->query($query);
-        
         }
         
     }
@@ -155,7 +154,7 @@ class DbUsrRecPermissions extends DbEntityBase
                 $recids[] = $record['rcp_RecID'];
             }
             $recids = array_unique($recids);
-            $grp_ids = $system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
             
             //verify that current owner is "everyone" or current user is member of owner group
             $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE rec_ID in ('.implode(',',$recids)
@@ -171,7 +170,7 @@ class DbUsrRecPermissions extends DbEntityBase
                                 .' records provided in request';
                 }
                 
-                $system->addError(HEURIST_REQUEST_DENIED,
+                $this->system->addError(HEURIST_REQUEST_DENIED,
                     'Current user does not have sufficient authority to change '.$sMsg
                     .'. User must be either the owner or member of the group that owns record');
                     return false;
@@ -270,6 +269,7 @@ class DbUsrRecPermissions extends DbEntityBase
     public function delete($disable_foreign_checks = false){
         
         //extract records from $_REQUEST data 
+        $mysqli = $this->system->get_mysqli();
         
         if(!@$this->data['rcp_RecID']){ //array of record ids
         
@@ -282,7 +282,7 @@ class DbUsrRecPermissions extends DbEntityBase
             if(!$this->_validatePermission()){
                 return false;
             }
-           
+            
             $query = 'DELETE FROM '.$this->config['tableName'].' WHERE rcp_RecID in ('.implode(',', $recids).')';
             $res = $mysqli->query( $query );
             if(!$res){
@@ -296,11 +296,11 @@ class DbUsrRecPermissions extends DbEntityBase
             $group_ids_to_delete = prepareIds($this->data['rcp_UGrpID']);
             
             //current user must be a member of all provided groups
-            $grp_ids = $system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
             
             foreach ($group_ids_to_delete as $id){
                 if(!in_array($id, $grp_ids)){
-                    $system->addError(HEURIST_REQUEST_DENIED,
+                    $this->system->addError(HEURIST_REQUEST_DENIED,
                         'Current user does not have sufficient authority to remove permissions. '
                         .' User must be either the owner or member of the group that owns record');
                     return false;

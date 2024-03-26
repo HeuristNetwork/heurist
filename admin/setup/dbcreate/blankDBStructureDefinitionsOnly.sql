@@ -23,7 +23,7 @@
  -- NOTE: do not include referential integrity as this is only a subet of tables
  -- and we only need the structures
 
--- defCalcFunctions, defCrosswalk, defDetailTypes,defFileExtToMimetype, defLanguages, defOntologies,
+-- defCalcFunctions, defCrosswalk, defDetailTypes,defFileExtToMimetype, defOntologies,
 -- defRecStructure, defRecTypeGroups, defRecTypes, defRelationshipConstraints,
 -- defVocabularyGroups,defTerms, defTranslations, sysIdentification, sysUGrps, sysUsrGrpLinks, usrTags
 
@@ -154,21 +154,6 @@ CREATE TABLE defFileExtToMimetype (
   fxm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (fxm_Extension)
 ) ENGINE=InnoDB  COMMENT='Converts extensions to mimetypes and provides icons and mime';
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'defLanguages'
---
-
-CREATE TABLE defLanguages (
-  lng_NISOZ3953 char(3) NOT NULL COMMENT 'Three character NISO Z39.53 language code',
-  lng_ISO639 char(2) NOT NULL COMMENT 'Two character ISO639 language code',
-  lng_Name varchar(63) NOT NULL COMMENT 'Language name, generally accepted name (normally English terminology)',
-  lng_Notes varchar(1000) default NULL COMMENT 'URL reference to, or notes on the definition of the language',
-  lng_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
-  PRIMARY KEY  (lng_NISOZ3953)
-) ENGINE=InnoDB  COMMENT='Language list including optional standard language codes';
 
 -- --------------------------------------------------------
 

@@ -4,9 +4,13 @@
 
         <title>HEURIST Context Help - KML import</title>
         <link rel=stylesheet href=../h4styles.css>
+        <style>
+                    .snippet { color: #666666; }
+                    .snippet b { color: black; }
+        </style>
     </head>
 
-    <body width=600 height=500>
+    <body>
 
         <div style="width: 100%; height: 100%; overflow: auto;">
 
@@ -27,12 +31,13 @@
                 process the file, and prompt you for a record type.  <em>All records created
                     by a single KML import will have the same record type.</em></p>
 
-            <p>Heurist attempts to import each <tt>&lt;Placemark&gt;</tt> as a separate record.
+            <p>Heurist attempts to import each <code>&lt;Placemark&gt;</code> as a separate record.
                 The following table lists the KML tags that Heurist recognises as record
                 details, and the bibliographic data fields that they are imported to.</p>
 
-            <center>
+            <div style="margin-left:auto;margin-right:auto;width:700px;">
                 <table border=1 cellpadding=3 id=types>
+                    <caption></caption>
                     <tr>
                         <th width=200>KML tag</th>
                         <th width=300>Heurist detail field</th>
@@ -94,14 +99,10 @@
                         </td>
                     </tr>
                 </table>
-            </center>
+            </div>
 
-            <p>It is possible to specify Heurist-formatted data in HXTBL format between
-                KML's <tt>&lt;Metadata&gt;</tt> tags, e.g.
-                <style>
-                    .snippet { color: #666666; }
-                    .snippet b { color: black; }
-                </style>
+            <div><p>It is possible to specify Heurist-formatted data in HXTBL format between
+                KML's <code>&lt;Metadata&gt;</code> tags, e.g.</p>
                 <pre class=snippet>
                     ...
                     &lt;Placemark&gt;
@@ -122,18 +123,18 @@
                     ...
                 </pre>
                 Heurist will add fields of type #160 (Title) and type #203 (Organisation type)
-                to the record corresponding to this <tt>&lt;Placemark&gt;</tt>.</p>
+                to the record corresponding to this <code>&lt;Placemark&gt;</code>.</div    >
 
             <h4>Updating existing records</h4>
 
-            <p>If you specify an existing record ID in the <tt>ExtendedData</tt> element,
+            <p>If you specify an existing record ID in the <code>ExtendedData</code> element,
                 the importer will update that record as follows:</p>
             <ul>
                 <li>All existing geo details will be removed, and replaced with the new values from the KML</li>
                 <li>Other fields will be merged, as is normal behaviour for the importer when duplicate records are detected</li>
             </ul>
             <p>For example,<p>
-            <p><tt>&lt;ExtendedData&gt;&lt;Data name="HeuristID"&gt;&lt;value&gt;1234&lt;/value&gt;</tt></p>
+            <p><code>&lt;ExtendedData&gt;&lt;Data name="HeuristID"&gt;&lt;value&gt;1234&lt;/value&gt;</code></p>
 
             <h4>How do I create KML?</h4>
 

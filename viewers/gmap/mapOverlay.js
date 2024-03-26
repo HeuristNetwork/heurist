@@ -553,7 +553,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         legenditem.find(".overlay-legend").on('change',_showHideOverlay);
 
-        if(true || !ismapdoc){//it is possible to edit mapdoc layers since 2017/07/01
+        if(true){// || !ismapdoc it is possible to edit mapdoc layers since 2017/07/01
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
             .on('click',function(event){ 
@@ -938,7 +938,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     var deferred = $.Deferred();
                     setTimeout(function () { 
 
-                        new Shapefile({
+                        var sf = new Shapefile({
                             shp: source.shpFile,
                             dbf: source.dbfFile
                             }, function (data) {

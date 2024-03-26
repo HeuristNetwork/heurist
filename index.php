@@ -298,6 +298,8 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
 
+<script src="<?php echo PDIR;?>hclient/widgets/admin/repositoryConfig.js"></script>
+
 <script type="text/javascript">
 
     function onPageInit(success){

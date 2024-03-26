@@ -86,7 +86,7 @@ $.widget( "heurist.searchByEntity", {
                 
         }else{
         
-            this.element.css({height:'100%',height:'100%','font-size':'0.8em'});
+            this.element.css({height:'100%','font-size':'0.8em'});
 
             //------------------------------------------- filter by entities
             this.options.by_favorites = this.options.by_favorites && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
@@ -284,7 +284,7 @@ $.widget( "heurist.searchByEntity", {
 
         var cont;
         if(this.options.use_combined_select){
-            if(true || !this.combined_select){
+
 
                 this._off(this.combined_select.find('li[data-id]'), 'click');
                 var cont = this.combined_select.find('.by-usage');
@@ -301,7 +301,6 @@ $.widget( "heurist.searchByEntity", {
                         +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
                        +'</li>').appendTo(cont);    
                 });
-            }
             
             cont = this.combined_select.find('.by-selected');
             cont.empty();

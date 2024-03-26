@@ -46,8 +46,8 @@
     */
 
 ?>
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <title><?php print htmlspecialchars(strip_tags($website_title_translated)); ?></title>
@@ -97,7 +97,7 @@
                     <div class="bor-header-sub-title sr-only">The University of Sydney and World War II</div>
                 </a>
                 <div class="horizontal bor-header-search" role="search">
-                    <fieldset>
+                    <fieldset><legend style="display:none"></legend>
                         <div class="form-group">
                             <label class="col-lg-12 control-label sr-only" for="query">Enter your search terms to search the Beyond 1939 database</label>
                             <div class="col-lg-12 bor-search-body">

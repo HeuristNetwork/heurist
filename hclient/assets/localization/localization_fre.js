@@ -23,8 +23,6 @@
 regional['FRE'] = {
     language: 'Langue',
     'Databases': 'Bases de données',
-    'Design database': 'Concevoir une base de données',
-    'Import data': 'Importer des données',
     'Files in situ': 'Dossiers in situ',
     'Report bug': 'Signaler un bug',
     'About': 'A propos...',
@@ -34,10 +32,7 @@ regional['FRE'] = {
     'Register': 'S\'inscrire',
     'Registration': 'Inscription',
     'Login': 'Connexion',
-    'Please log in': 'Veuillez vous connecter',
-    'Please contact to register':'Veuillez contacter le propriétaire de la base de données pour vous inscrire ',
     'Log out' : 'Déconnexion',
-    'Manage': 'Gérer',
     'Sort': 'Trier',
     'Search': 'Chercher',
     'Search result': 'Résultat de recherche',
@@ -47,7 +42,6 @@ regional['FRE'] = {
     'Access': 'Accès',
     'Notify': 'Notifier',
     'Embed / link': 'Intégrer / lier',
-    'Export': 'Exporter',
     'Import': 'Importer',
 
 
@@ -61,7 +55,6 @@ regional['FRE'] = {
     'Email to':'Envoyer courriel à',
     'User information has been saved successfully':'Les informations de l\'utilisateur ont été sauvegardées avec succès',
 
-    'Database': 'Base de données',
     'Select database': 'Choisir la base de données',
     'My User Info' : 'Mon profil utilisateur',
     'My Groups' : 'Mes groupes',
@@ -70,7 +63,6 @@ regional['FRE'] = {
     'Manage Files': 'Gérer mes dossiers',
     'Manage Reminders' : 'Gérer mes rappels',
     'Set Ratings' : 'Définir mes notations',
-    'No Rating': 'Aucune notation',
 
     'Name': 'Titre',
     'Description': 'Description',
@@ -91,7 +83,6 @@ regional['FRE'] = {
     'Field': 'Champ',
     'Contains': 'Contient',
     'Is': 'Est',
-    'Sort by': 'Trier par',
     'Sorted by': 'Trier par',
     'Sort Ascending': 'Trier en ordre croissant',
     'fields':'champs',
@@ -136,7 +127,7 @@ regional['FRE'] = {
     'list':'liste',
     'icons':'icônes',
     'thumbs':'vignettes',
-    'thumbs3':'vignettes3',
+    'thumbs3':'aperçu',
 
     'first':'premier',
     'previous':'précédent',
@@ -167,7 +158,6 @@ regional['FRE'] = {
     'My Searches': 'Mes recherches',
     'Predefined searches': 'Recherches prédefinies',
     'Recent changes': 'Modifications récents',
-    'All records': 'Tous',
     'All (date order)': 'Tous (ordonnés par date)',
     'Edit saved filter': 'Éditer la recherche sauvegardée',
     'Edit RuleSet': 'Éditer la règle',
@@ -281,6 +271,7 @@ regional['FRE'] = {
     'drag from saved filters': 'tirer depuis filtres enregistrés', 
     'Workflow stages': 'Etapes de travail',
     'External lookups': 'Consultations externes',
+    'External repositories': 'Dépôts externes',
 
     //admin menu
     'Database': 'Base de données',
@@ -336,6 +327,7 @@ regional['FRE'] = {
     'menu-import-csv-fieldtypes': 'Importer depuis CSV', 
     'menu-structure-import': 'Parcourir les modèles',
     'menu-lookup-config': 'Consultation externe',
+    'menu-repository-config': 'Dépôts externes',
     'menu-structure-summary': 'Visualiser',
     'menu-structure-refresh': 'Rafraîchir le cache',
 
@@ -401,7 +393,7 @@ regional['FRE'] = {
     'menu-cms-edit-page': 'Éditer',
     'menu-cms-view-page': 'Consulter',
 
-    'Export': 'Export',
+    'Export': 'Exporter',
     'menu-export-csv': 'CSV',
     'menu-export-hml-resultset': 'XML',
     'menu-export-json': 'JSON',
@@ -512,6 +504,7 @@ regional['FRE'] = {
     'menu-selected-extract-pdf': 'Extraire le texte d\'un document PDF',
     'menu-selected-extract-pdf-hint': 'Extraire le texte d\'un document PDF (expérimental)',
     'Shared': 'Partager',
+    'Share':'Partager',
     'menu-selected-notify': 'Notification (courriel)',
     'menu-selected-notify-hint': 'Sélectionner un ou plusieurs enregistrement puis cliquer pour envoyer une notification',
     'menu-selected-email': 'Envoyer un courriel',
@@ -556,12 +549,6 @@ regional['FRE'] = {
     'Password reminder': 'Aide-mémoire pour le mot de passe',
     resultList_reorder_list_changed: 'La liste de réorganisation a été modifiée.', 
     //END resultList
-
-    //search - filters
-    'Filter': 'Filtre',
-    'Filtered Result': 'Résultats d\'après les filtres',
-    'Save Filter': 'Sauvegarder le fltre',
-    save_filter_hint: '',
 
     //edit 
     Warn_Lost_Data: 'Vous avez fait des modifications dans les données. Cliquez sur "Sauvegarder", autrement tous vos changements seront perdus.',     
@@ -733,7 +720,16 @@ regional['FRE'] = {
     'Base Maps': 'Cartes de base',
     
     map_print_note: 'Après avoir cliqué sur Imprimer, vous devez faire glisser une boîte sur la carte pour définir la zone que vous souhaitez imprimer. Tant que vous ne l\'aurez pas fait, la boîte de dialogue d\'impression ne s\'affichera pas.',
-
+    
+    // EMAIL FORM  --------------------
+    'Email Us': 'Ecrivez-nous',
+    'Your name': 'Votre nom',
+    'Email Address': 'Adresse e-mail',
+    'Email Message': 'Message',
+    'Prove you are human': 'Prouvez que vous êtes humain',
+    'Email does not appear to be valid': "L'e-mail ne semble pas valide",
+    'Email has been sent': "L'e-mail a été envoyé",
+    
 //===================    
     
     'Design database': 'Conçevoir base de données',
@@ -741,8 +737,6 @@ regional['FRE'] = {
     'Please log in':'Veuillez vous connecter ou vous enregistrer pour utiliser toutes les fonctionnalités de Heurist.',
     'Session expired': ' semble que vous ne soyez pas connecté ou que votre session ait expiré. Veuillez recharger la page pour vous connecter à nouveau',
     'Please contact to register':'Veuillez contacter le propriétaire de la base de données pour vous enregistrer et utiliser toutes les fonctionnalités de Heurist.',
-    'My Searches':'Mes filtres',
-    'My Bookmarks':'Mes bookmarks',
 
     'Password_Reset':'Votre mot de passe a été réinitialisé. Vous devriez recevoir sous peu un e-mail contenant votre nouveau mot de passe.',
     'Error_Password_Reset':'Impossible de terminer l\'opération.',
@@ -829,11 +823,6 @@ regional['FRE'] = {
     'record_action_fails_local_to_repository': 'Fichiers qui n\'ont pas pu être téléchargés dans le référentiel sélectionné',
     
     'record_action_errors': 'Erreurs',
-
-    'thumbs3':'aperçu',
-    
-    'Collected':'Collecter',
-    'Shared':'Partager',
 
     'feature_request': 'Veuillez demander à l\'équipe Heurist si nécessaire ou ajoutez au code et soumettez une demande de tirage (pull request)'
 

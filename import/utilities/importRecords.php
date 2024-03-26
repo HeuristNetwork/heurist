@@ -35,7 +35,8 @@ $file_max_size = USystem::getConfigBytes('upload_max_filesize');
 $max_size = min($file_max_size,$post_max_size);
 $s_max_size = round($max_size/1024/1024).' MBytes';
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
     <head>
 
         <!-- Force latest IE rendering engine or ChromeFrame if installed -->

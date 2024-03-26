@@ -39,7 +39,6 @@ require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapCoordinates.php";
 
 //require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
 
-
 $mysqli = $system->get_mysqli();
 
 require_once 'verifyValue.php';
@@ -50,7 +49,7 @@ $system->defineConstant('DT_RELATION_TYPE');
 
 //use these two vars to disable any part of verification
 $active_all = true; //all part are active
-$active = array('relationship_cache','defgroups','dateindex'); //if $active_all=false, active are included in this list
+$active = array('relationship_cache', 'defgroups', 'dateindex'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
@@ -438,7 +437,7 @@ if($active_all || in_array('dup_terms', $active)) {
                 
                     $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
 
-                    $query = 'UPDATE defTerms set trm_ParentTermID=NULL, trm_VocabularyGroupID='.$trash_group_id
+                    $query = 'UPDATE defTerms set trm_ParentTermID=NULL, trm_VocabularyGroupID='.intval($trash_group_id)
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongParents).')';
                     $res = $mysqli->query( $query );
                     if(! $res )
@@ -758,11 +757,11 @@ if($active_all || in_array('pointer_targets', $active)) {
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                        <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a></td>
                         <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                         <td><?= $row['dtl_Value'] ?></td>
@@ -824,10 +823,10 @@ if($active_all || in_array('target_types', $active)) {
                     foreach ($bibs as $row) {
                         ?>
                         <tr>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a></td>
                             <td><?= $row['dty_Name'] ?></td>
                             <td>points to</td>
@@ -902,12 +901,12 @@ if($active_all || in_array('target_parent', $active)) {
             $prec_ids1 = array();
             while ($row = $res->fetch_assoc()){
 
-                $child_ID = $row['dtl_Value'];
+                $child_ID = intval($row['dtl_Value']);
 
                 if(@$_REQUEST['fixparents']=="1"){ 
                     //new way: add missed reverse link to alleged children
                     $query2 = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.$row['rec_ID'] . ')';
+                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.intval($row['rec_ID']) . ')';
                     $mysqli->query($query2);
                     $wasadded1++;
                 }else{
@@ -944,7 +943,7 @@ if($active_all || in_array('target_parent', $active)) {
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
                 $bibs2[] = $row;
                 $prec_ids2[] = $row['dtl_Value'];  //remove DT_PARENT_ENTITY from orphaned children
-                array_push($det_ids, $row['child_d_id']); 
+                array_push($det_ids, intval($row['child_d_id'])); 
                 /*
                 if($row['parent_d_id']>0){
                 // keep dtl_ID of pointer field in parent record 
@@ -1002,16 +1001,16 @@ if($active_all || in_array('target_parent', $active)) {
                     foreach ($bibs1 as $row) {
                         ?>
                         <tr>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'><?= $row['rec_ID'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a></td>
                             <td><?= $row['p_title'] ?></td>
                             <td>points to</td>
                             <td style="white-space: nowrap;"><a target=_new2
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_Value'] ?>'><?= $row['dtl_Value'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a></td>
                             <td><?= substr($row['c_title'], 0, 50) ?></td>
                         </tr>
@@ -1056,13 +1055,13 @@ if($active_all || in_array('target_parent', $active)) {
                         <tr>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_Value'] ?>'><?= $row['dtl_Value'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a></td>
                             <td><?= $row['p_title'] ?></td>
                             <td>has reverse 'pointer to parent' in </td>
                             <td style="white-space: nowrap;"><a target=_new2
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['child_id'] ?>'><?= $row['child_id'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a></td>
                             <td><?= substr($row['c_title'], 0, 50) ?></td>
                         </tr>
@@ -1155,11 +1154,11 @@ if($active_all || in_array('empty_fields', $active)) {
                 ?>
                 <tr>
                     <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
-                            <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                            
                     <td><?= $row['dty_Name'] ?></td>
@@ -1375,11 +1374,11 @@ if($active_all || in_array('date_values', $active)) {
                         ?>
                             <tr>
                                 <td><?php print '<input type=checkbox name="datesCorrected" value='.$row['dtl_RecID'].'>'; ?></td>
-                                <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                                <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                                 <td style="white-space: nowrap;"><a target=_new
                                         href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                         <?= $row['dtl_RecID'] ?>
-                                        <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                        <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                     </a></td>
                                 <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
                                 <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
@@ -1426,11 +1425,11 @@ if($active_all || in_array('date_values', $active)) {
                 ?>
                 <tr>
                     <td><?php print '<input type=checkbox name="datesSuggestion" value='.$row['dtl_RecID'].'>'; ?></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
-                            <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                         </a></td>
                     <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
                     <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
@@ -1468,11 +1467,11 @@ if($active_all || in_array('date_values', $active)) {
                         ?>
                         <tr>
                             <td><?php print '<input type=checkbox name="datesManual" value='.$row['dtl_RecID'].'>'; ?></td>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;">
                                 <a target="_new" href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?>
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a>
                             </td>
                             <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
@@ -1534,12 +1533,12 @@ if($active_all || in_array('date_values', $active)) {
                     ?>
                     <tr style="color:gray">
                         <td><?php print '<input type=checkbox name="datesAmbig" value='.$row['dtl_RecID'].'>'; ?></td>
-                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
+                        <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
                                         src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a></td>
                         <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
                         <td class="truncate" style="max-width:150px;min-width:50px"><?=strip_tags($row['rst_DisplayName']) ?></td>
@@ -1646,11 +1645,11 @@ if($active_all || in_array('term_values', $active)) {
                 ?>
                 <tr>
                     <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                    <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
-                            <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                            <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                        
                     <td><?= $row['dty_Name'] ?></td>
@@ -1731,14 +1730,13 @@ if($active_all || in_array('expected_terms', $active)) {
                         ?>
                         <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
                         <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').trigger('click'); return false;}">(show results as search)</a></span>
-                        <table>
+                        <table role="presentation">
                         <tr>
-                            <th style="width: 30px;text-align:left">Record</th>
-                            <th style="width: 45ex;text-align:left;">Field</th>
-                            <th style="width: 25ex;">Term</th>
-                            <th>Record title</th>
+                            <td style="width: 30px;text-align:left">Record</td>
+                            <td style="width: 45ex;text-align:left;">Field</td>
+                            <td style="width: 25ex;">Term</td>
+                            <td>Record title</td>
                         </tr>
-
                         <?php
                     }
                     ?>
@@ -1746,7 +1744,7 @@ if($active_all || in_array('expected_terms', $active)) {
                         <td style="width:50px;">
                             <a target=_new  title='Click to edit record'
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
+                                <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
                             </a>
                         </td>
@@ -1772,8 +1770,8 @@ if($active_all || in_array('expected_terms', $active)) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
                 echo '<script>$(".expected_terms").css("background-color", "#6AA84F");</script>';
             }else{
-                echo '<script>$(".expected_terms").css("background-color", "#E60000");</script>';
                 echo '</table><br>';   
+                echo '<script>$(".expected_terms").css("background-color", "#E60000");</script>';
                 echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
                 .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
             }
@@ -1814,11 +1812,11 @@ if($active_all || in_array('expected_terms', $active)) {
 <span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field, 
 <br>however the same term label exists in the vocabulary specified for the field.
 <br><button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
-                        <table>
+                        <table role="presentation">
                         <tr>
-                            <th style="width: 50px;text-align: left;">Field ID</th>
-                            <th style="width: 45ex;text-align:left;">Field</th>
-                            <th style="width: 25ex;">Term</th>
+                            <td style="width: 50px;text-align: left;">Field ID</td>
+                            <td style="width: 45ex;text-align:left;">Field</td>
+                            <td style="width: 25ex;">Term</td>
                         </tr>
 
 <?php                   
@@ -1910,12 +1908,12 @@ if($active_all || in_array('single_value', $active)) {
                             <td>
                                 <input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>>
                             </td>
-                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
+                            <td><img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>"></td>
 
                             <td style="white-space: nowrap;">
                                 <a target=_blank href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?></a>
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </td>
                             <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                             </td>
@@ -1989,8 +1987,8 @@ if($active_all || in_array('required_fields', $active)) {
                 <h3>Records with missing or empty required values</h3>
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= implode(',', array_keys($ids)) ?>'>
-                        (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-                    <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                        (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                    <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
             </div>
 
@@ -2014,9 +2012,9 @@ if($active_all || in_array('required_fields', $active)) {
                                 <a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                     <?= $row['rec_ID'] ?>
-                                    <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                    <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                         src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                    <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                    <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                 </a>
                             </td>
                             <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
@@ -2090,8 +2088,8 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                 <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
-                        (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-                    <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                        (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                    <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
                 <table role="none">
 
@@ -2115,9 +2113,9 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                                     <a target=_new
                                         href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                         <?= $row['rec_ID'] ?>
-                                        <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                        <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                             src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                        <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                        <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                                     </a>
                                 </td>
 
@@ -2244,7 +2242,7 @@ if($active_all || in_array('defgroups', $active)) {
 
             $orphaned_entities = false;
             
-            $cnt = mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
@@ -2254,7 +2252,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
                 if($trash_id>0){
             
-                    $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.$trash_id.' WHERE rtg_ID is null');        
+                    $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.intval($trash_id).' WHERE rtg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     
@@ -2267,7 +2265,7 @@ if($active_all || in_array('defgroups', $active)) {
             }
 
             // fields types =========================
-            $cnt = mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
@@ -2277,7 +2275,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
                 if($trash_id>0){
             
-                    $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.$trash_id.' WHERE dtg_ID is null');        
+                    $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.intval($trash_id).' WHERE dtg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     
@@ -2290,7 +2288,7 @@ if($active_all || in_array('defgroups', $active)) {
             }
 
             // vocabularies =========================
-            $cnt = mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null');
+            $cnt = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null'));
             if($cnt>0){
                 
                 $orphaned_entities = true;
@@ -2300,7 +2298,7 @@ if($active_all || in_array('defgroups', $active)) {
                 $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
                 if($trash_id>0){
                     $trash_id = $mysqli->real_escape_string($trash_id);
-                    $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.$trash_id.' WHERE trm_ParentTermID is null and vcg_ID is null');        
+                    $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.intval($trash_id).' WHERE trm_ParentTermID is null and vcg_ID is null');        
                     
                     $cnt2 = $mysqli->affected_rows;
                     
@@ -2492,8 +2490,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <h3>Records with invalid geospatial values</h3>
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids3) ?>'>
-                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="none">
@@ -2518,9 +2516,9 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                             <a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                 <?= $row['rec_ID'] ?>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a>
                         </td>
 
@@ -2555,8 +2553,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <h3>Records missing geospatial values</h3>
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids1) ?>'>
-                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="none">
@@ -2581,9 +2579,9 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                             <a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                 <?= $row['rec_ID'] ?>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a>
                         </td>
 
@@ -2618,8 +2616,8 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <h3>Records with geospatial data that is out of bounds</h3>
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
-                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="none">
@@ -2659,9 +2657,9 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                             <a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                 <?= $row['rec_ID'] ?>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a>
                         </td>
 
@@ -2796,7 +2794,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
         }
 
         print '<a target=_new href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&w=all&q=ids:'.implode(',', $ids1).'">Search for updated values '
-            . '<img src="'.HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif"></a>';
+            . '<img alt src="'.HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif"></a>';
     }
 
     // Value that has multi-spaces, except double spacing
@@ -2817,8 +2815,8 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
         </span>
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
-                (show results as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_spaces');">(show selected as search) <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_spaces');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
@@ -2844,9 +2842,9 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
                             <a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                 <?= $row['rec_ID'] ?>
-                                <img class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
+                                <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$row['rec_RecTypeID']?>)" title="<?php echo $row['rty_Name']?>" 
                                     src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
-                                <img src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                                <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                             </a>
                         </td>
 
@@ -2879,6 +2877,137 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
 
     print '<br><br></div>';
 } //END fld_spacing check
+
+if($active_all || in_array('multi_swf_values', $active)) { 
+    ?>
+
+    <div id="multi_swf_values" style="top:110px"> <!-- Start of Multiple Workflow Stage Values -->
+    
+    <script>
+        $('#links').append('<li class="multi_swf_values"><a href="#multi_swf_values" style="white-space: nowrap;padding-right:10px;color:black;">Multiple workflow stages</a></li>');
+        tabs_obj.tabs('refresh');
+    </script>
+
+    <?php
+
+    $completedRecords = array();
+    if(defined('DT_WORKFLOW_STAGE')){
+
+        $recsWithManySWF = mysql__select_assoc($mysqli, "SELECT dtl_RecID, rec_RecTypeID, rec_Title FROM recDetails INNER JOIN Records ON rec_ID = dtl_RecID WHERE dtl_DetailTypeID = " . DT_WORKFLOW_STAGE . " GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1");
+
+        if($recsWithManySWF && !empty($recsWithManySWF)){
+
+            foreach($recsWithManySWF as $rec_ID => $rec){
+
+                $rectype_ID = $rec['rec_RecTypeID'];
+                $rec_Title = $rec['rec_Title'];
+
+                $rec_ID = intval($rec_ID);
+                $rectype_ID = intval($rectype_ID);
+
+                $repeatability = mysql__select_value($mysqli, "SELECT rst_MaxValues FROM defRecStructure WHERE rst_RecTypeID = $rectype_ID AND rst_DetailTypeID = " . DT_WORKFLOW_STAGE);
+                $repeatability = $repeatability === null ? 1 : intval($repeatability);
+
+                if($repeatability > 1 || $repeatability == 0){
+                    unset($recsWithManySWF[$rec_ID]);
+                    continue;
+                }
+
+                $stages = mysql__select_list2($myqsli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $rec_ID ORDER BY dtl_ID", 'intval');
+
+                $final_stage = [];
+                $found_import = [];
+
+                foreach($stages as $dtl_ID => $swf_ID){
+
+                    if(defined('TRM_SWF_IMPORT') && $swf_ID == TRM_SWF_IMPORT){
+                        $found_import = empty($found_import) ? [$dtl_ID, $swf_ID] : $found_import;
+                        continue;
+                    }
+
+                    $final_stage = [$dtl_ID, $swf_ID]; // use the oldest
+                }
+
+                $final_stage = empty($final_stage) ? $found_import : $final_stage;
+                if(empty($final_stage)){
+                    unset($recsWithManySWF[$rec_ID]); // $strangeRecs[] = $rec_ID;
+                    continue;
+                }
+
+                unset( $stages[$final_stage[0]] );
+                $dtl_IDs = array_keys($stages);
+
+                if(count($dtl_IDs) > 1){
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
+                }else{
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]})");
+                }
+
+                $rty_Label = mysql__select_value($mysqli, "SELECT rty_Name FROM defRecTypes WHERE rty_ID = $rectype_ID");
+                $swf_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = {$final_stage[1]}");
+
+                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $$rty_Label, 'stage' => $swf_Label ] ];
+            }
+        }
+    }
+
+    if(!empty($completedRecords)){
+        ?>
+        <h3>Records were found to have multiple workflow stages</h3><br>&nbsp;<br>
+
+        There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).<br>
+
+        <span>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($completedRecords)) ?>'>
+                (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <button onclick="removeMultiSpacing()">Fix selected records</button>
+        </span>
+
+        <table role="none">
+
+            <tr>
+                <td colspan="6">
+                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'multi_swf_values');}">Mark all</label>
+                </td>
+            </tr>
+        <?php 
+        foreach ($completedRecords as $rec_ID => $record) {
+        ?>
+            <tr>
+                <td>
+                    <input type=checkbox name="multi_swf_values" value=<?= $rec_ID ?>>
+                </td>
+                <td style="white-space: nowrap;">
+                    <a target=_new
+                        href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $rec_ID ?>'>
+                        <?= $rec_ID ?>
+                        <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$record['type'];?>)" title="<?php echo $record['type_name']?>" 
+                            src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
+                        <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
+                    </a>
+                </td>
+
+                <td class="truncate" style="max-width:400px"><?=strip_tags($record['title']) ?></td>
+
+                <td> was set to stage: </td>
+
+                <td width="100px" style="max-width:100px" class="truncate"><?=strip_tags($record['stage']) ?></td>
+            </tr>
+        <?php
+        }//for
+            ?>
+        </table>
+        <?php
+        echo '<script>$(".multi_swf_values").css("background-color", "#E60000");</script>';
+
+    }else{
+        print '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
+        echo '<script>$(".multi_swf_values").css("background-color", "#6AA84F");</script>';
+    }
+    print '<br><br></div>';   // End of Multiple Workflow Stage Values
+    
+} //END multi_swf_values
         ?>
 
         </div>

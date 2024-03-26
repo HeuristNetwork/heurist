@@ -202,6 +202,10 @@ protected function _outputRecord($record){
         $this->separate_entity);  //separate multi geo values per record as separate entries
         
     if($this->is_leaflet){ //include only geoenabled features, timeline data goes in the separate timeline array
+    
+        $recID = $record['rec_ID'];
+        $rty_ID = $record['rec_RecTypeID'];
+    
         if(@$feature['when']){
             $this->timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
                 'rec_RecTypeID'=>$rty_ID, "rec_Title"=>$record['rec_Title']);
@@ -276,6 +280,7 @@ protected function _outputRecord($record){
 //
 //
 protected function _outputFooter(){
+
 
     fwrite($this->fd, ']'); //close
 

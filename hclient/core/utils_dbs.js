@@ -682,7 +682,7 @@ window.hWin.HEURIST4.dbs = {
                 
                 $res['title'] = 'Any record type';
                 $res['type'] = 'rectype';
-                
+                /* disabled
                 if(false && $mode==5 && $recursion_depth==0 && $recTypeId && $recTypeId.indexOf(',')>0){ //for faceted search
                     $res['key'] = $recTypeId;
                     $res['type'] = 'rectype';
@@ -692,28 +692,7 @@ window.hWin.HEURIST4.dbs = {
                     $res['title'] = $Db.rty( recTypes[0],'rty_Name');
                     
                     var  $details = $Db.rst(recTypes[0]); 
-
-                    //if there are several rectypes - find common fields only
-                    //IJ wants show all fields of fist record type only
-                    /*  2020-04-25
-                    var names = [];
-                    $.each(recTypes, function(i, rtid){ 
-                        names.push(rectypes.names[rtid]) 
-                        if(i>0){
-                            var fields = rectypes['typedefs'][rtid]['dtFields'];
-                            var dtIds = Object.keys($details);
-                            for (var k=0; k<dtIds.length; k++){
-                                if(!fields[dtIds[k]]){
-                                    //it does not exist 
-                                    $details[dtIds[k]] = null;
-                                    delete $details[dtIds[k]];
-                                }
-                            }
-                        }
-                    });
-                    $res['title'] = names.join(', ');
-                    */
-                    
+                     
                     var $children_links = [];
                     var $new_pointer_fields = [];
 
@@ -743,13 +722,7 @@ window.hWin.HEURIST4.dbs = {
                         }
                     });//for details
                     
-                    
-                    /**
-                     * sort bt rst_DisplayOrder
-                     * @param {number} a
-                     * @param {number} b
-                     * @returns {number}
-                     */
+                    //sort bt rst_DisplayOrder
                     $children.sort(function(a,b){
                         return (a['display_order']<b['display_order'])?-1:1;
                     });
@@ -757,7 +730,7 @@ window.hWin.HEURIST4.dbs = {
                     //add resource and relation at the end of result array
                     $children = $children.concat($children_links);                    
                     
-                }
+                }*/
                 
             }
 
@@ -2193,8 +2166,6 @@ window.hWin.HEURIST4.dbs = {
                 }
             }
             
-            {default_palette_class:'ui-heurist-design'}
-
             //some of selected terms are already in this vocabulary
             if(is_exists>0){
                 window.hWin.HEURIST4.msg.showMsgDlg('Term <b>'+$Db.trm(is_exists,'trm_Label')
@@ -2907,7 +2878,9 @@ window.hWin.HEURIST4.dbs = {
                 for(const rst_title of rst_titles){
                     processed_fields.push({key: dty_id, title: rst_title, depth: 1, hidden: show_in_list});
                 }
-            }else if(false && mode == 2){ // needs testing
+            }
+            /*  needs testing
+            else if(false && mode == 2){ 
 
                 let node = {
                     'title': dty_title,
@@ -2928,6 +2901,7 @@ window.hWin.HEURIST4.dbs = {
 
                 processed_fields.push(node);
             }
+            */
 		}
 
         if(mode == 0 || mode == 2){

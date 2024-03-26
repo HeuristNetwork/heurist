@@ -193,7 +193,7 @@ if(!$format) $format='csv';
             <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
         </div>
 
-        <fieldset style="width:380px;">
+        <fieldset style="width:380px;"><legend style="display:none"></legend>
                 <div>
                     <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
                     <div class="input-cell">        
@@ -300,12 +300,12 @@ if(!$format) $format='csv';
                 </div>
                 <div class="ent_content" id="divFieldRoles" style="top:6em;bottom:3.5em;padding: 0.2em 0.5em;border: 1px solid lightgray;">
                     
-                    <table class="tbfields" style="font-weight:bold"><thead><tr>
-                                <td style="width:150px">Column</td>
-                                <td style="width:50px">&nbsp;</td>
-                                <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
-                                <td style="width:50px;text-align:center" class="date-column">Date</td>
-                                <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></thead><tbody></tbody></table>
+                    <table class="tbfields" style="font-weight:bold"><caption></caption><thead><tr>
+                                <th style="width:150px">Column</th>
+                                <th style="width:50px">&nbsp;</th>
+                                <th style="width:50px;text-align:center">Heurist<br>Identifier</th>
+                                <th style="width:50px;text-align:center" class="date-column">Date</th>
+                                <th style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></th></tr></thead><tbody></tbody></table>
                     
                     
                 </div>
@@ -371,7 +371,7 @@ if(!$format) $format='csv';
                     <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
         </div>
         
-        <fieldset style="position: absolute;left: 0;right: 0;top:80px;">
+        <fieldset style="position: absolute;left: 0;right: 0;top:80px;"><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
                 <label style="vertical-align: top;">Importing:</label><br>
@@ -389,10 +389,10 @@ if(!$format) $format='csv';
         </div>                    
         </fieldset>
         
-        <img id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
-        <img id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
-        <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
-        <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
+        <img alt id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
+        <img alt id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
+        <img alt id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
+        <img alt id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
         
         <div style="padding:1em 0 1em 1em;position: absolute;top:145px;width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
             <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
@@ -530,7 +530,7 @@ if(!$format) $format='csv';
 <!-- end radiogroup setting divs -->     
 
         <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
-            <table class="tbresults" style="display:inline-block">
+            <table role="presentation" class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
                                         <td rowspan="3" width="250">
@@ -579,7 +579,8 @@ if(!$format) $format='csv';
    
         
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
-            <thead><tr> <!-- Table headings -->
+            <caption></caption>
+            <thead><tr> 
                 <th style="width:75px;">Use&nbsp;<br>value</th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
@@ -597,7 +598,7 @@ if(!$format) $format='csv';
     </div>
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
     <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
-                <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
+                <table role="presentation" id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br>value</th>
                         <th width="75px">Unique&nbsp;<br>values</th>
@@ -628,7 +629,7 @@ if(!$format) $format='csv';
 <div id="divPopupPreview2" style="display:none"></div>
 
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
-        <fieldset>
+        <fieldset><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
             <div class="input-cell">

@@ -213,7 +213,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         let author_codes = this.element.find('#author-codes').text();
         let contributor_codes = '';//this.element.find('#contributor-codes').text()
-        const regex = /\d+/g;
+        const regex = /\d+/;
 
         if(regex.test(author_codes)){
             let parts = author_codes.match(regex);

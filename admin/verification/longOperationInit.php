@@ -54,6 +54,7 @@ $dbname = htmlspecialchars($_REQUEST['db']);
     $sTitle = 'Verifying database';
  }
 ?>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <title><?php echo $sTitle; ?></title>
@@ -70,7 +71,7 @@ $dbname = htmlspecialchars($_REQUEST['db']);
             setTimeout(function(){
                 var $dosframe = $('#verification_output');
                 $dosframe.on('load', function(){
-                    $dosframe.css({width:'100%',height:'100%'}).show(); 
+                    $dosframe.css({width:'97%',height:'97%'}).show(); 
                     $('#in_porgress').hide()
                 });
                 
@@ -87,13 +88,14 @@ $dbname = htmlspecialchars($_REQUEST['db']);
             background-position:50%;
             cursor: wait;
             width:100%;
-            height:100%
+            height:100%;
+            min-height:250px;
         }
         </style>            
     </head>
     <body class="popup" style="overflow:hidden">
         <div id='in_porgress'><h2><?php echo $sTitle; ?>. This may take up to a few minutes for large databases...</h2></div>    
-        <iframe id="verification_output" style='display:none;border:none;width:1;height:1'>
+        <iframe  title="Verification Output" id="verification_output" style="display:none;border:none;width:1;height:1;position:absolute;">
         </iframe>
     </body>
 </html>

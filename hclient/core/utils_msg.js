@@ -620,7 +620,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
 
             $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
-            .css({border:'2px solid green', overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+            .css({border:'none', overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
             
             if(options['allowfullscreen']){
                 $dosframe.attr('allowfullscreen',true);
@@ -1368,16 +1368,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(!options.height) options.height = 515;
             if(!options.width) options.width = 705;
             if(window.hWin.HEURIST4.util.isempty(options.resizable)) options.resizable = true;
-            if(false && options.resizable === true){
+            /* auto height dialog
+            if(options.resizable === true){
             options.resizeStop = function( event, ui ) {
-                
-
+ 
                var nh = $dlg.parent().height()
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height(); //-20
 
                     $dlg.css({overflow: 'none !important','width':'100%', 'height':nh });
                 };
-            }
+            }*/
         }else if(!options.width){
             options.width = 'auto';
         }

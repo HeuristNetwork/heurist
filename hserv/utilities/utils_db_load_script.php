@@ -552,11 +552,13 @@ skin_open();
     $kbytes_done  = round($bytes_done/1024,2);
     $mbytes_this  = round($kbytes_this/1024,2);
     $mbytes_done  = round($kbytes_done/1024,2);
+    
+    $filesize = intval($filesize);
 
     if (!$gzipmode)
     {
-      $bytes_togo  = $filesize-$foffset;
-      $bytes_tota  = $filesize;
+      $bytes_togo  = intval($filesize-$foffset);
+      $bytes_tota  = intval($filesize);
       $kbytes_togo = round($bytes_togo/1024,2);
       $kbytes_tota = round($bytes_tota/1024,2);
       $mbytes_togo = round($kbytes_togo/1024,2);

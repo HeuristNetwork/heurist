@@ -281,7 +281,6 @@ function hMapLayer( _options ) {
         removeLayer: function(){
             if(_map_overlay){
                 _map_overlay.removeOverlay();  
-                delete _map_overlay;
                 _map_overlay = null;
             } 
         }

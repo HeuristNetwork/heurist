@@ -793,9 +793,7 @@ var TemporalPopup = (function () {
 			let cc = ['taiwan','julian','gregorian'];
 
 			return (from.name.toLowerCase()==to.name.toLowerCase()) ||
-			(!hasMonth &&
-				((cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0) ||
-				(cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0)));
+			(!hasMonth && (cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0));
 		}
 
 		let newval = '';

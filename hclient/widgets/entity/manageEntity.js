@@ -443,28 +443,8 @@ $.widget( "heurist.manageEntity", {
                         
         }        
         
-       //---------    EDITOR PANEL
-       //if actions allowed - add div for edit form exists - it may be shown as right-hand panel or in modal popup
-       if(this.options.edit_mode!='none'){
-            if(this.options.edit_mode=='inline'){
-/* @todo align toolbar in list and editor for wide layout mode
-               if(this.recordList){
-                   this.recordList.css('width','250px');
-                   var list_container = this.recordList.find('.div-result-list-content');
-                   
-                   this.ent_editor_wrapper.css({'left':'250px'})
-                   //align with recordList header
-                   this.editForm.css({'border-top':'1px solid #cccccc',
-                                        top:list_container.css('top')});
-
-               }
-               this.ent_editor_wrapper.show();
-*/               
-            }else{
-               //this.ent_editor_wrapper.addClass('ui-heurist-bg-light').css({'overflow':'hidden'}).hide(); 
-            }
-       }
-
+        //---------    EDITOR PANEL
+        //if actions allowed - add div for edit form exists - it may be shown as right-hand panel or in modal popup
         //--------------------------------------------------------------------    
 
         //var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
@@ -1395,7 +1375,7 @@ $.widget( "heurist.manageEntity", {
             }else{
                 return this._cachedRecordset.getSubSetByIds(recIDs);    
             }
-        }else if(this.options.list_mode=='default'){
+        }else if(this.options.list_mode=='default' && this.recordList.resultList('instance')){
             if(window.hWin.HEURIST4.util.isnull(recIDs)){
                 return this.recordList.resultList('getRecordSet')
             }else{

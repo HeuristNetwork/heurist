@@ -276,11 +276,6 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                 //reload
                                 //that.searchForm.searchSysUsers('startSearch');
                                 if(newRole=='remove'){
-                                    if(false && that.searchForm.find('#input_search_type').val()!='any'){
-                                        var recset = that.recordList.resultList('getRecordSet');
-                                        recset.removeRecord(group_ID);
-                                        that.recordList.resultList('refreshPage');  
-                                    }
                                     window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
                                 }else{
                                     item.attr('data-value', newRole);

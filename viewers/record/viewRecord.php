@@ -107,8 +107,8 @@ if(!@$_REQUEST['popup']){
 }
         
 ?>
-<html>
-
+<!DOCTYPE>
+<html lang="en">
 <head>
 	<title>HEURIST - View record</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -121,7 +121,7 @@ if(!@$_REQUEST['popup']){
 <body style="margin: 0px;<?php if (@$_REQUEST['popup']) { ?>width: 480px; height: 600px; background-color: transparent;<?php } ?>" class="popup">
 	<div>
 	<!--<h3><?= htmlspecialchars($rec_title) ?></h3>-->
-	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?php echo $record_renderer_url;?>"></iframe>
+	<iframe title="viewer" name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?php echo $record_renderer_url;?>"></iframe>
 	</div>
 </body>
 </html>

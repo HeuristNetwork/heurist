@@ -1097,11 +1097,11 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
         rec_data['details'][1050] = term_id;
         window.hWin.HAPI4.RecordMgr.saveRecord(rec_data,
             function (response) {
-                if (response.status == window.hWin.ResponseStatus.OK) {
+                //if (response.status == window.hWin.ResponseStatus.OK) {
                     //Suffix update
-                } else {
+                //} else {
                     //Unable to create suffix term
-                }
+                //}
             });
     }
     if (type == "agentType") {
@@ -1122,10 +1122,10 @@ function postAddingTerm(type, term_id, id, rec_data, that) {
         rec_data['details'][991] = term_id;
         window.hWin.HAPI4.RecordMgr.saveRecord(rec_data,
             function (response) {
-                if (response.status == window.hWin.ResponseStatus.OK) {
-                } else {
+                //if (response.status == window.hWin.ResponseStatus.OK) {
+                //} else {
                     //Unable to add Bookformat while importing edition data
-                }
+                //}
             });
     }
 }

@@ -889,9 +889,9 @@ $.widget( "heurist.search", {
                                 that.query_request = data;
                                 that._refresh();
                             }
-                            if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
-                                that.input_search_prompt2.css({'visibility':'visible'}); //{display:'block'}
-                            }
+                            
+                            that.input_search_prompt2.css({'visibility':'visible'});
+                            
                         }
                     }
 

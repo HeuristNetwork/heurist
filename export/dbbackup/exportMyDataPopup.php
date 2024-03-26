@@ -37,8 +37,9 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);
 define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql');
+define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_hml');
 
-$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder
+$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
 $format = array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip'] == 1 ? 'zip' : 'tar';
 $mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
 $is_repository = array_key_exists('repository', $_REQUEST);
@@ -54,6 +55,8 @@ if($mode>1){
         downloadFile($mime, FOLDER_BACKUP.'.'.$format); //see recordFile.php
     }else if($mode=='3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)){  //archived sql dump
         downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
+    }else if($mode=='5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)){  //archived hml file
+        downloadFile($mime, FOLDER_HML_BACKUP.'.'.$format);
     }else if($mode=='4'){  //cleanup backup folder on exit
         folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
     }
@@ -61,7 +64,8 @@ if($mode>1){
 }
 
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Create data archive package</title>
@@ -133,7 +137,7 @@ if($mode>1){
                                 if($select.hSelect('instance') !== undefined){
                                     $select.hSelect('refresh');
                                 }
-                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
+                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to upload to Nakala.');
                                 return;
                             }
 
@@ -200,7 +204,7 @@ if($mode>1){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
                         return;
                     }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
-                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to upload to Nakala.');
+                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to upload to Nakala.');
                         return;
                     }
                 }
@@ -267,14 +271,21 @@ if($mode>1){
 
                 <div class="input-row" style="padding-top:10px">
                     <label>
-                        <input type="checkbox" name="includeresources" value="1" checked>
+                        <input type="checkbox" name="includeresources" value="1">
                         Include attached (uploaded) files eg. images (essential for full database archive).
                     </label> 
                 </div>
 
                 <div class="input-row">
+                    <label title="Adds all tilestacks that have been uploaded to Heurist">
+                        <input type="checkbox" name="include_tilestacks" value="1">
+                        Include tiled map images - these are typically very large and are probably already available elsewhere
+                    </label>
+                </div>
+
+                <div class="input-row">
                     <label title="Adds fully self-documenting HML (Heurist XML) file">
-                        <input type="checkbox" name="include_hml" value="1" checked>
+                        <input type="checkbox" name="include_hml" value="1">
                         Include HML (not required for transfer to a new server, but recommended for long-term archive)
                     </label>
                 </div>
@@ -282,8 +293,7 @@ if($mode>1){
                 <div class="input-row">
                     <label title="Export / Upload the archive in Zip format, instead of BZip">
                         <input type="checkbox" name="is_zip" value="1">
-                        Use Zip format rather than BZip
-                    </label>
+                        Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip is easier to open on personal computers )
                 </div>
 
                 <div class="input-row" style="display:none;">
@@ -382,6 +392,10 @@ if($mode>1){
             }else{
                 $copy_files_in_root = false;
             }
+            if(@$_REQUEST['include_tilestacks']=='1' && defined('HEURIST_TILESTACKS_DIR')){
+                if($folders_to_copy==null) $folders_to_copy = array();
+                $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
+            }
             if($folders_to_copy==null){
                 $folders_to_copy = array('no copy folders');   
             }
@@ -426,6 +440,10 @@ if($mode>1){
                 if (is_file($to_include)) {
                     include_once $to_include;
                 }
+
+                if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip){
+                    $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
+                }
             
            }//export HML
             
@@ -448,13 +466,13 @@ if($mode>1){
                 
                 
                 $database_dumpfile = FOLDER_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
-                $dump_options = array('skip-triggers' => true,  'add-drop-trigger' => false, 'add-drop-table'=>true);
+                $dump_options = array('skip-triggers' => true,  'quick' =>true, 'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
                 
                 $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
                 
                 if(!$res){
                     print '</div>';
-                    report_message("Sorry, unable to generate MySQL database dump.".$system->getError()['message'].'  '.$please_advise, true, true);
+                    report_message("Sorry, unable to generate MySQL database dump. ".$system->getError()['message'].'  '.$please_advise, true, true);
                 }
 
                 if($separate_sql_zip){ // copy sql dump to separate directory
@@ -503,6 +521,25 @@ if($mode>1){
                         $res_sql = UArchive::createBz2(FOLDER_BACKUP.'_sql', null, $destination_sql, true);
                     }
                 }
+
+                $res_hml = false;
+                if($separate_hml_zip){
+
+                    $destination_hml = FOLDER_BACKUP.'_hml.'.$format; // SQL dump only
+                    if(file_exists($destination_hml)){
+                        unlink($destination_hml);
+                    }
+                    if($format == 'tar' && file_exists(FOLDER_BACKUP.'_hml.tar.bz2')){
+                        unlink(FOLDER_BACKUP.'_hml.tar.bz2');
+                    }
+
+                    if($format == 'zip'){
+                        $res_hml = UArchive::zip(FOLDER_BACKUP.'_hml', null, $destination_hml, true);
+                    }else{
+                        $res_hml = UArchive::createBz2(FOLDER_BACKUP.'_hml', null, $destination_hml, true);
+                    }
+                    
+                }
             
                 if(!$is_repository) {
                         //success - print two links to download archives
@@ -528,6 +565,17 @@ if($mode>1){
     <?php }else{ ?>
         <br><br>
         <div>Failed to create standalone SQL dump. <?php echo $res_sql;?></div>
+    <?php 
+        } 
+    }
+    if($separate_hml_zip){
+        if($res_hml===true){ ?>
+        <br><br>
+        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_hml.<?php echo $format; ?>?mode=5&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
+            target="_blank" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $format;?> file only</a>
+    <?php }else{ ?>
+        <br><br>
+        <div>Failed to create / set up a standalone HML file. <?php echo $res_hml;?></div>
     <?php 
         } 
     }
@@ -610,7 +658,7 @@ if($mode>1){
                                 $params['status'] = 'pending'; // keep new record private, so it can be deleted
                                 $params['return_type'] = 'editor'; // return link to private record, will require login
         
-                                $rtn = uploadFileToNakala($system, $params);
+                                $rtn = uploadFileToNakala($system, $params); //upload database archive
         
                                 if($rtn === false){
                                     $rtn = $system->getError()['message'];
@@ -623,7 +671,7 @@ if($mode>1){
                                 echo_flush2('<br>'. $rtn .'<br>');
                             }else{
                                 report_message('Your Nakala API key cannot be retrieved, '
-                                .'please ensure it has been entered into Design > Setup > Properties > Personal Nakala API Key', true, true);
+                                .'please ensure it has been entered into Design > Setup > Properties > General Nakala API key', true, true);
                             }
                             
                             break;
@@ -658,6 +706,7 @@ function report_message($message, $is_error=true, $need_cleanup=false)
                 //cleanup temp folders
                 folderDelete2(FOLDER_BACKUP, true);
                 folderDelete2(FOLDER_SQL_BACKUP, true);
+                folderDelete2(FOLDER_HML_BACKUP, true);
             }
             //remove lock file
             isActionInProgress('exportDB', -1, HEURIST_DBNAME);

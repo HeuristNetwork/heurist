@@ -1,14 +1,14 @@
-<fieldset>
+<fieldset><legend style="display:none"></legend>
     <div style="height: 30px; width: 100%;" class="input">
         <div class="header" style="padding: 0 16px 0 16px;">
-            <label for="letter_name">Your name</label>
+            <label for="letter_name" class="slocale">Your name</label>
         </div>
         <input type="text" id="letter_name" required="required" placeholder="e.g. Jane Doe" aria-required="true" size="50">
     </div>
     
     <div style="height: 30px; width: 100%;" class="input">
         <div class="header" style="padding: 0 16px 0 16px;">
-            <label for="letter_email">Email Address</label>
+            <label for="letter_email" class="slocale">Email Address</label>
         </div>
         <input type="email" id="letter_email" required="required" placeholder="e.g. jane.doe@sydney.edu.au" aria-required="true" size="50">
     </div>
@@ -16,7 +16,7 @@
     
     <div style="padding: 0.2em; width: 100%;" class="input">
         <div class="header" style="padding: 0 16px 0 16px;vertical-align:top;">
-            <label for="letter_content">Email Message</label>
+            <label for="letter_content" class="slocale">Email Message</label>
         </div>
         <textarea id="letter_content"  required="required" style="width:400px;height:150px"></textarea>
     </div>
@@ -24,7 +24,7 @@
     
     <div style="height: 35px; width: 100%;" class="input">
         <div class="header" style="padding: 0 16px 0 16px;">
-            <label>Prove you are human</label>
+            <label class="slocale">Prove you are human</label>
         </div>
         <div id="captcha_img" style="padding:10px 4px;display:inline-block;"></div>
         <input type="text" name="captcha" id="captcha" style="display:inline-block;width:10em;" maxlength="16" />

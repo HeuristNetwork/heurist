@@ -639,38 +639,16 @@ $.widget( "heurist.svs_list", {
             }else if(this.btn_dbdesign){
                 this.btn_dbdesign.parent().hide();
             }
-
-            /*            
-            this.helper_btm.before(
-                $('<div>')
-                .attr('grpid',  'dbs').addClass('svs-acordeon')
-                .css('border','none')
-                .append( this._defineHeader(window.hWin.HR('Database Summary'), 'dbs').on('click', function(){ that._showDbSummary(); })
-            ) );
-            */
-
-        }
-        
-        
-        if(false && this.options.is_h6style){ //!!!!!!
-            this._updateTreeViewByGroup();
-            return;    
         }
         
         this._adjustAccordionTop();
-        /*
-        if(this.options.hide_header){
-            this.accordeon.css('top', 0);    
-        }else{
-            this.accordeon.css('top', this.options.is_h6style?36:this.div_header.height());    
-        }*/
         
         
         if(!(this.options.container_width>0)){
             this.options.container_width = this.accordeon.width();
         }
         
-        if(true || islogged || this.isPublished){
+        if(true){ // || islogged || this.isPublished
 
             /*
             if(!this.options.is_h6style)
@@ -1320,7 +1298,7 @@ $.widget( "heurist.svs_list", {
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var node = data.node;
-                if(true || node.data.cstrender){
+                if(true){ // || node.data.cstrender
                     var $span = $(node.span);
                     var s = '', s1='';
 
@@ -1826,69 +1804,34 @@ $.widget( "heurist.svs_list", {
 
             var context_opts = this._getAddContextMenu(groupID);
             var tree_links;
-            
-            if(false && this.options.is_h6style){
-            
-                tree_links = $('<div '
-                +'class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:8px 0px 0px 22px;margin-top:4px">'
-                +'Add Filters</div>'
-            +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px" data-group="'+groupID+'">'
-                +'<li data-action="saved"><span class="ui-icon ui-icon-plus"/>Simple</li>'
-                +'<li data-action="faceted"><span class="ui-icon ui-icon-box"/>Faceted</li>'
-                +'<li data-action="rules"><span class="ui-icon ui-icon-shuffle"/>RuleSet</li>'
-                +'<li data-action="folder"><span class="ui-icon ui-icon-folder-open"/>Folder</li></ul>');
-                
-                tree_links.find('li').addClass('fancytree-node')
-                            .css({'font-size':'smaller',padding:'2px 14px'});
-                tree_links.find('li > span').css({'margin-right':'4px','font-size':'1em'});
-                
-                this._on(tree_links.find('li'), {click:function(e){
 
-                    var ele = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
-                    var groupID = ele.parent('ul').attr('data-group');
-                    var cmd = ele.attr('data-action');
-                    var node = null;
+            var append_link = $("<a>",{href:'#'})
+                .html('<span class="ui-icon ui-icon-plus hasmenu2 droppable" '
+                    +' style="display:inline-block; vertical-align: bottom"></span>'
+                    +'<span class="hasmenu2 droppable">add</span>')
+                .on('click',function(event){
+                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
+                    //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
+             });
+             append_link.contextmenu(context_opts);
 
-                    if(cmd=='folder'){
-                        this._addNewFolder( groupID );
-                    }else{
-                        this.editSavedSearch( cmd, groupID, null, null, node );    
-                    }
+
+            //treedata is empty - add div - to show add links
+            tree_links = $('<div>', {id:"addlink"+groupID, 'data-groupid':groupID})
+            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
+            .append( append_link );
+
+            tree_links.droppable({
+                classes: {
+                    "ui-droppable-hover": "ui-state-active"
+                }, 
+                accept: function(){ return true },
+                drop: function( event, ui ) {
+                        var mod_node = $(ui.helper).data("ftSourceNode");
+                        var newGroupID = $(this).attr('data-groupid');
+                        that._moveSavedSearch(mod_node, newGroupID);
                     
-                }});
-            }else{
-
-                var append_link = $("<a>",{href:'#'})
-                    .html('<span class="ui-icon ui-icon-plus hasmenu2 droppable" '
-                        +' style="display:inline-block; vertical-align: bottom"></span>'
-                        +'<span class="hasmenu2 droppable">add</span>')
-                    .on('click',function(event){
-                        append_link.contextmenu('open', append_link.find('span.ui-icon') );
-                        //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
-                 });
-                 append_link.contextmenu(context_opts);
-
-
-                //treedata is empty - add div - to show add links
-                tree_links = $('<div>', {id:"addlink"+groupID, 'data-groupid':groupID})
-                .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
-                .append( append_link );
-
-                tree_links.droppable({
-                    classes: {
-                        "ui-droppable-hover": "ui-state-active"
-                    }, 
-                    accept: function(){ return true },
-                    drop: function( event, ui ) {
-                        
-                            var mod_node = $(ui.helper).data("ftSourceNode");
-                            var newGroupID = $(this).attr('data-groupid');
-                            
-                            that._moveSavedSearch(mod_node, newGroupID);
-                        
-                }});
-
-            }
+            }});
 
             
             if(window.hWin.HEURIST4.util.isnull(container)){
@@ -2624,9 +2567,8 @@ $.widget( "heurist.svs_list", {
     _showEmbedDialog: function(svs_ID){
         window.hWin.HEURIST4.msg.showMsgErr('The embed operation is no longer available from saved lists, please use alternative options available from within the Publisher menus');
         return;
-        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
-        
-        window.hWin.HEURIST4.ui.showPublishDialog({mode:'websearch', url: query, url_encoded: query});
+        //var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
+        //window.hWin.HEURIST4.ui.showPublishDialog({mode:'websearch', url: query, url_encoded: query});
     },
 
     //--------------------------------------------------------------------------------------

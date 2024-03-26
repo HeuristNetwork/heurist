@@ -305,7 +305,7 @@ if($response!=null){
                 
                 if($registerAtOnce==1){
                 
-                    $entity = new DbRecUploadedFiles($system, null);
+                    $entity = new DbRecUploadedFiles($system);
                     $ret = $entity->registerFile($file, null, true, $tiledImageStack); //it returns ulf_ID
                     
                     if( is_bool($ret) && !$ret ){

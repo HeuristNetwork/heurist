@@ -78,7 +78,7 @@ class DbsImport {
     private $translations_report;
 
     //  $data = 
-    function __construct( $system ) {
+    public function __construct( $system ) {
         $this->system = $system;
     }
 
@@ -974,7 +974,7 @@ TitleMask::set_fields_correspondence(null);
 // VII. Import calculated fields
 if(is_array($cfn_tobeimported) && count($cfn_tobeimported)>0){
 
-$cfn_entity = new DbDefCalcFunctions($this->system, array('entity'=>'defCalcFunctions'));
+$cfn_entity = new DbDefCalcFunctions($this->system);
 
 $repAction = new ReportActions($this->system, null);
 
@@ -1035,7 +1035,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             $cfn_values = array('entity'=>'defCalcFunctions', 'fields'=>$cfn_values);
             
             $cfn_entity->setData($cfn_values);
-            $cfn_entity->setRecords(null); //reset
+            //$cfn_entity->setRecords(null); //reset
             $new_cfn_ID = $cfn_entity->save();   //register remote url - it returns ulf_ID
             if(is_array($new_cfn_ID)) $new_cfn_ID = $new_cfn_ID[0];
             
@@ -1727,9 +1727,9 @@ $mysqli->commit();
                 if($parent_id==null){
                     //for vocabularies
                     $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_code], 
-                                                            null, $domain, $idx_code);
+                                                            $idx_code);
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
-                                                            null, $domain, $idx_label);
+                                                            $idx_label);
                     
                     if(@$term_import[$idx_vocab_group_id]>0 && @$this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
                         $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];
@@ -1916,7 +1916,7 @@ $mysqli->commit();
                     $src_group['vcg_ID'] = $new_grp_id;
                     $this->target_defs['terms']['groups'][$new_grp_id] = $src_group;
                 }else{
-                    $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".@$res['error']);
+                    $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".$mysqli->error);
                     return false;
                 }
             }

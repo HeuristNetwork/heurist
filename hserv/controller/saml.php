@@ -66,8 +66,10 @@ if($error){
                     $res2 = json_encode($res);
                     //pass to window.close('echo $res;');
                     ?>
-                    <html>
+                    <!DOCTYPE>
+                    <html lang="en">
                     <head>
+                    <title>Heurist external authentification</title>
                     <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
                     <script>
                         window.hWin.HAPI4.currentUser = <?php echo json_encode($res['currentUser']); ?>;
@@ -109,8 +111,10 @@ if($msg==null){
     }
 }
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
 <head>
+<title>Heurist external authentification</title>
 <script>
     window.onload = function(){
 console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');                                

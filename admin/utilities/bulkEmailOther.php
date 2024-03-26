@@ -191,12 +191,12 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		foreach ($dbs as $db) {
             
-            $db = $mysqli->real_escape_string(str_replace('`','',$db));
-	
+            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);
+            
 			$query = "SELECT count(*) 
 								FROM (
 									SELECT *
-									FROM `".$db."`.Records AS rec
+									FROM `$db`.Records AS rec
 									WHERE rec_Title IS NOT NULL
 									AND rec_Title NOT LIKE 'Heurist System Email Receipt%'
 									AND rec_FlagTemporary != 1
@@ -244,7 +244,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	foreach($dbs as $db){
         
-        $db = $mysqli->real_escape_string(str_replace('`','',$db));
+        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
 
 		if($user_request == "owner"){ // Owners
 			$where_clause = "WHERE ugr.ugr_ID = 2";
@@ -312,8 +312,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$data = array();
 	foreach($dbs as $db){
         if(strpos($db,'hdb_')===0){
-            $db = str_replace('`','',$db); 
-		    $query = 'SELECT count(*) FROM `' . $mysqli->real_escape_string($db) . '`.`Records` WHERE rec_FlagTemporary != 1';
+            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
+		    $query = 'SELECT count(*) FROM `' . $db . '`.`Records` WHERE rec_FlagTemporary != 1';
 		    $res = $mysqli->query($query);
 		    if(!$res){
 			    $data[$db] = 'error';
@@ -363,12 +363,11 @@ function getDatabaseDetails($mysqli, $db_list){
 	// Retrieve record count and last update (record or structure)
 	foreach ($db_list as $database) {
 
-        $database = $mysqli->real_escape_string(str_replace('`','',$database));
+        $database = preg_replace('/[^a-zA-Z0-9_]/', "", $database);
 			
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
-
 		// Get record count
-		$cnt_query = 'SELECT COUNT(*) FROM `' . $database . '`.Records WHERE rec_FlagTemporary != 1';
+		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
 		$res = $mysqli->query($cnt_query);
 		if(!$res){
 			$db_data['rec_count'] = 0;
@@ -381,7 +380,7 @@ function getDatabaseDetails($mysqli, $db_list){
 		$last_recent = null;
 		$last_struct = null;
 
-		$last_rec_query = 'SELECT MAX(rec_Modified) FROM `' . $database . '`.Records WHERE rec_FlagTemporary != 1';
+		$last_rec_query = "SELECT MAX(rec_Modified) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
 		$res = $mysqli->query($last_rec_query);
 		if($res){
 			while($row = $res->fetch_row()){
@@ -389,7 +388,7 @@ function getDatabaseDetails($mysqli, $db_list){
 			}
 		} // else keep $last_rec null
 
-		$last_struct_query = 'SELECT MAX(rst_Modified) FROM `' . $database . '`.defRecStructure';
+		$last_struct_query = "SELECT MAX(rst_Modified) FROM `$database`.defRecStructure";
 		$res = $mysqli->query($last_struct_query);
 		if($res){
 			while($row = $res->fetch_row()){

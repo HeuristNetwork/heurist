@@ -117,7 +117,6 @@ function ReportScheduleEditor() {
         }
         
         document.getElementById('rps_Title').onchange = function(event){
-            window.hWin.HEURIST4.util
             document.getElementById('rps_FileName').value = window.hWin.HEURIST4.ui.cleanFilename(event.target.value);
         }
 

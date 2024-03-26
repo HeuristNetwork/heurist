@@ -35,6 +35,8 @@ require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
 //require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
+define('DEBUG_RUN', false);
+
 /**
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
 * 
@@ -97,7 +99,7 @@ class RecordsBatch
     private $not_putify = null; //fields that will not html purified
     private $purifier = null;   //html purifier instance
     
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
        
@@ -133,7 +135,7 @@ class RecordsBatch
     //
     //
     //
-    function  setData($data){
+    public function setData($data){
         $this->data = $data;    
     }
     
@@ -210,15 +212,16 @@ class RecordsBatch
             //normalize recIDs to an array for code below
             $recIDs = prepareIds($this->data['recIDs']);
             
-            $rtyID = @$this->data['rtyID'];
+            $rtyID = intval(@$this->data['rtyID']);
             
             $passedRecIDCnt = count($recIDs);
 
             if ($passedRecIDCnt>0) {//check editable access for passed records
             
-                if($rtyID){ //filter for record type
+                if($rtyID>0){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
+                    $recIDs = prepareIds($recIDs); //redundant for snyk
                     $passedRecIDCnt = is_array($recIDs)?count($recIDs):0;
                 }
                 if($passedRecIDCnt>0){
@@ -229,6 +232,7 @@ class RecordsBatch
                         $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
                             .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
                             .join(",",$this->system->get_user_group_ids()).")");
+                        $this->recIDs = prepareIds($this->recIDs); //redundant for snyk
                     }
 
                     $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
@@ -243,11 +247,13 @@ class RecordsBatch
                 return true;
             }
             
-            if($rtyID){
+            if($rtyID>0){
                 $this->rtyIDs = array($rtyID);
             }else {
                 $this->rtyIDs = mysql__select_list($mysqli, 'Records','distinct(rec_RecTypeID)',"rec_ID in ("
                     .implode(",",$this->recIDs).")");
+                    
+                $this->rtyIDs = prepareIds($this->rtyIDs);
             }
 
         }        
@@ -527,6 +533,7 @@ class RecordsBatch
         $sqlErrors = array();
         
         foreach ($this->recIDs as $recID) {
+            $recID = intval($recID); //redundant for snyk
             //check field limit for this record
             $query = "select rec_RecTypeID, tmp.cnt from Records ".
             "left join (select dtl_RecID as recID, count(dtl_ID) as cnt ".
@@ -729,6 +736,7 @@ class RecordsBatch
 
             //??? why we need it if $dtyID is defined
             $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"'); // OR dty_Type = "geo"
+            $types = prepareIds($types);//redundant for snyk
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
             
         }else{
@@ -803,14 +811,14 @@ class RecordsBatch
                     
                     $query = $query.', Records '
                             .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID '
-            .(count($this->rtyIDs)>1?('in ('.getCommaSepIds($this->rtyIDs).')'):('='.$this->rtyIDs[0]))
+            .(count($this->rtyIDs)>1?('in ('.implode(',',$this->rtyIDs).')'):('='.$this->rtyIDs[0]))
                             ." AND dtl_DetailTypeID = $dtyID and $searchClause";
                 }
             }else{
                 $query = $query."WHERE  dtl_DetailTypeID = $dtyID and $searchClause";
                 //get matching detail value for record if there is one
                 if($recID!='all'){
-                    $query = $query." AND  dtl_RecID = $recID ";
+                    $query = $query.' AND  dtl_RecID = '.intval($recID);
                 }
             }
             $query = $query.' ORDER BY dtl_RecID';
@@ -880,8 +888,8 @@ class RecordsBatch
                 }
 
             //foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
-                $dtlID = $row[0];
-                $recID = $row[1];
+                $dtlID = intval($row[0]);
+                $recID = intval($row[1]);
                 
                 if($is_multiline){ //replace with several values (long text)
 
@@ -948,13 +956,13 @@ class RecordsBatch
                 
                 if($replace_all_occurences || $is_multiline)
                 {
-                    if($is_multiline) array_push($valuesToBeDeleted, $dtlID);  //= array_keys($valuesToBeReplaced);
+                    if($is_multiline) array_push($valuesToBeDeleted, intval($dtlID));  //= array_keys($valuesToBeReplaced);
                     
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){
                             break;    
                         }
-                        array_push($valuesToBeDeleted, $row[0]);
+                        array_push($valuesToBeDeleted, intval($row[0]));
                     }
                     $get_next_row = false;
                 }
@@ -1103,6 +1111,8 @@ class RecordsBatch
         }
         
         foreach ($this->recIDs as $recID) {
+            
+            $recID = intval($recID);
             
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
@@ -1356,12 +1366,12 @@ class RecordsBatch
         // 3. Parse pdf file
                             try{
 
-                                if(true){ 
+                                if(!DEBUG_RUN){ 
                                     $pdf    = $parser->parseFile($file);
 
-                                    if(false){
-                                        $text = $pdf->getText();
-                                    }else{
+                                    //if(false){
+                                    //    $text = $pdf->getText();
+                                    //}else{
                                         // Retrieve all pages from the pdf file.
                                         $pages  = $pdf->getPages();
                                         $page_cnt = 0; 
@@ -1389,7 +1399,7 @@ class RecordsBatch
 
 
                                         }//foreach     
-                                    }
+                                    //}
 
                                 }else{
                                     //debug without real parsing 
@@ -1446,7 +1456,7 @@ class RecordsBatch
                 }else{}
                 */    
     // 5. Add new values to 2-652 - one entry per file
-                if(true){
+                if(!DEBUG_RUN){
                     $dtl['dtl_RecID'] = $recID;
                     foreach($details as $text){
                         $dtl['dtl_Value'] = $text;
@@ -1539,7 +1549,7 @@ class RecordsBatch
         //5. If download - register new file
         //6. Replace ulf_ID in dtl_UploadedFileID
 
-        $file_entity = new DbRecUploadedFiles($this->system, null);
+        $file_entity = new DbRecUploadedFiles($this->system);
         
         //1. find external urls for field values
         $query = 'SELECT dtl_ID, ulf_ID, ulf_ExternalFileReference, dtl_RecID FROM recUploadedFiles, recDetails '
@@ -1591,8 +1601,8 @@ class RecordsBatch
                     
                 }
 
-                $dtl_IDs[] = $row[0];
-                $rec_IDs[] = $row[3];
+                $dtl_IDs[] = intval($row[0]);
+                $rec_IDs[] = intval($row[3]);
                 
 
             }//while
@@ -1664,7 +1674,8 @@ class RecordsBatch
         if ($res){
             
             while ($row = $res->fetch_row()){        
-                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.filter_var($row[0],FILTER_SANITIZE_STRING).'.png'; //'ulf_ObfuscatedFileID'
+                $obfuscation_id = preg_replace('/[^a-z0-9]/', "", $row[0]);  //for snyk
+                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$obfuscation_id.'.png'; //'ulf_ObfuscatedFileID'
                 if(file_exists($thumbnail_file)){
                     unlink($thumbnail_file);
                     $cnt++;
@@ -1772,18 +1783,20 @@ public methods
                     $tag_ids = $this->_tagGetByName(array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }
-            if( !is_array($record_ids) || count($record_ids)<0 ){
+            if( !is_array($record_ids) || count($record_ids)==0 ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Record ids are not defined');
                 return false;
             }
 
-            if( !is_array($tag_ids) || count($tag_ids)<0 ){
+            if( !is_array($tag_ids) || count($tag_ids)==0 ){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Tags ids either not found or not defined');
                 return false;
             }
 
             $mysqli = $system->get_mysqli();
 
+            $record_ids = prepareIds($record_ids); //for snyk
+            
             //assign links
             $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
                 . 'select rec_ID, tag_ID from usrTags, Records '
@@ -1997,6 +2010,8 @@ public methods
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         foreach($record_ids as $rec_id){
+            
+            $rec_id = intval($rec_id); //snyk does not see intval in mysql__select_list2
 
             // 1. Get values -----
             $details_to_transfer = array();
@@ -2085,6 +2100,8 @@ public methods
                 if($split_values != 0){
                     $dtl_IDs = $details_to_transfer[$idx];
                 }
+                
+                $dtl_IDs = prepareIds($dtl_IDs); //for snyk
 
                 $upd_where = count($dtl_IDs) == 1 ? ("= " . $dtl_IDs[0]) : ("IN (" . implode(',', $dtl_IDs) . ")");
                 $upd_query = "UPDATE recDetails SET dtl_RecID = $rec_id WHERE dtl_ID $upd_where";
@@ -2521,6 +2538,8 @@ public methods
 
     /**
      * Upload file to an external repository
+     * 1. Find files linked to given set of records
+     * 2. Create metadata
      */
     public function uploadFileToRepository(){
 
@@ -2542,7 +2561,7 @@ public methods
         $uploadError = array();
         $failed_ids = array();
 
-        $file_entity = new DbRecUploadedFiles($this->system, array('entity'=>'recUploadedFiles'));
+        $file_entity = new DbRecUploadedFiles($this->system);
         
         // Find relevant local files
         $query = 'SELECT dtl_ID, ulf_ID, dtl_RecID '
@@ -2568,10 +2587,26 @@ public methods
         $dtl_IDs = array();
         $rec_IDs = array();
         $completed_ulf_IDs = array();
+        
+        //2024-03-23 
+        // Obtain write API key/credentials
+        $service_id = $this->data['repository'];
+        
+        $credentials = user_getRepositoryCredentials2($this->system, $service_id);
+        
+        if($credentials==null){
+            
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for sepecified repository and user/group not found');
+            return false;
+            
+        }else if(!@$credentials[$service_id]['params']['writeApiKey']){  // || @$credentials['params']['writeUser']
 
-        if($this->data['repository'] == 'Nakala'){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
+            return false;
+        
+        }else if(strpos($service_id,'nakala')===0){
 
-            if(array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
+            if(!array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
                 return false;
             }
@@ -2595,7 +2630,7 @@ public methods
                 'propertyUri' => 'http://nakala.fr/terms#license'
             );
 
-            $api_key = $this->system->get_system('sys_NakalaKey');
+            $api_key = $credentials[$service_id]['params']['writeApiKey']; //$this->system->get_system('sys_NakalaKey');
 
             while($row = $res->fetch_row()){
 
@@ -2617,7 +2652,7 @@ public methods
 
                     $file_query = 'SELECT ulf_OrigFileName, concat(ulf_FilePath, ulf_FileName) AS "fullPath", fxm_MimeType, ulf_Description, concat(ugr_FirstName, " ", ugr_LastName) AS "fullName", DATE(ulf_Added) '
                     .'FROM recUploadedFiles, defFileExtToMimetype, sysUGrps '
-                    .'WHERE ulf_ID=' . $row[1] . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
+                    .'WHERE ulf_ID=' . intval($row[1]) . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
                     $file_res = $mysqli->query($file_query);
                     if(!$file_res){ // another mysql error, skip
                         $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
@@ -2641,7 +2676,10 @@ public methods
                         continue;
                     }
 
-                    $file = array('path' => $file_path, 'type' => $file_dtl[2], 'name' => $file_dtl[0], 'description' => $file_dtl[3]);
+                    $file = array('path' => $file_path, 
+                                  'type' => $file_dtl[2], 
+                                  'name' => $file_dtl[0], 
+                                  'description' => $file_dtl[3]);
 
                     $meta_values['title'] = array(
                         'value' => $file_dtl[0],
@@ -2694,11 +2732,19 @@ public methods
                         'propertyUri' => 'http://nakala.fr/terms#created'
                     );
 
-                    $rtn = uploadFileToNakala($this->system, array('api_key' => $api_key, 'file' => $file, 'meta' => $meta_values, 'status' => 'published')); // pending | published
+                    $rtn = uploadFileToNakala($this->system,   //upload in batch
+                        array('api_key' => $api_key, 'file' => $file, 
+                              'meta' => $meta_values, 'status' => 'published')); // pending | published
 
                     if($rtn){ // register URL ($rtn)
-                        $file_entity->setRecords(null); // reset records
-                        $new_ulf_ID = $file_entity->registerURL($rtn); // register nakala url
+                        //$file_entity->setRecords(null); // reset records
+                        if($service_id){
+                            $fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');    
+                        }else{
+                            $fields = null;
+                        }
+                        
+                        $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields); // register nakala url
                         if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
                             $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
                             $failed_ids[] = $row[2];
@@ -2715,8 +2761,8 @@ public methods
                     }
                 }
 
-                $dtl_IDs[] = $row[0];
-                $rec_IDs[] = $row[3];
+                $dtl_IDs[] = intval($row[0]);
+                $rec_IDs[] = intval($row[3]);
 
             } // while
         }
@@ -2733,7 +2779,7 @@ public methods
             $ulf_to_delete = array();
             foreach ($completed_ulf_IDs as $org_ID => $new_ID) {
                 $query = 'SELECT dtl_ID FROM recDetails WHERE dtl_UploadedFileID = ' . $org_ID;
-                $dtl_IDs = mysql__select_list2($mysqli, $query);
+                $dtl_IDs = mysql__select_list2($mysqli, $query, 'intval');
 
                 if(!$dtl_IDs){
                     continue;
@@ -2743,6 +2789,7 @@ public methods
                     $ulf_to_delete[] = $org_ID;
                 }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
+                    $dtl_IDs = prepareIds($dtl_IDs); //for snyk
                     if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
                         // then delete the file reference + local file
                         $ulf_to_delete[] = $org_ID;

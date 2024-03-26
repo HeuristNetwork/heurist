@@ -26,6 +26,20 @@
     */
 
     //
+    //
+    //
+    function initLangCodes(){
+        global $glb_lang_codes, $glb_lang_codes_index;
+        
+        if(!isset($glb_lang_codes)){
+            $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-active-list.json'),true);
+            foreach($glb_lang_codes as $codes){
+                $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);
+            }
+        }
+    }
+    
+    //
     // get 3 letters ISO code
     //
     function getLangCode3($lang){
@@ -35,12 +49,7 @@
         
         if ($lang) { 
 
-            if(!isset($glb_lang_codes)){
-                $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-3b2.json'),true);
-                foreach($glb_lang_codes as $codes){
-                    $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);
-                }
-            }
+            initLangCodes();
             
             $lang = strtoupper($lang);
             if(strlen($lang)==3){
@@ -61,6 +70,33 @@
                 }
             }*/
             
+        }
+        
+        return $res;
+    }
+
+    //
+    // get 2 letters ISO code
+    //
+    function getLangCode2($lang){
+
+        global $glb_lang_codes, $glb_lang_codes_index;
+
+        $res = null;
+        
+        if ($lang) { 
+
+            initLangCodes();            
+            
+            $lang = strtoupper($lang);
+            if(strlen($lang)==3){
+                $lang = strtoupper($lang);
+                if(@$glb_lang_codes_index[$lang]!=null){
+                    $res = $glb_lang_codes_index[$lang];
+                }
+            }else{
+                $res = array_search($lang, $glb_lang_codes_index) === false ? null : $lang;
+            }
         }
         
         return $res;
@@ -87,18 +123,6 @@
                 if($val[2]==':'){
                     $lang = substr($val,0,2);
                     $pos = 3;
-                    
-                    /*find 3 chars code - move to utlities
-                    if(!isset($glb_lang_codes)){
-                        $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-                    }
-                    foreach($glb_lang_codes as $codes){
-                        if(strcasecmp($codes['a2'],$lang)===0){
-                            $lang = $codes['a3'];
-                            break;
-                        }
-                    }*/
-                    
                 }else if($val[3]==':'){
                     $lang = substr($val,0,3);
                     $pos = 4;
@@ -209,15 +233,12 @@
 
         global $glb_lang_codes, $glb_lang_codes_index, $accessToken_DeepLAPI;
 
-        if(!isset($glb_lang_codes)){ //load codes
-            $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-3b2.json'),true);
-            foreach($glb_lang_codes as $codes){
-                $glb_lang_codes_index[strtoupper($codes['a3'])] = strtoupper($codes['a2']);
-            }
-        }
+        initLangCodes();
 
         // Default list of languages - from https://www.deepl.com/docs-api/general/get-languages
-        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI', 'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL', 'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
+        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI', 
+                               'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL', 
+                               'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
 
         // Retrieve from file, created by daily script
         $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';

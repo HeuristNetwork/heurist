@@ -168,6 +168,7 @@ regional['ENG'] = {
         'menu-structure-import': 'Browse templates',
         'menu-structure-workflowstages': 'Workflow stages',
         'menu-lookup-config': 'External lookups',
+        'menu-repository-config': 'External repositories',
         'menu-structure-summary': 'Visualise',
         'menu-structure-refresh': 'Refresh memory',
     
@@ -180,8 +181,8 @@ regional['ENG'] = {
 
     'Setup': '',
         'menu-manage-dashboards': 'Shortcuts bar',
-        'menu-manage-archive': 'Archive file - download',
-        'menu-manage-archive-upload': 'Archive file - to repository',
+        'menu-manage-archive': 'Safeguard file - download',
+        'menu-manage-archive-upload': 'Safeguard file - to repository',
         'menu-manage-dashboards-hint': 'Defines an editable list of shortcuts to functions to be displayed on a toolbar at startup unless turned off',
         'menu-manage-archive-hint': 'Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink',
     
@@ -508,7 +509,6 @@ regional['ENG'] = {
     filter_help_hint: 'Show syntax and examples of the Heurist query/filter language',
     save_filter_hint: 'Save the current filter and rules as a link in the navigation tree',
     search_filter_hint: 'enter search/filter or use "Filter builder"',
-    'Filter builder': '',
     filter_builder_hint: 'Build a filter expression using a form-driven approach',
     'Facet builder': '',
     filter_facetbuilder_hint: 'Build new faceted search',
@@ -662,9 +662,6 @@ regional['ENG'] = {
 
     'thumbs3':'preview',
     
-    'Collected':'Collect',
-    'Shared':'Share',
-
     'feature_request': 'Please request from Heurist team if needed or add to code and do a pull request'
 
 };

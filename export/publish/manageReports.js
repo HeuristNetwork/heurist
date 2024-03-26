@@ -194,7 +194,7 @@ function ReportManager(_isFilterMode, _isWindowMode) {
                             +window.hWin.HAPI4.database+'&publish=3&mode=html&id='
                             +data
                             +'" target="_blank">'
-                            +'<img src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
+                            +'<img alt src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
                             +'</a>';
                         }
                     }else{
@@ -243,6 +243,7 @@ return '<div align="center" data-id="'+data+'">'
             }
         ];
 
+        $('.div_datatable').empty();
         _dataTable = $('.div_datatable').DataTable( _dataTableParams );
 
         $('.dataTables_filter').css({float:'left'});

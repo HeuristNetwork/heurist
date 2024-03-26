@@ -172,7 +172,8 @@ if(@$_REQUEST['ids']){
 }
 if(!($is_map_popup || $without_header)){
 ?>
-<html>
+<!DOCTYPE>
+<html lang="en">
     <head>
         <title>HEURIST - View record</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -1273,11 +1274,11 @@ function print_header_line($bib) {
         <?php }
         if(!empty($wfs_details)){
 
-            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . $wfs_details[0];
+            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . intval($wfs_details[0]);
         ?>
 
             <span style="cursor: default; padding-left: 20px;">
-                Workflow stage: <?php echo $wfs_details[1]; ?>
+                Workflow stage: <?php echo htmlspecialchars($wfs_details[1]); ?>
                 <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
             </span>
 
@@ -1602,8 +1603,9 @@ function print_public_details($bib) {
         .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.intval($relRT)
         .' AND '.$ACCESS_CONDITION;
         
-//print $query;            
-        if(true){  //this query fails for maria db        
+//print $query; 
+        $allow_execute_this_complex_query = true;           
+        if($allow_execute_this_complex_query){  //this query fails for maria db        
                 
             $bds_res = $mysqli->query($query);     
             if($bds_res){   
@@ -1721,7 +1723,7 @@ function print_public_details($bib) {
 
                 if(!($bd['dtl_UploadedFileID']>0)){
                      // FIX on fly - @todo  remove on 2022-08-22
-                     $ruf_entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                     $ruf_entity = new DbRecUploadedFiles($system);
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
                     $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see recordFile.php
@@ -2737,7 +2739,7 @@ function linkifyValue($value){
 
     $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value); // "%0A", "%0D"
 
-    preg_match_all('/((?:https?|ftp|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+    preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
 
     if(is_array($url_matches) && count($url_matches[0]) > 0){
 

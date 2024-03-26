@@ -502,7 +502,7 @@ function hSvsEdit(args) {
                                     [
                                       {text:'Replace existing', click: function(){ 
                                             svs_id.val(id);
-                                            __doSave(false), 
+                                            __doSave(false);
                                             $mdlg.dialog( "close" );
                                             
                                             if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){

@@ -94,7 +94,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
                             <!-- Left Side -->
                             <div class="border border-dark bg-white" style="width: 340px;padding: 7px;float: left;height: 92%;">
-                                <fieldset>
+                                <fieldset><legend style="display:none"></legend>
                                     <!-- Dataset selection -->
                                     <div>
                                         <div class="align-items-center" style="width: 100%;" id="divLoadSettings">
@@ -106,7 +106,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
                                         <div>
 
-                                            <fieldset id="shows" style="display:none;">
+                                            <fieldset id="shows" style="display:none;"><legend style="display:none"></legend>
                                                 <div class="align-items-center">
                                                     <div style="font-size: 14px;vertical-align: top;">
                                                         <label for="rbShowValue">Show</label>
@@ -206,7 +206,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                     </div>
                                 </div>
 
-                                <fieldset id="vars" style="display:none;">
+                                <fieldset id="vars" style="display:none;"><legend style="display:none"></legend>
 
                                     <div id="row_container">
                                         <div class="align-items-center" id="rowVars" style="margin-bottom: 5px;">

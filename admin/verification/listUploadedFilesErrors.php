@@ -74,10 +74,42 @@ $mysqli = $system->get_mysqli();
         <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>    
     
         <div class="banner">
+            <h2>Disk usage and quota</h2>
+        </div>
+<?php
+        $quota = $system->getDiskQuota(); //takes value from disk_quota_allowances.txt
+        $quota_not_defined = (!($quota>0));
+        if($quota_not_defined){
+            $quota = 1073741824; //1GB    
+        }
+        $usage = filestoreGetUsageByScan($system);
+        
+        $quota /= 1048576;
+        $quota = round((float)$quota, 2);
+
+        $usage /= 1048576;
+        $usage = round((float)$usage, 2);
+        
+        $dirs = filestoreGetUsageByFolders($system);
+        
+        print '<p>Disk quota: '.$quota.' MB</p>';
+        print 'Disk usage by folder<br><table><tr><th>folder</th><th>MB</th></tr>';
+        
+        foreach ($dirs as $dir=>$size){
+            if($size>0){
+                $size /= 1048576;
+                $size = round((float)$size, 2);
+                print '<tr><td>'.htmlspecialchars($dir).'</td><td>'.$size.'</td></tr>';    
+            }
+        }//for
+        print '</table>';
+        print 'Total usage: <b>'.$usage.' MB</b><br><hr>';
+?>        
+        <div class="banner">
             <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
-        <div><br><br>
+        <div>
             These checks look for errors in uploaded file records.
             <br><br><hr><br><br>
             <div id="linkbar"></div>
@@ -88,7 +120,7 @@ $mysqli = $system->get_mysqli();
             <?php
 
     $files_duplicates = array();
-    $files_duplicates_all_ids = array();
+    $files_duplicates_all_ids = array(); //not used 
 
     $files_orphaned = array();
     $files_unused_local = array();
@@ -126,9 +158,12 @@ $mysqli = $system->get_mysqli();
                 
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
-                    array_push($dups_ids, $res4[0]);
+                    $dups_ids[] = intval($res4[0]);
+                    //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
+                
+                if(count($dups_ids)<2) continue;
                 
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
@@ -139,7 +174,7 @@ $mysqli = $system->get_mysqli();
                 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$max_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
+                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                 $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
 //print $upd_query.'<br>';                
 //print $del_query.'<br>';
@@ -165,22 +200,28 @@ $mysqli = $system->get_mysqli();
             $fix_dupes = 0;
             $fix_url = 0;
             //find id with duplicated path+filename 
-            while ($res = $res2->fetch_row()) {
-                $query3 = 'SELECT ulf_ID FROM recUploadedFiles '
-                    .'where ulf_ExternalFileReference="'.$mysqli->real_escape_string($res[0]).'"';
-                $res3 = $mysqli->query($query3);
+            while ($roww = $res2->fetch_row()) {
+                $external_url = $roww[0];
+                $query3 = 'SELECT ulf_ID FROM recUploadedFiles where ulf_ExternalFileReference=?';
+                $res3 = mysql__select_param_query($mysqli, $query3, array('s', $external_url));
+                    
                 $dups_ids = array();
                 
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
-                    array_push($dups_ids, $res4[0]);
+                    $dups_ids[] = intval($res4[0]);
+                    //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
-                $files_duplicates[$res[0]] = $dups_ids;
+                
+                if(count($dups_ids)<2) continue;
+                
+                $files_duplicates[$external_url] = $dups_ids;
                 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$max_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
+                $dups_ids = prepareIds($dups_ids); //for stupid snyk
+                $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                 $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
                 $mysqli->query($upd_query);
                 $mysqli->query($del_query);
@@ -421,16 +462,17 @@ $mysqli = $system->get_mysqli();
       
         $ulf_ID = $row['ulf_ID'];
         if(@$row['clear_remote']){ //remove url from ulf_FilePath
-                $query = 'update recUploadedFiles set ulf_ExternalFileReference="'
-                                .$mysqli->real_escape_string($row['clear_remote'])
-                                .'", ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.intval($ulf_ID);
+                $query = 'update recUploadedFiles set ulf_ExternalFileReference=?'
+                                .', ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.intval($ulf_ID);
+
+                mysql__exec_param_query($mysqli, $query, array('s', $row['clear_remote']));
+        
         }else{
-                    $query = 'update recUploadedFiles set ulf_FilePath="'
-                                    .$mysqli->real_escape_string($row['res_relative'])
-                                    .'", ulf_FileName="'
-                                    .$mysqli->real_escape_string($row['filename']).'" where ulf_ID = '.intval($ulf_ID);
+                $query = 'update recUploadedFiles set ulf_FilePath=?, ulf_FileName=? where ulf_ID = '.intval($ulf_ID);
+
+                mysql__exec_param_query($mysqli, $query, array('ss', $row['res_relative'], $row['filename']));
+        
         }
-       $mysqli->query($query);            
     }
     if(is_array($files_path_to_correct) && count($files_path_to_correct)>0){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';

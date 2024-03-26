@@ -67,7 +67,8 @@ if(!isset($message)){
     $dbname = $_REQUEST['db'];
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title><?php print defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist"; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">

@@ -80,8 +80,9 @@ if($arg_database==null){
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
+//require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 
 //retrieve list of databases
@@ -221,9 +222,9 @@ foreach ($arg_database as $idx=>$db_name){
         folderRecurseCopy( $database_folder, $folder, $folders_to_copy, null, $copy_files_in_root);
     }
 
-    if(false){// 2016-10-25  
-        folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
-    }
+    //if(false){// 2016-10-25  
+    //    folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
+    //}
 
 
     if(!$arg_skip_hml){
@@ -272,17 +273,25 @@ foreach ($arg_database as $idx=>$db_name){
     */
 
     // Do an SQL dump of the whole database
+    $dumpfile = $folder."/".$db_name."_MySQL_Database_Dump.sql";
+    
+    $res = DbUtils::databaseDump($db_name, $dumpfile, $dump_options);
+    if($res===false){
+        if(file_exists($progress_flag)) unlink($progress_flag);
+        
+        $err = $system->getError();
+        exit("Sorry, unable to generate MySQL database dump for $db_name.".$err['message']."\n");
+    }
+/*    
     try{
         $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
         $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
-        
-        //$dump = new Mysqldump( 'hdb_'.$db_name, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', $dump_options);
-        $dump->start($folder."/".$db_name."_MySQL_Database_Dump.sql");
+        $dump->start($dumpfile);
     } catch (Exception $e) {
         if(file_exists($progress_flag)) unlink($progress_flag);
         exit("Sorry, unable to generate MySQL database dump for $db_name.".$e->getMessage()."\n");
     }
-
+*/
      echo "zip.. ";
      
     // Create a zipfile of the definitions and data which have been dumped to disk

@@ -1,6 +1,4 @@
 <?php 
-//declare(strict_types=1);
-
 /**
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -18,8 +16,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-//@todo - reimplement using Singleton pattern
+//declare(strict_types=1);
 
 require_once dirname(__FILE__).'/../configIni.php'; // read in the configuration file
 require_once dirname(__FILE__).'/consts.php';
@@ -269,11 +266,11 @@ class System {
                
                foreach($config as $idx=>$cfg){
                    
-                   $allowed_dbs = @$cfg['database'];
-                   if(true){ //$allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
+                   //$allowed_dbs = @$cfg['database'];
+                   //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
                    
                        $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                       if(true || $rty_ID>0){
+                       //if($rty_ID>0){
                            
                             $cfg['rty_ID'] = $rty_ID;
                            
@@ -297,8 +294,8 @@ class System {
                             }
                            
                             $config_res[] = $cfg;
-                       }
-                   }
+                       //}
+                   //}
                }
            }
         }
@@ -1072,27 +1069,55 @@ class System {
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
                $needEncodeRecordDetails, 
-               $common_languages_for_translation, $glb_lang_codes, 
+               $common_languages_for_translation, $glb_lang_codes, $glb_lang_codes_index, 
                $saml_service_provides, $hideStandardLogin,
-               $accessToken_DeepLAPI, $useRewrtieRulesForRecordLink;
+               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink;
    
         if(!isset($needEncodeRecordDetails)){
             $needEncodeRecordDetails = 0;
         }
         
         // extracts from $glb_lang_codes names and alpha2 codes to be sent to client
-        if(!isset($glb_lang_codes)){
-            $glb_lang_codes = json_decode(file_get_contents('../../hclient/assets/language-codes-3b2.json'),true);
-        }
+        initLangCodes();
+        
         $common_languages = array();
+        //ordered as in $common_languages_for_translation (defined in heuristConfigIni)
+        foreach($common_languages_for_translation as $code){
+            $lang = strtolower($code);
+            
+            $key = array_search($lang, array_column($glb_lang_codes, 'a3'));
+            if($key!==false){
+                $common_languages[strtoupper($lang)] = $glb_lang_codes[$key];
+            }
+        }
+        /* ordered as in language-codes-active-list.json       
         foreach($glb_lang_codes as $codes){
             $lang = strtoupper($codes['a3']);
             if(in_array($lang, $common_languages_for_translation)){
                 $common_languages[$lang] = $codes;
             }
         }
+        */
         
         try{
+
+        //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+        $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
+        if(!$host_logo || !file_exists($host_logo)){
+            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
+        }
+        $host_url = null;
+        if($host_logo!==false &&  file_exists($host_logo)){
+            $host_logo = HEURIST_BASE_URL.'?logo=host';
+            $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
+            if($host_url!==false && file_exists($host_url)){
+                $host_url = file_get_contents($host_url);   
+            }else{
+                $host_url = null;
+            }
+        }else{
+            $host_logo = null;    
+        }
             
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -1114,24 +1139,6 @@ class System {
                         array_push($dbrecent, $db);
                     }
                 }
-            }
-            
-            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
-            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-            if(!$host_logo || !file_exists($host_logo)){
-                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
-            }
-            $host_url = null;
-            if($host_logo!==false &&  file_exists($host_logo)){
-                $host_logo = HEURIST_BASE_URL.'?logo=host';
-                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-                if($host_url!==false && file_exists($host_url)){
-                    $host_url = file_get_contents($host_url);   
-                }else{
-                    $host_url = null;
-                }
-            }else{
-                $host_logo = null;    
             }
             
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
@@ -1192,7 +1199,7 @@ class System {
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
                     'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),   //allow run multi-db server actions
                     'api_Translator' => (!empty($accessToken_DeepLAPI)), // an api key has been setup for Deepl
-                    'use_redirect' => @$useRewrtieRulesForRecordLink
+                    'use_redirect' => @$useRewriteRulesForRecordLink
                 )
             );
             
@@ -1220,7 +1227,7 @@ class System {
                     'saml_service_provides'=>$saml_service_provides,
                     'hideStandardLogin' => $hideStandardLogin,
                     'common_languages'=>$common_languages,
-                    'use_redirect' => @$useRewrtieRulesForRecordLink
+                    'use_redirect' => @$useRewriteRulesForRecordLink
             );
 
         }
@@ -1294,7 +1301,7 @@ class System {
             array_push($groups, intval($ugrID) );
             return $groups;
         }else{
-            null;
+            return null;
         }
     }
 
@@ -1504,7 +1511,6 @@ class System {
     private function login_verify( $user ){
         
         $reload_user_from_db = false; 
-        //$h3session = $this->dbname_full.'.heurist';
         
         if( is_array($user) ){  //user info already found (see login) - need reset session
             $reload_user_from_db = true;            
@@ -1514,16 +1520,6 @@ class System {
             $reload_user_from_db = ($user==true);  //reload user unconditionally
             
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
-            
-            /*
-            if(!$userID){ //in h4 or h5 session user not found
-                // vsn 3 backward capability  - restore user id from old session
-                $userID = @$_SESSION[$h3session]['user_id'];
-                if($userID){
-                    $_SESSION[$this->dbname_full]['keepalive'] = @$_SESSION[$h3session]['keepalive'];
-                    $reload_user_from_db = true;
-                }
-            }*/
         }
         
         if($userID == null){
@@ -1572,6 +1568,13 @@ class System {
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
+            
+            //remove credentials for remote repositories
+            if(@$this->current_User['ugr_Preferences']['externalRepositories']){
+                $this->current_User['ugr_Preferences']['externalRepositories'] = null;
+                unset($this->current_User['ugr_Preferences']['externalRepositories']);
+            }
+
         }
         return $islogged;
     }
@@ -1767,15 +1770,6 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
         
-        if(true){
-            $h3session = $this->dbname_full.'.heurist';
-            if(@$_SESSION[$h3session]['user_id']){
-                unset($_SESSION[$h3session]['user_id']);
-                unset($_SESSION[$h3session]['user_name']);
-                unset($_SESSION[$h3session]['user_realname']);
-            }
-        }
-        
         // clear
         // even if user is logged to different databases he has the only session per browser
         // it means logout exits all databases
@@ -1790,7 +1784,8 @@ class System {
     }
 
     //
-    //
+    // Returns individual property from SESSION
+    // To load the entire set of preferences from database use user_getPreferences
     //
     public function user_GetPreference($property, $def=null){
 
@@ -1923,7 +1918,7 @@ class System {
     //
     public function recordLink($rec_id){
 
-        global $useRewrtieRulesForRecordLink;
+        global $useRewriteRulesForRecordLink;
 
         $template = '';
         if(preg_match('/(\d+)\/(.+\.tpl)/', $rec_id, $matches)){ //strpos($rec_id, "/") !== false
@@ -1940,7 +1935,7 @@ class System {
             }
         }
 
-        if(isset($useRewrtieRulesForRecordLink) && $useRewrtieRulesForRecordLink){
+        if(isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink){
             $url = empty($template) ? HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id 
                         : HEURIST_BASE_URL.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
 
@@ -2192,14 +2187,16 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 continue;
             }else if($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
 
-                $title = "Heurist version " . $local_ver . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
+                $title = "Heurist version " . htmlspecialchars($local_ver)
+                 . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
 
-                $msg = "Heurist on the referenced server is running version " . $local_ver . " which can be upgraded to the newer " . $server_ver . ".<br><br>"
-                . "Please check for an update package at <a href='https://heuristnetwork.org/installation/'>https://heuristnetwork.org/installation/</a><br><br>"
-                . "Update packages reflect the alpha version and install in parallel with existing versions"
-                . " so you may test them before full adoption. We recommend use of the alpha package"
-                . " by any confident user, as they bring bug-fixes, cosmetic improvements and new"
-                . " features. They are safe to use and we will respond repidly to any reported bugs.";
+                $msg = 'Heurist on the referenced server is running version '
+                    . " $local_ver which can be upgraded to the newer $server_ver<br><br>"
+                . 'Please check for an update package at <a href="https://heuristnetwork.org/installation/">https://heuristnetwork.org/installation/</a><br><br>'
+                . 'Update packages reflect the alpha version and install in parallel with existing versions'
+                . ' so you may test them before full adoption. We recommend use of the alpha package'
+                . ' by any confident user, as they bring bug-fixes, cosmetic improvements and new'
+                . ' features. They are safe to use and we will respond repidly to any reported bugs.';
                 
                 //Update notification
                 sendEmail(HEURIST_MAIL_TO_ADMIN, $title, $msg, true);

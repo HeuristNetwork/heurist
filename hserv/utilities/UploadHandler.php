@@ -60,7 +60,7 @@ class UploadHandler
     
     protected $image_objects = array();
 
-    function __construct($options = null, $initialize = true, $error_messages = null) {
+    public function __construct($options = null, $initialize = true, $error_messages = null) {
 	
         //ARTEM - take upload folder from request
         //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
@@ -71,14 +71,16 @@ class UploadHandler
         $error = System::dbname_check($heurist_db);
         if($error){
             //database not defined
-            return $this->header('HTTP/1.1 403 Forbidden');
+            $this->header('HTTP/1.1 403 Forbidden');
+            return; 
         }
         
         $system = new System();
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
             //not logged in
-            return $this->header('HTTP/1.1 403 Forbidden');
+            $this->header('HTTP/1.1 403 Forbidden');
+            return;
         }
         
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
@@ -228,8 +230,8 @@ class UploadHandler
                     // don't pose any restrictions on the type of uploaded files, e.g. by
                     // copying the .htaccess file from the files directory for Apache:
                     //'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/thumb/',
-                    'upload_dir' => (@$upload_thumb_dir)?$upload_thumb_dir:null,
-                    'upload_url' => (@$upload_thumb_url)?$upload_thumb_url:null, //$this->get_full_url().'/thumb/',
+                    'upload_dir' => null, //$upload_thumb_dir
+                    'upload_url' => null, //$upload_thumb_url $this->get_full_url().'/thumb/',
                     // Uncomment the following to force the max
                     // dimensions and e.g. create square thumbnails:
                     //'crop' => true,
@@ -510,7 +512,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $this->error_messages[$error] : $error;
     }
 
-    function get_config_bytes($val) {
+    private function get_config_bytes($val) {
         $val = trim($val);
         $last = strtolower($val[strlen($val)-1]);
         if($last=='g' || $last=='m' || $last=='k'){
@@ -537,8 +539,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $to = dirname($to);
         $to = USanitize::sanitizePath($to);
         if(isPathInHeuristUploadFolder($to, true)===false){
-            $file->error = $this->get_error_message('only_heurist')
-                .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
+            //$this->error = $this->get_error_message('only_heurist')
+            //    .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
             return false;
         }
         return copy($from, $to.$filename);
@@ -576,7 +578,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
 
         //Artem Osmakov - limited set of file types
-        if (preg_match('/\.(bat|exe|cmd|sh|php([0-9])?|pl|cgi|386|dll|com|torrent|js|app|jar|pif|vb|vbscript|wsf|asp|cer|csr|jsp|drv|sys|ade|adp|bas|chm|cpl|crt|csh|fxp|hlp|hta|inf|ins|isp|jse|htaccess|htpasswd|ksh|lnk|mdb|mde|mdt|mdw|msc|msi|msp|mst|ops|pcd|prg|reg|scr|sct|shb|shs|url|vbe|vbs|wsc|wsf|wsh)$/i'
+        if (preg_match('/\.(bat|exe|cmd|sh|php([0-9])?|pl|cgi|386|dll|com|torrent|js|app|jar|pif|vb|vbscript|asp|cer|csr|jsp|drv|sys|ade|adp|bas|chm|cpl|crt|csh|fxp|hlp|hta|inf|ins|isp|jse|htaccess|htpasswd|ksh|lnk|mdb|mde|mdt|mdw|msc|msi|msp|mst|ops|pcd|prg|reg|scr|sct|shb|shs|url|vbe|vbs|wsc|wsf|wsh)$/i'
                     , $file->original_name)) {
             $file->error = $this->get_error_message('except_file_types');
             return false;
@@ -1067,7 +1069,6 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             case 'gif':
             case 'png':
                 imagecolortransparent($new_img, imagecolorallocate($new_img, 0, 0, 0));
-            case 'png':
                 imagealphablending($new_img, false);
                 imagesavealpha($new_img, true);
                 break;
@@ -1671,16 +1672,18 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $redirect_header = 'X-Accel-Redirect';
                 break;
             default:
-                return $this->header('HTTP/1.1 403 Forbidden');
+                $this->header('HTTP/1.1 403 Forbidden');
+                return;
         }
         $file_name = $this->get_file_name_param(); 
         $subfolder = $this->get_subfolder_param(); 
         
         if (!$this->is_valid_file_object($file_name, $subfolder)) {
-            return $this->header('HTTP/1.1 404 Not Found');
+            $this->header('HTTP/1.1 404 Not Found');
+            return;
         }
         if ($redirect_header) {
-            return $this->header(
+            $this->header(
                 $redirect_header.': '.$this->get_download_url(
                     $file_name,
                     $subfolder, 
@@ -1688,8 +1691,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     true
                 )
             );
+            return;
         }
         $file_path = $this->get_upload_path($file_name, $subfolder, $this->get_version_param());
+        //$file_path = USanitize::sanitizePath($file_path);
         // Prevent browsers from MIME-sniffing the content-type:
         $this->header('X-Content-Type-Options: nosniff');
         if (!preg_match($this->options['inline_file_types'], $file_name)) {

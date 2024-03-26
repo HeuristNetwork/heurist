@@ -28,7 +28,7 @@ require_once dirname(__FILE__).'/../utilities/uMail.php';
 class DbUsrReminders extends DbEntityBase
 {
     
- function __construct( $system, $data ) {
+ public function __construct( $system, $data=null ) {
         
        if($data==null){
            $data = array();
@@ -464,7 +464,8 @@ exit;
                     }
                     
                     //$res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);
-                    sendPHPMailer(null, $email_from_name, $recipient['email'], $email_title, $email_text, null, false);
+                    $recipient_sanitized = filter_var($recipient['email'], FILTER_VALIDATE_EMAIL);
+                    sendPHPMailer(null, $email_from_name, $recipient_sanitized, $email_title, $email_text, null, false);
                     
                     
                 }//for recipients
@@ -511,6 +512,8 @@ exit;
                 .' and rem_Nonce="'.$mysqli->real_escape_string($this->data['h']).'"';
                     
             $rem_ID = mysql__select_value($mysqli, $query);  
+            $rem_ID = intval($rem_ID);    
+            
             if($rem_ID>0){
                 
                 //@$this->data['e'] || 

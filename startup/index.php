@@ -27,7 +27,7 @@ if (!defined('PDIR')){
 //$system->defineConstants();
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 
 <title>Heurist Academic Collaborative Database (C) 2005 - 2020, University of Sydney</title>

@@ -168,7 +168,7 @@ $.widget( "heurist.editing_input", {
         var lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
 
         //header
-        if(true || this.options.show_header){
+        if(true){ // || this.options.show_header
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
@@ -3458,10 +3458,6 @@ $.widget( "heurist.editing_input", {
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.trigger('click'); } } );
                         $input_img.on({click: function(e){ //find('a')
                             $input.trigger('click'); //open file browse
-                            
-                            if($(e.target).is('img')){
-                            }else{
-                            }
                         }});
             }
             else //------------------------------------------------------------------------------------
@@ -4053,7 +4049,25 @@ $.widget( "heurist.editing_input", {
                         if(that.is_disabled) return;
                         
                         //if empty
-                        if(that.getValues()[0] == '') return;
+                        if(that.getValues()[0] == '') { 
+
+                            let delete_images = that.configMode && that.configMode.entity == 'defTerms' && that.input_img && // only for defTerms for now
+                                                    !window.hWin.HEURIST4.util.isempty(that.input_img.find('img').attr('src'));
+                            if($(that.inputs[0]).fileupload('instance') !== undefined && delete_images){
+
+                                // Check there is an image to delete
+                                window.hWin.HAPI4.checkImage(that.configMode.entity, that.options.recID, 'thumb', function(response){
+                                    if(response.data=='ok'){
+                                        that.newvalues[$input.attr('id')] = 'delete'; // tell php script to delete image files
+                                        that.input_img.find('img').attr('src', ''); // remove from field input
+        
+                                        that.onChange(); // trigger modified flag
+                                    }
+                                });
+                            }
+
+                            return;
+                        }
 
                         var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                         

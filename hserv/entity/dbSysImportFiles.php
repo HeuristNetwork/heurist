@@ -33,6 +33,10 @@ class DbSysImportFiles extends DbEntityBase
     public function init(){
         
         $mysqli = $this->system->get_mysqli();
+        
+        $this->is_table_exists = hasTable($mysqli, 'sysImportFiles');
+        
+        if(!$this->is_table_exists){
 
     $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
     `sif_ID` int(11) unsigned NOT NULL auto_increment
@@ -44,8 +48,10 @@ class DbSysImportFiles extends DbEntityBase
     PRIMARY KEY  (`sif_ID`))";    
     
     
-        if (!$mysqli->query($query)) {
-            $this->is_table_exists = false;
+            if ($mysqli->query($query)) {
+                $this->is_table_exists = true;
+            }
+        
         }
         
     }
@@ -204,7 +210,9 @@ class DbSysImportFiles extends DbEntityBase
         foreach($row as $id => $session){
 
             $session = json_decode($session, true);
-            $query = "drop table IF EXISTS ".$session['import_table'];
+            $table_name = preg_replace('/[^a-zA-Z0-9_]/', "", $session['import_table']);//for snyk
+            
+            $query = "drop table IF EXISTS `$table_name`";
 
             if (!$mysqli->query($query)) {
                 $this->system->addError(HEURIST_DB_ERROR, 

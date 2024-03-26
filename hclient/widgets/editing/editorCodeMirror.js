@@ -119,6 +119,15 @@ class EditorCodeMirror {
                 that.input.val(instance.getValue());
                 that.input.trigger('change');
               });
+              
+              
+          //$('.CodeMirror')
+          this.editorContainer.resizable({
+              resize: function() {
+                that.codeEditor.setSize($(this).width(), $(this).height());
+              }
+          });              
+              
       }
 
       //autoformat

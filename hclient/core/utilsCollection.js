@@ -63,6 +63,8 @@ if (!window.hWin.HEURIST4.collection)
             var params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
 
             window.hWin.HEURIST4.collection.collectionUpdate(params);
+            
+//baseURL/hserv/controller/collectionController.php?db=database&fetch=1&add=ids
         },
 
         collectionDel: function(recIDs, _selection){
@@ -148,7 +150,7 @@ if (!window.hWin.HEURIST4.collection)
                     }
                 }
             }
-
+            
             if(!params){
                 params = {db:window.hWin.HAPI4.database, fetch:1};
             }

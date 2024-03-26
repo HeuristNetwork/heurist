@@ -380,7 +380,7 @@ public static function findDupes( $params ){
     if(!$res){
         
         $response = self::$system->addError(HEURIST_DB_ERROR, 
-                $savedSearchName.'Search duplications (base query for records)', self::$mysqli->error);
+                'Search duplications (base query for records)', self::$mysqli->error);
         return false;
         
     }else{

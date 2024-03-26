@@ -45,6 +45,7 @@ class RecordsExport {
     private static $defDetailtypes = null;
     private static $defTerms = null;
     private static $datetime_field_types = null;
+    private static $mapdoc_defaults = null;
     
 //
 //
@@ -162,7 +163,7 @@ public static function output($data, $params){
         $ds_file_fields = mysql__select_list2(self::$mysqli,
             'select dty_ID from defDetailTypes where dty_Type="file"');        
         //get default values for mapspace
-        $mapdoc_defaults = mysql__select_assoc2(self::$mysqli,
+        self::$mapdoc_defaults = mysql__select_assoc2(self::$mysqli,
             'select rst_DetailTypeID, rst_DefaultValue from defRecStructure where rst_RecTypeID='.RT_MAP_DOCUMENT
             .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
     }
@@ -852,7 +853,7 @@ XML;
     
     if($is_tlc_export){ // && $idx==count($records)
         //calculate extent of mapdocument - last record
-        $records[$idx] = self::_calculateSummaryExtent($maplayer_extents, true);
+        $records[$idx] = self::_calculateSummaryExtent($maplayer_extents, true, $params['tlcmap'], $maplayer_records);
         $is_tlc_export = false; //avoid infinite loop
     }
     
@@ -1252,8 +1253,7 @@ XML;
 //
 //
 //
-private static function _calculateSummaryExtent($maplayer_extents, $is_return_rec){
-
+private static function _calculateSummaryExtent($maplayer_extents, $is_return_rec, $tlc_mapdoc_name, $maplayer_records){
 
         $zoomKm = 0;
         $mbookmark = null;
@@ -1302,13 +1302,13 @@ private static function _calculateSummaryExtent($maplayer_extents, $is_return_re
             //add constructed mapspace record
             $record['rec_ID'] = 999999999;
             $record['rec_RecTypeID'] = RT_MAP_DOCUMENT;
-            $record['rec_Title'] = $params['tlcmap'];
+            $record['rec_Title'] = $tlc_mapdoc_name;
             $record['rec_URL'] = ''; 
             $record['rec_ScratchPad'] = '';
             $record["details"] = array(
-                DT_NAME=>array('1'=>$params['tlcmap']),
-                DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:$mapdoc_defaults[DT_MAP_BOOKMARK])),
-                DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:$mapdoc_defaults[DT_ZOOM_KM_POINT])),
+                DT_NAME=>array('1'=>$tlc_mapdoc_name),
+                DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:self::$mapdoc_defaults[DT_MAP_BOOKMARK])),
+                DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:self::$mapdoc_defaults[DT_ZOOM_KM_POINT])),
                 DT_GEO_OBJECT=>array('4'=>($mbox!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
                 DT_MAP_LAYER=>$maplayer_records
             );

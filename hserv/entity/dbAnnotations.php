@@ -28,7 +28,7 @@ class DbAnnotations extends DbEntityBase
     private $dty_Annotation_Info;
     
     
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
         $this->system->defineConstant('RT_ANNOTATION');
@@ -45,7 +45,6 @@ class DbAnnotations extends DbEntityBase
                 ? DT_ANNOTATION_INFO
                 : 0; 
 
-        $this->init();
     }
 
     public function isvalid(){
@@ -189,9 +188,9 @@ class DbAnnotations extends DbEntityBase
           uuid: annotation.id,
         },
 */      
-        if( !(defined('RT_MAP_ANNOTATION') || defined('RT_MAP_ANNOTATION')) ){
+        if(!defined('RT_MAP_ANNOTATION')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                    'Can not add annotation. This database does not have either "Map/Image Annotation" or "Annotation" record type. '
+                    'Can not add annotation. This database does not have "Map/Image Annotation" record type. '
                     .'Import required record type');
             return false;
         }
@@ -332,14 +331,14 @@ class DbAnnotations extends DbEntityBase
                                 $res = saveURLasFile($url, $tmp_file);
 
                                 if($res>0){
-                                    $entity = new DbRecUploadedFiles($this->system, null);
+                                    $entity = new DbRecUploadedFiles($this->system);
 
                                     $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
 
                                     if($dtl_UploadedFileID===false){
-                                        $err_msg = $system->getError();
+                                        $err_msg = $this->system->getError();
                                         $err_msg = $err_msg['message'];
-                                        $system->clearError();  
+                                        $this->system->clearError();  
                                     }else{
                                         $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
                                     }

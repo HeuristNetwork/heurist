@@ -662,6 +662,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             powerpaste_word_import: 'clean',
             powerpaste_html_import: 'clean',
 
+            default_link_target: "_blank", // default to new tab
+
             formats: custom_formatting.formats,
             style_formats_merge: true,
             style_formats: style_formats,
@@ -743,6 +745,44 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         tinymce.activeEditor.insertContent( '<hr>' );
                     }
                 });
+            },
+            paste_preprocess: function(plugin, args){
+
+                let content = args.content;
+
+                if(content.indexOf('<img') === 0){
+                    // Tell user to use the 'Insert media' tool instead
+                    args.content = '';
+
+                    let msg = 'Please use the "Add media" tool located within the toolbar to added images';
+                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                }else if(content.search(/https?|ftps?|mailto/) == 0){
+                    // Trigger 'Insert link' dialog
+                    
+                    let href = args.content;
+                    href = href.replaceAll(/&amp;/g, '&');
+
+                    const org_href = href;
+                    args.content = '';
+
+                    href += `_${Math.random()}`;
+
+                    tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+
+                    let $link = $(tinymce.activeEditor.selection.getNode()); console.log($link);
+                    if(!$link.is('a')){
+                        $link = $link.find(`a[href="${href}"]`); console.log($link);
+                    }
+                    if($link.length == 0){
+                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`); console.log($link);
+                    }
+
+                    $link.attr({
+                        'href': org_href,
+                        'data-mce-href': org_href,
+                        'target': '_blank'
+                    }).text(org_href);
+                }
             }
         };
 
@@ -975,7 +1015,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
         
-        if(true || current_edit_mode=='website'){
+        if(true){ // || current_edit_mode=='website'
             _panel_propertyView.hide();
             __restoreTree();
         }else if(_panel_propertyView.is(':visible')){
@@ -1115,9 +1155,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             //+ ele_ID
             + (is_intreeview?'<span class="ui-icon ui-icon-menu" style="width:20px"></span>'
                             :'<span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2"></span>')
-            + (true || is_root || is_cardinal?'':
-                ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
-                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>'))               
+            //+ (true || is_root || is_cardinal?'':
+            + ('<span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
+                    + '<span class="ui-icon ui-icon-arrow-4" style="font-weight:normal"></span>Drag</span>')
+                                   
             + '<span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
             +'<span class="ui-icon ui-icon-pencil"></span>Style</span>';               
             

@@ -37,8 +37,10 @@ loads main page for logo, icon, banner, style
 $system->defineConstants();
 $hasAccess = ($system->is_admin());
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
 <head>
+    <title><?php echo HEURIST_TITLE; ?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
 <?php

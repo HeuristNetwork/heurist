@@ -1065,7 +1065,7 @@ function outputRecords($result) {
                 }
 
             }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
-                unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+                unlink(HEURIST_HML_DIR.intval($recID).".xml");
             }
         }
 
@@ -1084,7 +1084,7 @@ function outputRecords($result) {
                 if($res){
                     $already_out[$recID] = $relRT;   
                 }elseif ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
-                    unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+                    unlink(HEURIST_HML_DIR.$recID.".xml");
                 }
             }
         }
@@ -1764,6 +1764,7 @@ function outputTDateDetail($attrs, $value) {
             if (@$matches[3]) makeTag('day', null, $matches[3]);
         }
         if ($time) {
+                         // hours                                 minutes                   seconds             
             preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
             if (@$matches[1]) makeTag('hour', null, $matches[1]);
             if (@$matches[2]) makeTag('minutes', null, $matches[2]);
@@ -1916,8 +1917,10 @@ if($intofile){ // flags HuNI manifest + separate files per record
     }else{
 
         ?>
-        <html>
+<!DOCTYPE html>
+<html lang="en">
         <head>
+            <title>The HuNI project</title>
             <style>
                 * {
                     font-family: Helvetica,Arial,sans-serif;
@@ -1926,9 +1929,9 @@ if($intofile){ // flags HuNI manifest + separate files per record
             </style>
         </head>
         <body>
-        <table style='width:500px;'>
+        <table role="presentation" style='width:500px;'>
             <tr>
-                <td style='width:150px;'><img src='../../hclient/assets/branding/logo_huni.png'></td>
+                <td style='width:150px;'><img alt src='../../hclient/assets/branding/logo_huni.png'></td>
                 <td><h2 style="padding-top:1em;font-size: 16px;">The HuNI Project</h2></td>
             </tr>
             <tr>

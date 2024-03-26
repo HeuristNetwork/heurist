@@ -596,7 +596,7 @@ function zoomToFit(){
         midY = box.y + height / 2;
 
     var scale = getFitToExtentScale();
-    if (scale == null && Number(scale) == NaN) return; // nothing to fit
+    if (scale == null && isNaN(Number(scale)) ) return; // nothing to fit
 
     var translate = [
         fullWidth  / 2 - scale * midX,
@@ -966,7 +966,7 @@ function tick() {
         var cur_scaleExtend = zoomBehaviour.scaleExtent();
         var lower_extent = getFitToExtentScale();
 
-        if(lower_extent != null && Number(lower_extent) != NaN){
+        if(lower_extent != null && !isNaN(Number(lower_extent))){
             zoomBehaviour.scaleExtent([lower_extent, cur_scaleExtend[1]]);
         }
         if(zoomBehaviour.scale() < lower_extent){

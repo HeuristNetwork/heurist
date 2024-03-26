@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta http-equiv="Expires" content="Fri, Jan 01 1900 00:00:00 GMT">
         <meta http-equiv="Pragma" content="no-cache">
@@ -19,6 +19,11 @@
             tr:nth-child(even) {
                 background-color: #D6EEEE;
             }
+            caption{
+                text-align: left;
+                font-size:16px;
+                font-weight:bold;
+            }
         </style>            
     </head>
     <body>
@@ -28,18 +33,19 @@
         <p>Note: The statuses indicated here reflect HEURIST_SUPPORT/external_h7 (in prep. Jan 2024)</p>
         <p> ** See also external_libraries.txt ** </p>
 
-        <h4>Javascript</h4>
+        
         <table style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top; width:100%">
-            <tbody style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top;">
+            <caption>Javascript</caption> 
+            <thead>
                 <tr style="font-size:14px">
-                    <td style="width:219px"><strong>Library</strong></td>
-                    <td style="width:70px"><strong>CDN</strong></td>
-                    <td style="width:113px"><strong>Current version<br>used</strong></td>
-                    <td style="width:106px"><strong>Latest version<br>available</strong></td>
-                    <td style="width:738px"><strong>Notes</strong></td>
-                    <td style="width:738px"><strong>URL</strong></td>
+                    <th style="width:219px">Library</th>
+                    <th style="width:70px">CDN</th>
+                    <th style="width:113px">Current version<br>used</th>
+                    <th style="width:106px">Latest version<br>available</th>
+                    <th style="width:738px">Notes</th>
                 </tr>
-
+            </thead>
+            <tbody>
                 <tr>
                     <td colspan="6" style="background-color:#e67e22">CLEANUP/REPLACEMENT REQUIRED?</td>
                 </tr>
@@ -278,18 +284,20 @@
             </tbody>
         </table>
 
+        <br>
         
-        <h4>PHP</h4>
         <table style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top; width:100%">
-            <tbody style="border-spacing:0; color:#000000; border-color:#000000; border-style:solid; border-width:1px; font-size:12px; vertical-align:top;">
+            <caption>PHP</caption> 
+            <thead>
                 <tr style="font-size:14px">
-                    <td style="width:219px"><strong>Library</strong></td>
-                    <td style="width:70px"><strong>Composer</strong></td>
-                    <td style="width:113px"><strong>Current version<br>used</strong></td>
-                    <td style="width:106px"><strong>Latest version<br>available</strong></td>
-                    <td style="width:738px"><strong>Notes</strong></td>
+                    <th style="width:219px">Library</th>
+                    <th style="width:70px">Composer</th>
+                    <th style="width:113px">Current version<br>used</th>
+                    <th style="width:106px">Latest version<br>available</th>
+                    <th style="width:738px">Notes</th>
                 </tr>
-                
+            </thead>
+            <tbody>
                 <tr>
                     <td>
                         <p>phayes/geophp</p>

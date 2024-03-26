@@ -35,6 +35,8 @@
 class USanitize {
   
     private function __construct() {}    
+    
+    private static $purifier = null;
 
     //
     //
@@ -180,6 +182,13 @@ class USanitize {
             $config->set('CSS.AllowTricky', true);
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
+
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.DefinitionRev', 1);
+
+            $config->set('Attr.AllowedFrameTargets','_blank');
+            $config->set('HTML.SafeIframe', true);
             /*$config->set('Core.AcceptFullDocuments',false);
             $config->set('Core.HiddenElements',array (
                     'script' => true,
@@ -196,6 +205,7 @@ class USanitize {
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
             
+            
             return new HTMLPurifier($config);
         
     }
@@ -206,22 +216,30 @@ class USanitize {
     public static function purifyHTML(&$params, $purifier = null){
         
         if($purifier==null){
-            $purifier = USanitize::getHTMLPurifier();
+            if(self::$purifier==null){
+               self::$purifier = USanitize::getHTMLPurifier();   
+            }
+            $purifier = self::$purifier;
         }
 
-        foreach($params as $k => $v)
-        {
-            if($v!=null){
-                
-                if(is_array($v) && count($v)>0){
-                    USanitize::purifyHTML($v, $purifier);
-                }else{
-                    $v = $purifier->purify($v);
-                    //$v = htmlspecialchars_decode($v);
+        if(is_array($params)){
+        
+            foreach($params as $k => $v)
+            {
+                if($v!=null){
+                    
+                    if(is_array($v) && count($v)>0){
+                        USanitize::purifyHTML($v, $purifier);
+                    }else{
+                        $v = $purifier->purify($v);
+                        //$v = htmlspecialchars_decode($v);
+                    }
+                    $params[$k] = $v;
                 }
-                $params[$k] = $v;
-            }
-        }//for
+            }//for
+        }else{
+            $params = $purifier->purify($params);
+        }
     }
 
     //

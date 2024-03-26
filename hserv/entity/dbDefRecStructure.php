@@ -29,22 +29,6 @@ require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 class DbDefRecStructure extends DbEntityBase
 {
     
-    //
-    // constructor - load configuration from json file
-    //    
-    function __construct( $system, $data ) {
-        
-       if($data==null){
-           $data = array();
-       } 
-       if(!@$data['entity']){
-           $data['entity'] = 'defRecStructure';
-       }
-        
-       parent::__construct( $system, $data );
-    }
-    
-
     /**
     *  search user or/and groups
     * 

@@ -372,10 +372,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 }
             },
             renderNode: function(event, data){
-                if(false && data.node.data.type == "enum") { // hide blue and expand arrows for terms
+                /*
+                if(false && data.node.data.type == "enum") { 
+                    // hide blue and expand arrows for terms
                     $(data.node.span.childNodes[0]).hide();
                     $(data.node.span.childNodes[1]).hide();
-                }
+                }*/
                 if(data.node.parent && (data.node.parent.data.type == 'resource' || data.node.parent.data.type == 'rectype')){ // add left border+margin
                     $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
                 }

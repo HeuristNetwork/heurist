@@ -18,7 +18,7 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-class DbEntityBase
+abstract class DbEntityBase
 {
     protected $system;  
     
@@ -34,7 +34,7 @@ class DbEntityBase
         data[fields] - values for particular record 
                  initiated in prepareRecords
     */    
-    protected $data;  
+    protected $data = null;  
     
     /*
         configuration form json file
@@ -80,27 +80,29 @@ class DbEntityBase
     * @var array
     */
     protected $recordIDs = array();
+    
+    //
+    // Name of table 
+    //    
+    private $entityName;
 
     //
     // constructor - loads configuration from json file
     //    
-    function __construct( $system, $data ) {
+    public function __construct( $system, $data=null ) {
        $this->system = $system;
-       $this->data = $data;
-       $this->_readConfig();    
+
+       $this->init(); //recreate table is it does not exist
+
+       $this->entityName = lcfirst(substr(get_class($this),2));
        
-       $this->init();
-       
-       
-       //rename generic ID or recID to valid primary field name for particular entity
-       if(@$this->data[$this->primaryField]==null){
-            if(@$this->data['ID']>0) {
-                $this->data[$this->primaryField] = $this->data['ID'];
-            }else if(@$this->data['recID']>0) {
-                $this->data[$this->primaryField] = $this->data['recID'];
-            }
+       if($data){
+           $this->setData($data);
+       }else{
+           $this->config = array('entityName'=>$this->entityName, 'entityTable'=>$this->entityName);
        }
     }
+    
 
     //
     // verifies that entity is valid 
@@ -110,12 +112,55 @@ class DbEntityBase
     public function isvalid(){
         return is_array($this->config) && is_array($this->fields) && count($this->fields)>0;
     }
+    
+    //
+    //
+    //
+    private function _readConfig(){
+        
+        /*
+        if(is_array($this->config)){ //config may be predefined as part of code
+            $this->fields = array();
+            $this->_readFields($this->config['fields']);
+            return;
+        }*/
+
+        if(@$this->data['entity']){
+            $this->entityName = lcfirst(@$this->data['entity']);    
+        }
+        
+        
+        //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
+        $entity_file = HEURIST_DIR.'hserv/entity/'.$this->entityName.'.json';
+        
+        if(file_exists($entity_file)){
+            
+           $json = file_get_contents($entity_file);
+           
+           $this->config = json_decode($json, true);
+           
+           
+           if(is_array($this->config) && $this->config['fields']){
+               
+                $this->fields = array();
+                $this->_readFields($this->config['fields']);
+           }
+           
+           if(!$this->isvalid()){
+                $this->system->addError(HEURIST_SYSTEM_FATAL, 
+                    "Configuration file $entity_file is invalid. Cannot init instance on server");     
+           }
+           
+        }else{
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');     
+        }
+    }
+    
 
     //
     // config getter
     //
-    public function init(){
-    }
+    public function init(){}
 
     //
     // assign parameters on server side
@@ -123,18 +168,45 @@ class DbEntityBase
     public function setData($data){
         $this->data = $data; 
         $this->records = null;
+        
+        if(!$this->isvalid()){
+           $this->_readConfig();    
+           //rename generic ID or recID to valid primary field name for particular entity
+           if(@$this->data[$this->primaryField]==null){
+                if(@$this->data['ID']>0) {
+                    $this->data[$this->primaryField] = $this->data['ID'];
+                }else if(@$this->data['recID']>0) {
+                    $this->data[$this->primaryField] = $this->data['recID'];
+                }
+           }
+        }
     }
 
+    //
+    //
+    //  
     public function getData(){
         return $this->data; 
     }
+
+    //
+    //
+    //    
+    public function setRecords($records){
+        $this->records = $records;
+    }
+    
+    //
+    //
+    //
+    public function records(){
+        return $this->records;
+    }
+    
+    
     
     public function setNeedTransaction($value){
         $this->need_transaction = $value;
-    }
-    
-    public function setRecords($records){
-        $this->records = $records;
     }
     
     //
@@ -320,10 +392,6 @@ class DbEntityBase
     //
     //
     //
-    public function records(){
-        return $this->records;
-    }
-    
     public function run(){
         
         $res = false;
@@ -366,7 +434,6 @@ class DbEntityBase
         }
         
         return $res;
-        
     }
     
     //
@@ -584,12 +651,14 @@ class DbEntityBase
     // various counts(aggregations) request - implementation depends on entity
     //
     public function counts(){
+        return 0;
     }
     
     //
     // see specific implemenation for every class 
-    //
+    //  
     public function batch_action(){
+        return false;
     }
     
     //
@@ -628,7 +697,7 @@ class DbEntityBase
     //
     protected function _validateValues(){
         
-        $fieldvalues = $this->data['fields'];
+        $fieldvalues = $this->data['fields'];  //current record
         
         foreach($this->fields as $fieldname=>$field_config){
             if(@$field_config['dty_Role']=='virtual') continue;
@@ -686,44 +755,7 @@ class DbEntityBase
     }    
 
     //
-    //
-    //
-    private function _readConfig(){
-        
-        if(is_array($this->config)){ //config may be predefined as part of code
-            $this->fields = array();
-            $this->_readFields($this->config['fields']);
-            return;
-        }
-
-        //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hserv/entity/'.lcfirst(@$this->data['entity']).'.json';
-        
-        if(file_exists($entity_file)){
-            
-           $json = file_get_contents($entity_file);
-           
-           $this->config = json_decode($json, true);
-           
-           
-           if(is_array($this->config) && $this->config['fields']){
-               
-                $this->fields = array();
-                $this->_readFields($this->config['fields']);
-           }
-           
-           if(!$this->isvalid()){
-                $this->system->addError(HEURIST_SYSTEM_FATAL, 
-                    "Configuration file $entity_file is invalid. Cannot init instance on server");     
-           }
-           
-        }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');     
-        }
-    }
-
-    //
-    //
+    // Returns localized configuration 
     //    
     private function _readConfigLocale( $locale='en' ){
 
@@ -925,7 +957,7 @@ class DbEntityBase
             
             $entity_name = $this->config['entityName'];
             
-            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $verions, $db_name, $extension);
+            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $version, $db_name, $extension);
             
             return $filename;
 /*            

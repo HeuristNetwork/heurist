@@ -144,6 +144,7 @@ regional['GER'] = {
         'menu-import-csv-fieldtypes': 'Import from CSV', //@translate
         'menu-structure-import': 'Templates durchsuchen',
         'menu-lookup-config': 'Externe Lookups',
+        'menu-repository-config': 'Externe Repositorys',
         'menu-structure-summary': 'Visualisieren',
         'menu-structure-refresh': 'Neuladen',
     
@@ -469,8 +470,18 @@ regional['GER'] = {
     Error_Report_Team: 'Sollte dieser Fehler wiederholt auftreten, benachrichtigen Sie bitte das Heurist-Team und beschreiben Sie die Umstände, unter denen er auftrit.',
     Error_Wrong_Request: 'Wert, Anzahl und/oder die Menge der Anfrageparameter sind ungültig.',
     Error_System_Config: 'Dieser Fehler wird wahrscheinlich von einem Netzwerkausfall oder Systemkonfigurationsfehler verursacht. Bitte melden Sie ihn Ihrem*r Systemadministrator*in.',
-    Error_Json_Parse: 'Antwort des Servers ist unbekannt.'
+    Error_Json_Parse: 'Antwort des Servers ist unbekannt.',
     
 //---------------------- END OF TRANSLATION 2021-10-19
+
+    // EMAIL FORM WIDGET --------------------
+    'Email Us': 'E-Mail an uns'',
+    'Your name': 'Dein Name',
+    'Email Address': 'E-Mail-Adresse',
+    'Email Message': 'Bericht',
+    'Prove you are human': 'Beweise, dass du ein Mensch bist',
+    'Email does not appear to be valid': 'Die E-Mail-Adresse ist nicht gültig',
+    'Email has been sent': 'E-Mail wurde gesendet'
+
 
 };

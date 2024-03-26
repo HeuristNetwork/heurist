@@ -391,9 +391,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                        data.node.setExpanded(!data.node.isExpanded());
                        //treediv.find('.fancytree-expander').hide();
                        
-                   }else if( false && data.node.lazy  ) { //
-                       data.node.setExpanded( true );
                    }
+                   //else if( false && data.node.lazy  ) { 
+                   //    data.node.setExpanded( true );
+                   //}
                 },
                 
                 dblclick: function(e, data) {

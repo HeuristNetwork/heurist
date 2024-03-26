@@ -1134,8 +1134,24 @@ function openSearchMenu(that, $select, has_filter=true){
 
                     window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 }
-            });        
+            });
         }
+
+        // Add term image to dropdown options
+        $menu.find('.ui-menu-item .ui-menu-item-wrapper').each(function(idx, option){
+
+            let trm_id = $select.find(`option:nth-child(${idx+1})`).val();
+
+            if(trm_id == 'select' || window.hWin.HEURIST4.util.isempty(trm_id)){
+                return;
+            }
+
+            let icon = window.hWin.HAPI4.getImageUrl('defTerms', trm_id, 'icon', null, null, true);
+
+            icon = `<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}");' />`;
+
+            $('<span>', {style: 'position: absolute;right: 5px;'}).html(icon).appendTo($(option).css('padding-right', '25px'));
+        });
 
         var $trm_btns = $select.parents('.input-div').find('.btn_add_term, .btn_add_term');
         if($trm_btns.length > 0){
@@ -1155,10 +1171,10 @@ function openSearchMenu(that, $select, has_filter=true){
         $menu.width('auto');
         let width = $menu.width();
 
-        if(width < 200){
+        if((width + 30) < 200){
             $menu.width(200);
         }else{
-            $menu.width(width+10); // make slightly bigger than needed to avoid resizing
+            $menu.width(width+30); // make slightly bigger than needed to avoid resizing
         }
     }
 
@@ -1732,7 +1748,7 @@ function browseTerms(_editing_input, $input, value){
 
                     let $target_ele = $(event.target);
 
-                    if($target_ele.children().length != 0 || $target_ele.text() == '<blank>'){
+                    if(($target_ele.children().length != 0 && $target_ele.find('img').length != 1) || $target_ele.text() == '<blank>'){
                         return;
                     }
 
@@ -1773,15 +1789,29 @@ function browseTerms(_editing_input, $input, value){
                             delay: 2000,
                             duration: 0
                         },
-                        content: function(){ // Provide text
-                            return details;
+                        content: function(callback){ // Check for image, then provide text
+
+                            const ele_context = this;
+
+                            window.hWin.HAPI4.checkImage('defTerms', term_id, 'icon', function(response){
+
+                                if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
+
+                                    let icon = window.hWin.HAPI4.getImageUrl('defTerms', term_id, 'icon', null, null, true);
+                                    details += `<br><br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
+                                }
+
+                                callback.call(ele_context, details);
+                            });
+
+                            return '';
                         },
                         open: function(event, ui){ // Add custom CSS + class
                             ui.tooltip.css({
                                 "width": "200px",
                                 "background": "rgb(209, 231, 231)",
                                 "font-size": "1.1em"
-                            })//.addClass('ui-heurist-populate');
+                            });
                         }
                     });
                  })

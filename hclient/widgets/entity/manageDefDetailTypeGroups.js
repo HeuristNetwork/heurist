@@ -261,11 +261,12 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     // can remove group with assigned fields
     //     
     _deleteAndClose: function(unconditionally){    
-        
+        /*            
         if(false && this._getField('dtg_FieldCount')>0){
             window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
             return;                
         }
+        */
 
         if(unconditionally===true){
             this._super(); 

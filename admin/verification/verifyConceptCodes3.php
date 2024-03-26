@@ -85,6 +85,8 @@ $mysqli = $system->get_mysqli();
     
     foreach ($databases as $idx=>$db_name){
 
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
+        
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         if(!($ver>0)) continue;
@@ -133,9 +135,10 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 
         //RECORD TYPES
         
-        $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB FROM '
-            .$db_name.".defRecTypes WHERE (rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL " 
-            ."OR rty_IDInOriginatingDB='' OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)";
+        $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB '
+            ." FROM `$db_name`.defRecTypes "
+            .' WHERE (rty_OriginatingDBID="" OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL ' 
+            .'OR rty_IDInOriginatingDB="" OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)';
             //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
         
         $res = $mysqli->query($query);
@@ -178,8 +181,8 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         
         //FIELD TYPES
         if($need_Details){
-        $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
-            .$db_name.".defDetailTypes "
+        $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB '
+            ." FROM `$db_name`.defDetailTypes "
             ." WHERE  dty_OriginatingDBID='' OR dty_OriginatingDBID=0 OR dty_OriginatingDBID IS NULL " //
             ."OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL ";
             
@@ -212,9 +215,9 @@ $mysqli->query($query);
         
         //TERMS
         if($need_Terms){
-            $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB FROM '
-                .$db_name.".defTerms "
-            ."WHERE trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL " //
+            $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB '
+            ." FROM `$db_name`.defTerms "
+            ." WHERE trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL " //
             ."OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL";
                 
             $res = $mysqli->query($query);

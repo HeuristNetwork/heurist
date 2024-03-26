@@ -249,7 +249,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 + fld2('cfn_Name','50ex');
         
         // add edit/remove action buttons
-        if(true || (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
+        if(true){  //|| (this.options.select_mode=='manager' && this.options.edit_mode=='popup')){
             html = html 
                 + '<div class="logged-in-only" style="width:90px;display: inline-block">'
                 + '<div title="Click to edit calculation" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'

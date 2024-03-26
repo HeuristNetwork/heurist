@@ -214,7 +214,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
                         print '<id>'.htmlspecialchars($row[0]).'</id>';
                         print '<name>'.htmlspecialchars ($row[2]).'</name>';
-                        if($row[1]){
+                        if($row[1]){ //  FILTER_SANITIZE_SPECIAL_CHARS
                             print '<description><![CDATA[ <a href="'.filter_var($row[1],FILTER_SANITIZE_URL).'">link</a>]]></description>'; 										}
                         print $kml;
                         print '</Placemark>';

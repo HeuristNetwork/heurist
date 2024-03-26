@@ -483,7 +483,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         // Check that an api key has been set
                         if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
 
-                            window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > Personal Nakala API Key, in order to use Nakala.');
+                            window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to use Nakala.');
                             $select.val('');
                             if($select.hSelect('instance') !== undefined){
                                 $select.hSelect('refresh');
@@ -1431,10 +1431,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         $.each(data['types'], (idx, type) => {
                             window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
-
+/* Artem 2024-03-13  label not defined
                             if(that._last_upload_details[0].type.indexOf(label.toLowerCase()) !== -1){
                                 selected_type = code;
                             }
+*/                            
                         });
                         window.hWin.HEURIST4.ui.initHSelect($select, false);
                         can_assign ++;

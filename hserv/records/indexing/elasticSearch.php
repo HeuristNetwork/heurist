@@ -258,7 +258,7 @@ class ElasticSearch {
     * @param int $recTypeID   The record type to rebuild for
     * @return bool True if successful
     */
-    function buildIndexForRectype ($dbName, $recTypeID) {
+    public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
             
             self::initialize();                        
@@ -352,7 +352,8 @@ class ElasticSearch {
      */
     private static function getHighestMySqlTimestamp() {
 
-        $res = mysql__select_value(self::$mysqli, 'SELECT MAX(rec_Modified) FROM Records');
+        $query = 'SELECT MAX(rec_Modified) FROM Records';
+        $res = mysql__select_value(self::$mysqli, $query);
         
         if ($res) {
             return $res; // Gets the rec_Modified value from the first row.

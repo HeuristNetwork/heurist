@@ -32,7 +32,6 @@ regional['RUS'] = {
     'Please log in': 'Зарегистрируйтесь, чтобы использовать все возможности Heurist',
     'Please contact to register':'Для получения регистрации свяжитесь с администратором',
     'Log out' : 'Выйти',
-    'Manage': 'Управление',
     'Sort': 'Порядок',
     'Search': 'Поиск',
     'Search result': 'Результаты поиска',
@@ -42,7 +41,6 @@ regional['RUS'] = {
     'Access': 'Доступ',
     'Notify': 'Сообщить',
     'Embed / link': 'Код ссылки',
-    'Export': 'Экспорт',
     'Import': 'Импорт',
 
 
@@ -56,7 +54,6 @@ regional['RUS'] = {
     'Email to':'Контакт',
     'User information has been saved successfully':'Информация о пользователе сохранена',
 
-    'Database': 'База Данных',
     'Select database': 'Выберите базу данных',
     'My User Info' : 'Мои данные',
     'My Groups' : 'Мои группы',
@@ -64,8 +61,6 @@ regional['RUS'] = {
     'Tags' : 'Ярлыки',
     'Manage Files': 'Файлы',
     'Manage Reminders' : 'Напоминания',
-    'Set Ratings' : 'Присвоить оценку',
-    'No Rating': 'Нет оценки',
 
     'Name': 'Название',
     'Description': 'Описание',
@@ -138,7 +133,6 @@ regional['RUS'] = {
     'My Searches': 'Мои запросы',
     'Predefined searches': 'Рекомендуемые запросы',
     'Recent changes': 'Свежие записи',
-    'All records': 'Все записи',
     'All (date order)': 'Все (сорт по дате)',
     'Edit saved search': 'Редактировать поиск',
     'Delete saved search': 'Удалить сохраненный поиск',
@@ -229,7 +223,6 @@ regional['RUS'] = {
     'Entities': 'Типы записей',
     'Saved Filters': 'Каталог фильтров',
     'Build': 'Создать',
-    'Filter builder': 'Условия поиска',
     'Facets builder': 'Многогранный поиск',
     'Save filter': 'Сохранить фильтр',
     'Advanced': 'Дополнительно',
@@ -287,10 +280,11 @@ regional['RUS'] = {
         'menu-import-csv-rectypes': 'Import from CSV', //@translate
         'menu-structure-vocabterms': 'Словари',
         'menu-structure-fieldtypes': 'Базовые поля',
-        'menu-import-csv-fieldtypes': 'Import from CSV', //@translate
+        'menu-import-csv-fieldtypes': 'Импорт из CSV',
         'menu-structure-import': 'Импорт шаблонов',
         'menu-structure-workflowstages': 'Стадии работы',
-        'menu-lookup-config': 'External lookups', //@translate
+        'menu-lookup-config': 'Внешний поиск данных',
+        'menu-repository-config': 'Внешние хранилища',
         'menu-structure-summary': 'Визуализация',
         'menu-structure-refresh': 'Перегрузить структуру',
     
@@ -426,7 +420,7 @@ regional['RUS'] = {
         'menu-selected-delete': 'Удалить',
         'menu-selected-delete-hint': 'Удалить отмеченые записи',
     'Collected': 'Выбрано',
-    'Collect': 'Выбрано',
+    'Collect': 'Выбрать',
         'menu-collected-add': 'Добавить',
         'menu-collected-add-hint': 'Отметь записи и добавь в выбранные (коллекцию)',
         'menu-collected-del': 'Убрать',
@@ -591,9 +585,10 @@ regional['RUS'] = {
         'Bookmarks removed': 'Удалено из избранных',
     'Set Record Rating': 'Рейтинг для избранных записей',
         'Set Rating': 'Установить рейтинг',
+        'Set Ratings' : 'Присвоить оценку',
+        'No Rating': 'Нет оценки',
         'Please specify rating value': 'Пожалуйста определите значение рейтинга',
         'Rating updated': 'Рейтинг изменен',
-        'No Rating': 'без рейтинга',
     'Delete Records': 'Удаление записей',        
         
     //SERVER SIDE MESSAGES
@@ -660,6 +655,14 @@ regional['RUS'] = {
             'Personal Files':'Личные файлы',
             'Delete selected files': 'Удалить отмеченные файлы',
     
+    // EMAIL FORM WIDGET --------------------
+    'Email Us': 'Отправить',
+    'Your name': 'Ваше имя',
+    'Email Address': 'Ваш адрес эл.почты',
+    'Email Message': 'Текст сообщения',
+    'Prove you are human': 'Докажите что вы не робот',
+    'Email does not appear to be valid': 'Адрес эл.почты некорректен',
+    'Email has been sent': 'Сообщение отправлено'
     
 };
 

@@ -63,8 +63,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     ?>
-    <html>
-
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title><?php print htmlspecialchars(strip_tags($website_title_translated));?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
