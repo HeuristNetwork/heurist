@@ -1109,7 +1109,7 @@ function save_report_into_file($tpl_source){
 
                 $url = htmlspecialchars(HEURIST_FILESTORE_URL . 'generated-reports/' . $file_name);
                 ?>
-                <!DOCTYPE>
+                <!DOCTYPE HTML>
                 <html lang="en">
                 <head>
                     <meta http-equiv="content-type" content="text/html; charset=utf-8">

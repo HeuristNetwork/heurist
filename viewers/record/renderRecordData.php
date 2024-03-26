@@ -172,7 +172,7 @@ if(@$_REQUEST['ids']){
 }
 if(!($is_map_popup || $without_header)){
 ?>
-<!DOCTYPE>
+<!DOCTYPE HTML>
 <html lang="en">
     <head>
         <title>HEURIST - View record</title>

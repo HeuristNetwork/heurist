@@ -95,8 +95,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 				_clearHideTimer();
 			}
 
-			popup_div.mouseover(__clearHideTimer2);
-			popup_div.mouseout(__hideToolTip2);
+			popup_div.on( 'mouseenter', __clearHideTimer2 ).on( 'mouseleave', __hideToolTip2 );
 		}
 	}
 

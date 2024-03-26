@@ -52,7 +52,7 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
     if($is_debug){
         if(!@$_REQUEST['auth'] && $require_auth){ //fake/debug authorization
                 ?>
-                <!DOCTYPE>
+                <!DOCTYPE HTML>
                 <html lang="en">
                     <head>
                         <title>Heurist external authentification</title>

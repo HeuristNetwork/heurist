@@ -35,7 +35,7 @@ $max_size = min($file_max_size,$post_max_size);
 if(!($max_size>0)) $max_size = 0;
 
 ?>
-<!DOCTYPE>
+<!DOCTYPE HTML>
 <html lang="en">
     <head>
 

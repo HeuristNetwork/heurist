@@ -1316,7 +1316,7 @@ function(value){
             */
 
             //hide gear icon and overlay on mouse exit
-            function _onmouseexit(event){
+            function __onmouseexit(event){
                 
                 if(_panel_propertyView.is(':visible')) return;
 
@@ -1370,10 +1370,9 @@ function(value){
                     }
                     
                 }
-            }               
-
-            $(item).hover ( // mousemove  mouseover
-                function(event){
+            };             
+            
+            function __onmouseenter(event){
 
                     if (current_edit_mode != 'page') return;
                     if(_panel_propertyView.is(':visible')) return;
@@ -1470,10 +1469,9 @@ function(value){
 
                     }
 
-                },
-                //mouseleave handler
-                _onmouseexit
-            );  
+            };
+                
+            $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
 
             /*                            
             $(item).on('mouseleave',

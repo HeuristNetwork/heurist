@@ -752,11 +752,14 @@ console.log( JSON.stringify(that.options.service_config) );
             this._reloadServiceList_item( idx, s ); //add to list
         }
         
-        this.serviceList.find('li').hover(function(event){ // service list hover event
+        
+        this.serviceList.find('li')
+        .on( 'mouseenter', function(event){ // service list hover event
             var ele = $(event.target);
             if(!ele.is('li')) ele = ele.parent();
             ele.addClass('ui-state-hover');
-        }, function(event){
+        })
+        .on( 'mouseleave', function(event){
             var ele = $(event.target);
             if(!ele.is('li')){ 
                 ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
@@ -764,7 +767,7 @@ console.log( JSON.stringify(that.options.service_config) );
             }
             ele.removeClass('ui-state-hover');
         });
-
+        
         var eles = this.serviceList.find('span[data-service-id]');
         this._on(eles,{'click':function(event)
         { // remove service button

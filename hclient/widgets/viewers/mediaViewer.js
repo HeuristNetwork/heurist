@@ -236,10 +236,10 @@ $.widget( "heurist.mediaViewer", {
                                 loop:true};
             
             if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && window.hWin.HUL.isFunction($.fancybox)
-                    $('body').unbind('click.fb-start');
+                    $('body').off('click.fb-start');
                     window.hWin.HAPI4.fancybox( fancy_opts );
             }else if (window.hWin.HUL.isFunction($.fn.fancybox)){
-                    $('body').unbind('click.fb-start');
+                    $('body').off('click.fb-start');
                     $.fn.fancybox( fancy_opts );
             }
             */
@@ -443,7 +443,7 @@ $.widget( "heurist.mediaViewer", {
         var fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
                             selector : '[data-myfancybox="fb-images"]', 
                             loop:true};
-        $('body').unbind('click.fb-start');
+        $('body').off("click.fb-start"); //was unbind
         //this.mediacontent.off("click.fb-start", '[data-myfancybox="fb-images"]');
         
         if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 

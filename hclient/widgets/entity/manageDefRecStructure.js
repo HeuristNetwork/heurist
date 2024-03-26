@@ -698,6 +698,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 node.find('.detail-count').css('display','inline-block');
                 that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
 
+                field_tooltip = node.parents('ul.fancytree-container');
+                
                 if(field_tooltip.tooltip("instance") !== undefined){
                     field_tooltip.tooltip("destroy");
                 }

@@ -4290,7 +4290,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(this._currentEditID){
 
                     this.element.find('.btn-rec-history').button({icon:'ui-icon-clock'})
-                            .css(btn_css).click(function(){
+                            .css(btn_css).on('click',function(){
                                 that._getRecordHistory();
                             });
                 }else{

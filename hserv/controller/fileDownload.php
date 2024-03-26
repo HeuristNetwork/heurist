@@ -135,7 +135,7 @@ if(!$error){
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.htmlspecialchars($db).'&file='.$fileid.'&size='.$size;
                 
                     ?>
-                    <!DOCTYPE>
+                    <!DOCTYPE HTML>
                     <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
                         <head>
                             <title>Heurist mediaplayer</title>
