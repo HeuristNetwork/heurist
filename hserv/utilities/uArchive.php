@@ -79,6 +79,9 @@ class UArchive {
                     }
                 }
 
+                $entry_idx = 0;
+                $do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
+                
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -121,12 +124,19 @@ class UArchive {
                                 //$zip->getStatusString()
                                 return $verbose?('Can not add folder '.$newdir.' to archive'):false;
                             }
+                            $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2); //without folder name
                             if(!$zip->addFile($file, $newfile)){
                                 return $verbose?('Can not add file '.$newfile.' to archive'):false;
                             }
+                            $type = strtolower(substr(strrchr($newfile, '.'), 1));
+                            if(in_array($type, $do_not_compress)){
+                                $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                            }
+                            $entry_idx++;
+                            
                             //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                         }
                     }
@@ -340,6 +350,9 @@ class UArchive {
                     }
                 }
 
+                $entry_idx = 0;
+                //$do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
+                
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -379,12 +392,20 @@ class UArchive {
                             //remove root path
                             $newdir = str_replace($source.'/', '', $file2.'/');
                             $phar->addEmptyDir( $newdir );
+                            $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2); //without folder name
 
                             $phar->addFile($file, $newfile);
 
+                            // THERE IS NO WAY TO SET INDIVIDUAL COMPRESSION LEVEL PER FILE
+                            //$type = strtolower(substr(strrchr($newfile, '.'), 1));
+                            //if(in_array($type, $do_not_compress)){
+                            //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                            //}
+                            $entry_idx++;
+                            
                             $numFiles++;
 
                             //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));

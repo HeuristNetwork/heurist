@@ -520,6 +520,12 @@ class DbUtils {
             return false;
         }
         
+        $format = 'zip';
+        if(!is_bool($createArchive)){
+            $format = ($createArchive=='tar')?'tar':'zip';
+            $createArchive = true;
+        }
+        
         self::$db_del_in_progress = null;
         
         if($database_name==null){
@@ -584,7 +590,9 @@ class DbUtils {
             $destination = $archiveFolder.$database_name.'_'.$datetime1->format('Y-m-d_H_i_s'); 
             
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
-            $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates'));
+            $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates', 
+            //'uploaded_files', 'uploaded_tilestacks', 
+            'rectype-icons','term-images','webimagecache'));
             foreach($folders_to_copy as $idx=>$folder_name){
                 $folder_name = realpath($folder_name);
                 if($folder_name!==false){
@@ -596,17 +604,15 @@ class DbUtils {
             //$folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
             $folders_to_copy[] = realpath($db_dump_file);
             
-            
-            if( extension_loaded('bz2') ){
+            if($format=='zip' || !extension_loaded('bz2')){
                 
-                $destination = $destination.'.tar'; 
-                
-                $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
-                
-            }else{
                 $destination = $destination.'.zip'; 
                 
                 $archOK = UArchive::zip($source, $folders_to_copy, $destination, $verbose);
+            }else{
+                $destination = $destination.'.tar'; 
+                
+                $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
             }
 
             if($archOK!==true){
