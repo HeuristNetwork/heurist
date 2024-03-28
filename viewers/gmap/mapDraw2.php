@@ -55,7 +55,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     handleApiReady();
                 }else{                            
                     $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
-                    +'&libraries=drawing,geometry&callback=handleApiReady');                                           
+                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');                                           
                 }
 
             } //onPageInit
