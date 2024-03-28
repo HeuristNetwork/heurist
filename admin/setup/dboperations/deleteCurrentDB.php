@@ -94,6 +94,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                 <label><input type='radio' checked name="db-archive" value="zip">Zip all database files</label>
                 <label><input type='radio' name="db-archive" value="tar">BZip all database files</label>
                 <label><input type='radio' name="db-archive" value="">Do not archive</label><br>
+                <span class="heurist-helper2">BZip is more efficient for archiving but may be slower if there are lot of images</span>
                 
                 <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
                 <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='db-password'>
@@ -126,11 +127,14 @@ $('#btnDelete').on({click:function(){
         request['create_archive'] = arch_mode;
     }
   
-                   
+    //show wait screen
+    window.hWin.HEURIST4.msg.bringCoverallToFront(null, null, 'Deleting Current Heurist Database...');
                    
     window.hWin.HEURIST4.util.sendRequest(url, request, null,
         function(response){
             $('#wait_p').hide();
+            window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+            
             if(response.status == window.hWin.ResponseStatus.OK){
                 
                     var msgAboutArc = '';
@@ -156,7 +160,7 @@ $('#btnDelete').on({click:function(){
                 window.hWin.HEURIST4.msg.showMsgErr(response, false);
                 
             }
-        }, null, 360000  //timeout 6 minutes
+        }, null, 600000  //timeout 10 minutes
     );
 }
 });    

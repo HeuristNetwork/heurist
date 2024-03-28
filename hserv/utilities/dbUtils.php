@@ -637,8 +637,8 @@ class DbUtils {
             //get owner info
             $owner_user = user_getDbOwner($mysqli);
             
-            //set it to false to check archiving only
-            $real_delete_database = true;
+            //set it to false to check archiving only                        
+            $real_delete_database = true;                                    
 
             if($real_delete_database){
                 // Delete database from MySQL server
