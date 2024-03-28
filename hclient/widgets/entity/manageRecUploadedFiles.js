@@ -32,7 +32,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _init_ExternalFileReference: null,
     _init_MimeExt: null,
     
-    _external_repositories: ['Nakala'], // list of external repositories
+    _external_repositories: {}, // list of external repositories
     _last_upload_details: [], // last uploaded file details
 
     _selectAllFiles: false, // checked when perform certain operations
@@ -295,6 +295,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _afterInitEditForm: function(){
 
+        var that = this;
+
         this._super();
 
         var isLocal = true;
@@ -426,76 +428,91 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }); 
                     
                 if(this._additionMode!='tiled'){
-                let $select = this._edit_dialog.find('#external_repos');
-                this._edit_dialog.find('#upload_file_repository').fileupload({
-                    url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php', 
-                    formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
-                                {name:'entity', value:'temp'}, //to place file into scratch folder
-                                {name:'max_file_size', value:1024*1024}],
-                    autoUpload: true,
-                    sequentialUploads:true,
-                    dataType: 'json',
-                    done: function (e, response) {
-                        response = response.result;
-                        that._last_upload_details = [];
-                        if(response.status==window.hWin.ResponseStatus.OK){
-                            var data = response.data;
-                            $.each(data.files, function (index, file) {
 
-                                if(file.error){
-                                    $('#type-err').html(file.error); // display under section
-                                    return;
-                                }
+                    let $select = this._edit_dialog.find('#external_repos');
 
-                                that._edit_dialog.find('#upload_file_repository').attr('filename', file.name);
-                                that._last_upload_details.push($.extend({}, file));
+                    this._edit_dialog.find('#upload_file_repository').fileupload({
+                        url: window.hWin.HAPI4.baseURL +  'hserv/controller/fileUpload.php', 
+                        formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
+                                    {name:'entity', value:'temp'}, //to place file into scratch folder
+                                    {name:'max_file_size', value:1024*1024}],
+                        autoUpload: true,
+                        sequentialUploads:true,
+                        dataType: 'json',
+                        done: function (e, response) {
+                            response = response.result;
+                            that._last_upload_details = [];
+                            if(response.status==window.hWin.ResponseStatus.OK){
+                                var data = response.data;
+                                $.each(data.files, function (index, file) {
 
-                                if($select.val() != ''){
-                                    // file uploaded
-                                    that._handleExternalRepository();
-                                }
-                            });
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
-                        }
-                            
-                        var inpt = this;
-                        that._edit_dialog.find('#btn_upload_file_repository').off('click');
-                        that._edit_dialog.find('#btn_upload_file_repository').on({click: function(){
-                            $(inpt).click();
-                        }});                
-                    },
-                    fail: function (e, response) {
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
+                                    if(file.error){
+                                        $('#type-err').html(file.error); // display under section
+                                        return;
+                                    }
 
-                // Dropdown of available repositories
-                $.each(this._external_repositories, (idx, repo_name) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                });
-                window.hWin.HEURIST4.ui.initHSelect($select, false, {width: '150px'});
-                this._on($select, {
-                    'change': () => {
-                        let file_ele = that._edit_dialog.find('#upload_file_repository');
-                        let repo = $select.val();
+                                    that._edit_dialog.find('#upload_file_repository').attr('filename', file.name);
+                                    that._last_upload_details.push($.extend({}, file));
 
-                        // Check that an api key has been set
-                        if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
-
-                            window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to use Nakala.');
-                            $select.val('');
-                            if($select.hSelect('instance') !== undefined){
-                                $select.hSelect('refresh');
+                                    if($select.val() != ''){
+                                        // file uploaded
+                                        that._handleExternalRepository();
+                                    }
+                                });
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response.message);
                             }
+                                
+                            var inpt = this;
+                            that._edit_dialog.find('#btn_upload_file_repository').off('click');
+                            that._edit_dialog.find('#btn_upload_file_repository').on({click: function(){
+                                $(inpt).click();
+                            }});                
+                        },
+                        fail: function (e, response) {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                    
+                    // Dropdown of available repositories
+                    window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list', 'include_test': 1}, (response) => {
+
+                        if(response.status != window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                             return;
                         }
 
-                        if(file_ele.attr('filename') != '' || that._last_upload_details.length > 0){
-                            that._handleExternalRepository();
+                        $.each(response.data, (idx, repo_details) => {
+
+                            let repo_name = repo_details[1];
+                            repo_name = repo_name.charAt(0).toUpperCase() + repo_name.slice(1);
+
+                            if(Object.hasOwn(that._external_repositories, repo_name)){
+                                that._external_repositories[repo_name].push(repo_details);
+                                return;
+                            }
+
+                            that._external_repositories[repo_name] = [ repo_details ];
+
+                            window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
+                        }); console.log(that._external_repositories, response.data);
+
+                        if($select.hSelect('instance') !== undefined){
+                            $select.hSelect('refresh');
                         }
-                    }
-                });
+                    });
+
+                    window.hWin.HEURIST4.ui.initHSelect($select, false, {width: '150px'});
+                    this._on($select, {
+                        'change': () => {
+
+                            let file_ele = that._edit_dialog.find('#upload_file_repository');
+
+                            if(file_ele.attr('filename') != '' || that._last_upload_details.length > 0){
+                                that._handleExternalRepository();
+                            }
+                        }
+                    });
                 }//external repos
                     
                 this._edit_dialog.find('#btn_select_file').css({'min-width':'9em','z-index':2})
@@ -629,7 +646,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
 
         if(!isLocal){ //remote - detect mimetype when URL is changed
-            var that = this;
+
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
             var inpt = ele.editing_input('getInputs');
             //ele.editing_input('option', 'change', function(){
@@ -1205,7 +1222,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         let selected_repo = this._edit_dialog.find('#external_repos').val();
         let uploaded_file = this._edit_dialog.find('#upload_file_repository').attr('filename');
 
-        if(selected_repo == '' && uploaded_file == ''){
+        if((selected_repo == '' && uploaded_file == '' || that._last_upload_details.length == 0) ){
             return;
         }
 
@@ -1221,6 +1238,29 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                             // Form content
                             + '<fieldset>'
+
+                                + '<div>'
+                                    + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>Account:</label></div>'
+                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px;"></span>'
+                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
+                                        + '<select class="text ui-widget-content ui-corner-all" id="account"></select>'
+                                        + '<span id="acc-helper" class="heurist-helper1" style="display:inline-block;width:300px;padding-bottom:5px;">'
+                                            + 'Please use one of these for testing purposes. If you use a personal login and API code the data will be permanently stored in Nakala'
+                                        + '</span>'
+                                        + '<br>'
+                                        + '<span class="heurist-helper1">Select a Nakala account to use</span>'
+                                    + '</div>'
+                                + '</div>'
+
+                                + '<div id="nakala-url">'
+                                    + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Use test server:</label></div>'
+                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
+                                        + '<input type="checkbox" class="text ui-widget-content ui-corner-all" id="use_test_url">'
+                                        + '<br>'
+                                        + '<span class="heurist-helper1">Use Nakala\'s test server, instead of the standard version</span>'
+                                    + '</div>'
+                                + '</div>'
 
                                 + '<div>'
                                     + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>File title:</label></div>'
@@ -1284,9 +1324,15 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     let orcid = $dlg.find('#orcid').val();
                     let created = $dlg.find('#created').val();
                     let license = $dlg.find('#license').val();
+                    let account = $dlg.find('#account').val();
 
+                    if(window.hWin.HEURIST4.util.isempty(account)){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select an account to use...', 3000);
+                        return;
+                    }else
                     if(window.hWin.HEURIST4.util.isempty(title) || window.hWin.HEURIST4.util.isempty(type) || window.hWin.HEURIST4.util.isempty(license)){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please make sure the required fields are filled', 3000);
+                        return;
                     }
 
                     // Check type
@@ -1340,7 +1386,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             created: created,
                             type: type,
                             license: license
-                        }
+                        },
+                        api_key: account,
+                        use_test_url: $dlg.find('#use_test_url').is(':checked') || account.indexOf('_') == -1 ? 1 : 0
                     };
 
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._edit_dialog);
@@ -1430,12 +1478,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     if(data.hasOwnProperty('types') && Object.keys(data['types']).length > 0){
 
                         $.each(data['types'], (idx, type) => {
+
                             window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
-/* Artem 2024-03-13  label not defined
-                            if(that._last_upload_details[0].type.indexOf(label.toLowerCase()) !== -1){
+
+                            if(that._last_upload_details && that._last_upload_details.length > 0 && that._last_upload_details[0].type.indexOf(type[0].toLowerCase()) !== -1){
                                 selected_type = code;
                             }
-*/                            
                         });
                         window.hWin.HEURIST4.ui.initHSelect($select, false);
                         can_assign ++;
@@ -1459,6 +1507,25 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             + 'If this problem persists, please contact the Heurist team.');
                     }
                 });
+
+                let $accounts = $('#account');
+                $.each(that._external_repositories[selected_repo], (idx, details) => {
+
+                    let lbl = `${details[0].indexOf('_') >= 0 ? '' : 'Test - '}${details[3]}`;
+                    window.hWin.HEURIST4.ui.addoption($accounts[0], details[0], lbl);
+                });
+
+                window.hWin.HEURIST4.ui.initHSelect($accounts, false, null, {
+                    onSelectMenu: () => {
+
+                        let value = $accounts.val();
+
+                        value != '' && value.indexOf('_') >= 0 ? $dlg.find('#nakala-url').show() : $dlg.find('#nakala-url').hide();
+                        value != '' && value.indexOf('_') >= 0 ? $dlg.find('#acc-helper').hide() : $dlg.find('#acc-helper').show();
+                    }
+                });
+
+                $accounts.trigger('change');
 
                 break;
 
