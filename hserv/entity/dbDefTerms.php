@@ -925,7 +925,7 @@ class DbDefTerms extends DbEntityBase
 
                 $code_clause = !empty($trm_ids) ? 'trn_Code IN (' . implode(',', $trm_ids) . ')' : '';
             }else if(is_int($trm_ids) && $trm_ids > 0){
-                $code_clause = 'trn_Code = ' . $trm_ids;
+                $code_clause = 'trn_Code = ' . intval($trm_ids);
             }
 
             $where_clause .= empty($code_clause) ? '' : ' AND ' . $code_clause; 

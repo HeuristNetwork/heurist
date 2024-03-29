@@ -937,6 +937,8 @@
                         .$mysqli->real_escape_string($ldb).'\'');
                 if(!$dbname) continue;
                 
+                $ldb = preg_replace('/[^a-zA-Z0-9_]/', '', $ldb); //for snyk
+                
                 //2. find sys_UGrpsDatabase in linked database - this database must be in list
                 $linked_dbs2 = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
                 if(!$linked_dbs2) continue; //this database is not mutually linked
@@ -959,14 +961,14 @@
                             'ugr_MinHyperlinkWords,ugr_IsModelUser,'.  //ugr_LoginCount,
                             'ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT';
 
-                            $query1 = "insert into `$dbname`.sysUGrps (ugr_Type,ugr_Name,$fields) ".
+                            $query1 = "insert into `$ldb`.sysUGrps (ugr_Type,ugr_Name,$fields) ".
                             "SELECT ugr_Type,ugr_eMail,$fields ".
                             "FROM sysUGrps where ugr_ID=".intval($userID);                            
 
 
                         }else if($is_approvement){
                             //enable user
-                            $query1 = "update `$dbname`.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
+                            $query1 = "update `$ldb`.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
                         }
 
                         $res = $mysqli->query($query1);

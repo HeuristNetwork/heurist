@@ -1522,7 +1522,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     if(is_array($geo_fields) && count($geo_fields)>0){
 
         // northing, easting
-        $query = "select ".implode(',',$geo_fields).", imp_ID from `$import_table` ";
+        $query = "select `".implode('`,`',$geo_fields)."`, imp_ID from `$import_table` ";
 
         if(count($geo_fields)==1){
             $query = $query . ' WHERE `'.$geo_fields[0].'` > ""';    
