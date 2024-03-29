@@ -931,7 +931,7 @@
                 if(strpos($ldb, HEURIST_DB_PREFIX)!==0){
                     $ldb = HEURIST_DB_PREFIX.$ldb;
                 }
-                
+                //database exists
                 $dbname = mysql__select_value($mysqli, 
                     'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \''
                         .$mysqli->real_escape_string($ldb).'\'');
@@ -948,8 +948,8 @@
                     if( strcasecmp($dbname_full, $ldb2)==0 ){
                         //yes database is mutually linked
                         //3. find user email in linked database
-                        $userEmail_in_linkedDB = mysql__select_value($mysqli, 'select ugr_eMail from '
-                                .$ldb.'.sysUGrps where ugr_eMail="'.$userEmail.'"');
+                        $userEmail_in_linkedDB = mysql__select_value($mysqli, 'select ugr_eMail from `'
+                                .$ldb.'`.sysUGrps where ugr_eMail="'.$userEmail.'"');
                         if(!$userEmail_in_linkedDB){
                             //add new user to linked database
 
@@ -959,14 +959,14 @@
                             'ugr_MinHyperlinkWords,ugr_IsModelUser,'.  //ugr_LoginCount,
                             'ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT';
 
-                            $query1 = "insert into $ldb.sysUGrps (ugr_Type,ugr_Name,$fields) ".
+                            $query1 = "insert into `$dbname`.sysUGrps (ugr_Type,ugr_Name,$fields) ".
                             "SELECT ugr_Type,ugr_eMail,$fields ".
                             "FROM sysUGrps where ugr_ID=".intval($userID);                            
 
 
                         }else if($is_approvement){
                             //enable user
-                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
+                            $query1 = "update `$dbname`.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
                         }
 
                         $res = $mysqli->query($query1);

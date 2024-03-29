@@ -1294,7 +1294,9 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
         
         $k++;
-        
+
+        $field = preg_replace('/[^a-zA-Z0-9_]/', "", $field);  //for snyk
+
         $wrong_records = self::getWrongRecords($query, $imp_session,
             "This field is required. It is recommended that a value must be supplied for every record. "
             ."You can find and correct these values using Verify > Verify integrity",
@@ -1523,7 +1525,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         $query = "select ".implode(',',$geo_fields).", imp_ID from `$import_table` ";
 
         if(count($geo_fields)==1){
-            $query = $query . ' WHERE '.$geo_fields[0].' > ""';    
+            $query = $query . ' WHERE `'.$geo_fields[0].'` > ""';    
         }else{
             $query = $query . ' LIMIT 5';
         }

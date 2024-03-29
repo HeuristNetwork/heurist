@@ -1796,6 +1796,7 @@ public methods
             $mysqli = $system->get_mysqli();
 
             $record_ids = prepareIds($record_ids); //for snyk
+            $tag_ids    = prepareIds($tag_ids); //for snyk 
             
             //assign links
             $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
