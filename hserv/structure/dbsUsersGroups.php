@@ -1352,15 +1352,17 @@
     function user_getRepositoryCredentials($system, $search_all_groups, $ugr_ID, $serviceName=null) {
 
         //1. search all workgroups
+        $ugr_ID = intval($ugr_ID);
+        
         if($search_all_groups){
             $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' WHERE ugr_ID=0 OR ugr_ID='.$ugr_ID
                     .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
                     .' ORDER BY ugr_Type DESC';
         }else{
         //2 search only specific group or user        
             $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID='.intval($ugr_ID);
+                    .' WHERE ugr_ID='.$ugr_ID;
         }
         
         /*
@@ -1426,7 +1428,7 @@
         if($ugr_ID>=0){
             //1. search all workgroups
             $query = 'SELECT ugr_ID, ugr_Name, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' WHERE ugr_ID=0 OR ugr_ID='.$ugr_ID
                     .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
                     .' ORDER BY ugr_Type DESC';
                     
