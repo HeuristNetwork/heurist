@@ -855,8 +855,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     codeEditor.setValue(contents[new_lang]);
                     ce_container.attr('data-lang',new_lang);
                     
+                    if(new_lang==''){
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').hide();            
+                    }else{
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').show();
             codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').removeClass('ui-button-action');
             codeEditorDlg.parent().find('.ui-dialog-buttonset').find(`[data-lang=${new_lang}]`).addClass('ui-button-action');
+                    }
                     
                     
                     }});
@@ -909,8 +914,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             initial_content = contents[init_lang];
             ce_container.attr('data-lang', init_lang);
             
+                    if(init_lang==''){
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').hide();            
+                    }else{
+            codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').show();            
             codeEditorDlg.parent().find('.ui-dialog-buttonset').find('[data-lang]').removeClass('ui-button-action');
             codeEditorDlg.parent().find('.ui-dialog-buttonset').find(`[data-lang=${init_lang}]`).addClass('ui-button-action');
+                    }
             
         }
         if(window.hWin.HEURIST4.util.isempty(initial_content)) initial_content = ' ';
