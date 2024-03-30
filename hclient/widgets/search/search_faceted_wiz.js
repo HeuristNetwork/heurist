@@ -1782,7 +1782,6 @@ $.widget( "heurist.search_faceted_wiz", {
                     facets.splice(k,1);
                     continue;
                 }
-                
                 var harchy = resh.harchy;
                 var harchy_fields = resh.harchy_fields;
                 
@@ -1937,7 +1936,6 @@ $.widget( "heurist.search_faceted_wiz", {
                         facets[k].isfacet = (facets[k].type=='freetext' || facets[k].type=='blocktext')?0:1;
                     }
                 }
-
 
                 //assign values
                 if(facets[k].title=='{NEW}'){
