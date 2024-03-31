@@ -454,10 +454,11 @@ own"0","viewable",NULL,NULL,NULL,NULL
                                  "WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? " .
                                  "ORDER BY arc_ID";
 
-                $res_changes = mysql__select_param_query($mysqli, $query_changes, array('is', $recID, $row_date[0]));
+                $res_changes = mysql__select_param_query($mysqli, $query_changes, array('is', $rec_ID, $row_date[0]));
                                  
                 if(!$res_changes){
-                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' . $row_date[0], $mysqli->error);
+                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' 
+                                        . $row_date[0], $mysqli->error);
                     return false;
                 }
 
