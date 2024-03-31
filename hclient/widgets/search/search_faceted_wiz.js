@@ -1317,6 +1317,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                     
                     }else{
+                        var sMsg = 'Heurist limits the depth of nesting to limit memory usage. If you require deeper nexting, please contact the Heurist team. However, you can generally solve this problem more efficiently by changing the starting point of your query or using Expansion rulesets';
+                        window.hWin.HEURIST4.msg.showTooltipFlash(sMsg,3000,$(node.li));                        
+                        node.tooltip = sMsg;
+                        node.setTitle(node.title + '<span style="color:red">&nbsp;Reached limit of nesting</span>');
+                        node.renderTitle();
                         data.result = [];
                     }                            
                     
