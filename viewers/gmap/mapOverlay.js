@@ -1059,16 +1059,29 @@ map.data.addListener('mouseover', function(event) {
             }
 
             if(loadingbar==null){
-                var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
-                loadingbar = new google.maps.Marker({
-                    icon: image,
-                    optimized: false
-                });            
+                
+                
+                if(google.maps.marker){
+                    const loadingImg = document.createElement("img");
+                    loadingImg.src = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
+                    
+                    loadingbar = new google.maps.marker.AdvancedMarkerElement({
+                        content: loadingImg,
+                        position: map.getCenter()
+                    });            
+                }else{
+                    loadingbar = new google.maps.Marker({
+                        icon: window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif',
+                        position: map.getCenter(),
+                        optimized: false
+                    });            
+                }
+                
             }
             if(loadingbar){
                 loadingbar.setMap(map);
-                loadingbar.setPosition(map.getCenter());
-            } 
+                //loadingbar.setPosition(map.getCenter());
+            }
 
             $('#mapping').css('cursor','progress');
 

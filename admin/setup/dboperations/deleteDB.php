@@ -47,9 +47,11 @@ if(!@$_REQUEST['pwd']){
 
     $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete); //for snyk
 
-    $create_arc = ( (@$_REQUEST['create_archive']===true)
-            || (@$_REQUEST['create_archive']==='true') 
-            || (@$_REQUEST['create_archive']==1));
+    if(array_key_exists('create_archive', $_REQUEST)){
+        $create_arc = $_REQUEST['create_archive'];
+    }else{
+        $create_arc = false;
+    }
 
 //if user deletes its own database
     $is_delete_current_db = (@$_REQUEST['db']==$database_to_delete && @$_REQUEST['pwd']=='DELETE MY DATABASE');
@@ -109,6 +111,7 @@ if(!@$_REQUEST['pwd']){
                         //find owner of database
                         $usr_owner = user_getByField($system->get_mysqli(), 'ugr_ID', 2, $dbname_full);
                 
+                        //not verbose
                         $res = DbUtils::databaseDrop(false, $database_to_delete, $create_arc);    
                         
                         // in case deletion by sysadmin - send email to onwer of deleted database

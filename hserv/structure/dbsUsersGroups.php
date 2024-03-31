@@ -930,11 +930,13 @@
                 if(strpos($ldb, HEURIST_DB_PREFIX)!==0){
                     $ldb = HEURIST_DB_PREFIX.$ldb;
                 }
-                
+                //database exists
                 $dbname = mysql__select_value($mysqli, 
                     'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \''
                         .$mysqli->real_escape_string($ldb).'\'');
                 if(!$dbname) continue;
+                
+                $ldb = preg_replace('/[^a-zA-Z0-9_]/', '', $ldb); //for snyk
                 
                 //2. find sys_UGrpsDatabase in linked database - this database must be in list
                 $linked_dbs2 = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
@@ -947,8 +949,8 @@
                     if( strcasecmp($dbname_full, $ldb2)==0 ){
                         //yes database is mutually linked
                         //3. find user email in linked database
-                        $userEmail_in_linkedDB = mysql__select_value($mysqli, 'select ugr_eMail from '
-                                .$ldb.'.sysUGrps where ugr_eMail="'.$userEmail.'"');
+                        $userEmail_in_linkedDB = mysql__select_value($mysqli, 'select ugr_eMail from `'
+                                .$ldb.'`.sysUGrps where ugr_eMail="'.$userEmail.'"');
                         if(!$userEmail_in_linkedDB){
                             //add new user to linked database
 
@@ -958,14 +960,14 @@
                             'ugr_MinHyperlinkWords,ugr_IsModelUser,'.  //ugr_LoginCount,
                             'ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT';
 
-                            $query1 = "insert into $ldb.sysUGrps (ugr_Type,ugr_Name,$fields) ".
+                            $query1 = "insert into `$ldb`.sysUGrps (ugr_Type,ugr_Name,$fields) ".
                             "SELECT ugr_Type,ugr_eMail,$fields ".
                             "FROM sysUGrps where ugr_ID=".intval($userID);                            
 
 
                         }else if($is_approvement){
                             //enable user
-                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
+                            $query1 = "update `$ldb`.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);                            
                         }
 
                         $res = $mysqli->query($query1);
@@ -1320,6 +1322,19 @@
     // returns credentials for given service_id  (service_name+user_id) 
     //
     function user_getRepositoryCredentials2($system, $serviceId) {
+
+        // Chcek if serviceId is a testing one
+        //  these keys are publicly available from their respective services
+        $TEST_KEYS = [
+            // Nakala => https://test.nakala.fr/
+            'tnakala' => '01234567-89ab-cdef-0123-456789abcdef',
+            'unakala1' => '33170cfe-f53c-550b-5fb6-4814ce981293',
+            'unakala2' => 'f41f5957-d396-3bb9-ce35-a4692773f636',
+            'unakala3' => 'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2'
+        ];
+        if(array_key_exists($serviceId, $TEST_KEYS)){
+            return [ $serviceId => [ 'params' => [ 'writeApiKey' => $TEST_KEYS[$serviceId] ] ] ]; //implode('-', $TEST_KEYS[$serviceId])
+        }
         
         $parts = explode('_', $serviceId);
         $ugr_ID = end($parts);
@@ -1338,15 +1353,17 @@
     function user_getRepositoryCredentials($system, $search_all_groups, $ugr_ID, $serviceName=null) {
 
         //1. search all workgroups
+        $ugr_ID = intval($ugr_ID);
+        
         if($search_all_groups){
             $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' WHERE ugr_ID=0 OR ugr_ID='.$ugr_ID
                     .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
                     .' ORDER BY ugr_Type DESC';
         }else{
         //2 search only specific group or user        
             $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID='.intval($ugr_ID);
+                    .' WHERE ugr_ID='.$ugr_ID;
         }
         
         /*
@@ -1412,7 +1429,7 @@
         if($ugr_ID>=0){
             //1. search all workgroups
             $query = 'SELECT ugr_ID, ugr_Name, ugr_Preferences FROM sysUGrps '
-                    .' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
+                    .' WHERE ugr_ID=0 OR ugr_ID='.$ugr_ID
                     .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.$ugr_ID.')'
                     .' ORDER BY ugr_Type DESC';
                     

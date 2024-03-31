@@ -679,102 +679,106 @@
 
                 // load ONE file to ext.repository - from manageRecUploadedFiles
                 // see also local_to_repository in record_batch
-            
-            
-                // Prepare parameters
-                $params = array();
 
-                // File
-                $params['file'] = array(
-                    'path' => HEURIST_FILESTORE_DIR . '/scratch/' 
-                            . USanitize::sanitizeFileName(USanitize::sanitizePath($_REQUEST['file'][0]['name'])),
-                    'type' => htmlspecialchars($_REQUEST['file'][0]['type']),
-                    'name' => htmlspecialchars($_REQUEST['file'][0]['original_name'])
-                );
-
-                // Metadata
-                $params['meta']['title'] = array(
-                    'value' => htmlspecialchars(@$_REQUEST['meta']['title']),
-                    'lang' => null,
-                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                    'propertyUri' => 'http://nakala.fr/terms#title'
-                );
-
-                if(empty($_REQUEST['meta']['creator']['authorId'])){
-                    $params['meta']['creator'] = array(
-                        'value' => null,
-                        'lang' => null,
-                        'typeUri' => null,
-                        'propertyUri' => 'http://nakala.fr/terms#creator'
-                    );
-
-                    if(array_key_exists('givenname', $_REQUEST['meta']['creator']) || array_key_exists('surname', $_REQUEST['meta']['creator'])){
-
-                        $fullname = '';
-                        if(array_key_exists('givenname', $_REQUEST['meta']['creator'])){
-                            $fullname .= htmlspecialchars($_REQUEST['meta']['creator']['givenname']);
-                        }
-                        if(array_key_exists('surname', $_REQUEST['meta']['creator'])){
-                            $fullname .= ' ' . htmlspecialchars($_REQUEST['meta']['creator']['surname']);
-                        }
-                        $fullname = trim($fullname);
-
-                        $params['meta']['alt_creator'] = array(
-                            'value' => $fullname,
-                            'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://purl.org/dc/terms/creator'
-                        );
-                    }
+                $credentials = user_getRepositoryCredentials2($system, $_REQUEST['api_key']);
+                if($credentials === null || !@$credentials[$service_id]['params']['writeApiKey']){
+                    $system->addError(HEURIST_INVALID_REQUEST, 'We were unable to retrieve the specified Nakala API key, please ensure you have entered the API key into Design > External repositories');
                 }else{
-                    $params['meta']['creator'] = array(
-                        'value' => @$_REQUEST['meta']['creator'],
-                        'propertyUri' => 'http://nakala.fr/terms#creator'
-                    );
-                }
 
-                if(array_key_exists('created', $_REQUEST['meta']) && !empty($_REQUEST['meta']['created'])){
-                    $params['meta']['created'] = array(
-                        'value' => @$_REQUEST['meta']['created'],
+                    // Prepare parameters
+                    $params = array();
+
+                    // File
+                    $params['file'] = array(
+                        'path' => HEURIST_FILESTORE_DIR . '/scratch/' 
+                                . USanitize::sanitizeFileName(USanitize::sanitizePath($_REQUEST['file'][0]['name'])),
+                        'type' => htmlspecialchars($_REQUEST['file'][0]['type']),
+                        'name' => htmlspecialchars($_REQUEST['file'][0]['original_name'])
+                    );
+
+                    // Metadata
+                    $params['meta']['title'] = array(
+                        'value' => htmlspecialchars(@$_REQUEST['meta']['title']),
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#created'
+                        'propertyUri' => 'http://nakala.fr/terms#title'
                     );
-                }else{
-                    $params['meta']['created'] = array(
-                        'value' => null,
+
+                    if(empty($_REQUEST['meta']['creator']['authorId'])){
+                        $params['meta']['creator'] = array(
+                            'value' => null,
+                            'lang' => null,
+                            'typeUri' => null,
+                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                        );
+
+                        if(array_key_exists('givenname', $_REQUEST['meta']['creator']) || array_key_exists('surname', $_REQUEST['meta']['creator'])){
+
+                            $fullname = '';
+                            if(array_key_exists('givenname', $_REQUEST['meta']['creator'])){
+                                $fullname .= htmlspecialchars($_REQUEST['meta']['creator']['givenname']);
+                            }
+                            if(array_key_exists('surname', $_REQUEST['meta']['creator'])){
+                                $fullname .= ' ' . htmlspecialchars($_REQUEST['meta']['creator']['surname']);
+                            }
+                            $fullname = trim($fullname);
+
+                            $params['meta']['alt_creator'] = array(
+                                'value' => $fullname,
+                                'lang' => null,
+                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                                'propertyUri' => 'http://purl.org/dc/terms/creator'
+                            );
+                        }
+                    }else{
+                        $params['meta']['creator'] = array(
+                            'value' => @$_REQUEST['meta']['creator'],
+                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                        );
+                    }
+
+                    if(array_key_exists('created', $_REQUEST['meta']) && !empty($_REQUEST['meta']['created'])){
+                        $params['meta']['created'] = array(
+                            'value' => @$_REQUEST['meta']['created'],
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://nakala.fr/terms#created'
+                        );
+                    }else{
+                        $params['meta']['created'] = array(
+                            'value' => null,
+                            'lang' => null,
+                            'typeUri' => null,
+                            'propertyUri' => 'http://nakala.fr/terms#created'
+                        );
+                    }
+
+                    $params['meta']['type'] = array(
+                        'value' => @$_REQUEST['meta']['type'],
                         'lang' => null,
-                        'typeUri' => null,
-                        'propertyUri' => 'http://nakala.fr/terms#created'
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                        'propertyUri' => 'http://nakala.fr/terms#type'
                     );
+
+                    $params['meta']['license'] = array(
+                        'value' => @$_REQUEST['meta']['license'],
+                        'lang' => null,
+                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                        'propertyUri' => 'http://nakala.fr/terms#license'
+                    );
+
+                    // User API Key
+                    $params['api_key'] = $credentials[$_REQUEST['api_key']]['params']['writeApiKey'];
+
+                    $params['use_test_url'] = @$_REQUEST['use_test_url'] == 1 || strpos($_REQUEST['api_key'],'nakala')===1 ? 1 : 0;
+
+                    $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
+
+                    // Upload file
+                    $res = uploadFileToNakala($system, $params); //from record edit - define file field
+
                 }
-
-                $params['meta']['type'] = array(
-                    'value' => @$_REQUEST['meta']['type'],
-                    'lang' => null,
-                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                    'propertyUri' => 'http://nakala.fr/terms#type'
-                );
-
-                $params['meta']['license'] = array(
-                    'value' => @$_REQUEST['meta']['license'],
-                    'lang' => null,
-                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                    'propertyUri' => 'http://nakala.fr/terms#license'
-                );
-
-                // User API Key
-                if($system->get_system('sys_NakalaKey')){
-                    $params['api_key'] = $system->get_system('sys_NakalaKey');
-                }else{
-                    $system->addError(HEURIST_INVALID_REQUEST, 'No Nakala API Key provided, please ensure you have entered your personal key into Design > Setup > Properties > General Nakala API key');
-                }
-
-                $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
-
-                // Upload file
-                $res = uploadFileToNakala($system, $params); //from record edit - define file field
-
+                
                 if($res !== false){
                     // delete local file after upload
                     fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . basename($_REQUEST['file'][0]['name']));

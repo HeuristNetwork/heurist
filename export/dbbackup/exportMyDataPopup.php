@@ -83,6 +83,7 @@ if($mode>1){
         
         <script type=text/javascript>
             var is_repository = <?php echo $is_repository?'true':'false';?>;
+            var complete_list_repositories = {};
             
             $(document).ready(function() {
                 $('input[type="submit"]').button();
@@ -119,31 +120,96 @@ if($mode>1){
             //
             function initRepositorySelector(){
 
-                let available = ['Nakala'];
-                let $select = $('#sel_repository');
+                let $repos = $('#sel_repository');
+                let $accounts = $('#sel_accounts');
 
-                $.each(available, (idx, repo_name) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                });
-                window.hWin.HEURIST4.ui.initHSelect($select, false, {width: '150px', 'margin-left': '5px'}, {
-                    onSelectMenu: () => {
-                        let value = $select.val();
+                if($repos.length == 0 || $accounts.length == 0){
+                    return;
+                }
 
-                        if(value == 'Nakala'){
+                $repos.empty();
+                window.hWin.HEURIST4.ui.addoption($repos[0], '', 'select a repository...');
 
-                            // Check if API Key has been provided
-                            if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
-                                $select.val('');
-                                if($select.hSelect('instance') !== undefined){
-                                    $select.hSelect('refresh');
-                                }
-                                window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to upload to Nakala.');
+                window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list', 'include_test': 1}, (response) => {
+
+                    if(response.status != window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        return;
+                    }
+
+                    let listed_repos = [];
+                    $.each(response.data, (idx, repo_details) => {
+
+                        let repo_name = repo_details[1];
+                        repo_name = repo_name.charAt(0).toUpperCase() + repo_name.slice(1);
+
+                        let is_test = repo_details[0].indexOf('_') == -1;
+
+                        repo_details[4] = true;
+
+                        if(Object.hasOwn(complete_list_repositories, repo_name)){
+                            complete_list_repositories[repo_name].push(repo_details);
+                            return;
+                        }
+
+                        complete_list_repositories[repo_name] = [ repo_details ];
+
+                        window.hWin.HEURIST4.ui.addoption($repos[0], repo_name, repo_name);
+                    });
+
+                    $accounts.parent().hide();
+
+                    window.hWin.HEURIST4.ui.initHSelect($repos, false, {width: '150px', 'margin-left': '5px'}, {
+                        onSelectMenu: () => {
+
+                            let value = $repos.val();
+
+                            $accounts.empty();
+                            $('[class*="repo-"]').hide();
+
+                            if(value == ''){
+                                $accounts.parent().hide();
                                 return;
                             }
 
-                            getNakalaLicenses();
+                            $accounts.parent().show();
+
+                            window.hWin.HEURIST4.ui.addoption($accounts[0], '', 'Select an account to use...');
+
+                            $(`.repo-${value}`).show();
+
+                            let accounts = complete_list_repositories[value];
+                            $.each(accounts, (idx, details) => {
+
+                                let lbl = `${details[0].indexOf('_') >= 0 ? '' : 'Test - '}${details[3]}`;
+
+                                window.hWin.HEURIST4.ui.addoption($accounts[0], details[0], lbl);
+                            });
+
+                            if($accounts.hSelect('instance') !== undefined){
+                                $accounts.hSelect('refresh');
+                            }
+
+                            if(value == 'Nakala'){
+                                $('#nakala-url').hide();
+                                getNakalaLicenses();
+                            }
                         }
-                    }
+                    });
+
+                    window.hWin.HEURIST4.ui.initHSelect($accounts, false, {width: '200px', 'margin-left':'5px'}, {
+                        onSelectMenu: () => {
+
+                            let repo = $repos.val();
+                            let value = $accounts.val();
+
+                            if(repo == 'Nakala'){
+                                value != '' && value.indexOf('_') >= 0 ? $('#nakala-url').show() : $('#nakala-url').hide();
+                            }
+
+                            value != '' && value.indexOf('_') == -1 ? $('.setup-keys').show() : $('.setup-keys').hide();
+                        }
+                    });
                 });
             }
             
@@ -200,11 +266,15 @@ if($mode>1){
 
                 if(is_repository){
                     let repo = $('#sel_repository').val();
+                    let acc = $('#sel_accounts').val();
                     if(repo == ''){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a repository...', 2000);
                         return;
-                    }else if(repo == 'Nakala' && window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.nakala_api_key)){
-                        window.hWin.HEURIST4.msg.showMsgErr('You need to enter your Nakala API Key into Design > Setup > Properties > General Nakala API key, in order to upload to Nakala.');
+                    }else if(acc == ''){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select an account to use...', 2000);
+                        return;
+                    }else if(acc.indexOf('nakala') >= 0 && $('#sel_license').val() == ''){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please select a license...', 2000);
                         return;
                     }
                 }
@@ -313,11 +383,36 @@ if($mode>1){
 
         <?php if($is_repository){ ?>
                 <div class="input-row" style="padding: 20px 0 5px 0;">
-                    <label>Select a repository <select id='sel_repository' name='repository'><option value="">select a repository...</option></select></label>
+                    <span>Select a repository <select id='sel_repository' name='repository'></select> </span>
                 </div>
 
-                <div class="input-row" style="display: none;padding: 5px 0 10px 0;">
-                    <label>Select a license <select id='sel_license' name='license'><option value="">select a license...</option></select></label>
+                <div class="input-row" style="padding: 10px 0px;">
+                    <span>
+                        Select an account 
+                        <select id='sel_accounts' name='repo_account'></select> 
+
+                        <span class="heurist-helper1 setup-keys" style="vertical-align: middle;display: none;">
+                            This key is for a test account, you can setup your own key at Design > External repositories
+                        </span>
+                    </span>
+                </div>
+
+                <div id="nakala-url" class="input-row repo-Nakala" style="padding: 10px 0px; display: none;">
+                    <span>
+                        Select which version of Nakala to use: <br><br>
+                        <label style="display: inline-block; margin-bottom: 5px;"> <input type='radio' name='use_test_url' value='0' checked="checked"> Standard</label> <br>
+                        <label style="display: inline-block; margin-bottom: 5px;"> <input type='radio' name='use_test_url' value='1'> Test (test.nakala.fr)</label> 
+                        <span class="heurist-helper1" style="vertical-align: middle;">
+                            Please note that this version should only be used for testing / temporary storage as at any moment the uploaded Zip can be cleared by Nakala/Huma-num
+                        </span>
+                    </span>
+                </div>
+
+                <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
+                    <span>
+                        Select a license 
+                        <select id='sel_license' name='license'> <option value="">select a license...</option> </select>
+                    </span>
                 </div>
         <?php } ?>
 
@@ -365,8 +460,12 @@ if($mode>1){
             if($separate_sql_zip && !folderCreate(FOLDER_SQL_BACKUP, true)){
                 $separate_sql_zip = false; // hide option
             }
+            if($separate_hml_zip && !folderCreate(FOLDER_HML_BACKUP, true)){
+                $separate_hml_zip = false; // hide option
+            }
 
-            if($is_repository && @$_REQUEST['repository']!='Nakala'){
+            $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
+            if($is_repository && (!$repo || $repo == 'Nakala')){
                 report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, false);
             }
 
@@ -375,7 +474,9 @@ if($mode>1){
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, 
-                    array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs', 'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 'term-images', 'webimagecache')); //except these folders - some of them may exist in old databases only
+                    array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs', 
+                          'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 
+                          'term-images', 'webimagecache')); //except these folders - some of them may exist in old databases only
                 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );
@@ -550,7 +651,7 @@ if($mode>1){
             $format = 'tar.bz2';
         }
     ?>                
-    <p>Your data have been backed up in <?php echo FOLDER_BACKUP;?></p>
+    <p>Your data has been backed up in <?php echo FOLDER_BACKUP;?></p>
     <br><br><div class='lbl_form'></div>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $format; ?>?mode=2&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $format;?> archive</a>
@@ -591,94 +692,97 @@ if($mode>1){
                 else if($is_repository){
                     //upload archive to repository
 
-                    $repo = htmlspecialchars($_REQUEST['repository']);
+                    $repo_account = htmlspecialchars($_REQUEST['repo_account']);
+
                     if($format == 'tar'){
                         $format = 'tar.bz2';
                     }
 
+                    $repo_details = user_getRepositoryCredentials2($system, $repo_account);
+
                     echo_flush2('<hr><br>Uploading archive to ' . $repo . '...');
 
                     // Prepare metadata
-                    switch ($repo) {
-                        case 'Nakala':
-                            // Title, Type, Alt Author, License, Created
+                    if($repo_details === null ||!@$repo_details[$repo_account]['params']['writeApiKey']){
 
-                            $date = date('Y-m-d');
+                        $msg = $repo_details === null ? 
+                                'Credentials for sepecified repository and user/group not found.' : 'Write Credentials for sepecified repository and user/group not defined.';
 
-                            $params = array();
-                            $params['file'] = array(
-                                'path' => FOLDER_BACKUP . '.' . $format,
-                                'type' => $mime,
-                                'name' => HEURIST_DBNAME . '.' . $format
-                            );
+                        $msg .= ' Please check the credentials within Design > External repositories.';
 
-                            $params['meta']['title'] = array(
-                                'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
+                        report_message($msg, true, true);
+                    }else if($repo == 'Nakala'){
+                        // Title, Type, Alt Author, License, Created
+
+                        $date = date('Y-m-d');
+
+                        $params = array();
+                        $params['file'] = array(
+                            'path' => FOLDER_BACKUP . '.' . $format,
+                            'type' => $mime,
+                            'name' => HEURIST_DBNAME . '.' . $format
+                        );
+
+                        $params['meta']['title'] = array(
+                            'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://nakala.fr/terms#title'
+                        );
+
+                        $usr = $system->getCurrentUser();
+                        if(is_array($usr) && count($usr) > 0){
+                            $params['meta']['creator'] = array(
+                                'value' => $usr['ugr_FullName'],
                                 'lang' => null,
                                 'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#title'
+                                'propertyUri' => 'http://purl.org/dc/terms/creator'
                             );
+                        }
 
-                            $usr = $system->getCurrentUser();
-                            if(is_array($usr) && count($usr) > 0){
-                                $params['meta']['creator'] = array(
-                                    'value' => $usr['ugr_FullName'],
-                                    'lang' => null,
-                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                    'propertyUri' => 'http://purl.org/dc/terms/creator'
-                                );
-                            }
+                        $params['meta']['created'] = array(
+                            'value' => $date,
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
+                            'propertyUri' => 'http://nakala.fr/terms#created'
+                        );
 
-                            $params['meta']['created'] = array(
-                                'value' => $date,
+                        $params['meta']['type'] = array(
+                            'value' => 'http://purl.org/coar/resource_type/c_ddb1',
+                            'lang' => null,
+                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                            'propertyUri' => 'http://nakala.fr/terms#type'
+                        );
+
+                        if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
+                            $params['meta']['license'] = array(
+                                'value' => $_REQUEST['license'],
                                 'lang' => null,
                                 'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#created'
+                                'propertyUri' => 'http://nakala.fr/terms#license'
                             );
+                        }
 
-                            $params['meta']['type'] = array(
-                                'value' => 'http://purl.org/coar/resource_type/c_ddb1',
-                                'lang' => null,
-                                'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                                'propertyUri' => 'http://nakala.fr/terms#type'
-                            );
+                        $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey']; //$system->get_system('sys_NakalaKey');
+                        $params['use_test_url'] = @$_REQUEST['use_test_url'] == 1 || strpos($repo_account,'nakala')===1 ? 1 : 0; // use test version
 
-                            if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
-                                $params['meta']['license'] = array(
-                                    'value' => $_REQUEST['license'],
-                                    'lang' => null,
-                                    'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                    'propertyUri' => 'http://nakala.fr/terms#license'
-                                );
-                            }
+                        $params['status'] = 'pending'; // keep new record private, so it can be deleted
+                        $params['return_type'] = 'editor'; // return link to private record, will require login
 
-                            if($system->get_system('sys_NakalaKey')){
-                                $params['api_key'] = $system->get_system('sys_NakalaKey');
+                        $rtn = uploadFileToNakala($system, $params); //upload database archive
 
-                                $params['status'] = 'pending'; // keep new record private, so it can be deleted
-                                $params['return_type'] = 'editor'; // return link to private record, will require login
-        
-                                $rtn = uploadFileToNakala($system, $params); //upload database archive
-        
-                                if($rtn === false){
-                                    $rtn = $system->getError()['message'];
-                                    echo_flush2('failed<br>');
-                                }else{
-                                    echo_flush2('finished<br>');
-                                    $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
-                                }
-        
-                                echo_flush2('<br>'. $rtn .'<br>');
-                            }else{
-                                report_message('Your Nakala API key cannot be retrieved, '
-                                .'please ensure it has been entered into Design > Setup > Properties > General Nakala API key', true, true);
-                            }
-                            
-                            break;
-                        
-                        default:
-                            report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, true);
-                            break;
+                        if($rtn === false){
+                            $rtn = $system->getError()['message'];
+                            echo_flush2('failed<br>');
+                        }else{
+                            echo_flush2('finished<br>');
+                            $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
+                        }
+
+                        echo_flush2('<br>'. $rtn .'<br>');
+                    }else{
+
+                        report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, true);
                     }
                     
                 }//end repository

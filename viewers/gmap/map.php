@@ -31,12 +31,27 @@ $system->defineConstants();
 <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.js" charset="utf-8"></script>
 <link type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet"/>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>&libraries=drawing,geometry"></script>
-<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>&libraries=drawing,geometry,marker&callback=initMap" async></script>
+<!--
+<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script> 
+
+<script>
+  (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+    key: "<?php echo $accessToken_GoogleAPI;?>",
+    // Add other bootstrap parameters as needed, using camel case.
+    // Use the 'v' parameter to indicate the version to load (alpha, beta, weekly, etc.)
+  });
+</script>
+
+-->
+
 <!-- Timemap -->
 <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
   
 <script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
+
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/markerclusterer.js"></script>
+
 <!-- script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
@@ -117,12 +132,19 @@ $system->defineConstants();
 
 <script type="text/javascript">
 
-    var mapping, menu_datasets, btn_datasets;
+    var mapping, menu_datasets, btn_datasets, 
+        is_googlemap_loaded = false, is_page_loaded = false;
+    
+    function initMap(){
+        is_googlemap_loaded = true;
+        if(is_page_loaded) onPageInit(true);
+    }
     
     // Callback function on page initialization - see initPage.php
     function onPageInit(success){
-
-        if(!success) return;
+        
+        is_page_loaded = success;
+        if(!success || !is_googlemap_loaded) return;
         
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='Beyond1914' || lt=='UAdelaide'){
@@ -178,6 +200,7 @@ $system->defineConstants();
         var mylayout = $('#mapping').layout(layout_opts);
         
         $('#map').css('padding',0);
+        $('#map').attr('data-mapid', 'cb51443861458fd0'); //google mapid for digital harlem
         
         // Mapping data
         var mapdata = [];

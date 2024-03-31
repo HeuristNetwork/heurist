@@ -420,6 +420,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
 
             $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
+                + '<div class="header" style="padding-right: 16px;"><label for="sel_repository">Use test server</label></div>'
+                + '<input type="checkbox" id="ch_use_test_server" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">'
+            + '</div>').appendTo($fieldset);
+
+            $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_license">License</label></div>'
                 + '<select id="sel_license" style="max-width:30em" data-init="0"></select>'
             + '</div>').appendTo($fieldset);
@@ -432,37 +437,37 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             
             if($fieldset.find('#sel_repository').length != 0){
-                
-            window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list'}, function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    var repositories = window.hWin.HEURIST4.util.isJSON(response.data);
-                    
-                    //service_id, service_label, usr_ID, usr_Name
 
-                    let $sel_repos = $fieldset.find('#sel_repository');
-                    for (let i = 0; i < repositories.length; i++) {
-                        var repo = repositories[i];
-                        var repo_name = repo[1];
-                        var usr_name = repo[3];
-                        //usr_name = window.hWin.HAPI4.SystemMgr.getUserNameLocal(repo[2]);    
+                window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list', 'include_test': 1}, function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var repositories = window.hWin.HEURIST4.util.isJSON(response.data);
                         
-                        window.hWin.HEURIST4.ui.addoption($sel_repos[0], 
-                                repo[0], 
-                                repo_name+' > '+usr_name);
-                    }
-                    $sel_repos.on('change', () => {
-                        let repo = $sel_repos.val();
-                        if(repo.indexOf('nakala')===0){
+                        //service_id, service_label, usr_ID, usr_Name
+
+                        let $sel_repos = $fieldset.find('#sel_repository');
+                        for (let i = 0; i < repositories.length; i++) {
+                            var repo = repositories[i];
+                            var repo_name = repo[1];
+                            var usr_name = repo[3];
+                            //usr_name = window.hWin.HAPI4.SystemMgr.getUserNameLocal(repo[2]);    
+                            
+                            window.hWin.HEURIST4.ui.addoption($sel_repos[0], 
+                                    repo[0], 
+                                    repo_name+' > '+usr_name);
+                        }
+                        $sel_repos.on('change', () => {
+                            let repo = $sel_repos.val();
+                            if(repo.indexOf('nakala')===0 || repo.indexOf('nakala')===1){
                                 $('#sel_license').parent().show();
                                 _popuplateNakalaLicense();
-                        }
-                    });
-                    
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });
-            
+                                repo.indexOf('nakala')===0 ? $('#ch_use_test_server').parent().show() : $('#ch_use_test_server').parent().hide();
+                            }
+                        });
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
             
             }
         }else if(action_type=='merge_delete_detail'){ //@todo
@@ -810,12 +815,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     request['delete_file'] = 1;
                 }
 
-                if(request['repository'].indexOf('nakala')===0){
+                if(request['repository'].indexOf('nakala')===0 || request['repository'].indexOf('nakala')===1){
                     request['license'] = $('#sel_license').val();
                     if(window.hWin.HEURIST4.util.isempty(request['license'])){
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
                         return;
                     }
+                    request['use_test_url'] = $('#ch_use_test_server').is(':checked') || request['repository'].indexOf('nakala')===1 ?
+                                                1 : 0;
                 }
 
             }else if(action_type=='delete_detail'){

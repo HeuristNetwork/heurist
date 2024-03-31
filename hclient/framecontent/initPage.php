@@ -151,6 +151,7 @@ if(true || defined('IS_INDEX_PAGE')){
 
 <?php 
 // Do not use google analytics unless requested in heuristConfigIni.php
+$allowGoogleAnalytics = false; //this is deprecated version of google analytics that will be disabled in June 2024
 if($allowGoogleAnalytics && !$isLocalHost) {
     $host = strtolower($_SERVER["SERVER_NAME"]);
     
@@ -216,8 +217,10 @@ $isUpgrade = true;
 
 <?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
+<!--    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
-    <?php } ?>
+-->
+<?php } ?>
 
 <!-- CSS -->
 <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>

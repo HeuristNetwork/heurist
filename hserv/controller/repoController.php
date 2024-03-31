@@ -112,6 +112,12 @@ if(!$system->init(@$_REQUEST['db'])){
             
             //array(ugr_ID, serviceName)
             $res = user_getRepositoryList($system, $ugr_ID, true);
+
+            if(@$_REQUEST['include_test'] == 1 && is_array($res)){ // add test accounts
+
+                // add Nakala testing
+                array_push($res, ['tnakala', 'Nakala', 0, 'tnakala'], ['unakala1', 'Nakala', 0, 'unakala1'], ['unakala2', 'Nakala', 0, 'unakala2'], ['unakala3', 'Nakala', 0, 'unakala3'] );
+            }
             
         }else if($action=='get'){   
             //get credentials (to edit on client side) for given user

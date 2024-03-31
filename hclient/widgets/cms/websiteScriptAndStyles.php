@@ -577,8 +577,8 @@ if($website_custom_css!=null){
                     
                 if(isJsAllowed){
                     server_request.columns.push(DT_CMS_SCRIPT);
-                    server_request.columns.push(DT_CMS_CSS);
                 }
+                    server_request.columns.push(DT_CMS_CSS);
                 
                 //perform search see record_output.php       
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,

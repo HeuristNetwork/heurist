@@ -1067,8 +1067,6 @@ $.widget( "heurist.search_faceted", {
        
        $.each(this.options.params.facets, function(idx, field){
        
-           //content_id+"_"+
-           
           var codes = field['code'].split(':');
           var j = 0;
           var harchy = [];
