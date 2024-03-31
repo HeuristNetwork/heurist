@@ -1256,7 +1256,7 @@ $.widget( "heurist.mapping", {
                         var lbl = (id==10)?'Start/end dates':$Db.dty(id,'dty_Name');
                         
                         sfields = sfields
-                        + '<br><label><input type="checkbox" data-layer_id="'+layer_id+'" data-dty_id="'+id+'" checked/>'     
+                        + '<br><label><input name="se_dates" type="checkbox" data-layer_id="'+layer_id+'" data-dty_id="'+id+'" checked/>'     
                         + lbl + '</label>';
                     } 
                     sfields = sfields + '</span>'

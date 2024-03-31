@@ -1204,7 +1204,7 @@ function onHapiInit(success){
                 $('<div>'  //background: white;
                     +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
-                            +'<label>at: </label>'
+                            +'<span>at: </span>'
                             +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );

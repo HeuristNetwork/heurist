@@ -215,7 +215,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 $('<div style="height:40px;padding-left:4px;float:right">'
                     +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                     +'" target="_blank" style="text-decoration:none;color:black;">'
-                            +'<label>at: &nbsp;</label>'
+                            +'<span>at: &nbsp;</span>'
                             +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                             +'" height="35" align="center"></a></div>')
                 .appendTo($dlg.find('div#host_info'));
