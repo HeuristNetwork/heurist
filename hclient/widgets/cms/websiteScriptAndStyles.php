@@ -454,7 +454,7 @@ function switchLanguage(event){
 //
 // Loads content of specified record to #main-content and inits all widgets 
 // pageid    - record id to be loaded 
-// eventdata - data to be passed to afterPageLoad (to perform intial search) - it may be call from another page
+// eventdata - data to be passed to afterPageLoad (to perform initial search or other action) - it may be call from another page
 //
 function loadPageContent(pageid, eventdata){
     var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
@@ -510,13 +510,16 @@ function loadPageContent(pageid, eventdata){
         
         var page_target = $('#main-content');
         
-        var supp_options = {heurist_emailForm: {website_record_id: home_page_record_id},
+        var supp_options = {
+            heurist_emailForm: {website_record_id: home_page_record_id},
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
             heurist_Navigation: {aftermenuselect: initLinksAndImages},
-            lang: current_language
+            lang: current_language,
+            heurist_isJsAllowed: isJsAllowed
         };
         if(eventdata && (eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
-            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)){
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT))
+        {
             supp_options['heurist_SearchTree'] = {suppress_default_search:true};
             supp_options['heurist_SearchInput'] = {suppress_default_search:true};
         }
@@ -557,7 +560,7 @@ if($website_custom_css!=null){
                 current_page_id = pageid;
                 
                 var page_footer = page_target.find('#page-footer');
-                if(page_footer.length>0){
+                if(page_footer.length>0){  //adjust page footer height
                     page_footer.detach();
                     page_footer.appendTo( page_target );  
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
@@ -609,9 +612,9 @@ if($website_custom_css!=null){
                                             window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
                                }
                                
-                               page_cache[pageid] = res;
+                               page_cache[pageid] = res; //assign to cache after load from server side
                                __loadPageContent();
-                           }else if(pageid!=home_page_record_id){ //load home page by default
+                           }else if(pageid!=home_page_record_id){ //page not found - load home page by default
                                loadPageContent(home_page_record_id);
                            }else{
                                window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+pageid+')');
