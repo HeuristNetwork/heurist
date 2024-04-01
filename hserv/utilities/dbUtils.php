@@ -503,7 +503,7 @@ class DbUtils {
     //
     // remove database entirely
     // $database_name - name of database to be deleted
-    // $createArchive - create db dump and archive all uploaded files
+    // $createArchive - create db dump and archive all uploaded files true/false or zip format
     //
     // 1. Create an SQL dump in the filestore directory
     // 2. Zip the filestore directories (using bzip2) directly into the DELETED_DATABASES directory
