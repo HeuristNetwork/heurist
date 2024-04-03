@@ -7,6 +7,12 @@
 *   unzipFlat
 *   
 *   createBz2
+* 
+* At the moment we have 3 places where we use archives
+* DbUtils::databaseDrop  - optionally archive the entire dbfolder+sql dump into single archive
+* Safeguard archive/upload to repository - creates 3 archives a) with individual set of folder (depends on user preferences)+dump b) sql dump c) hml
+* Purge inactive databases.  Uses DbUtils::databaseDrop and optionally creates 2 archives with sysArchive and Import tables
+* 
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
