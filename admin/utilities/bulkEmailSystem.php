@@ -454,7 +454,7 @@ class systemEmailExt {
         }
 
 		// Initialise PHPMailer
-		$mailer = new PHPMailer(true);
+		$mailer = new PHPMailer(true); // send true to use exceptions
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
@@ -495,8 +495,6 @@ class systemEmailExt {
 			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist email about databases: " . $db_url_listed);
             $status_msg = '';
 
-            
-
             if($this->debug_run){
 
                 $status_msg = 'OK';
@@ -530,10 +528,10 @@ class systemEmailExt {
                     $mailer->Body = $body;
                     try {
                         $mailer->send();
-                    } catch (phpmailerException $e) {
+                    } catch (Exception $e) { // PHPMailer exception
                         $this->set_error($e->errorMessage());
                         $email_rtn = -3;
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) { // Global PHP exception
                         $this->set_error($e->getMessage());
                         $email_rtn = -3;
                     }
