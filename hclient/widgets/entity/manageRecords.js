@@ -4684,7 +4684,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         //update record type icon
         let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID+this._icon_timer_suffix;
-        $(this.element).find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
+
+        this.element.find('.rt-info-header img.rt-icon').css('background-image',`url('${rt_icon}')`);
+        this.editFormSummary.find('.summary-accordion').first().find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
         
         //
         //
