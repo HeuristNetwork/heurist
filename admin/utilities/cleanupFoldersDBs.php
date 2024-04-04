@@ -71,7 +71,7 @@ if (@$argv) {
     
 }else{
     //from browser
-    define('ADMIN_REQUIRED',1);
+    define('OWNER_REQUIRED',1);
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
     $eol = "</div><br>";
