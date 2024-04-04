@@ -1256,6 +1256,7 @@ $website_languages_links ->#main-languages
             let styles = $('#main-header').attr('style');
             styles = styles.replace('background: none !important;', '');
             $('#main-header').attr('style', 'background-image: url(\'<?php print $image_banner; ?>\') !important;' + styles);
+            initHeaderTitle();
         };
         banner_img.src = '<?php print $image_banner; ?>';
 
@@ -1336,11 +1337,15 @@ function initHeaderTitle(){
 
         var ele = $('#main-title');
         var isFirstInit = (ele.length>0 && ele.children().length==0);
-        
-        //'.($image_banner?' 
-        ele.empty().append('<h2 style="text-shadow: 3px 3px 5px black">'
-                + pagetitle
-                + '</h2>');
+
+        // show shadow for title if there is header background image (banner)
+        let bg_img = $('#main-header').css('background-image');
+        let css_shadow = '';
+        if(!(bg_img=='' || bg_img=='none')){
+            css_shadow = ' style="text-shadow: 3px 3px 5px black"';
+        }
+
+        ele.empty().append(`<h2${css_shadow}>${pagetitle}</h2>`);
             
         if(isFirstInit && ele.parent().is('#main-header')){
             ele.hide();
