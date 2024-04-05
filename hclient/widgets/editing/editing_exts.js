@@ -935,13 +935,14 @@ function openSearchMenu(that, $select, has_filter=true){
                 if(val.length<2){
                     $mnu.find('li').css('display','list-item');
                     $mnu.find('div.not-found').hide();
-                }else{
+                }else{ //start search from 3 characters
                     if(_timeout==0){
                         $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
                     }
 
                     let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-                        let showing_option = false;
+                    let showing_option = [];
+                    
                     $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
 
                         let title = $(item).text().toLowerCase();
@@ -951,14 +952,47 @@ function openSearchMenu(that, $select, has_filter=true){
                         }
 
                         if(title.indexOf(val)>=0){
-                            $(item).parent().css('display','list-item');
-                                showing_option = true;
+                            $(item).parent().css('display','list-item');   //li
+                            showing_option.push( item ); //found
                         }else{
                             $(item).parent().css('display','none');
                         }
                     });
+                    
+                    //show children of found items - for terms
+                    showing_option.forEach(function(item){
+                        
+                        item = $(item);
+                        let depth = parseInt(item.attr('data-depth'));
+                        
+                        //find previous element with depth-1 - parent term
+                        if(depth>0){                       
+                        $.each(item.parent().prevAll(),function(i,li_item){
+                            let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                            let depth2 = parseInt(opt_item.attr('data-depth'));
+                            if(depth2<depth){
+                                $(li_item).css('display','list-item');
+                                if(depth2==0) return false; //break
+                            }
+                        });                        
+                        }    
+                        //find next elements with depth+1
+                        if(depth>=0){                       
+                        $.each(item.parent().nextAll(),function(i,li_item){
+                            let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                            let depth2 = parseInt(opt_item.attr('data-depth'));
+                            if(depth2<=depth){
+                                return false; //break - the same level
+                            }else if(depth2==depth+1){
+                                //children
+                                $(li_item).css('display','list-item');
+                            }
+                        });
+                        }
+                    });
+                    
                     $mnu.find('div.not-found').css('display',
-                            !showing_option?'block':'none');
+                            (showing_option.length==0)?'block':'none');
                     _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
                 }                                    
             }
