@@ -343,9 +343,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
   if (!$error && TESTMODE)
   {
     skin_open();
-    echo ("<p class=\"centr\">TEST MODE ENABLED</p>\n");
-    echo ("<p class=\"centr\">Processing file: <b>".$curfilename."</b></p>\n");
-    echo ("<p class=\"smlcentr\">Starting from line: ".$param_start."</p>\n");
+    echo "<p class=\"centr\">TEST MODE ENABLED</p>\n";
+    echo "<p class=\"centr\">Processing file: <b>".$curfilename."</b></p>\n";
+    echo "<p class=\"smlcentr\">Starting from line: ".$param_start."</p>\n";
     skin_close();
   }
 

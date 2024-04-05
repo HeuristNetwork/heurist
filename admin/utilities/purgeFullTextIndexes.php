@@ -224,7 +224,7 @@ if(!$arg_no_action){
     echo $tabs0.'Purged indexes for '.$cnt_processed.' databases'.$eol;    
 }
 
-echo ($tabs0.'finished'.$eol);
+echo $tabs0.'finished'.$eol;
 
 function exclusion_list(){
     

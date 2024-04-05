@@ -424,7 +424,7 @@ Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip i
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo ($is_repository ? 'Export & Upload' : 'Create Archive'); ?>" 
+                    <input type="button" value="<?php echo $is_repository ? 'Export & Upload' : 'Create Archive'; ?>" 
                         style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
                     <input type="button" id="btnClose_1" value="Cancel" onClick="closeArchiveWindow();">
                 </div>
@@ -828,9 +828,9 @@ function report_message($message, $is_error=true, $need_cleanup=false)
 
             <!-- <div class="logo" style="background-color:#2e3e50;width:100%"></div> -->
 
-            <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
+            <div class="<?php echo $is_error?'ui-state-error':''; ?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo $message;?>
             </div>

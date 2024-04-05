@@ -591,7 +591,7 @@ if(!$arg_no_action){
     }
 }
 
-echo ($tabs0.'finished'.$eol);
+echo $tabs0.'finished'.$eol;
 
 if(is_array($email_list) && count($email_list)>0 && $need_email)
 {

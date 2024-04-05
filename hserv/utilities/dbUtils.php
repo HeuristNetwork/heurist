@@ -1120,16 +1120,16 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         
-        if($verbose) echo ("Deleting ".htmlspecialchars($remark)."</br>");
+        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>" };
 
         if(!$mysqli->query("delete from $name where 1")){
             if($verbose) {
-                echo ("<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
-                    ." - SQL error: ".$mysqli->error."</p>");
+                echo "<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
+                    ." - SQL error: ".$mysqli->error."</p>";
             }
             return false;
         }else{
-            //if($verbose) { echo ("<p>OK</p>"); }
+            //if($verbose) { echo "<p>OK</p>"; }
             return true;
         }
     }
@@ -1166,8 +1166,8 @@ class DbUtils {
         if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
             $res = false;
             if($verbose) {
-                echo ("<br><p>Warning: Unable to set parent IDs to null for Comments".
-                    " - SQL error: ".$mysqli->error."</p>");
+                echo "<br><p>Warning: Unable to set parent IDs to null for Comments".
+                    " - SQL error: ".$mysqli->error."</p>";
             }
         }
         
@@ -1272,7 +1272,7 @@ class DbUtils {
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                     if($verbose) {
-                        echo ("<b>Adding records to tables: </b>");
+                        echo "<b>Adding records to tables: </b>";
                     }
                     while ($table = $tables->fetch_row()) { //loop for all tables
                         $table = $table[0];
@@ -1300,12 +1300,12 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ");
+                                    echo " > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ";
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo ("<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
+                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>";
                                     }
                                 }else{
                                     $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
@@ -1377,7 +1377,7 @@ class DbUtils {
                     $res = false;
                     $message = 'Cannot get list of table in database '.$db_target;
                     if($verbose) {
-                        echo ('<br><p class=\"error\">Error: '.htmlspecialchars($message).'</p>');
+                        echo '<br><p class=\"error\">Error: '.htmlspecialchars($message).'</p>';
                     }
                 }
 

@@ -147,9 +147,9 @@ if(!isset($message)){
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
-            <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
+            <div class="<?php echo $is_error?'ui-state-error':''; ?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo USanitize::sanitizeString($message);?>
             </div>

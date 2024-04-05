@@ -80,23 +80,23 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
-    var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
+    var isWebPage = <?php echo $isWebPage ?'true':'false';?>;
     var current_page_id = 0;
     var current_language = '<?php echo $website_language_def?$website_language_def:'def'; ?>';
     var default_language = current_language; //is is needed for edit CMS
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
-    var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
-    var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
-    var isCMS_NewWebsite = <?php echo (array_key_exists('newlycreated', $_REQUEST) ?'true':'false'); ?>;
+    var isCMS_active = <?php echo @$_REQUEST['edit']?'true':'false'; ?>; //use new CMS editor and init it once
+    var isCMS_InHeuristUI = <?php echo @$_REQUEST['edit']==4 ?'true':'false'; ?>;
+    var isCMS_NewWebsite = <?php echo array_key_exists('newlycreated', $_REQUEST) ?'true':'false'; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
     var is_execute_homepage_custom_javascript = false;  //semaphore
     var isJsAllowed = <?php echo $website_custom_javascript_allowed?'true':'false'; ?>;
     var first_not_empty_page = 0;
     var website_title = <?php echo $website_title; ?>; 
     
-    var record_view_smarty_template = '<?php echo ($record_view_smarty_template!=null?$record_view_smarty_template:'');?>';
-    var record_view_target = '<?php echo ($record_view_target!=null?$record_view_target:'');?>';
+    var record_view_smarty_template = '<?php echo $record_view_smarty_template!=null?$record_view_smarty_template:'';?>';
+    var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
 </script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -1452,7 +1452,7 @@ $(document).ready(function() {
                 
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
+            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
         }else{
             // Not standalone, use HAPI from parent window
             initHeaderElements();

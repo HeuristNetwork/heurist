@@ -232,7 +232,7 @@ if($arg_need_action){
     echo $tabs0.'Databases: '.$cnt_archived.'. Total size: '.round($tot_size/(1024*1024)).'Mb'.$eol;    
 }
 
-echo ($tabs0.'finished'.$eol);
+echo $tabs0.'finished'.$eol;
 
 if(!$is_command_line) print '</body></html>';
 

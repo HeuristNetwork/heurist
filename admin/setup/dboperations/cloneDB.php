@@ -98,9 +98,9 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
         
         if($rty>0 || $dty>0 || $trm>0){
             $s = array();
-            if($rty>0) $s[] = intval($rty).' record types';
-            if($dty>0) $s[] = intval($dty).' base fields';
-            if($trm>0) $s[] = intval($trm).' vocabularies or terms';
+            if($rty>0) { $s[] = intval($rty).' record types'; }
+            if($dty>0) { $s[] = intval($dty).' base fields'; }
+            if($trm>0) { $s[] = intval($trm).' vocabularies or terms'; }
             $sHasNewDefsWarning = implode(', ',$s);
         }
     }
@@ -260,7 +260,7 @@ if(@$_REQUEST['mode']=='2'){
         </script>
 
 
-        <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
+        <div class="banner"><h2>Clone <?php print $isCloneTemplate?'Template ':''?>Database</h2></div>
         <div id="page-inner" style="overflow:auto">
             <div id="loading" style="display:none;height:100%" class="loading">
                 <!-- <img alt="cloning ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" /> -->
@@ -383,9 +383,10 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         .'</div>');
         
         return false;
-    }else{
-        echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:0px">Structure created OK</p>');
     }
+    
+    echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:0px">Structure created OK</p>');
+    
     
     if($isCloneTemplate){
         $source_database = $templateddb;
@@ -411,30 +412,30 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     echo_flush ("<p><b>Copying data</b></p>");
     // db_clone function in /common/php/db_utils.php does all the work
-    if( DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
-        echo_flush ('<p style="padding-left:20px">Data copied OK</p>');
-    }else{
+    if( !DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
         DbUtils::databaseDrop( false, $targetdbname_full, false);
-        
         return false;
     }
+    
+    echo_flush ('<p style="padding-left:20px">Data copied OK</p>');
     
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues ".CONTACT_HEURIST_TEAM."</p>";
     
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p><b>Addition of Referential Constraints</b></p>");
     
-    if(DbUtils::databaseCreateConstraintsAndTriggers($targetdbname_full)){
-        echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
-        echo_flush ('<p style="padding-left:20px">Procedures and triggers added OK</p>');
-    }else{
+    if(!DbUtils::databaseCreateConstraintsAndTriggers($targetdbname_full)){
         DbUtils::databaseDrop( false, $targetdbname_full, false);
         print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
                 .CONTACT_HEURIST_TEAM
                 .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>'
                 .$errorScriptExecution;
-         return false;
+        return false;
     }
+
+    echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
+    echo_flush ('<p style="padding-left:20px">Procedures and triggers added OK</p>');
+
     
     // 5. remove registration info and assign originID for definitions
     $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
@@ -465,20 +466,19 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
             DbUtils::databaseDrop(false, $targetdbname_full, false);
 
-            if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
-
-                sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
-                if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
-                }
+            if(count($warnings) == 2 && $warnings['revert']){
+                $msg_title = 'Unable to create database root folder';
+                $msg_body  = $warnings['message'];
             }else{
-
-                sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database sub directories', "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings));
-                if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                    sendEmail(HEURIST_MAIL_TO_ADMIN, "Unable to create database sub directories", "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings));
-                }
+                $msg_title = 'Unable to create database sub directories';
+                $msg_body  = "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings);
             }
 
+            sendEmail(HEURIST_MAIL_TO_BUG, $msg_title, $msg_body);
+            if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                sendEmail(HEURIST_MAIL_TO_ADMIN, $msg_title, $msg_body);
+            }
+            
             print '<br><strong>Sorry, we were not able to create all file directories required by the database.</strong><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.';
             return false;
         }
