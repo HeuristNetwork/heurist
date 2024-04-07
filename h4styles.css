@@ -2662,6 +2662,9 @@ li.edit-form-tab > a{
 .cms-widget-config .ui-tabs-panel .ui-selectmenu-button,
 .cms-widget-config .ui-tabs-panel select.truncate{
     font-size: 1em !important;
-
     width: 240px !important;
 }
+
+.input-with-invisible-text{color:transparent !important;}
+.input-with-invisible-text::selection {background: transparent;}
+.input-with-invisible-text::-moz-selection {background: transparent;}
