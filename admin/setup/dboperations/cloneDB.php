@@ -461,17 +461,20 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
 		$warnings = array();
         $warnings = DbUtils::databaseCreateFolders($targetdbname);
+        
+        $has_warnings = (is_array($warnings) && count($warnings) > 0);
 
-        if(is_array($warnings) && count($warnings) > 0){ // Catch if db root directory or any sub directory couldn't be created
+        if($has_warnings){ // Catch if db root directory or any sub directory couldn't be created
 
             DbUtils::databaseDrop(false, $targetdbname_full, false);
 
-            if(count($warnings) == 2 && $warnings['revert']){
+            if(count($warnings) == 2 && @$warnings['revert']){
                 $msg_title = 'Unable to create database root folder';
                 $msg_body  = $warnings['message'];
             }else{
                 $msg_title = 'Unable to create database sub directories';
-                $msg_body  = "Unable to create the sub directories within the database root directory,\nDatabase name: " . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings);
+                $msg_body  = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
+                        . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings);
             }
 
             sendEmail(HEURIST_MAIL_TO_BUG, $msg_title, $msg_body);
