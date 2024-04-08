@@ -87,7 +87,7 @@ if(@$_REQUEST['db']){
     if(@$_REQUEST['name']){
           $names = explode(' ', $_REQUEST['name']);
           $_REQUEST['ugr_FirstName'] = $names[0];
-          if(is_array($names) && count($names)>0) $_REQUEST['ugr_LastName'] = $names[1];
+          if(is_array($names) && count($names)>0) { $_REQUEST['ugr_LastName'] = $names[1]; }
           $isRegdataFromParams = true;
     }
     if(@$_REQUEST['email']){
@@ -343,7 +343,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
             //
             //
             function closeDialog(){
-                <?php echo (@$_REQUEST['popup']=="1"?"setTimeout(function(){window.close();},1500)":"") ?>
+                <?php echo @$_REQUEST['popup']=="1"?"setTimeout(function(){window.close();},1500)":""; ?>
             }
 
 
@@ -415,7 +415,7 @@ if($registrationRequired){ //show user registration dialog again after wrong cap
             }
 ?>
 
-        <div id="page-inner" style="overflow:auto;<?php echo (@$_REQUEST['popup']=='1'?'top:10px;':'') ?>">
+        <div id="page-inner" style="overflow:auto;<?php echo @$_REQUEST['popup']=='1'?'top:10px;':''; ?>">
             <div id="loading" style="display:none">
                 <img alt="creation ..." src="<?php echo HEURIST_BASE_URL.'hclient/assets/mini-loading.gif'?>" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Creation of database will take a few seconds </span></strong>

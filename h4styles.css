@@ -706,7 +706,6 @@ div .selected_last{
     right: 0px;
     top: 22px;
     height: 96px;
-    opacity: 0.5;
 }
 
 .recordDiv.rl-not-logged-in .recTypeThumb{
@@ -1314,8 +1313,11 @@ div.div-result-list-content.icons_list{
     text-align: center;
     position: relative;
 }
-.horizontal .rectypeThumb, .vertical .rectypeThumb{
-    opacity: 0.2;
+.rectypeThumb{
+    opacity: 0.5;
+}
+.realThumb{
+    opacity: 1;
 }
 
 
@@ -2660,6 +2662,9 @@ li.edit-form-tab > a{
 .cms-widget-config .ui-tabs-panel .ui-selectmenu-button,
 .cms-widget-config .ui-tabs-panel select.truncate{
     font-size: 1em !important;
-
     width: 240px !important;
 }
+
+.input-with-invisible-text{color:transparent !important;}
+.input-with-invisible-text::selection {background: transparent;}
+.input-with-invisible-text::-moz-selection {background: transparent;}

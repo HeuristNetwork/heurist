@@ -5356,6 +5356,12 @@ $.widget( "heurist.editing_input", {
                 
                 if(vals && k<vals.length && vals[k]==1){
                     btn.attr('hide_field',1);
+
+                    if(this.is_disabled){
+                        $input.addClass('input-with-invisible-text');                        
+                    }else{
+                        $input.removeClass('input-with-invisible-text');                            
+                    }
                 }else{
                     btn.attr('hide_field',0);
                 }
@@ -5448,12 +5454,27 @@ $.widget( "heurist.editing_input", {
     setDisabled: function(is_disabled){
         //return;
         if(!this.isReadonly()){
+            
+            var check_ind_visibility = this.options.showedit_button 
+                    && this.detailType!="relmarker"
+                    && !window.hWin.HEURIST4.util.isempty(this.f('rst_NonOwnerVisibility'));
+            
             var idx;
             for (idx in this.inputs) {
                 if(!this.isFileForRecord) {  //this.detailType=='file'
                     var input_id = this.inputs[idx];
                     var $input = $(input_id);
                     window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
+                    
+                    if(check_ind_visibility){
+                        var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+
+                        if(is_disabled && btn.attr('hide_field')==1){
+                            $input.addClass('input-with-invisible-text');       
+                        }else{
+                            $input.removeClass('input-with-invisible-text');       
+                        }
+                    }
                 }
             }
             this.is_disabled = is_disabled;

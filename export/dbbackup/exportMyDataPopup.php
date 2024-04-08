@@ -40,7 +40,14 @@ define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql
 define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_hml');
 
 $mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
-$format = array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip'] == 1 ? 'zip' : 'tar';
+$format = 'zip'; //default
+if(array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip']==1){
+    $format = 'zip';    
+}
+if(array_key_exists('is_tar', $_REQUEST) && $_REQUEST['is_tar']==1){
+    $format = 'tar';    
+}
+
 $mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
 $is_repository = array_key_exists('repository', $_REQUEST);
 
@@ -361,9 +368,10 @@ if($mode>1){
                 </div>
 
                 <div class="input-row">
-                    <label title="Export / Upload the archive in Zip format, instead of BZip">
-                        <input type="checkbox" name="is_zip" value="1">
-                        Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip is easier to open on personal computers )
+                    <label title="Export / Upload the archive in BZip format, instead of Zip">
+                        <input type="checkbox" name="is_tar" value="1">
+Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip is faster if there are lot of images and easier to open on personal computers)
+                    </label>
                 </div>
 
                 <div class="input-row" style="display:none;">
@@ -417,7 +425,7 @@ if($mode>1){
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo ($is_repository ? 'Export & Upload' : 'Create Archive'); ?>" 
+                    <input type="button" value="<?php echo $is_repository ? 'Export & Upload' : 'Create Archive'; ?>" 
                         style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
                     <input type="button" id="btnClose_1" value="Cancel" onClick="closeArchiveWindow();">
                 </div>
@@ -645,7 +653,7 @@ if($mode>1){
                 if(!$is_repository) {
                         //success - print two links to download archives
     
-        $is_zip = '&is_zip='.($format == 'zip' ? 1 : 0); 
+        $is_zip = '&is_tar='.($format == 'tar' ? 1 : 0); 
     
         if($format == 'tar'){
             $format = 'tar.bz2';
@@ -821,9 +829,9 @@ function report_message($message, $is_error=true, $need_cleanup=false)
 
             <!-- <div class="logo" style="background-color:#2e3e50;width:100%"></div> -->
 
-            <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
+            <div class="<?php echo $is_error?'ui-state-error':''; ?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info'; ?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo $message;?>
             </div>

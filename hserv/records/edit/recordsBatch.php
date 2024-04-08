@@ -2737,7 +2737,7 @@ public methods
                     $rtn = uploadFileToNakala($this->system,   //upload in batch
                         array('api_key' => $api_key, 'file' => $file, 
                               'meta' => $meta_values, 'status' => 'published', // pending | published
-                              'use_test_url' => $use_test_url);
+                              'use_test_url' => $use_test_url));
 
                     if($rtn){ // register URL ($rtn)
                         //$file_entity->setRecords(null); // reset records

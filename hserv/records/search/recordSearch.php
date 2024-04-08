@@ -3314,7 +3314,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
         
         if($system->has_access() && in_array($rec_owner, $usr_groups)){
             //owner of record can see any field
-            $detail_visibility_conditions = null; // .= ' OR rst_NonOwnerVisibility="hidden"';
+            $detail_visibility_conditions = ' AND (rst_RequirementType!="forbidden")';
         }else{
             $detail_visibility_conditions = array('(rst_NonOwnerVisibility IS NULL)'); //not standard
             if($system->has_access()){
@@ -3323,7 +3323,8 @@ function recordSearchDetails($system, &$record, $detail_types) {
             }
             $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
             
-            $detail_visibility_conditions = ' AND ('.implode(' OR ',$detail_visibility_conditions).')';
+            $detail_visibility_conditions = ' AND (rst_RequirementType!="forbidden") AND ('
+                                            .implode(' OR ',$detail_visibility_conditions).')';
         }
         
         if($detail_visibility_conditions!=null){

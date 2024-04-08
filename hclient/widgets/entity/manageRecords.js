@@ -4250,12 +4250,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 
+            this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'});
+            
             if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
             {
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'}).css(btn_css)
+                this.element.find('.btn-edit-rt').css(btn_css)
                         .on('click',function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
                 
                 var btn = this.element.find('.btn-edit-rt2');        
@@ -4684,7 +4686,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         //update record type icon
         let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID+this._icon_timer_suffix;
-        $(this.element).find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
+
+        this.element.find('.rt-info-header img.rt-icon').css('background-image',`url('${rt_icon}')`);
+        this.editFormSummary.find('.summary-accordion').first().find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
         
         //
         //

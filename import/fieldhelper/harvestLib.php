@@ -42,7 +42,7 @@ function getMediaFolders($mysqli) {
 
     if (count($dirs) == 0) {
         $dirs = array(HEURIST_FILESTORE_DIR); // default to the data folder for this database
-        //print ("<p><b>It seems that there are no media folders specified for this database</b>");
+        //print "<p><b>It seems that there are no media folders specified for this database</b>";
     }
                 
     return array('dirs'=>$dirs, 'exts'=>$mediaExts);

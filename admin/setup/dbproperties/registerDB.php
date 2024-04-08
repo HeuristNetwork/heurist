@@ -342,7 +342,7 @@ function registerDatabase() {
                 'usrEmail'=>$dbowner['ugr_eMail'],
                 'serverURL'=>$serverURL
                 );
-                if($dbNewID!=null && intval($dbNewID)>0){
+                if(intval($dbNewID)>0){
                     $params['newid'] = $dbNewID;
                 }
 
@@ -362,7 +362,7 @@ function registerDatabase() {
                        
                     $data = loadRemoteURLContentWithRange($reg_url, null, true);
                     
-                    if (!isset($data) || $data==null) {
+                    if (!isset($data)) {
                         global $glb_curl_error;
                         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
@@ -404,7 +404,8 @@ function registerDatabase() {
                     echo '<p class="ui-state-error">'. htmlspecialchars($msg) . "</p><br>";
                     return false;
                 }
-                else if($dbID == -1)
+                
+                if($dbID == -1)
                 { // old title update function, should no longer be called
                     $res = $mysqli->query(
                         "update sysIdentification set `sys_dbDescription`='".$mysqli->real_escape_string($dbDescription)."' where 1");
@@ -412,62 +413,61 @@ function registerDatabase() {
                     "Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
                     
                     return true;
-                } else
-                { // We have got a new dbID, set the assigned dbID in sysIdentification
+                }
                 
-
-                    $res = $mysqli->query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
-                        "`sys_dbDescription`='".$mysqli->real_escape_string($dbDescription)."' where 1");
-                        
-                    if($res) {
-                        
-                        $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
- ?>                  
- <fieldset><legend style="display:none"></legend>
-                        <div><div class='header'>Database:</div>
-                        <div class='text'><?php echo HEURIST_DBNAME;?></div></div>
-                        
-                        <div><div class='header' style="vertical-align:top;">
-                        Registration successful, database ID allocated is</div>
-                        <div class='text' style="font-size:large;height:2em"><?php echo $dbID;?></div></div>
-                        
-                        <div><div class='header'>Basic description: </div>
-                        <div class='text' style="width:450px;"><?php echo $dbDescription;?></div></div>
-                        
-                        <div><div class='header'>Collection metadata:</div>
-                        <div class='text'><a href="<?php echo $edit_url;?>" target=_blank>Click here to edit</a>
-                        (login - if asked - as yourself) </div></div>
- </fieldset>
+                // We have got a new dbID, set the assigned dbID in sysIdentification
+                $res = $mysqli->query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
+                    "`sys_dbDescription`='".$mysqli->real_escape_string($dbDescription)."' where 1");
+                    
+                if($res) {
+                    
+                    $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
+?>                  
+<fieldset><legend style="display:none"></legend>
+                    <div><div class='header'>Database:</div>
+                    <div class='text'><?php echo HEURIST_DBNAME;?></div></div>
+                    
+                    <div><div class='header' style="vertical-align:top;">
+                    Registration successful, database ID allocated is</div>
+                    <div class='text' style="font-size:large;height:2em"><?php echo $dbID;?></div></div>
+                    
+                    <div><div class='header'>Basic description: </div>
+                    <div class='text' style="width:450px;"><?php echo $dbDescription;?></div></div>
+                    
+                    <div><div class='header'>Collection metadata:</div>
+                    <div class='text'><a href="<?php echo $edit_url;?>" target=_blank>Click here to edit</a>
+                    (login - if asked - as yourself) </div></div>
+</fieldset>
 <?php                        
-                        // Update original DB ID and original db code for all existing record types, fields and terms
-                        // which don't have them (meaning that they were defined within this database)
-                        // Record types
-                        $result = DbUtils::databaseRegister( $dbID );
-                        
-                        if (!$result) {
-                            echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed. Please report a bug to Heurist team</div></div>';
-                        }
-                        ?>
-                        <script> // automatically call Heurist Reference Index metadata edit form for this database
-                            //need reload local defintitions and sysinfo on client side    
-                            if(window.hWin){
-                                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
-                                window.hWin.HAPI4.SystemMgr.sys_info( function(){
-                                    window.open("<?=$edit_url?>",'_blank');
-                                }
-                                );
+                    // Update original DB ID and original db code for all existing record types, fields and terms
+                    // which don't have them (meaning that they were defined within this database)
+                    // Record types
+                    $result = DbUtils::databaseRegister( $dbID );
+                    
+                    if (!$result) {
+                        echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed. Please report a bug to Heurist team</div></div>';
+                    }
+                    ?>
+                    <script> // automatically call Heurist Reference Index metadata edit form for this database
+                        //need reload local defintitions and sysinfo on client side    
+                        if(window.hWin){
+                            window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
+                            window.hWin.HAPI4.SystemMgr.sys_info( function(){
+                                window.open("<?php echo $edit_url?>",'_blank');
                             }
-                        </script>
-                        <?php
-                    } else {
-                        $msg = '<div class=wrap><div class="ui-state-error"><span>Unable to write database identification record</span>'.
-                        'this database might be incorrectly set up<br>'.
-                        'Please '.CONTACT_HEURIST_TEAM.' for advice</div></div>';
-                        echo $msg;
-                    } // unable to write db identification record
-                } // successful new DB ID
+                            );
+                        }
+                    </script>
+                    <?php
+                } else {
+                    $msg = '<div class=wrap><div class="ui-state-error"><span>Unable to write database identification record</span>'.
+                    'this database might be incorrectly set up<br>'.
+                    'Please '.CONTACT_HEURIST_TEAM.' for advice</div></div>';
+                    echo $msg;
+                } // unable to write db identification record
+
                 return true;
-            } // registerDatabase()
+} // registerDatabase()
 
 ?>
 

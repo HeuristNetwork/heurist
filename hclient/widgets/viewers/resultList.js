@@ -1693,7 +1693,7 @@ $.widget( "heurist.resultList", {
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" title="'+
                 recTitle_strip_all+'" style="background-image: url(&quot;'
-                + fld('rec_ThumbnailURL') + '&quot;);opacity:1" data-id="'+recID+'"></div>';
+                + fld('rec_ThumbnailURL') + '&quot;);" data-id="'+recID+'"></div>';
         }else{
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
             if(this.options.view_mode=='horizontal' || this.options.view_mode=='vertical'){

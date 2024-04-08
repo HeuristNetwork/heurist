@@ -764,7 +764,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 * 
 * @param mixed $src
 */
-function folderSubs($src, $exclude=null) {
+function folderSubs($src, $exclude=null, $full_path=true) {
     $res = array();
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -782,7 +782,12 @@ function folderSubs($src, $exclude=null) {
                                 continue;
                             }
                             
-                            $res[] = $src.$file.'/';
+                            if($full_path){
+                                $res[] = $src.$file.'/';    
+                            }else{
+                                $res[] = $file;
+                            }
+                            
                     }
                 }
             closedir($dir);
