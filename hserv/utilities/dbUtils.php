@@ -1120,7 +1120,7 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         
-        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>" };
+        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>"; }
 
         if(!$mysqli->query("delete from $name where 1")){
             if($verbose) {
