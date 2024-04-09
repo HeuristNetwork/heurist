@@ -45,7 +45,7 @@ abstract class DbEntityBase
     protected $primaryField; 
 
 
-    //names of multilang fiekds from $config by rst_MultiLang=1
+    //names of multilang fields from $config by rst_MultiLang=1
     protected $multilangFields = array(); 
     
     /*

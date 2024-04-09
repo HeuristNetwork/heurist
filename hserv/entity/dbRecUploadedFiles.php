@@ -417,7 +417,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 //@$iiif_manifest['label'];
 
                                 if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
-                                    $this->records[$idx]['ulf_Description'] = @$iiif_manifest['description']; 
+                                    $desc = $iiif_manifest['description'];
+                                    if(is_array($desc)){ //multilang desc
+                                        $desc = array_shift($desc);
+                                        $desc = @$desc['@value'];
+                                    }
+                                    if($desc){
+                                        $this->records[$idx]['ulf_Description'] = $desc;     
+                                    }
                                 }
                                 if(@$iiif_manifest['thumbnail']){
 
@@ -456,7 +463,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $new_y = ceil($y * $scale);
                                 
                                 //https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/f25/full/90,120/0/default.jpg
-                                
+                                //https://fragmentarium.ms:443/loris/F-hsd6/fol_2r.jp2/full/full/0/default.jpg
+                                  
                                 $thumb_url = $record['ulf_ExternalFileReference'];
                                 
                                 //remove info.json
