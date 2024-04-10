@@ -850,7 +850,7 @@ function saveURLasFile($url, $filename)
 {   
     //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false); //use proxy 
-    if(is_resource($rawdata)){
+    if(is_string($rawdata)){
         return fileSave($rawdata, $filename); //returns file size
     }else{
         error_log('Can not access remote resource'); //.filter_var($url,FILTER_SANITIZE_URL));
