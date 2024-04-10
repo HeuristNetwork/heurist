@@ -35,7 +35,7 @@ class Heurist_Security_Policy extends Smarty_Security {
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
                     'array_multisort', 'asort', 'time', 'nl2br', 'print_r',
-                    'printf', 'substr');
+                    'printf', 'setlocale', 'substr', 'strpos');
         
   // remove PHP tags
   public $php_handling = Smarty::PHP_REMOVE;
@@ -45,7 +45,7 @@ class Heurist_Security_Policy extends Smarty_Security {
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
                     'asort', 'time', 'nl2br', 'print_r',
-                    'printf', 'substr'); //array('escape','count');
+                    'printf', 'substr', 'strpos'); //array('escape','count');
   
   public $allow_super_globals = false; //default true
 
