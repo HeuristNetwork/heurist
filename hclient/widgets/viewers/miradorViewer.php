@@ -124,6 +124,7 @@ if($use_custom_mirador){
     if (!preg_match('[\W]', $dbname)){
 ?>      
     window.endpointURL = "<?php echo $baseUrl.'/heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
+//    window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.htmlspecialchars($dbname).'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php    
     }
