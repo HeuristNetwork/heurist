@@ -564,8 +564,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         var that = this;
         let parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+        let workflowstage = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
 
-        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator' || dtId == parententity){
+        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null 
+            || $Db.dty(dtId, 'dty_Type') == 'separator' 
+            || dtId == parententity || dtId == workflowstage){
             return;
         }
 
@@ -634,14 +637,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
 
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-
                     if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
                             that.reloadEditForm(true); // reload record editor
                             that._reloadRtsEditor(true); // reload structure editor
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            window.hWin.HEURIST4.msg.showMsgFlash(
+                                window.hWin.HR('Field added to record type structure'), 1500);
                         });
                     }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });

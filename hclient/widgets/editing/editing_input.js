@@ -5356,11 +5356,7 @@ $.widget( "heurist.editing_input", {
                 if(vals && k<vals.length && vals[k]==1){
                     btn.attr('hide_field',1);
 
-                    if(this.is_disabled){
-                        $input.addClass('input-with-invisible-text');                        
-                    }else{
-                        $input.removeClass('input-with-invisible-text');                            
-                    }
+                    this._setHiddenField($input, this.is_disabled);
                 }else{
                     btn.attr('hide_field',0);
                 }
@@ -5445,6 +5441,22 @@ $.widget( "heurist.editing_input", {
         }
 
     },
+    
+    _setHiddenField($input, is_hidden){
+     
+        if(is_hidden){
+            $input.addClass('input-with-invisible-text');   
+            if($input.is('select')){
+                $input.nextAll('.ui-selectmenu-button').addClass('input-with-invisible-text');
+            }
+        }else{
+            $input.removeClass('input-with-invisible-text');       
+            if($input.is('select')){
+                $input.nextAll('.ui-selectmenu-button').removeClass('input-with-invisible-text');
+            }
+        }
+        
+    },
 
     
     //
@@ -5468,11 +5480,7 @@ $.widget( "heurist.editing_input", {
                     if(check_ind_visibility){
                         var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
 
-                        if(is_disabled && btn.attr('hide_field')==1){
-                            $input.addClass('input-with-invisible-text');       
-                        }else{
-                            $input.removeClass('input-with-invisible-text');       
-                        }
+                        this._setHiddenField($input, (is_disabled && btn.attr('hide_field')==1));
                     }
                 }
             }
