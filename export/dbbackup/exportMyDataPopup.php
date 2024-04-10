@@ -366,13 +366,14 @@ if($mode>1){
                     </label>
                 </div>
 
+<!-- 2024-04-09 - we use solely zip
                 <div class="input-row">
                     <label title="Export / Upload the archive in BZip format, instead of Zip">
                         <input type="checkbox" name="is_tar" value="1">
-Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip is faster if there are lot of images and easier to open on personal computers)
+Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip is faster if there are lot of images and easier to open on personal computers)
                     </label>
                 </div>
-
+-->
                 <div class="input-row" style="display:none;">
                     <label 
                         title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">
