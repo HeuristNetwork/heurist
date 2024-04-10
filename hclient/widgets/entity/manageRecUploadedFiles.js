@@ -495,7 +495,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._external_repositories[repo_name] = [ repo_details ];
 
                             window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                        }); console.log(that._external_repositories, response.data);
+                        }); //DEBUG console.log(that._external_repositories, response.data);
 
                         if($select.hSelect('instance') !== undefined){
                             $select.hSelect('refresh');

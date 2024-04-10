@@ -239,7 +239,7 @@ class DbAnnotations extends DbEntityBase
                $recordId = 0; //add new annotation 
             }
         }
-        //"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
+        //"body":{"type":"TextualBody","value":"<p>RR Station</p>"},
         $anno_dec = json_decode($anno['data'], true);
         if(is_array($anno_dec)){
         
@@ -259,7 +259,7 @@ class DbAnnotations extends DbEntityBase
                             if($region){
                                 $region = substr($region, 5);
                                 
-                                
+                                // https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json
                                 // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/ 
                                 $url2 = $anno['canvas'];
                                 $url = $anno['canvas'];
@@ -270,9 +270,9 @@ class DbAnnotations extends DbEntityBase
                                     $iiif_manifest = json_decode($iiif_manifest, true);
                                     if($iiif_manifest!==false && is_array($iiif_manifest)){
 
-                                    //"@context": "https://iiif.io/api/presentation/2/context.json"    
+                                    //"@context": "http://iiif.io/api/presentation/2/context.json"    
                                     //sequences->canvases->images->resource->service->@id
-                                    if(@$iiif_manifest['@context']=='https://iiif.io/api/presentation/2/context.json'){
+                                    if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
                                         if(is_array(@$iiif_manifest['sequences']))
                                         foreach($iiif_manifest['sequences'] as $seq){
                                             if(is_array(@$seq['canvases']))
@@ -290,7 +290,7 @@ class DbAnnotations extends DbEntityBase
                                         }
                                         
                                     }else{ //version 3
-                                    //"@context": "https://iiif.io/api/presentation/3/context.json" 
+                                    //"@context": "http://iiif.io/api/presentation/3/context.json" 
                                     //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
                                         
                                         if(is_array(@$iiif_manifest['items']))
