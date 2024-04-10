@@ -454,7 +454,8 @@ Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip i
                 }
             }
             if (!folderCreate(FOLDER_BACKUP, true)) {
-                $message = 'Failed to create folder '.FOLDER_BACKUP.'<br> in which to create the backup. Please consult your sysadmin.';            report_message($message, true);
+                $message = 'Failed to create folder '.FOLDER_BACKUP.'<br> in which to create the backup. Please consult your sysadmin.';
+                report_message($message, true);
             }
 
             // Just SQL dump
@@ -472,7 +473,7 @@ Use Zip format rather than BZip (BZip is more efficient for archiving, but Zip i
             }
 
             $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
-            if($is_repository && (!$repo || $repo == 'Nakala')){
+            if($is_repository && (!$repo || $repo != 'Nakala')){
                 report_message('The repository ' . $repo . ' is not supported please ' . CONTACT_HEURIST_TEAM, true, false);
             }
 
