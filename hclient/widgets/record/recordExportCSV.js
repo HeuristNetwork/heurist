@@ -890,7 +890,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     val = 'asc';
                 }else if($(event.target).hasClass('ui-icon-circle-b-arrow-s')){
                     val = 'desc';
-                }else if($(event.target).hasClass('ui-icon-minus')){
+                }else if($(event.target).hasClass('ui-icon-circle-b-minus')){
                     val = '';
                 }
                 if(val || val == ''){
@@ -951,7 +951,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }else if(value == 'desc'){
             iconSet.find('span.ui-icon-circle-arrow-s').removeClass('ui-icon-circle-arrow-s').addClass('ui-icon-circle-b-arrow-s');
         }else{
-            iconSet.find('span.ui-icon-minusthick').removeClass('ui-icon-minusthick').addClass('ui-icon-minus');
+            iconSet.find('span.ui-icon-circle-minus').removeClass('ui-icon-circle-minus').addClass('ui-icon-circle-b-minus');
         }
 
         if(new_value == 'asc'){
@@ -959,7 +959,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }else if(new_value == 'desc'){
             iconSet.find('span.ui-icon-circle-b-arrow-s').removeClass('ui-icon-circle-b-arrow-s').addClass('ui-icon-circle-arrow-s');
         }else{
-            iconSet.find('span.ui-icon-minus').removeClass('ui-icon-minus').addClass('ui-icon-minusthick');
+            iconSet.find('span.ui-icon-circle-b-minus').removeClass('ui-icon-circle-b-minus').addClass('ui-icon-circle-minus');
         }
 
         return new_value;
