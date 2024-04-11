@@ -1072,6 +1072,14 @@ class DbDefTerms extends DbEntityBase
     //
     protected function _validatePermission()
     {
+        
+        if(!$this->system->is_admin()){ //there are records to update/delete
+            
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
+                return false;
+        }
+        
         if(@$this->data['a'] == 'delete'){
             
             if(!@$this->recordIDs){

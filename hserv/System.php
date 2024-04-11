@@ -2261,6 +2261,13 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     }
     
     /**
+    * Remove database definition cache file
+    */
+    public function cleanDefCache(){
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json');
+    }
+    
+    /**
      * Retrieve saved settings for current database from settings/
      * 
      * @param string $setting_name - setting's name, matches a key in database_settings

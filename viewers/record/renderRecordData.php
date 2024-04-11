@@ -676,7 +676,21 @@ if(!($is_map_popup || $without_header)){
                     //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
                 }
                 //init open in mirador links
-                $('.miradorViewer_link').click(function(event){
+                function __openMiradorViewer(event){
+                    
+                    //verify annotation record type
+                    let evt = event;
+                    
+                    if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
+                        if(!window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+                            'In order to add Annotation to image you have to import "Annotation" record type',
+                            function(){
+                                evt.already_checked = true;
+                                __openMiradorViewer(evt);
+                            })){
+                            return;
+                        }
+                    }
                    
                     var ele = $(event.target)
 
@@ -709,9 +723,9 @@ if(!($is_map_popup || $without_header)){
                     }                      
 
                     //data-id
-                });
+                };
 
-                
+                $('.miradorViewer_link').on('click', __openMiradorViewer);
             }
 
             //

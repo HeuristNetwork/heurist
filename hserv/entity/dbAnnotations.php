@@ -22,6 +22,7 @@
 
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
+require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 class DbAnnotations extends DbEntityBase 
 {
@@ -31,7 +32,6 @@ class DbAnnotations extends DbEntityBase
     public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
-        $this->system->defineConstant('RT_ANNOTATION');
         $this->system->defineConstant('RT_MAP_ANNOTATION');
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_URL');
@@ -210,12 +210,29 @@ class DbAnnotations extends DbEntityBase
         },
 */      
         if(!defined('RT_MAP_ANNOTATION')){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+
+            $isOK = false;
+            $importDef = new DbsImport( $this->system );
+            if($importDef->doPrepare(  array(
+            'defType'=>'rectype', 
+            'databaseID'=>2, 
+            'conceptCode'=>array('2-101'))))
+            {
+                $isOK = $importDef->doImport();
+            }
+            if(!$isOK){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
                     'Can not add annotation. This database does not have "Map/Image Annotation" record type. '
                     .'Import required record type');
-            return false;
+                return false;
+            }
+            
+            //redefine constants            
+            $this->system->defineConstant('RT_MAP_ANNOTATION', true);
+            $this->system->defineConstant('DT_ORIGINAL_RECORD_ID', true);
+            $this->system->defineConstant('DT_ANNOTATION_INFO', true);
         }
-         
+                 
         if( !defined('DT_ANNOTATION_INFO') || !defined('DT_ORIGINAL_RECORD_ID')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
                     'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '

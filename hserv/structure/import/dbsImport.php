@@ -1072,6 +1072,8 @@ if(count($this->def_translations['detailtypes']) > 0 || count($this->def_transla
 
 $mysqli->commit();   
             
+            $this->system->cleanDefCache();
+            
             return true;
     }//doImport
     
