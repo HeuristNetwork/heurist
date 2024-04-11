@@ -93,6 +93,7 @@ function hLayoutMgr(){
             //this is not json - HTML
             
             if(forStorage){
+                //do not init and returns html
                 return layout; //returns html 
             }else if(typeof layout === 'string' && layout.indexOf('data-heurist-app-id')>0){
                 //old format with some widgets
@@ -165,10 +166,38 @@ function hLayoutMgr(){
         if(forStorage){
             return container.html();
         }else{
+            //remove all javascript event attributes
+            if(isFirstLevel && _supp_options && !_supp_options.heurist_isJsAllowed){
+                
+                _layoutSanitize( container );
+                
+            }
+            
             return layout;    
         }
         
     }//_layoutInitFromJSON
+    
+    //
+    // Removes all javascript event attributes
+    //
+    function _layoutSanitize( container ){
+        
+        $.each(container.children(), function(idx, ele){
+            ele = $(ele);
+            _layoutSanitize( ele );
+        });
+        
+        let ele2 = container.get(0);
+        
+        for (let i = 0; i < ele2.attributes.length; i++) {
+            if(ele2.attributes[i].name.indexOf('on')===0){
+                ele2.removeAttribute(ele2.attributes[i].name);
+            }
+        }        
+        
+    }
+    
     
     //
     // creates new div
@@ -278,6 +307,9 @@ function hLayoutMgr(){
         return $d;        
     }
 
+    //
+    //
+    //
     function _layoutInitGroup(layout, container, forStorage){
         
         //create parent div
@@ -1232,7 +1264,9 @@ function hLayoutMgr(){
             return are_all_widgets_inited;
         },
         
-        
+        //
+        //
+        //
         convertJSONtoHTML:function(content){
             return _convertJSONtoHTML(content);
         }

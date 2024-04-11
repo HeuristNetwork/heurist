@@ -764,7 +764,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 * 
 * @param mixed $src
 */
-function folderSubs($src, $exclude=null) {
+function folderSubs($src, $exclude=null, $full_path=true) {
     $res = array();
 
     $src =  $src . ((substr($src,-1)=='/')?'':'/');
@@ -782,7 +782,12 @@ function folderSubs($src, $exclude=null) {
                                 continue;
                             }
                             
-                            $res[] = $src.$file.'/';
+                            if($full_path){
+                                $res[] = $src.$file.'/';    
+                            }else{
+                                $res[] = $file;
+                            }
+                            
                     }
                 }
             closedir($dir);
@@ -845,7 +850,7 @@ function saveURLasFile($url, $filename)
 {   
     //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false); //use proxy 
-    if(is_resource($rawdata)){
+    if(is_string($rawdata)){
         return fileSave($rawdata, $filename); //returns file size
     }else{
         error_log('Can not access remote resource'); //.filter_var($url,FILTER_SANITIZE_URL));
@@ -1436,6 +1441,9 @@ function uploadFileToNakala($system, $params) {
 
     $herror = HEURIST_ACTION_BLOCKED;
 
+    $NAKALA_BASE_URL = @$params['use_test_url'] == 1 ? 'https://test.nakala.fr/u/datas/' : 'https://nakala.fr/u/datas/';
+    $NAKALA_BASE_URL_API = @$params['use_test_url'] == 1 ? 'https://apitest.nakala.fr/datas/' : 'https://api.nakala.fr/datas/';
+
     $missing_key = '<br><br>Your Nakala API key is either missing or invalid, please ';
     $missing_key .= $system->is_admin() ? 'ask a database administrator to setup the key within' : 'ensure you\'ve set it in';
     $missing_key .= ' Database properties';
@@ -1486,7 +1494,7 @@ function uploadFileToNakala($system, $params) {
     $curl_file = new CURLFile($params['file']['path'], $params['file']['type'], $params['file']['name']);
     $local_sha1 = sha1_file($params['file']['path']);
 
-    curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas/uploads');
+    curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}uploads");
 
     // Check if file has already been uploaded - may have previously failed
     $file_list = curl_exec($ch);
@@ -1618,7 +1626,7 @@ function uploadFileToNakala($system, $params) {
     }
 
     curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json')); // Reset headers to specify the return type
-    curl_setopt($ch, CURLOPT_URL, 'https://api.nakala.fr/datas');
+    curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}");
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($metadata));
 
     $result = curl_exec($ch);
@@ -1658,9 +1666,9 @@ function uploadFileToNakala($system, $params) {
         $payload = $result['payload'];
         if(array_key_exists('id', $payload)){        
             if(array_key_exists('return_type', $params) && $params['return_type'] == 'editor'){ // returns link to private view
-                $external_url = 'https://nakala.fr/u/datas/' . $result['payload']['id'];
+                $external_url = "{$NAKALA_BASE_URL}{$result['payload']['id']}";
             }else{ // returns link to publically available file
-                $external_url = 'https://api.nakala.fr/data/' . $result['payload']['id'] . '/' . $file_sha1;
+                $external_url = "{$NAKALA_BASE_URL_API}{$result['payload']['id']}/{$file_sha1}";
             }
         }else{
 

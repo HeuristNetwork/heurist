@@ -237,13 +237,13 @@ if($isWebPage){ //set in websiteRecord.php
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
     </div>
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
-            style="top:152px;<?php echo ($is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''); ?>padding: 5px;">
+            style="top:152px;<?php echo $is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''; ?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
             <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
-            style="<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+            style="<?php echo !$is_page_footer_fixed && $page_footer?'position:static;':'';?>">
         </div>
-        <div id="main-recordview" style="height:100%;<?php echo (!$is_page_footer_fixed && $page_footer?'position:static;':'');?>">
+        <div id="main-recordview" style="height:100%;<?php echo !$is_page_footer_fixed && $page_footer?'position:static;':'';?>">
                 <iframe title="container" style="overflow:none !important;width:100% !important;"></iframe>
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>

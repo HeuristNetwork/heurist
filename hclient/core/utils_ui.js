@@ -3425,6 +3425,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     
     var depth = parseInt($(item.element).attr('depth'));
     if(!(depth>0)) depth = 0;
+    wrapper.attr('data-depth', depth);
     if(rt_checkbox>=0) depth = depth + 1;
     wrapper.css('padding-left',(depth+0.2)+'em');
     

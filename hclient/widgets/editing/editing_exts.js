@@ -892,7 +892,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 // $select => jQuery select with hSelect init'd
 // has_filter => disable click on search option, to avoid selecting it as the value
 //
-function openSearchMenu(that, $select, has_filter=true){
+function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 
     var $menu = $select.hSelect('menuWidget');
     var $inpt = $menu.find('input.input_menu_filter'); //filter input
@@ -935,13 +935,20 @@ function openSearchMenu(that, $select, has_filter=true){
                 if(val.length<2){
                     $mnu.find('li').css('display','list-item');
                     $mnu.find('div.not-found').hide();
-                }else{
+                }else{ //start search from 3 characters
                     if(_timeout==0){
                         $mnu.find('.ui-menu-item-wrapper').css('cursor','progress');
                     }
 
                     let key = that.f('rst_RecTypeID')+'-'+that.f('rst_DetailTypeID');
-                        let showing_option = false;
+                    let showing_option = [];
+                    let harchy = [];
+                    
+                    if(is_terms && val.indexOf('.')>0){
+                        harchy = val.split('.');
+                        val = harchy.pop();
+                    }
+                    
                     $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
 
                         let title = $(item).text().toLowerCase();
@@ -951,14 +958,84 @@ function openSearchMenu(that, $select, has_filter=true){
                         }
 
                         if(title.indexOf(val)>=0){
-                            $(item).parent().css('display','list-item');
-                                showing_option = true;
+                            
+                            let is_ok = true;
+
+                            //for terms - if hierarchy check parents
+                            if(harchy.length>0){
+
+                                let item2 = $(item);
+                                let depth = parseInt(item2.attr('data-depth'));
+                                
+                                is_ok = false;
+                                //find previous element with depth-1 - parent term
+                                if(depth>0){                       
+                                    let idx = harchy.length-1;
+                                    $.each(item2.parent().prevAll(),function(i,li_item){
+                                        let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                                        let depth2 = parseInt(opt_item.attr('data-depth'));
+                                        if(depth2<depth){
+                                            let title = opt_item.text().toLowerCase();
+                                            if(title.indexOf(harchy[idx])>=0){
+                                                idx--;
+                                                if(depth2==0 || idx<0){
+                                                    is_ok = (idx<0);
+                                                    return false; //break
+                                                } 
+                                            }else{
+                                                return false; //not found
+                                            }
+                                        }
+                                    });                        
+                                }
+                            }
+                            
+                            if(is_ok){
+                                $(item).parent().css('display','list-item');   //li
+                                showing_option.push( item ); //found
+                            }
+                            
                         }else{
                             $(item).parent().css('display','none');
                         }
                     });
+                    
+                    //show children of found items - for terms
+                    if(is_terms){
+                        showing_option.forEach(function(item){
+                            
+                            item = $(item);
+                            let depth = parseInt(item.attr('data-depth'));
+                            
+                            //find previous element with depth-1 - parent term
+                            if(depth>0){                       
+                            $.each(item.parent().prevAll(),function(i,li_item){
+                                let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                                let depth2 = parseInt(opt_item.attr('data-depth'));
+                                if(depth2<depth){
+                                    $(li_item).css('display','list-item');
+                                    if(depth2==0) return false; //break
+                                }
+                            });                        
+                            }    
+                            //find next elements with depth+1
+                            if(depth>=0){                       
+                            $.each(item.parent().nextAll(),function(i,li_item){
+                                let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                                let depth2 = parseInt(opt_item.attr('data-depth'));
+                                if(depth2<=depth){
+                                    return false; //break - the same level
+                                }else if(depth2==depth+1){
+                                    //children
+                                    $(li_item).css('display','list-item');
+                                }
+                            });
+                            }
+                        });
+                    }
+                    
                     $mnu.find('div.not-found').css('display',
-                            !showing_option?'block':'none');
+                            (showing_option.length==0)?'block':'none');
                     _timeout = setTimeout(function(){$mnu.find('.ui-menu-item-wrapper').css('cursor','default');_timeout=0;},500);
                 }                                    
             }
@@ -1580,14 +1657,14 @@ function browseRecords(_editing_input, $input){
                         ele.find('.rt-icon').css({width:'12px',height:'12px','margin-right':'10px'});
                         ele.find('.rt-icon2').css({'margin-right':'0px'});
 
-                        openSearchMenu(that, that.selObj, true);
+                        openSearchMenu(that, that.selObj, true, false);
                     };
 
                     events['onSelectMenu'] = function ( event ){
                         
                         var $mnu = that.selObj.hSelect('menuWidget');
                         if($mnu.find('.ui-menu-item-wrapper:first').css('cursor')=='progress'){
-                            openSearchMenu(that, that.selObj, false);
+                            openSearchMenu(that, that.selObj, false, false);
                             return;
                         }
                         
@@ -1867,7 +1944,7 @@ function browseTerms(_editing_input, $input, value){
         var events = {};
         events['onOpenMenu'] = function(){
             __createTermTooltips(that.selObj);
-            openSearchMenu(that, that.selObj, true);
+            openSearchMenu(that, that.selObj, true, true);
         };
 
         events['onSelectMenu'] = function ( event ){

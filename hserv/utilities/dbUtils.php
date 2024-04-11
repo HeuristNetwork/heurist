@@ -503,7 +503,7 @@ class DbUtils {
     //
     // remove database entirely
     // $database_name - name of database to be deleted
-    // $createArchive - create db dump and archive all uploaded files
+    // $createArchive - create db dump and archive all uploaded files true/false or zip format
     //
     // 1. Create an SQL dump in the filestore directory
     // 2. Zip the filestore directories (using bzip2) directly into the DELETED_DATABASES directory
@@ -518,6 +518,12 @@ class DbUtils {
         if(self::$db_del_in_progress!==null){
             //DELETION ALREADY IN PROGRESS
             return false;
+        }
+        
+        $format = 'zip';
+        if(!is_bool($createArchive)){
+            $format = ($createArchive=='tar')?'tar':'zip';
+            $createArchive = true;
         }
         
         self::$db_del_in_progress = null;
@@ -584,7 +590,9 @@ class DbUtils {
             $destination = $archiveFolder.$database_name.'_'.$datetime1->format('Y-m-d_H_i_s'); 
             
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
-            $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates'));
+            $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates', 
+            //'uploaded_files', 'uploaded_tilestacks', 
+            'rectype-icons','term-images','webimagecache'));
             foreach($folders_to_copy as $idx=>$folder_name){
                 $folder_name = realpath($folder_name);
                 if($folder_name!==false){
@@ -596,17 +604,15 @@ class DbUtils {
             //$folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
             $folders_to_copy[] = realpath($db_dump_file);
             
-            
-            if( extension_loaded('bz2') ){
+            if($format=='zip' || !extension_loaded('bz2')){
                 
-                $destination = $destination.'.tar'; 
-                
-                $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
-                
-            }else{
                 $destination = $destination.'.zip'; 
                 
                 $archOK = UArchive::zip($source, $folders_to_copy, $destination, $verbose);
+            }else{
+                $destination = $destination.'.tar'; 
+                
+                $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
             }
 
             if($archOK!==true){
@@ -631,8 +637,8 @@ class DbUtils {
             //get owner info
             $owner_user = user_getDbOwner($mysqli);
             
-            //set it to false to check archiving only
-            $real_delete_database = true;
+            //set it to false to check archiving only                        
+            $real_delete_database = true;                                    
 
             if($real_delete_database){
                 // Delete database from MySQL server
@@ -1114,16 +1120,16 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         
-        if($verbose) echo ("Deleting ".htmlspecialchars($remark)."</br>");
+        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>"; }
 
         if(!$mysqli->query("delete from $name where 1")){
             if($verbose) {
-                echo ("<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
-                    ." - SQL error: ".$mysqli->error."</p>");
+                echo "<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
+                    ." - SQL error: ".$mysqli->error."</p>";
             }
             return false;
         }else{
-            //if($verbose) { echo ("<p>OK</p>"); }
+            //if($verbose) { echo "<p>OK</p>"; }
             return true;
         }
     }
@@ -1160,8 +1166,8 @@ class DbUtils {
         if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
             $res = false;
             if($verbose) {
-                echo ("<br><p>Warning: Unable to set parent IDs to null for Comments".
-                    " - SQL error: ".$mysqli->error."</p>");
+                echo "<br><p>Warning: Unable to set parent IDs to null for Comments".
+                    " - SQL error: ".$mysqli->error."</p>";
             }
         }
         
@@ -1266,7 +1272,7 @@ class DbUtils {
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                     if($verbose) {
-                        echo ("<b>Adding records to tables: </b>");
+                        echo "<b>Adding records to tables: </b>";
                     }
                     while ($table = $tables->fetch_row()) { //loop for all tables
                         $table = $table[0];
@@ -1294,12 +1300,12 @@ class DbUtils {
 
                         if($res){
                                 if($verbose) {
-                                    echo (" > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ");
+                                    echo " > " . htmlspecialchars($table) . ": ".intval($mysqli->affected_rows) . "  ";
                                 }
                         }else{
                                 if($table=='usrReportSchedule'){
                                     if($verbose) {
-                                        echo ("<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>");
+                                        echo "<br><p class=\"error\">Warning: Unable to add records into ".htmlspecialchars($table)." - SQL error: ".$mysqli->error."</p>";
                                     }
                                 }else{
                                     $message = "Unable to add records into ".$table." - SQL error: ".$mysqli->error;
@@ -1371,7 +1377,7 @@ class DbUtils {
                     $res = false;
                     $message = 'Cannot get list of table in database '.$db_target;
                     if($verbose) {
-                        echo ('<br><p class=\"error\">Error: '.htmlspecialchars($message).'</p>');
+                        echo '<br><p class=\"error\">Error: '.htmlspecialchars($message).'</p>';
                     }
                 }
 

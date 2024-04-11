@@ -7,6 +7,12 @@
 *   unzipFlat
 *   
 *   createBz2
+* 
+* At the moment we have 3 places where we use archives
+* DbUtils::databaseDrop  - optionally archive the entire dbfolder+sql dump into single archive
+* Safeguard archive/upload to repository - creates 3 archives a) with individual set of folder (depends on user preferences)+dump b) sql dump c) hml
+* Purge inactive databases.  Uses DbUtils::databaseDrop and optionally creates 2 archives with sysArchive and Import tables
+* 
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -79,6 +85,9 @@ class UArchive {
                     }
                 }
 
+                $entry_idx = 0;
+                $do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
+                
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -121,12 +130,19 @@ class UArchive {
                                 //$zip->getStatusString()
                                 return $verbose?('Can not add folder '.$newdir.' to archive'):false;
                             }
+                            $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2); //without folder name
                             if(!$zip->addFile($file, $newfile)){
                                 return $verbose?('Can not add file '.$newfile.' to archive'):false;
                             }
+                            $type = strtolower(substr(strrchr($newfile, '.'), 1));
+                            if(in_array($type, $do_not_compress)){
+                                $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                            }
+                            $entry_idx++;
+                            
                             //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                         }
                     }
@@ -340,6 +356,9 @@ class UArchive {
                     }
                 }
 
+                $entry_idx = 0;
+                //$do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
+                
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -379,12 +398,20 @@ class UArchive {
                             //remove root path
                             $newdir = str_replace($source.'/', '', $file2.'/');
                             $phar->addEmptyDir( $newdir );
+                            $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2); //without folder name
 
                             $phar->addFile($file, $newfile);
 
+                            // THERE IS NO WAY TO SET INDIVIDUAL COMPRESSION LEVEL PER FILE
+                            //$type = strtolower(substr(strrchr($newfile, '.'), 1));
+                            //if(in_array($type, $do_not_compress)){
+                            //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                            //}
+                            $entry_idx++;
+                            
                             $numFiles++;
 
                             //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));

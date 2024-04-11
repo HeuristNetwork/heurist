@@ -1056,7 +1056,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             $rty_ID = array_keys($codes)[0];
             $dty_ID = $codes[$rty_ID];
             $query = 'UPDATE defRecStructure SET rst_CalcFunctionID='
-                .$new_cfn_ID.' WHERE rst_RecTypeID='.$rty_ID.' AND rst_DetailTypeID='.$dty_ID;
+                .intval($new_cfn_ID).' WHERE rst_RecTypeID='.intval($rty_ID).' AND rst_DetailTypeID='.intval($dty_ID);
             $mysqli->query( $query );
         }
     
@@ -1071,6 +1071,8 @@ if(count($this->def_translations['detailtypes']) > 0 || count($this->def_transla
 }
 
 $mysqli->commit();   
+            
+            $this->system->cleanDefCache();
             
             return true;
     }//doImport

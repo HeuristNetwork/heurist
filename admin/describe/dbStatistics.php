@@ -62,7 +62,7 @@ function mysql__select_val($query) {
     global $mysqli;
     
     $res = mysql__select_value($mysqli, $query);
-    if ($res==null) $res = 0;
+    if ($res==null) { $res = 0; }
     
     return $res;
 }

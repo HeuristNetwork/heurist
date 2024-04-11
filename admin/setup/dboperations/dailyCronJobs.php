@@ -106,9 +106,9 @@ if( !$system->init(null, false, false) ){
 require_once dirname(__FILE__).'/../../../viewers/smarty/updateReportOutput.php';
 
 
-if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'
-if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');
+if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');}
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}//'heurist.huma-num.fr'
+if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');}
 
 print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
@@ -239,7 +239,7 @@ foreach ($databases as $idx=>$db_name){
             echo $tabs.' reminders: ';
             foreach($report as $freq=>$cnt){
                 echo $freq.':'.$cnt.'  ';  
-                if(!@$email_list[$freq]) $email_list[$freq] = 0;
+                if(!@$email_list[$freq]) {$email_list[$freq] = 0;}
                 $email_list[$freq] = $email_list[$freq] + $cnt;  
             }
             echo $eol;
@@ -329,7 +329,7 @@ foreach ($databases as $idx=>$db_name){
 }//foreach
 
 
-echo ($eol.$tabs0.'finished'.$eol);
+echo $eol.$tabs0.'finished'.$eol;
 
 if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
 
@@ -411,7 +411,7 @@ function exclusion_list(){
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            if($line=='' || substr($line,0,1)=='#') continue; //remarked
+            if($line=='' || substr($line,0,1)=='#') {continue;}
             $res[] = $line;
         }
         fclose($handle);

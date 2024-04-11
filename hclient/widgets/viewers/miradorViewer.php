@@ -124,12 +124,13 @@ if($use_custom_mirador){
     if (!preg_match('[\W]', $dbname)){
 ?>      
     window.endpointURL = "<?php echo $baseUrl.'/heurist/api/'.htmlspecialchars($dbname).'/annotations';?>";
+//    window.endpointURL = "<?php echo $baseUrl.'/h6-alpha/api/'.htmlspecialchars($dbname).'/annotations';?>";
     window.manifestUrl = "<?php echo $manifest_url;?>";
 <?php    
     }
 ?>
-    window.hideThumbs = <?php echo (@$_REQUEST['iiif_image']?'true':'false');?>; 
-    window.sourceRecordId = <?php echo (@$_REQUEST['recID']>0?intval($_REQUEST['recID']):0);?>; 
+    window.hideThumbs = <?php echo @$_REQUEST['iiif_image']?'true':'false';?>; 
+    window.sourceRecordId = <?php echo @$_REQUEST['recID']>0?intval($_REQUEST['recID']):0;?>; 
 </script>
 <?php
 if($use_custom_mirador){
@@ -142,7 +143,7 @@ var mirador = Mirador.viewer({
   "windows": [
     {
       "loadedManifest": "<?php echo $manifest_url;?>"
-      <?php echo (@$_REQUEST['iiif_image']?'':',"thumbnailNavigationPosition": "far-bottom"');?>
+      <?php echo @$_REQUEST['iiif_image']?'':',"thumbnailNavigationPosition": "far-bottom"';?>
     }
   ]
 });

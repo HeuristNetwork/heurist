@@ -80,23 +80,23 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
-    var isWebPage = <?php echo ($isWebPage ?'true':'false');?>;
+    var isWebPage = <?php echo $isWebPage ?'true':'false';?>;
     var current_page_id = 0;
     var current_language = '<?php echo $website_language_def?$website_language_def:'def'; ?>';
     var default_language = current_language; //is is needed for edit CMS
     var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
     var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
-    var isCMS_active = <?php echo (@$_REQUEST['edit']?'true':'false'); ?>; //use new CMS editor and init it once
-    var isCMS_InHeuristUI = <?php echo (@$_REQUEST['edit']==4 ?'true':'false'); ?>;
-    var isCMS_NewWebsite = <?php echo (array_key_exists('newlycreated', $_REQUEST) ?'true':'false'); ?>;
+    var isCMS_active = <?php echo @$_REQUEST['edit']?'true':'false'; ?>; //use new CMS editor and init it once
+    var isCMS_InHeuristUI = <?php echo @$_REQUEST['edit']==4 ?'true':'false'; ?>;
+    var isCMS_NewWebsite = <?php echo array_key_exists('newlycreated', $_REQUEST) ?'true':'false'; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
     var is_execute_homepage_custom_javascript = false;  //semaphore
     var isJsAllowed = <?php echo $website_custom_javascript_allowed?'true':'false'; ?>;
     var first_not_empty_page = 0;
     var website_title = <?php echo $website_title; ?>; 
     
-    var record_view_smarty_template = '<?php echo ($record_view_smarty_template!=null?$record_view_smarty_template:'');?>';
-    var record_view_target = '<?php echo ($record_view_target!=null?$record_view_target:'');?>';
+    var record_view_smarty_template = '<?php echo $record_view_smarty_template!=null?$record_view_smarty_template:'';?>';
+    var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
 </script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -454,7 +454,7 @@ function switchLanguage(event){
 //
 // Loads content of specified record to #main-content and inits all widgets 
 // pageid    - record id to be loaded 
-// eventdata - data to be passed to afterPageLoad (to perform intial search) - it may be call from another page
+// eventdata - data to be passed to afterPageLoad (to perform initial search or other action) - it may be call from another page
 //
 function loadPageContent(pageid, eventdata){
     var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
@@ -510,13 +510,16 @@ function loadPageContent(pageid, eventdata){
         
         var page_target = $('#main-content');
         
-        var supp_options = {heurist_emailForm: {website_record_id: home_page_record_id},
+        var supp_options = {
+            heurist_emailForm: {website_record_id: home_page_record_id},
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
             heurist_Navigation: {aftermenuselect: initLinksAndImages},
-            lang: current_language
+            lang: current_language,
+            heurist_isJsAllowed: isJsAllowed
         };
         if(eventdata && (eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
-            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)){
+            || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT))
+        {
             supp_options['heurist_SearchTree'] = {suppress_default_search:true};
             supp_options['heurist_SearchInput'] = {suppress_default_search:true};
         }
@@ -557,7 +560,7 @@ if($website_custom_css!=null){
                 current_page_id = pageid;
                 
                 var page_footer = page_target.find('#page-footer');
-                if(page_footer.length>0){
+                if(page_footer.length>0){  //adjust page footer height
                     page_footer.detach();
                     page_footer.appendTo( page_target );  
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
@@ -581,8 +584,8 @@ if($website_custom_css!=null){
                     
                 if(isJsAllowed){
                     server_request.columns.push(DT_CMS_SCRIPT);
-                    server_request.columns.push(DT_CMS_CSS);
                 }
+                    server_request.columns.push(DT_CMS_CSS);
                 
                 //perform search see record_output.php       
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
@@ -609,9 +612,9 @@ if($website_custom_css!=null){
                                             window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
                                }
                                
-                               page_cache[pageid] = res;
+                               page_cache[pageid] = res; //assign to cache after load from server side
                                __loadPageContent();
-                           }else if(pageid!=home_page_record_id){ //load home page by default
+                           }else if(pageid!=home_page_record_id){ //page not found - load home page by default
                                loadPageContent(home_page_record_id);
                            }else{
                                window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+pageid+')');
@@ -1253,6 +1256,7 @@ $website_languages_links ->#main-languages
             let styles = $('#main-header').attr('style');
             styles = styles.replace('background: none !important;', '');
             $('#main-header').attr('style', 'background-image: url(\'<?php print $image_banner; ?>\') !important;' + styles);
+            initHeaderTitle();
         };
         banner_img.src = '<?php print $image_banner; ?>';
 
@@ -1333,11 +1337,15 @@ function initHeaderTitle(){
 
         var ele = $('#main-title');
         var isFirstInit = (ele.length>0 && ele.children().length==0);
-        
-        //'.($image_banner?' 
-        ele.empty().append('<h2 style="text-shadow: 3px 3px 5px black">'
-                + pagetitle
-                + '</h2>');
+
+        // show shadow for title if there is header background image (banner)
+        let bg_img = $('#main-header').css('background-image');
+        let css_shadow = '';
+        if(!(bg_img=='' || bg_img=='none')){
+            css_shadow = ' style="text-shadow: 3px 3px 5px black"';
+        }
+
+        ele.empty().append(`<h2${css_shadow}>${pagetitle}</h2>`);
             
         if(isFirstInit && ele.parent().is('#main-header')){
             ele.hide();
@@ -1444,7 +1452,7 @@ $(document).ready(function() {
                 
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
+            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
         }else{
             // Not standalone, use HAPI from parent window
             initHeaderElements();

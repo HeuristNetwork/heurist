@@ -2935,7 +2935,7 @@ if($active_all || in_array('multi_swf_values', $active)) {
 
                 unset( $stages[$final_stage[0]] );
                 $dtl_IDs = array_keys($stages);
-
+                $dtl_IDs = prepareIds($dtl_IDs);
                 if(count($dtl_IDs) > 1){
                     $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
                 }else{
@@ -2957,7 +2957,7 @@ if($active_all || in_array('multi_swf_values', $active)) {
         There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).<br>
 
         <span>
-            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($completedRecords)) ?>'>
+            <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= htmlspecialchars(implode(',', array_keys($completedRecords))) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <button onclick="removeMultiSpacing()">Fix selected records</button>
@@ -2972,26 +2972,27 @@ if($active_all || in_array('multi_swf_values', $active)) {
             </tr>
         <?php 
         foreach ($completedRecords as $rec_ID => $record) {
+            $rec_ID = intval($rec_ID);
         ?>
             <tr>
                 <td>
-                    <input type=checkbox name="multi_swf_values" value=<?= $rec_ID ?>>
+                    <input type=checkbox name="multi_swf_values" value=<?=$rec_ID ?>>
                 </td>
                 <td style="white-space: nowrap;">
                     <a target=_new
                         href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $rec_ID ?>'>
                         <?= $rec_ID ?>
-                        <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.$record['type'];?>)" title="<?php echo $record['type_name']?>" 
+                        <img alt class="rft" style="background-image:url(<?php echo HEURIST_RTY_ICON.intval($record['type']);?>)" title="<?php echo htmlspecialchars($record['type_name'])?>" 
                             src="<?php echo HEURIST_BASE_URL.'hclient/assets/16x16.gif'?>">&nbsp;
                         <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>' title='Click to edit record'>
                     </a>
                 </td>
 
-                <td class="truncate" style="max-width:400px"><?=strip_tags($record['title']) ?></td>
+                <td class="truncate" style="max-width:400px"><?=htmlspecialchars($record['title']) ?></td>
 
                 <td> was set to stage: </td>
 
-                <td width="100px" style="max-width:100px" class="truncate"><?=strip_tags($record['stage']) ?></td>
+                <td width="100px" style="max-width:100px" class="truncate"><?=htmlspecialchars($record['stage']) ?></td>
             </tr>
         <?php
         }//for

@@ -2743,6 +2743,7 @@ window.hWin.HEURIST4.dbs = {
                     harchy.push(' . '+sFieldName+' &gt ');
                     harchy_fields.push(sFieldName);
                 }else{
+                    //reverse link
                     var from_rtid = codes[j+2];
 
                     var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
@@ -2754,6 +2755,7 @@ window.hWin.HEURIST4.dbs = {
                     }
                     
                     harchy.push(' &lt '+sFieldName+' . ');
+                    harchy_fields.push(sFieldName);
                 }
                 
                 }//dtid>0

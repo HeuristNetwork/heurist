@@ -197,6 +197,9 @@ $.widget( "heurist.resultList", {
     
     _cached_linked_images: {}, // cache of images linked to the record
     
+    //to refresh icon after structure edit
+    _icon_timer_suffix: ('&t='+Math.round(Math.random()*100000)),
+    
     // the constructor
     _create: function() {
 
@@ -243,6 +246,7 @@ $.widget( "heurist.resultList", {
         if(this.options.eventbased)
         {
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS 
+                + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 + ' ' + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
                 + ' ' + window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
@@ -497,7 +501,14 @@ $.widget( "heurist.resultList", {
                 if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)
                 {
                     that.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+                }else 
+                if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE)
+                {
+                    //update record type icon
+                    that._icon_timer_suffix = ('&t='+Math.round(Math.random()*100000));
+                    that._renderPage(that.current_page);
                 }
+                
                 //that._refresh();
             });
 
@@ -1669,7 +1680,7 @@ $.widget( "heurist.resultList", {
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
         if(!recIcon) recIcon = rectypeID;
-        recIcon = window.hWin.HAPI4.iconBaseURL + recIcon;
+        recIcon = window.hWin.HAPI4.iconBaseURL + recIcon + this._icon_timer_suffix;
 
 
         //get thumbnail if available for this record, or generic thumbnail for record type
@@ -1677,7 +1688,7 @@ $.widget( "heurist.resultList", {
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" title="'+
                 recTitle_strip_all+'" style="background-image: url(&quot;'
-                + fld('rec_ThumbnailURL') + '&quot;);opacity:1" data-id="'+recID+'"></div>';
+                + fld('rec_ThumbnailURL') + '&quot;);" data-id="'+recID+'"></div>';
         }else{
             rectypeTitleClass = 'recordTitleInPlaceOfThumb';
             if(this.options.view_mode=='horizontal' || this.options.view_mode=='vertical'){
@@ -1688,7 +1699,7 @@ $.widget( "heurist.resultList", {
             }else{
                 html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
                     +recTitle_strip_all+'" style="background-image: url(&quot;'
-                    + window.hWin.HAPI4.iconBaseURL  + rectypeID + '&version=thumb&quot;);"></div>';
+                    + window.hWin.HAPI4.iconBaseURL  + rectypeID + this._icon_timer_suffix + '&version=thumb&quot;);"></div>';
             }
             
         }

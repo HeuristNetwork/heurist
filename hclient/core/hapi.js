@@ -2534,36 +2534,41 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             //"xx" means take current system language
             if(lang){
+
                 lang = window.hWin.HAPI4.getLangCode3(lang);
-                
+                let a2_lang = that.sysinfo.common_languages[lang]['a2'].toUpperCase();
+
                 var def_val = '';
                 var is_object = $.isPlainObject(val);
                 
                 for (var key in values) {
                     if (!is_object || val.hasOwnProperty(key)) {
 
-                    var val = values[key];
-                    
-                    if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
-                        if(val.substr(0,3)==lang){
-                            def_val = val.substr(4).trim();
-                            break;
+                        var val = values[key];
+                        
+                        if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+
+                            if(val.substr(0,3).toUpperCase() == lang){
+                                def_val = val.substr(4).trim();
+                                break;
+                            }
+                        }else if(val != null && val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+
+                            if(val.substr(0, 2).toUpperCase() == a2_lang){
+                                def_val = val.substr(3).trim();
+                                break;
+                            }
+                        }else {
+                            //without prefix
+                            def_val = val;
+                            if(lang=='def'){ //take first without prefix
+                                break;
+                            }
                         }
-                    }else {
-                        //without prefix
-                        def_val = val;
-                        if(lang=='def'){ //take first without prefix
-                            break;
-                        }
-                    }
                     
                     }
                 }//for
-                
-                //for(var i=0; i<values.length; i++){
-                //    var val = values[i];
-                    
-                
+
                 return def_val;
             }else if($.isPlainObject(values)){
                 return values[Object.keys(values)[0]];

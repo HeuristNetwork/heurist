@@ -454,7 +454,7 @@ class systemEmailExt {
         }
 
 		// Initialise PHPMailer
-		$mailer = new PHPMailer(true);
+		$mailer = new PHPMailer(true); // send true to use exceptions
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
@@ -495,8 +495,6 @@ class systemEmailExt {
 			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist email about databases: " . $db_url_listed);
             $status_msg = '';
 
-            
-
             if($this->debug_run){
 
                 $status_msg = 'OK';
@@ -530,10 +528,10 @@ class systemEmailExt {
                     $mailer->Body = $body;
                     try {
                         $mailer->send();
-                    } catch (phpmailerException $e) {
+                    } catch (Exception $e) { // PHPMailer exception
                         $this->set_error($e->errorMessage());
                         $email_rtn = -3;
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) { // Global PHP exception
                         $this->set_error($e->getMessage());
                         $email_rtn = -3;
                     }
@@ -604,47 +602,26 @@ class systemEmailExt {
 		header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
         // Add column headers
-		fputcsv($fd, array("User Email", "User Name", "Databases", "Database URLs", "Record Counts", "Last Modified Record", "request: {record_limit, lastmodification_period, lastmodification_unit, lastmodification_logic}", "Full Email"));
+		fputcsv($fd, array("User Email", "User Name", "Databases", "Record Counts"));
 
 		// Add column data, row by row
 		foreach ($this->user_details as $email => $details) {
 			
 			$name = $details["first_name"] . " " . $details["last_name"];
 
-			$db_url_arr = array();
 			$record_count_arr = array();
-			$record_mod_arr = array();
 
 			$dbs = $details["db_list"];
 
 			// Raw listed information to Array
 			foreach ($dbs as $db) {
-				$db_url_arr[] = HEURIST_BASE_URL . "?db=" . $db;
-
 				$row = $this->records[HEURIST_DB_PREFIX.$db];
 
 				$record_count_arr[] = $row[0];
-				$record_mod_arr[] = $row[1];
 			}
 
-			// Array to Readable List
-			$db_listed = $this->createListFromArray($dbs);
-			$db_url_listed = $this->createListFromArray($db_url_arr);
-			$records_listed = $this->createListFromArray($record_count_arr);
-			$lastmod_listed = $this->createListFromArray($record_mod_arr);
-
-			// Construct email and request
-			$replace_with = array($details["first_name"], $details["last_name"], $email, $db_listed, $db_url_listed, $records_listed, $lastmod_listed);
-
-			$body = str_ireplace($this->substitute_vals, $replace_with, $this->email_body);
-			$title = (isset($this->email_subject) ? $this->email_subject : "Heurist system email for databases: " . $db_url_listed);
-
-			$full_email = $title . "\n\n" . $body;
-
-			$request = "request: {".$this->rec_count.", ".$this->rec_lastmod_period.", ".$this->rec_lastmod_unit.", ".$this->rec_lastmod_logic."}";
-
 			// Add row
-			fputcsv($fd, array($email, $name, implode(",", $dbs), implode(",", $db_url_arr), implode(",", $record_count_arr), implode(",", $record_mod_arr), $request, $full_email));
+			fputcsv($fd, array($email, $name, implode(",", $dbs), implode(",", $record_count_arr)));
 		}
 
         // Close descriptor and exit

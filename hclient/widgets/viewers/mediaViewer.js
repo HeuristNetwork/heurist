@@ -317,44 +317,59 @@ $.widget( "heurist.mediaViewer", {
                                 external_url =  external_url + '&recID='+rec_ID;    
                             }
                                      
+                            function __openMiradorViewer(e){
+
+                                let evt = e;
+
+                                if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
+                                    if(!window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+                                        'In order to add Annotation to image you have to import "Annotation" record type',
+                                        function(){
+                                            evt.already_checked = true;
+                                            __openMiradorViewer(evt);
+                                    })){
+                                        return;
+                                    }
+                                }
+
+                                var ele = $(e.target)
+                                if(!ele.attr('data-iiif')){
+                                    ele = ele.parents('[data-iiif]');
+                                }
+                                var param  = ele.attr('data-iiif');
+                                var obf_recID = ele.attr('data-id');
+
+                                var url =  that.options.baseURL 
+                                + 'hclient/widgets/viewers/miradorViewer.php?db='
+                                +  that.options.database
+                                + '&' + param;// + '='+obf_recID;
+
+                                if(rec_ID>0){
+                                    url =  url + '&recID='+rec_ID;    
+                                }
+
+                                if(window.hWin && window.hWin.HEURIST4){
+                                    //borderless:true, 
+                                    window.hWin.HEURIST4.msg.showDialog(url, 
+                                        {dialogid:'mirador-viewer',
+                                            //resizable:false, draggable: false, 
+                                            //maximize:true, 
+                                            default_palette_class: 'ui-heurist-explore',
+                                            width:'90%',height:'95%',
+                                            allowfullscreen:true,'padding-content':'0px'});   
+
+                                    $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                                    $dlg.parent().css('top','50px');
+                                }else{
+                                    window.open(url, '_blank');        
+                                }
+
+                            };
+                            
                             //on thumbnail click
-                            that._on($alink, {click:function(e){
-                                
-                                
-                                  var ele = $(e.target)
-                                  if(!ele.attr('data-iiif')){
-                                      ele = ele.parents('[data-iiif]');
-                                  }
-                                  var param  = ele.attr('data-iiif');
-                                  var obf_recID = ele.attr('data-id');
-                                  
-                                  var url =  that.options.baseURL 
-                                        + 'hclient/widgets/viewers/miradorViewer.php?db='
-                                        +  that.options.database
-                                        + '&' + param;// + '='+obf_recID;
-                                     
-                                  if(rec_ID>0){
-                                        url =  url + '&recID='+rec_ID;    
-                                  }
-                                    
-                                  if(window.hWin && window.hWin.HEURIST4){
-                                        //borderless:true, 
-                                        window.hWin.HEURIST4.msg.showDialog(url, 
-                                            {dialogid:'mirador-viewer',
-                                             //resizable:false, draggable: false, 
-                                             //maximize:true, 
-                                             default_palette_class: 'ui-heurist-explore',
-                                             width:'90%',height:'95%',
-                                             allowfullscreen:true,'padding-content':'0px'});   
-                                             
-                                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-                                        
-                                        $dlg.parent().css('top','50px');
-                                  }else{
-                                        window.open(url, '_blank');        
-                                  }
-          
-                            }});
+                            that._on($alink, {click:__openMiradorViewer});
+                            
                             
                         }else
                         if(mode_3d_viewer!=null && mode_3d_viewer!=''){

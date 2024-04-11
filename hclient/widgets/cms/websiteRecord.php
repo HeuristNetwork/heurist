@@ -272,16 +272,20 @@ if(defined('DT_LANGUAGES')){
         $orig_arr = print_r($website_languages,true);
         $website_languages_codes = getTermCodes($mysqli, $website_languages);
         $res = '';
+        $website_languages_res = array(); //defined codes
+        
         foreach($website_languages as $term_id){
             $lang_code = @$website_languages_codes[$term_id];
+            
             if($lang_code){
                 $lang_code = strtoupper($lang_code);
                 if($website_language_def=='') $website_language_def = $lang_code;
                 $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
+                array_push($website_languages_res, $lang_code);        
             } 
         }
         $website_languages_links = $res;
-        $website_languages = $website_languages_codes;
+        $website_languages = $website_languages_res;
     }
 }
 
@@ -330,10 +334,10 @@ if($website_custom_javascript_allowed)
             }
         }
     }
-    //custom styles - mainly to override positions/visibility for #main-xxx elements
-    $website_custom_css = __getValue($rec, DT_CMS_CSS);
     $website_custom_javascript = __getValue($rec, DT_CMS_SCRIPT);
 }
+//custom styles - mainly to override positions/visibility for #main-xxx elements
+$website_custom_css = __getValue($rec, DT_CMS_CSS);
 
 //color scheme for website
 if($system->defineConstant('DT_SYMBOLOGY')){

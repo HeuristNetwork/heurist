@@ -1244,9 +1244,14 @@ EOD;
                     $new_values = $values;      
                 }
                 
-                if(is_array($new_values) && count($new_values)>0){
-                    $record['details'][$ftId] = $new_values; 
-                    
+                if(is_array($new_values) && count($new_values)>0)
+                {
+                    if (isset($record['details'][$ftId])){
+                        array_push($record['details'][$ftId], ...$new_values);    
+                    }else{
+                        $record['details'][$ftId] = $new_values; 
+                    }
+
                     if($is_cms_init && $dty_ID == DT_EXTENDED_DESCRIPTION && $new_values[0]=='BLOG TEMPLATE'){
                         $is_blog_record = true;
                     }

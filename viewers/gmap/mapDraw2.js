@@ -375,6 +375,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         _init_DeleteMenu();
  
         var map = new google.maps.Map(document.getElementById(mapdiv_id), {
+            mapId: "cb51443861458fd0", // Map ID is required for advanced markers.
             zoom: 2,
             center: new google.maps.LatLng(31.2890625, 5), //22.344, 114.048),
             disableDefaultUI: true,

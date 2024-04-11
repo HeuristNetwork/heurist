@@ -1151,6 +1151,10 @@ if(_mapdata.limit_warning){
 
        }// __onDataLoaded
 
+       
+        
+       
+       
         //asign 2 global for mapping - on select listener and startup map document
         if(__onSelectEventListener) _onSelectEventListener = __onSelectEventListener;
 
@@ -1229,10 +1233,10 @@ if(_mapdata.limit_warning){
                     customTheme['iconAnchor']  = [8,8];
                 }
             }
-
+            
             // Initialize TimeMap
             tmap = TimeMap.init({
-                mapId: mapdiv_id, // Id of gmap div element (required)
+                mapId: mapdiv_id, //Id of gmap div element (required)
                 timelineId: null, //timelinediv_id, // Id of timeline div element (required)
                 datasets: _mapdata,
 

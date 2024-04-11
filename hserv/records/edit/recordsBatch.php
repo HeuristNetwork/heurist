@@ -1796,6 +1796,7 @@ public methods
             $mysqli = $system->get_mysqli();
 
             $record_ids = prepareIds($record_ids); //for snyk
+            $tag_ids    = prepareIds($tag_ids); //for snyk 
             
             //assign links
             $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
@@ -2604,7 +2605,7 @@ public methods
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
             return false;
         
-        }else if(strpos($service_id,'nakala')===0){
+        }else if(strpos($service_id,'nakala')===0 || strpos($service_id,'nakala')===1){
 
             if(!array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
@@ -2631,6 +2632,7 @@ public methods
             );
 
             $api_key = $credentials[$service_id]['params']['writeApiKey']; //$this->system->get_system('sys_NakalaKey');
+            $use_test_url = @$this->data['use_test_url'] == 1 || strpos($service_id,'nakala')===1 ? 1 : 0;
 
             while($row = $res->fetch_row()){
 
@@ -2734,7 +2736,8 @@ public methods
 
                     $rtn = uploadFileToNakala($this->system,   //upload in batch
                         array('api_key' => $api_key, 'file' => $file, 
-                              'meta' => $meta_values, 'status' => 'published')); // pending | published
+                              'meta' => $meta_values, 'status' => 'published', // pending | published
+                              'use_test_url' => $use_test_url));
 
                     if($rtn){ // register URL ($rtn)
                         //$file_entity->setRecords(null); // reset records

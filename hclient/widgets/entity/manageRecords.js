@@ -72,6 +72,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     file_values: {},
     resource_values: [],
     relmarker_values: [],
+    
+    //to refresh icon after structure edit
+    _icon_timer_suffix: ('&t='+Math.round(Math.random()*100000)),
 
     // Record history
     _record_history: null,
@@ -561,8 +564,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         var that = this;
         let parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+        let workflowstage = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
 
-        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator' || dtId == parententity){
+        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null 
+            || $Db.dty(dtId, 'dty_Type') == 'separator' 
+            || dtId == parententity || dtId == workflowstage){
             return;
         }
 
@@ -631,14 +637,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
 
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-
                     if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
                             that.reloadEditForm(true); // reload record editor
                             that._reloadRtsEditor(true); // reload structure editor
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            window.hWin.HEURIST4.msg.showMsgFlash(
+                                window.hWin.HR('Field added to record type structure'), 1500);
                         });
                     }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -1443,12 +1451,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                }
             
                 var recRecTypeID = that._getField('rec_RecTypeID');
+                var recRecTypeIcon = window.hWin.HAPI4.iconBaseURL+recRecTypeID+that._icon_timer_suffix;
+                
                 sContent =  
 '<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display:inline-block;width: 100%;">'
 
 +'<h3 class="truncate rectypeHeader" style="float:left;max-width:400px;margin:0 8px 0 0;">'
                 + '<img src="'+ph_gif+'" class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
-                + window.hWin.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
+                + recRecTypeIcon +'\');"/>'
                 + $Db.rty(recRecTypeID, 'rty_Name')+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
@@ -1555,7 +1565,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                               
                                               selHd.html(
                         '<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
-                        + window.hWin.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
+                        + window.hWin.HAPI4.iconBaseURL+selRt.val()+that._icon_timer_suffix+'\');"/>'
                         + $Db.rty(selRt.val(), 'rty_Name')                                      
                                               );
                                                                                       
@@ -2250,6 +2260,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 height: 820,
                 onClose: function(){
                     //refresh icon, title, mask
+                    that._icon_timer_suffix = '&t='+Math.round(Math.random()*100000);
+                    
                     that._initEditForm_step3(that._currentEditID);
                 }
             };
@@ -4181,7 +4193,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         // Icon
         let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-        let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID;
         let rt_name = $Db.rty(this._currentEditRecTypeID,'rty_Name');
 
         if( this.element.find('.chb_opt_fields').length==0 )
@@ -4199,8 +4210,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 +'<div style="padding-right:25px;display:inline-block" class="rt-info-header">'
                     +'<img src="'+ph_gif
-                        +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;'
-                        +'background-image:url(\'' + rt_icon + '\');"/>'
+                        +'" width=36 height=36 class="rt-icon" style="padding:2px;background-size: 28px 28px;vertical-align:middle;margin: 2px 10px 2px 4px;"/>'
                     + '<span style="display:inline-block;vertical-align:middle;font-size:larger;font-weight:bold;max-width:25ex;" '
                     + 'class="truncate" title="'+ rt_name +'">'
                         + rt_name
@@ -4245,12 +4255,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 
+            this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'});
+            
             if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
             {
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'}).css(btn_css)
+                this.element.find('.btn-edit-rt').css(btn_css)
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
                 
                 var btn = this.element.find('.btn-edit-rt2');        
@@ -4352,7 +4364,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             this.element.find('.chb_opt_fields').prop('checked', isfields_on);
             this.element.find('.chb_show_help').prop('checked', ishelp_on);
 
-            this.element.find('.rt-info-header img').css('background-image', `url('${rt_icon}')`);
+            //this.element.find('.rt-info-header img').css('background-image', `url('${rt_icon}')`);
             this.element.find('.rt-info-header span').text(rt_name).attr('title', rt_name);
         }
 
@@ -4676,6 +4688,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             this.editForm.find('.editint-inout-repeat-container').css('min-width', width);
         }
+        
+        //update record type icon
+        let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID+this._icon_timer_suffix;
+
+        this.element.find('.rt-info-header img.rt-icon').css('background-image',`url('${rt_icon}')`);
+        this.editFormSummary.find('.summary-accordion').first().find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
         
         //
         //

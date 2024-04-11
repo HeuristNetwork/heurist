@@ -451,13 +451,14 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 $query_changes = "SELECT arc_ID, arc_ChangedByUGrpID, arc_TimeOfChange, arc_DataBeforeChange " .
                                  "FROM sysArchive " .
-                                 "WHERE arc_Table = 'dtl' AND arc_RecID = $rec_ID AND arc_TimeOfChange = '". $row_date[0] . "' " .
+                                 "WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? " .
                                  "ORDER BY arc_ID";
 
-                $res_changes = $mysqli->query($query_changes);
-
+                $res_changes = mysql__select_param_query($mysqli, $query_changes, array('is', $rec_ID, $row_date[0]));
+                                 
                 if(!$res_changes){
-                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' . $row_date[0], $mysqli->error);
+                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' 
+                                        . $row_date[0], $mysqli->error);
                     return false;
                 }
 

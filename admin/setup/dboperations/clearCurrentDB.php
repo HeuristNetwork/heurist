@@ -125,7 +125,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                 $res = DbUtils::databaseEmpty($dbname);
 
                 if (!$res) {
-                    echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".htmlspecialchars(HEURIST_DB_PREFIX.$dbname)."</b>");
+                    echo "<h2>Warning:</h2> Unable to fully delete records from <b>".htmlspecialchars(HEURIST_DB_PREFIX.$dbname)."</b>";
                     //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
                 } else {
                     // Remove from ElasticSearch

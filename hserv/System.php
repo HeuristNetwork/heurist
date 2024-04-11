@@ -1935,14 +1935,22 @@ class System {
             }
         }
 
-        if(isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink){
-            $url = empty($template) ? HEURIST_BASE_URL.$this->dbname.'/view/'.$rec_id 
-                        : HEURIST_BASE_URL.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
+        $use_rewrite = isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink;
+
+        $base_url = HEURIST_BASE_URL;
+        if($use_rewrite && strpos($base_url, "/HEURIST/") !== false){
+            $parts = explode('/', $base_url);
+            $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
+        }
+
+        if($use_rewrite){
+            $url = empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id 
+                        : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
 
             return $url;
         }else{
-            $url = empty($template) ? HEURIST_BASE_URL.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname 
-                        : HEURIST_BASE_URL . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
+            $url = empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname 
+                        : $base_url . 'viewers/smarty/showReps.php?publish=1&db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
 
             return $url;
             /* it will be redirected
@@ -2250,6 +2258,13 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         }
 
         fileSave(json_encode($target_languages), $language_file);
+    }
+    
+    /**
+    * Remove database definition cache file
+    */
+    public function cleanDefCache(){
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json');
     }
     
     /**

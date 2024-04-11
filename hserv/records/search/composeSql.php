@@ -3098,10 +3098,13 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
                     if(empty($lang)){ // default only
                         $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{3}:'";
+                        $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{2}:'";
                     }else if($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
+                        $res = $res . " OR SUBSTRING(dtl_Value, 0, 3) = '" . $mysqli->real_escape_string($this->value) . "'";
                     }else if($lang != 'ALL' && !empty($lang)){ // specific language
-                        $res = $res . " AND LEFT(dtl_Value, 4) = '$lang:'";
+                        $ar2 = strtoupper(getLangCode2($lang));
+                        $res = $res . " AND ( LEFT(dtl_Value, 4) = '{$lang}:' OR LEFT(dtl_Value, 3) = '{$ar2}:' )";
                     }
                 }
             }

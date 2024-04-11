@@ -91,7 +91,10 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                 <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
                 <h2>About to delete database: <?php echo htmlspecialchars($dbname);?></h2>
 
-                <label><input type='checkbox' checked id='db-archive'>Archive all database files</label><br>
+                <label><input type='radio' checked name="db-archive" value="zip">Zip all database files</label>
+                <label><input type='radio' name="db-archive" value="tar">BZip all database files</label>
+                <label><input type='radio' name="db-archive" value="">Do not archive</label><br>
+                <span class="heurist-helper2">BZip is more efficient for archiving but may be slower if there are lot of images</span>
                 
                 <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
                 <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='db-password'>
@@ -112,20 +115,30 @@ $('#btnDelete').on({click:function(){
     
     $('#page-inner').hide();
     $('#wait_p').show();
-  
+    
     var url = window.hWin.HAPI4.baseURL+'admin/setup/dboperations/deleteDB.php';
     var request = {pwd: $('#db-password').val(), 
                    db: window.hWin.HAPI4.database,
-                   database: window.hWin.HAPI4.database,   //database to be deleted
-                   create_archive:$('#db-archive').is(':checked')};
+                   database: window.hWin.HAPI4.database   //database to be deleted
+                   };
 
+    let arch_mode = $('input[name=db-archive]:checked').val();
+    if(arch_mode){
+        request['create_archive'] = arch_mode;
+    }
+  
+    //show wait screen
+    window.hWin.HEURIST4.msg.bringCoverallToFront(null, null, 'Deleting Current Heurist Database...');
+                   
     window.hWin.HEURIST4.util.sendRequest(url, request, null,
         function(response){
             $('#wait_p').hide();
+            window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+            
             if(response.status == window.hWin.ResponseStatus.OK){
                 
                     var msgAboutArc = '';
-                    if($('#db-archive').is(':checked')){
+                    if($('input[name=db-archive]:checked').val()!=''){
                        msgAboutArc = '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
                        + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>';                        
                     }
@@ -147,7 +160,7 @@ $('#btnDelete').on({click:function(){
                 window.hWin.HEURIST4.msg.showMsgErr(response, false);
                 
             }
-        }, null, 360000  //timeout 6 minutes
+        }, null, 600000  //timeout 10 minutes
     );
 }
 });    

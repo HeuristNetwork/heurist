@@ -22,6 +22,7 @@
 
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
+require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 class DbAnnotations extends DbEntityBase 
 {
@@ -31,7 +32,6 @@ class DbAnnotations extends DbEntityBase
     public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
-        $this->system->defineConstant('RT_ANNOTATION');
         $this->system->defineConstant('RT_MAP_ANNOTATION');
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_URL');
@@ -175,7 +175,28 @@ class DbAnnotations extends DbEntityBase
         }        
     }
     
+    //
+    //
+    // 
+    private function _assignField(&$details, $id, $value){
+        if(intval($id)>0){
+            $id = intval($id);
+        }else if(defined($id)){
+            $id = constant($id);
+        }
+            //$id = "t:".$id;
+        if(intval($id)>0){            
+            if(@$details[$id]){
+                $details[$id][0] = $value;
+            }else{
+                $details[$id][] = $value;        
+            }
+        } 
+    }
     
+    //
+    //
+    //    
     public function save(){
          //validate permission for current user and set of records see $this->recordIDs
         if(!$this->_validatePermission()){
@@ -189,12 +210,29 @@ class DbAnnotations extends DbEntityBase
         },
 */      
         if(!defined('RT_MAP_ANNOTATION')){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+
+            $isOK = false;
+            $importDef = new DbsImport( $this->system );
+            if($importDef->doPrepare(  array(
+            'defType'=>'rectype', 
+            'databaseID'=>2, 
+            'conceptCode'=>array('2-101'))))
+            {
+                $isOK = $importDef->doImport();
+            }
+            if(!$isOK){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 
                     'Can not add annotation. This database does not have "Map/Image Annotation" record type. '
                     .'Import required record type');
-            return false;
+                return false;
+            }
+            
+            //redefine constants            
+            $this->system->defineConstant('RT_MAP_ANNOTATION', true);
+            $this->system->defineConstant('DT_ORIGINAL_RECORD_ID', true);
+            $this->system->defineConstant('DT_ANNOTATION_INFO', true);
         }
-         
+                 
         if( !defined('DT_ANNOTATION_INFO') || !defined('DT_ORIGINAL_RECORD_ID')){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
                     'Can not add annotation. This database does not have "Annotation" (2-1098) or "Original ID" fields (2-36). '
@@ -231,27 +269,31 @@ class DbAnnotations extends DbEntityBase
                         }else{
                             $value = $row[2];
                         }
-                        if(!@$details["t:".$field_type]) $details["t:".$field_type] = array();
-                        $details["t:".$field_type][] = $value;
+                        //if(!@$details[$field_type]) $details[$field_type] = array(); //
+                        $details[$field_type][] = $value; //"t:"
                     }
                 }            
             }else{
                $recordId = 0; //add new annotation 
             }
         }
-        //"body":{"type":"TextualBody","value":"<p>VOKZAL</p>"},
+        //"body":{"type":"TextualBody","value":"<p>RR Station</p>"},
         $anno_dec = json_decode($anno['data'], true);
         if(is_array($anno_dec)){
         
             if(@$anno_dec['body']['type']=='TextualBody'){
-                $details[DT_NAME][] = substr(strip_tags($anno_dec['body']['value']),0,50);
-                if(defined('DT_SHORT_SUMMARY')) $details[DT_SHORT_SUMMARY][] = $anno_dec['body']['value'];
+                $this->_assignField($details, 'DT_NAME', substr(strip_tags($anno_dec['body']['value']),0,50));
+                $this->_assignField($details, 'DT_SHORT_SUMMARY', $anno_dec['body']['value']); 
             }
 
             //thumbnail
             // "selector":[{"type":"FragmentSelector","value":"xywh=524,358,396,445"}
-            if(@$anno['canvas']){
-                if(@$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
+            if(@$anno['canvas']){ //canvas defined on addition only
+                
+                //at the moment it creates thumbnail on addition only
+                //@todo - check  FragmentSelector and compare with $details[$this->dty_Annotation_Info]
+                // recreate thumbnail if annotated area is changed
+                if(is_array(@$anno_dec['target']) && @$anno_dec['target']['selector'] && defined('DT_THUMBNAIL')){
                     
                     foreach ($anno_dec['target']['selector'] as $selector){
                         if(@$selector['type']=='FragmentSelector'){
@@ -259,7 +301,7 @@ class DbAnnotations extends DbEntityBase
                             if($region){
                                 $region = substr($region, 5);
                                 
-                                
+                                // https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json
                                 // https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/canvas/f11/ 
                                 $url2 = $anno['canvas'];
                                 $url = $anno['canvas'];
@@ -270,9 +312,9 @@ class DbAnnotations extends DbEntityBase
                                     $iiif_manifest = json_decode($iiif_manifest, true);
                                     if($iiif_manifest!==false && is_array($iiif_manifest)){
 
-                                    //"@context": "https://iiif.io/api/presentation/2/context.json"    
+                                    //"@context": "http://iiif.io/api/presentation/2/context.json"    
                                     //sequences->canvases->images->resource->service->@id
-                                    if(@$iiif_manifest['@context']=='https://iiif.io/api/presentation/2/context.json'){
+                                    if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
                                         if(is_array(@$iiif_manifest['sequences']))
                                         foreach($iiif_manifest['sequences'] as $seq){
                                             if(is_array(@$seq['canvases']))
@@ -290,7 +332,7 @@ class DbAnnotations extends DbEntityBase
                                         }
                                         
                                     }else{ //version 3
-                                    //"@context": "https://iiif.io/api/presentation/3/context.json" 
+                                    //"@context": "http://iiif.io/api/presentation/3/context.json" 
                                     //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
                                         
                                         if(is_array(@$iiif_manifest['items']))
@@ -340,7 +382,7 @@ class DbAnnotations extends DbEntityBase
                                         $err_msg = $err_msg['message'];
                                         $this->system->clearError();  
                                     }else{
-                                        $details[DT_THUMBNAIL][] = $dtl_UploadedFileID[0];
+                                        $this->_assignField($details, 'DT_THUMBNAIL', $dtl_UploadedFileID[0]); 
                                     }
                                 }
                                 
@@ -350,16 +392,22 @@ class DbAnnotations extends DbEntityBase
                         }
                     }
                 }
+                //url to page/canvas
+                $details[DT_URL][] = $anno['canvas'];
+            }else {
+                if($this->is_addition && @$anno_dec['target']['source']){ //page is not changed on edit
+                    $this->_assignField($details, 'DT_URL', $anno_dec['target']['source']); 
+                }
             }
         
-            $details[DT_URL][] = $anno['canvas'];
         }
-        $details[$this->dty_Annotation_Info][] = $anno['data'];
-        $details[DT_ORIGINAL_RECORD_ID][] = $anno['uuid'];
         
-        if($anno['sourceRecordId']>0 && defined('DT_MEDIA_RESOURCE')){
+        $this->_assignField($details, $this->dty_Annotation_Info, $anno['data']); 
+        $this->_assignField($details, 'DT_ORIGINAL_RECORD_ID', $anno['uuid']); 
+        
+        if($anno['sourceRecordId']>0){
             //link referenced image record with annotation record
-            $details[DT_MEDIA_RESOURCE][] = $anno['sourceRecordId'];
+            $this->_assignField($details, 'DT_MEDIA_RESOURCE', $anno['sourceRecordId']); 
         }
         
         //record header

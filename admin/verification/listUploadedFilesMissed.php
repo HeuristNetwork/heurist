@@ -89,9 +89,10 @@ $is_all_databases = false;
 if(@$_REQUEST['all']==1){
     //scan all databases
     $is_all_databases = true;
-    $databases = mysql__getdatabases4($mysqli, false);   
-}else{
-    $databases = array($_REQUEST['db']);
+    $databases = mysql__getdatabases4($mysqli, true);   
+}else if(@$_REQUEST['db']){
+    list($db_full, $db) = mysql__get_names($_REQUEST['db']);
+    $databases = array($db_full);
 }
 
 $total_count = 0;

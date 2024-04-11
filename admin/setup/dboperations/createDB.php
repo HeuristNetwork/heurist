@@ -24,6 +24,8 @@ require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
 require_once dirname(__FILE__).'/../../../hserv/utilities/uFile.php';
 require_once 'welcomeEmail.php';
 
+set_time_limit(0);
+
 header('Content-type: text/javascript');
 
 $_DEBUG_NOT_CREATE = false; //set to true to avoid db creation
@@ -301,8 +303,8 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             if(!empty($def_lookups)){
 
                 $lookup_str = json_encode($def_lookups);
-                $upd_query = "UPDATE `". $database_name_full ."`.sysIdentification SET sys_ExternalReferenceLookups = '" . $lookup_str . "' WHERE sys_ID = 1";
-                $mysqli->query($upd_query);
+                $upd_query = "UPDATE `$database_name_full`.sysIdentification SET sys_ExternalReferenceLookups = ? WHERE sys_ID = 1";
+                mysql__exec_param_query($mysqli, $upd_query, array('s', $lookup_str));
             }else{
                 //$warnings.push('Unable to setup default lookup services.');
             }

@@ -179,7 +179,7 @@ class USanitize {
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             //$config->set('Core.EscapeNonASCIICharacters', true);
             $config->set('CSS.AllowImportant', true);
-            $config->set('CSS.AllowTricky', true);
+            $config->set('CSS.AllowTricky', true);  //allow css
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
 
@@ -199,7 +199,7 @@ class USanitize {
             $config->set('HTML.Allowed', array('head'=>true,'style'=>true));
             $config->set('HTML.AllowedElements', array('head'=>true,'style'=>true));
             */
-            $def = $config->getHTMLDefinition(true);
+            $def = $config->getHTMLDefinition(true); //non standard attributes
             $def->addAttribute('div', 'id', 'Text');            
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
             $def->addAttribute('div', 'data-inited', 'Text');
@@ -211,7 +211,9 @@ class USanitize {
     }
     
     //
-    // not used
+    // It is used in mail and cms
+    //
+    // $params - object or array to purify
     //    
     public static function purifyHTML(&$params, $purifier = null){
         
