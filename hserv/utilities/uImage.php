@@ -349,6 +349,31 @@ class UImage {
                 
         return  $mimeExt;
     }
+    
+    
+    /**
+    * Returns orientation based of exif
+    *     
+    * @param mixed $file_path
+    * @return int
+    */
+    public static function getImageOrientation($file_path){
+        
+        if (!function_exists('exif_read_data')) {
+            return 0;
+        }
+        $exif = @exif_read_data($file_path);
+        if ($exif === false) {
+            return 0;
+        }
+        $orientation = (int)@$exif['Orientation'];
+        if ($orientation < 2 || $orientation > 8) {
+            return 0;
+        }else{
+            return $orientation;
+        }
+        
+    }
 
     /**
     * Verifies the size of image - is it possible to load into allowed memory
@@ -497,8 +522,12 @@ class UImage {
     * 
     * @param mixed $filename
     */
-    public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200){
+    public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200, $orientation=0){
 
+        if($orientation>0){
+            $img = UImage::gd_orient_image($img, $orientation);    
+        }
+        
         $no_enlarge = false;
         // calculate image size
         // note - we never change the aspect ratio of the image!
@@ -532,7 +561,7 @@ class UImage {
             //?????
             $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
         }
-
+        
         imagepng($img_resized, $resized_file);//save into file
         imagedestroy($img);
         imagedestroy($img_resized);
@@ -544,6 +573,98 @@ class UImage {
         
         return true;   
     }
+    
+    private static function gd_imageflip($image, $mode) {
+        if (function_exists('imageflip')) {
+            return imageflip($image, $mode);
+        }
+        $new_width = $src_width = imagesx($image);
+        $new_height = $src_height = imagesy($image);
+        $new_img = imagecreatetruecolor($new_width, $new_height);
+        $src_x = 0;
+        $src_y = 0;
+        switch ($mode) {
+            case '1': // flip on the horizontal axis
+                $src_y = $new_height - 1;
+                $src_height = -$new_height;
+                break;
+            case '2': // flip on the vertical axis
+                $src_x  = $new_width - 1;
+                $src_width = -$new_width;
+                break;
+            case '3': // flip on both axes
+                $src_y = $new_height - 1;
+                $src_height = -$new_height;
+                $src_x  = $new_width - 1;
+                $src_width = -$new_width;
+                break;
+            default:
+                return $image;
+        }
+        imagecopyresampled(
+            $new_img,
+            $image,
+            0,
+            0,
+            $src_x,
+            $src_y,
+            $new_width,
+            $new_height,
+            $src_width,
+            $src_height
+        );
+        return $new_img;
+    }
+
+    private static function gd_orient_image($src_img, $orientation) {
+        if ($orientation < 2 || $orientation > 8) {
+            return $src_img;
+        }
+        switch ($orientation) {
+            case 2:
+                $new_img = UImage::gd_imageflip(
+                    $src_img,
+                    defined('IMG_FLIP_VERTICAL') ? IMG_FLIP_VERTICAL : 2
+                );
+                break;
+            case 3:
+                $new_img = imagerotate($src_img, 180, 0);
+                break;
+            case 4:
+                $new_img = UImage::gd_imageflip(
+                    $src_img,
+                    defined('IMG_FLIP_HORIZONTAL') ? IMG_FLIP_HORIZONTAL : 1
+                );
+                break;
+            case 5:
+                $tmp_img = UImage::gd_imageflip(
+                    $src_img,
+                    defined('IMG_FLIP_HORIZONTAL') ? IMG_FLIP_HORIZONTAL : 1
+                );
+                $new_img = imagerotate($tmp_img, 270, 0);
+                imagedestroy($tmp_img);
+                break;
+            case 6:
+                $new_img = imagerotate($src_img, 270, 0);
+                break;
+            case 7:
+                $tmp_img = UImage::gd_imageflip(
+                    $src_img,
+                    defined('IMG_FLIP_VERTICAL') ? IMG_FLIP_VERTICAL : 2
+                );
+                $new_img = imagerotate($tmp_img, 270, 0);
+                imagedestroy($tmp_img);
+                break;
+            case 8:
+                $new_img = imagerotate($src_img, 90, 0);
+                break;
+            default:
+                return false;
+        }
+
+        return $new_img;
+    }
+    
 
     /**
     * Creates thumbnail from pdf file
