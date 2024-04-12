@@ -957,6 +957,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         
         list($file_path, $new_file_path) =
             $this->get_scaled_image_file_paths($file_name, $subfolder, $version);
+
+        /*if (function_exists('exif_thumbnail')) {
+            $thumbimage = exif_thumbnail($file_name, $width, $height, $thumb_type);
+        }*/
             
         $type = substr(strrchr($file_name, '.'), 1);
         if(@$options['scale_to_png']==true && strtolower($type)!='png'){ //Artem Osmakov: scale to png only
@@ -990,6 +994,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             default:
                 return 'Not supported image format ('.$type.')';
         }
+        
         
         if($this->check_memory($file_path, $new_file_path, $type, $version)){
             return true;
@@ -1403,6 +1408,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     );
                 } else {
                     $file->size = $this->get_file_size($file_path, true);
+                    $file->size_total = $file->size;
                 }
             } else {
                 $failed_versions[$version ? $version : 'original'] = $res;
