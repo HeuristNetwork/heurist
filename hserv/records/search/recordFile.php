@@ -1131,17 +1131,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         
             }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
-                $img = UImage::getRemoteImage($file['ulf_ExternalFileReference']);
-                
-                if(strpos($file['fxm_MimeType'], '/jpe')>0 || strpos($file['fxm_MimeType'], '/jpg')>0){
-                    //save in temp file     
-                    $_tmp = tempnam(HEURIST_SCRATCHSPACE_DIR, 'tmp');
-                    imagejpeg($img, $_tmp);//save into file
-                    //get orientation based on exif
-                    $orientation = UImage::getImageOrientation($_tmp);
-                    unlink($_tmp);
-                }
-                
+                $img = UImage::getRemoteImage($file['ulf_ExternalFileReference'], $orientation);
                 
             }else    
             if( @$file['fxm_MimeType'] == 'video/youtube' 

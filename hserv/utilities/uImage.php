@@ -182,12 +182,22 @@ class UImage {
     * @param mixed $remote_url
     * @return resource
     */
-    public static function getRemoteImage($remote_url){  //get_remote_image
+    public static function getRemoteImage($remote_url, &$orientation=null){  //get_remote_image
 
         $img = null;
         
         $data = loadRemoteURLContent($remote_url, false); //get_remote_image as raw data
         if($data){
+            
+            if(isset($orientation)){
+                //save into file
+                $_tmp = tempnam(HEURIST_SCRATCHSPACE_DIR, 'img');
+                //imagejpeg($data, $_tmp);
+                file_put_contents($_tmp,  $data);
+                $orientation = UImage::getImageOrientation($_tmp);
+                unlink($_tmp);
+            }
+            
             try{    
                 $img = imagecreatefromstring($data);
             }catch(Exception  $e){
@@ -199,6 +209,7 @@ class UImage {
 
         return $img;
     }
+
     
     /**
     * Returns image object for given filename
