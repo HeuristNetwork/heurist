@@ -1334,6 +1334,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             modal: true,
             closeOnEscape: true,
             buttons: buttons
+            
         };
         
         if(ext_options){
@@ -1350,6 +1351,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(posele.length>0)
                     options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
+           
+           if(ext_options['removeOnClose']){
+                options.close = function(event, ui){  $dlg.remove(); };   
+           }
+           
         }
         if(!options.position){
             options.position = { my: "center center", at: "center center", of: window };    
