@@ -2113,6 +2113,13 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.ui-icon-clear-formatting { 
+    background-image: url(hclient/assets/clear_formatting.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 

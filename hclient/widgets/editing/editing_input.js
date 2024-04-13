@@ -1204,13 +1204,16 @@ $.widget( "heurist.editing_input", {
                         setup:function(editor) {
 
                             if(editor.ui){
+                                // ----- Custom buttons -----
+                                // Insert Heurist media
                                 editor.ui.registry.addButton('customHeuristMedia', {
                                     icon: 'image',
                                     text: 'Media',
                                     onAction: function (_) {  //since v5 onAction in v4 onclick
                                         that._addHeuristMedia();
                                     }
-                                });                                        
+                                });
+                                // Insert figcaption to image/figure
                                 editor.ui.registry.addButton('customAddFigCaption', {
                                     icon: 'comment',
                                     text: 'Caption',
@@ -1232,6 +1235,7 @@ $.widget( "heurist.editing_input", {
                                         }
                                     }
                                 });
+                                // Insert link to Heurist record
                                 editor.ui.registry.addButton('customHeuristLink', {
                                     icon: 'link',
                                     text: 'Record',
@@ -1291,10 +1295,21 @@ $.widget( "heurist.editing_input", {
                                         });
                                     }
                                 });
+                                // Insert horizontal rule
                                 editor.ui.registry.addButton('customHRtag', {
                                     text: '&lt;hr&gt;',
                                     onAction: function (_) {
                                         tinymce.activeEditor.insertContent( '<hr>' );
+                                    }
+                                });
+                                // Clear text formatting - to replace the original icon
+                                editor.ui.registry.addIcon('clear-formatting', `<img style="padding-left: 5px;" src="${window.hWin.HAPI4.baseURL}hclient/assets/clear_formatting.svg" />`)
+                                editor.ui.registry.addButton('customClear', {
+                                    text: '',
+                                    icon: 'clear-formatting',
+                                    tooltip: 'Clear formatting',
+                                    onAction: function (_) {
+                                        tinymce.activeEditor.execCommand('RemoveFormat');
                                     }
                                 });
                             }else{
@@ -1307,6 +1322,7 @@ $.widget( "heurist.editing_input", {
                                 });
                             }
 
+                            // ----- Event handlers -----
                             let has_initd = false, is_blur = false;
                             editor.on('init', function(e) {
                                 let $container = $(editor.editorContainer);
@@ -1389,10 +1405,10 @@ $.widget( "heurist.editing_input", {
                             });
                         },
                         init_instance_callback: function(editor){
-
-                            // button[11] is the link button
                             let html = '<span class="tox-tbtn__select-label">URL</span>';
                             $(editor.container).find('.tox-tbtn[title="Insert/edit link"]').append(html);
+
+                            $(editor.container).find('.tox-split-button[title="Background color"]').attr('title', 'Highlight text');
                         },
                         plugins: [ //contextmenu, textcolor since v5 in core
                             'advlist autolink lists link image preview ', //anchor charmap print 
@@ -1400,7 +1416,7 @@ $.widget( "heurist.editing_input", {
                             'media table paste help autoresize'  //insertdatetime  wordcount
                         ],      
                         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor customHRtag | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | removeformat | help'],
+                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | help'],
                         formats: custom_formatting.formats,
                         style_formats_merge: true,
                         style_formats: style_formats,
