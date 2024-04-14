@@ -1522,7 +1522,6 @@ function recordGetRelationship($system, $sourceID, $targetID, $search_request=nu
 
 }
 
-
 //
 // find parent record for rec_ID with given record type
 //
