@@ -107,20 +107,20 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 .' AND dtl_DetailTypeID='.DT_URL
                 .' GROUP BY dtl_Value ORDER BY cnt DESC';
                 
+            $row = mysql__select_row($mysqli, $query); //get first row
+
+            if(is_array($row) && @$row[0]!=null){
+                $canvasUri = $row[0];   
+            }
+            
             if(@$_REQUEST['iiif']==null && @$_REQUEST['file']==null){
                 //get manifest url from database   
-                $query = 'SELECT dtl_RecID, ulf_ObfuscatedFileID '
+                $query = 'SELECT ulf_ObfuscatedFileID '
                     .' FROM recDetails, recUploadedFiles '
                     .' WHERE dtl_RecID='.$rec_ID //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
                     .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
 
                 $_REQUEST['iiif'] = mysql__select_value($mysqli, $query);
-            }
-                
-            $row = mysql__select_row($mysqli, $query); //get first row
-
-            if(is_array($row) && @$row[0]!=null){
-                $canvasUri = $row[0];   
             }
             
         }
