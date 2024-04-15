@@ -60,7 +60,7 @@ if(!preg_match('[\W]', $dbname) && $rec_ID>0){
 require_once dirname(__FILE__).'/../../../hserv/System.php';
     
     $system = new System();
-    if( ! $system->init($_REQUEST['db']) ){
+    if( ! $system->init($_REQUEST['db'], true, false) ){
         //get error and response
         $system->error_exit_api(); //exit from script
     }
@@ -73,16 +73,15 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
         $res = recordSearchByID($system, $rec_ID, false, 'rec_ID,rec_RecTypeID');
         $system->defineConstant('DT_URL');
         $mysqli = $system->get_mysqli();
+        //$file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
         
         if($res['rec_RecTypeID']==RT_MAP_ANNOTATION){
             //find parent record with iiif image - it returns obfuscation id
-            
-            $file_field_types = mysql__select_list2($mysqli,'select dty_ID from defDetailTypes where dty_Type="file"');
 
             $query = 'SELECT dtl_RecID, ulf_ObfuscatedFileID '
                 .' FROM recLinks, recDetails, recUploadedFiles '
                 .' WHERE rl_SourceID='.$rec_ID
-                .' AND dtl_RecID=rl_TargetID AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
+                .' AND dtl_RecID=rl_TargetID '  //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
                 .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
 
             $row = mysql__select_row($mysqli, $query);
@@ -107,6 +106,16 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 .' AND dtl_RecID=rec_ID '
                 .' AND dtl_DetailTypeID='.DT_URL
                 .' GROUP BY dtl_Value ORDER BY cnt DESC';
+                
+            if(@$_REQUEST['iiif']==null && @$_REQUEST['file']==null){
+                //get manifest url from database   
+                $query = 'SELECT dtl_RecID, ulf_ObfuscatedFileID '
+                    .' FROM recDetails, recUploadedFiles '
+                    .' WHERE dtl_RecID='.$rec_ID //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
+                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
+
+                $_REQUEST['iiif'] = mysql__select_value($mysqli, $query);
+            }
                 
             $row = mysql__select_row($mysqli, $query); //get first row
 
