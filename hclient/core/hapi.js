@@ -1348,10 +1348,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         //refresh local definitions
                         if (response.defs) {
                             if (response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
-
+                            
                             if (response.defs.entities)
                                 for (var entityName in response.defs.entities) {
-
                                     //refresh local definitions
                                     window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
                                         response.defs.entities);
@@ -1815,6 +1814,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var entity_configs = {};
         var entity_data = {};
+        var entity_timestamp = 0;
 
         var that = {
 
@@ -1978,13 +1978,28 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             //
+            // Check that definitions are up to date on client side
+            //            
+            // It erases db definitions cache on server side (db.json) on every structure change - 
+            // it means that every new heurist window obtains fresh set of definitions.
+            // For existing instances (ie in different browser window) it verifies the  relevance of definitions every 20 seconds.
+            // see initialLoadDatabaseDefintions 
+            //
+            relevanceEntityData: function (callback) {
+                if(entity_timestamp>0){
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
+                }
+            },
+            
+            //
             // refresh several entity data at once
             // 
             refreshEntityData: function (entityName, callback) {
 
                 var params = { a: 'structure', 'details': 'full'};
-                params['entity'] = entityName
-                
+                params['entity'] = entityName;
+                params['timestamp'] = entity_timestamp;
+
                 /*
                 if($.isPlainObject(opts) && opts['recID']>0){ 
                     //special case - loads defs for particular record only
@@ -2000,12 +2015,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                  
                 _callserver('entityScrud', params,
                     function (response) {
-                        if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
+                        
+                        if (response && response['uptodate']) {
+                            
+                            //console.log('definitions are up to date');
+                            if ($.isFunction(callback)) callback(this, true);
+                            
+                        }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
                             var fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
+                            
                             var dbdefs = (response['defRecTypes']?response:response['data']);
-
                             for (var entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
@@ -2078,12 +2099,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // data either recordset or response.data
             //
             setEntityData: function (entityName, data) {
+                
+                if(entityName=='timestamp'){ 
+                    
+                    entity_timestamp = Number(data[entityName]); 
 
-                if (window.hWin.HEURIST4.util.isRecordSet(data)) {
+                }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
                 } else {
-
+                    
                     entity_data[entityName] = new hRecordSet(data[entityName]);
 
                     //build rst index

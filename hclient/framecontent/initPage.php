@@ -340,6 +340,9 @@ if($isLocalHost){
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
                     if(arguments[1]){
+                        
+                        //verify definitions relevance every 20 seconds
+                        setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
 
                         if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
                             callback(true);

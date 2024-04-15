@@ -912,7 +912,9 @@ class System {
         exit;
     }
 
-
+    //
+    //
+    //
     public function error_exit_api( $message=null, $error_code=null, $is_api=true) {
         
         $this->dbclose();
