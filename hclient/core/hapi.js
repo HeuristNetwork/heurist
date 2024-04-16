@@ -2646,7 +2646,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return _regional[key];
                 } else {
                     //if not found take from english version
-                    if (_region != 'ENG' && regional['ENG'] && regional['ENG'][key]) {
+                    if (_region != 'ENG' && regional && regional['ENG'] && regional['ENG'][key]) {
 
                         return regional['ENG'][key];
 
