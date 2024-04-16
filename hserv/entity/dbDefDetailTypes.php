@@ -251,6 +251,11 @@ class DbDefDetailTypes extends DbEntityBase
             
             //validate duplication
             if(@$this->records[$idx]['dty_Name']){
+
+                // Strip trailing + double spacing
+                $this->records[$idx]['dty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['dty_Name']);
+                $this->records[$idx]['dty_Name'] = super_trim($this->records[$idx]['dty_Name']);
+
                 $res = mysql__select_value($mysqli,
                         "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
                         .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");

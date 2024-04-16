@@ -5274,6 +5274,9 @@ $.widget( "heurist.editing_input", {
             
             if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
                 res = res.trim();
+
+                // strip double spacing from freetext fields
+                res = this.detailType == 'freetext' ? res.replaceAll(/  +/g, ' ') : res;
             }
         }else {
             res = this.newvalues[$input.attr('id')];    
