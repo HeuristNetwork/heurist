@@ -521,7 +521,7 @@ class DbUtils {
         }
         
         $format = 'zip';
-        if(!is_bool($createArchive)){
+        if(!is_bool($createArchive)){ //default is zip format
             $format = ($createArchive=='tar')?'tar':'zip';
             $createArchive = true;
         }

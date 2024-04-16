@@ -92,9 +92,11 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
                 <h2>About to delete database: <?php echo htmlspecialchars($dbname);?></h2>
 
                 <label><input type='radio' checked name="db-archive" value="zip">Zip all database files</label>
-                <label><input type='radio' name="db-archive" value="tar">BZip all database files</label>
                 <label><input type='radio' name="db-archive" value="">Do not archive</label><br>
+                <!-- 
+                <label><input type='radio' name="db-archive" value="tar">BZip all database files</label>
                 <span class="heurist-helper2">BZip is more efficient for archiving but may be slower if there are lot of images</span>
+                 -->
                 
                 <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
                 <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='db-password'>
