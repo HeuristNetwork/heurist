@@ -1182,12 +1182,12 @@ if(!$has_emails || empty($emails)) {
 
                     <div id="authenContainer">
 
-                        Please enter the System Manager password to comfirm:&nbsp;
+                        Please enter the System Manager password to confirm:&nbsp;
 
                         <input type="password" name="pwd" autocomplete="off" id="sm_pwd" />
                         
                         
-                        <label><input type="checkbox" name="use_native" checked id="use_native" value="1"/>use native mail</label>
+                        <label><input type="checkbox" name="use_native" id="use_native" value="1"/>use native mail</label>
 
                     </div>
                     
