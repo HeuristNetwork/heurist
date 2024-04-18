@@ -253,7 +253,7 @@ class UArchive {
 
                     fclose($fp);
                 } else {
-                    if (!mkdir($destination_dir.$filename, 0777, true)) {
+                    if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
                         throw new Exception('Cannot create subfolder on unzip');
                     }
                 }
