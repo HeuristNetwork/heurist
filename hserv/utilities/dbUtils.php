@@ -961,6 +961,104 @@ class DbUtils {
             
             return true;
     }
+
+
+    //
+    // checks that database name is valid, correct length and unique
+    //
+    public static function databaseValidateName($database_name, $check_unique=true){
+        
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $error_msg = System::dbname_check($database_name_full);
+        
+        if ($check_unique && $error_msg==null) {
+            //verify that database with such name already exists
+            $dblist = mysql__select_list2($mysqli, 'show databases');
+            if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+                $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';
+            }
+        }
+        
+        return $error_msg;        
+    }
+    
+    //
+    // Restore database from archive
+    //     
+    public static function databaseCreateFromArchive($database_name, $archive_file){
+        
+        self::initialize();
+
+        $upload_root = self::$system->getFileStoreRootFolder();
+        
+        if(!file_exists($archive_file)){
+            
+            $archive_file = $upload_root.'DELETED_DATABASES/'.$archive_file;
+            
+            if(!file_exists($archive_file)){
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 'Database archive file not found');
+                return false;
+            }
+        }
+        
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $error_msg = DbUtils::databaseValidateName($database_name);
+        if ($error_msg!=null) {
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            return false;
+        }
+        
+        //create folder 
+        $database_folder = $upload_root.$database_name.'/';
+        
+        $warnings = DbUtils::databaseCreateFolders($database_name);
+        if(is_array($warnings) && count($warnings)>0){
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, implode('<br>',$warnings));
+            return false;
+        }
+
+        //unpack archive into this folder
+        $unzip_error = null;
+        try{
+            UArchive::unzip(self::$system, $archive_file, $database_folder);
+        }catch(Exceprion $e){
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
+                            .' Error: '.Exception::getMessage());        
+            return false;
+        }
+        
+        //find dump file 
+        
+        $dumpfile = folderFirstFile($database_folder, 'sql', false);
+        
+        //create database and import data from dumpfile
+        if(!file_exists($dumpfile)){
+
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Archive does not contain sql dump file');
+            return false;
+            
+        }else{
+        
+            $script_file = basename($dumpfile);
+            $script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
+            
+            fileCopy($dumpfile, $script_file);
+
+            $res = DbUtils::databaseCreate($database_name, 1, $script_file);
+            fileDelete($script_file);                
+            if(!$res){
+                folderDelete($database_folder);  
+                
+            }
+            return $res;
+        }
+        
+    }
     
     //    
     //create new empty heurist database
@@ -972,17 +1070,10 @@ class DbUtils {
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
-        if(strlen($database_name_full)>64){
-                self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full.' is too long. Max 64 characters allowed');
-                return false;
-        }
-        $hasInvalid = preg_match('[\W]', $database_name_full);
-        if ($hasInvalid) {
-                self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full
-                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
-                return false;
+        $error_msg = DbUtils::databaseValidateName($database_name);
+        if ($error_msg!=null) {
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            return false;
         }
         
         if($dumpfile==null){
@@ -1000,13 +1091,14 @@ class DbUtils {
             return true; //create empty database
             
         }else{
+            
             $res = mysql__script($database_name_full, $dumpfile);
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
             }else if($level<2){
                 return true;
-            }else if(self::databaseCreateConstraintsAndTriggers($database_name)){
+            }else if(self::databaseCreateConstraintsAndTriggers($database_name_full)){
                 return true;    
             }
         }
@@ -1108,7 +1200,7 @@ class DbUtils {
         
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });
-
+        
         return $warnings;
     }
     
@@ -1134,10 +1226,8 @@ class DbUtils {
         }
     }
 
-    
-
     //
-    //
+    // clears data tables (retains defintions)
     //
     public static function databaseEmpty($database_name, $verbose=true){
 
