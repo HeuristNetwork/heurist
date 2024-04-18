@@ -133,9 +133,10 @@ if(false){
 }else if(false){
     __convertTustep();
 }
+    __findRDF();
 */
     
-    __findRDF();
+    __dropBkpDateIndex();    
 
 //
 // Report database versions
@@ -186,7 +187,7 @@ function __updateDatabase(){
 
         mysql__usedatabase($mysqli, $db_name);
         
-        $db_name = htmlspecialchars($db_name)
+        $db_name = htmlspecialchars($db_name);
         
         if(hasTable($mysqli, 'defRecStructure')){
             
@@ -1580,7 +1581,7 @@ $html_to_hex = array(
 //
 //
 function __findRDF(){
-     global $system, $mysqli, $databases; 
+    global $system, $mysqli, $databases; 
 
     foreach ($databases as $idx=>$db_name){
     
@@ -1614,6 +1615,27 @@ function __findRDF(){
                 .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""'));
             
             echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";     //$s1/$s2 
+        }
+    }
+    print '<br>END';
+}
+
+function __dropBkpDateIndex(){
+    
+    
+    global $system, $mysqli, $databases; 
+
+    foreach ($databases as $idx=>$db_name){
+    
+        if($db_name=='') continue;
+
+        $db_name = htmlspecialchars($db_name);        
+        
+        mysql__usedatabase($mysqli, $db_name);
+        
+        if(hasTable($mysqli, 'bkpDetailsDateIndex')){
+            $mysqli->query('DROP TABLE bkpDetailsDateIndex');
+            print $db_name.'<br>';
         }
     }
     print '<br>END';
