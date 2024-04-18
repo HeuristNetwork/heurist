@@ -29,7 +29,7 @@ set_time_limit(0);
 header('Content-type: text/javascript');
 
 $_DEBUG_NOT_CREATE = false; //set to true to avoid db creation
-$_DEBUG_NOT_EMAIL = false; //set to true to avoid db creation
+$_DEBUG_NOT_EMAIL = false;  //set to true to avoid db creation
 
 $res = false;
 
@@ -137,30 +137,12 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         $database_name = $uName . trim(preg_replace('/[^a-zA-Z0-9_]/', "", $_REQUEST['dbname']));
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
-        if(strlen($database_name_full)>64){
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.htmlspecialchars($database_name_full).' is too long. Max 64 characters allowed');
-                print json_encode($system->getError());
-                exit;
-        }
-        $invalidDbName = System::dbname_check($database_name_full);
-        if ($invalidDbName) {
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.htmlspecialchars($database_name_full)
-                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
-                print json_encode($system->getError());
-                exit;
-        }
-        
-        
-        //verify that database with such name already exists
-        $dblist = mysql__select_list2($mysqli, 'show databases');
-        if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
-            //$mysqli->query('drop database '.$database_name_full);
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name');
-                print json_encode($system->getError());
-                exit;
+        //checks that database name is valid, correct length and unique
+        $error_msg = DbUtils::databaseValidateName($database_name_full);
+        if ($error_msg!=null) {
+            $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            print json_encode($system->getError());
+            exit;
         }
 
         //get path to registered db template and download coreDefinitions.txt

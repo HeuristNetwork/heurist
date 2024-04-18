@@ -486,7 +486,7 @@ if($need_email){
             }
             
             if($cnt_dumped>0)
-            {
+            {   //archive import tables
                 $archOK = true;
                 $destination = $backup_imports.$db_name.' '.$datetime1->format('Y-m-d').'.tar';
                 $archOK = UArchive::createBz2($backup_imports2, null, $destination, false);

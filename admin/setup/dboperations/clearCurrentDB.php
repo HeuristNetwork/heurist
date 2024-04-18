@@ -67,17 +67,8 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
 <?php
     $dbname = filter_var(@$_REQUEST['db'], FILTER_SANITIZE_STRING);
     
-    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    $sErrorMsg = null;
-    if($dbname==null || trim($dbname)==''){
-        $sErrorMsg = 'Database parameter not defined';
-    }else if(preg_match('/[^A-Za-z0-9_\$]/', $dbname)){ //validatate database name
-        $sErrorMsg = 'Database name '.$dbname.' is wrong';
-    }else if(strlen($dbname)>64){
-        $sErrorMsg = 'Database name '.$dbname.' is too long. Max 64 characters allowed';
-    }
-    
-    //$is_db_valid = mysql__check_dbname($dbname);
+    //database validation
+    $sErrorMsg = DbUtils::databaseValidateName($dbname, false);
     
     $sysadmin_protection = @$_REQUEST['sa_protect'];
     

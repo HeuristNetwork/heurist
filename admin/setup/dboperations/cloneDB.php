@@ -59,12 +59,11 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     
     $sErrorMsg = null;
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
-    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    if(preg_match('/[^A-Za-z0-9_\$]/', $templateddb)){ //validatate database name
-        $sErrorMsg = "Database name '$templateddb_out' is wrong";
-    }else if(strlen($templateddb)>64){
-        $sErrorMsg = "Database name '$templateddb_out' is too long. Max 64 characters allowed";
-    }else if(mysql__usedatabase($mysqli, $templateddb)!==true){
+    
+    //database name validation
+    $sErrorMsg = DbUtils::databaseValidateName($templateddb, false);
+    
+    if($sErrorMsg==null && mysql__usedatabase($mysqli, $templateddb)!==true){
         $sErrorMsg = "Sorry, could not connect to the database $templateddb_out. "
         .'Operation is possible when database to be cloned is on the same server';
     }else{
@@ -123,33 +122,12 @@ if(@$_REQUEST['mode']=='2'){
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
         
-        $targetdbname_out = htmlspecialchars($targetdbname);
-
-        //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-        if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
-                $sErrorMsg = 'Database name '.$targetdbname_out.' is wrong';
-        }else if(strlen($targetdbname)>64){
-                $sErrorMsg = 'Database name '.$targetdbname_out.' is too long. Max 64 characters allowed';
+        //checks that database name is valid, correct length and unique
+        $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+        if ($sErrorMsg!=null) {
+            $sErrorMsg = "<div class='ui-state-error'>Warning: $sErrorMsg <br></div>";
         }else{
-            // Avoid illegal chars in db name
-            $invalidDbName = System::dbname_check($targetdbname);
-            if ($invalidDbName) {
-                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname_out"
-                ."</b> is invalid</p>"
-                ."<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
-            } // rejecting illegal characters in db name
-            else{
-
-                list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
-
-                $dblist = mysql__select_list2($mysqli, 'show databases');
-                if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '$targetdbname_out"
-                    ."' already exists. Please choose a different name<br></div>";
-                }else{
-                    ob_start();
-                }
-            }
+            ob_start();
         }
     }
     if($sErrorMsg){

@@ -35,13 +35,10 @@ if(!@$_REQUEST['pwd']){
     
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    $sErrorMsg = null;
-    if(preg_match('/[^A-Za-z0-9_\$]/', $database_to_delete)){ //validatate database name
-            $sErrorMsg = 'Database name '.$database_to_delete.' is wrong';
-    }else if(strlen($database_to_delete)>64){
-            $sErrorMsg = 'Database name '.$database_to_delete.' is too long. Max 64 characters allowed';
-    }
-    if ($sErrorMsg) {
+    
+    $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, false);
+    
+    if ($sErrorMsg!=null) {
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 

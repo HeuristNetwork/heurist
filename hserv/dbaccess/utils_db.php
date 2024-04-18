@@ -141,9 +141,9 @@
         if($db_name==null || trim($db_name)==''){
             $res = 'Database parameter not defined';
         }else if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
-            $res = 'Database name '.$db_name.' is wrong. Only letters, numbers and underscores (_) are allowed in the database name';
+            $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
         }else if(strlen($db_name)>64){
-            $res = 'Database name '.$db_name.' is too long. Max 64 characters allowed';
+            $res = 'Database name '.htmlspecialchars($db_name).' is too long. Max 64 characters allowed';
         }
         
         if($res!==true){
@@ -834,6 +834,9 @@
                 $dbScriptMode = 0;
             }
             
+            //  cat sourcefile.sql | sed '/^CREATE DATABASE/d' | sed '/^USE/d' > destfile.sql
+            //  cat sourcefile.sql | sed '/^CREATE DATABASE/d' | sed '/^USE/d' | mysql newdbname
+            
             //$dbScriptMode = 0; //disable all others
             
             if($dbScriptMode==2){
@@ -1128,11 +1131,13 @@
                 
                 if($json_for_record_details){
                     $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
+                /*
                     $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
                          bkp_ID int unsigned NOT NULL auto_increment,
                          dtl_ID int unsigned NOT NULL,
                          dtl_Value TEXT,
                          PRIMARY KEY (bkp_ID))');
+                */
                 }
                 
                 if($cnt_dates<150000){
@@ -1208,6 +1213,7 @@
                                         htmlspecialchars($row2[0].'" Max:"'.$row2[1]).'". Query:'.$query;
                                 }else{
             //4. Keep old plain string temporal object in backup table 
+                                    /*
                                     if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
                                         $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
                                             .$mysqli->real_escape_string($dtl_Value).'\')';
@@ -1217,7 +1223,7 @@
                                             $isok = false;
                                             break;
                                         }
-                                    }
+                                    }*/
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
                                     if($dtl_Value != $dtl_NewValue_for_update){
