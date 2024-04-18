@@ -569,7 +569,7 @@ class DbUtils {
         if($createArchive) {
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, 
+                    $system->addError(HEURIST_ACTION_BLOCKED, 
                         $msg_prefix.' Cannot create archive folder for database to be deleteted.');                
                     self::$db_del_in_progress = null;
                     return false;
@@ -579,7 +579,7 @@ class DbUtils {
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);                
                     if($verbose) echo '<br>'.htmlspecialchars($msg);
                     self::$db_del_in_progress = null;
                     return false;
@@ -803,7 +803,6 @@ class DbUtils {
                     $cmd = '"'.$cmd.'"';
                 }
                 
-
                 $cmd = $cmd
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local 
@@ -811,17 +810,16 @@ class DbUtils {
                 ." {$tables} > ".$database_dumpfile;
                 
                 $arr_out = array();
-                
+
                 exec($cmd, $arr_out, $res2);
 
                 if($res2 !== 0) {
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
                     $msg = "mysqldump for ".htmlspecialchars($database_name_full)
                                 ." failed with a return code of {$res2}";
                     if($verbose) echo '<br>'.$msg;
                     
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);
                     
                     
                     //echo "Error message was:\n";

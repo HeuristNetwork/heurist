@@ -214,6 +214,8 @@ $cnt_archived = 0;
 $email_list = array();
 $email_list_deleted = array();
 
+//$databases = array('osmak_3');
+
 foreach ($databases as $idx=>$db_name){
     
     if(in_array($db_name,$exclusion_list)){
