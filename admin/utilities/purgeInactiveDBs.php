@@ -341,7 +341,7 @@ if($need_email){
                 $report .= ' ARCHIVED'; 
                 $cnt_archived++;
             }else{
-                $report .= ('ERROR: '.$system->getError()['message']);
+                $report .= (' ERROR: '.$system->getError()['message']);
             }
         }
     }else{

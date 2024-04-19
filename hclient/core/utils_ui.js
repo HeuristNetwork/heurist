@@ -2676,31 +2676,39 @@ window.hWin.HEURIST4.ui = {
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         var  doc_body = $(window.hWin.document).find('body');
-        if($.isFunction(doc_body[actionName])){ //OK! widget script js has been loaded
+        
+        var widgetName = actionName;
+        
+        if(actionName=='dbCreate'){
+            widgetName = 'dbAction';
+            options['actionName'] = actionName;
+        }
+        
+        if($.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
             if(!options.container){ //container not defined - add new one to body
                 
-                manage_dlg = $('<div id="heurist-dialog-'+actionName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( doc_body )
-                    [actionName]( options );
+                    [widgetName]( options );
             }else{
                 
-                if($(options.container)[actionName]('instance')){
+                if($(options.container)[widgetName]('instance')){
                     
                     if(options.need_reload===false){
                         $(options.container).show();
                         return;
                     }else{
-                        $(options.container)[actionName]('destroy');
+                        $(options.container)[widgetName]('destroy');
                     }
                     
                 }
                 $(options.container).empty();
                 $(options.container).show();
                 
-                manage_dlg = $(options.container)[actionName]( options );
+                manage_dlg = $(options.container)[widgetName]( options );
             }
             
             return manage_dlg;
@@ -2719,6 +2727,9 @@ window.hWin.HEURIST4.ui = {
                 scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/popups/'+actionName+'.js'];
             }else if( actionName.indexOf('lookupGN')===0 || actionName=='lookupConfig'){
                 scripts.unshift( window.hWin.HAPI4.baseURL +'hclient/core/accessTokens.php' );
+            }else if(actionName=='dbCreate'){
+                scripts = [window.hWin.HAPI4.baseURL + 'hclient/widgets/baseAction.js', 
+                           window.hWin.HAPI4.baseURL + 'hclient/widgets/database/dbAction.js'];
             }
             
             $.getMultiScripts(scripts)
@@ -2834,6 +2845,9 @@ window.hWin.HEURIST4.ui = {
         return true;
     },    
     
+    //
+    //
+    //
     preventNonNumeric: function(evt) {
         var theEvent = evt || window.event;
         var key = theEvent.keyCode || theEvent.which;
@@ -2841,20 +2855,24 @@ window.hWin.HEURIST4.ui = {
         key = String.fromCharCode( key );
         var regex = /[0-9]|\./;
         if( !regex.test(key) ) {
-            theEvent.returnValue = false;
-            theEvent.preventDefault();
+            window.hWin.HEURIST4.util.stopEvent(theEvent);
         }
     },
-
+    
+    //
+    //
+    //
     preventNonAlphaNumeric: function(evt) {
         var theEvent = evt || window.event;
         var key = theEvent.keyCode || theEvent.which;
-        if(key==37 || key==39) return;
-        key = String.fromCharCode( key );
-        if(!/^[a-zA-Z0-9$_]+$/.test(key)){
-            theEvent.returnValue = false;
-            theEvent.preventDefault();
+        //if(key==37 || key==39) return;  // % '
+        if(key > 31){
+            key = String.fromCharCode( key );
+            if(!/^[a-zA-Z0-9_]+$/.test(key)){
+                window.hWin.HEURIST4.util.stopEvent(theEvent);
+            }
         }
+        return true;        
     },
     
     cleanFilename: function(filename) {

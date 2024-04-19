@@ -241,7 +241,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      * - `message`: error message or Ajax response
      * - `data`: data returned for request
      */
-    function _callserver(action, request, callback) {
+    function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
 
@@ -268,7 +268,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var request_code = { script: action, action: request.a };
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        $.ajax({
+        var ajax_options = {
             url: url,
             type: "POST",
             data: request,
@@ -326,7 +326,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     callback(response);
                 }
             }
-        });
+        };
+        
+        if(timeout>0){ //default 120000 - 120 seconds
+            ajax_options['timeout'] = timeout;
+        }
+        
+        $.ajax(ajax_options);
 
     }
 
@@ -1439,6 +1445,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             repositoryAction: function (request, callback) {
                 _callserver('repoController', request, callback);
+            },
+            
+            databaseAction: function (request, callback) {
+                _callserver('databaseController', request, callback, 600000); //5 minutes
             },
 
         }

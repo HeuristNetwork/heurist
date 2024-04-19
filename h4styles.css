@@ -1694,6 +1694,11 @@ ul.fancytree-container ul{
     font-size: 0.9em;
     vertical-align:top;
 }
+.heurist-helper1{
+    font-style:normal;
+}
+
+
 /* nearly same as helper but nor affected to help status*/
 .heurist-prompt{
     font-size:0.9em;

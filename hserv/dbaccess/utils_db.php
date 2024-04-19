@@ -803,7 +803,7 @@
     * @param mixed $database_name_full
     * @param mixed $script_file
     */
-    function mysql__script($database_name_full, $script_file) {
+    function mysql__script($database_name_full, $script_file, $force_scriptmode=0) {
         global $errorScriptExecution;
         
         $error = '';
@@ -811,7 +811,12 @@
     
         
         //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        if($force_scriptmode>0){
+             $dbScriptMode = ($force_scriptmode==2)?2:0;
+        }else{
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        }
+        
         
         //all scripts are in admin/setup/dbcreate
         if($script_file = basename($script_file)){
@@ -839,7 +844,7 @@
             
             //$dbScriptMode = 0; //disable all others
             
-            if($dbScriptMode==2){
+            if($dbScriptMode==2){  //DEFAULT
                 //shell script - server admin must specify "local" login-path with mysql_config_editor 
                 // mysql_config_editor set --login-path=local --host=127.0.0.1 --user=username --password
             
@@ -900,7 +905,7 @@
                     $mysqli2->close();
                 }
             */
-            }else{ //3d party function that uses PDO  - DEFAULT
+            }else{ //3d party function that uses PDO
                 
                 if(!function_exists('execute_db_script')){
                         include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php'; // used to load procedures/triggers
@@ -1610,7 +1615,7 @@
 
     
 
-    //
+    // NOT USED
     // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
     //
     function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
@@ -1683,6 +1688,7 @@
         
         if($value=='REMOVE'){
             if($is_exist) fileDelete($session_file);
+            $res = 'terminate';
         }else{
             //get    
             if($is_exist) $res = file_get_contents($session_file);

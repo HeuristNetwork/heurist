@@ -1854,7 +1854,6 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     initHelpDiv: function(){
-        
         this.helper_div = $('<div>').addClass('ui-helper-popup').hide().appendTo(this.element);
         
         var _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo(this.helper_div);  

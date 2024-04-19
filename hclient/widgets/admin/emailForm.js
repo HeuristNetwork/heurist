@@ -3,6 +3,8 @@
 * emailForm widget - either creates form or use given one
 * send email to address defined in given record id, if record not define 
 * it sends email to database owner
+* 
+* @todo - use baseAction as parent
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

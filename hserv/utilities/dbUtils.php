@@ -56,6 +56,7 @@ class DbUtils {
     private static $system = null;
     private static $initialized = false;
     private static $db_del_in_progress = null;
+    private static $session_id = 0;
 
     public static function initialize($mysqli=null)
     {
@@ -74,6 +75,23 @@ class DbUtils {
         self::$initialized = true;
     }
 
+    public static function setSessionId($id){
+        self::$session_id = $id;
+    }
+
+    //
+    // returns true if session has been terminated
+    //
+    private static function setSessionVal($session_val){
+        $current_val = mysql__update_progress(self::$mysqli, self::$session_id, false, $session_val);
+        if($current_val=='terminate'){ //session was terminated from client side
+            self::$session_id = 0;
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
     //
     // set Origin ID for rectype, detail and term defintions
     //
@@ -574,8 +592,8 @@ class DbUtils {
                     self::$db_del_in_progress = null;
                     return false;
             }
-            
-            $db_dump_file = DbUtils::databaseDump( $database_name, null, null, $verbose );
+                                
+            $db_dump_file = self::databaseDump( $database_name, null, null, $verbose );
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
@@ -875,8 +893,10 @@ class DbUtils {
     
     //
     // Creates new heurist database with file folders and ready to use
+    // 
+    // returns false or array of warnings
     //
-    public static function databaseCreateFull($database_name_full, &$user_record, $templateFileName=null){
+    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null){
         
             self::initialize();
             $mysqli = self::$mysqli;
@@ -894,37 +914,65 @@ class DbUtils {
                 return false;
             }   
             
-            list($database_name_full, $database_name) = mysql__get_names( $database_name_full );         
-
-            //create empty database
-            if(!DbUtils::databaseCreate($database_name_full)){
+            list($database_name_full, $database_name) = mysql__get_names( $database_name );
+            
+            //checks that database name is valid, correct length and unique
+            $error_msg = self::databaseValidateName($database_name);
+            if ($error_msg!=null) {
+                self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
                 return false;
             }
             
-            //switch to new database            
-            mysql__usedatabase( $mysqli, $database_name_full);  
+            if(self::setSessionVal(1)) return false;
+            
+            //create folders 
+            $upload_root = self::$system->getFileStoreRootFolder();
+            
+            $database_folder = $upload_root.$database_name.'/';
+            
+            $warnings = self::databaseCreateFolders($database_name);
+            if(is_array($warnings) && count($warnings)>0){
+                folderDelete($database_folder);  
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                                            implode("<br>",$warnings));
+                return false;
+            }
 
+            if(self::setSessionVal(2)) return false;
+            
+            //create empty database
+            if(!self::databaseCreate($database_name_full)){
+                folderDelete($database_folder);  
+                return false;
+            }
+            
+            if(self::setSessionVal(3)) return false;
+            
+            //switch to new database            
+            mysql__usedatabase( $mysqli, $database_name_full );  
+
+            //import definitions from template file
             $idef = new ImportDefinitions();
             $idef->initialize( $mysqli );
 
             if(!$idef->doImport( $templateFileName )) {
                 
                 $system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Error importing core definitions from coreDefinitions.txt '
+                    'Error importing core definitions from '
+                    . basename($templateFileName)
                     .' for database '.$database_name_full.'<br>'
                     .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
                     
+                folderDelete($database_folder);  
                 mysql__drop_database( $mysqli, $database_name_full );
                 return false;
             }
+
+            if(self::setSessionVal(4)) return false; //@todo on termination drop database
             
-            $warnings = DbUtils::databaseCreateFolders($database_name_full);
-            
-            if(is_array($warnings) && count($warnings)>0){
-                return $warnings;
-            }
-            
-            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
+            //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
+            //not used 
+            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ 
                 $upload_root = $system->getFileStoreRootFolder();
                 
                 $unzip_error = null;
@@ -936,7 +984,29 @@ class DbUtils {
                 }
             }            
             
-            //update owner in new database
+            $warnings2 = self::_initForNewDatabase($user_record);
+
+            if(self::setSessionVal(5)) return false;
+            
+            $warnings = array_merge($warnings, $warnings2); 
+
+            self::setSessionVal('REMOVE');
+            
+            return $warnings;
+    }
+
+    // 
+    // Updates user#2 
+    // Adds default saved searches tree for DbAdmins groups and DbOwner (users ##1,2)
+    // Adds default lookups (geonames and nakala)
+    //
+    private static function _initForNewDatabase(&$user_record)
+    {
+            $warnings = array();
+            
+            $mysqli = self::$mysqli;
+        
+            //update owner user (#2) in new database
             $user_record['ugr_ID'] = 2;
             $user_record['ugr_NavigationTree'] = '"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}}]}';
 //,{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}
@@ -949,17 +1019,90 @@ class DbUtils {
            
             //add default saved searches and tree
             $navTree = '{"expanded":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_1","title":"Save some filters here ...","children":[]}]}';
-
 //{"key":"28","title":"Organisations","data":{"isfaceted":false}},{"key":"29","title":"Persons","data":{"isfaceted":false}},{"key":"30","title":"Media items","data":{"isfaceted":false}}
-                        
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
             if($ret!=1){
                 array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);                
             }
             
-            return true;
-    }
+            //ADD DEFAULT LOOKUPS
+            $def_lookups = array();
 
+            $to_replace = array('DB_ID', 'DTY_ID', 'RTY_ID');
+            $dty_CCode = 'SELECT dty_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_OriginatingDBID = DB_ID AND dty_IDInOriginatingDB = DTY_ID AND rst_RecTypeID = RTY_ID';
+
+            // GeoNames
+            $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $fld_geo = mysql__select_value($mysqli, str_replace($to_replace, array('2', '28', $rty_id), $dty_CCode));
+                $fld_geo = (empty($fld_geo)) ? '' : $fld_geo;
+
+                $fld_cc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '26', $rty_id), $dty_CCode));
+                $fld_cc = (empty($fld_cc)) ? '' : $fld_cc;
+
+                $fld_fname = mysql__select_value($mysqli, str_replace($to_replace, array('3', '1068', $rty_id), $dty_CCode));
+                $fld_fname = (empty($fld_fname)) ? '' : $fld_fname;
+
+                $fld_id = mysql__select_value($mysqli, str_replace($to_replace, array('2', '581', $rty_id), $dty_CCode));
+                $fld_id = (empty($fld_id)) ? '' : $fld_id;
+
+                $key = 'geoName_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'geoName', 'rty_ID' => $rty_id, 'label' => 'GeoName', 'dialog' => 'lookupGN', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('name' => $fld_name, 'lng' => $fld_geo, 'lat' => $fld_geo, 'countryCode' => $fld_cc, 'adminCode1' => "", 'fclName' => $fld_fname, 'fcodeName' => "", 'geonameId' => $fld_id, 'population' => "");
+            }
+
+            // Nakala
+            $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_url = mysql__select_value($mysqli, str_replace($to_replace, array('2', '38', $rty_id), $dty_CCode));
+                $fld_url = (empty($fld_url)) ? '' : $fld_url;
+
+                $fld_title = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_title = (empty($fld_title)) ? '' : $fld_title;
+
+                $fld_aut = mysql__select_value($mysqli, str_replace($to_replace, array('2', '15', $rty_id), $dty_CCode));
+                $fld_aut = (empty($fld_aut)) ? '' : $fld_aut;
+
+                $fld_date = mysql__select_value($mysqli, str_replace($to_replace, array('2', '10', $rty_id), $dty_CCode));
+                $fld_date = (empty($fld_date)) ? '' : $fld_date;
+
+                $fld_lic = mysql__select_value($mysqli, str_replace($to_replace, array('1144', '318', $rty_id), $dty_CCode));
+                $fld_lic = (empty($fld_lic)) ? '' : $fld_lic;
+
+                $fld_type = mysql__select_value($mysqli, str_replace($to_replace, array('2', '41', $rty_id), $dty_CCode));
+                $fld_type = (empty($fld_type)) ? '' : $fld_type;
+
+                $fld_desc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '3', $rty_id), $dty_CCode));
+                $fld_desc = (empty($fld_desc)) ? '' : $fld_desc;
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '62', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $key = 'nakala_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'nakala', 'rty_ID' => $rty_id, 'label' => 'Nakala Lookup', 'dialog' => 'lookupNakala', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('url' => $fld_url, 'title' => $fld_title, 'author' => $fld_aut, 'date' => $fld_date, 'license' => $fld_lic, 'mime_type' => $fld_type, 'abstract' => $fld_desc, 'rec_url' => '', 'filename' => $fld_name);
+            }
+
+            if(!empty($def_lookups)){
+
+                $lookup_str = json_encode($def_lookups);
+                $upd_query = "UPDATE sysIdentification SET sys_ExternalReferenceLookups = ? WHERE sys_ID = 1";
+                mysql__exec_param_query($mysqli, $upd_query, array('s', $lookup_str));
+            }else{
+                array_push($warnings, 'Unable to setup default lookup services.');
+            }
+            
+            return  $warnings;
+            
+    }
+    
 
     //
     // checks that database name is valid, correct length and unique
@@ -972,7 +1115,7 @@ class DbUtils {
         
         if ($check_unique && $error_msg==null) {
             //verify that database with such name already exists
-            $dblist = mysql__select_list2($mysqli, 'show databases');
+            $dblist = mysql__select_list2(self::$mysqli, 'show databases');
             if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
                 $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';
             }
@@ -990,6 +1133,7 @@ class DbUtils {
 
         $upload_root = self::$system->getFileStoreRootFolder();
         
+        //check archive
         if(!file_exists($archive_file)){
             
             $archive_file = $upload_root.'DELETED_DATABASES/'.$archive_file;
@@ -1002,19 +1146,21 @@ class DbUtils {
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
-        $error_msg = DbUtils::databaseValidateName($database_name);
+        //check database name and unique 
+        $error_msg = self::databaseValidateName($database_name);
         if ($error_msg!=null) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             return false;
         }
         
-        //create folder 
+        //create folders 
         $database_folder = $upload_root.$database_name.'/';
         
-        $warnings = DbUtils::databaseCreateFolders($database_name);
+        $warnings = self::databaseCreateFolders($database_name);
         if(is_array($warnings) && count($warnings)>0){
             folderDelete($database_folder);  
-            self::$system->addError(HEURIST_ACTION_BLOCKED, implode('<br>',$warnings));
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                                    implode('<br>',$warnings));
             return false;
         }
 
@@ -1030,7 +1176,6 @@ class DbUtils {
         }
         
         //find dump file 
-        
         $dumpfile = folderFirstFile($database_folder, 'sql', false);
         
         //create database and import data from dumpfile
@@ -1047,7 +1192,7 @@ class DbUtils {
             
             fileCopy($dumpfile, $script_file);
 
-            $res = DbUtils::databaseCreate($database_name, 1, $script_file);
+            $res = self::databaseCreate($database_name, 1, $script_file); //from archive
             fileDelete($script_file);                
             if(!$res){
                 folderDelete($database_folder);  
@@ -1068,14 +1213,17 @@ class DbUtils {
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
-        $error_msg = DbUtils::databaseValidateName($database_name);
+        $error_msg = self::databaseValidateName($database_name);
         if ($error_msg!=null) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             return false;
         }
         
+        $force_scriptmode = 0;
+        
         if($dumpfile==null){
             $dumpfile = 'blankDBStructure.sql';
+            $force_scriptmode = 1;
         }
         
         $mysqli = self::$mysqli;
@@ -1090,7 +1238,7 @@ class DbUtils {
             
         }else{
             
-            $res = mysql__script($database_name_full, $dumpfile);
+            $res = mysql__script($database_name_full, $dumpfile, $force_scriptmode);
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
@@ -1145,11 +1293,11 @@ class DbUtils {
         if (folderCreate($database_folder, true)){
             folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
         }else{
-            return array('message'=>"Heurist was unable to create the required database root folder,\nDatabase name: " . $database_name . "\nServer url: " . HEURIST_BASE_URL, 'revert'=>true);
+            return array('Heurist was unable to create the required database root folder,<br>Database name: '
+                        . $database_name . '<br>Server url: ' . HEURIST_BASE_URL); //, 'revert'=>true
         }
 
         $warnings = array();
-
 
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons", $database_folder."entity" )){
             
@@ -1196,8 +1344,15 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
         
+//DEBUG        $warnings = array('1111111111111','aaaaaa1111111111111','bbbbbb1111111111111',
+//DEBUG            'ccccc1111111111111','ddddd1111111111111','222222222222222222','/filethumbs', 'used to store thumbnails for uploaded files');
+        
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });
+        if(count($warnings)>0){
+            array_unshift($warnings, "Unable to create the sub directories within the database root directory,<br>Database name: " 
+                        . $database_name . ",<br><br>Server url: " . HEURIST_BASE_URL . ",<br>Warnings:\n");
+        }
         
         return $warnings;
     }
