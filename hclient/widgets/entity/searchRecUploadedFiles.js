@@ -183,8 +183,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search_my.show();
             }
 
+            this.input_sort_type.val('name');
+
         }else{
             this.element.find('.manager-only').hide().off('click'); // hide and remove functions
+
+            this.input_sort_type.val('recent');
         }
 
         this.startSearch();   
