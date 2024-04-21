@@ -2198,7 +2198,7 @@ div.coverall-div, div.coverall-div-bare
     margin: 0px;
 }
 div.coverall-div {
-    background-color: #000;
+    background-color: rgb(0, 0, 0);
     opacity: 0.6;
     /*filter: progid:DXImageTransform.Microsoft.Alpha(opacity=60);*/
     background-image: url(hclient/assets/loading-animation-white.gif);

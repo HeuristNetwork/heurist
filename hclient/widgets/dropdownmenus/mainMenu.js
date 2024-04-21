@@ -886,10 +886,34 @@ $.widget( "heurist.mainMenu", {
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
 
         }
-/*        else if(action == "menu-database-create"){
+        else if(action == "menu-database-create"){
         
             popup_dialog_options.title = window.hWin.HR('Create New Database');
             window.hWin.HEURIST4.ui.showRecordActionDialog('dbCreate', popup_dialog_options);
+        
+        }
+        else if(action == "menu-database-delete"){
+        
+            popup_dialog_options.title = window.hWin.HR('Delete Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbDelete', popup_dialog_options);
+        
+        }
+        else if(action == "menu-database-clear"){
+        
+            popup_dialog_options.title = window.hWin.HR('Clear Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClear', popup_dialog_options);
+        
+        }/*
+        else if(action == "menu-database-rename"){
+        
+            popup_dialog_options.title = window.hWin.HR('Rename Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRename', popup_dialog_options);
+            
+        }
+        else if(action == "menu-database-clone"){
+        
+            popup_dialog_options.title = window.hWin.HR('Clone Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClone', popup_dialog_options);
         
         }*/
         else if(action == "menu-cms-create"){

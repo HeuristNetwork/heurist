@@ -2679,7 +2679,7 @@ window.hWin.HEURIST4.ui = {
         
         var widgetName = actionName;
         
-        if(actionName=='dbCreate'){
+        if(actionName.indexOf('db')===0){
             widgetName = 'dbAction';
             options['actionName'] = actionName;
         }

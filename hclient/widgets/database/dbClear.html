@@ -1,0 +1,35 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <div style="display:inline-block;background-color:yellow;padding:6px;border: 1px solid red; border-radius: 3px;font-size: 14px;color:red;">
+            <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+            DANGER 
+            &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+        </div>
+        
+        <h2 style='display:inline-block;vertical-align: middle;'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h2><br>
+        <h2>This will clear (delete) all records and reset counter to 1 for the current database: </h2>
+        <h2>Clear database: <span class="dbname"></span></h2>
+
+        <p>Database definitions - record types, fields, terms, tags, users etc. - are not affected.<br>
+            Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<br>
+            This operation may take some minutes on a large database
+        </p>
+        <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database</p>
+        <p>Type the words above to confirm deletion of records: 
+            <input type='input' maxlength='20' size='20' id='db-password' autocomplete="off" autocorrect="off"/>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="ui-button-action" id="btnDelete">OK to Clear</button>
+        </p>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    Record data, bookmarks and tags have been deleted from <b><span class="dbname"></span></b><br>
+    Database structure (record types, fields, terms, constraints etc.) and users have not been affected.
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+            </ol>
+        </div>
+</div>

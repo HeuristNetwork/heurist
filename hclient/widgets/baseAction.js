@@ -45,6 +45,8 @@ $.widget( "heurist.baseAction", {
         onClose:null
         
     },
+
+    _$: $,
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
@@ -62,6 +64,7 @@ $.widget( "heurist.baseAction", {
     _create: function() {
         // prevent double click to select text
         // it prevents inputs in FF this.element.disableSelection();
+        this._$ = selector => this.element.find(selector);
     }, //end _create
     
     //
@@ -91,7 +94,7 @@ $.widget( "heurist.baseAction", {
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + this.options.path + this.options.htmlContent
                         +'?t='+window.hWin.HEURIST4.util.random();
-//console.log(url);        
+console.log(url);        
             
             this.element.load(url, 
             function(response, status, xhr){
@@ -100,7 +103,7 @@ $.widget( "heurist.baseAction", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -109,7 +112,7 @@ $.widget( "heurist.baseAction", {
             return;
         }else{
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }
@@ -275,7 +278,7 @@ $.widget( "heurist.baseAction", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
-                    if($.isFunction(that.options.onClose)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose( that._context_on_close );
                     } 
@@ -333,11 +336,11 @@ $.widget( "heurist.baseAction", {
         }else{
             
             var canClose = true;
-            if($.isFunction(this.options.beforeClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
             if(canClose){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose( this._context_on_close );
                 }
             }

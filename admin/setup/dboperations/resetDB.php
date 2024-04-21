@@ -1,6 +1,6 @@
 <?php                                                
 /**
-* resetDB.php removes and rectreats the certain demo database. For faily cron job
+* resetDB.php removes and rectreats the certain demo database. For daily cron job
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

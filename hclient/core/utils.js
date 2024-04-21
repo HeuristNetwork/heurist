@@ -97,7 +97,10 @@ window.hWin.HEURIST4.util = {
             }
     },
     
-
+    isFunction: function(f){
+        return typeof f === 'function';
+    },
+    
     isNumber: function (n) {
         //return typeof n === 'number' && isFinite(n);
         return !isNaN(parseFloat(n)) && isFinite(n);

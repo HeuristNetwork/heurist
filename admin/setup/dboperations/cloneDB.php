@@ -389,7 +389,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
 
     echo_flush ("<p><b>Copying data</b></p>");
-    // db_clone function in /common/php/db_utils.php does all the work
+    // db_clone function in /common/php/dbUtils.php does all the work
     if( !DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
         DbUtils::databaseDrop( false, $targetdbname_full, false);
         return false;

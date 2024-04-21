@@ -2043,7 +2043,7 @@ class System {
     }
 
     //
-    // return true if password is wrong
+    // returns true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
     {

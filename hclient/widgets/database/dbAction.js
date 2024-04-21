@@ -29,7 +29,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     
     _progressInterval:0,
 
-
     _init: function() {
 
         if(this.options.htmlContent=='' && this.options.actionName){
@@ -37,6 +36,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     +(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')+'.html';
         }
         
+        // dbCreate => create
         this.options.actionName = this.options.actionName.slice(2)
         this.options.actionName = this.options.actionName[0].toLowerCase()
                                     +this.options.actionName.slice(1)
@@ -51,20 +51,24 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var that = this;
         
         //find and activate event listeners for elements
-        this._on(this.element.find('input[type=text]'),{keypress:window.hWin.HEURIST4.ui.preventNonAlphaNumeric});
+        this._on(this._$('input[type=text]'),{keypress:window.hWin.HEURIST4.ui.preventNonAlphaNumeric});
         
-        this.element.find('#btnCreateDb').button(); // 
-        this._on(this.element.find('#btnCreateDb'),{click:this.doAction});
+        this._$('button.ui-button-action').button(); // 
+        this._on(this._$('button.ui-button-action'),{click:this.doAction});
         
         if(this.options.actionName=='create'){
-                var ele = this.element.find('#uname');
-                if(ele.val()=='' && window.hWin.HAPI4.currentUser){
-                    ele.val(window.hWin.HAPI4.currentUser.ugr_Name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
-                }
-                $('#dbname').focus();
-                
-                this._on(this.element.find('#newdblink'),{click:this.closeDialog});
         }
+        else if(this.options.actionName=='delete' || this.options.actionName=='clear'){
+        }
+            
+        var ele = this._$('#uname');
+        if(ele.val()=='' && window.hWin.HAPI4.currentUser){
+            ele.val(window.hWin.HAPI4.currentUser.ugr_Name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
+        }
+        this._on(this._$('#newdblink'),{click:this.closeDialog});
+        this._$('span.dbname').text(window.hWin.HAPI4.database);
+
+        this._$('#dbname').focus();
         
         return this._super();
     },
@@ -92,37 +96,45 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         var request;
         
-        if(this.options.actionName=='create'){
+        if(this.options.actionName=='create' 
+            || this.options.actionName=='rename'
+            || this.options.actionName=='clone')
+        {
+
+           var dbname = this._$('#dbname').val().trim();
+           if(dbname==''){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
+                return;  
+           } 
            
-           request = {action: 'create',
-                      uname : $('#uname').val(), 
-                      dbname: $('#dbname').val()}; 
+           request = {action: this.options.actionName,
+                      uname : this._$('#uname').val().trim(), 
+                      dbname: dbname}; 
 
-        }else if(this.options.actionName=='clone'){
-            
-           request = {action: 'clone', 
-                      nodata: $('#nodata').is(':checked'),
-                      dbname: $('#dbname').val(),
-                      }; 
-            
-        }else if(this.options.actionName=='clear'){
+           if(this.options.actionName=='clone'){
+                request['nodata'] = this._$('#nodata').is(':checked'),     
+           }
+                      
+        }else if(this.options.actionName=='clear' || this.options.actionName=='delete'){
 
-           request = {action: 'clear', 
-                      dbname: $('#dbname').val()
-                      }; 
-            
-        }else if(this.options.actionName=='delete'){
+           var pwd = this._$('#db-password').val().trim();
+           if(pwd==''){
+                return;  
+           } 
 
-           request = {action: 'delete', 
-                      dbname: $('#dbname').val(),
-                      archive: $('#iszip').is(':checked')
-                      }; 
-            
-        }else if(this.options.actionName=='rename'){
-
-           request = {action: 'rename', 
-                      dbname: $('#dbname').val()
-                      }; 
+           request = {action: this.options.actionName, 
+                        //database : window.hWin.HAPI4.database, //current database
+                        pwd: pwd
+                     }; 
+              
+           if(this.options.actionName=='delete'){       
+               if(!this._$('#db-archive').is(':checked')){
+                    request['noarchive'] = 1;
+                    this._$('li.archive').hide();
+               }else{
+                    this._$('li.archive').show();
+               }
+           }
             
         }else if(this.options.actionName=='restore'){
             
@@ -148,10 +160,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                    that.element.find('.ent_wrapper').hide();
-                    that.element.find('#div_header').show();
+                    that._$('.ent_wrapper').hide();
+                    that._$('#div_header').show();
                 }
-          
               
         });
 
@@ -165,24 +176,47 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _afterActionEvenHandler: function( response ){
         
-        if(this.options.actionName=='create'){
+        this._$('.ent_wrapper').hide();
+        this._$("#div_result").show();
             
-            this.element.find('.ent_wrapper').hide();
-                        
-            this.element.find("#div_result").show();
-            this.element.find('#newdbname').text(response.newdbname);
-            this.element.find('#newusername').text(response.newusername);
-            this.element.find('#newdblink').attr('href',response.newdblink).text(response.newdblink);
+        if(this.options.actionName=='delete'){
+            
+            var msgAboutArc = '';
+            if(this._$('input[name=db-archive]:checked').val()!=''){
+               msgAboutArc = '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
+               + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>';                        
+            }
+    
+    
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been deleted</h3>'+msgAboutArc
+               ,null, 'Database deleted',
+               {
+                    width:700,
+                    height:'auto',
+                    close: function(){
+                        //redirects to startup page - list of all databases
+                        window.hWin.document.location = window.hWin.HAPI4.baseURL; //startup page
+                    }
+               }
+            );             
+            
+        }else{
+            
+            this._$('#newdbname').text(response.newdbname);
+            this._$('#newusername').text(response.newusername);
+            this._$('#newdblink').attr('href',response.newdblink).text(response.newdblink);
             
             if(response.warnings && response.warnings.length>0){
-                this.element.find('#div_warnings').html(response.warnings.join('<br><br>')).show();
-                this.element.find('#div_login_info').hide();
+                this._$('#div_warnings').html(response.warnings.join('<br><br>')).show();
+                this._$('#div_login_info').hide();
             }
                
             //clear local list of databases   
             if(window.hWin && window.hWin.HAPI4){
                 window.hWin.HAPI4.EntityMgr.emptyEntityData('sysDatabases');
             }    
+            
         }
                     
        
@@ -201,34 +235,42 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
              this._hideProgress();
              return;
         }
+        
+        //show wait screen
+        window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR(this.options.title));
+        $('body').css('cursor','progress');
+        
         var that = this;
        
         var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
-        //this.element.find('#div_header').hide();
-        this.element.find('.ent_wrapper').hide();
-        var progress_div = this.element.find('.progressbar_div').show();
+        this._$('.ent_wrapper').hide();
+        var progress_div = this._$('.progressbar_div').show();
         
-        $('body').css('cursor','progress');
         var div_loading = progress_div.find('.loading').show();
         div_loading.find('li').css('color','lightgray');
         var that = this;
         var prevStep = 0;
+        
                 
         this._progressInterval = setInterval(function(){ 
             
             var request = {t:(new Date()).getMilliseconds(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-
+                
                 if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
                     that._hideProgress();
                 }else if(response=='terminate' && is_autohide){
                     that._hideProgress();
                 }else if(prevStep!=response){
                     prevStep = response;
-                    var arr = div_loading.find('li').slice(0,prevStep);
-                    arr.css('color','black'); 
+                    if(window.hWin.HEURIST4.util.isNumber(prevStep)){
+                        var arr = div_loading.find('li').slice(0,prevStep);
+                        arr.css('color','black'); 
+                    }else{
+                        $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
+                    }
                 }
             },'text');
         
@@ -239,14 +281,15 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _hideProgress: function (){
         
         $('body').css('cursor','auto');
+        window.hWin.HEURIST4.msg.sendCoverallToBack(true);
         
         if(this._progressInterval!=null){
             
             clearInterval(this._progressInterval);
             this._progressInterval = null;
         }
-        this.element.find('.progressbar_div').hide();
-        this.element.find('#div_header').show();
+        this._$('.ent_wrapper').hide();
+        this._$('#div_header').show();
         
     },
     

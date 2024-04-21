@@ -1,17 +1,13 @@
 <div id="div_header" class="ent_wrapper" style="margin-left:40px;width:530px;font-size:0.95em">
     <div class="heurist-helper1" style="margin-top:50px">       
-        As creator of a database you become the database owner and can manage the database and other
-        <br>database users, including creation of workgroups and modification of database structure.
-        <br>
-        <br>
-        <b>Please use a <u>concise and informative name</u> of less than ~40 characters</b>
-        <i> <br>(Please avoid very generic names such as JH_test. Aim for a concise subject such as 
-            <br>JH_18CMonksLiguria or compact project names such USyd_CommunityEducationActivism60s70s)
-        </i>
+        This will perform the clone and delete functions back to back in order to rename the current database, 
+        so please ensure all edits/changes have been saved before proceeding.
+        <br><br>
+        After successful completion you will be required to login into the newly cloned database.    
     </div>
 
     <div class="entry-box">
-        <h3>Enter a name for the new database</h3>
+        <h3>Enter a new name for your database</h3>
         
         <div>
             hdb_<input type="text" id="uname"  name="uname" class="text ui-widget-content ui-corner-all" 
@@ -19,7 +15,7 @@
             _<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
                     maxlength="64" size="30" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
 
-            <button class="ui-button-action" id="btnCreateDb">Create Database</button>
+            <button class="ui-button-action" id="btnCreateDb">Rename <span class="dbname"></span></button>
         </div>
         
     </div>
@@ -49,6 +45,11 @@
         <!--or Database &gt; Structure &gt; Acquire from Templates -->
     </div>
 </div>
+
+<!--
+<p style="padding-left:20px;"><h2 style="color:red">Your database has not been renamed.</h2>
+<p>Please run Verify &gt; Verify database integrity. If this does not find and fix the error, please send a bug report (Help &gt; Bug report) and we will investigate the problem.</p>
+-->
 
 <div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
         <div class="loading" style="display:none;height:100%">
