@@ -315,18 +315,29 @@ title: "Overview"
                                                     if(page_id == window.hWin.current_page_id){
                                                         _refreshCurrentPage(window.hWin.current_page_id);
                                                     }
-                                                    
-                                                    var node = $container.fancytree('getTree').getNodeByKey(''+page_id);
-                                                    if(node){
-                                                        var old_name = node.title;
-                                                        var new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
-                                                        if(old_name!=new_name){
-                                                            node.setTitle( new_name ); 
-                                                            _defineActionIcons( node );   
-                                                            if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
-                                                            _refreshMainMenu( false ); //after Edit record
+
+                                                    // Update website tree and in site menu
+                                                    let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                                    let refresh_menus = false;
+
+                                                    if(page_cache[page_id]) page_cache[page_id][DT_NAME] = new_name;
+
+                                                    // Update tree nodes
+                                                    $container.fancytree('getTree').visit((node) => {
+
+                                                        let old_name = node.title;
+                                                        if(node.data.page_id == page_id){
+
+                                                            if(old_name == new_name){ return false; } // name wasn't updated
+
+                                                            node.setTitle( new_name );
+                                                            _defineActionIcons(node);
+                                                            refresh_menus = true;
                                                         }
-                                                    }
+
+                                                    });
+
+                                                    if(refresh_menus){ _refreshMainMenu(false); } // update menu
                                                 }
                                     }});
                                 }
