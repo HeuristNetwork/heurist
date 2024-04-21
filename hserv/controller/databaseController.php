@@ -66,7 +66,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             
             //compose database name
             $database_name = __composeDbName();
-            if(is_bool($database_name) && !$database_name){
+            if($database_name!==false){
             
                 if($isNewUserRegistration){
                     //@todo get user info from $_REQUEST
@@ -236,5 +236,6 @@ function __composeDbName(){
     }else{
         $res = $uName . $dbName;
     }
+    return $res;
 }
 ?>

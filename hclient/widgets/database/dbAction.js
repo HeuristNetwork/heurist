@@ -112,7 +112,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                       dbname: dbname}; 
 
            if(this.options.actionName=='clone'){
-                request['nodata'] = this._$('#nodata').is(':checked'),     
+                request['nodata'] = this._$('#nodata').is(':checked');
            }
                       
         }else if(this.options.actionName=='clear' || this.options.actionName=='delete'){
