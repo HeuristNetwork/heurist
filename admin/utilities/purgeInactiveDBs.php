@@ -229,8 +229,12 @@ foreach ($databases as $idx=>$db_name){
     if($res!==true){
         if(is_array($res) && $mysqli->error){
             //$mysqli->error 'gone away'
-            error_log('Cannot execute purgeInactiveDBs. Execution stopped on database '
+            $sMsg = 'Cannot execute purgeInactiveDBs. Execution stopped on database '
                 .$db_name.' ('.$arg_no_action.','.$is_shell.'). Error message: '.$mysqli->error);
+            error_log($sMsg);    
+            $sTitle = 'purgeInactiveDBs has been terminated. On '.HEURIST_SERVER_NAME;                
+            sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, false);
+                
             exit;
         }
         echo @$res[1]."\n";
