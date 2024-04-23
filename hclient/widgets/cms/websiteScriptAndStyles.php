@@ -1331,7 +1331,7 @@ function initHeaderTitle(){
         var headertitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
 
         document.title = window.hWin.HEURIST4.util.stripTags(headertitle);
-        headertitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');
+        headertitle = window.hWin.HEURIST4.util.stripTags(headertitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');
         
 
         var ele = $('#main-title');
