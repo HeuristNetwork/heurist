@@ -280,6 +280,8 @@ foreach ($arg_database as $idx=>$db_name){
         if(file_exists($progress_flag)) unlink($progress_flag);
         
         $err = $system->getError();
+        error_log('buildArchivePackagesCMD Error: '.@$err['message']);
+        
         exit("Sorry, unable to generate MySQL database dump for $db_name.".$err['message']."\n");
     }
 /*    

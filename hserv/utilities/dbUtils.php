@@ -844,7 +844,7 @@ class DbUtils {
                                 ." failed with a return code of {$res2}";
                     if($verbose) echo '<br>'.$msg;
                     
-                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
                     
                     //echo "Error message was:\n";

@@ -227,6 +227,12 @@ foreach ($databases as $idx=>$db_name){
     
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
+        if(is_array($res) && $mysqli->error){
+            //$mysqli->error 'gone away'
+            error_log('Cannot execute purgeInactiveDBs. Execution stopped on database '
+                .$db_name.' ('.$arg_no_action.','.$is_shell.'). Error message: '.$mysqli->error);
+            exit;
+        }
         echo @$res[1]."\n";
         continue;
     }
@@ -341,7 +347,9 @@ if($need_email){
                 $report .= ' ARCHIVED'; 
                 $cnt_archived++;
             }else{
-                $report .= (' ERROR: '.$system->getError()['message']);
+                $err = $system->getError();
+                error_log('purgeInactiveDBs Error: '.@$err['message']);
+                $report .= (' ERROR: '.@$err['message']);
             }
         }
     }else{

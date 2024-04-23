@@ -114,9 +114,11 @@
                     $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
 
                     if($db_exists == null){
-                        return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
+                        return array(HEURIST_ACTION_BLOCKED, 
+                            "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist", $mysqli->error);
                     }else{
-                        return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                        return array(HEURIST_INVALID_REQUEST, 
+                            "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'), $mysqli->error);
                     }
                 }
             }else{
