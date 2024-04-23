@@ -22,8 +22,8 @@
 * 
 * returns new id  or 0,error message
 *
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0

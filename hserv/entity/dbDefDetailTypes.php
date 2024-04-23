@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -251,6 +251,11 @@ class DbDefDetailTypes extends DbEntityBase
             
             //validate duplication
             if(@$this->records[$idx]['dty_Name']){
+
+                // Strip trailing + double spacing
+                $this->records[$idx]['dty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['dty_Name']);
+                $this->records[$idx]['dty_Name'] = super_trim($this->records[$idx]['dty_Name']);
+
                 $res = mysql__select_value($mysqli,
                         "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
                         .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");

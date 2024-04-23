@@ -17,7 +17,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -253,7 +253,7 @@ class UArchive {
 
                     fclose($fp);
                 } else {
-                    if (!mkdir($destination_dir.$filename, 0777, true)) {
+                    if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
                         throw new Exception('Cannot create subfolder on unzip');
                     }
                 }

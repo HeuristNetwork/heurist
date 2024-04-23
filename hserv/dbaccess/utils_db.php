@@ -48,7 +48,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -114,9 +114,11 @@
                     $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
 
                     if($db_exists == null){
-                        return array(HEURIST_ACTION_BLOCKED, "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist");
+                        return array(HEURIST_ACTION_BLOCKED, 
+                            "The requested database '".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8')."' does not exist", $mysqli->error);
                     }else{
-                        return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
+                        return array(HEURIST_INVALID_REQUEST, 
+                            "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'), $mysqli->error);
                     }
                 }
             }else{
@@ -141,9 +143,9 @@
         if($db_name==null || trim($db_name)==''){
             $res = 'Database parameter not defined';
         }else if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
-            $res = 'Database name '.$db_name.' is wrong. Only letters, numbers and underscores (_) are allowed in the database name';
+            $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
         }else if(strlen($db_name)>64){
-            $res = 'Database name '.$db_name.' is too long. Max 64 characters allowed';
+            $res = 'Database name '.htmlspecialchars($db_name).' is too long. Max 64 characters allowed';
         }
         
         if($res!==true){
@@ -803,7 +805,7 @@
     * @param mixed $database_name_full
     * @param mixed $script_file
     */
-    function mysql__script($database_name_full, $script_file) {
+    function mysql__script($database_name_full, $script_file, $force_scriptmode=0) {
         global $errorScriptExecution;
         
         $error = '';
@@ -811,7 +813,12 @@
     
         
         //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        if($force_scriptmode>0){
+             $dbScriptMode = ($force_scriptmode==2)?2:0;
+        }else{
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        }
+        
         
         //all scripts are in admin/setup/dbcreate
         if($script_file = basename($script_file)){
@@ -834,9 +841,12 @@
                 $dbScriptMode = 0;
             }
             
+            //  cat sourcefile.sql | sed '/^CREATE DATABASE/d' | sed '/^USE/d' > destfile.sql
+            //  cat sourcefile.sql | sed '/^CREATE DATABASE/d' | sed '/^USE/d' | mysql newdbname
+            
             //$dbScriptMode = 0; //disable all others
             
-            if($dbScriptMode==2){
+            if($dbScriptMode==2){  //DEFAULT
                 //shell script - server admin must specify "local" login-path with mysql_config_editor 
                 // mysql_config_editor set --login-path=local --host=127.0.0.1 --user=username --password
             
@@ -897,7 +907,7 @@
                     $mysqli2->close();
                 }
             */
-            }else{ //3d party function that uses PDO  - DEFAULT
+            }else{ //3d party function that uses PDO
                 
                 if(!function_exists('execute_db_script')){
                         include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php'; // used to load procedures/triggers
@@ -1128,11 +1138,13 @@
                 
                 if($json_for_record_details){
                     $mysqli->query('DROP TABLE IF EXISTS bkpDetailsDateIndex');
+                /*
                     $res3 = $mysqli->query('CREATE TABLE bkpDetailsDateIndex (
                          bkp_ID int unsigned NOT NULL auto_increment,
                          dtl_ID int unsigned NOT NULL,
                          dtl_Value TEXT,
                          PRIMARY KEY (bkp_ID))');
+                */
                 }
                 
                 if($cnt_dates<150000){
@@ -1208,6 +1220,7 @@
                                         htmlspecialchars($row2[0].'" Max:"'.$row2[1]).'". Query:'.$query;
                                 }else{
             //4. Keep old plain string temporal object in backup table 
+                                    /*
                                     if($json_for_record_details && strpos($dtl_Value,'|VER=1|')===0){ // !$is_date_simple
                                         $query = 'INSERT INTO bkpDetailsDateIndex(dtl_ID,dtl_Value) VALUES('.$dtl_ID.',\''
                                             .$mysqli->real_escape_string($dtl_Value).'\')';
@@ -1217,7 +1230,7 @@
                                             $isok = false;
                                             break;
                                         }
-                                    }
+                                    }*/
             //5A. If simple date - retain value in recDetails                                    
             //5B. If temporal object it saves JSON in recDetails
                                     if($dtl_Value != $dtl_NewValue_for_update){
@@ -1604,7 +1617,7 @@
 
     
 
-    //
+    // NOT USED
     // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
     //
     function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
@@ -1677,6 +1690,7 @@
         
         if($value=='REMOVE'){
             if($is_exist) fileDelete($session_file);
+            $res = 'terminate';
         }else{
             //get    
             if($is_exist) $res = file_get_contents($session_file);

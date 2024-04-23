@@ -12,7 +12,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -339,6 +339,11 @@ $isUpgrade = true;
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
                     if(arguments[1]){
+                        
+                        //verify definitions relevance every 20 seconds
+                        if(false){
+                            setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
+                        }
 
                         if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HUL.isFunction(callback)){
                             callback(true);

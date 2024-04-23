@@ -25,9 +25,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White   
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.6
@@ -69,6 +69,8 @@ class TitleMask {
     private static $rdr = null;  //record detail types
     //private static $rectypes = null;
     private static $records = null;
+
+    private static $provided_mask = null; // provided title mask - for checking/testing
     
     //private static $DT_PARENT_ENTITY = 0;
 
@@ -109,6 +111,8 @@ class TitleMask {
         // no substitutions to make
         return $checkempty?'Title mask must have at least one data field ( in [ ] ) to replace':'';
     }
+
+    self::$provided_mask = $mask;
 
     $res = self::execute($mask, $rt, 1, null, _ERR_REP_MSG);
     if(is_array($res)){
@@ -250,7 +254,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
                 $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
 
-                $cond_parts = mb_split("\\\\", $cond_mask[0]); //@todo mb_split apart
+                $cond_parts = mb_split("\\\\", $cond_mask[0]);
                 if(is_numeric(trim($cond_parts[0])) || empty($cond_parts[0])){
                     $str_maxlen = intval($cond_parts[0]);
                     array_shift($cond_parts);
@@ -269,7 +273,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                             }
 
                             $new_str = ($str_maxlen > 0 && mb_strlen($replacements[$cond_field]) > $str_maxlen ? mb_substr($replacements[$cond_field], 0, $str_maxlen) . '...' : $replacements[$cond_field]);
-                            $cond_part = mb_eregi_replace(preg_quote($cond_str, "/"), $new_str, $cond_part); //@todo mb_eregi_replace
+                            $cond_part = mb_eregi_replace(preg_quote($cond_str, "/"), $new_str, $cond_part);
                         }
 
                         if($is_valid){
@@ -304,7 +308,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 }
 
                 if($cond_replace !== null){ // replace part 
-                    $mask = mb_eregi_replace(preg_quote($cond_str, "/"), $cond_replace, $mask);  //@todo mb_eregi_replace
+                    $mask = mb_eregi_replace(preg_quote($cond_str, "/"), $cond_replace, $mask);
                 }
             }
         }
@@ -660,7 +664,8 @@ private static function __get_file_name($ulf_ID){
     if($ulf_ID>0){
         $fileinfo = fileGetFullInfo(self::$system, $ulf_ID);
         if(is_array($fileinfo) && count($fileinfo)>0){
-            return $fileinfo[0]['ulf_OrigFileName'];
+            return $fileinfo[0]['ulf_OrigFileName'] == '_remote' ? 
+                    $fileinfo[0]['ulf_ExternalFileReference'] : $fileinfo[0]['ulf_OrigFileName'];
             //  array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
         }        
     }
@@ -917,7 +922,14 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $rdt_id = self::__get_dt_field($rt, $field_name, $mode);  //get concept code
         if(!$rdt_id){
             //ERROR
-            return array("Field name '$field_name' not recognised");
+            $msg = "Field name '$field_name' not recognised";
+            $check_mask = $mode == 1 && !empty(self::$provided_mask);
+            if($check_mask && mb_ereg("(^|[^\[])\[ +$field_name|$field_name +\]([^\]]|$)", self::$provided_mask)){
+                // check for possible error
+                $msg .= "<br>This may be due to leading, trailing or multiple spaces in"
+                       ."<br>the field names - please edit the field names if this is the case";
+            }
+            return array($msg);
         }else {
             return self::__get_field_value( $rdt_id, $rt, $mode, $rec_id );
         }
@@ -1026,7 +1038,14 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
         }else{
             //ERROR
-            return array("'$parent_field_name' not recognised as a field name");
+            $msg = "'$parent_field_name' not recognised as a field name";
+            $check_mask = $mode == 1 && !empty(self::$provided_mask);
+            if($check_mask && mb_ereg("(^|[^\[])\[ +$parent_field_name|$parent_field_name +\]([^\]]|$)", self::$provided_mask)){
+                // check for possible error
+                $msg .= "<br>This may be due to leading, trailing or multiple spaces in"
+                       ."<br>the field names - please edit the field names if this is the case";
+            }
+            return array($msg);
         }
     } else {
         return "";

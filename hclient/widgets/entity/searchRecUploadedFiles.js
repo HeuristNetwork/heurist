@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -183,8 +183,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search_my.show();
             }
 
+            this.input_sort_type.val('name');
+
         }else{
             this.element.find('.manager-only').hide().off('click'); // hide and remove functions
+
+            this.input_sort_type.val('recent');
         }
 
         this.startSearch();   

@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -78,6 +78,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
     // Record history
     _record_history: null,
+    _check_history: true, // check for record history
 
     _init: function() {
         
@@ -564,8 +565,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         var that = this;
         let parententity = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
+        let workflowstage = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_WORKFLOW_STAGE']);
 
-        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null || $Db.dty(dtId, 'dty_Type') == 'separator' || dtId == parententity){
+        if(dtId == null || $Db.rst(this._currentEditRecTypeID, dtId) != null 
+            || $Db.dty(dtId, 'dty_Type') == 'separator' 
+            || dtId == parententity || dtId == workflowstage){
             return;
         }
 
@@ -634,14 +638,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
 
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-
                     if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HAPI4.EntityMgr.refreshEntityData(['defRecStructure'], function(){
                             that.reloadEditForm(true); // reload record editor
                             that._reloadRtsEditor(true); // reload structure editor
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            window.hWin.HEURIST4.msg.showMsgFlash(
+                                window.hWin.HR('Field added to record type structure'), 1500);
                         });
                     }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -2344,6 +2350,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //fill with values
         this._currentEditID = recID;
+        this._check_history = true; // reset history check
         
         var that = this;
         
@@ -4361,6 +4368,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             //this.element.find('.rt-info-header img').css('background-image', `url('${rt_icon}')`);
             this.element.find('.rt-info-header span').text(rt_name).attr('title', rt_name);
+
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('.btn-rec-history'), false); // reset get history button
         }
 
         // Toggle record visibility button
@@ -6402,6 +6411,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
     _getRecordHistory: function(){
 
+        if(!this._check_history){
+            window.hWin.HEURIST4.msg.showMsgFlash('No edits found on for this record...', 3000);
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('.btn-rec-history'), true);
+            return;
+        }
+
         const that = this;
         const rectype = this._getField('rec_RecTypeID');
 
@@ -6478,7 +6493,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     let cur_date_stamp = fld_history[fld_idx][0].arc_TimeOfChange;
-                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-m-d');
+                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-M-d');
 
                     history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
                                     + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>: <em style="${date_stamp_css}">${cur_date_stamp}</em> `
@@ -6495,11 +6510,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             prev_value = '';
                         }else if(type == 'freetext' || type == 'blocktext'){
                             prev_value = window.hWin.HEURIST4.util.stripTags(prev_value, 'u, i, b, strong, em');
-                            prev_value = prev_value.replaceAll(/"/g, '\\"');
                         }
     
                         let date_stamp = cur_history['arc_TimeOfChange'];
-                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-m-d');
+                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-M-d');
 
                         history_log += `<div id="${field.id}-${fld_idx}-${idx}">`
                                         + `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}"> <span>${cur_history.arc_Action}</span> <em style="${date_stamp_css}">${date_stamp}</em> `
@@ -6545,6 +6559,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(that.editFormPopup.layout().state['east']['outerWidth'] < width){
                     that.editFormPopup.layout().sizePane('east', width);
                 }
+            }else{
+                that._check_history = false;
+                that._getRecordHistory();
             }
 
             if(Object.keys(rec_ids).length > 0){

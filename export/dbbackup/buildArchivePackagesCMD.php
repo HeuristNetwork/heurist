@@ -9,8 +9,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2022 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6
 */
@@ -280,6 +280,8 @@ foreach ($arg_database as $idx=>$db_name){
         if(file_exists($progress_flag)) unlink($progress_flag);
         
         $err = $system->getError();
+        error_log('buildArchivePackagesCMD Error: '.@$err['message']);
+        
         exit("Sorry, unable to generate MySQL database dump for $db_name.".$err['message']."\n");
     }
 /*    

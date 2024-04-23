@@ -12,9 +12,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -674,7 +674,21 @@ if(!($is_map_popup || $without_header)){
                     //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
                 }
                 //init open in mirador links
-                $('.miradorViewer_link').on('click',function(event){
+                function __openMiradorViewer(event){
+                    
+                    //verify annotation record type
+                    let evt = event;
+                    
+                    if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
+                        if(!window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
+                            'In order to add Annotation to image you have to import "Annotation" record type',
+                            function(){
+                                evt.already_checked = true;
+                                __openMiradorViewer(evt);
+                            })){
+                            return;
+                        }
+                    }
                    
                     var ele = $(event.target)
 
@@ -707,9 +721,9 @@ if(!($is_map_popup || $without_header)){
                     }                      
 
                     //data-id
-                });
+                };
 
-                
+                $('.miradorViewer_link').on('click', __openMiradorViewer);
             }
 
             //
@@ -1561,10 +1575,10 @@ function print_public_details($bib) {
     }
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
-        $detail_visibility_conditions .= ' AND rst_NonOwnerVisibility != "hidden" AND rst_RequirementType != "forbidden" AND IFNULL(dtl_HideFromPublic, 0) != 1';
+        $detail_visibility_conditions .= ' AND IFNULL(rst_NonOwnerVisibility,"")!="hidden" AND IFNULL(rst_RequirementType,"")!="forbidden" AND IFNULL(dtl_HideFromPublic, 0)!=1';
     }else if(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         // hide forbidden fields from all except owners an admins
-        $detail_visibility_conditions .= ' AND rst_RequirementType != "forbidden"';
+        $detail_visibility_conditions .= ' AND IFNULL(rst_RequirementType,"")!="forbidden"';   //ifnull needed for non-standard fields
     }
 
     $query = $query.$detail_visibility_conditions

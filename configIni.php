@@ -9,8 +9,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2022 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6
 */
@@ -82,7 +82,7 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.5.4"; // sets current program version number, determined by Heurist development lead
+$version = "6.5.5"; // sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
 // Release dates - latest: 6.5.4 21 Feb 2024  

@@ -9,7 +9,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -499,6 +499,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
         if (e) {
             e.cancelBubble = true;
             if (e.stopPropagation) e.stopPropagation();
+            e.returnValue = false;
             e.preventDefault();
         }
         return e;

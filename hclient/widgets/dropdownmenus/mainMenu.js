@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -882,6 +882,36 @@ $.widget( "heurist.mainMenu", {
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
 
         }
+        else if(action == "menu-database-create"){
+        
+            popup_dialog_options.title = window.hWin.HR('Create New Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbCreate', popup_dialog_options);
+        
+        }
+        else if(action == "menu-database-delete"){
+        
+            popup_dialog_options.title = window.hWin.HR('Delete Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbDelete', popup_dialog_options);
+        
+        }
+        else if(action == "menu-database-clear"){
+        
+            popup_dialog_options.title = window.hWin.HR('Clear Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClear', popup_dialog_options);
+        
+        }/*
+        else if(action == "menu-database-rename"){
+        
+            popup_dialog_options.title = window.hWin.HR('Rename Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRename', popup_dialog_options);
+            
+        }
+        else if(action == "menu-database-clone"){
+        
+            popup_dialog_options.title = window.hWin.HR('Clone Database');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbClone', popup_dialog_options);
+        
+        }*/
         else if(action == "menu-cms-create"){
 
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){

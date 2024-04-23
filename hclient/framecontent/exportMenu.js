@@ -2,7 +2,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -273,7 +273,8 @@ function hexportMenu( container ) {
             _exportRecords({format:'rdf', save_as_file:save_as_file});
             
         }else if(action == "menu-export-gephi"){ 
-            _exportRecords({format:'gephi', save_as_file:save_as_file});
+
+            _popupFields({format:'gephi', save_as_file:save_as_file});
 
         }else if(action == "menu-export-iiif"){
             _exportRecords({format:'iiif', save_as_file:save_as_file});
@@ -287,7 +288,7 @@ function hexportMenu( container ) {
         }
         
         event.preventDefault();
-    }    
+    }
     
     //
     // opts: {format, isAll, includeRelated, multifile, save_as_file}
@@ -427,8 +428,9 @@ function hexportMenu( container ) {
                 }else{
                     params = params + '&format='+opts.format
 
-                    if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
-                        params = params + '&limit=1000';    
+                    if(opts.format=='gephi'){
+                        params += $('#limitGEPHI').is(':checked') ? '&limit=1000' : '';    
+                        params += !window.hWin.HEURIST4.util.isempty(opts.fields) ? `&columns=${opts.fields}` : '';    
                     }else if(opts.format=='geojson'){
                         params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
                     }else if(opts.format=='rdf'){
@@ -536,7 +538,51 @@ function hexportMenu( container ) {
                 window.hWin.open(url, '_blank');
             }
         }
-    }     
+    }
+
+    //
+    // Get fields to output
+    //
+    function _popupFields(opts){
+
+        let $dlg;
+
+        let msg = 'Would you like to export additional fields, or proceed with the standard fields?';
+
+        let btns = {};
+        btns[window.hWin.HR('Select additional fields')] = () => {
+
+            const dty_dialog_options = {
+                select_mode: 'select_multi',
+                edit_mode: 'popup',
+                isdialog: true,
+                width: 540,
+                selection_on_init: [],
+                title: 'Select fields to export',
+                filters: {
+                    types: [ "enum", "float", "date", "file", "geo", "freetext", "blocktext", "integer", "year", "boolean" ]
+                },
+                onselect:function(event, data){
+    
+                    if(data && data.selection){
+                        opts['fields'] = data.selection.join();
+                    }
+    
+                    _exportRecords(opts);
+                }
+            }
+    
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_dialog_options);
+
+            $dlg.dialog('close');
+        };
+
+        btns[window.hWin.HR('Proceed without other fields')] = () => { $dlg.dialog('close'); _exportRecords(opts); };
+
+        btns[window.hWin.HR('Cancel')] = () => { $dlg.dialog('close'); };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Add additional fields to export'}, {default_palette_class: 'ui-heurist-publish'});
+    }
      
     //public members
     var that = {

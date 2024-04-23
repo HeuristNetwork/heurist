@@ -36,9 +36,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -1560,7 +1560,7 @@ function log_smarty_activity($system, $rec_ids){
 
         // log each id one at a time
         for ($i=0; $i < count($rec_ids); $i++) {     
-            $system->user_LogActivity('custRep', array($rec_ids, count($rec_ids)), null, TRUE);
+            $system->user_LogActivity('custRep', array(implode(' ', $rec_ids), count($rec_ids)), null, TRUE);
         }
     }
 }

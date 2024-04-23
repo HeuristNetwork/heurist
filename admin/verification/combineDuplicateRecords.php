@@ -20,9 +20,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -491,14 +491,14 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     if (is_array($detail)) {
                                         if ($repeatCount != 1){//repeatable
                                             foreach ($detail as $val) {
-                                                print '<div>'. htmlspecialchars($val) . '</div>';
+                                                print '<div>'. $val . '</div>';
                                             }
                                         } else{
-                                            print '<div>'. htmlspecialchars($detail[0]) . '</div>';
+                                            print '<div>'. $detail[0] . '</div>';
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div>'. htmlspecialchars($detail) . '</div>';
+                                        print '<div>'. $detail . '</div>';
                                     }
 
                                     print '</td>';
@@ -616,7 +616,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
         '" '.($def_checked).
         ' value="'.($is_type_repeatable?  $detail_id :($is_master? "master":$detail_id)).
         '" id="'.($is_type_repeatable? ($is_master?"keep_detail_id":"add_detail_id"):"update").$detail_id.
-        '">'.detail_str($detail_type, $detail_val).'';
+        '">'.htmlspecialchars( detail_str($detail_type, $detail_val) ).'';
         
         $rv[]= $input;
     }

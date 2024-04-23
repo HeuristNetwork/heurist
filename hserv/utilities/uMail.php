@@ -6,7 +6,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -41,7 +41,9 @@ use PHPMailer\PHPMailer\Exception;
         if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
         if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
         
-        USanitize::purifyHTML($email_text);
+        if($is_html){
+            USanitize::purifyHTML($email_text);
+        }
         
         if(is_array($email_text)){
             $email_text =  json_encode($email_text);    

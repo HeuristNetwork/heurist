@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -495,7 +495,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             that._external_repositories[repo_name] = [ repo_details ];
 
                             window.hWin.HEURIST4.ui.addoption($select[0], repo_name, repo_name);
-                        }); console.log(that._external_repositories, response.data);
+                        }); //DEBUG console.log(that._external_repositories, response.data);
 
                         if($select.hSelect('instance') !== undefined){
                             $select.hSelect('refresh');

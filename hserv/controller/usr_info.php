@@ -8,8 +8,8 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -546,7 +546,7 @@
                     $sp = $_REQUEST['saml_entity'];
                     
                     //check saml session
-                    require_once dirname(__FILE__).'/../utilities/utils_saml.php';
+                    require_once dirname(__FILE__).'/../utilities/uSaml.php';
                     
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     
@@ -567,14 +567,14 @@
 
             } else if ($action=="reset_password") {
 
-                $system->user_LogActivity('ResetPassword');
-
                 $password = array_key_exists('new_password', $_REQUEST) ? $_REQUEST['new_password'] : null;
                 if(array_key_exists('new_password', $_REQUEST)) unset($_REQUEST['new_password']); // remove from REQUEST
 
                 if($_REQUEST['pin'] && $_REQUEST['username'] && $password){ // update password w/ pin
+                    $system->user_LogActivity('ResetPassword', "Updating password for {$_REQUEST['username']}");
                     $res = user_ResetPassword($system, $_REQUEST['username'], $password, $_REQUEST['pin']);
                 }else if($_REQUEST['pin']){ // get/validate reset pin
+                    $system->user_LogActivity('ResetPassword', "Handling reset pin for {$_REQUEST['username']}");
                     $res = user_HandleResetPin($system, @$_REQUEST['username'], @$_REQUEST['pin'], @$_REQUEST['captcha']);
                 }else{
                     $res = $system->addError(HEURIST_ERROR, 'An invalid request was made to the password reset system.<br>Please contact the Heurist team.');

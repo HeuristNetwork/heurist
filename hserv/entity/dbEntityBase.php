@@ -14,7 +14,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -45,7 +45,7 @@ abstract class DbEntityBase
     protected $primaryField; 
 
 
-    //names of multilang fiekds from $config by rst_MultiLang=1
+    //names of multilang fields from $config by rst_MultiLang=1
     protected $multilangFields = array(); 
     
     /*
@@ -444,10 +444,10 @@ abstract class DbEntityBase
         if(is_array($this->config) && 
             in_array($this->config['tablePrefix'], array('rty','dty','rst','trm','rtg','dtg','vcg','swf')))
         { //affected entity
-            fileDelete($this->system->getFileStoreRootFolder().$this->system->dbname().'/entity/db.json');
+            $this->system->cleanDefCache();
         }
     }
-    
+
     //
     // save one or several records 
     // returns false or array of record IDs
@@ -690,6 +690,13 @@ abstract class DbEntityBase
     //@todo validate permission per record
     //
     protected function _validatePermission(){
+
+        if(!$this->system->has_access()){
+             $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'You must be logged in. Insufficient rights (logout/in to refresh) for this operation');
+             return false;
+        }
+
         return true;
     }
     //

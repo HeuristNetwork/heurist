@@ -18,7 +18,7 @@
 *
 * this script may be inited via http, otherwise it is included and $database_id already defined
 *
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0

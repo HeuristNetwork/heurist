@@ -17,7 +17,7 @@
     * This is fix for bug of database creation (happened between 2017-09-22 and 2017-10-16)
     * New database has empty pointer constraints for resouce fields
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
     * @version     3.1

@@ -18,12 +18,12 @@
     * folderSize
     * folderTree
     * folderTreeToFancyTree - NOT USED
-    * folderFirstTileImage - returns first file from first folder - for tiled image stack
+    * folderFirstFile - returns first file from first folder (search first file given ext or just first file in subfolders 
+    *                   used for tiled image stack
     *     
     * fileCopy
     * fileSave
     * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
-    * fileWithGivenExt - returns basename by filename (extension is known)
     *     
     * getRelativePath
     * folderRecurseCopy
@@ -33,7 +33,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -421,7 +421,7 @@
     //
     //
     //
-    function folderFirstTileImage($dir){
+    function folderFirstFile($dir, $ext=null, $recursion=true){
     
         $dir = realpath($dir);
         
@@ -434,9 +434,23 @@
                 }
                 $file = $dir.'/'.$node;
                 if(is_dir($file)){
-                    return folderFirstTileImage($file);    
+                    if($recursion){
+                        return folderFirstFile($file, $ext, $recursion);    
+                    }
                 }else{
-                    return $file;    
+                    if($ext!=null)
+                    {
+                        $path_parts = pathinfo($file);
+                        if(array_key_exists('extension', $path_parts))
+                        {
+                            $fext = strtolower($path_parts['extension']);
+                            if($ext==$fext){
+                                return $file;    
+                            }
+                        }
+                    }else{
+                        return $file;
+                    }
                 }
             }
         }
@@ -850,7 +864,7 @@ function saveURLasFile($url, $filename)
 {   
     //Download file from remote server
     $rawdata = loadRemoteURLContent($url, false); //use proxy 
-    if(is_resource($rawdata)){
+    if(is_string($rawdata)){
         return fileSave($rawdata, $filename); //returns file size
     }else{
         error_log('Can not access remote resource'); //.filter_var($url,FILTER_SANITIZE_URL));

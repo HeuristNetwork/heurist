@@ -5,8 +5,8 @@
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -223,6 +223,9 @@ li.menu-explore{
     background: #EBEBEB 0% 0% no-repeat padding-box;
     box-shadow: 0px 1px 3px #00000033;
     border-radius: 4px;
+    padding: 5px 20px 20px;
+    margin: 20px 0;
+    min-width: 520px;    
 }
 
 /* narrow scroll for saved filters list */

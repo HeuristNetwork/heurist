@@ -3,7 +3,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -912,7 +912,9 @@ class System {
         exit;
     }
 
-
+    //
+    //
+    //
     public function error_exit_api( $message=null, $error_code=null, $is_api=true) {
         
         $this->dbclose();
@@ -2041,7 +2043,7 @@ class System {
     }
 
     //
-    // return true if password is wrong
+    // returns true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
     {
@@ -2258,6 +2260,13 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         }
 
         fileSave(json_encode($target_languages), $language_file);
+    }
+    
+    /**
+    * Remove database definition cache file
+    */
+    public function cleanDefCache(){
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json');
     }
     
     /**

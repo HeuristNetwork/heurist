@@ -78,10 +78,19 @@ echo -e "Fetching Heurist code from $ref_server"
 $2 wget $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
+
 # move what was downloaded to $root/HEURIST/hx.x.x.xxx
 # this will fail if hx.x.x.xxx already exists, use update script in this case
+# Ian 22/3/24: surely this should set permissions on code, surprising this oversight has not beeen experienced
 $2 mkdir ../$1
 $2 cp -R $1/* ../$1/
+
+# One of these should fail harmlessly
+$2 chgrp -R apache ../$1
+$2 chgrp -R nginx ../$1
+
+$2 chmod -R g+rwx ../$1
+
 $2 rm -rf $1
 # TODO?: cd .. ; rmdir temp   (temp is empty from now on)
 
@@ -123,11 +132,17 @@ $2 mv "${base_dir}/HEURIST/$1/movetoparent/js_in_database_authorised.txt" "${bas
 $2 mv "${base_dir}/HEURIST/$1/movetoparent/heuristConfigIni.php" "${base_dir}/HEURIST/heuristConfigIni.php"
 $2 mv "${base_dir}/HEURIST/$1/movetoparent/index.html" "${base_dir}/HEURIST/index.html"
 
-# one or other of these will fail harmlessly
-# on a two tier system you may need to map apache to nobody
+# one or other of these may fail harmlessly. 
+# on a two tier system you may need to map apache to nobody.
 echo "Trying both www-data (Debian) and apache (Redhat) as owner and group for data directories, one will succeed"
-$2 chown -R www-data:www-data "${base_dir}/HEURIST/"
-$2 chown -R apache:apache "${base_dir}/HEURIST/"
+
+$2 chown -R apache "${base_dir}/HEURIST/"
+$2 chown -R nginx "${base_dir}/HEURIST/"
+$2 chown -R www-data "${base_dir}/HEURIST/"
+
+$2 chgrp -R apache "${base_dir}/HEURIST/"
+$2 chgrp -R nginx "${base_dir}/HEURIST/"
+$2 chgrp -R www-data "${base_dir}/HEURIST/"
 
 $2 chmod -R 775  "${base_dir}/HEURIST/"
 $2 chmod -R 775  "${base_dir}/HEURIST/HEURIST_FILESTORE/"

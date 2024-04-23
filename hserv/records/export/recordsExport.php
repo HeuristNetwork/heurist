@@ -15,8 +15,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -397,33 +397,50 @@ IIIF;
         .'</attributes>'
         .'<nodes>';
 */
-//although anyURI is defined it is not recognized by gephi v0.92
+        //although anyURI is defined it is not recognized by gephi v0.92
 
-    $heurist_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
+        $heurist_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
+
+        $rec_fields = '<attribute id="0" title="name" type="string"/>
+                <attribute id="1" title="image" type="string"/>
+                <attribute id="2" title="rectype" type="string"/>
+                <attribute id="3" title="count" type="float"/>
+                <attribute id="4" title="url" type="string"/>';
+
+        if(!empty(@$params['columns'])){
+            
+            $id_idx = 5;
+
+            $params['columns'] = prepareIds($params['columns']);
+
+            foreach ($params['columns'] as $dty_ID) {
+
+                $dty_Name = mysql__select_value(self::$mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
+                $rec_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$dty_Name}\" type=\"string\"/>";
+
+                $id_idx ++;
+            }
+        }
 
         $gephi_header = <<<XML
-<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-     xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
-    <meta lastmodifieddate="{$dt}">
-        <creator>HeuristNetwork.org</creator>
-        <description>Visualisation export $heurist_url </description>
-    </meta>
-    <graph mode="static" defaultedgetype="directed">
-        <attributes class="node">
-            <attribute id="0" title="name" type="string"/>
-            <attribute id="1" title="image" type="string"/>
-            <attribute id="2" title="rectype" type="string"/>
-            <attribute id="3" title="count" type="float"/>
-            <attribute id="4" title="url" type="string"/>
-        </attributes>
-        <attributes class="edge">
-            <attribute id="0" title="relation-id" type="float"/>
-            <attribute id="1" title="relation-name" type="string"/>
-            <attribute id="2" title="relation-image" type="string"/>
-            <attribute id="3" title="relation-count" type="float"/>
-        </attributes>
-        <nodes>
-XML;
+            <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+                <meta lastmodifieddate="{$dt}">
+                    <creator>HeuristNetwork.org</creator>
+                    <description>Visualisation export $heurist_url </description>
+                </meta>
+                <graph mode="static" defaultedgetype="directed">
+                    <attributes class="node">
+                        {$rec_fields}
+                    </attributes>
+                    <attributes class="edge">
+                        <attribute id="0" title="relation-id" type="float"/>
+                        <attribute id="1" title="relation-name" type="string"/>
+                        <attribute id="2" title="relation-image" type="string"/>
+                        <attribute id="3" title="relation-count" type="float"/>
+                    </attributes>
+                    <nodes>
+        XML;
 
         $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
@@ -807,19 +824,62 @@ XML;
             if($cnt>1000 || $params['iiif_image']) break;
             
         }else if($params['format']=='gephi'){ 
-            
-            $name   = htmlspecialchars($record['rec_Title']);                               
+
+            $name   = htmlspecialchars($record['rec_Title']);
             $image  = htmlspecialchars(HEURIST_RTY_ICON.$rty_ID);
-            $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.HEURIST_DBNAME);                               
-                               
+            $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.HEURIST_DBNAME);
+
+            $rec_values = "<attvalue for=\"0\" value=\"{$name}\"/>
+            <attvalue for=\"1\" value=\"{$image}\"/>
+            <attvalue for=\"2\" value=\"{$rty_ID}\"/>
+            <attvalue for=\"3\" value=\"0\"/>
+            <attvalue for=\"4\" value=\"{$recURL}\"/>";
+
+            if(is_array($retrieve_detail_fields)){
+
+                $att_id = 4;
+                foreach($retrieve_detail_fields as $dty_ID){
+
+                    $att_id ++;
+                    $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ? 
+                                $record['details'][$dty_ID] : null;
+
+                    if(empty($values)) { continue; }
+
+                    $dty_Type = mysql__select_value(self::$mysqli, "SELECT dty_Type FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
+
+                    foreach($values as $dtl_ID => $value){
+
+                        if($dty_Type == 'file'){ // get external URL / Heurist URL
+
+                            $f_id = $value['file']['ulf_ObfuscatedFileID'];
+                            $external_url = $value['file']['ulf_ExternalFileReference'];
+
+                            $value = empty($external_url) ? HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file={$f_id}" : $external_url;
+
+                        }else if($dty_Type == 'enum'){ // get term label
+                            $value = mysql__select_value(self::$mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = $value");
+                        }
+
+                        if(strpos($value, '"') !== false){ // add slashes, to avoid double quote issues
+                            $values[$dtl_ID] = addslashes($value);
+                        }
+
+                        $values[$dtl_ID] = $value;
+                    }
+
+                    $values = is_array($values) ? implode('|', $values) : $values;
+
+                    if(empty($values)) { continue; }
+
+                    $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+                }
+            }
+
             $gephi_node = <<<XML
 <node id="{$recID}" label="{$name}">                               
     <attvalues>
-    <attvalue for="0" value="{$name}"/>
-    <attvalue for="1" value="{$image}"/>
-    <attvalue for="2" value="{$rty_ID}"/>
-    <attvalue for="3" value="0"/>
-    <attvalue for="4" value="{$recURL}"/>
+        {$rec_values}
     </attvalues>
 </node>
 XML;

@@ -6,8 +6,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -59,12 +59,11 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     
     $sErrorMsg = null;
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
-    //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    if(preg_match('/[^A-Za-z0-9_\$]/', $templateddb)){ //validatate database name
-        $sErrorMsg = "Database name '$templateddb_out' is wrong";
-    }else if(strlen($templateddb)>64){
-        $sErrorMsg = "Database name '$templateddb_out' is too long. Max 64 characters allowed";
-    }else if(mysql__usedatabase($mysqli, $templateddb)!==true){
+    
+    //database name validation
+    $sErrorMsg = DbUtils::databaseValidateName($templateddb, false);
+    
+    if($sErrorMsg==null && mysql__usedatabase($mysqli, $templateddb)!==true){
         $sErrorMsg = "Sorry, could not connect to the database $templateddb_out. "
         .'Operation is possible when database to be cloned is on the same server';
     }else{
@@ -123,33 +122,12 @@ if(@$_REQUEST['mode']=='2'){
 
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
         
-        $targetdbname_out = htmlspecialchars($targetdbname);
-
-        //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-        if(preg_match('/[^A-Za-z0-9_\$]/', $targetdbname)){ //validatate database name
-                $sErrorMsg = 'Database name '.$targetdbname_out.' is wrong';
-        }else if(strlen($targetdbname)>64){
-                $sErrorMsg = 'Database name '.$targetdbname_out.' is too long. Max 64 characters allowed';
+        //checks that database name is valid, correct length and unique
+        $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+        if ($sErrorMsg!=null) {
+            $sErrorMsg = "<div class='ui-state-error'>Warning: $sErrorMsg <br></div>";
         }else{
-            // Avoid illegal chars in db name
-            $invalidDbName = System::dbname_check($targetdbname);
-            if ($invalidDbName) {
-                $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname_out"
-                ."</b> is invalid</p>"
-                ."<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
-            } // rejecting illegal characters in db name
-            else{
-
-                list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
-
-                $dblist = mysql__select_list2($mysqli, 'show databases');
-                if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                    $sErrorMsg = "<div class='ui-state-error'>Warning: database '$targetdbname_out"
-                    ."' already exists. Please choose a different name<br></div>";
-                }else{
-                    ob_start();
-                }
-            }
+            ob_start();
         }
     }
     if($sErrorMsg){
@@ -412,7 +390,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
 
     echo_flush ("<p><b>Copying data</b></p>");
-    // db_clone function in /common/php/db_utils.php does all the work
+    // db_clone function in /common/php/dbUtils.php does all the work
     if( !DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
         DbUtils::databaseDrop( false, $targetdbname_full, false);
         return false;
@@ -469,13 +447,12 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
             DbUtils::databaseDrop(false, $targetdbname_full, false);
 
-            if(count($warnings) == 2 && @$warnings['revert']){
+            if(count($warnings) == 1 && strpos($warnings,'required database root folder')>0){  ///!!!!!!!! 
                 $msg_title = 'Unable to create database root folder';
-                $msg_body  = $warnings['message'];
+                $msg_body  = $warnings[0];
             }else{
                 $msg_title = 'Unable to create database sub directories';
-                $msg_body  = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
-                        . $targetdbname . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings:\n" . implode(",\n", $warnings);
+                $msg_body  = implode(",\n", $warnings);
             }
 
             sendEmail(HEURIST_MAIL_TO_BUG, $msg_title, $msg_body);

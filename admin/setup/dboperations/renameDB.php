@@ -5,8 +5,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     6
 */
@@ -40,30 +40,12 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
 
 	$targetdbname = htmlspecialchars(filter_var($_REQUEST['targetdbname']));
 
-    if(strlen($targetdbname)>64){ // validate length
-        $sErrorMsg = 'Database name <b>'.$targetdbname.'</b> is too long. Max 64 characters allowed';
-    }else{
-        // Avoid illegal chars in db name
-        $invalidDbName = System::dbname_check($targetdbname);
-        if ($invalidDbName) {
-            $sErrorMsg =  '<p><hr></p><p>&nbsp;</p><p>Requested database rename: "'.$targetdbname
-                    .'" is invalid. Only letters, numbers and underscores (_) are allowed in the database name</p>';
-        } // rejecting illegal characters in db name
-        else{
-            list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
-
-            $dblist = mysql__select_list2($mysqli, 'show databases');
-            if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                $sErrorMsg = "<div class='ui-state-error'>Warning: database '".
-                $targetdbname
-                ."' already exists. Please choose a different name<br></div>";
-            }else{
-                ob_start();
-            }
-        }
-    }
-
-    if($regID > 0){
+    list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
+    
+    //checks that database name is valid, correct length and unique
+    $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+    
+    if($sErrorMsg==null && $regID > 0){
 
         if(array_key_exists('pwd', $_REQUEST)){
 
@@ -82,7 +64,10 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
         $_REQUEST['targetdbname'] = null;
         unset($_REQUEST['targetdbname']);
 
-        $sErrorMsg = "<span class='ui-state-error'>$sErrorMsg</span>";
+        $sErrorMsg = "<div class='ui-state-error'>Warning: $sErrorMsg<br></div>";
+        //$sErrorMsg = "<span class='ui-state-error'>$sErrorMsg</span>";
+    }else{
+        ob_start();     
     }
 }
 ?>

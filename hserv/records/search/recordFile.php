@@ -36,7 +36,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -1054,13 +1054,14 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
     $file = fileGetFullInfo($system, $fileid, true);
     $placeholder = '../../hclient/assets/100x100.gif';
     $thumbnail_file = null;
+    $orientation = 0;
     
     if($file!==false){
         $file = $file[0];    
     
         $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file['ulf_ObfuscatedFileID'].".png";    
         
-        if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
+        if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){  //local
             
             if (@$file['fullPath']){
                 $filename = $file['fullPath'];
@@ -1093,6 +1094,8 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 
                 //get real image type from exif
                 $mimeExt = UImage::getImageType($filename);
+                //get orientation based on exif
+                $orientation = UImage::getImageOrientation($filename);
                 
                 $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
                     
@@ -1128,7 +1131,8 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         
             }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
-                $img = UImage::getRemoteImage($file['ulf_ExternalFileReference']);
+                $img = UImage::getRemoteImage($file['ulf_ExternalFileReference'], $orientation);
+                
             }else    
             if( @$file['fxm_MimeType'] == 'video/youtube' 
                 || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
@@ -1192,7 +1196,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             header('Location: '.$placeholder);
         }
     }else{
-        UImage::resizeImage($img, $thumbnail_file); //$img will be destroyed inside this function
+        UImage::resizeImage($img, $thumbnail_file, 200, 200, $orientation); //$img will be destroyed inside this function
         if($is_download){
             if(file_exists($thumbnail_file)){
                 header('Content-type: image/png');

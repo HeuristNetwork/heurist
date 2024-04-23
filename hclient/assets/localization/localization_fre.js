@@ -2,12 +2,12 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005_2024 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @contributor      Mohammed Benkhalid <benkhalid@unistra.fr>
 * @contributor      Tara Cooke <tcooke@unistra.fr>
 * @contributor      Guillaume Porte <gporte@unistra.fr>
 * @contributor      Régis Witz <rwitz@unistra.fr>
-* @contributor      Ian Johnson <ian.johnson@sydney.edu.au>
+* @contributor      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl_3.0.txt GNU License 3.0
 * @version     6.5.0
 */

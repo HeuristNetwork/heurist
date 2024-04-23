@@ -29,7 +29,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -1521,7 +1521,6 @@ function recordGetRelationship($system, $sourceID, $targetID, $search_request=nu
 
 
 }
-
 
 //
 // find parent record for rec_ID with given record type
@@ -3314,16 +3313,16 @@ function recordSearchDetails($system, &$record, $detail_types) {
         
         if($system->has_access() && in_array($rec_owner, $usr_groups)){
             //owner of record can see any field
-            $detail_visibility_conditions = ' AND (rst_RequirementType!="forbidden")';
+            $detail_visibility_conditions = ' AND (IFNULL(rst_RequirementType,"")!="forbidden")'; //ifnull needed for non-standard fields
         }else{
-            $detail_visibility_conditions = array('(rst_NonOwnerVisibility IS NULL)'); //not standard
+            $detail_visibility_conditions = array('(rst_NonOwnerVisibility IS NULL)'); //not standard field
             if($system->has_access()){
                 //logged in user can see viewable
                 $detail_visibility_conditions[] = '(rst_NonOwnerVisibility="viewable")';
             }
             $detail_visibility_conditions[] = '((rst_NonOwnerVisibility="public" OR rst_NonOwnerVisibility="pending") AND IFNULL(dtl_HideFromPublic, 0)!=1)';    
             
-            $detail_visibility_conditions = ' AND (rst_RequirementType!="forbidden") AND ('
+            $detail_visibility_conditions = ' AND (IFNULL(rst_RequirementType,"")!="forbidden") AND ('
                                             .implode(' OR ',$detail_visibility_conditions).')';
         }
         

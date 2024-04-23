@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -471,7 +471,8 @@ $.widget( "heurist.navigation", {
             +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <div style="margin: 10px 0px">'
             +(s.join('<br>'))
             +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)'
-            +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>');
+            +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>'
+            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true});
             
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
             +'<li>Find parent menu(s) in "Linked From" section</li>'

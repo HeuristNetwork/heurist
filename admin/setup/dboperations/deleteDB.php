@@ -6,8 +6,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -22,6 +22,7 @@
 
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
+require_once 'welcomeEmail.php';
 
 set_time_limit(0);
 
@@ -35,13 +36,9 @@ if(!@$_REQUEST['pwd']){
     
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    $sErrorMsg = null;
-    if(preg_match('/[^A-Za-z0-9_\$]/', $database_to_delete)){ //validatate database name
-            $sErrorMsg = 'Database name '.$database_to_delete.' is wrong';
-    }else if(strlen($database_to_delete)>64){
-            $sErrorMsg = 'Database name '.$database_to_delete.' is too long. Max 64 characters allowed';
-    }
-    if ($sErrorMsg) {
+    $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, false);
+    
+    if ($sErrorMsg!=null) {
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 
@@ -117,28 +114,7 @@ if(!@$_REQUEST['pwd']){
                         // in case deletion by sysadmin - send email to onwer of deleted database
                         if($res && !$is_delete_current_db)
                         { 
-                    $server_name = HEURIST_SERVER_NAME;
-                    $email_title = 'Your Heurist database '.$dbname.' has been archived';
-                    $email_text = <<<EOD
-Dear {$usr_owner['ugr_FirstName']} {$usr_owner['ugr_LastName']},                    
-                    
-Your Heurist database {$dbname} on {$server_name} has been archived. We would like to help you get (re)started.
-
-In order to conserve server space (or as part of moving to another server) we have archived your database on {$server_name} since it has not been used for several months and/or no data has ever been created and/or it is being recreated somewhere else. 
- 
-If you got as far as creating a database but did not know how to proceed you are not alone, but those who persevere, even a little, will soon find the system easy to use and surprisingly powerful. We invite you to get in touch ( support@HeuristNetwork.org ) so that we can help you over that (small) initial hump and help you see how it fits with your research (or other use). 
-
-With a brand new interface in 2021, developed in collaboration with an experienced UX designer, Heurist is significantly easier to use than previous versions. The new interface (version 6) remains compatible with databases created more than 10 years ago - we believe in sustainability.
- 
-Please contact us if you need your database re-enabled or visit one of our free servers to create a new database (visit HeuristNetwork dot org).
- 
-Heurist is research-led and responds rapidly to evolving user needs - we often turn around small user suggestions (and most bug-fixes) in a day and larger ones within a couple of weeks. We are still forging ahead with new capabilities such as enhancements to the integrated CMS website builder, new output formats, improved data exchange through XML, JSON, remote resource lookups and linked open data, and improved search, mapping and visualisation widgets (embeddable in websites). 
- 
-For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
-EOD;
-                            
-sendEmail(array($usr_owner['ugr_eMail'],HEURIST_MAIL_TO_ADMIN), $email_title, $email_text);
-
+                            sendEmail_DatabaseDelete($usr_owner, $dbname, 1);
                         }
                         
                     }else{

@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -417,7 +417,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 //@$iiif_manifest['label'];
 
                                 if(!@$record['ulf_Description'] && @$iiif_manifest['description']){
-                                    $this->records[$idx]['ulf_Description'] = @$iiif_manifest['description']; 
+                                    $desc = $iiif_manifest['description'];
+                                    if(is_array($desc)){ //multilang desc
+                                        $desc = array_shift($desc);
+                                        $desc = @$desc['@value'];
+                                    }
+                                    if($desc){
+                                        $this->records[$idx]['ulf_Description'] = $desc;     
+                                    }
                                 }
                                 if(@$iiif_manifest['thumbnail']){
 
@@ -426,6 +433,35 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     }else if(@$iiif_manifest['thumbnail']['id']){  //v3
                                         $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['id'];      
                                     }
+                                }else{
+                                    //sequences -> canvases[0] -> images[0] -> resource -> @id or service -> @id
+                                    
+                                    $thumb_url = @$iiif_manifest['sequences'][0]['canvases'][0];
+                                    if($thumb_url){
+                                        
+                                        if(@$thumb_url['thumbnail']['@id']){
+                                            $thumb_url = @$thumb_url['thumbnail']['@id'];
+                                        }else{
+                                            if(@$thumb_url['images'][0]['resource']['service']['@id']){
+                                                $image_url = $thumb_url['images'][0]['resource']['service']['@id'];
+                                            }else{
+                                                $image_url = @$thumb_url['images'][0]['resource']['@id'];
+                                            }
+                                            
+                                            if($image_url!=null){
+                                                $thumb_url = $this->_composeThumbnailIIIF(
+                                                    $image_url,
+                                                    @$thumb_url['images'][0]['resource']['width'],
+                                                    @$thumb_url['images'][0]['resource']['height']
+                                                                );
+                                                                
+                                                $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;
+                                            }
+                                        }
+                                        
+                                    }
+                                    
+                                    
                                 }
 
                                 if(!@$this->records[$idx]['ulf_OrigFileName']){
@@ -435,32 +471,17 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
                                 
-                            }else if(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id']))
+                            }else if(@$iiif_manifest['@context'] && (@$iiif_manifest['@id'] || @$iiif_manifest['id'])
+                                    && substr($record['ulf_ExternalFileReference'], 0, -9) == 'info.json' )
                             {   //IIIF image
                                 
                                 //create url for thumbnail
-                                
-                                $x = $iiif_manifest['width'];
-                                $y = $iiif_manifest['height'];
-                                
-                                $rx = 200 / $x;
-                                $ry = 200 / $y;
-                                
-                                $scale = $rx ? ($ry ? min($rx, $ry) : $rx) : $ry;
-                                
-                                if ($scale > 1) { //no enlarge
-                                    $scale = 1;
-                                }
-                                
-                                $new_x = ceil($x * $scale);
-                                $new_y = ceil($y * $scale);
-                                
-                                //https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/f25/full/90,120/0/default.jpg
-                                
                                 $thumb_url = $record['ulf_ExternalFileReference'];
-                                
                                 //remove info.json
-                                $thumb_url = substr($thumb_url, 0, -9).'full/'.$new_x.','.$new_y.'/0/default.jpg';
+                                $thumb_url = substr($thumb_url, 0, -9).'full/full/0/default.jpg';
+                                $thumb_url = $this->_composeThumbnailIIIF($thumb_url,
+                                            @$iiif_manifest['width'],
+                                            @$iiif_manifest['height']);
                                 
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;      
                                 
@@ -570,7 +591,48 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
         return $ret;
         
-    }    
+    }  
+    
+    //
+    //
+    //
+    private function _composeThumbnailIIIF($image_url, $width, $height)
+    {
+        $x = intval($width);
+        $y = intval($height);
+        if(!($x>0)){
+            $x = 200;
+        }
+        if(!($y>0)){
+            $y = 200;
+        }
+        
+        $rx = 200 / $x;
+        $ry = 200 / $y;
+        
+        $scale = $rx ? ($ry ? min($rx, $ry) : $rx) : $ry;
+        
+        if ($scale > 1) { //no enlarge
+            $scale = 1;
+        }
+        
+        $new_x = ceil($x * $scale);
+        $new_y = ceil($y * $scale);
+        
+        //https://gallica.bnf.fr/iiif/ark:/12148/bpt6k9604118j/f25/full/90,120/0/default.jpg
+        //https://fragmentarium.ms/metadata/iiif/F-hsd6/manifest.json  or info.json
+        //https://purl.stanford.edu/sn904cj3429/iiif/manifest
+        //https://fragmentarium.ms:443/loris/F-hsd6/fol_2r.jp2/full/full/0/default.jpg
+        
+        if(strpos($image_url,'/full/full/')>0){
+            $thumb_url = str_replace('/full/full/', '/full/'.$new_x.','.$new_y.'/', $image_url);
+        }else{
+            $thumb_url = $image_url.'/full/'.$new_x.','.$new_y.'/0/default.jpg';
+        }
+        
+        return $thumb_url;
+    }
+      
 
     // there are 3 ways
     // 1) add for local files - via register
@@ -705,7 +767,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $size = folderSize2($dest);
                             
                             //get first file from first folder - use it as thumbnail
-                            $filename = folderFirstTileImage($dest);
+                            $filename = folderFirstFile($dest);
                             
                             $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                             

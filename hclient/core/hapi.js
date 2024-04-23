@@ -12,7 +12,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -241,7 +241,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      * - `message`: error message or Ajax response
      * - `data`: data returned for request
      */
-    function _callserver(action, request, callback) {
+    function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
 
@@ -268,7 +268,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var request_code = { script: action, action: request.a };
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        $.ajax({
+        var ajax_options = {
             url: url,
             type: "POST",
             data: request,
@@ -326,7 +326,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     callback(response);
                 }
             }
-        });
+        };
+        
+        if(timeout>0){ //default 120000 - 120 seconds
+            ajax_options['timeout'] = timeout;
+        }
+        
+        $.ajax(ajax_options);
 
     }
 
@@ -1348,10 +1354,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         //refresh local definitions
                         if (response.defs) {
                             if (response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
-
+                            
                             if (response.defs.entities)
                                 for (var entityName in response.defs.entities) {
-
                                     //refresh local definitions
                                     window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
                                         response.defs.entities);
@@ -1440,6 +1445,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             repositoryAction: function (request, callback) {
                 _callserver('repoController', request, callback);
+            },
+            
+            databaseAction: function (request, callback) {
+                _callserver('databaseController', request, callback, 600000); //5 minutes
             },
 
         }
@@ -1815,6 +1824,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var entity_configs = {};
         var entity_data = {};
+        var entity_timestamp = 0;
 
         var that = {
 
@@ -1978,13 +1988,28 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             //
+            // Check that definitions are up to date on client side
+            //            
+            // It erases db definitions cache on server side (db.json) on every structure change - 
+            // it means that every new heurist window obtains fresh set of definitions.
+            // For existing instances (ie in different browser window) it verifies the  relevance of definitions every 20 seconds.
+            // see initialLoadDatabaseDefintions 
+            //
+            relevanceEntityData: function (callback) {
+                if(entity_timestamp>0){
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
+                }
+            },
+            
+            //
             // refresh several entity data at once
             // 
             refreshEntityData: function (entityName, callback) {
 
                 var params = { a: 'structure', 'details': 'full'};
-                params['entity'] = entityName
-                
+                params['entity'] = entityName;
+                params['timestamp'] = entity_timestamp;
+
                 /*
                 if($.isPlainObject(opts) && opts['recID']>0){ 
                     //special case - loads defs for particular record only
@@ -2000,12 +2025,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                  
                 _callserver('entityScrud', params,
                     function (response) {
-                        if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
+                        
+                        if (response && response['uptodate']) {
+                            
+                            //console.log('definitions are up to date');
+                            if ($.isFunction(callback)) callback(this, true);
+                            
+                        }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
                             var fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
+                            
                             var dbdefs = (response['defRecTypes']?response:response['data']);
-
                             for (var entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
@@ -2078,12 +2109,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // data either recordset or response.data
             //
             setEntityData: function (entityName, data) {
+                
+                if(entityName=='timestamp'){ 
+                    
+                    entity_timestamp = Number(data[entityName]); 
 
-                if (window.hWin.HEURIST4.util.isRecordSet(data)) {
+                }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
                 } else {
-
+                    
                     entity_data[entityName] = new hRecordSet(data[entityName]);
 
                     //build rst index
@@ -2533,36 +2568,41 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             //"xx" means take current system language
             if(lang){
+
                 lang = window.hWin.HAPI4.getLangCode3(lang);
-                
+                let a2_lang = that.sysinfo.common_languages[lang]['a2'].toUpperCase();
+
                 var def_val = '';
                 var is_object = $.isPlainObject(val);
                 
                 for (var key in values) {
                     if (!is_object || val.hasOwnProperty(key)) {
 
-                    var val = values[key];
-                    
-                    if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
-                        if(val.substr(0,3)==lang){
-                            def_val = val.substr(4).trim();
-                            break;
+                        var val = values[key];
+                        
+                        if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+
+                            if(val.substr(0,3).toUpperCase() == lang){
+                                def_val = val.substr(4).trim();
+                                break;
+                            }
+                        }else if(val != null && val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+
+                            if(val.substr(0, 2).toUpperCase() == a2_lang){
+                                def_val = val.substr(3).trim();
+                                break;
+                            }
+                        }else {
+                            //without prefix
+                            def_val = val;
+                            if(lang=='def'){ //take first without prefix
+                                break;
+                            }
                         }
-                    }else {
-                        //without prefix
-                        def_val = val;
-                        if(lang=='def'){ //take first without prefix
-                            break;
-                        }
-                    }
                     
                     }
                 }//for
-                
-                //for(var i=0; i<values.length; i++){
-                //    var val = values[i];
-                    
-                
+
                 return def_val;
             }else if($.isPlainObject(values)){
                 return values[Object.keys(values)[0]];
@@ -2615,7 +2655,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return _regional[key];
                 } else {
                     //if not found take from english version
-                    if (_region != 'ENG' && regional['ENG'] && regional['ENG'][key]) {
+                    if (_region != 'ENG' && regional && regional['ENG'] && regional['ENG'][key]) {
 
                         return regional['ENG'][key];
 

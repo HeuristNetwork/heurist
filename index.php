@@ -6,7 +6,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -187,6 +187,9 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 <!-- array of possible layouts -->
 <script type="text/javascript" src="layout_default.js"></script>
+
+<script type="text/javascript" src="hclient/widgets/baseAction.js"></script>
+<script type="text/javascript" src="hclient/widgets/database/dbAction.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
 <script type="text/javascript" src="hclient/widgets/record/recordAccess.js"></script>

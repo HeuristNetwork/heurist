@@ -17,7 +17,7 @@
 /**
 * Returns kml for given record id. It searches detail with type 221 or 551
 *
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
