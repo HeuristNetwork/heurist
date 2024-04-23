@@ -16,7 +16,7 @@
     /**
     * convertTextFieldToFileField - change text field to file field, register new remote in recUploadedFiles and update recDetails
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
     * @version     3.1

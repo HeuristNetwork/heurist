@@ -16,7 +16,7 @@
     /**
     * Verifies missed concept codes for registered databases
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
     * @version     3.1

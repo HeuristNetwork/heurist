@@ -32,7 +32,7 @@
     * @link https://HeuristNetwork.org
     * @copyright (C) 2005-2020 University of Sydney
     * @author Michael Falk <michael.falk@sydney.edu.au>
-    * @author Artem Osmakov <artem.osmakov@sydney.edu.au>
+    * @author Artem Osmakov <osmakov@gmail.com>
     * @license http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version 6
     */

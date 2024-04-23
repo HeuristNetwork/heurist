@@ -12,7 +12,7 @@
  * @package     Heurist academic knowledge management system
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney
- * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+ * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Brandon McKay   <blmckay13@gmail.com>
  * @author      Martin Yldh   <martinsami@yahoo.com>
  * @author      Staphanson Hudson   <staphanson98@hotmail.com>
