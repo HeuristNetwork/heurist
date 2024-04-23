@@ -52,7 +52,7 @@ MAILTO=ian.johnson.heurist@gmail.com
 
 # SUMMARISATION AND MAILING OF ERRORS
 
-MAILTO=ian.johnson.heurist@gmail.com,abed@sydney.edu.au
+MAILTO=ian.johnson.heurist@gmail.com,abed@mq.edu.au
 
 #Ansible: Email PHP errors logs
 15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php
