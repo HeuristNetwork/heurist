@@ -726,7 +726,7 @@ function assignPageTitle(pageid){
     
     if(!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_NAME])){
         pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);    
-        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span'); //<br>
     }
     
     var is_show_pagetitle = (is_show_pagetitle_main || 
@@ -1328,11 +1328,10 @@ function initHeaderTitle(){
 
     if(website_title){
         
-        var pagetitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
+        var headertitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
 
-        document.title = window.hWin.HEURIST4.util.stripTags(pagetitle);
-        
-        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+        document.title = window.hWin.HEURIST4.util.stripTags(headertitle);
+        headertitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');
         
 
         var ele = $('#main-title');
@@ -1345,7 +1344,7 @@ function initHeaderTitle(){
             css_shadow = ' style="text-shadow: 3px 3px 5px black"';
         }
 
-        ele.empty().append(`<h2${css_shadow}>${pagetitle}</h2>`);
+        ele.empty().append(`<h2${css_shadow}>${headertitle}</h2>`);
             
         if(isFirstInit && ele.parent().is('#main-header')){
             ele.hide();
