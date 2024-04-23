@@ -3,7 +3,7 @@
 # Runs all the descriptive scripts and sends the resultatn files by email to thy system admin.
 # This should be run weekly by cron
 
-# For multiple recipients: RCPTS="ian.johnson@sydney.edu.au,support@heuristnetwork.org"
+# For multiple recipients: RCPTS="ian.johnson.heurist@gmail.com,support@heuristnetwork.org"
 
 RCPTS="ian.johnson.france@gmail.com"
 
