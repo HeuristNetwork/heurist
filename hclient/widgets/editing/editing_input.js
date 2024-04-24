@@ -112,6 +112,12 @@ $.widget( "heurist.editing_input", {
             }
 
         }
+
+        if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+            this.options.detailtype = 'resource';
+            this.options['dtFields']['rst_FieldConfig']= {entity:'DefDetailTypes',csv:true};
+        }
+
         
         if(this.options.dtFields==null){ //field description is not defined
             return;
@@ -2308,9 +2314,9 @@ $.widget( "heurist.editing_input", {
             } 
         } 
         
-        else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
+        else if(this.detailType=='resource' && 
+                (this.configMode.entity=='DefRecTypes' || this.configMode.entity=='DefDetailTypes')){ //-----------
             //it defines slightly different select dialog for defRecTypes
-        
             __show_select_dialog = function(event){
         
                 if(that.is_disabled) return;
@@ -2335,8 +2341,12 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                 }
+
+                if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+                    rg_options['filters']= {types: ['date','year']};
+                }
                 
-                window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rg_options);
+                window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, rg_options);
             }
             
             //replace input with div
