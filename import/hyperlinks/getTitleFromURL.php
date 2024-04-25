@@ -35,7 +35,8 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 header('Content-type: text/javascript; charset=utf-8');
 
 $title = '';
-$url = @$_REQUEST['url'];
+
+$url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
 
 $rv = array('num'=>$_REQUEST['num']);
 
