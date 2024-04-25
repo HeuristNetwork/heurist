@@ -307,18 +307,19 @@
             return false;
         }
 
+
+        $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
+        
         // Handle source language
         if(!empty($source_language) && strlen($source_language) == 3){ // get ar2
             $source_language = $glb_lang_codes_index[$source_language];
         }
-        $source_language = !empty($source_language) && !in_array($source_language, $deepl_languages) ? '' : $source_language;
-
-        $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
-
-        if(!empty($source_language)){
-            $url .= '&source_lang=' . $source_language;
+        
+        if(!empty($source_language) && in_array($source_language, $deepl_languages)){
+            $k = array_search($source_language, $deepl_languages);
+            $url .= '&source_lang=' . $deepl_languages[k];
         }
-
+        
         if(strpos($string, '<?xml') === 0){ // possible xml
             $url .= '&tag_handling=xml';
         }else{ // assume html

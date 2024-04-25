@@ -344,7 +344,9 @@
     }
 
     // validate url and query
-    $url = filter_var($params['service'], FILTER_VALIDATE_URL);
+    
+    $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
+    //if(!$url){$url = filter_var($params['service'], FILTER_VALIDATE_URL);}
 
     $clean_query = array();
 

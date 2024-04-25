@@ -102,7 +102,8 @@ class DbUtils {
         
         $res = true;
 
-        if($dbID>0){
+        if($dbID>0){                                
+                    $dbID = intval($dbID);
                     $mysqli = self::$mysqli;
                     $result = 0;
                     $res = $mysqli->query("update defRecTypes set "

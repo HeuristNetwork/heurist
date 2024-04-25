@@ -2374,8 +2374,11 @@ $mysqli->commit();
             foreach ($remote_ids as $id) {
                 
                 $translation = $translations['translations'][$id];
+                $local_id = intval($local_id);
 
-                $mysqli->query('DELETE FROM defTranslations where trn_Source="'.$translation['trn_Source'].'" AND trn_Code='.$local_id);
+                $mysqli->query('DELETE FROM defTranslations where trn_Source="'
+                        .$mysqli->real_escape_string($translation['trn_Source'])
+                        .'" AND trn_Code='.$local_id);
 
                 $translation['trn_ID'] = 0;
                 $translation['trn_Code'] = $local_id;
