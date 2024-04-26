@@ -1445,8 +1445,10 @@
                             if(!in_array($code, $handled_types)){
 
                                 if(strpos($code, 'c_') !== false){
+                                    
+                                    $escaped_code = str_replace("'", "&apos;", $code);
 
-                                    $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
+                                    $nodes = $datatypes_xml->xpath("//node[@id='$escaped_code']");
                                     if(is_array($nodes) && count($nodes) > 0){
                                         $label = $nodes[0]->attributes()->label;
                                         $label = ucfirst($label);
