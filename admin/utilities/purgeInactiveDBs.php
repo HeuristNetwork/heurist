@@ -472,7 +472,7 @@ if($need_email){
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false);
                     
-                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts); //import tables
                     if($res===false){
                         $err = $system->getError();
                         $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name. "
@@ -558,7 +558,7 @@ if($need_email){
                         }
                     */
                     
-                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);  //sysArchive
                     if($res===false){
                         $err = $system->getError();
 
