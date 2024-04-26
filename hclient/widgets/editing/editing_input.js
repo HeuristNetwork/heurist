@@ -113,7 +113,9 @@ $.widget( "heurist.editing_input", {
 
         }
 
-        if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS'] &&
+           this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
+
             this.options.detailtype = 'resource';
             this.options['dtFields']['rst_FieldConfig']= {entity:'DefDetailTypes',csv:true};
         }
