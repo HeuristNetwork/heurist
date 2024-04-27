@@ -2122,7 +2122,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 
                 //add functions for other daily tasks
                 $this->_sendDailyErrorReport();
-                $this->_heuristVersionCheck();   // Check if different local and server versions are different
+                $this->_heuristVersionCheck();  // Check if different local and server code versions are different
                 $this->_getDeeplLanguages();    // Get list of allowed target languages from Deepl API
             }
     }

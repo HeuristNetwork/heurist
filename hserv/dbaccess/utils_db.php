@@ -1772,6 +1772,48 @@
     }  
     
     /**
+    * Validates the present of all tables in given or current database
+    * 
+    * @param mixed $mysqli
+    * @param mixed $db_name
+    */
+    function hasAllTables($mysqli, $db_name=null){
+
+        $query = '';
+        if($db_name!=null){
+            //$db_name = HEURIST_DBNAME_FULL;
+            $query = 'FROM `'.$db_name.'`';
+        }
+
+        $list = mysql__select_list2($mysqli, "SHOW TABLES $query", 'strtolower');
+        
+/*not used        
+defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
+recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
+woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
+*/
+
+//auto recreated
+//'reclinks'
+
+//recreated via upgrade
+//'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+
+        $check_list = array(
+'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
+'defrecstructure','defrectypegroups','defrectypes','defterms','deftermslinks',
+'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
+'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
+'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
+'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
+
+        $missed = array_diff($check_list, $list);
+
+        return $missed;
+    }
+    
+    
+    /**
     * Returns true if table exists in database
     * 
     * @param mixed $mysqli
@@ -1783,7 +1825,7 @@
             $query = '';
             if($db_name!=null){
                 //$db_name = HEURIST_DBNAME_FULL;
-                $query = 'FROM '.$db_name;
+                $query = 'FROM `'.$db_name.'`';
             }
     
             $value = mysql__select_value($mysqli, "SHOW TABLES $query LIKE '$table_name'");

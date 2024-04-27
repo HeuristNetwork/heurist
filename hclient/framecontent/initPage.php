@@ -57,6 +57,24 @@ if(!$isSystemInited){
     exit;
 }
 
+if(defined('IS_INDEX_PAGE')){
+    //check for missed tables
+    $missed = hasAllTables($system->get_mysqli());
+    
+    if(count($missed)>0){
+        $message = 'Database '.htmlspecialchars($_REQUEST['db'])
+        .' encounters a serious issue. The following tables are missed:<br><br>'
+        .implode(', ',$missed)
+        .'<p>Either database has not been created (if new) or restored from archive completely. Or drive space has been exhausted'
+        .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
+        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers).'
+        .'<br>We apologise for any inconvenience</p>';        
+        
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+}
+
 $login_warning = 'To perform this action you must be logged in';
 $invalid_access = true;
 
