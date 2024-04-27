@@ -1560,7 +1560,7 @@ function log_smarty_activity($system, $rec_ids){
 
         // log each id one at a time
         for ($i=0; $i < count($rec_ids); $i++) {     
-            $system->user_LogActivity('custRep', array(implode(' ', $rec_ids), count($rec_ids)), null, TRUE);
+            $system->user_LogActivity('custRep', array(implode(' ', $rec_ids), count($rec_ids)));
         }
     }
 }

@@ -223,6 +223,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                              
                             res = res.getIds();                     
                             if(res && res.length>0){
+                                //filter by field group
                                 that.options.dtg_ID = res[0];
                                 that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0])
                             }

@@ -57,12 +57,12 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     exit;
 }
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
+            <p>This report shows </p>
 */
 ?>            
 
          
-<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
-            <p>This report shows </p>
 <?php            
 
 
@@ -133,10 +133,11 @@ if(false){
 }else if(false){
     __convertTustep();
 }
+    __dropBkpDateIndex();    
     __findRDF();
 */
     
-    __dropBkpDateIndex();    
+    __getBelegContext();
 
 //
 // Report database versions
@@ -1638,6 +1639,104 @@ function __dropBkpDateIndex(){
             print $db_name.'<br>';
         }
     }
-    print '<br>END';
+    print '<br>END';                                                                           
 }
+
+function __findBelegSpan($context){
+
+    $dom = new DomDocument();
+    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context);
+//$dom->encoding = 'UTF-8';
+//print $dom->actualEncoding;
+    
+    $finder = new DomXPath($dom);
+    //$classname='Beleg';
+    $nodes = $finder->query("//span[contains(concat(' ', normalize-space(@class), ' '), ' Beleg ')]");
+
+    foreach ($nodes as $idsx=>$node) 
+    {
+        $nvals[] = $dom->saveHTML($node);
+        //if(strpos($nval))
+        //echo '<xmp>'.$dom->saveHTML($node).'</xmp><br>';
+        //echo '<xmp>'.$node->nodeValue.'</xmp><br>';
+    }
+    
+    //if there no characters between spans they merge without space <span>a</span><span>dam</span> => adam
+    $res = '';
+    foreach ($nvals as $idx=>$nval)
+    {
+        //exclude internal spans
+        foreach ($nvals as $nval2)
+        {
+            $k = mb_strpos($nval2, $nval);
+            if($k>19){
+                continue 2;                
+            }
+        }
+        
+        //detect if between this and next node no other characrters
+        $space = '';
+        if($idx>0){
+            $pos2 = mb_strpos($context, $nval);
+            $pos1 = mb_strpos($context, $nvals[$idx-1])+mb_strlen($nvals[$idx-1]);
+            if($pos1<$pos2){
+                $space = ' ';
+            }
+        }    
+        
+        /* 
+        $str = $nodes[$idx]->nodeValue;
+        $str = $dom->saveHTML($nodes[$idx]);
+        print $str.'  '.mb_detect_encoding($str).'  '.
+                    mb_convert_encoding($str, "UTF-8").'<br>';
+        */
+        
+        //$res = $res.$space.$nval; 
+        $res = $res.$space.$nodes[$idx]->nodeValue;
+    }
+    
+    //print '<xmp>'.$context.'</xmp>';
+    //print $res.'<br><br>';
+    
+    print $res."\t";
+    print $context."\n";
+    
+}
+      
+// <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span>      
+      
+                                                                      
+function __getBelegContext(){
+     global $system, $mysqli; 
+
+//print '<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>';
+     
+     header('Content-type: text/plain;charset=UTF-8');
+     
+     mysql__usedatabase($mysqli, 'HiFoS');
+     
+     //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
+     $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids')); // 'limit'=>10, 
+//     echo var_dump($res);
+     
+     $ids = @$res['data']['records'];
+     
+     if(is_array($ids) && count($ids)>0){
+         foreach($ids as $recID){
+             $rec = array('rec_ID'=>$recID);
+             recordSearchDetails($system, $rec, array(1094));
+             
+             $val = $rec['details'][1094];
+             $val = array_shift($val);
+             
+//$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';             
+             echo $recID."\t";
+             __findBelegSpan($val);
+         }
+     }     
+     
+//print '</body></html>';     
+}
+
+
 ?>

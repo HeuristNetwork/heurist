@@ -671,7 +671,7 @@
                 
             }else if($action == 'get_url_content_type'){
                 
-                $url = @$_REQUEST['url'];
+                $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 

@@ -33,8 +33,9 @@ class Heurist_Security_Policy extends Smarty_Security {
   // disable PHP functions except listed, set to null to disable ALL
   public $php_functions = array('isset', 'empty', 'count', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
-                    'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
-                    'array_multisort', 'asort', 'time', 'nl2br', 'print_r',
+                    'array_key_exists', 'array_count_values', 'array_column', 
+                    'array_diff', 'array_merge', 'array_unique',
+                    'array_multisort', 'array_values', 'asort', 'time', 'nl2br', 'print_r',
                     'printf', 'setlocale', 'substr', 'strpos');
         
   // remove PHP tags
@@ -44,7 +45,7 @@ class Heurist_Security_Policy extends Smarty_Security {
   public $php_modifiers = array('isset', 'empty', 'count', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
-                    'asort', 'time', 'nl2br', 'print_r',
+                    'asort', 'array_merge','json_encode', 'time', 'nl2br', 'print_r',
                     'printf', 'substr', 'strpos'); //array('escape','count');
   
   public $allow_super_globals = false; //default true

@@ -1150,7 +1150,7 @@ public static function validateImport($params) {
         if($ft_vals[$idx_fieldtype] == "geo"){
 
             //for geo fields take first
-            $geo_fields = array($field_name[0]); //WKT field
+            $geo_fields = array(preg_replace('/[^a-zA-Z0-9_]/', '', $field_name[0])); //WKT field
             
         }else
         if($ft_vals[$idx_reqtype] == "required"){
@@ -1520,6 +1520,10 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
     //7. Verify geo fields, TODO: Verify geo fields for UTM
     if(is_array($geo_fields) && count($geo_fields)>0){
+        
+        foreach($geo_fields as $k=>$fld){ //for snyk
+            $geo_fields[$k] = preg_replace('/[^a-zA-Z0-9_]/', "", $fld);     
+        }
 
         // northing, easting
         $query = "select `".implode('`,`',$geo_fields)."`, imp_ID from `$import_table` ";

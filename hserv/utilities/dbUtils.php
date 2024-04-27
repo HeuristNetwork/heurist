@@ -102,7 +102,8 @@ class DbUtils {
         
         $res = true;
 
-        if($dbID>0){
+        if($dbID>0){                                
+                    $dbID = intval($dbID);
                     $mysqli = self::$mysqli;
                     $result = 0;
                     $res = $mysqli->query("update defRecTypes set "
@@ -751,13 +752,13 @@ class DbUtils {
             if($dump_options==null){
                 $dump_options = array(
                         'add-drop-table' => true,
-                        'single-transaction' => true, //was true till 2024-02-16
+                        'single-transaction' => true, //improve performance on restore
+                        'quick' =>true,               //improve performance on restore
                         'add-drop-trigger' => true,
                         //'databases' => true,
                         'skip-triggers' =>true,
                         'skip-dump-date' => true,
                         //'routines' =>true,
-                        'quick' =>true,
                         'no-create-db' =>true,
                         'add-drop-database' => true);
                         
@@ -861,7 +862,7 @@ class DbUtils {
             }
             else{ //USE 3d Party php MySQLdump lib
             
-                if(@$dump_options['quick']){ unset($dump_options['quick']); }
+                if(@$dump_options['quick']){ unset($dump_options['quick']); } //not supported
                 if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }
                 
                 try{

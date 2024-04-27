@@ -132,7 +132,7 @@ $databases = array('AmateurS1');
 set_time_limit(0); //no limit
 ini_set('memory_limit','1024M');
 
-$datetime1 = date_create('now');
+$today = strtotime('now');
 $cnt_archived = 0;
 $email_list = array();
 $email_list_deleted = array();
@@ -179,7 +179,26 @@ foreach ($databases as $idx=>$db_name){
             //1 root 
             $content = folderContent($dir_root);
             foreach ($content['records'] as $object) {
-                if ($object[1] != '.' && $object[1] != '..' && strpos($object[1],'ulf_')===false) {
+
+                if(strpos($object[1], 'userInteraction') === 0){ // check if log is a year old
+
+                    // Get expiry date, from first line in log
+                    $log_fd = fopen($object[2].'/'.$object[1], 'r');
+                    $first_line = !$log_fd || filesize($object[2].'/'.$object[1]) < 1 ? '' : fgets($log_fd);
+
+                    if(empty($first_line) || count(explode(',', $first_line)) < 3){
+                        continue;
+                    }
+
+                    $expire_date = strtotime('+1 year', strtotime(explode(',', $first_line)[2]));
+
+                    if($expire_date < $today){
+                        unlink($object[2].'/'.$object[1]); // log is a year old, clear
+                    }
+
+                }else if ($object[1] != '.' && $object[1] != '..' && 
+                    strpos($object[1],'ulf_')===false && strpos($object[1],'user_notification')===false) {
+
                     unlink($object[2].'/'.$object[1]);
                 }
             }

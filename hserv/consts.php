@@ -352,6 +352,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_ALTERNATE_NAME' => array(3, 1009),
+    'DT_TIMELINE_FIELDS' => array(2, 1105),
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
     'DT_MAP_BOOKMARK' => array(3, 1082),

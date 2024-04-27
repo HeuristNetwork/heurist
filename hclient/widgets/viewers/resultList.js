@@ -121,6 +121,7 @@ $.widget( "heurist.resultList", {
 
         auto_select_first: false,   //automatically select first record within result list
         placeholder_text: null,     //text to display while no recordset is loaded (search is not prefromed yet)
+        blank_placeholder: false,   // leave placeholder blank
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
@@ -389,8 +390,8 @@ $.widget( "heurist.resultList", {
                             let msg = data.is_facet && !window.hWin.HEURIST4.util.isempty(that.options.placeholder_text) ? 
                                             that.options.placeholder_text : '';
 
-                            msg = window.hWin.HEURIST4.util.isempty(msg) && !that.options.blank_empty_remark && data.empty_remark ? 
-                                            data.empty_remark : '';
+                            msg = window.hWin.HEURIST4.util.isempty(msg) && !that.options.blank_placeholder && data.empty_remark ? 
+                                            data.empty_remark : msg;
 
                             that.div_content.html( msg );
                         }else{
@@ -529,13 +530,14 @@ $.widget( "heurist.resultList", {
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
             
         }else{
-             this.setCollected(null); //to obtain collection
+
+            this.setCollected(null); //to obtain collection
             
-             if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+            if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
                 this.div_content.html(this.options.placeholder_text);
-             }
+            }
              
-             this.options.init_completed = true;
+            this.options.init_completed = true;
         }    
     }, //end _create
     

@@ -640,7 +640,7 @@ $.widget( "heurist.mapping", {
         if(this.crs_current!=CRS){
             this.crs_current = CRS;
 
-            if(CRS=='' || !L.CRS[CRS]){
+            if(CRS=='' || !L.CRS[CRS] || CRS=='EPSG4326'){
                 //default L.CRS.EPSG3857
                 CRS = 'EPSG3857';
             }

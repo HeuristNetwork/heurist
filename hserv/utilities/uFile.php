@@ -957,6 +957,15 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         
         return false;
     }
+    
+    $url = filter_var($url, FILTER_VALIDATE_URL);
+    if(empty($url) || $url===false){
+        $glb_curl_code = HEURIST_INVALID_REQUEST;
+        $glb_curl_error = 'URL is not defined or invalid';
+        
+        return false;
+    }
+    
 
     /*
     if(false && strpos($url, HEURIST_SERVER_URL)===0){
@@ -1005,7 +1014,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         curl_setopt($ch, CURLOPT_HTTPHEADER, $additional_headers);
         //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
     }
-
+    
     curl_setopt($ch, CURLOPT_URL, $url);
     $data = curl_exec($ch);
 

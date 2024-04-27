@@ -103,7 +103,7 @@ use Shapefile\ShapefileReader;
     }
     $isZipArchive = false;
     
-    $record = array("rec_ID"=>$params['recID']);
+    $record = array("rec_ID"=>intval($params['recID']));
     recordSearchDetails($system, $record, $fields);
     
     if (@$record['details'] &&

@@ -1807,7 +1807,7 @@ class System {
     //
     //
     //    
-    public function user_LogActivity($action, $suplementary = '', $user_id=null, $date_only=false){
+    public function user_LogActivity($action, $suplementary = '', $user_id=null){
         
         if($user_id==null){
             $this->login_verify( false );
@@ -1816,9 +1816,7 @@ class System {
         
         $now = new DateTime();
 
-        $timestamp = $date_only ? $now->format('Y-m-d') : $now->format('Y-m-d H:i:s');
-
-        $info = array($user_id, $action, $timestamp);
+        $info = array($user_id, $action, $now->format('Y-m-d H:i:s'));
 
         if(is_array($suplementary)){
             $info = array_merge($info, $suplementary);
