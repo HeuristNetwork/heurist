@@ -213,6 +213,7 @@ $datetime1 = date_create('now');
 $cnt_archived = 0;
 $email_list = array();
 $email_list_deleted = array();
+$email_list_failed = array();
 
 //$databases = array('osmak_3');
 
@@ -352,8 +353,12 @@ if($need_email){
                 $cnt_archived++;
             }else{
                 $err = $system->getError();
-                error_log('purgeInactiveDBs Error: '.@$err['message']);
+                error_log('purgeInactiveDBs. FAILED database drop: '.@$err['message']);
                 $report .= (' ERROR: '.@$err['message']);
+                
+                array_push($email_list_failed, 
+                        "<tr><td>$db_name</td><td>".@$err['message']."</td></tr>");
+                
             }
         }
     }else{
@@ -623,11 +628,16 @@ if($need_email){
 
 
 if(!$arg_no_action){
+    //report after actual action
     echo $tabs0.'Archived '.$cnt_archived.' databases'.$eol;    
     
-    if(count($email_list_deleted)>0 && $need_email){
+    if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;                
-        sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.' <table>'.implode("\n",$email_list_deleted).'</table>',true);
+        $sMsg = $sTitle.' <table>'.implode("\n", $email_list_deleted).'</table>';
+        if(count($email_list_failed)>0)){
+             $sMsg = $sMsg.'<br>FAILED on database drop<table>'.implode("\n", $email_list_failed).'</table>';
+        }
+        sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);
     }
 }
 
