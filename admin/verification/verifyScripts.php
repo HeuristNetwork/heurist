@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit; 
+//print 'disabled'; 
+//exit; 
 ini_set('max_execution_time', '0');
 
  
@@ -1643,11 +1643,22 @@ function __dropBkpDateIndex(){
 }
 
 function __findBelegSpan($context){
+    
+    $context_original = $context;
 
     $dom = new DomDocument();
-    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context);
-//$dom->encoding = 'UTF-8';
-//print $dom->actualEncoding;
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = false;
+
+    //remove ident and formatting
+    $context = preg_replace("/[ \t]+/S", " ", $context);
+    $context = str_replace("\n <",'<',$context);
+    $context = str_replace("\n </",'</',$context);
+    
+    //remove indent spaces after new line before \n...<span
+    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    
+    //$context2 = $dom->documentElement->nodeValue;
     
     $finder = new DomXPath($dom);
     //$classname='Beleg';
@@ -1680,8 +1691,25 @@ function __findBelegSpan($context){
             $pos2 = mb_strpos($context, $nval);
             $pos1 = mb_strpos($context, $nvals[$idx-1])+mb_strlen($nvals[$idx-1]);
             if($pos1<$pos2){
+                $str = mb_substr($context,$pos1,$pos2-$pos1);
+                $str = strip_tags($str);
+                
+                $str = preg_replace("/\s+/S", " ", $str);
+                if(mb_strlen($str)>0){
+                    if($str==' '){
+                        $space = ' ';
+                    }else{
+                        $space = '[…]';
+                    }
+                }
+            }
+            /*
+            $pos2 = mb_strpos($context2, $nodes[$idx]->nodeValue);
+            $pos1 = mb_strpos($context, $nodes[$idx-1]->nodeValue)+mb_strlen($nodes[$idx-1]->nodeValue);
+            if($pos1<$pos2){
                 $space = ' ';
             }
+            */
         }    
         
         /* 
@@ -1699,7 +1727,7 @@ function __findBelegSpan($context){
     //print $res.'<br><br>';
     
     print $res."\t";
-    print $context."\n";
+    print $context_original."\n";
     
 }
       
@@ -1717,6 +1745,7 @@ function __getBelegContext(){
      
      //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
      $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids')); // 'limit'=>10, 
+//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids')); // 'limit'=>10, 
 //     echo var_dump($res);
      
      $ids = @$res['data']['records'];
@@ -1730,6 +1759,20 @@ function __getBelegContext(){
              $val = array_shift($val);
              
 //$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';             
+/*
+$val = '<span class="Beleg">
+    <span style="mso-char-type: symbol; mso-symbol-font-family: Mediaevum;">
+      <span style="font-family: Mediaevum;">a
+      </span>
+    </span>
+  </span>
+  <span style="font-family: Times New Roman;">aaaa
+    <span class="Beleg">ů eine
+      <em style="mso-bidi-font-style: normal;">m
+      </em> male
+    </span> da |
+  </span>';
+*/
              echo $recID."\t";
              __findBelegSpan($val);
          }
