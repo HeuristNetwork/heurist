@@ -762,7 +762,7 @@ class DbSysUsers extends DbEntityBase
                             .implode(',',$remove).')';
                     $res = $mysqli->query($query);
                     if(!$res){
-                        $ret = false;
+                        $ret = false;                     
                         $this->system->addError(HEURIST_DB_ERROR, 'Can\'t remove roles for existing users in workgroup #'.$groupID, $mysqli->error );
                         break;
                     }                            

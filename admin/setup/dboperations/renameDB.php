@@ -43,7 +43,7 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
     list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
     
     //checks that database name is valid, correct length and unique
-    $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+    $sErrorMsg = DbUtils::databaseValidateName($targetdbname, 1);
     
     if($sErrorMsg==null && $regID > 0){
 

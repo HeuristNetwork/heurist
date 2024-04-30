@@ -61,7 +61,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
     
     //database name validation
-    $sErrorMsg = DbUtils::databaseValidateName($templateddb, false);
+    $sErrorMsg = DbUtils::databaseValidateName($templateddb, 0);
     
     if($sErrorMsg==null && mysql__usedatabase($mysqli, $templateddb)!==true){
         $sErrorMsg = "Sorry, could not connect to the database $templateddb_out. "
@@ -123,7 +123,7 @@ if(@$_REQUEST['mode']=='2'){
         $targetdbname = filter_var(@$_REQUEST['targetdbname'], FILTER_SANITIZE_STRING);
         
         //checks that database name is valid, correct length and unique
-        $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+        $sErrorMsg = DbUtils::databaseValidateName($targetdbname, 1);
         if ($sErrorMsg!=null) {
             $sErrorMsg = "<div class='ui-state-error'>Warning: $sErrorMsg <br></div>";
         }else{

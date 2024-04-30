@@ -138,7 +138,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
         //checks that database name is valid, correct length and unique
-        $error_msg = DbUtils::databaseValidateName($database_name_full);
+        $error_msg = DbUtils::databaseValidateName($database_name_full, 1);
         if ($error_msg!=null) {
             $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             print json_encode($system->getError());

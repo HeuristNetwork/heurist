@@ -68,7 +68,7 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
     $dbname = filter_var(@$_REQUEST['db'], FILTER_SANITIZE_STRING);
     
     //database validation
-    $sErrorMsg = DbUtils::databaseValidateName($dbname, false);
+    $sErrorMsg = DbUtils::databaseValidateName($dbname, 2);
     
     $sysadmin_protection = @$_REQUEST['sa_protect'];
     

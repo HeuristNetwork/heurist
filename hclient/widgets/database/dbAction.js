@@ -24,7 +24,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     options: {
         actionName: '',
         default_palette_class: 'ui-heurist-admin',
-        path: 'widgets/database/'
+        path: 'widgets/database/',
+        entered_password: ''
     },
     
     _progressInterval:0,
@@ -56,11 +57,14 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         this._$('button.ui-button-action').button(); // 
         this._on(this._$('button.ui-button-action'),{click:this.doAction});
         
-        if(this.options.actionName=='create'){
+        if(this.options.actionName=='create' &&
+            window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation']){
+                this._$('#div_need_password').show();
         }
-        else if(this.options.actionName=='delete' || this.options.actionName=='clear'){
+        else if(this.options.actionName=='clone'){
+                this._checkNewDefinitions();
         }
-            
+        
         var ele = this._$('#uname');
         if(ele.val()=='' && window.hWin.HAPI4.currentUser){
             ele.val(window.hWin.HAPI4.currentUser.ugr_Name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
@@ -107,39 +111,63 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 return;  
            } 
            
+           var ele = this._$('#uname');
+           
            request = {action: this.options.actionName,
-                      uname : this._$('#uname').val().trim(), 
+                      uname : (ele.length>0?ele.val().trim():''), 
                       dbname: dbname}; 
 
-           if(this.options.actionName=='clone'){
-                request['nodata'] = this._$('#nodata').is(':checked');
+           if(this.options.actionName=='clone'){ 
+                if(this._$('#nodata').is(':checked')){
+                    request['nodata'] = 1;
+                }
+                var pwd = this._$('#pwd').val().trim();
+                if(pwd!=''){
+                    request['pwd'] = pwd;
+                } 
+                
+           }else if(this.options.actionName=='create' && window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation']){
+                var pwd = this._$('#create_pwd').val().trim();
+                if(pwd==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define password'));
+                    return;  
+                } 
+                request['create_pwd'] = pwd;
            }
+
                       
         }else if(this.options.actionName=='clear' || this.options.actionName=='delete'){
 
-           var pwd = this._$('#db-password').val().trim();
-           if(pwd==''){
-                return;  
+           //challenged word
+           var chpwd = this._$('#db-password').val().trim();
+           if(chpwd==''){
+               window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define challenge word'));
+               return;  
            } 
-
+           
            request = {action: this.options.actionName, 
                         //database : window.hWin.HAPI4.database, //current database
-                        pwd: pwd
+                        chpwd: chpwd
                      }; 
-              
-           if(this.options.actionName=='delete'){       
-               if(!this._$('#db-archive').is(':checked')){
-                    request['noarchive'] = 1;
-                    this._$('li.archive').hide();
-               }else{
-                    this._$('li.archive').show();
-               }
+
+           if(this.options.entered_password){
+                request['pwd'] = this.options.entered_password;
            }
-            
+              
         }else if(this.options.actionName=='restore'){
             
         }
 
+        
+        if(this.options.actionName=='delete' || this.options.actionName=='rename'){       
+           if(!this._$('#db-archive').is(':checked')){
+                request['noarchive'] = 1;
+                this._$('li.archive').hide();
+           }else{
+                this._$('li.archive').show();
+           }
+        }
+        
         //unique session id    
         var session_id = Math.round((new Date()).getTime()/1000);
         
@@ -169,6 +197,31 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         return;
     },
+    
+    //
+    //
+    //
+    _checkNewDefinitions: function(){
+
+        var that = this;
+      
+        var request = {action: 'check_newdefs',        
+                       db: window.hWin.HAPI4.database};
+        
+        window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
+
+                if (response.status == window.hWin.ResponseStatus.OK) {
+                    if(response.data!=''){
+                        that._$('#div_need_password').show();
+                        that._$('#new_defs_warning').text(response.data);
+                    }
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+              
+        });
+        
+    },
 
     //  -----------------------------------------------------
     //
@@ -187,7 +240,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>';                        
             }
     
-    
             window.hWin.HEURIST4.msg.showMsgDlg(
                 '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been deleted</h3>'+msgAboutArc
                ,null, 'Database deleted',
@@ -200,6 +252,29 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     }
                }
             );             
+            
+        }else if(this.options.actionName=='rename'){
+            
+            var msgAboutArc = '';
+            if(this._$('input[name=db-archive]:checked').val()!=''){
+               msgAboutArc = '<p>Database with previous name has been archived and moved to "DELETED_DATABASES" folder.</p>';
+            }
+    
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been renamed</h3>'
+                +msgAboutArc
+                +'<p>You will be redirected to renamed database <b>'+window.hWin.HEURIST4.util.htmlEscape(response.newdbname)+'</b></p>'
+               ,null, 'Database renamed',
+               {
+                    width:700,
+                    height:'auto',
+                    close: function(){
+                        //redirects to renamed database
+                        window.hWin.document.location = response.newdblink;
+                    }
+               }
+            );             
+            
             
         }else{
             

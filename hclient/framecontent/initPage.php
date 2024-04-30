@@ -63,9 +63,9 @@ if(defined('IS_INDEX_PAGE')){
     
     if(count($missed)>0){
         $message = 'Database '.htmlspecialchars($_REQUEST['db'])
-        .' encounters a serious issue. The following tables are missed:<br><br>'
+        .' encounters a serious issue. The following tables are missed:<br><br><i>'
         .implode(', ',$missed)
-        .'<p>Either database has not been created (if new) or restored from archive completely. Or drive space has been exhausted'
+        .'</i><p>Either database has not been created (if new) or restored from archive completely. Or drive space has been exhausted'
         .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
         .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers).'
         .'<br>We apologise for any inconvenience</p>';        
