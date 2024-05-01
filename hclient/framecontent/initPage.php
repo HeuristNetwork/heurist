@@ -62,13 +62,19 @@ if(defined('IS_INDEX_PAGE')){
     $missed = hasAllTables($system->get_mysqli());
     
     if(count($missed)>0){
-        $message = 'Database '.htmlspecialchars($_REQUEST['db'])
-        .' encounters a serious issue. The following tables are missed:<br><br><i>'
+        $message = 'Database <b>'.HEURIST_DBNAME
+        .'</b> is missing the following tables:<br><br><i>'
         .implode(', ',$missed)
-        .'</i><p>Either database has not been created (if new) or restored from archive completely. Or drive space has been exhausted'
+        .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
+        .'It is also possible that drive space has been exhausted. '
         .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
-        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers).'
+        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
         .'<br>We apologise for any inconvenience</p>';        
+
+        //to add to error log            
+        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
+                .' is missing the following tables: '.implode(', ',$missed));
+        
         
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;

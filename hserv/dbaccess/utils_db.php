@@ -1808,7 +1808,7 @@ woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
 'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
 
         $missed = array_diff($check_list, $list);
-
+        
         return $missed;
     }
     
