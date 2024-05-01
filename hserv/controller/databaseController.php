@@ -249,7 +249,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                         $pwd = @$_REQUEST['pwd']; //sysadmin protection
 
                         list($db_source_full, $db_source ) = mysql__get_names($db_source);
-                        $sourceRegID = mysql__select_value($mysqli, 'select `'.$db_source_full.'`.sys_dbRegisteredID from sysIdentification where 1'); 
+                        $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from `'.$db_source_full.'`.sysIdentification where 1'); 
         
                     
                         if($is_current_db){
@@ -307,6 +307,9 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     $res = DbUtils::databaseCloneFull($db_source, $db_target, $nodata, $is_template);
 
                     if($res!==false){
+                        
+                        DbUtils::resetRegistration($db_target); //remove registration from sysIndetification
+                        
                         //to send email after clone
                         $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $db_target);
                         sendEmail_NewDatabase($usr_owner, $db_target, 
