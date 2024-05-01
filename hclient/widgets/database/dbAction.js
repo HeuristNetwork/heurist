@@ -162,9 +162,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         if(this.options.actionName=='delete' || this.options.actionName=='rename'){       
            if(!this._$('#db-archive').is(':checked')){
                 request['noarchive'] = 1;
-                this._$('li.archive').hide();
+                this._$('.archive').hide();
            }else{
-                this._$('li.archive').show();
+                this._$('.archive').show();
            }
         }
         
@@ -174,7 +174,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         request['db'] = window.hWin.HAPI4.database;
         request['locale'] = window.hWin.HAPI4.getLocale();
         request['session'] = session_id;
-        
+
         this._showProgress( session_id, false, 1000 );
         var that = this;
         
@@ -230,19 +230,16 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _afterActionEvenHandler: function( response ){
         
         this._$('.ent_wrapper').hide();
-        this._$("#div_result").show();
+        var div_res = this._$("#div_result").show();
+        
+        if(response && response.newdbname){
+            this._$('#newdbname').text(response.newdbname);  
+        } 
             
         if(this.options.actionName=='delete'){
-            
-            var msgAboutArc = '';
-            if(this._$('input[name=db-archive]:checked').val()!=''){
-               msgAboutArc = '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
-               + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>';                        
-            }
-    
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been deleted</h3>'+msgAboutArc
-               ,null, 'Database deleted',
+
+            window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
+               null, window.hWin.HR('Database deleted'),
                {
                     width:700,
                     height:'auto',
@@ -251,20 +248,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         window.hWin.document.location = window.hWin.HAPI4.baseURL; //startup page
                     }
                }
-            );             
+            );
             
         }else if(this.options.actionName=='rename'){
-            
-            var msgAboutArc = '';
-            if(this._$('input[name=db-archive]:checked').val()!=''){
-               msgAboutArc = '<p>Database with previous name has been archived and moved to "DELETED_DATABASES" folder.</p>';
-            }
-    
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been renamed</h3>'
-                +msgAboutArc
-                +'<p>You will be redirected to renamed database <b>'+window.hWin.HEURIST4.util.htmlEscape(response.newdbname)+'</b></p>'
-               ,null, 'Database renamed',
+
+            window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
+               null, window.hWin.HR('Database renamed'),
                {
                     width:700,
                     height:'auto',
@@ -273,12 +262,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         window.hWin.document.location = response.newdblink;
                     }
                }
-            );             
-            
+            );
             
         }else{
             
-            this._$('#newdbname').text(response.newdbname);
+            
             this._$('#newusername').text(response.newusername);
             this._$('#newdblink').attr('href',response.newdblink).text(response.newdblink);
             
