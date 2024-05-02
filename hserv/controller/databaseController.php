@@ -149,6 +149,8 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             
             $allow_action = false;
             $db_target = @$_REQUEST['database']?$_REQUEST['database']:$_REQUEST['db'];    
+            $db_target = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_target)); //for snyk
+            
             $create_archive = !array_key_exists('noarchive', $_REQUEST); //for delete
             
             $sErrorMsg = DbUtils::databaseValidateName($db_target, 2); //exists
