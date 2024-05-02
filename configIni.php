@@ -116,10 +116,10 @@ $indexServerPort='';
 
 // Functions normally available only to the system adminstrator. Password(s) must be > 14 characters or they are treated as blank
 // If DatabaseDeletion password set, system administrator can delete up to 10 at a time (with password challenge) 
-$passwordForDatabaseCreation=''; // normally blank = any logged in user can create, otherwise password challenge
-$passwordForDatabaseDeletion=''; // if blank = no one can delete db except db owner
-$passwordForReservedChanges=''; // if blank = no-one can modify reserved fields, otherwise password challenge
-$passwordForServerFunctions=''; // if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
+$passwordForDatabaseCreation =''; // normally blank = any logged in user can create, otherwise password challenge
+$passwordForDatabaseDeletion =''; // if blank = no one can delete db except db owner (to delete from server management)
+$passwordForReservedChanges  =''; // if blank = no-one can modify reserved fields, otherwise password challenge
+$passwordForServerFunctions  =''; // if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
 
 $allowGoogleAnalytics = false;
 

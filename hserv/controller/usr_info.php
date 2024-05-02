@@ -75,17 +75,19 @@
     
     }
     else if($action=='usr_log'){
-        
-        $system->initPathConstants($dbname);                                
-        $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
-        $res = true;
-        
-        if(@$_REQUEST['activity']=='impEmails'){
-            $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
+
+        if($system->set_dbname_full($dbname)){
+
+            $system->initPathConstants($dbname);
+            $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
+            $res = true;
+            
+            if(@$_REQUEST['activity']=='impEmails'){
+                $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
+                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
+            }
         }
-        
-        
+
     } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
         if($system->verify_credentials($dbname)>0){
@@ -97,12 +99,12 @@
     
         if($system->set_dbname_full($dbname)){
             
-                $system->initPathConstants($dbname);
-                $system->user_LogActivity('Logout');
+            $system->initPathConstants($dbname);
+            $system->user_LogActivity('Logout');
 
-                if($system->doLogout()){
-                    $res = true;
-                }
+            if($system->doLogout()){
+                $res = true;
+            }
         }
         
     }else if($action == 'check_for_alpha'){ // check if an alpha version is available
@@ -563,6 +565,8 @@
                     $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
+
+                    $system->user_LogActivity('Login');
                 }
 
             } else if ($action=="reset_password") {

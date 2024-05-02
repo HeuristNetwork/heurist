@@ -1737,7 +1737,8 @@ $.widget( "heurist.svs_list", {
             if(that.options.filter_by_type<2){
                 arr_menu.push({title: "----"});
                 arr_menu.push({title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" });
-                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" });
+//IJ 2022-10-04 Block use here, Publish alternative are to be used instead                
+//                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }); 
             }
             arr_menu.push({title: "----"});
             arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });

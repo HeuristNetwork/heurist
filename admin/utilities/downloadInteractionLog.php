@@ -50,8 +50,33 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         exit;
     }
 
+    $action_filter = array();
+    $is_all_actions = false;
+    $fileprefix = "interaction";
+
+    switch ($_REQUEST['actionType']) {
+        case 'recuse': // record use [Edit Record, View Record, Custom Report]
+            array_push($action_filter, 'editRec', 'viewRec', 'custRep');
+            $filename = "record";
+            break;
+
+        case 'website': // end user visiting a CMS webpage/homepage
+            array_push($action_filter, 'VisitPage');
+            $fileprefix = "website";
+            break;
+
+        case 'accounts': // account actions [Log in, Log off, Reset Password]
+            array_push($action_filter, 'Login', 'Logout', 'ResetPassword');
+            $fileprefix = "account";
+            break;
+        
+        default: // all actions
+            $is_all_actions = true;
+            break;
+    }
+
     // Construct initial headers
-    $filename = "user_log_". $_REQUEST['db'] .".csv";
+    $filename = "{$fileprefix}_logs_{$_REQUEST['db']}.csv";
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="' . $filename . '";');
     header('Pragma: no-cache');
@@ -59,19 +84,6 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
     // Add column headers
     fputcsv($csv_fd, array("User", "Function", "Date", "Record ID", "Resultset Size"));
-
-    $action_filter = array();
-    $is_all_actions = false;
-
-    switch ($_REQUEST['actionType']) {
-        case 'recuse': // record use [Edit Record, View Record, Custom Report]
-            array_push($action_filter, 'editRec', 'viewRec', 'custRep');
-            break;
-        
-        default: // all actions
-            $is_all_actions = true;
-            break;
-    }
 
     // Prepare user filtering by workgroups
     $users = null;
@@ -261,8 +273,10 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                 <label for="completeLog"><input type="radio" name="actionType" id="completeLog" value="all" checked="true"> Download entire log</label>
             </div>
 
-    		<div style="margin-top: 10px;">
-                <label for="recUsage"><input type="radio" name="actionType" id="recUsage" value="recuse"> Download record usage (when a record is viewed, edited, or used within a custom report)</label>
+            <div style="margin-top: 10px;">
+                <label for="recUsage"><input type="radio" name="actionType" id="recUsage" value="recuse"> Download record usage (when a record is viewed, edited, or used within a custom report)</label><br><br>
+                <label for="webUsage"><input type="radio" name="actionType" id="webUsage" value="website"> Download webpage usages (when users view a CMS Homepage or CMS webpage)</label><br><br>
+                <label for="accUsage"><input type="radio" name="actionType" id="accUsage" value="accounts"> Download account related actions (when accounts login, logout or request a password reset)</label>
             </div>
             <!-- Add other actions -->
 

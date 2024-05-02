@@ -987,8 +987,9 @@ function afterPageLoad(document, pageid, eventdata){
                 }
                 
             });
-        
-    
+
+    // Log interaction
+    window.hWin.HAPI4.SystemMgr.user_log('VisitPage', pageid);
 }
 
 //

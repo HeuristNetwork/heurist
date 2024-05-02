@@ -36,7 +36,7 @@ if(!@$_REQUEST['pwd']){
     
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
-    $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, false);
+    $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, 2);
     
     if ($sErrorMsg!=null) {
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);

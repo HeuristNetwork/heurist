@@ -46,14 +46,17 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
 
    $isNewUserRegistration = ($action=='create' && !$system->has_access()); 
     
-   if(!($isNewUserRegistration || $system->is_dbowner()>0)){
-        $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be an owner of database');
-        // 'Administrator permissions are required');
+   if(!($isNewUserRegistration || $system->has_access())){
+        $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
+        //@todo !!!!!  check for $passwordForDatabaseCreation
    }else{
        
         $res = false;        
         
-        DbUtils::setSessionId($session_id);
+        DbUtils::initialize();
+        if($session_id>0){
+            DbUtils::setSessionId($session_id);  
+        } 
         
         $mysqli =  $system->get_mysqli();
         
@@ -62,148 +65,275 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             
             
         }
-        else if($action=='create'){   
+        else if ($action=='check_newdefs'){   
             
-            //compose database name
-            $database_name = __composeDbName();
-            if($database_name!==false){
+            $res = DbUtils::databaseCheckNewDefs(); //check for current database
+            if($res===false){
+                $res = ''; //there are not new defintions
+            }
+
+        }
+        else if($action=='create'){  
+        
+            if( !isset($passwordForDatabaseCreation) 
+                || $passwordForDatabaseCreation==''
+                || !$system->verifyActionPassword(@$_REQUEST['create_pwd'], $passwordForDatabaseCreation, 6)){
             
-                if($isNewUserRegistration){
-                    //@todo get user info from $_REQUEST
-                }else{
-                    $ugr_ID = $system->get_user_id(); //intval(@$_REQUEST["ugr_ID"]);
-                    $usr_owner = user_getById($mysqli, $ugr_ID);
-                }
             
-                //it returns false or array of warnings            
-                $res = DbUtils::databaseCreateFull($database_name, $usr_owner);
+                //compose database name
+                $database_name = __composeDbName();
+                if($database_name!==false){
                 
-                if($res!==false){
-                    sendEmail_NewDatabase($usr_owner, $database_name, null);
-                    //add url to new database
-                    $res = array(
-                        'newdbname'  => $database_name, 
-                        'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1',
-                        'newusername'=> $usr_owner['ugr_Name'],
-                        'warnings'   => $res);
+                    $usr_owner = null;
+                    
+                    if($isNewUserRegistration)
+                    {
+                        //check capture
+                        if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
+                            
+                            $system->addError(HEURIST_ACTION_BLOCKED, 
+                                'Are you a bot? Please enter the correct answer to the challenge question');
+                        }
+                        if (@$_SESSION["captcha_code"]){
+                            unset($_SESSION["captcha_code"]);
+                        }
+                        unset($_REQUEST['ugr_Captcha']);
+                        
+                        //get registration form fields
+                        $usr_owner = array();
+                        foreach($_REQUEST as $name=>$val){
+                            if(strpos($name,'ugr_')===0){
+                                $usr_owner[$name] = $mysqli->real_escape_string($_REQUEST[$name]);
+                            }
+                        }
+                        
+                        //mandatory fields
+                        $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
+                        foreach($fld_req as $name){
+                            if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
+                                $system->addError(HEURIST_ACTION_BLOCKED, 'Mandatory data for your registration profile '
+                                    .'(first and last name, email, password) are not completed. Please fill out registration form');
+                                $usr_owner = null;
+                                break;
+                            }
+                        }
+                        if($usr_owner!=null){
+                            $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
+                        }
+                        
+                    }else{
+                        $ugr_ID = $system->get_user_id();
+                        $usr_owner = user_getById($mysqli, $ugr_ID);
+                    }
+                
+                    if($usr_owner!=null){
+                        //it returns false or array of warnings            
+                        $res = DbUtils::databaseCreateFull($database_name, $usr_owner);
+                        
+                        if($res!==false){
+                            sendEmail_NewDatabase($usr_owner, $database_name, null);
+                            //add url to new database
+                            $res = array(
+                                'newdbname'  => $database_name, 
+                                'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1',
+                                'newusername'=> $usr_owner['ugr_Name'],
+                                'warnings'   => $res);
+                        }
+                    }
                 }
             }
             
         }
-        else if($action=='delete' || $action=='clear') //temp || $action=='rename' || $action=='clone'
+        else if($action=='delete' || $action=='clear')  
         {
-            $isRenameClone = ($action=='rename' || $action=='clone');
-            $db_source = null;
-            $database_names_valid = true;
-            $allow_action = false;
-            $is_template = false;   
             
-            if($isRenameClone){
+            $allow_action = false;
+            $db_target = @$_REQUEST['database']?$_REQUEST['database']:$_REQUEST['db'];    
+            $db_target = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_target)); //for snyk
+            
+            $create_archive = !array_key_exists('noarchive', $_REQUEST); //for delete
+            
+            $sErrorMsg = DbUtils::databaseValidateName($db_target, 2); //exists
+            if ($sErrorMsg!=null) {
+                $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
+            }else{
+
+                $pwd = @$_REQUEST['pwd']; //sysadmin protection
+                $is_current_db = ($_REQUEST['db']==$db_target);
+                
+                //validate premissions
+                if($pwd!=null){
+                    $allow_action = !$system->verifyActionPassword($pwd, $passwordForDatabaseDeletion, 15);        
+                }
+                
+                if($is_current_db) {
+                    
+                    if($system->is_dbowner() || $allow_action){ 
+                        $challenge_pwd  = @$_REQUEST['chpwd'];
+                        $challenge_word = ($action=='clear')?'CLEAR ALL RECORDS':'DELETE MY DATABASE';
+                        $allow_action = !$system->verifyActionPassword($challenge_pwd, $challenge_word);
+                    }else{
+                        $system->addError(HEURIST_REQUEST_DENIED, 
+                            'To perform this action you must be logged in as Database Owner');                        
+                    }
+                    
+                }else if(!$allow_action && (!isset($passwordForDatabaseDeletion) || $passwordForDatabaseDeletion=='')) { 
+                    $this->addError(HEURIST_REQUEST_DENIED, 
+                        'This action is not allowed unless a password is provided - please consult system administrator');
+                }
+            }
+            
+            if($allow_action){
+                if($action=='clear'){
+                 
+                    $res = DbUtils::databaseEmpty($db_target, false);
+                    
+                }else
+                if($action=='delete'){
+                    //keep owner info to send email after deletion
+                    $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $db_target);
+                    
+                    $res = DbUtils::databaseDrop(false, $db_target, $create_archive);    
+                    
+                    if($res!==false && !$is_current_db){
+                        sendEmail_DatabaseDelete($usr_owner, $db_target, 1);
+                    }
+                }
+            }
+            
+            
+        }
+        else if($action=='rename' || $action=='clone')
+        {
+            $allow_action = false;
+            $is_current_db = false;
+
+            //source database
+            $is_template = (@$_REQUEST['templatedb']!=null);
+            if($is_template){
+                $db_source = filter_var(@$_REQUEST['templatedb'], FILTER_SANITIZE_STRING);
+            }else if (@$_REQUEST['sourcedb']){ //by sysadmin from list of databases
+                $db_source = filter_var(@$_REQUEST['sourcedb'], FILTER_SANITIZE_STRING);
+            }else{
+                $db_source = $_REQUEST['db'];    
+                $is_current_db  = true;
+            }
+            
+            $db_source = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_source)); //for snyk
+            
+            $sErrorMsg = DbUtils::databaseValidateName($db_source, 2); //exists
+            if ($sErrorMsg!=null) {
+                if(strpos($sErrorMsg,'not exists')>0){
+                   $sErrorMsg = 'Operation is possible when database to be cloned or renamed is on the same server. '
+                                .$sErrorMsg;
+                }
+                $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
+            }else{
+                
                 //target database
-                $dbname = __composeDbName();
-                if(is_bool($dbname) && !$dbname){
-                    $database_names_valid = false;    
-                }else{
-                    //source database
-                    $is_template = (@$_REQUEST['templatedb']!=null);
-                    $db_source = $is_template?$_REQUEST['templatedb']:@$_REQUEST['db'];
-                    $is_current_db = (@$_REQUEST['db']==$db_source);
-                    $sErrorMsg = DbUtils::databaseValidateName($db_source, false);
+                $db_target = __composeDbName();
+                if($db_target!==false){//!is_bool($db_target)
+                    $sErrorMsg = DbUtils::databaseValidateName($db_target, 1); //unique
                     if ($sErrorMsg!=null) {
                         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
-                        $database_names_valid = false;
-                    }
-                }
-                
-            }else{
-                $dbname = @$_REQUEST['database']?$_REQUEST['database']:$_REQUEST['db'];    
-                $is_current_db = (@$_REQUEST['db']==$dbname);
-            }
-
-            // check unique name for rename/clone
-            if($database_names_valid){
-                $sErrorMsg = DbUtils::databaseValidateName($dbname, $isRenameClone);
-                if ($sErrorMsg!=null) {
-                    $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
-                    $database_names_valid = false;
-                }
-            }
-            
-            if($database_names_valid){
-
-                $pwd = @$_REQUEST['pwd'];
-                                         
-                if($is_current_db){
-                    if($isRenameClone){
-                        $challenge_word = null;
                     }else{
-                        $challenge_word = ($action=='clear')?'CLEAR ALL RECORDS':'DELETE MY DATABASE';
-                    }
+                        
+                        //validate permissions
+                        //
+                        //1. current database
+                        //   must dbowner or dbadmin
+                        //   must be registered or without new defs - otherwise sysadmin pwd 
+                        //2. cloned by sysadmin (sourcedb=)
+                        //   sysadmin pwd    
+                        //3. template (templatedb=)
+                        //   owner will be replaced with current owner
+                        //   must be curated (regID<21) or <1000?
+                
+                        // sysadmin_protection
+                        $pwd = @$_REQUEST['pwd']; //sysadmin protection
+
+                        list($db_source_full, $db_source ) = mysql__get_names($db_source);
+                        $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from `'.$db_source_full.'`.sysIdentification where 1'); 
+        
                     
-                    //validate ownership
-                    if($challenge_word==null || !$system->verifyActionPassword($pwd, $challenge_word)){
-                        if($system->is_dbowner()){  //|| $system->is_admin()){
+                        if($is_current_db){
+                            if(!$system->is_admin()){ 
+                                $system->addError(HEURIST_REQUEST_DENIED, 
+'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');                                                    
+                            }else{
+                                $allow_action = true;
+                                if($action=='clone' && !($sourceRegID>0)){
+                                    //check for new definitions
+                                    $hasWarning = DbUtils::databaseCheckNewDefs();
+                                    if($hasWarning!=false && $system->verifyActionPassword($pwd, $passwordForServerFunctions)){    
+                                        $allow_action = false;
+                                        //add prefix 
+                                        $system->addErrorMsg(
+"Sorry, the database $db_source has new definitions.<br>It must be registered before cloning or provide special system administrator password.<br><br>");                        
+                                    }
+                                }
+                            }
+                        }else if($is_template){
+                            
+                            if($sourceRegID>0 && $sourceRegID<1000){
+                                $allow_action = true;
+                            }else{
+$sErrorMsg = "Sorry, the database $db_source must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
+                            }
+                            
+                        }else if (!$system->verifyActionPassword($pwd, $passwordForServerFunctions)){
+                            //cloned by sysadmin (sourcedb=) from list of databases
                             $allow_action = true;
-                        }else{
-                            $system->addError(HEURIST_REQUEST_DENIED, 
-                            'To perform this action you must be logged in as Database Owner');                        
-    //   'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');                
                         }
                     }
-                    
-                }else if($is_template || !$system->verifyActionPassword($pwd, $passwordForDatabaseDeletion, 14)){
-                    //@todo 
-                    //1. verify is current user is server manager (by IP and email)
-                    //2. or by login credentials to database to be deleted
-                    $allow_action = true;
                 }
             }
-            
+
             if($allow_action){ 
 
-                $create_archive = !array_key_exists('noarchive', $_REQUEST); //for rename,delete
+                $create_archive = !array_key_exists('noarchive', $_REQUEST); //for rename
                 $nodata = array_key_exists('nodata', $_REQUEST);    //for clone  
                 
-                list($database_name_full, $database_name ) = mysql__get_names($dbname);
                 
                 if($action=='rename'){
                  
-                    $res = DbUtils::databaseRename($db_source, $database_name, $create_archive);
-
-                }else
-                if($action=='clone'){
-                    //keep owner info to send email after deletion
-                    $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $database_name_full);
-
-                    $res = DbUtils::databaseCloneFull($db_source, $database_name, $nodata, $is_template);
+                    $res = DbUtils::databaseRename($db_source, $db_target, $create_archive);
 
                     if($res!==false){
-                        sendEmail_NewDatabase($usr_owner, $database_name, 
-                                ' from  '.($is_template?'template ':'').$db_source);
+                        $res = array(
+                                'newdbname'  => $db_target, 
+                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
                     }
                     
                 }else
-                if($action=='clear'){
-                 
-                    $res = DbUtils::databaseEmpty($database_name, false);
-                    
-                }else{
-                    //keep owner info to send email after deletion
-                    $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $database_name_full);
-                    
-                    $res = DbUtils::databaseDrop(false, $database_name, $create_archive);    
-                    
-                    if($res!==false && !$is_current_db){
-                        sendEmail_DatabaseDelete($usr_owner, $database_name, 1);
+                if($action=='clone'){
+
+                    $res = DbUtils::databaseCloneFull($db_source, $db_target, $nodata, $is_template);
+
+                    if($res!==false){
+                        
+                        DbUtils::resetRegistration($db_target); //remove registration from sysIndetification
+                        
+                        //to send email after clone
+                        $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $db_target);
+                        sendEmail_NewDatabase($usr_owner, $db_target, 
+                                ' from  '.($is_template?'':'template ').$db_source);
+                                
+                        $res = array(
+                                'newdbname'  => $db_target, 
+                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
+                                
                     }
+                    
                 }
             }
             
-            DbUtils::setSessionVal('REMOVE');
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");                
             $res = false;
         }
+
+        DbUtils::setSessionVal('REMOVE');
         
         if(is_bool($res) && $res==false){
                 $response = $system->getError();

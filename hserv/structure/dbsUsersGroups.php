@@ -83,8 +83,15 @@
     */
     function user_getByField($mysqli, $field, $value, $database=null){
 
+        if($database!=null){
+            list($database_full, $database ) = mysql__get_names($database);
+            $database_full = '`'.$database_full.'`.';
+        }else{
+            $database_full = '';
+        }
+        
         $user = null;
-        $query = 'select * from '.($database!=null?('`'.$database.'`.'):'')
+        $query = 'select * from '.$database_full
             .'sysUGrps where '.$field.' = ?';
             
         $res = mysql__select_param_query($mysqli, $query, array('s',$value));

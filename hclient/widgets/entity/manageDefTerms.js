@@ -697,11 +697,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let $show_all = $('<div style="display:inline-block;padding:0.2em" id="div_show_already_in_db">'
                 + '<div class="header4" style="display: inline-block;text-align:right;">'
-                    + '<label for="input_search" accesskey="F" class="slocale">All Find</label>'
+                    + '<label for="input_search" class="slocale">All Find</label>'
                 + '</div>'
                 + '<input id="input_search" class="text ui-widget-content ui-corner-all" slocale-title="Find by name, ID or concept code" style="width: 250px; margin-right:0.2em"/>'
 
-                + '<label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show All&nbsp;'
+                + '<label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" >Show All&nbsp;'
                 + '<input id="chb_show_already_in_db" class="text ui-widget-content ui-corner-all" style="margin-right:0.2em" type="checkbox"/></label>'
             + '</div>');
 

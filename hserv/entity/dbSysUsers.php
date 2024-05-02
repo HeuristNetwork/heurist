@@ -757,12 +757,12 @@ class DbSysUsers extends DbEntityBase
                     }    
                 }
                 
-                if(count($remove)>0){
+                if(is_array($remove) && count($remove)>0){
                     $query = 'DELETE FROM sysUsrGrpLinks WHERE ugl_GroupID='.$groupID.' AND ugl_UserID in ('
                             .implode(',',$remove).')';
                     $res = $mysqli->query($query);
                     if(!$res){
-                        $ret = false;
+                        $ret = false;                     
                         $this->system->addError(HEURIST_DB_ERROR, 'Can\'t remove roles for existing users in workgroup #'.$groupID, $mysqli->error );
                         break;
                     }                            

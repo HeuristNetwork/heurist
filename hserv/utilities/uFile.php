@@ -966,6 +966,11 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
         return false;
     }
     
+    if(!(strpos(strtolower($url),'https://')===0 || strpos(strtolower($url),'http://')===0)){
+        $glb_curl_code = HEURIST_INVALID_REQUEST;
+        $glb_curl_error = 'URL is not started with a trusted scheme';
+        return false;
+    }
 
     /*
     if(false && strpos($url, HEURIST_SERVER_URL)===0){
@@ -1059,6 +1064,10 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
         return false;
     }
     if(!$url){
+        return false;
+    }
+    
+    if(!(strpos(strtolower($url),'https://')===0 || strpos(strtolower($url),'http://')===0)){
         return false;
     }
 

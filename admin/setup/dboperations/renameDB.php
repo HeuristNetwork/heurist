@@ -43,7 +43,7 @@ if($_REQUEST['mode'] == 2){ // verify the new name is unique
     list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
     
     //checks that database name is valid, correct length and unique
-    $sErrorMsg = DbUtils::databaseValidateName($targetdbname);
+    $sErrorMsg = DbUtils::databaseValidateName($targetdbname, 1);
     
     if($sErrorMsg==null && $regID > 0){
 
@@ -305,31 +305,11 @@ function updateRegDetails($mysqli, $regID, $new_db_name, $new_dbname_full){
         'serverURL'=>$serverURL
     );
 
-    $data = 'Unknown error';
-    if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){
-        $data = DbUtils::updateRegisteredDatabase($params);
-    }else{
-        $reg_url =   HEURIST_INDEX_BASE_URL
-            .'admin/setup/dbproperties/getNextDBRegistrationID.php?'
-            .http_build_query($params);
-
-        $data = loadRemoteURLContentWithRange($reg_url, null, true);
-
-        if (!isset($data) || $data==null) {
-            global $glb_curl_error;
-            $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
-
-            echo '<p class="ui-state-error">'
-                .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br><br>'
-                . $error_code . '<br>'
-                ."URL requested: ".htmlspecialchars($reg_url)."</p><br>";
-            return false;
-        }
-    }
+    $data = DbUtils::updateRegisteredDatabase($params);
 
     if($data != $regID){
         DbUtils::databaseDrop(false, $new_dbname_full, false);
-        echo $data;
+        echo '<p class="ui-state-error">'.$data.'</p>';
         return false;    
     }
 

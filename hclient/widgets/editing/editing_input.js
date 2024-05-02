@@ -3648,13 +3648,15 @@ $.widget( "heurist.editing_input", {
 
             }
             else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
-                
+
                 $input.colorpicker({
-                        hideButton: false, //show button right to input
-                        showOn: "both",
-                        val:value});
-                $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
-                
+                    hideButton: false, //show button right to input
+                    showOn: "both",
+                    val:value
+                }).css('max-width', '130px');
+
+                $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'180px'});
+
             }
             else 
             if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 

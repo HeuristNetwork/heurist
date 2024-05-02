@@ -352,7 +352,7 @@
 			<div id="c" class="display-tab">
 					<div style="margin:20px 0px 20px 50px;">
 						Mean Date:
-						<input type=text id="BCE" title="Enter date in  y-m-d h:m:s" tabindex="1" onclick="return c14DateClick('BCE');" style="width:80px; margin: 0px 5px" />
+						<input type=text id="BCE" title="Enter date in  y-m-d h:m:s" onclick="return c14DateClick('BCE');" style="width:80px; margin: 0px 5px" />
 						<span style="margin:0px 15px 0px 15px" >or</span>
 							<input type=text id="BPD" title="Enter date in  y-m-d h:m:s" tabindex="-1" onclick="return c14DateClick('BPD');" style="width:80px; margin: 0px 5px 0px 0px" />
 						<br>
@@ -362,7 +362,7 @@
                     
 					<div style="margin:20px 0px 20px 50px;">
 						<span title="Enter duration in  PnYnMnDTnHnMnS format" style=" margin:0px 25px 0px 65px">±
-							<input type=text id="DEV" onclick="return c14DevClick('DEV');" tabindex="2" style="width:50px; margin:0px 25px 0px 1px" />or
+							<input type=text id="DEV" onclick="return c14DevClick('DEV');" style="width:50px; margin:0px 25px 0px 1px" />or
 						</span>
 						<span title="Enter duration in  PnYnMnDTnHnMnS format">+
 							<input type=text id="DVP" onclick="return c14DevClick('DVP');" tabindex="-1" style="width:50px; margin:0px 9px 0px 1px" />
@@ -377,9 +377,9 @@
                     
 					<div style="margin:20px 0px 20px 50px;">
 						Lab Code:
-						<input type=text id="COD" tabindex="4" title="Enter Lab Code" style="width:100px; margin: 0px 5px 0px 14px" />
+						<input type=text id="COD" title="Enter Lab Code" style="width:100px; margin: 0px 5px 0px 14px" />
 						<span style="margin:0px 30px 0px 15px" >
-							<input type="checkbox" tabindex="5" id="CAL" />Calibrated
+							<input type="checkbox" id="CAL" />Calibrated
 						</span>
 					</div>
 				</div>
@@ -392,8 +392,8 @@
 		<div style="font-size:0.8em;">
 			<span style="margin:10px 270px">&nbsp;</span>
 			<span>
-				<input type="button" tabindex="11" value="Save" onclick="TemporalPopup.close();" />
-				<input type="button" tabindex="12" value="Cancel" onclick="TemporalPopup.cancel();" />
+				<input type="button" value="Save" onclick="TemporalPopup.close();" />
+				<input type="button" value="Cancel" onclick="TemporalPopup.cancel();" />
 			</span>
 		</div>
         
@@ -423,7 +423,7 @@
             
 			<div title="Enter comment for this temporal or ">
 				<div style="width:200px;float:left;text-align:right;padding: 2px 5px;">Comment/original information:</div>
-				<input type=text id="COM" tabindex="10" style="width:300px;font-size:1em;" />
+				<input type=text id="COM" style="width:300px;font-size:1em;" />
 			</div>
             
 			<div style="margin:5px 0px 15px 175px; font-size:7pt; color:grey;"  >

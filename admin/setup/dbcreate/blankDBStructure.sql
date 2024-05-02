@@ -644,7 +644,7 @@ CREATE TABLE sysDocumentation (
   doc_id tinyint unsigned NOT NULL auto_increment,
   doc_text text COMMENT 'Relevant documentation as text',
   PRIMARY KEY  (doc_id)
-) ENGINE=InnoDB COMMENT='Descriptive infORmation about this database and its function';
+) ENGINE=InnoDB COMMENT='Descriptive information about this database and its function';
 
 -- --------------------------------------------------------
 

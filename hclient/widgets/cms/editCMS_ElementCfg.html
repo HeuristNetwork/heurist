@@ -101,7 +101,7 @@
                             <div data-flexitem="stub" style="display:none">
                                 <div class="header_narrow" title="Child item proportion and basis size">Item proportion:</div>
                                 <input data-type="flex-grow" type="number" min="0" value="" placeholder="0" style="width:40px"/>
-                                <label>&nbsp;Size:</label>
+                                <label for="">&nbsp;Size:</label>
                                 <input data-type="flex-basis" type="text" value="" placeholder="auto" style="width:50px"/>                       
                             </div>                    
                     </fieldset>
@@ -112,9 +112,9 @@
                     <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
                         <div>
                             <div class="header_narrow"><b>Dimensions</b></div>
-                            <label>&nbsp;Width:</label>
+                            <label for="">&nbsp;Width:</label>
                             <input data-type="css" name="width" type="text" min="0" placeholder="auto" style="width:50px"/>
-                            <label>&nbsp;Height:</label>
+                            <label for="">&nbsp;Height:</label>
                             <input data-type="css" name="height"  type="text" min="0" placeholder="auto" style="width:50px"/>                       
                         </div>
                     </fieldset>
@@ -161,14 +161,14 @@
                             <div>
                                 <div class="header_narrow">Size</div>
                                 <input data-type="cardinal" data-pane="north" name="size" type="number" min="10" value="" style="width:40px"/>
-                                <label>&nbsp;Resizeable:</label>
-                                <input data-type="cardinal" data-pane="north" name="resizable" type="checkbox" checked="checked"/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="north" name="resizable" type="checkbox" checked="checked"/></label>
                             </div>
                             <div>
                                 <div class="header_narrow">Min size:</div>
                                 <input data-type="cardinal" data-pane="north" name="minSize" type="number" min="0" value="" style="width:40px"/>
-                                <label>&nbsp;Max size:</label>
-                                <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="north" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>                       
                             </div>
                     </fieldset>
                     <fieldset style="border:1px solid lightgray;border-radius:4px;margin:2px 4px;"><legend style="display:none"></legend>
@@ -183,14 +183,14 @@
                             <div>
                                 <div class="header_narrow">Size:</div>
                                 <input data-type="cardinal" data-pane="south" name="size" type="number" min="10" value="" style="width:40px"/>
-                                <label>&nbsp;Resizeable:</label>
-                                <input data-type="cardinal" data-pane="south" name="resizable" type="checkbox" checked/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="south" name="resizable" type="checkbox" checked/></label>
                             </div>
                             <div>
                                 <div class="header_narrow">Min size:</div>
                                 <input data-type="cardinal" data-pane="south" name="minSize" type="number" min="0" value="" style="width:40px"/>
-                                <label>&nbsp;Max size:</label>
-                                <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="south" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
                     
@@ -206,14 +206,14 @@
                             <div>
                                 <div class="header_narrow">Size</div>
                                 <input data-type="cardinal" data-pane="west" name="size" type="number" min="10" value="" style="width:40px"/>
-                                <label>&nbsp;Resizeable:</label>
-                                <input data-type="cardinal" data-pane="west" name="resizable" type="checkbox" checked/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="west" name="resizable" type="checkbox" checked/></label>
                             </div>
                             <div>
                                 <div class="header_narrow">Min size:</div>
                                 <input data-type="cardinal" data-pane="west" name="minSize" type="number" min="0" value="" style="width:40px"/>
-                                <label>&nbsp;Max size:</label>
-                                <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="west" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
 
@@ -229,14 +229,14 @@
                             <div>
                                 <div class="header_narrow">Size</div>
                                 <input data-type="cardinal" data-pane="east" name="size" type="number" min="10" value="" style="width:40px"/>
-                                <label>&nbsp;Resizeable:</label>
-                                <input data-type="cardinal" data-pane="east" name="resizable" type="checkbox" checked/>
+                                <label>&nbsp;Resizeable:
+                                <input data-type="cardinal" data-pane="east" name="resizable" type="checkbox" checked/></label>
                             </div>
                             <div>
                                 <div class="header_narrow">Min size:</div>
                                 <input data-type="cardinal" data-pane="east" name="minSize" type="number" min="0" value="" style="width:40px"/>
-                                <label>&nbsp;Max size:</label>
-                                <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/>                       
+                                <label>&nbsp;Max size:
+                                <input data-type="cardinal" data-pane="east" name="maxSize"  type="number" min="0" value="" style="width:40px"/></label>
                             </div>
                     </fieldset>
 
@@ -270,8 +270,8 @@
                             <div>
                                 <div class="header_narrow">Size:</div>
                                 <input data-type="css" name="border-width" type="number" min="1" max="20" value="" placeholder="1" style="width:50px"/>
-                                <label>&nbsp;Corner:</label>
-                                <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/>                       
+                                <label>&nbsp;Corner:
+                                <input data-type="css" name="border-radius"  type="number" min="0" max="40" value="" placeholder="0" style="width:50px"/></label>
                             </div>
                         </div>
 
@@ -330,10 +330,10 @@
                         <h3 style="padding: 0.1em 0.1em 0.1em 1em;">
                             Margins
                             <div style="display:none;" class="margin-short">
-                                <label>&nbsp;Inner:</label>
-                                <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/>
-                                <label>&nbsp;Outer:</label>
-                                <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/>
+                                <label>&nbsp;Inner:
+                                <input data-type="css" name="padding" type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
+                                <label>&nbsp;Outer:
+                                <input data-type="css" name="margin"  type="number" min="0" value="" placeholder="0" style="width:50px"/></label>
                             </div> 
                         </h3>
 

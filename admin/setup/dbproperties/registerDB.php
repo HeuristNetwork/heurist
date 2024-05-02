@@ -165,17 +165,17 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <fieldset><legend style="display:none"></legend>
     
     <div>
-        <div class="header"><label>Database:</label></div>
+        <div class="header">Database:</div>
         <div class="text ui-widget-content ui-corner-all" style="margin:4px"><?php echo $system->dbname_full();?></div>
     </div>
 
     <div>
-        <div class="header"><label>Already registered with ID:</label></div>
+        <div class="header">Already registered with ID:</div>
         <div class="text ui-widget-content ui-corner-all" style="margin:4px"><?php echo $dbID;?></div>
     </div>
 
     <div>
-        <div class="header" style="vertical-align:top"><label>Description:</label></div>
+        <div class="header" style="vertical-align:top">Description:</div>
         <div class="text ui-widget-content ui-corner-all"
             style="width:450px;margin:4px" readonly="readonly">
             <?php echo $dbDescription;?>
@@ -183,8 +183,8 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     </div>
     
     <div>
-        <div class="header"><label><b>Please edit the collection metadata 
-                describing this database:</b></label></div>
+        <div class="header"><b>Please edit the collection metadata 
+                describing this database:</b></div>
         <div class="text ui-widget-content ui-corner-all" style="margin:4px">
             <a href="<?php echo $edit_url;?>" target=_blank style='color:red;'>Click here to edit</a> (login as person who registered this database - 
                  note: use EMAIL ADDRESS as username)
@@ -215,13 +215,13 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 <fieldset style="padding-right:30px"><legend style="display:none"></legend>
 
     <div>
-        <div class="header" style="vertical-align:top;min-width:100px"><label>Registration URL:</label></div>
+        <div class="header" style="vertical-align:top;min-width:100px">Registration URL:</div>
         <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;"
             tabindex="-1"
             value="<?php echo HEURIST_SERVER_URL . '/heurist/' . "?db=" . HEURIST_DBNAME;?>"/>
     </div>
     <div>
-        <div class="header" style="vertical-align:top;min-width:100px"><label>Database Description:</label></div>
+        <div class="header" style="vertical-align:top;min-width:100px">Database Description:</div>
         <textarea type="memo" maxlength="1000" cols="70" rows="3" name="dbDescription" id="dbDescription" class="text"
         style="border:1px solid;padding:2px" tabindex="0" autofocus
                                 onkeyup="onKeyUpDbDescription( event )"><?php echo $dbDescription;?></textarea>
@@ -231,7 +231,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
         </div>
                                 
         <div style="padding-top:10px"  xstyle="display:inline-block;vertical-align:top;padding-left:4px">
-                            <label id="cntChars" style="text-align:left"></label><br>
+                            <span id="cntChars" style="text-align:left"></span><br>
                             <input id="btnSubmit" type="submit" name="submit" value="Register"
                                  style="padding:4px 6px;font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
         </div>
@@ -248,9 +248,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
         </div>
 <?php if($is_SpecialAdminUseOnly){?>
         <div style="border:1px solid gray;margin-top:14px;padding:14px">
-            <label>SYSTEM ADMIN USE ONLY</label><br><br><label>ID </label>
+            SYSTEM ADMIN USE ONLY<br><br>ID 
             <input name="dbNewID" pattern="[0-9]" type="number" size="7" style="width:70px" value="<?php echo htmlspecialchars($dbNewID);?>"/>
-            <label style="padding-left:50px">PASSWORD </label>
+            <span style="padding-left:50px">PASSWORD </span>
             <input name="dbNewID_pwd" type="password"/>
         </div>
 <?php }?>

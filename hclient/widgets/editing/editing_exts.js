@@ -142,6 +142,7 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Stroke color:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -162,6 +163,7 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Fill color:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -181,6 +183,7 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Stroke color from:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -188,6 +191,7 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "to:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -208,12 +212,14 @@ function editSymbology(current_value, mode_edit, callback){
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Fill color from:",
                 "rst_DisplayHelpText": "",
+                "rst_DisplayWidth": 17,
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
         {"dtID": "fillColor2",
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "to:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "",
                 "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
@@ -402,9 +408,9 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Stroke color:",
-                "rst_DisplayWidth": 10,
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "",
-                "rst_FieldConfig":{"colorpicker":"colorpicker", "container_width":"130"}  //use colorpicker widget
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
         {"dtID": "weight",
             "dtFields":{
@@ -470,8 +476,9 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Fill color:",
+                "rst_DisplayWidth": 17,
                 "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
-                "rst_FieldConfig":{"colorpicker":"colorpicker", "container_width":"130"}  //use colorpicker widget
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
         }},
         {"dtID": "fillOpacity",
             "dtFields":{

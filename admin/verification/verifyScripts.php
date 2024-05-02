@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit; 
+//print 'disabled'; 
+//exit; 
 ini_set('max_execution_time', '0');
 
  
@@ -137,7 +137,7 @@ if(false){
     __findRDF();
 */
     
-    __getBelegContext();
+__getBelegContext();
 
 //
 // Report database versions
@@ -292,9 +292,8 @@ function findMissedTermLinks() {
             if(!hasColumn($mysqli, 'defTerms', 'trm_VocabularyGroupID', $db_name)){
                 print $db_name.'<br>';
             }
-            */
             continue;
-                    
+            */
             
             //is defTermLinks exist
             if(!hasTable($mysqli, 'defTermsLinks', $db_name)){
@@ -538,8 +537,6 @@ function __findLongTermLabels(){
 
         mysql__usedatabase($mysqli, $db_name);
         
-        if(true){
-            
             $list = mysql__select_assoc($mysqli, 'select trm_ID, trm_Label, CHAR_LENGTH(trm_Label) as chars, length(trm_Label) as len '
             .' from defTerms where length(trm_Label)>255');
 
@@ -552,7 +549,6 @@ function __findLongTermLabels(){
                 }
                 
             }
-        }
     }
     print '[end report]';    
     
@@ -1044,12 +1040,10 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
     
     echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
     
-    return;
-
     
     if(!defined('HEURIST_FILESTORE_ROOT')) return;
 
-
+        /* DISABLED
     foreach ($databases as $idx=>$db_name){
 
         //mysql__usedatabase($mysqli, $db_name);
@@ -1159,7 +1153,8 @@ if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
         
         
 
-    }        
+    }  
+          */
 }
 
 
@@ -1481,6 +1476,15 @@ $html_to_hex = array(
 '&Hmacr;' =>  '&#x0048;&#x0304;'
 );
 
+$tustep_to_html = array(
+'&amp;' =>'#%#%#',
+'#;ou' =>'&#x016F;',
+'#;eo' =>'&#xE4CF;',
+'#;ev' =>'&#x011B;'
+);
+
+
+
 /* test
     $s = '<p>#.ö   &#163; > %/Y#;iv < &#x017F;  &longs; &Ouml;  &#x201E; &ldquo;  &#x201C; &rdquo; &#x0153; &oelig; &Hmacr;  &#x0048;&#x0304;   &wv;</p>';
 
@@ -1513,12 +1517,16 @@ $html_to_hex = array(
     
             $s = ''.$row[1];
 
+            $not_found = true;
+            
             //1. Convert TUSTEP to html entities
             foreach ($tustep_to_html as $tustep=>$entity) {
                 if(strpos($s,$tustep)!==false){
                     $s = str_replace($tustep, $entity, $s);
+                    $not_found = false;
                 }
             }
+            if($not_found) continue;
             
             //2. Decode HTML entities    
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
@@ -1547,7 +1555,7 @@ $html_to_hex = array(
             $m = str_replace('#%#%#', '&amp;', $m); //convert back
             
             //update in database
-            /*
+            /*  
             $update_stmt->bind_param('si', $m, $row[0]);
             $res33 = $update_stmt->execute();
             if(! $res33 )
@@ -1558,6 +1566,7 @@ $html_to_hex = array(
                 break;
             }
             */
+            
             
         }//while
         $res->close();
@@ -1643,11 +1652,22 @@ function __dropBkpDateIndex(){
 }
 
 function __findBelegSpan($context){
+    
+    $context_original = $context;
 
     $dom = new DomDocument();
-    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context);
-//$dom->encoding = 'UTF-8';
-//print $dom->actualEncoding;
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = false;
+
+    //remove ident and formatting
+    $context = preg_replace("/[ \t]+/S", " ", $context);
+    $context = str_replace("\n <",'<',$context);
+    $context = str_replace("\n </",'</',$context);
+    
+    //remove indent spaces after new line before \n...<span
+    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    
+    //$context2 = $dom->documentElement->nodeValue;
     
     $finder = new DomXPath($dom);
     //$classname='Beleg';
@@ -1680,8 +1700,25 @@ function __findBelegSpan($context){
             $pos2 = mb_strpos($context, $nval);
             $pos1 = mb_strpos($context, $nvals[$idx-1])+mb_strlen($nvals[$idx-1]);
             if($pos1<$pos2){
+                $str = mb_substr($context,$pos1,$pos2-$pos1);
+                $str = strip_tags($str);
+                
+                $str = preg_replace("/\s+/S", " ", $str);
+                if(mb_strlen($str)>0){
+                    if($str==' '){
+                        $space = ' ';
+                    }else{
+                        $space = ' […] ';
+                    }
+                }
+            }
+            /*
+            $pos2 = mb_strpos($context2, $nodes[$idx]->nodeValue);
+            $pos1 = mb_strpos($context, $nodes[$idx-1]->nodeValue)+mb_strlen($nodes[$idx-1]->nodeValue);
+            if($pos1<$pos2){
                 $space = ' ';
             }
+            */
         }    
         
         /* 
@@ -1699,7 +1736,7 @@ function __findBelegSpan($context){
     //print $res.'<br><br>';
     
     print $res."\t";
-    print $context."\n";
+    print $context_original."\n";
     
 }
       
@@ -1717,6 +1754,7 @@ function __getBelegContext(){
      
      //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
      $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids')); // 'limit'=>10, 
+//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids')); // 'limit'=>10, 
 //     echo var_dump($res);
      
      $ids = @$res['data']['records'];
@@ -1730,7 +1768,21 @@ function __getBelegContext(){
              $val = array_shift($val);
              
 //$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';             
-             echo $recID."\t";
+/*
+$val = '<span class="Beleg">
+    <span style="mso-char-type: symbol; mso-symbol-font-family: Mediaevum;">
+      <span style="font-family: Mediaevum;">a
+      </span>
+    </span>
+  </span>
+  <span style="font-family: Times New Roman;">aaaa
+    <span class="Beleg">ů eine
+      <em style="mso-bidi-font-style: normal;">m
+      </em> male
+    </span> da |
+  </span>';
+*/
+             echo intval($recID)."\t";
              __findBelegSpan($val);
          }
      }     

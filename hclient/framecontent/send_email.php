@@ -30,7 +30,6 @@ if(isset($_POST['data'])) {
     $response = "";
 
     $subject = htmlspecialchars(filter_var($data->subject));  // Email subject
-    $header =  htmlspecialchars(filter_var($data->header));    // Email header
     foreach($data->emails as $email) {
         // Determine message & recipients
         USanitize::purifyHTML($email->message);       // Email message
@@ -40,7 +39,14 @@ if(isset($_POST['data'])) {
             $recipient_sanitized = filter_var($recipient, FILTER_VALIDATE_EMAIL);
             if($recipient_sanitized) {
                 // Send e-mail
-                $result = sendEmail_native($recipient_sanitized, $subject, $message, $header); // uMail.php
+                $result = sendEmail($recipient_sanitized, $subject, $email->message);
+                if(!$result){
+                    $err = $system->getError();
+                    $result = $err['message'];
+                }else{
+                    $result = 'sent';
+                }
+
                 $response .= $recipient_sanitized . " --> " . $result . "\n";
             }else{
                 $response .= $recipient . " --> invalid e-mail address\n";
@@ -57,31 +63,33 @@ if(isset($_POST['data'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <title>Bulk email sender</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Bulk email sender</title>
 
-  <!-- CSS -->
-  <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
+    <!-- CSS -->
+    <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
 
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
-  <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-  <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 
-  <style>
-    #btn_redo {
-        cursor: pointer;
-        float: right;
-        font-size: 1.4em;
-        height: 1.8em;
-        margin-left: 2px;
-        margin-top: 6px;
-        width: 1.8em;
-    }
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
-  </style>
+    <style>
+        #btn_redo {
+            cursor: pointer;
+            float: right;
+            font-size: 1.4em;
+            height: 1.8em;
+            margin-left: 2px;
+            margin-top: 6px;
+            width: 1.8em;
+        }
+
+    </style>
   
 </head>
 
@@ -130,7 +138,6 @@ if(isset($_POST['data'])) {
 
         <hr>
 
-
         <div>
             <div class="header_narrow"><label for="subject">Subject :</label></div>
             <input type="text" name="subject" id="subject" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:24.2em"/>
@@ -140,7 +147,7 @@ if(isset($_POST['data'])) {
             <textarea name="message2" id="message" rows="8" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em"></textarea>
             <textarea name="message" id="message-prepared" rows="10"
                                                             class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em;display: none"></textarea>
-            <button id="btn_redo" style="display: none" onclick="redo()">&#10226;</button>
+            <button id="btn_redo" style="display: none" onclick="redo()" class="ui-icon ui-icon-arrowrefresh-1-s"></button>
 
             <div style="font-size: smaller; margin-top: 2px;">may include html; #fieldname to include content of field</div>
        </div>
@@ -151,8 +158,7 @@ if(isset($_POST['data'])) {
                     role="button" aria-disabled="false" onClick="prepare()">
                     <span class="ui-button-text">Prepare emails</span>
             </button>
-       </div>                                                
-
+       </div>
 
     </fieldset>
 
@@ -282,13 +288,13 @@ if(isset($_POST['data'])) {
                 return record.d[index]; 
 
             }else if(type == "memo") {
-                 alert("Memo");
+                alert("Memo");
 
             }else if(type == "seperator") {
-                         alert("sep");
+                alert("sep");
 
             }else if(type == "numeric") {
-                         alert("num");
+                alert("num");
 
             }else if(type == "enum") {
                 var enumID = record.d[index];
@@ -375,7 +381,6 @@ if(isset($_POST['data'])) {
                 // SEND EMAILS
                 var data = {};
                 data.subject = $("#subject").val();
-                data.header = "header";
                 data.emails = [];
 
                 // Construct a message based on record data

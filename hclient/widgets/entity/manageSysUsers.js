@@ -636,11 +636,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         this._super( recID, fieldvalues );
-        this.getRecordSet().setRecord(recID, fieldvalues);
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
         }else{
+            this.getRecordSet().setRecord(recID, fieldvalues);
             this.recordList.resultList('refreshPage');  
         }
     },
