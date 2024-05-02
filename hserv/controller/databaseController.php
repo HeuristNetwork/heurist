@@ -209,9 +209,9 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             //source database
             $is_template = (@$_REQUEST['templatedb']!=null);
             if($is_template){
-                $db_source = $_REQUEST['templatedb'];    
+                $db_source = filter_var(@$_REQUEST['templatedb'], FILTER_SANITIZE_STRING);
             }else if (@$_REQUEST['sourcedb']){ //by sysadmin from list of databases
-                $db_source = $_REQUEST['sourcedb'];    
+                $db_source = filter_var(@$_REQUEST['sourcedb'], FILTER_SANITIZE_STRING);
             }else{
                 $db_source = $_REQUEST['db'];    
                 $is_current_db  = true;

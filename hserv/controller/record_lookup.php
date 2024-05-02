@@ -1446,7 +1446,9 @@
 
                                 if(strpos($code, 'c_') !== false){
                                     
-                                    $escaped_code = str_replace("'", "&apos;", $code);
+                                    $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code
+                                    
+                                    $escaped_code = str_replace("'", "&apos;", $escaped_code);
 
                                     $nodes = $datatypes_xml->xpath("//node[@id='$escaped_code']");
                                     if(is_array($nodes) && count($nodes) > 0){

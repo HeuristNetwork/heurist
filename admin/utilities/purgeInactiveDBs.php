@@ -619,7 +619,7 @@ if($need_email){
     }
     
     if($report!=''){
-        echo $tabs0.$db_name.$tabs.$report.$eol;
+        echo $tabs0.$db_name.$tabs.htmlspecialchars($report).$eol; //htmlspecialchars for snyk
     }
 
 

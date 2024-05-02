@@ -137,7 +137,7 @@ if(false){
     __findRDF();
 */
     
-    __getBelegContext();
+__getBelegContext();
 
 //
 // Report database versions
@@ -1481,6 +1481,15 @@ $html_to_hex = array(
 '&Hmacr;' =>  '&#x0048;&#x0304;'
 );
 
+$tustep_to_html = array(
+'&amp;' =>'#%#%#',
+'#;ou' =>'&#x016F;',
+'#;eo' =>'&#xE4CF;',
+'#;ev' =>'&#x011B;'
+);
+
+
+
 /* test
     $s = '<p>#.ö   &#163; > %/Y#;iv < &#x017F;  &longs; &Ouml;  &#x201E; &ldquo;  &#x201C; &rdquo; &#x0153; &oelig; &Hmacr;  &#x0048;&#x0304;   &wv;</p>';
 
@@ -1513,12 +1522,16 @@ $html_to_hex = array(
     
             $s = ''.$row[1];
 
+            $not_found = true;
+            
             //1. Convert TUSTEP to html entities
             foreach ($tustep_to_html as $tustep=>$entity) {
                 if(strpos($s,$tustep)!==false){
                     $s = str_replace($tustep, $entity, $s);
+                    $not_found = false;
                 }
             }
+            if($not_found) continue;
             
             //2. Decode HTML entities    
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
@@ -1547,7 +1560,7 @@ $html_to_hex = array(
             $m = str_replace('#%#%#', '&amp;', $m); //convert back
             
             //update in database
-            /*
+            /*  
             $update_stmt->bind_param('si', $m, $row[0]);
             $res33 = $update_stmt->execute();
             if(! $res33 )
@@ -1558,6 +1571,7 @@ $html_to_hex = array(
                 break;
             }
             */
+            
             
         }//while
         $res->close();
@@ -1699,7 +1713,7 @@ function __findBelegSpan($context){
                     if($str==' '){
                         $space = ' ';
                     }else{
-                        $space = '[…]';
+                        $space = ' […] ';
                     }
                 }
             }
@@ -1773,7 +1787,7 @@ $val = '<span class="Beleg">
     </span> da |
   </span>';
 */
-             echo $recID."\t";
+             echo intval($recID)."\t";
              __findBelegSpan($val);
          }
      }     

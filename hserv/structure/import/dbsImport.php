@@ -2369,6 +2369,8 @@ $mysqli->commit();
 
         $mysqli = $this->system->get_mysqli();
 
+        $delete_stmt = $mysqli->prepare('DELETE FROM defTranslations where trn_Source=? AND trn_Code=?');
+        
         foreach ($translations['key_mapping'] as $local_id => $remote_ids) {
             
             foreach ($remote_ids as $id) {
@@ -2376,15 +2378,18 @@ $mysqli->commit();
                 $translation = $translations['translations'][$id];
                 $local_id = intval($local_id);
 
-                $mysqli->query('DELETE FROM defTranslations where trn_Source="'
-                        .$mysqli->real_escape_string($translation['trn_Source'])
-                        .'" AND trn_Code='.$local_id);
+                //$mysqli->query('DELETE FROM defTranslations where trn_Source="'
+                //        .$mysqli->real_escape_string($translation['trn_Source'])
+                //        .'" AND trn_Code='.$local_id);
+
+                $delete_stmt->bind_param('si', $translation['trn_Source'], $local_id);
+                $res33 = $delete_stmt->execute();
 
                 $translation['trn_ID'] = 0;
                 $translation['trn_Code'] = $local_id;
 
                 $res = mysql__insertupdate($mysqli, 'defTranslations', 'trn', $translation);
-
+                
                 if($res > 0 && in_array($local_id, $this->translations_report[$def])){
                     $this->translations_report[$def][] = $local_id;
                 }
