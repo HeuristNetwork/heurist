@@ -1446,7 +1446,7 @@
 
                                 if(strpos($code, 'c_') !== false){
                                     
-                                    $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code
+                                    $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code));
                                     
                                     $escaped_code = str_replace("'", "&apos;", $escaped_code);
 

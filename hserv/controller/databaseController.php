@@ -217,6 +217,8 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                 $is_current_db  = true;
             }
             
+            $db_source = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_source)); //for snyk
+            
             $sErrorMsg = DbUtils::databaseValidateName($db_source, 2); //exists
             if ($sErrorMsg!=null) {
                 if(strpos($sErrorMsg,'not exists')>0){
