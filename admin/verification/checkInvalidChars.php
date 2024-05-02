@@ -64,9 +64,9 @@ $mysqli = $system->get_mysqli();
                 <br>&nbsp;<hr>
             </div>
 
-            <table role="none">
+            <table>
                 <?php
-
+                // role="none"
                 function check($text) {
                     global $invalidChars;
                     foreach ($invalidChars as $charCode){
