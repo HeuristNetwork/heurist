@@ -68,7 +68,7 @@ $is_not_found = true;
 <?php
 }
 ?>
-            <table role="none">
+            <table role="table">
                 <?php
                 $now = date('Y-m-d H:i:s');
                 $prevInvalidRecId = 0;

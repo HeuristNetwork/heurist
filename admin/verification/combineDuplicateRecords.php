@@ -205,7 +205,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                     ?>
                 </div><br><hr>
 
-                <table role="none"><tbody id="tb">
+                <table role="table"><tbody id="tb">
                         <?php
                         
                         if($master_rec_id>0){

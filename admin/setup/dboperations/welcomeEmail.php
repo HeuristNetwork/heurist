@@ -77,7 +77,7 @@ function sendEmail_DatabaseDelete($usr_owner, $database_name, $reason){
                     $email_text = <<<EOD
 Dear {$usr_owner['ugr_FirstName']} {$usr_owner['ugr_LastName']},                    
                     
-Your Heurist database {$dbname} on {$server_name} has been archived. We would like to help you get (re)started.
+Your Heurist database {$database_name} on {$server_name} has been archived. We would like to help you get (re)started.
 
 In order to conserve server space (or as part of moving to another server) we have archived your database on {$server_name} since it has not been used for several months and/or no data has ever been created and/or it is being recreated somewhere else. 
  

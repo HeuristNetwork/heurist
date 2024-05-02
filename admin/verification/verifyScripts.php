@@ -292,9 +292,8 @@ function findMissedTermLinks() {
             if(!hasColumn($mysqli, 'defTerms', 'trm_VocabularyGroupID', $db_name)){
                 print $db_name.'<br>';
             }
-            */
             continue;
-                    
+            */
             
             //is defTermLinks exist
             if(!hasTable($mysqli, 'defTermsLinks', $db_name)){
@@ -538,8 +537,6 @@ function __findLongTermLabels(){
 
         mysql__usedatabase($mysqli, $db_name);
         
-        if(true){
-            
             $list = mysql__select_assoc($mysqli, 'select trm_ID, trm_Label, CHAR_LENGTH(trm_Label) as chars, length(trm_Label) as len '
             .' from defTerms where length(trm_Label)>255');
 
@@ -552,7 +549,6 @@ function __findLongTermLabels(){
                 }
                 
             }
-        }
     }
     print '[end report]';    
     
@@ -1044,12 +1040,10 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
     
     echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
     
-    return;
-
     
     if(!defined('HEURIST_FILESTORE_ROOT')) return;
 
-
+        /* DISABLED
     foreach ($databases as $idx=>$db_name){
 
         //mysql__usedatabase($mysqli, $db_name);
@@ -1159,7 +1153,8 @@ if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
         
         
 
-    }        
+    }  
+          */
 }
 
 
