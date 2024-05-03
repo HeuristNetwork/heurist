@@ -83,7 +83,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add column headers
-    fputcsv($csv_fd, array("User", "Function", "Date", "Record ID", "Resultset Size"));
+    fputcsv($csv_fd, array("User", "Function", "Date", "Operating System", "Browser", "IP Address", "Record ID", "Resultset Size"));
 
     // Prepare user filtering by workgroups
     $users = null;
@@ -104,14 +104,14 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         }
     }
 
-    $processed_ids = array(array(), array()); // 2d array, [0] => found allowed records [1] => found filtered out records
-
     //
     // [0] => User ID
     // [1] => Action
     // [2] => Timestamp
-    // [3] => Record ID(s) ('|' separated, can also be "Record_Count recs: id1,id2,...")
-    // [4] => Record Count
+    // [3] => Operating System
+    // [4] => Web Browser
+    // [5] => Record ID(s) ('|' separated, can also be "Record_Count recs: id1,id2,...")
+    // [6] => Record Count
     //
     while(!feof($log_fd)){
 
@@ -133,13 +133,19 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
             $line_chunks[4] = $part_chunks[0];
             $line_chunks[3] = implode('|', $recids);
-        }else if(count($line_chunks) > 5){ // currently un-supported entry, skip
+        }else if(count($line_chunks) > 7){ // currently un-supported entry, skip
             continue;
         }
 
         // Apply user filter
         if($users != null && !in_array($line_chunks[0], $users)){
             continue;
+        }
+
+        if(empty($line_chunks[3]) || is_numeric($line_chunks[3]) ||
+            $line_chunks[3] == 'Array' || preg_match("/\d\s\d/", $line_chunks[3])){ // older format
+
+            array_splice($line_chunks, 3, 0, ['Unknown', 'Unknown', 'Unknown']);
         }
 
         // Apply date filtering
@@ -171,8 +177,8 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             }
         }
 
-        if(count($line_chunks) < 5){
-            $line_chunks = array_pad($line_chunks, 5, '');
+        if(count($line_chunks) < 7){
+            $line_chunks = array_pad($line_chunks, 7, '');
         }
 
         // Add row

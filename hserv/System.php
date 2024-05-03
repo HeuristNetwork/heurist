@@ -1810,15 +1810,20 @@ class System {
     //
     //    
     public function user_LogActivity($action, $suplementary = '', $user_id=null){
-        
+
         if($user_id==null){
             $this->login_verify( false );
             $user_id = $this->get_user_id();
         }
-        
+
         $now = new DateTime();
 
-        $info = array($user_id, $action, $now->format('Y-m-d H:i:s'));
+        $user_agent = USystem::getUserAgent();
+
+        $IPv4 = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        $IPv4 = empty($IPv4) ? 'Unknown' : $IPv4;
+
+        $info = array($user_id, $action, $now->format('Y-m-d H:i:s'), $user_agent['os'], $user_agent['browser'], $IPv4);
 
         if(is_array($suplementary)){
             $info = array_merge($info, $suplementary);
