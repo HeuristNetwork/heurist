@@ -29,6 +29,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
     
     _progressInterval:0,
+    _select_file_dlg:null,
+    Heurist_Reference_Index: 'Heurist_Reference_Index',
 
     _init: function() {
 
@@ -49,22 +51,70 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     // invoked from _init after loading of html content
     //
     _initControls:function(){
-        var that = this;
         
-        //find and activate event listeners for elements
-        this._on(this._$('input[type=text]'),{keypress:window.hWin.HEURIST4.ui.preventNonAlphaNumeric});
-        
-        this._$('button.ui-button-action').button(); // 
+        this._$('button').button();
         this._on(this._$('button.ui-button-action'),{click:this.doAction});
         
         if(this.options.actionName=='create' &&
-            window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation']){
-                this._$('#div_need_password').show();
+            window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation'])
+        {
+            this._$('#div_need_password').show();
         }
-        else if(this.options.actionName=='clone'){
-                this._checkNewDefinitions();
-        }
+        else if(this.options.actionName=='clone')
+        {
+            this._checkNewDefinitions();
+        }else if(this.options.actionName=='restore')
+        {
+            this._on(this._$('#btnSelectZip'),{click:this._selectArchive});
         
+        }else if(this.options.actionName=='register')
+        {
+            
+            var that = this;
+            window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
+                if(!window.hWin.HEURIST4.util.isempty(response)){
+                    var record = response.getFirstRecord();
+                    that._$('.dbDescription').text(record[17]);
+                    that._$('#dbTitle').val(record[17]).trigger('keyup');
+                }});
+
+            if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
+ 
+                this._$('.dbDescription').text('');
+                this._$('span.dbId').text(window.hWin.HAPI4.sysinfo['db_registeredid']);
+                this._$('a.dbLink').attr('href',
+                    window.hWin.HAPI4.baseURL_pro
+                        +'?fmt=edit&recID='+window.hWin.HAPI4.sysinfo['db_registeredid']
+                        +'&db='+this.Heurist_Reference_Index)
+                       
+                this._$('.ent_wrapper').hide();
+                var div_res = this._$("#div_result").show();
+                        
+            }else{
+            
+                this._$('#serverURL').val(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database);
+                this._$('#dbTitle').val('');
+                
+                if(window.hWin.HAPI4.user_id()!=2){
+                    this._$('#div_need_password').show();
+                }else{
+                    this._$('#div_need_password').hide();
+                }
+                
+                this._on(this._$('#dbTitle'),{keyup:
+                        function ( event ){
+                            var len = $(event.target).val().length;
+                            var ele = this._$('#cntChars').text(len);
+                            ele.parent().css('color',(len<40)?'red':'#6A7C99');
+                        }
+                });
+                
+            }
+
+        }
+
+
+        //user and database name inputs        
         var ele = this._$('#uname');
         if(ele.val()=='' && window.hWin.HAPI4.currentUser){
             ele.val(window.hWin.HAPI4.currentUser.ugr_Name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
@@ -73,6 +123,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         this._$('span.dbname').text(window.hWin.HAPI4.database);
 
         this._$('#dbname').focus();
+
+        //find and activate event listeners for elements
+        this._on(this._$('input[type=text]'),{keypress:window.hWin.HEURIST4.ui.preventNonAlphaNumeric});
         
         return this._super();
     },
@@ -92,7 +145,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _getActionButtons: function(){
         return this._super();
     },
-
+    
     //
     //
     //
@@ -113,8 +166,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            
            var ele = this._$('#uname');
            
-           request = {action: this.options.actionName,
-                      uname : (ele.length>0?ele.val().trim():''), 
+           request = {uname : (ele.length>0?ele.val().trim():''), 
                       dbname: dbname}; 
 
            if(this.options.actionName=='clone'){ 
@@ -145,7 +197,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                return;  
            } 
            
-           request = {action: this.options.actionName, 
+           request = {
                         //database : window.hWin.HAPI4.database, //current database
                         chpwd: chpwd
                      }; 
@@ -156,7 +208,48 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
               
         }else if(this.options.actionName=='restore'){
             
-        }
+           var dbname = this._$('#dbname').val().trim();
+           if(dbname==''){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
+                return;  
+           } 
+           
+           //check for source/archive file
+           var dbarchive_file = this._$('#selectedZip').text();
+           if(dbarchive_file==''){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
+                return;  
+           }
+           
+           var dbarchive_folder = this._$('#selArchiveFolder').val();
+
+           request = {file: dbarchive_file,
+                      folder: dbarchive_folder, //id
+                      dbname: dbname}; 
+                      
+        }else if(this.options.actionName=='register'){
+            
+            let description = this._$('#dbTitle').val().trim();
+            if(description.length<40){
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define informative description (min 40 characters)'));
+                return;  
+            }
+
+           request = {dbReg: window.hWin.HAPI4.database,
+                      dbTitle: description,
+                      dbVer: window.hWin.HAPI4.sysinfo['db_version'],
+                      serverURL: this._$('#serverURL').val()
+                      }; 
+                      
+           if(window.hWin.HAPI4.user_id()!=2){
+                let pwd = this._$('#pwd').val().trim()    
+                if(pwd==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define password'));
+                    return;  
+                } 
+                request['pwd'] = pwd;
+           }
+        }//end switch
 
         
         if(this.options.actionName=='delete' || this.options.actionName=='rename'){       
@@ -168,14 +261,16 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            }
         }
         
-        //unique session id    
+        
+        //unique session id    ------------------------
         var session_id = Math.round((new Date()).getTime()/1000);
         
+        request['action'] = this.options.actionName;       
         request['db'] = window.hWin.HAPI4.database;
         request['locale'] = window.hWin.HAPI4.getLocale();
         request['session'] = session_id;
 
-        this._showProgress( session_id, false, 1000 );
+        this._showProgress( session_id, false, (this.options.actionName=='register')?0:1000 );
         var that = this;
         
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
@@ -194,12 +289,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
               
         });
 
-
         return;
     },
     
-    //
-    //
+    // Action: Clone
+    // Verify new defintions in database to be cloned
     //
     _checkNewDefinitions: function(){
 
@@ -223,6 +317,44 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
     },
 
+    // Action: Restore
+    // select database zip archive to be restored
+    //
+    _selectArchive: function(){
+        
+        
+        if(!this._select_file_dlg){
+            this._select_file_dlg = $('<div>').hide().appendTo( this.element );
+        }
+        
+        var that = this;
+        
+        this._select_file_dlg.selectFile({
+           showFilter: true, 
+           source: this._$('#selArchiveFolder').val(),     
+           extensions: 'zip',
+           title: window.HR('Select database archive'),
+           onselect:function(res){
+                if(res && res.filename){
+                    that._$('#selectedZip').text(res.filename);
+                    that._$('#divSelectedZip').show();
+                    //alert(res.path, res.filename);
+                    
+                    //suggest database name
+                    if(that._$('#dbname').val().trim()==''){
+                        that._$('#dbname').val(res.filename.substr(0,res.filename.length-24));
+                    }
+                    
+                }else{
+                    that._$('#selectedZip').text('');
+                    that._$('#divSelectedZip').hide();
+                }
+           }});        
+
+    },
+
+    
+    
     //  -----------------------------------------------------
     //
     //  after save event handler
@@ -264,6 +396,29 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                }
             );
             
+        }else if(this.options.actionName=='register'){
+
+            this._$('.dbDescription').text(response.dbTitle);
+            this._$('span.dbId').text(response.dbID);
+            this._$('a.dbLink').attr('href',
+                window.hWin.HAPI4.baseURL_pro
+                    +'?fmt=edit&recID='+response.dbID
+                    +'&db='+this.Heurist_Reference_Index);
+            
+            
+            //reload page
+            window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
+               null, window.hWin.HR('Database registered'),
+               {
+                    width:700,
+                    height:'auto',
+                    close: function(){
+                        //redirects to renamed database
+                        window.hWin.document.location.reload();
+                    }
+               }
+            );
+            
         }else{
             
             
@@ -275,14 +430,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('#div_login_info').hide();
             }
                
-            //clear local list of databases   
-            if(window.hWin && window.hWin.HAPI4){
-                window.hWin.HAPI4.EntityMgr.emptyEntityData('sysDatabases');
-            }    
-            
         }
                     
-       
+        //clear local list of databases   
+        if(this.options.actionName!='clear'){
+            window.hWin.HAPI4.EntityMgr.emptyEntityData('sysDatabases');
+        }    
     },
 
     //
@@ -305,8 +458,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         var that = this;
        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-
         this._$('.ent_wrapper').hide();
         var progress_div = this._$('.progressbar_div').show();
         
@@ -315,29 +466,34 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var that = this;
         var prevStep = 0;
         
+        if(t_interval>900){
+
+            var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
                 
-        this._progressInterval = setInterval(function(){ 
-            
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+            this._progressInterval = setInterval(function(){ 
                 
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    that._hideProgress();
-                }else if(response=='terminate' && is_autohide){
-                    that._hideProgress();
-                }else if(prevStep!=response){
-                    prevStep = response;
-                    if(window.hWin.HEURIST4.util.isNumber(prevStep)){
-                        var arr = div_loading.find('li').slice(0,prevStep);
-                        arr.css('color','black'); 
-                    }else{
-                        $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
+                var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+                
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    
+                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        that._hideProgress();
+                    }else if(response=='terminate' && is_autohide){
+                        that._hideProgress();
+                    }else if(prevStep!=response){
+                        prevStep = response;
+                        if(window.hWin.HEURIST4.util.isNumber(prevStep)){
+                            var arr = div_loading.find('li').slice(0,prevStep);
+                            arr.css('color','black'); 
+                        }else{
+                            $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
+                        }
                     }
-                }
-            },'text');
+                },'text');
+            
+            }, t_interval);    
         
-        }, t_interval);                
+        }            
         
     },
     

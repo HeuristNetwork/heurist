@@ -25,6 +25,7 @@ require_once dirname(__FILE__).'/../edit/saveStructureLib.php';
 require_once dirname(__FILE__).'/../../controller/entityScrudSrv.php';
 require_once dirname(__FILE__).'/../dbsTerms.php';
 
+//require_once dirname(__FILE__).'/../../utilities/dbRegis.php';
 require_once dirname(__FILE__).'/../../utilities/uFile.php';
 
 define('_DBG', false); //debug log output
@@ -209,16 +210,22 @@ class DbsImport {
             $this->source_db_reg_id = $db_reg_id;
             
             // 1. get database url by database id
-            $database_url = $this->_getDatabaseURL($db_reg_id);        
+            require_once dirname(__FILE__).'/../../utilities/dbRegis.php';
+            $database_url = DbRegis::registrationGet(array('dbID'=>$db_reg_id));
+            if(!$database_url){
+                $this->system->addErrorMsg('Can not obtain database url. ');
+            }
         
         }else{
             $this->source_db_reg_id = $db_reg_id;
             $database_url = $data['databaseURL'];        
+            if(!$database_url){
+                $this->system->addError(HEURIST_ERROR, 'Can not obtain database url for database # '.$this->source_db_reg_id);
+            }
         }
         
         if(!$database_url){
-            $this->system->addError(HEURIST_ERROR, "Can not obtain database url for database # ".$this->source_db_reg_id);
-            return false; //see $system->getError
+            return false;
         }        
     
         // 2. get definitions from remote database
@@ -1095,26 +1102,6 @@ $mysqli->commit();
         //$defType = 'detailtypes';
         
     }
-    
-    //
-    // returns database URL by its ID in reference index database see getDatabaseURL
-    // @todo move it to special class?
-    //
-    private function _getDatabaseURL($database_id){
-        
-        $to_include = dirname(__FILE__).'/../../../admin/setup/dbproperties/getDatabaseURL.php';
-        if (is_file($to_include)) {
-            include_once $to_include;
-        }
-
-        if(isset($error_msg)){
-            $this->system->addError(HEURIST_ERROR, $error_msg);
-            return false;
-        }
-        
-        return $database_url;
-    }
-
 
     //
     // returns source database definitions by database url

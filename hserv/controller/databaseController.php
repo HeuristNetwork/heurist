@@ -24,6 +24,7 @@ Rename
 Restore
   
 */
+set_time_limit(0);
 
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
@@ -33,6 +34,8 @@ require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php
 $system = new System();
 
 $action = @$_REQUEST['a'];
+$locale = @$_REQUEST['locale'];
+
 if($action==null){
     $action = @$_REQUEST['action'];
 }
@@ -67,7 +70,8 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
         }
         else if ($action=='check_newdefs'){   
             
-            $res = DbUtils::databaseCheckNewDefs(); //check for current database
+            //check new definitions for current database
+            $res = DbUtils::databaseCheckNewDefs(); 
             if($res===false){
                 $res = ''; //there are not new defintions
             }
@@ -142,7 +146,29 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                     }
                 }
             }
-            
+
+        }
+        else if($action=='restore')  
+        {
+            //compose database name
+            $database_name = __composeDbName();
+            if($database_name!==false){
+                
+                $archive_file = @$_REQUEST['file'];
+                $archive_folder = intval(@$_REQUEST['folder']);
+                
+                $res = DbUtils::databaseRestoreFromArchive($database_name, $archive_file, $archive_folder);
+
+                if($res!==false){
+                    sendEmail_Database($usr_owner, $database_name, $locale, 'restore');
+                    
+                    //add url to new database
+                    $res = array(
+                        'newdbname'  => $database_name, 
+                        'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1'
+                    );
+                }
+            }
         }
         else if($action=='delete' || $action=='clear')  
         {
@@ -312,7 +338,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
                     if($res!==false){
                         
-                        DbUtils::resetRegistration($db_target); //remove registration from sysIndetification
+                        DbUtils::databaseResetRegistration($db_target); //remove registration from sysIndetification
                         
                         //to send email after clone
                         $usr_owner = user_getByField($mysqli, 'ugr_ID', 2, $db_target);

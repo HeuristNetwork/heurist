@@ -38,7 +38,7 @@
         New</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
-<li><a href="admin/setup/dboperations/cloneDB.php" id="menu-database-clone"
+<li><a id="menu-database-clone"
         data-user-admin-status="1"  data-icon="ui-icon-databases"
         data-header="Clone database"
         data-help=""
@@ -46,13 +46,23 @@
         Clone</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
-<li><a href="admin/setup/dboperations/renameDB.php" id="menu-database-rename"
+<li><a id="menu-database-rename"
         data-user-admin-status="1"  data-icon="ui-icon-rename"
         data-header="Rename database"
         data-help=""
         data-container="admin">
         Rename</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
+
+<li><a href="#" id="menu-database-restore"
+        data-user-admin-status="1"  data-icon="ui-icon-file-zip"
+        Xdata-pwd="ServerFunctions"
+        data-header="Resotore database"
+        data-help=""
+        data-container="admin">
+        Restore</a>
+</li>
+
 
 <li data-user-admin-status="1">-</li>
 
@@ -75,8 +85,7 @@
 </li>
 
 <li>
-    <a href="admin/setup/dbproperties/registerDB.php"        
-        id="menu-database-register"
+    <a  id="menu-database-register"
         data-user-admin-status="1" data-logaction="db_Register" data-pwd-nonowner="ServerFunctions"  
         data-icon="ui-icon-star"
         data-header="Register database"
@@ -88,15 +97,13 @@
 
 <li data-user-admin-status="0" data-user-experience-level="1">-</li>
 
-<li><a href="admin/setup/dboperations/deleteCurrentDB.php"
-        id="menu-database-delete"
+<li><a  id="menu-database-delete"
         data-container="admin"
         data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-trash">
         Delete</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
-<li><a href="admin/setup/dboperations/clearCurrentDB.php"
-        id="menu-database-clear"
+<li><a  id="menu-database-clear"
         data-container="admin"
         data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-erase">
         Clear</a> <!-- Holding value, substituted from localisation file using id -->

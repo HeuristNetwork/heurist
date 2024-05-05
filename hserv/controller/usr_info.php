@@ -402,6 +402,20 @@
               
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
+              }else if(intval($source)>0){
+
+                  $source = intval($source);
+                  if($source==1){
+                      $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
+                  }else if($source==2){
+                      $lib_path = '/srv/BACKUP';
+                  }else if($source==3){
+                      $lib_path = '/srv/BACKUP/ARCHIVE';
+                  }else if($source==4){
+                      $lib_path = '/srv/transfer';
+                  }
+
+                  $lib_path = array($lib_path);
               }else{
                   //default 64px
                   $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');

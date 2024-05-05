@@ -1448,7 +1448,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
             
             databaseAction: function (request, callback) {
-                _callserver('databaseController', request, callback, 600000); //5 minutes
+                let controller = 'databaseController';
+                if(request.action=='register'){
+                    controller = 'indexController';
+                }
+                _callserver(controller, request, callback, 600000); //5 minutes
             },
 
         }

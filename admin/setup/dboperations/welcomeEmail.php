@@ -18,6 +18,13 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+function sendEmail_Database($usr_owner, $database_name, $locale, $reason){
+    
+    
+}
+
+
 function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     
     $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];

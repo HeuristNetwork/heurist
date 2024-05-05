@@ -951,12 +951,13 @@ $.widget( "heurist.importStructure", {
             }else if(action=='clone'){
 
                 if(!recURL) return;
-                
+                /* todo !!!!!
                 var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
                 +'?db='+window.hWin.HAPI4.database
                 +'&templatedb='+dbName;
 
                 window.hWin.HEURIST4.msg.showDialog(cloneURL, { width: 800, height: 400, title:'Clone curated template'});
+                */
             }
 
         }

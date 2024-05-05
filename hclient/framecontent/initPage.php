@@ -50,9 +50,9 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    if(count($system->getError()) > 0){
+    /*if(count($system->getError()) > 0){
         $_REQUEST['error'] = $system->getError();
-    }
+    }*/
     include_once ERROR_REDIR;
     exit;
 }

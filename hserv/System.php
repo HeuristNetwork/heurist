@@ -879,17 +879,6 @@ class System {
     
 
     /**
-    * return list of errors
-    */
-    public function getError(){
-        return $this->errors;
-    }
-
-    public function clearError(){
-        $this->errors = array();
-    }
-
-    /**
     * produce json output and 
     * terminate execution of script 
     * 
@@ -974,13 +963,21 @@ class System {
     }
 
     /**
-    * keep error message (for further use with getError)
+    * keeps error message (for further use with getError)
     */
     public function addErrorArr($error) {
         if(!is_array($error)){
-            $error = array(HEURIST_ERROR,$error);
+            //just message - general message
+            $error = array(HEURIST_ERROR, $error);
         }
-        return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
+        if(@$error['message']){
+            //from remote request
+            $status = @$error['status']?$error['status']:HEURIST_ERROR;
+            return $this->addError($status, $error['message'], @$error['sysmsg'], @$error['error_title']);
+        }else{
+            //from mysql__ functions
+            return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
+        }
     }
     
     /**
@@ -1026,6 +1023,18 @@ class System {
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
         return $this->errors;
     }
+    
+    /**
+    * returns error array (status,message,sysmsg,error_title)
+    */
+    public function getError(){
+        return $this->errors;
+    }
+
+    public function clearError(){
+        $this->errors = array();
+    }
+    
 
     //
     // returns total records in db and counts of active entries in dashboard  
@@ -1149,7 +1158,7 @@ class System {
             $res = array(
                 "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
-                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'), //allow new user registration
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                     "db_managers_groupid"=>($this->get_system('sys_OwnerGroupID')>0?$this->get_system('sys_OwnerGroupID'):1),
                     "help"=>HEURIST_HELP,
@@ -2024,7 +2033,10 @@ class System {
                 }
        
             }else{
-                $url = ($isAlpha ? HEURIST_MAIN_SERVER . '/h6-alpha/' : HEURIST_INDEX_BASE_URL) . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
+                $url = ($isAlpha 
+                        ? HEURIST_MAIN_SERVER . '/h6-alpha/' 
+                        : HEURIST_INDEX_BASE_URL) 
+                        . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
                 $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
             }
             
