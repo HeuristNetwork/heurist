@@ -360,7 +360,7 @@ class DbRegis {
                 $err_msg = 'URL (server URL)';
             }
             if(!empty($dbTitle)){
-                $record['rec_Title'] = $defRecTitle.': '.$dbTitle;
+                $record['rec_Title'] = $defRecTitle.' : '.$dbTitle;
                 $err_msg = $err_msg . (!empty($err_msg) ? ' and ' : '') . 'Title (database name)';
             }
             $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
@@ -590,7 +590,7 @@ class DbRegis {
             //return $dbID;
         }else{// new registration
 
-            $defRecTitle = '<i>'.$dbName.'</i>:'.$dbTitle;
+            $defRecTitle = '<i>'.$dbName.'</i> : '.$dbTitle;
         
             $mysqli->query('set @logged_in_user_id = 2');
 

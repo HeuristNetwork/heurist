@@ -331,7 +331,7 @@ class DbUtils {
                 
                 if($regID>0)
                 {
-                    $dbTitle = $rec['sys_dbDescription'];
+                    /* TEMP
                     $dbowner = user_getDbOwner($mysqli);
                     $params = array(
                         'action'=>'delete',
@@ -345,6 +345,7 @@ class DbUtils {
                         self::$system->addErrorMsg(
                             'Failed to delete record in reference index for #'.$regID.' for deleted database '.$db_target.'<br>');                    
                     }
+                    */
                 }
             }
                 
@@ -641,9 +642,10 @@ class DbUtils {
                 $unzip_error = null;
                 try{
                     UArchive::unzip($system, $templateFoldersContent, $upload_root.$database_name.'/');
-                }catch(Exceprion $e){
+                }catch(Exception $e){
                     array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
-                                .' Error: '.Exception::getMessage());        
+                                //.' Target :'.$upload_root.$database_name
+                                .' Error: '.$e->getMessage());        
                 }
             }            
             
@@ -855,10 +857,10 @@ class DbUtils {
         $unzip_error = null;
         try{
             UArchive::unzip(self::$system, $archive_file, $database_folder);
-        }catch(Exceprion $e){
+        }catch(Exception $e){
             folderDelete($database_folder);  
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
-                            .' Error: '.Exception::getMessage());        
+                            .' Error: '.$e->getMessage());        
             return false;
         }
 
