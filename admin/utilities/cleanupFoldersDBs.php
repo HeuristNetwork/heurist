@@ -157,47 +157,101 @@ foreach ($databases as $idx=>$db_name){
         
         //only list with size summary
         $res = listFolderContent($dir_root);
+        $root_line = $tabs0.'..  '.intval($res[0]).$eol;
         $db_size = $db_size + intval($res[0]);
-        $report .= $tabs0.'..  '.intval($res[0]).$eol;
 
         $sz = folderSize2($dir_backup);
-        $report .= $tabs0.substr($dir_backup, strrpos($dir_backup, '/',-2)+1, -1).'  '.$sz.$eol;
+        $backup_line = $tabs0.substr($dir_backup, strrpos($dir_backup, '/',-2)+1, -1).'  '.$sz.$eol;
         $db_size = $db_size + $sz;
 
         $sz = folderSize2($dir_scratch);
-        $report .= $tabs0.substr($dir_scratch, strrpos($dir_scratch, '/',-2)+1, -1).'  '.$sz.$eol;
+        $scratch_line = $tabs0.substr($dir_scratch, strrpos($dir_scratch, '/',-2)+1, -1).'  '.$sz.$eol;
         $db_size = $db_size + $sz;
 
         if(file_exists($dir_docs)){
             $sz = folderSize2($dir_docs);
-            $report .= $tabs0.substr($dir_docs, strrpos($dir_docs, '/',-2)+1, -1).'  '.$sz.$eol;
+            $doc_line = $tabs0.substr($dir_docs, strrpos($dir_docs, '/',-2)+1, -1).'  '.$sz.$eol;
             $db_size = $db_size + $sz;
         }
-            
+
         if($arg_need_action){
             
             //1 root 
             $content = folderContent($dir_root);
+            $added_root_line = false;
             foreach ($content['records'] as $object) {
 
-                if(strpos($object[1], 'userInteraction') === 0){ // check if log is a year old
+                if(strpos($object[1], 'userInteraction') === 0){ // remove interactions older than a year
 
-                    // Get expiry date, from first line in log
                     $log_fd = fopen($object[2].'/'.$object[1], 'r');
-                    $first_line = !$log_fd || filesize($object[2].'/'.$object[1]) < 1 ? '' : fgets($log_fd);
 
-                    if(empty($first_line) || count(explode(',', $first_line)) < 3){
+                    $log_file = $object[2].'/'.$object[1];
+                    $log_tmp = $object[2].'/log.tmp';
+
+                    if(filesize($log_file) == 0){
                         continue;
                     }
 
-                    $expire_date = strtotime('+1 year', strtotime(explode(',', $first_line)[2]));
+                    // Setup file objects
+                    $org_log = new SplFileObject($log_file);
+                    $new_log = new SplFileObject($log_tmp, 'w'); // to replace log, if lines removed
 
-                    if($expire_date < $today){
-                        unlink($object[2].'/'.$object[1]); // log is a year old, clear
+                    $remove_lines = 0;
+                    $skip_overwrite = false;
+                    
+                    // Check each line's date
+                    while(!$org_log->eof()){
+
+                        $line = $org_log->fgets(); // get line
+
+                        $chunks = explode(',', $line);
+                        if(count($chunks) < 3){ // invalid line, skip it
+                            continue;
+                        }
+
+                        $date = strtotime('+1 week', strtotime($chunks[2])); // ge expiry date
+
+                        if($date < $today){ // expired action
+                            $remove_lines ++;
+                            continue;
+                        }
+
+                        if($remove_lines == 0){ // nothing has changed, escape
+                            break;
+                        }
+
+                        $res_write = $new_log->fwrite($line); // write to temp file
+                        if(!$res_write){ // unable to write to temp file
+                            $report .= "{$tabs}Failed to write to temporary log file{$eol}";
+                            $remove_lines = 0;
+                            break;
+                        }
                     }
+
+                    // Destroy file objects
+                    unset($org_log);
+                    unset($new_log);
+
+                    if($remove_lines > 0 && filesize($log_tmp) > 0){ // replace existing file with temp
+                        fileCopy($log_tmp, $log_file);
+                        $report .= "{$tabs}Removed {$remove_lines} interactions from the log file{$eol}";
+                    }
+
+                    fileDelete($log_tmp); // delete temp file
 
                 }else if ($object[1] != '.' && $object[1] != '..' && 
                     strpos($object[1],'ulf_')===false && strpos($object[1],'user_notification')===false) {
+                        
+                    if(strpos($object[1], 'index.html') === false){
+
+                        if(!$added_root_line){
+                            $report .= $root_line;
+                            $added_root_line = true;
+                        }
+
+                        $f_size = filesize($object[2].'/'.$object[1]);
+                        $report .= "{$tabs}Deleted file {$object[2]}/{$object[1]}, size: {$f_size}{$eol}";
+                    }
 
                     unlink($object[2].'/'.$object[1]);
                 }
@@ -205,19 +259,44 @@ foreach ($databases as $idx=>$db_name){
             folderAddIndexHTML($dir_root);
             
             //2 backup   
-            folderDelete($dir_backup, false);
+            $delete_log = folderDelete($dir_backup, false, true);
+            if(count($delete_log) > 1){ // check that more than index.html has been deleted
+                $report .= $backup_line;
+                foreach($delete_log as $log){
+                    if(strpos($log, 'index.html') === false){
+                        $report .= $tabs.$log.$eol;
+                    }
+                }
+            }
             folderAddIndexHTML($dir_backup);
 
             //3 scratch   
-            folderDelete($dir_scratch, false);
+            $delete_log = folderDelete($dir_scratch, false, true);
+            if(count($delete_log) > 1){ // check that more than index.html has been deleted
+                $report .= $scratch_line;
+                foreach($delete_log as $log){
+                    if(strpos($log, 'index.html') === false){
+                        $report .= $tabs.$log.$eol;
+                    }
+                }
+            }
             folderAddIndexHTML($dir_scratch);
-            
+
             //documents
-            if(file_exists($dir_docs))
-                folderDelete($dir_docs, true);
+            if(file_exists($dir_docs)){
+                $delete_log = folderDelete($dir_docs, true, true);
+                if(count($delete_log) > 1){ // check that more than index.html has been deleted
+                    $report .= $doc_line;
+                    foreach($delete_log as $log){
+                        if(strpos($log, 'index.html') === false){
+                            $report .= $tabs.$log.$eol;
+                        }
+                    }
+                }
+            }
         
         }
-    
+
         if($arg_need_report){
             if($report!=''){
                 echo $tabs0.'---'.$eol;

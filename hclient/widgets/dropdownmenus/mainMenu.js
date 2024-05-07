@@ -1566,7 +1566,7 @@ $.widget( "heurist.mainMenu", {
 
                     $dlg.dialog({
                         autoOpen: true,
-                        height: 600,
+                        height: 640,
                         width: 600,
                         modal: true,
                         resizable: false,

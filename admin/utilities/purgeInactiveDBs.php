@@ -231,7 +231,7 @@ foreach ($databases as $idx=>$db_name){
         if(is_array($res) && $mysqli->error){
             //$mysqli->error 'gone away'
             $sMsg = 'Cannot execute purgeInactiveDBs. Execution stopped on database '
-                .$db_name.' ('.$arg_no_action.','.$is_shell.'). Error message: '.$mysqli->error);
+                .$db_name.' ('.$arg_no_action.','.$is_shell.'). Error message: '.$mysqli->error;
             error_log($sMsg);    
             $sTitle = 'purgeInactiveDBs has been terminated. On '.HEURIST_SERVER_NAME;                
             sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, false);
@@ -634,7 +634,7 @@ if(!$arg_no_action){
     if( (count($email_list_deleted)>0 || count($email_list_failed)>0) && $need_email){
         $sTitle = 'Archived databases on '.HEURIST_SERVER_NAME;                
         $sMsg = $sTitle.' <table>'.implode("\n", $email_list_deleted).'</table>';
-        if(count($email_list_failed)>0)){
+        if(count($email_list_failed)>0){
              $sMsg = $sMsg.'<br>FAILED on database drop<table>'.implode("\n", $email_list_failed).'</table>';
         }
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, true);

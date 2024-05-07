@@ -230,14 +230,24 @@
     * 
     * @param mixed $dir
     */
-    function folderDelete($dir, $rmdir=true) {
+    function folderDelete($dir, $rmdir=true, $verbos = false) {
+
+        $msgs = [];
+
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != '.' && $object != '..') {
                     if (filetype($dir.'/'.$object) == 'dir') {
-                        folderDelete($dir.'/'.$object); //delete files
+
+                        $rtn = folderDelete($dir.'/'.$object, true, $verbos); //delete files
+                        
+                        $msgs[] = "Deleting sub directory $object";
+                        if($verbos && !empty($rtn)){ // merge messages
+                            $msgs = array_merge($msgs, $rtn);
+                        }
                     } else {
+                        $msgs[] = "Deleted file $object, size: " . filesize("$dir/$object");
                         unlink($dir.'/'.$object);
                     }
                 }
@@ -246,6 +256,8 @@
             if($rmdir)
                 rmdir($dir); //delete folder itself
         }
+
+        return $verbos ? $msgs : null;
     }
     
     //
