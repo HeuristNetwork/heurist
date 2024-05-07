@@ -5,22 +5,23 @@
         by nightly backup/archiving functions, or by requesting download of an safeguard file 
         through Publish > Safeguard file. 
         <br><br>
-        If restoring from a file created on another server, we recommend uploading it to /srv/transfer using sftp. 
+        If restoring from a file created on another server, we recommend uploading it to  …/HEURIST_FILESTORE/DBS_TO_RESTORE using sftp. 
         Older archives (pre 2024) in tar.bz2 will need to be unzipped and loaded manually via the Unix command line.
         <br><br>
         After successful completion you will be required to login into the restored database.    
         
         
         <br><br>
-        <label>Select source to browse for database archive
-            <select id="selArchiveFolder"> 
-                <option value="1">Deleted database</option>
-                <option value="2">Backup</option>
-                <option value="3">Backup archive</option>
-                <option value="4">Transfer</option>
-            </select>
-        </label>
-        <button id="btnSelectZip">Browse for Database Zip</button>
+            Select source to browse for database archive<br>
+            <label>
+                <input type="radio" value="1" name="selArchiveFolder" checked/>
+                Deleted database
+            </label>&nbsp;&nbsp;
+            <label>
+                <input type="radio" value="4" name="selArchiveFolder"/>
+                Database to restore
+            </label>
+            <button id="btnSelectZip">Browse for Database Zip</button>
         
     </div>
 

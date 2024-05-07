@@ -412,7 +412,7 @@
                   }else if($source==3){
                       $lib_path = '/srv/BACKUP/ARCHIVE';
                   }else if($source==4){
-                      $lib_path = '/srv/transfer';
+                      $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
                   }
 
                   $lib_path = array($lib_path);

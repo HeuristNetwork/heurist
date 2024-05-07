@@ -67,7 +67,8 @@ $.widget( "heurist.selectFile", {
             this.element.find('.recordList').css('top',0);
         }
 
-        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `+this.options.source;
+        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `
+            +(parseInt(this.options.source)>0?'given foldeer':this.options.source);
         
         //resultList with images
 //init record list

@@ -217,15 +217,16 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            //check for source/archive file
            var dbarchive_file = this._$('#selectedZip').text();
            if(dbarchive_file==''){
-                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
+                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of source zip archive'));
                 return;  
            }
            
-           var dbarchive_folder = this._$('#selArchiveFolder').val();
+           var dbarchive_folder = this._$('input[name=selArchiveFolder]:checked').val();
 
            request = {file: dbarchive_file,
                       folder: dbarchive_folder, //id
-                      dbname: dbname}; 
+                      dbname: dbname,
+                      pwd: this.options.entered_password}; 
                       
         }else if(this.options.actionName=='register'){
             
@@ -331,7 +332,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         this._select_file_dlg.selectFile({
            showFilter: true, 
-           source: this._$('#selArchiveFolder').val(),     
+           source: this._$('input[name=selArchiveFolder]:checked').val(),     
            extensions: 'zip',
            title: window.HR('Select database archive'),
            onselect:function(res){

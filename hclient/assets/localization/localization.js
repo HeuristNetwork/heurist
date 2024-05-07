@@ -122,6 +122,7 @@ regional['ENG'] = {
         'menu-database-rollback': 'Rollback',
         'menu-database-register': 'Register',
         'menu-database-properties': 'Properties',
+        'menu-database-restore': 'Restore',
         
         'menu-database-browse-hint':'Open and login to another Heurist database - current database remains open',
         'menu-database-create-hint':'Create a new database on the current server - essential structure elements are populated automatically',
@@ -132,6 +133,7 @@ regional['ENG'] = {
         'menu-database-rollback-hint':'Selectively roll back the data in the database to a specific date and time',
         'menu-database-register-hint':'Register this database with the Heurist Reference Index - this makes the structure (but not data) available for import by other databases',
         'menu-database-properties-hint':'Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database',
+        'menu-database-restore-hint': 'Restore databases from safeguard  files (zip format)',
     
     'Manage Users': '',
         'menu-profile-groups': 'Workgroups',

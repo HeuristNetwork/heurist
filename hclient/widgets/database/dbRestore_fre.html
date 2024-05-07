@@ -14,15 +14,16 @@
          Après avoir terminé avec succès, vous devrez vous connecter à la base de données restaurée.        
         
         <br><br>
-        <label>Sélectionnez la source pour rechercher l'archive
-            <select id="selArchiveFolder"> 
-                <option value="1">Deleted database</option>
-                <option value="2">Backup</option>
-                <option value="3">Backup archive</option>
-                <option value="4">Transfer</option>
-            </select>
-        </label>
-        <button id="btnSelectZip">Rechercher le zip</button>
+            Sélectionnez la source pour rechercher l'archive<br>
+            <label>
+                <input type="radio" value="1" name="selArchiveFolder" checked/>
+                Deleted database
+            </label>&nbsp;&nbsp;
+            <label>
+                <input type="radio" value="4" name="selArchiveFolder"/>
+                Database to restore
+            </label>
+            <button id="btnSelectZip">Rechercher le zip</button>
         
     </div>
 

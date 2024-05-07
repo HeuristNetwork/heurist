@@ -815,7 +815,7 @@ class DbUtils {
         }else if($source==3){
             $lib_path = '/srv/BACKUP/ARCHIVE/';
         }else if($source==4){
-            $lib_path = '/srv/transfer/';
+            $lib_path = $upload_root.'DBS_TO_RESTORE/';
         }else{
             //default
             $lib_path = $upload_root.'DELETED_DATABASES/';

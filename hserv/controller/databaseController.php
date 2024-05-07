@@ -154,19 +154,27 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             $database_name = __composeDbName();
             if($database_name!==false){
                 
-                $archive_file = @$_REQUEST['file'];
-                $archive_folder = intval(@$_REQUEST['folder']);
-                
-                $res = DbUtils::databaseRestoreFromArchive($database_name, $archive_file, $archive_folder);
-
-                if($res!==false){
-                    sendEmail_Database($usr_owner, $database_name, $locale, 'restore');
+                $pwd = @$_REQUEST['pwd']; //sysadmin protection
+                if($system->verifyActionPassword($pwd, $passwordForServerFunctions)){    
+                    $allow_action = false;
+                    $system->addErrorMsg('This action requires a special system administrator password<br>');                        
                     
-                    //add url to new database
-                    $res = array(
-                        'newdbname'  => $database_name, 
-                        'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1'
-                    );
+                }else{
+                
+                    $archive_file = @$_REQUEST['file'];
+                    $archive_folder = intval(@$_REQUEST['folder']);
+                    
+                    $res = DbUtils::databaseRestoreFromArchive($database_name, $archive_file, $archive_folder);
+
+                    if($res!==false){
+                        sendEmail_Database($usr_owner, $database_name, $locale, 'restore');
+                        
+                        //add url to new database
+                        $res = array(
+                            'newdbname'  => $database_name, 
+                            'newdblink'  => HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1'
+                        );
+                    }
                 }
             }
         }
