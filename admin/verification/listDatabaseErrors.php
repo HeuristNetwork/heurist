@@ -243,16 +243,17 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     window.hWin.HEURIST4.msg.showMsg('Mark at least one record to correct');
                 }
             }
-            
-            function openFileCheckPopup(){
-                
-                var body = $(window.hWin.document).find('body');
-                var opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
-       
+
+            function openFuncCheckPopup(type){
+
+                let body = $(window.hWin.document).find('body');
+                let opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
+
+                if(type != 'files' && type != 'urls') { return; }
+
                 window.hWin.HEURIST4.msg.showDialog(
-                        window.hWin.HAPI4.baseURL+'admin/verification/longOperationInit.php?type=files&db='+window.hWin.HAPI4.database, opts);                
+                    `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=${type}&db=${window.hWin.HAPI4.database}`, opts);                
             }
-            
 
             $(document).ready(function() {
                 $('button').button();
@@ -2175,7 +2176,6 @@ if($active_all || in_array('invalid_chars', $active)) {
         
 } //END invalid_chars
 
-
 if($active_all || in_array('title_mask', $active)) { 
         
         ?>
@@ -3016,10 +3016,17 @@ if($active_all || in_array('multi_swf_values', $active)) {
         <hr>            
 
         <div>
-            <br>
-            <button onclick="{openFileCheckPopup()}">
-                <b>Check files for consistency</b> Finds missing, duplicate and unused uploaded files
+            <h2>Slow checks</h2>
+            <button style="margin-right: 25px;" onclick="{openFuncCheckPopup('files')}">
+                <strong>Check files for consistency</strong>
             </button>
+            <span>Finds missing, duplicate and unused uploaded files</span>
+            <br>
+            <br>
+            <button style="margin-right: 86px;" onclick="{openFuncCheckPopup('urls')}">
+                <strong>Check URLs</strong>
+            </button>
+            <span>Checks record URLs and URLs referenced within text fields</span>
         </div>
 
 

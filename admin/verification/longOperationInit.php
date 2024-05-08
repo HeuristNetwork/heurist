@@ -27,32 +27,36 @@ set_time_limit(0);
 
 $recTypeIDs = (@$_REQUEST['recTypeIDs']!=null)?htmlspecialchars($_REQUEST['recTypeIDs']):null;
 $dbname = htmlspecialchars($_REQUEST['db']);
-            
- if(@$_REQUEST['type']=='titles'){
+
+if(@$_REQUEST['type']=='titles'){
     if($recTypeIDs){
         $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
     }else{
         $srcURL = 'rebuildRecordTitles.php?db='.$dbname;    
     }
     $sTitle = 'Recalculation of composite record titles';
- 
- }else
- if(@$_REQUEST['type']=='calcfields'){
+
+}else
+if(@$_REQUEST['type']=='calcfields'){
     if($recTypeIDs){
         $srcURL = 'rebuildCalculatedFields.php?recTypeIDs='.$recTypeIDs.'&db='.$dbname;    
     }else{
         $srcURL = 'rebuildCalculatedFields.php?db='.$dbname;    
     }
     $sTitle = 'Recalculation of calculated fields';
- 
- }else
- if(@$_REQUEST['type']=='files'){
+
+}else
+if(@$_REQUEST['type']=='files'){
     $srcURL = 'listUploadedFilesErrors.php?db='.$dbname;
     $sTitle = 'Verifying files';
- }else{
+}else
+if(@$_REQUEST['type']=='urls'){
+    $srcURL = 'checkRecURL.php?db='.$dbname;
+    $sTitle = 'Check Records URL';
+}else{
     $srcURL = 'listDatabaseErrors.php?db='.$dbname;
     $sTitle = 'Verifying database';
- }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
