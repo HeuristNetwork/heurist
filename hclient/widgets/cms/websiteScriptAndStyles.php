@@ -1122,8 +1122,7 @@ function initLinksAndImages($container, search_data){
                     }
             }else if(href.indexOf('./')===0){
                     //
-                    href = href.substring(2);
-                    rec_id = href;                                  
+                    rec_id = href.substring(2);
             }else if(!isNaN(parseInt(href)) && href>0){ //integer
                     // href="123" - it can be record or page id
                     rec_id = href;
