@@ -1030,6 +1030,10 @@ class System {
     public function getError(){
         return $this->errors;
     }
+    
+    public function getErrorMsg(){
+        return ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+    }
 
     public function clearError(){
         $this->errors = array();

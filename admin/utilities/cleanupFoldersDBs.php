@@ -200,7 +200,7 @@ foreach ($databases as $idx=>$db_name){
                     $skip_overwrite = false;
                     
                     // Check each line's date
-                    while(!$org_log->eof()){
+                    while($org_log!=null && !$org_log->eof()){
 
                         $line = $org_log->fgets(); // get line
 

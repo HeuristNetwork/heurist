@@ -32,17 +32,20 @@ if(isset($func_return) && $func_return == 1){
     return;
 }
 
+set_time_limit(0);
+
 global $glb_curl_error;
 
 if($is_included){
-
+    $verbose = false;
     print '<div style="padding:10px"><h3 id="records_url_msg">Check Records URL</h3><br>';
     
 }else{
     define('PDIR','../../');
-    set_time_limit(0);
     
     require_once dirname(__FILE__).'/../../hserv/System.php';
+    
+    $verbose = (@$_REQUEST['verbose']==1);
     
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
@@ -69,7 +72,7 @@ if($is_included){
 <?php    
 }
 
-$has_broken_url = checkURLs($system, false);
+$has_broken_url = checkURLs($system, false, $verbose);
 
 if(!$is_included){    
     print '</div></body></html>';
@@ -97,15 +100,18 @@ function __updateRecords_lastverified($mysqli){
 // Check various sources for URLs and validate
 // $return_output {boolean} => true = return array of result, false = return true or false for whether broken URLs were found
 //
-function checkURLs($system, $return_output){
+function checkURLs($system, $return_output, $verbose=false){
 
     global $is_included, $passed_rec_ids, $glb_curl_error;
+    
+    $is_heursit_reference_index = (strcasecmp(HEURIST_DBNAME,'Heurist_Reference_Index')==0);
 
     $mysqli = $system->get_mysqli();
 
     // Check rec_URL values
     $passed_cnt = 0;
     $broken_cnt = 0;
+    $cnt_total = 0;
 
     $results = false;
     if($return_output){
@@ -113,7 +119,7 @@ function checkURLs($system, $return_output){
         $results = array(0 => array(0 => array(), 'count' => 0), 1 => array(), 2 => array()); 
     }
     
-    $query = 'SELECT rec_ID, rec_URL FROM Records WHERE (rec_URL!="") AND (rec_URL IS NOT NULL)';
+    $query = 'SELECT rec_ID, rec_URL, rec_RecTypeID FROM Records WHERE (rec_URL!="") AND (rec_URL IS NOT NULL)';
         
     $res = $mysqli->query($query);
     if ($res){
@@ -122,15 +128,54 @@ function checkURLs($system, $return_output){
     
             $rec_id = $row[0];
             $rec_url = $row[1];
+            $rty_ID = $row[2];
             
             if($return_output){
                 $results[0]['count'] ++;
             }
+            
+            $is_check_heurist_instance = $is_heursit_reference_index && ($rty_ID==101 || $rty_ID==103);
+            if($is_check_heurist_instance){
+                 $rec_url = $rec_url.'&isalive=1';
+            }
+
+            if($is_check_heurist_instance && (!$return_output || $verbose)){
+                print intval($rec_id).' : '.htmlspecialchars($rec_url); 
+            }
+
+/*
+ https://int-heuristweb-prod.intersect.org.au/heurist/
+ https://heuristref.net/heurist/
+ https://int-heuristweb-prod.intersect.org.au/HEURIST/heurist/
+ https://heurist.huma-num.fr:443/heurist/
+ https://heurist.sfb1288.uni-bielefeld.de/
+ https://heurisko.io/heurist/
+ https://heurist.eie.gr/heurist/
+ https://ship.lub.lu.se/heurist/
+ https://heurist.fdm.uni-hamburg.de:443/html/heurist/
+ http://fedora.gwin.gwiss.uni-hamburg.de/heurist/
+ https://pfcmati.bnf.fr/heurist/
+ https://heurist.researchsoftware.unimelb.edu.au/heurist/
+ https://heurist.unige.ch/heurist
+ https://dcsrs-test-ssp.ad.unil.ch/heurist/
+*/
 
             //timeout 10 seconds (default 30)
             $data = loadRemoteURLContentWithRange($rec_url, "0-1000", true, 10);
-
+            
             if ($data){
+
+if($is_check_heurist_instance && (!$return_output || $verbose)){
+    if(strpos($data,'error: ')===0){
+        print ' <span style="color:red">'.htmlspecialchars($data).'</span><br>';
+    //}else if(strpos($data,'ok')===0){
+    //    print ' ok<br>'; 
+    }else{
+        print ' ok<br>'; 
+    }
+}else if (!$return_output) {
+        print ' ';
+}
                 $passed_cnt++;
                 $passed_rec_ids[] = intval($rec_id);
                 if(count($passed_rec_ids)>1000){
@@ -144,14 +189,24 @@ function checkURLs($system, $return_output){
                         array('ss', date('Y-m-d H:i:s'), 
                         (isset($glb_curl_error)?substr($glb_curl_error,0,255):'')), true);
 
-                if(!$return_output){
+                if($verbose){
+                    print '  error:'.(isset($glb_curl_error)?$glb_curl_error:'').'<br>';
+                }else if(!$return_output){
                     print '<div>'.intval($rec_id).' : '.htmlspecialchars($rec_url).'  '
                         .(isset($glb_curl_error)?$glb_curl_error:'').'</div>';
-                }else{
+                }
+                if($return_output){
                     $results[0][0][] = $rec_id;
                 }
             }
-    
+            $cnt_total++;
+            if($cnt_total % 10 == 0){
+                ob_flush();
+                flush();
+            }
+            //if($is_check_heurist_instance && $cnt_total>10){
+            //    break;
+            //}
         }
         $res->close();
     
@@ -159,22 +214,25 @@ function checkURLs($system, $return_output){
             __updateRecords_lastverified($mysqli);
         }
         
-        if(!$return_output){
+        if(!$return_output || $verbose){
 
             echo '<p>Processed: '.$passed_cnt.' records</p>';
 
             if($broken_cnt>0){
-                $results = true;
+                
                 print '<div style="padding-top:20px;color:red">There are <b>'.$broken_cnt
                 .'</b> records with broken url. Search "_BROKEN_" for details</div>';
             }else{
-                echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
+                print '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
             }
+        }
+        if(!$return_output && $broken_cnt>0){
+            $results = true;
         }
     
     }else{
         if(!$return_output){
-            echo '<div><h3 class="error"> Cannot execute search query to retrieve records URL '.$mysqli->error.'</h3></div>';
+            print '<div><h3 class="error"> Cannot execute search query to retrieve records URL '.$mysqli->error.'</h3></div>';
         }else{
             $results[0] = 'Cannot execute search query to retrieve records URL '.$mysqli->error;
         }
