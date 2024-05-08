@@ -61,15 +61,34 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             break;
 
         case 'website': // end user visiting a CMS webpage/homepage
-            array_push($action_filter, 'VisitPage');
+            array_push($action_filter, 'VisitPage', 'cmsNew', 'cmsEdit');
             $fileprefix = "website";
             break;
 
         case 'accounts': // account actions [Log in, Log off, Reset Password]
-            array_push($action_filter, 'Login', 'Logout', 'ResetPassword');
+            array_push($action_filter, 'Login', 'Logout', 'ResetPassword', 'profPrefs', 'profTags', 'profReminders', 'profUserinfo', 'profWorkgroups', 'profUsers', 'profImportUser');
             $fileprefix = "account";
             break;
-        
+
+        case 'database': // database actions
+            array_push($action_filter, 'dbBrowse', 'dbNew', 'dbClone', 
+                        'dbRename', 'dbRestore', 'dbProperties', 
+                        'dbRegister', 'dbClear', 'dbArchive', 'dbArchiveRepository', 
+                        'stRebuildTitles', 'stRebuildFields', 'profFiles');
+
+            $fileprefix = "database";
+            break;
+
+        case 'import':  // importing actions
+            array_push($action_filter, 'impDelimed', 'syncZotero', 'impKML', 'impRecords', 'impSt');
+            $fileprefix = "import";
+            break;
+
+        case 'export':  // exporting actions
+            array_push($action_filter, 'expCSV', 'expHML', 'expJSON', 'expRDF', 'expGeoJSON', 'expKML', 'expGEPHI', 'expIIIF', 'expXMLHuNI');
+            $fileprefix = "export";
+            break;
+
         default: // all actions
             $is_all_actions = true;
             break;
@@ -280,8 +299,11 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
             <div style="margin-top: 10px;">
                 <label for="recUsage"><input type="radio" name="actionType" id="recUsage" value="recuse"> Download record usage (when a record is viewed, edited, or used within a custom report)</label><br><br>
-                <label for="webUsage"><input type="radio" name="actionType" id="webUsage" value="website"> Download webpage usages (when users view a CMS Homepage or CMS webpage)</label><br><br>
-                <label for="accUsage"><input type="radio" name="actionType" id="accUsage" value="accounts"> Download account related actions (when accounts login, logout or request a password reset)</label>
+                <label for="webUsage"><input type="radio" name="actionType" id="webUsage" value="website"> Download webpage usages (when users view a CMS Homepage or CMS webpage, when the pages were edited)</label><br><br>
+                <label for="accUsage"><input type="radio" name="actionType" id="accUsage" value="accounts"> Download account related actions (when accounts login, logout or request a password reset)</label><br><br>
+                <label for="dbUsage"><input type="radio" name="actionType" id="dbUsage" value="database"> Download database related actions (when renamed, cleared, archived, registered, etc...)</label><br><br>
+                <label for="impUsage"><input type="radio" name="actionType" id="impUsage" value="import"> Download importing related actions (when records are imported by CSV, HML, or JSON)</label><br><br>
+                <label for="expUsage"><input type="radio" name="actionType" id="expUsage" value="export"> Download exporting related actions (when records are exported in various formats)</label>
             </div>
             <!-- Add other actions -->
 

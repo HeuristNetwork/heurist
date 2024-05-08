@@ -923,10 +923,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
 
                 const log_actions = ['editRec', 'VisitPage']; // interactions to add to Heurist's logs
+                const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp']; // interactions w/ prefix to Heurist's logs
+                const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
 
-                if (log_actions.includes(activity)) {
+                if (log_actions.includes(activity) || 
+                    ( action_parts.length > 0 && log_prefix.indexOf( action_parts[0].toLowerCase() ) )){
 
-                    activity = activity.replace('_', '');
+                    if(action_parts.length > 0){
+                        for(let i = 1; i < action_parts.length; i++){
+                            action_parts[i] = action_parts[i].charAt(0).toUpperCase() + action_parts[i].slice(1);
+                        }
+                        activity = action_parts.join('');
+                    }
 
                     var request = { a: 'usr_log', activity: activity, suplementary: suplementary, user: window.hWin.HAPI4.user_id() };
                     _callserver('usr_info', request);
