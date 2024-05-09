@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -356,6 +356,11 @@ class DbDefRecTypes extends DbEntityBase
 
             //validate duplication
             if(@$this->records[$idx]['rty_Name']){
+
+                // Strip trailing + double spacing
+                $this->records[$idx]['rty_Name'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['rty_Name']);
+                $this->records[$idx]['rty_Name'] = super_trim($this->records[$idx]['rty_Name']);
+
                 $res = mysql__select_value($mysqli,
                         "SELECT rty_ID FROM defRecTypes  WHERE rty_Name='"
                         .$mysqli->real_escape_string( $this->records[$idx]['rty_Name'])."'");
@@ -521,13 +526,13 @@ class DbDefRecTypes extends DbEntityBase
 
                         $ret[$idx] = '';
 
-                        if(!array_key_exists($this->data['fields'][$idx], 'rty_Plural')){ // add plural
+                        if(!array_key_exists('rty_Plural', $this->data['fields'][$idx])){ // add plural
                             $this->data['fields'][$idx]['rty_Plural'] = $record['rty_Name'] . 's';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'rty_TitleMask')){ // add default title mask
+                        if(!array_key_exists('rty_TitleMask', $this->data['fields'][$idx])){ // add default title mask
                             $this->data['fields'][$idx]['rty_TitleMask'] = 'Please edit any <b>' . $record['rty_Name'] . '</b> record to choose fields for the constructed title';
                         }
-                        if(!array_key_exists($this->data['fields'][$idx], 'rty_RecTypeGroupID') && isset($this->data['rtg_ID'])){ // add rectype group
+                        if(!array_key_exists('rty_RecTypeGroupID', $this->data['fields'][$idx]) && isset($this->data['rtg_ID'])){ // add rectype group
                             $this->data['fields'][$idx]['rty_RecTypeGroupID'] = $this->data['rtg_ID'];
                         }
                     }

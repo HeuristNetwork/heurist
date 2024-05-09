@@ -19,9 +19,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White   
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -62,10 +62,21 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
-        $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120); //load external webpage to extract links
+        $url = filter_input($_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'url', FILTER_VALIDATE_URL);
+        
+        if(empty($url) || $url===false){
 
+            $src = null;
+            $error = 'URL is not valid.';
+            
+        }else{
+            $src = loadRemoteURLContentWithRange($url, null, false, 120); //load external webpage to extract links
+            if(!$src){
+                $error = 'URL could not be retrieved. Verify your proxy setting in configuration file.';
+            }
+        }
         if(!$src){
-            $error = 'URL could not be retrieved. Verify your proxy setting in configuration file. <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
+            $error = $error . ' <span style="font-weight: normal;">You might try saving the page you are importing, and then <a href="importHyperlinks.php">import from file</a>.</span>';
         }
 
 		$srcname = @$_REQUEST['url'];

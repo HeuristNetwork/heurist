@@ -12,8 +12,8 @@
 * @copyright   (C) 2005-2023 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.1.0
 */
@@ -243,16 +243,17 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     window.hWin.HEURIST4.msg.showMsg('Mark at least one record to correct');
                 }
             }
-            
-            function openFileCheckPopup(){
-                
-                var body = $(window.hWin.document).find('body');
-                var opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
-       
+
+            function openFuncCheckPopup(type){
+
+                let body = $(window.hWin.document).find('body');
+                let opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
+
+                if(type != 'files' && type != 'urls') { return; }
+
                 window.hWin.HEURIST4.msg.showDialog(
-                        window.hWin.HAPI4.baseURL+'admin/verification/longOperationInit.php?type=files&db='+window.hWin.HAPI4.database, opts);                
+                    `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=${type}&db=${window.hWin.HAPI4.database}`, opts);                
             }
-            
 
             $(document).ready(function() {
                 $('button').button();
@@ -745,7 +746,7 @@ if($active_all || in_array('pointer_targets', $active)) {
                         Delete ALL faulty pointers</button>
                 </div>
             </div>
-            <table role="none">
+            <table role="presentation">
                 <tr>
                     <td colspan="6">
                         <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
@@ -817,7 +818,7 @@ if($active_all || in_array('target_types', $active)) {
                 <h3>Records with record pointers to the wrong record type</h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($bibs)) ?>'>
                     (show results as search)</a></span>
-                <table role="none">
+                <table role="presentation">
                     <?php
                     foreach ($bibs as $row) {
                         ?>
@@ -995,7 +996,7 @@ if($active_all || in_array('target_parent', $active)) {
                         Add missing parent record pointers to child records</button>
                 </div>
 
-                <table role="none">
+                <table role="presentation">
                     <?php
                     foreach ($bibs1 as $row) {
                         ?>
@@ -1047,7 +1048,7 @@ if($active_all || in_array('target_parent', $active)) {
                 Delete broken parent-child fields in alleged children records</button>
                 </div>
                 -->                    
-                <table role="none">
+                <table role="presentation">
                     <?php
                     foreach ($bibs2 as $row) {
                         ?>
@@ -1138,7 +1139,7 @@ if($active_all || in_array('empty_fields', $active)) {
                 </div>
             </div>
 
-            <table role="none">
+            <table role="presentation">
             <tr>
                 <td colspan="5">
                     <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
@@ -1349,7 +1350,7 @@ if($active_all || in_array('date_values', $active)) {
 
                 </div>
 
-                <table role="none">
+                <table role="presentation">
                     <tr>
                         <td colspan="7">
                             <label><input type=checkbox 
@@ -1409,7 +1410,7 @@ if($active_all || in_array('date_values', $active)) {
 
                 </div>
 
-                <table role="none">
+                <table role="presentation">
                     <tr>
                         <td colspan="6">
                             <label><input type=checkbox 
@@ -1452,7 +1453,7 @@ if($active_all || in_array('date_values', $active)) {
 
                 </div>
 
-                <table role="none">
+                <table role="presentation">
                     <tr>
                         <td colspan="6">
                             <label><input type=checkbox 
@@ -1518,7 +1519,7 @@ if($active_all || in_array('date_values', $active)) {
                         <label><input type="radio" name="date_format" value="2"> mm/dd/yyyy (US format)</label>
                     </div>
                 </div>
-                <table role="none">
+                <table role="presentation">
                     <tr>
                         <td>
                             <label><input type=checkbox 
@@ -1632,7 +1633,7 @@ if($active_all || in_array('term_values', $active)) {
                 </div>
             </div>
 
-            <table role="none">
+            <table role="presentation">
             <tr>
                 <td colspan="5">
                     <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
@@ -1890,7 +1891,7 @@ if($active_all || in_array('single_value', $active)) {
                 </span>
             </div>
 
-            <table role="none">
+            <table role="presentation">
 
                 <tr>
                     <td colspan="5">
@@ -1991,7 +1992,7 @@ if($active_all || in_array('required_fields', $active)) {
                 </span>
             </div>
 
-            <table role="none">
+            <table role="presentation">
                 <tr>
                     <td colspan="4">
                         <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB3');}">Mark all</label>
@@ -2090,7 +2091,7 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                         (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                     <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
-                <table role="none">
+                <table role="presentation">
 
                     <tr>
                         <td colspan="6">
@@ -2174,7 +2175,6 @@ if($active_all || in_array('invalid_chars', $active)) {
         
         
 } //END invalid_chars
-
 
 if($active_all || in_array('title_mask', $active)) { 
         
@@ -2493,7 +2493,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table role="none">
+        <table role="presentation">
 
             <tr>
                 <td colspan="6">
@@ -2556,7 +2556,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table role="none">
+        <table role="presentation">
 
             <tr>
                 <td colspan="6">
@@ -2619,7 +2619,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
             <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
-        <table role="none">
+        <table role="presentation">
 
             <tr>
                 <td colspan="6">
@@ -2819,7 +2819,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
-        <table role="none">
+        <table role="presentation">
 
             <tr>
                 <td colspan="6">
@@ -2963,7 +2963,7 @@ if($active_all || in_array('multi_swf_values', $active)) {
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
-        <table role="none">
+        <table role="presentation">
 
             <tr>
                 <td colspan="6">
@@ -3016,10 +3016,17 @@ if($active_all || in_array('multi_swf_values', $active)) {
         <hr>            
 
         <div>
-            <br>
-            <button onclick="{openFileCheckPopup()}">
-                <b>Check files for consistency</b> Finds missing, duplicate and unused uploaded files
+            <h2>Slow checks</h2>
+            <button style="margin-right: 25px;" onclick="{openFuncCheckPopup('files')}">
+                <strong>Check files for consistency</strong>
             </button>
+            <span>Finds missing, duplicate and unused uploaded files</span>
+            <br>
+            <br>
+            <button style="margin-right: 86px;" onclick="{openFuncCheckPopup('urls')}">
+                <strong>Check URLs</strong>
+            </button>
+            <span>Checks record URLs and URLs referenced within text fields</span>
         </div>
 
 

@@ -6,8 +6,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 * @subpackage  DataStore
@@ -25,22 +25,34 @@
 * Static class to perform database operations
 *
 * Methods:
-
-* - databaseCreate() - creates empty database
-* - databaseCreateFull() - creates new heurist database with file folders and ready to use
-* - databaseDrop()
-* - databaseDump()
-* - databaseRestoreDump()
-* - databaseCreateFolders
-*   databaseEmpty    
-*   databaseClone
+*
+* databaseDrop - Removes database entirely with optional beforehand archiving 
+* databaseDump - dumps all tables (except csv import cache) into SQL dump
+* databaseCreateFull - Creates new heurist database, with file folders, given user and ready to use
+* databaseValidateName - Verifies that database name is valid and optionally that database exists or unique
+* databaseRestoreFromArchive - Restores database from archive 
+* databaseEmpty - Clears data tables (retains defintions)
+* databaseCloneFull - clones database including folders     
+* databaseResetRegistration 
+* databaseRename - renames database (in fact it clones database with new name and archive/drop old database)
 * 
-* - databaseRegister - set register ID to sysIdentification and rectype, detail and term defintions
-* - databaseNextRegisterID - get next registration ID from HEURIST_INDEX_DATABASE database
+* databaseCheckNewDefs  
+* updateOriginatingDB - Assigns given Origin ID for rectype, detail and term defintions
+* updateImportedOriginatingDB - Assigns Origin ID for rectype, detail and term defintions after import from unregistered database
+*
+* private:
+*    
+* _databaseInitForNew - updates dbowner, adds default saved searches and lookups
+* databaseClone - copy all tables (except csv import cache) from one db to another (@todo rename to _databaseCopyTables)
+* _emptyTable - delete all records for given table
+* databaseCreateFolders - creates if not exists the set of folders for given database
+* databaseCreate - Creates new heurist database 
+* databaseCreateConstraintsAndTriggers - Recreates constraints and triggers
 */
 
 require_once 'utils_db_load_script.php';
 require_once 'uArchive.php';
+require_once 'dbRegis.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 require_once dirname(__FILE__).'/../structure/import/importDefintions.php';
 
@@ -56,6 +68,8 @@ class DbUtils {
     private static $system = null;
     private static $initialized = false;
     private static $db_del_in_progress = null;
+    private static $session_id = 0;
+    private static $progress_step = 0;
 
     public static function initialize($mysqli=null)
     {
@@ -74,445 +88,76 @@ class DbUtils {
         self::$initialized = true;
     }
 
-    //
-    // set Origin ID for rectype, detail and term defintions
-    //
-    public static function databaseRegister($dbID){
-
-        self::initialize();
-        
-        $res = true;
-
-        if($dbID>0){
-                    $mysqli = self::$mysqli;
-                    $result = 0;
-                    $res = $mysqli->query("update defRecTypes set "
-                        ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
-                        ."where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
-                    if ($res===false) {$result = 1; }
-                    // Fields
-                    $res = $mysqli->query("update defDetailTypes set "
-                        ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
-                        ."where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
-                    if ($res===false) {$result = 1; }
-                    // Terms
-                    $res = $mysqli->query("update defTerms set "
-                        ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
-                        ."where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
-                    if ($res===false) {$result = 1; }
-
-                    
-                    if ($result == 1){
-                        self::$system->addError(HEURIST_DB_ERROR,
-                                    'Error on update IDs "IDInOriginatingDB" fields for database registration '.$dbID, $mysqli->error);
-                        $res = false;
-                    }
-        }
-        return $res;
-    }    
-
-    //
-    // set Origin ID for rectype, detail and term defintions for 9999 
-    // (after import from unregistered database)
-    //
-    public static function updateImportedOriginatingIds(){
-
-        self::initialize();
-        
-        $res = true;
-        
-        $dbID = 0;    
-        if(defined('HEURIST_DBID')){
-            $dbID = HEURIST_DBID;    
-        }
-
-        $mysqli = self::$mysqli;
-        $result = 0;
-        $res = $mysqli->query("update defRecTypes set "
-            ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
-            ."where (rty_OriginatingDBID = '9999')");
-        if ($res===false) {$result = 1; }
-        // Fields
-        $res = $mysqli->query("update defDetailTypes set "
-            ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
-            ."where (dty_OriginatingDBID = '9999')");
-        if ($res===false) {$result = 1; }
-        // Terms
-        $res = $mysqli->query("update defTerms set "
-            ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
-            ."where (trm_OriginatingDBID = '9999')");
-        if ($res===false) {$result = 1; }
-
-        
-        if ($result == 1){
-            self::$system->addError(HEURIST_DB_ERROR,
-                        'Error on update IDs "IDInOriginatingDB" fields for unregistered (imported) definitions '.$dbID, $mysqli->error);
-            $res = false;
-        }
-        
-        return $res;
-    }    
-
-    
-    //
-    // $params - registration parameters
-    //  return database ID or string "0,error message"
-    //
-    // this function switches database connection to HEURIST_INDEX_DATABASE
-    // it is mandatory to swtich it back mysql__usedatabase($mysqli, HEURIST_DBNAME); 
-    //
-    public static function databaseNextRegisterID($params){
-        
-        self::initialize();
-        
-        //switch to master index 
-        $mysqli = self::$mysqli;
-        
-        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!==true);
-        if($connect_failure){
-            return '0, Failed to connect to  Master Index database';
-        }
-        
-        $indexdb_user_id = 0; // Flags problem if not reset
-
-        // Get parameters passed from registration request
-        // @ preceding $params avoids errors, sets Null if parameter missing
-        $serverURL = $params["serverURL"];
-        $serverURL_lc = strtolower($params["serverURL"]);
-        $dbReg = $params["dbReg"];
-        $dbTitle = $params["dbTitle"];
-        $dbVersion = @$params["dbVer"];
-        $usrEmail = $params["usrEmail"];
-        $usrPassword = $params["usrPassword"];
-        $usrName = $params["usrName"];
-        $usrFirstName = $params["usrFirstName"];
-        $usrLastName = $params["usrLastName"];
-        $newid = intval(@$params["newid"]);
-
-        // $var is null, blank, 0 or false --> false
-        if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword) { // error in one or more parameters
-            $returnData = '0,Bad parameters passed';
-            return $returnData;
-        }
-
-        if(strpos($serverURL_lc,'http://')===false && strpos($serverURL_lc,'https://')===false){
-            $serverURL = 'https://'.$serverURL;  //https by default
-            $serverURL_lc = strtolower($serverURL);
-        }
-
-        if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
-            return '0,Impossible to register database from local server '.htmlspecialchars($serverURL);
-        }
-
-        // the record type for database (collection) descriptor records - fixed for Master database
-        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);        
-
-        
-        // if database is on main server it is possible to register database with user-defined ID        
-        if($newid>0){ 
-
-            if(!(strpos(strtolower($serverURL_lc), strtolower(HEURIST_MAIN_SERVER))===0)){ 
-            
-                return '0,It is possible to assign arbitrary ID for databases on heurist servers only';
-            }
-            
-            $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records where rec_ID='.$newid);
-            
-            if($rec_id>0){
-                return '0,Database ID '.$newid.' is already allocated. Please choose different number';
-            }
-        }        
-        
-        // allocate a new user for this database unless the user's email address is recognised
-        // If a new user, log the user in and assign the record ownership to that user
-        // By allocating users on the database based on email address we can allow them to edit their own registrations
-        // but they can't touch anyone else's
-
-        // Find the registering user in the index database, make them the owner of the new record
-        $usrEmail = strtolower(trim($usrEmail));
-
-        $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'
-                .$mysqli->real_escape_string($usrEmail).'"');
-
-        // Check if the email address is recognised as a user name
-        // Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
-        if(!($indexdb_user_id>0)) { // no user found on email, try querying on user name
-            $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'
-                .$mysqli->real_escape_string($usrEmail).'"');
-        }
-
-        if(!($indexdb_user_id>0)) { // did not find the user, create a new one and pass back login info
-            
-            // Note: we use $usrEmail as user name because the person's name may be repeated across many different users of
-            // different databases eg. there are lots of johnsons, which will cause insert statement to fail as ugr_Name is unique.
-            
-            $indexdb_user_id = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr_', 
-                array(
-                    'ugr_Name'=>$usrEmail,
-                    'ugr_Password'=>$usrPassword,
-                    'ugr_eMail'=>$usrEmail,
-                    'ugr_Enabled'=>'y',
-                    'ugr_FirstName'=>$usrFirstName,
-                    'ugr_LastName'=>$usrLastName,
-                )
-            );
-            
-            if(!($indexdb_user_id>0)) { // Unable to create the new user
-                return '0,Unable to write new user in Heurist master index database<br>'.
-                    'Please '.CONTACT_HEURIST_TEAM.' for advice';   
-            }
-        }        
-        
-        
-
-        // write the core database record describing the database to be registered and allocate registration ID
-        // This is not a fully valid Heurist record, we let the edit form take care of that
-        // First look to see if there is an existing registration - note, this uses the URL to find the record, not the registration ID
-        // TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly
-        // with slight URL variations to spawn multiple registrations of dummy databases
-
-        $dbID = mysql__select_value($mysqli, "select rec_ID from Records where lower(rec_URL)='".
-                        $mysqli->real_escape_string($serverURL_lc)."'");
-
-        if($dbID>0) { 
-            
-            return $dbID;
-            
-        }else{// new registration
-
-            $mysqli->query('set @logged_in_user_id = 2');
-
-            $dbID = mysql__insertupdate($mysqli, 'Records', 'rec_', 
-                array(
-                    'rec_ID'=>($newid>0)?-$newid:0,
-                    'rec_URL'=>$mysqli->real_escape_string($serverURL),
-                    'rec_Added'=>date('Y-m-d H:i:s'),
-                    'rec_Title'=>$mysqli->real_escape_string($dbTitle),
-                    'rec_RecTypeID'=> $rty_ID_registered_database,
-                    'rec_AddedByImport'=>0,
-                    'rec_OwnerUGrpID'=>$indexdb_user_id,
-                    'rec_NonOwnerVisibility'=>'public',
-                    'rec_Popularity'=>99,
-                ), true
-            );
-            $mysqli->query('set @logged_in_user_id = '.self::$system->get_user_id());
-            
-            if($dbID>0){
-                
-                self::$system->defineConstant('DT_NAME');
-
-                //Write the database title into the details, further data will be entered by the Heurist form
-                mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
-                    array(
-                        'dtl_RecID'=>$dbID,
-                        'dtl_DetailTypeID'=>DT_NAME,
-                        'dtl_Value'=>$mysqli->real_escape_string($dbTitle)
-                    )
-                );
-
-                //Write db version as detail
-                if($dbVersion){
-                    mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
-                        array(
-                            'dtl_RecID'=>$dbID,
-                            'dtl_DetailTypeID'=>ConceptCode::getDetailTypeLocalID(1176-335), //version
-                            'dtl_Value'=>$dbVersion
-                        )
-                    );
-                }
-
-                //Write db name as detail
-                if($dbReg){
-                    mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
-                        array(
-                            'dtl_RecID'=>$dbID,
-                            'dtl_DetailTypeID'=>ConceptCode::getDetailTypeLocalID("1176-469"),
-                            'dtl_Value'=>$dbReg
-                        )
-                    );   
-                }
-
-                // Write the record bookmark into the bookmarks table. This allos the user registering the database
-                // to see thir lsit of databases as My Bookmarks
-                mysql__insertupdate($mysqli, 'usrBookmarks', 'bkm_', 
-                    array(
-                        'bkm_UGrpID'=>$indexdb_user_id,
-                        'bkm_RecID'=>$dbID
-                    )
-                );
-                
-
-                //send email to administrator about new database registration
-                $email_text =
-                "There is a new Heurist database registration on the Heurist Reference Index\n\n".
-                "Database Title:     ".htmlspecialchars($dbTitle, ENT_QUOTES, 'UTF-8')."\n".
-                "Registration ID:    ".$dbID."\n". // was $indexdb_user_id, which is always 0 b/cnot yet logged in to master index
-                "DB Format Version:  ".$dbVersion."\n\n".
-                // "User name:    ".$usrFirstName." ".$usrLastName."\n".  // comes out 'every user' b/c user not set
-                // "Email address: ".$usrEmail."\n".                      // comes out 'not set for user 0'
-                "Go to the address below to review the database:\n".
-                $serverURL;
-
-                $dbowner = user_getDbOwner($mysqli);
-                $dbowner_Email = $dbowner['ugr_eMail'];
-                $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
-
-                //sendEmail($dbowner_Email, $email_title, $email_text);
-//TEMP it is very slow on intersect server                sendEmail_native($dbowner_Email, $email_title, $email_text, null);
-                //END email -----------------------------------
-
-                
-                return $dbID;
-            }else{
-                
-                self::$system->addError(HEURIST_DB_ERROR, 'Cannot write record in Heurist master index ', $dbID);
-                
-                $error = 'Cannot write record in Heurist master index database<br>'
-                .'The URL may have been registered with a previous database.<br>'
-                .'Please '.CONTACT_HEURIST_TEAM.' for advice';
-                return '0,'. $error;
-            }
-        
-        }
-        
-    }
-    
-    //
-    // Remotely update registered database details
-    // @todo Needs some sort of validation
-    public static function updateRegisteredDatabase($params){
-
-        self::initialize(); 
-        $mysqli = self::$mysqli;
-        
-        //switch to master index
-        $connect_failure = (mysql__usedatabase($mysqli, HEURIST_INDEX_DATABASE)!==true);
-        if($connect_failure){
-            return 'Failed to connect to Master Index database';
-        }
-
-        // Get parameters passed from update request
-        $serverURL = $params["serverURL"];
-        $serverURL_lc = strtolower($params["serverURL"]);
-        $dbReg = $params["dbReg"]; // Database name
-        $dbTitle = $params["dbTitle"]; // Database description
-        $usrEmail = $params["usrEmail"];
-        $usrPassword = $params["usrPassword"];
-        $dbID = intval(@$params["dbID"]);
-
-        // $var is null, blank, 0 or false --> false
-        if ( (!($dbID>0)) || (!$serverURL && !$dbReg && !$dbTitle)) { // error in one or more parameters
-            $returnData = 'Bad parameters passed';
-            return $returnData;
-        }
-
-        // Check the record exists
-        $res = mysql__select_value($mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID = ' . $dbID);
-        if(!$res){
-            return 'Unable to locate database record id '.$dbID;
-        }
-
-        if(strpos($serverURL_lc,'http://')===false && strpos($serverURL_lc,'https://')===false){
-            $serverURL = 'https://'.$serverURL;  //https by default
-            $serverURL_lc = strtolower($serverURL);
-        }
-
-        if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0 || strpos($serverURL_lc, '//web.local')>0){
-            return 'Registered databases cannot be on local server '.htmlspecialchars($serverURL);
-        }
-
-        $user_id = 0; // existing record owner
-        // Retrieve user - OWNER CAN BE CHANGED + DETAILS CAN BE CHANGED
-        $usrEmail = strtolower(trim($usrEmail));
-        $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'
-                    .$mysqli->real_escape_string($usrEmail).'"');
-
-        // Check if the email address is recognised as a user name
-        if($user_id <= 0){
-            $user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'
-                    .$mysqli->real_escape_string($usrEmail).'"');
-        }
-
-        // Validate password
-        $valid_password = !empty($usrPassword);
-        if($valid_password && $user_id > 0){
-            $user_pwd = mysql__select_value($mysqli, 'select ugr_Password from sysUGrps where ugr_ID=' . intval($user_id));
-            $valid_password = hash_equals(crypt($usrPassword, $user_pwd), $user_pwd);
-        }
-
-        // Unable to retrieve existing user or provided password is wrong
-        if($user_id <= 0 || !$valid_password){
-            return ($user_id <= 0 ? 'We were unable to retrieve your user account within the Heurist Index database.' 
-                    : 'We were unable to authenicate your account on the Heurist Index database')
-                . '<br>Please ensure that your email address and password on the Heurist Index database match your current email address and password.'
-                . '<br>Contact the Heurist team if you require help with updating your email address and password on the Heurist Index database.';
-        }
-
-        // Check user is owner of record
-        $res = mysql__select_value($mysqli, 'SELECT rec_ID FROM Records WHERE rec_ID = ' . $dbID . ' AND rec_OwnerUGrpID = ' . $user_id);
-        if(!$res){
-            return 'You do not own the record for this registered database, this could be due to a previous transfer in database ownership.'
-                . '<br>Please contact the Heurist team and request that the record for your database be updated.';
-        }
-
-        if(!empty($serverURL) || !empty($dbTitle)){
-            $record = array(
-                'rec_ID'=>$dbID,
-                'rec_Modified'=>date('Y-m-d H:i:s')
-            );
-
-            $err_msg = '';
-            if(!empty($serverURL)){
-                $record['rec_URL'] = $mysqli->real_escape_string($serverURL);
-                $err_msg = 'URL (server URL)';
-            }
-            if(!empty($dbTitle)){
-                $record['rec_Title'] = $mysqli->real_escape_string($dbTitle);
-                $err_msg = $err_msg . (!empty($err_msg) ? ' and ' : '') . 'Title (database name)';
-            }
-            $res = mysql__insertupdate($mysqli, 'Records', 'rec_', $record, true);
-
-            if(!$res && $res != $dbID){
-                return 'Failed to update record\'s ' . $err_msg . ', Error: ' . $mysqli->error;
-            }
-        }
-
-        // Database name
-        if($dbReg){
-
-            $dty_id = ConceptCode::getDetailTypeLocalID("1176-469");
-            $fld_id = mysql__select_value($mysqli, 'SELECT dtl_ID FROM recDetails WHERE dtl_DetailTypeID='.$dty_id.' AND dtl_RecID='.$dbID);
-
-            $detail = array(
-                'dtl_DetailTypeID'=>$dty_id,
-                'dtl_Value'=>$dbReg
-            );
-
-            if($fld_id != null){ // update
-                $detial['dtl_ID'] = $fld_id;
-            }else{ // insert - shouldn't be needed
-                $detail['dtl_RecID'] = $dbID;
-            }
-
-            mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);   
-        }
-
-        return $dbID;
+    public static function setSessionId($id){
+        self::$session_id = $id;
+        self::$progress_step = 0;
     }
 
     //
-    // remove database entirely
-    // $database_name - name of database to be deleted
-    // $createArchive - create db dump and archive all uploaded files true/false or zip format
+    // returns true if session has been terminated
     //
-    // 1. Create an SQL dump in the filestore directory
-    // 2. Zip the filestore directories (using bzip2) directly into the DELETED_DATABASES directory
-    // 3. Delete filestore directory for the database
-    // 4. Drop database
-    // 5. Append row to DELETED_DATABASES_LOG.csv in the Heurist filestore. 
+    public static function setSessionVal($session_val){
+        
+        if(self::$progress_step>0 && intval($session_val)>0){
+            $session_val = self::$progress_step+$session_val;
+        }
+        
+        $current_val = mysql__update_progress(self::$mysqli, self::$session_id, false, $session_val);
+        if($current_val=='terminate'){ //session was terminated from client side
+            self::$session_id = 0;
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     //
+    //
+    //
+    public static function databaseCheckNewDefs($database=null){
+
+        if($database!=null){
+            list($database_full, $database ) = mysql__get_names($database);
+            $database_full = '`'.$database_full.'`.';
+        }else{
+            $database_full = '';
+        }
+        
+        //check for new definitions
+        $rty = mysql__select_value(self::$mysqli, "SELECT count(*) FROM {$database_full}defRecTypes "
+            ." WHERE (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL)");
+        $dty = mysql__select_value(self::$mysqli, "SELECT count(*) FROM {$database_full}defDetailTypes "
+            ." WHERE (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL)");
+        $trm = mysql__select_value(self::$mysqli, "SELECT count(*) FROM {$database_full}defTerms "
+            ." WHERE (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL)");
+        
+        $sHasNewDefsWarning = false;
+        if($rty>0 || $dty>0 || $trm>0){
+            $s = array();
+            if($rty>0) { $s[] = intval($rty).' record types'; }
+            if($dty>0) { $s[] = intval($dty).' base fields'; }
+            if($trm>0) { $s[] = intval($trm).' vocabularies or terms'; }
+            $sHasNewDefsWarning = implode(', ',$s);
+        }
+        
+        return $sHasNewDefsWarning;
+    }
+    
+    /**
+    * Removes database entirely
+    * 
+    * @param mixed $verbose
+    * @param mixed $database_name - name of database to be deleted
+    * @param true $createArchive - if true - creates db dump and archives all uploaded files 
+    */
     public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false ){
 
+        // 1. Create an SQL dump in the filestore direcory
+        // 2. Zip the filestore directories (using bzip2) directly into the DELETED_DATABASES directory
+        // 3. Delete filestore directory for the database
+        // 4. Drop database
+        // 5. Append row to DELETED_DATABASES_LOG.csv in the Heurist filestore. 
+        
         self::initialize();
 
         if(self::$db_del_in_progress!==null){
@@ -521,7 +166,7 @@ class DbUtils {
         }
         
         $format = 'zip';
-        if(!is_bool($createArchive)){
+        if(!is_bool($createArchive)){ //default is zip format
             $format = ($createArchive=='tar')?'tar':'zip';
             $createArchive = true;
         }
@@ -537,8 +182,6 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         $system = self::$system;
-        
-        if($database_name==null && defined('HEURIST_DBNAME')) $database_name = HEURIST_DBNAME;
         
         self::$db_del_in_progress = $database_name; 
         
@@ -569,21 +212,25 @@ class DbUtils {
         if($createArchive) {
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, 
+                    $system->addError(HEURIST_ACTION_BLOCKED, 
                         $msg_prefix.' Cannot create archive folder for database to be deleteted.');                
                     self::$db_del_in_progress = null;
                     return false;
             }
             
-            $db_dump_file = DbUtils::databaseDump( $database_name, null, null, $verbose );
+            self::setSessionVal(1); //archive folder created
+                                
+            $db_dump_file = self::databaseDump( $database_name, null, null, $verbose );
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);                
                     if($verbose) echo '<br>'.htmlspecialchars($msg);
                     self::$db_del_in_progress = null;
                     return false;
             }
+
+            if(self::setSessionVal(2)) return false; //database dumped            
         
             // Zip $source to $destination
             $datetime1 = date_create('now');
@@ -630,6 +277,7 @@ class DbUtils {
                 return false;
             }
             
+            if(self::setSessionVal(3)) return false; //database dump archived
         }
             
         if($archOK){
@@ -639,8 +287,11 @@ class DbUtils {
             
             //set it to false to check archiving only                        
             $real_delete_database = true;                                    
-
             if($real_delete_database){
+
+                $regID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
+                
+                
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
 
@@ -649,6 +300,8 @@ class DbUtils {
                     if($verbose) echo '<br>'.htmlspecialchars($msg);
                     return false;
                 }
+
+                if(self::setSessionVal(4)) return false; //database dropped
 
                 if($verbose) {
                     echo "<br>Database ".htmlspecialchars($database_name)." has been dropped";
@@ -661,6 +314,7 @@ class DbUtils {
                 if($verbose) {
                     echo "<br>Folder ".htmlspecialchars($source)." has been deleted";   
                 }
+                if(self::setSessionVal(5)) return false; //database folder deleted
 
                 //add to log file
                 $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
@@ -674,8 +328,27 @@ class DbUtils {
                     fputcsv($fp, $row); 
                     fclose($fp);
                 }
+                
+                if($regID>0)
+                {
+                    /* TEMP
+                    $dbowner = user_getDbOwner($mysqli);
+                    $params = array(
+                        'action'=>'delete',
+                        'dbID'=>$regID,
+                        'usrPassword'=>$dbowner['ugr_Password'], 
+                        'usrEmail'=>$dbowner['ugr_eMail']
+                    );
+                    $res = DbRegis::registrationDelete($params);    
+                    // if not integer - this is error
+                    if(is_bool($res) && $res===false){
+                        self::$system->addErrorMsg(
+                            'Failed to delete record in reference index for #'.$regID.' for deleted database '.$db_target.'<br>');                    
+                    }
+                    */
+                }
             }
-
+                
             self::$db_del_in_progress = null;
             return true;
         }
@@ -688,10 +361,11 @@ class DbUtils {
     
     
     /**
-    * Dump all tables (except csv import cache) into text files
-    * It is assumed that all tables exist and empty in target db
-    *
-    * @param mixed $database_name - database name if not defined - current database
+    * Dumps all tables into SQL dump
+    * 
+    * @param mixed $database_name   - database name if not defined - current database
+    * @param mixed $database_dumpfile - name of dumpfile
+    * @param mixed $dump_options
     * @param mixed $verbose
     */
     public static function databaseDump($database_name=null, $database_dumpfile=null, $dump_options=null, $verbose=false ) {
@@ -726,13 +400,13 @@ class DbUtils {
             if($dump_options==null){
                 $dump_options = array(
                         'add-drop-table' => true,
-                        'single-transaction' => true, //was true till 2024-02-16
+                        'single-transaction' => true, //improve performance on restore
+                        'quick' =>true,               //improve performance on restore
                         'add-drop-trigger' => true,
                         //'databases' => true,
                         'skip-triggers' =>true,
                         'skip-dump-date' => true,
                         //'routines' =>true,
-                        'quick' =>true,
                         'no-create-db' =>true,
                         'add-drop-database' => true);
                         
@@ -803,7 +477,6 @@ class DbUtils {
                     $cmd = '"'.$cmd.'"';
                 }
                 
-
                 $cmd = $cmd
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 //." --login-path=local 
@@ -811,11 +484,10 @@ class DbUtils {
                 ." {$tables} > ".$database_dumpfile;
                 
                 $arr_out = array();
-                
+
                 exec($cmd, $arr_out, $res2);
 
                 if($res2 !== 0) {
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
                     $msg = "mysqldump for ".htmlspecialchars($database_name_full)
                                 ." failed with a return code of {$res2}";
@@ -838,7 +510,7 @@ class DbUtils {
             }
             else{ //USE 3d Party php MySQLdump lib
             
-                if(@$dump_options['quick']){ unset($dump_options['quick']); }
+                if(@$dump_options['quick']){ unset($dump_options['quick']); } //not supported
                 if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }
                 
                 try{
@@ -874,11 +546,17 @@ class DbUtils {
             return false;
         }
     }
-    
-    //
-    // Creates new heurist database with file folders and ready to use
-    //
-    public static function databaseCreateFull($database_name_full, &$user_record, $templateFileName=null){
+
+    /**
+    * Creates new heurist database with file folders, given user and ready to use
+    * 
+    * @param mixed $database_name - target db name
+    * @param mixed $user_record   - user that will added as dbowner
+    * @param mixed $templateFileName  - text based database definitions (coreDefinitions.txt by default)
+    * 
+    * @returns false or array of warnings
+    */
+    public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null){
         
             self::initialize();
             $mysqli = self::$mysqli;
@@ -887,7 +565,7 @@ class DbUtils {
             if($templateFileName==null){
                 $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
             }
-            $templateFoldersContent = 'NOT DEFINED'; //it is used for tempalate database only
+            $templateFoldersContent = 'NOT DEFINED'; //it is used for template database only
 
             //check template
             if(!file_exists($templateFileName)){
@@ -896,49 +574,103 @@ class DbUtils {
                 return false;
             }   
             
-            list($database_name_full, $database_name) = mysql__get_names( $database_name_full );         
-
-            //create empty database
-            if(!DbUtils::databaseCreate($database_name_full)){
+            list($database_name_full, $database_name) = mysql__get_names( $database_name );
+            
+            //checks that database name is valid, correct length and unique
+            $error_msg = self::databaseValidateName($database_name, 1); //unique
+            if ($error_msg!=null) {
+                self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
                 return false;
             }
+            
+            if(self::setSessionVal(1)) return false;
+            
+            //create folders 
+            $upload_root = self::$system->getFileStoreRootFolder();
+            
+            $database_folder = $upload_root.$database_name.'/';
+            
+            $warnings = self::databaseCreateFolders($database_name);
+            if(is_array($warnings) && count($warnings)>0){
+                folderDelete($database_folder);  
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                                            implode("<br>",$warnings));
+                return false;
+            }
+
+            if(self::setSessionVal(2)) return false;
+            
+            //create empty database
+            if(!self::databaseCreate($database_name_full)){ //with structure and triggers from default dump file 
+                folderDelete($database_folder);  
+                return false;
+            }
+            
+            if(self::setSessionVal(3)) return false;
             
             //switch to new database            
-            mysql__usedatabase( $mysqli, $database_name_full);  
+            mysql__usedatabase( $mysqli, $database_name_full );  
 
-            $idef = new ImportDefinitions();
-            $idef->initialize( $mysqli );
+            if(file_exists($templateFileName) && filesize($templateFileName)>0){ 
+            
+                //import definitions from template file
+                $idef = new ImportDefinitions();
+                $idef->initialize( $mysqli );
 
-            if(!$idef->doImport( $templateFileName )) {
-                
-                $system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Error importing core definitions from coreDefinitions.txt '
-                    .' for database '.$database_name_full.'<br>'
-                    .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
+                if(!$idef->doImport( $templateFileName )) {
                     
-                mysql__drop_database( $mysqli, $database_name_full );
-                return false;
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 
+                        'Error importing core definitions from '
+                        . basename($templateFileName)
+                        .' for database '.$database_name_full.'<br>'
+                        .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
+                        
+                    folderDelete($database_folder);  
+                    mysql__drop_database( $mysqli, $database_name_full );
+                    return false;
+                }
+                
             }
+
+            if(self::setSessionVal(4)) return false; //import core defs
             
-            $warnings = DbUtils::databaseCreateFolders($database_name_full);
-            
-            if(is_array($warnings) && count($warnings)>0){
-                return $warnings;
-            }
-            
-            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
+            //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
+            //not used 
+            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ 
                 $upload_root = $system->getFileStoreRootFolder();
                 
                 $unzip_error = null;
                 try{
                     UArchive::unzip($system, $templateFoldersContent, $upload_root.$database_name.'/');
-                }catch(Exceprion $e){
+                }catch(Exception $e){
                     array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
-                                .' Error: '.Exception::getMessage());        
+                                //.' Target :'.$upload_root.$database_name
+                                .' Error: '.$e->getMessage());        
                 }
             }            
             
-            //update owner in new database
+            $warnings2 = self::_databaseInitForNew($user_record);
+
+            if(self::setSessionVal(5)) return false;
+            
+            $warnings = array_merge($warnings, $warnings2); 
+
+            //self::setSessionVal('REMOVE');
+            
+            return $warnings;
+    }
+
+    /**
+    * Updates dbowner, adds default saved searches (for users ##1,2) and lookups (geonames and nakala)
+    * it uses current database
+    */
+    private static function _databaseInitForNew(&$user_record)
+    {
+            $warnings = array();
+            
+            $mysqli = self::$mysqli;
+        
+            //update owner user (#2) in new database
             $user_record['ugr_ID'] = 2;
             $user_record['ugr_NavigationTree'] = '"bookmark":{"expanded":true,"key":"root_1","title":"root","children":[{"folder":false,"key":"_1","title":"Recent changes","data":{"url":"?w=bookmark&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_2","title":"All (date order)","data":{"url":"?w=bookmark&q=sortby:-m&label=All records"}}]},"all":{"expanded":true,"key":"root_2","title":"root","children":[{"folder":false,"key":"_3","title":"Recent changes","data":{"url":"?w=all&q=sortby:-m after:\"1 week ago\"&label=Recent changes"}},{"folder":false,"key":"_4","title":"All (date order)","data":{"url":"?w=all&q=sortby:-m&label=All records"}}]}';
 //,{"folder":true,"key":"_5","title":"Rules","children":[{"folder":false,"key":"12","title":"Person > anything they created","data":{"isfaceted":false}},{"folder":false,"key":"13","title":"Organisation > Assoc. places","data":{"isfaceted":false}}]}
@@ -951,42 +683,256 @@ class DbUtils {
            
             //add default saved searches and tree
             $navTree = '{"expanded":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_1","title":"Save some filters here ...","children":[]}]}';
-
 //{"key":"28","title":"Organisations","data":{"isfaceted":false}},{"key":"29","title":"Persons","data":{"isfaceted":false}},{"key":"30","title":"Media items","data":{"isfaceted":false}}
-                        
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
             if($ret!=1){
                 array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);                
             }
             
-            return true;
+            //ADD DEFAULT LOOKUPS
+            $def_lookups = array();
+
+            $to_replace = array('DB_ID', 'DTY_ID', 'RTY_ID');
+            $dty_CCode = 'SELECT dty_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_OriginatingDBID = DB_ID AND dty_IDInOriginatingDB = DTY_ID AND rst_RecTypeID = RTY_ID';
+
+            // GeoNames
+            $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $fld_geo = mysql__select_value($mysqli, str_replace($to_replace, array('2', '28', $rty_id), $dty_CCode));
+                $fld_geo = (empty($fld_geo)) ? '' : $fld_geo;
+
+                $fld_cc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '26', $rty_id), $dty_CCode));
+                $fld_cc = (empty($fld_cc)) ? '' : $fld_cc;
+
+                $fld_fname = mysql__select_value($mysqli, str_replace($to_replace, array('3', '1068', $rty_id), $dty_CCode));
+                $fld_fname = (empty($fld_fname)) ? '' : $fld_fname;
+
+                $fld_id = mysql__select_value($mysqli, str_replace($to_replace, array('2', '581', $rty_id), $dty_CCode));
+                $fld_id = (empty($fld_id)) ? '' : $fld_id;
+
+                $key = 'geoName_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'geoName', 'rty_ID' => $rty_id, 'label' => 'GeoName', 'dialog' => 'lookupGN', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('name' => $fld_name, 'lng' => $fld_geo, 'lat' => $fld_geo, 'countryCode' => $fld_cc, 'adminCode1' => "", 'fclName' => $fld_fname, 'fcodeName' => "", 'geonameId' => $fld_id, 'population' => "");
+            }
+
+            // Nakala
+            $rty_query = 'SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
+            $rty_id = mysql__select_value($mysqli, $rty_query);
+            if(!empty($rty_id)){
+
+                $fld_url = mysql__select_value($mysqli, str_replace($to_replace, array('2', '38', $rty_id), $dty_CCode));
+                $fld_url = (empty($fld_url)) ? '' : $fld_url;
+
+                $fld_title = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
+                $fld_title = (empty($fld_title)) ? '' : $fld_title;
+
+                $fld_aut = mysql__select_value($mysqli, str_replace($to_replace, array('2', '15', $rty_id), $dty_CCode));
+                $fld_aut = (empty($fld_aut)) ? '' : $fld_aut;
+
+                $fld_date = mysql__select_value($mysqli, str_replace($to_replace, array('2', '10', $rty_id), $dty_CCode));
+                $fld_date = (empty($fld_date)) ? '' : $fld_date;
+
+                $fld_lic = mysql__select_value($mysqli, str_replace($to_replace, array('1144', '318', $rty_id), $dty_CCode));
+                $fld_lic = (empty($fld_lic)) ? '' : $fld_lic;
+
+                $fld_type = mysql__select_value($mysqli, str_replace($to_replace, array('2', '41', $rty_id), $dty_CCode));
+                $fld_type = (empty($fld_type)) ? '' : $fld_type;
+
+                $fld_desc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '3', $rty_id), $dty_CCode));
+                $fld_desc = (empty($fld_desc)) ? '' : $fld_desc;
+
+                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '62', $rty_id), $dty_CCode));
+                $fld_name = (empty($fld_name)) ? '' : $fld_name;
+
+                $key = 'nakala_' . $rty_id;
+                $def_lookups[$key] = array('service' => 'nakala', 'rty_ID' => $rty_id, 'label' => 'Nakala Lookup', 'dialog' => 'lookupNakala', 'fields' => null);
+                $def_lookups[$key]['fields'] = array('url' => $fld_url, 'title' => $fld_title, 'author' => $fld_aut, 'date' => $fld_date, 'license' => $fld_lic, 'mime_type' => $fld_type, 'abstract' => $fld_desc, 'rec_url' => '', 'filename' => $fld_name);
+            }
+
+            if(!empty($def_lookups)){
+
+                $lookup_str = json_encode($def_lookups);
+                $upd_query = "UPDATE sysIdentification SET sys_ExternalReferenceLookups = ? WHERE sys_ID = 1";
+                mysql__exec_param_query($mysqli, $upd_query, array('s', $lookup_str));
+            }else{
+                array_push($warnings, 'Unable to setup default lookup services.');
+            }
+            
+            return  $warnings;
+            
     }
     
-    //    
-    //create new empty heurist database
-    // $level - 0 empty db, 1 +strucute, 2 +constraints and triggers
-    //
+
+    /**
+    * Verifies that database name is valid and optionally that database exists or unique
+    * 
+    * @param mixed $database_name
+    * @param mixed $check_exist_or_unique - 1 must be unique, 2 - must exist, 0 - skip this check
+    */
+    public static function databaseValidateName($database_name, $check_exist_or_unique=1){
+        
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $error_msg = System::dbname_check($database_name_full);
+        
+        if ($check_exist_or_unique>0 && $error_msg==null) {
+            
+            if($check_exist_or_unique==1 && 
+               (strcasecmp($database_name,'DELETED_DATABASES')==0 || 
+                strcasecmp($database_name,'DBS_TO_RESTORE')==0 ||
+                strcasecmp($database_name,'AAA_LOGS')==0)){
+
+                $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';    
+                   
+            }else{
+                //verify that database with such name already exists
+                $dblist = mysql__select_list2(self::$mysqli, 'show databases');
+                if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+                    if($check_exist_or_unique==1){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+                    }
+                }else if($check_exist_or_unique==2){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
+                }
+            }
+        }
+        
+        return $error_msg;        
+    }
+    
+    /**
+    * Restores database from archive
+    * 
+    * @param mixed $database_name - name of target dastabase
+    * @param mixed $archive_file - name of zip file
+    * @param mixed $archive_folder - id of source folder (DATABASE_DELETED by default)
+    */
+    public static function databaseRestoreFromArchive($database_name, $archive_file, $archive_folder=1){
+        
+        self::initialize();
+
+        $upload_root = self::$system->getFileStoreRootFolder();
+
+        //only from limited list of folders        
+        $source = intval($archive_folder);
+        if($source==2){
+            $lib_path = '/srv/BACKUP/';
+        }else if($source==3){
+            $lib_path = '/srv/BACKUP/ARCHIVE/';
+        }else if($source==4){
+            $lib_path = $upload_root.'DBS_TO_RESTORE/';
+        }else{
+            //default
+            $lib_path = $upload_root.'DELETED_DATABASES/';
+        }
+
+        $archive_file = $lib_path.basename($archive_file); 
+
+        //check archive
+        if(!file_exists($archive_file)){
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Database archive file not found');
+            return false;
+        }
+        
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        //check database name and unique 
+        $error_msg = self::databaseValidateName($database_name, 1); //unique
+        if ($error_msg!=null) {
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            return false;
+        }
+
+        self::setSessionVal(1); //database name and archive validated
+        
+        //create folders 
+        $database_folder = $upload_root.$database_name.'/';
+        
+        $warnings = self::databaseCreateFolders($database_name);
+        if(is_array($warnings) && count($warnings)>0){
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                                    implode('<br>',$warnings));
+            return false;
+        }
+        
+        self::setSessionVal(2); //folders created
+
+        //unpack archive into this folder
+        $unzip_error = null;
+        try{
+            UArchive::unzip(self::$system, $archive_file, $database_folder);
+        }catch(Exception $e){
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
+                            .' Error: '.$e->getMessage());        
+            return false;
+        }
+
+        self::setSessionVal(3); //unpack archive
+        
+        //find dump file 
+        $dumpfile = folderFirstFile($database_folder, 'sql', false);
+        
+        //create database and import data from dumpfile
+        if(!file_exists($dumpfile)){
+
+            folderDelete($database_folder);  
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Archive does not contain sql dump file');
+            return false;
+            
+        }else{
+        
+            $script_file = basename($dumpfile);
+            //$script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
+            //fileCopy($dumpfile, $script_file);
+
+            $res = self::databaseCreate($database_name, 1, $script_file); //from archive
+
+            self::setSessionVal(4); //database restored from dump
+            
+            //fileDelete($script_file); //remove temp dump file
+                           
+            if(!$res){
+                folderDelete($database_folder);  
+            }
+            return $res;
+        }
+    }
+
+    /**
+    * Creates new heurist database 
+    * 
+    * @param mixed $database_name
+    * @param mixed $level - 0 empty db, 1 +structure, 2 +constraints and triggers
+    * @param mixed $dumpfile - database dump file to restore if $level>0
+    */
     public static function databaseCreate($database_name, $level=2, $dumpfile=null){
 
         self::initialize();
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
-        if(strlen($database_name_full)>64){
-                self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full.' is too long. Max 64 characters allowed');
-                return false;
+        $error_msg = self::databaseValidateName($database_name, 1); //unique
+        if ($error_msg!=null) {
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            return false;
         }
-        $hasInvalid = preg_match('[\W]', $database_name_full);
-        if ($hasInvalid) {
-                self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.$database_name_full
-                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
-                return false;
-        }
+        
+        $database_folder = null;
         
         if($dumpfile==null){
             $dumpfile = 'blankDBStructure.sql';
+        }else{
+            $dumpfile = basename($dumpfile);
+        
+            $upload_root = self::$system->getFileStoreRootFolder();
+            $database_folder = $upload_root.$database_name.'/';
         }
         
         $mysqli = self::$mysqli;
@@ -1000,25 +946,30 @@ class DbUtils {
             return true; //create empty database
             
         }else{
-            $res = mysql__script($database_name_full, $dumpfile);
+            //restore data from sql dump
+            $res = mysql__script($database_name_full, $dumpfile, $database_folder);
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
             }else if($level<2){
                 return true;
-            }else if(self::databaseCreateConstraintsAndTriggers($database_name)){
+            }else if(self::databaseCreateConstraintsAndTriggers($database_name_full)){
                 return true;    
             }
         }
         
-        //fail
+        //fails
         mysql__drop_database($mysqli, $database_name_full);
         return false;
     }
 
-    //
-    //
-    //    
+    
+    /**
+    * Recreates constraints and triggers (executes sql commands from files)
+    * 
+    * @param mixed $database_name
+    * @return {false|true}
+    */
     public static function databaseCreateConstraintsAndTriggers($database_name){
 
         self::initialize();
@@ -1040,9 +991,11 @@ class DbUtils {
         
     }
         
-    //
-    // create if not exists set of folders for given database
-    //
+    /**
+    * Creates if not exists set of folders for given database
+    * 
+    * @param mixed $database_name
+    */
     public static function databaseCreateFolders($database_name){
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
@@ -1055,11 +1008,11 @@ class DbUtils {
         if (folderCreate($database_folder, true)){
             folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
         }else{
-            return array('message'=>"Heurist was unable to create the required database root folder,\nDatabase name: " . $database_name . "\nServer url: " . HEURIST_BASE_URL, 'revert'=>true);
+            return array('Heurist was unable to create the required database root folder,<br>Database name: '
+                        . $database_name . '<br>Server url: ' . HEURIST_BASE_URL); //, 'revert'=>true
         }
 
         $warnings = array();
-
 
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons", $database_folder."entity" )){
             
@@ -1108,24 +1061,36 @@ class DbUtils {
         
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });
-
+        if(count($warnings)>0){
+            array_unshift($warnings, "Unable to create the sub directories within the database root directory,<br>Database name: " 
+                        . $database_name . ",<br><br>Server url: " . HEURIST_BASE_URL . ",<br>Warnings:\n");
+        }
+        
         return $warnings;
     }
     
-    
-    //
-    //
-    //
-    private static function empty_table($name, $remark, $verbose){
+    /**
+    * Clears data (delete all records) for given table
+    * 
+    * @param mixed $name
+    * @param mixed $remark - session message
+    * @param mixed $verbose
+    */
+    private static function _emptyTable($name, $remark, $verbose){
 
         $mysqli = self::$mysqli;
         
         if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>"; }
 
+        self::setSessionVal($remark);
+        
         if(!$mysqli->query("delete from $name where 1")){
+            
+            $error_msg = 'Unable to clean '.htmlspecialchars($remark);
+            
+            $system->addError(HEURIST_ACTION_BLOCKED, $error_msg, $mysqli->error);
             if($verbose) {
-                echo "<br><p>Warning: Unable to clean ".htmlspecialchars($remark)
-                    ." - SQL error: ".$mysqli->error."</p>";
+                echo "<br><p>Warning: $error_msg - SQL error: ".$mysqli->error."</p>";
             }
             return false;
         }else{
@@ -1134,20 +1099,28 @@ class DbUtils {
         }
     }
 
-    
-
-    //
-    //
-    //
+    /**
+    * Clears data tables (retains defintions)
+    * 
+    * @param mixed $database_name - target database
+    * @param mixed $verbose
+    * @return {false|mysqli_result|true}
+    */
     public static function databaseEmpty($database_name, $verbose=true){
+
+        self::initialize();
+        $mysqli = self::$mysqli;
+        $system  = self::$system;
+        
+        $error_msg = self::databaseValidateName($database_name, 2); //exists
+        if ($error_msg!=null) {
+            $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            return false;
+        }
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
         $res = true;
-        
-        self::initialize();
-        $mysqli = self::$mysqli;
-        $system  = self::$system;
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
            $connected = (mysql__usedatabase($mysqli, $database_name_full)==true);
@@ -1161,16 +1134,21 @@ class DbUtils {
             return false;
         }
         
-        $mysqli->autocommit(FALSE);
+        self::setSessionVal('Permission validation');
+        
+        $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
+        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
 
         if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
+            //not used
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Unable to set parent IDs to null for Comments');
             $res = false;
             if($verbose) {
                 echo "<br><p>Warning: Unable to set parent IDs to null for Comments".
                     " - SQL error: ".$mysqli->error."</p>";
             }
         }
-        
+
         if($res){
 
             $tables = array(
@@ -1188,15 +1166,15 @@ class DbUtils {
             );
 
             foreach ($tables as $name => $remark) {
-                if(! self::empty_table($name, $remark, $verbose)){
+                if(! self::_emptyTable($name, $remark, $verbose)){
                     $res = false;
                     break;
                 }
             }
 
             if($res){
-                $res = $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
-                if($res) $mysqli->commit();
+                $res2 = $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
+                if($res2) $mysqli->commit();
             }
         }
     
@@ -1204,7 +1182,8 @@ class DbUtils {
             $mysqli->rollback();
         }
 
-        $mysqli->close();
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        //$mysqli->close();
 
         return $res;
     }
@@ -1212,10 +1191,16 @@ class DbUtils {
     /**
     * Copy all tables (except csv import cache) from one db to another
     * It is assumed that all tables exist and empty in target db
+    * 
+    * source and target database must exist
+    * 
+    * $isCloneTemplate - true for clone curated database
     *
-    * @param mixed $db_source
-    * @param mixed $db_target - must exist as new empty heurist database created by  databaseCreate($targetdbname_full, 1)
+    * @param mixed $db_source - full name (with hdb_) for source database
+    * @param mixed $db_target - must exist as new empty heurist database created by  databaseCreate($db_target, 1)
     * @param mixed $verbose
+    * 
+    * @todo make private and rename to databaseCopyTables
     */
     public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate){
 
@@ -1258,10 +1243,12 @@ class DbUtils {
                 //$isCloneTemplate
                 $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
                 'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
+                'usrworkingsubsets', //'usrrecpermissions',
                 'usrreminders','usrremindersblocklist','recthreadedcomments','usrreportschedule','usrhyperlinkfilters', 'sysarchive');
                 
-                $data_tables = array('records','recdetails','reclinks',
+                $data_tables = array('records','recdetails','reclinks','recdetailsdateindex',
                 'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrectaglinks',
+                'usrrecpermissions','usrworkingsubsets',
                 'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots', 'sysarchive');
           
                 
@@ -1288,7 +1275,7 @@ class DbUtils {
                             $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
                             if(!($cnt>0)) continue;
                         }else if($table=='sysUGrps'){
-                            $cnt = mysql__select_value($mysqli, "SELECT count(*) FROM ". $db_source .".sysUGrps WHERE ugr_Enabled != 'n' AND ugr_Enabled != 'y'");
+                            $cnt = mysql__select_value($mysqli, "SELECT count(*) FROM `". $db_source ."`.sysUGrps WHERE ugr_Enabled != 'n' AND ugr_Enabled != 'y'");
 
                             if(is_numeric($cnt) && $cnt > 0){
                                 checkUserStatusColumn(self::$system, $db_target);
@@ -1396,7 +1383,326 @@ class DbUtils {
 
         return $res;
     }
+  
+    /**
+    * Clones database including folders
+    * 
+    * @param $db_source - source database by default current one (HEURIST_DBNAME)
+    * @param mixed $db_target - target database
+    * @param mixed $nodata - if true only defintions will be clone (no Records)
+    * @param false $isCloneTemplate - clone from curated registered datbase -
+    *           db onwer will be changed to current user
+    */
+    public static function databaseCloneFull($db_source, $db_target, $nodata=false, $isCloneTemplate)
+    {
+        global $passwordForServerFunctions;
+        
+        self::initialize();
+        
+        if($db_source==null){
+            $db_source = HEURIST_DBNAME;
+        }
+        
+        $isCloneTemplate = false;
+        //$system = self::$system;
+        $mysqli = self::$mysqli;
+        $ugr_ID = self::$system->get_user_id(); //current user
+        $usr_owner = user_getById($mysqli, $ugr_ID);
+        
+        
+        list($db_source_full, $db_source ) = mysql__get_names($db_source);
+        list($db_target_full, $db_target ) = mysql__get_names($db_target);
+        
+        
+        $sErrorMsg = DbUtils::databaseValidateName($db_target, 1); //unique
+        if ($sErrorMsg!=null) {
+            $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
+            return false;
+        }
+        
+        //additional check for self clone/rename
+        if($db_source==HEURIST_DBNAME && !self::$system->is_admin()){
+                
+                self::$system->addError(HEURIST_REQUEST_DENIED, 
+                            'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');                        
+                return false;
+        } 
+        
+        if(self::setSessionVal(1)) return false; //validation
+        
+        //create folders 
+        $upload_root = self::$system->getFileStoreRootFolder();
+        $database_folder = $upload_root.$db_target.'/';
+        
+        //2. Copy folders
+        //copy files and folder
+        if($nodata){
+            //limited set of folders
+            $warnings = self::databaseCreateFolders($db_target);
+            if(is_array($warnings) && count($warnings)>0){
+                folderDelete($database_folder);  
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Sorry, we were not able to create all file directories required by the database. '
+                                                .implode("<br>",$warnings));
+                return false;
+            }
+            
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
+                        HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/xsl-templates", 
+                        HEURIST_FILESTORE_ROOT.$targetdbname."/xsl-templates" );
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/entity", 
+                        HEURIST_FILESTORE_ROOT.$targetdbname."/entity" );
+
+        }else if(!folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source, HEURIST_FILESTORE_ROOT.$db_target )){
+                folderDelete($database_folder);  
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Sorry, we were not able to copy file directories for cloning  database.');
+                return false;
+        }
+        if(self::setSessionVal(2)) return false; //copy folders
+
+        //3. create target database  
+        $res = DbUtils::databaseCreate($db_target, 1);
+
+        if(!$res){
+            folderDelete($database_folder);  
+            return false;
+        }
+        
+        if(self::setSessionVal(3)) return false; //database creation
+
+        //4. copy tables  - it switches to target db
+        $res = DbUtils::databaseClone($db_source_full, $db_target_full, false, $nodata, $isCloneTemplate);  
+
+        if(!$res){
+            DbUtils::databaseDrop( false, $db_target, false);
+            return false;
+        }
+
+        if(self::setSessionVal(4)) return false; //copy data
+        
+        if($isCloneTemplate){
+        //5. add current user from current database as owner to target cloned db
+            $usr_owner['ugr_ID'] = 2;
+            unset($usr_owner['ugr_NavigationTree']);
+            $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', $usr_owner);
+            if($ret!=2){
+                DbUtils::databaseDrop( false, $db_target, false);
+                self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                                'Cannot set owner user. '.$ret);
+                return false;
+            }
+        }
+
+        //6. add constraints
+        if(!DbUtils::databaseCreateConstraintsAndTriggers($db_target)){
+            DbUtils::databaseDrop( false, $db_target, false);
+            return false;
+        }
+
+        if(self::setSessionVal(5)) return false; //triggers and constraints
+        
+        // 7. Update file path in target database  with absolute paths
+        $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_FILESTORE_ROOT.$db_target.
+        "/' where ulf_FilePath='".HEURIST_FILESTORE_ROOT.$db_source."/' and ulf_ID>0";
+        $res1 = $mysqli->query($query1);
+        if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
+//@todo
+//        print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
+//        "<br>Query was:".htmlspecialchars($query1).
+//        "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
+
+        }
+
+        if(self::setSessionVal(6)) return false; //triggers and constraints
+        
+        return true;
+    }
     
+    /**
+    * Removes registration info and assign originID for definitions
+    * (after clone)
+    * 
+    * @param mixed $dbname
+    */
+    public static function databaseResetRegistration($dbname){
+  
+        self::initialize();
+        
+        mysql__usedatabase(self::$mysqli, $dbname);
+        
+        //get current reg id
+        $sourceRegID = mysql__select_value(self::$mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
+        
+        //reset reg id and some other values in sysIdentification
+        $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, "
+            ."sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='uploaded_files', "
+            ."sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
+            
+        $res1 = self::$mysqli->query($query1);
+        if($sourceRegID>0){
+            self::updateOriginatingDB($sourceRegID);   
+        }
+    }
+    
+    public static function databaseUpdateRegistration($dbname, $reg_record){
+
+        self::initialize();
+        $res = mysql__usedatabase(self::$mysqli, $dbname);
+        if($res===true){
+            
+            $dbID = intval(@$reg_record['dbID']);
+            $dbDescription = @$reg_record['dbTitle'];
+            
+            if($dbID>0){
+                //update concept codes
+                $res = self::updateOriginatingDB( $dbID );
+                
+                //update sysIndentificatons
+                $res = self::$mysqli->query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
+                        "`sys_dbDescription`='".self::$mysqli->real_escape_string($dbDescription)."' where 1");
+            }
+        }
+        
+    }
+    
+    
+    
+    /**
+    * Renames database (in fact it clones database with new name and archive/drop old database)
+    * 
+    * @param mixed $db_source
+    * @param mixed $db_target
+    * @param mixed $createArchive - if true creates archive of old db before dropping
+    * @return true on success
+    */
+    public static function databaseRename($db_source, $db_target, $createArchive=false){
+  
+        //copy all data to new database
+        $res = DbUtils::databaseCloneFull($db_source, $db_target, false, false);
+        //drop/archive previous database
+        if($res){
+            $mysqli = self::$mysqli;
+            //update registration 
+            $rec = mysql__select_row_assoc($mysqli, 'select sys_dbRegisteredID, sys_dbDescription from sysIdentification where 1');
+            $regID = intval($rec['sys_dbRegisteredID']);
+            if($regID>0)
+            {
+                $dbTitle = $rec['sys_dbDescription'];
+                $dbowner = user_getDbOwner($mysqli);
+                $serverURL = HEURIST_SERVER_URL . '/heurist/' . "?db=" . $db_target;
+                $params = array(
+                    'action'=>'update',
+                    'dbID'=>$regID,
+                    'dbReg'=>$db_target, //new name 
+                    'dbTitle'=>$dbTitle,
+                    'usrPassword'=>$dbowner['ugr_Password'], 
+                    'usrEmail'=>$dbowner['ugr_eMail'],
+                    'serverURL'=>$serverURL //new url
+                );
+                $res = DbRegis::registrationUpdate($params);    
+                // if not integer - this is error
+                if(is_bool($res) && $res===false){
+                    self::$system->addErrorMsg(
+                        'Failed to update reference index for #'.$regID.' for renamed database '.$db_target.'<br>');                    
+                }
+            }
+                    
+            //archive and drop database with old name
+            self::$progress_step = 6;       
+            DbUtils::databaseDrop(false, $db_source, $createArchive);
+        }
+        
+        return $res;
+    }
+
+  
+
+    /**
+    * Assigns given Origin ID for rectype, detail and term defintions
+    * 
+    * @param mixed $dbID  - database registration id
+    * @return {false|true}
+    */
+    public static function updateOriginatingDB($dbID){
+
+        self::initialize();
+        
+        $res = true;
+
+        if($dbID>0){                                
+            $dbID = intval($dbID);
+            $mysqli = self::$mysqli;
+            $result = 0;
+            $res2 = $mysqli->query("update defRecTypes set "
+                ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
+                ."where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
+            if ($res2===false) {$result = 1; }
+            // Fields
+            $res2 = $mysqli->query("update defDetailTypes set "
+                ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
+                ."where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
+            if ($res2===false) {$result = 1; }
+            // Terms
+            $res2 = $mysqli->query("update defTerms set "
+                ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
+                ."where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
+            if ($res2===false) {$result = 1; }
+
+            
+            if ($result == 1){
+                self::$system->addError(HEURIST_DB_ERROR,
+                            'Error on update IDs "IDInOriginatingDB" fields for database registration '.$dbID, $mysqli->error);
+                $res = false;
+            }
+        }
+        return $res;
+    }    
+    
+    /**
+    * Assigns Origin ID for rectype, detail and term defintions if they equal 9999
+    * (after import from unregistered database)
+    */
+    public static function updateImportedOriginatingDB(){
+
+        self::initialize();
+        
+        $res = true;
+        
+        $dbID = 0;    
+        if(defined('HEURIST_DBID')){
+            $dbID = HEURIST_DBID;    
+        }
+
+        $mysqli = self::$mysqli;
+        $result = 0;
+        $res2 = $mysqli->query("update defRecTypes set "
+            ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
+            ."where (rty_OriginatingDBID = '9999')");
+        if ($res2===false) {$result = 1; }
+        // Fields
+        $res2 = $mysqli->query("update defDetailTypes set "
+            ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
+            ."where (dty_OriginatingDBID = '9999')");
+        if ($res2===false) {$result = 1; }
+        // Terms
+        $res2 = $mysqli->query("update defTerms set "
+            ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label, trm_IDInOriginatingDB=trm_ID "
+            ."where (trm_OriginatingDBID = '9999')");
+        if ($res2===false) {$result = 1; }
+
+        
+        if ($result == 1){
+            self::$system->addError(HEURIST_DB_ERROR,
+                        'Error on update IDs "IDInOriginatingDB" fields for unregistered (imported) definitions '.$dbID, $mysqli->error);
+            $res = false;
+        }
+        
+        return $res;
+    }    
+
+        
 }
 
 

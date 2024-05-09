@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -951,12 +951,13 @@ $.widget( "heurist.importStructure", {
             }else if(action=='clone'){
 
                 if(!recURL) return;
-                
+                /* todo !!!!!
                 var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
                 +'?db='+window.hWin.HAPI4.database
                 +'&templatedb='+dbName;
 
                 window.hWin.HEURIST4.msg.showDialog(cloneURL, { width: 800, height: 400, title:'Clone curated template'});
+                */
             }
 
         }

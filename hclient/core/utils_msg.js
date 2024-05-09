@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -83,7 +83,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             if(response.sysmsg && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
-                msg = msg + '<br>System error: ';
+                msg = msg + '<br><br>System error: ';
                 if(typeof response.sysmsg['join'] === "function"){
                     msg = msg + response.sysmsg.join('<br>');
                 }else{
@@ -1206,7 +1206,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
         
         if(!styles){
-            styles = {'background-color': "#000", opacity: '0.6', color: 'rgb(0, 190, 0)', 'font-size': '20px', 'font-weight': 'bold'};
+            styles = {opacity: '0.6', 'background-color': "rgb(0, 0, 0)", color: 'rgb(0, 190, 0)', 'font-size': '20px', 'font-weight': 'bold'};
         }
         window.hWin.HEURIST4.msg.coverall.css( styles );
         
@@ -1334,6 +1334,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             modal: true,
             closeOnEscape: true,
             buttons: buttons
+            
         };
         
         if(ext_options){
@@ -1350,6 +1351,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(posele.length>0)
                     options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
+           
+           if(ext_options['removeOnClose']){
+                options.close = function(event, ui){  $dlg.remove(); };   
+           }
+           
         }
         if(!options.position){
             options.position = { my: "center center", at: "center center", of: window };    

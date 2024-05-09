@@ -12,7 +12,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -50,11 +50,35 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    if(count($system->getError()) > 0){
+    /*if(count($system->getError()) > 0){
         $_REQUEST['error'] = $system->getError();
-    }
+    }*/
     include_once ERROR_REDIR;
     exit;
+}
+
+if(defined('IS_INDEX_PAGE')){
+    //check for missed tables
+    $missed = hasAllTables($system->get_mysqli());
+    
+    if(count($missed)>0){
+        $message = 'Database <b>'.HEURIST_DBNAME
+        .'</b> is missing the following tables:<br><br><i>'
+        .implode(', ',$missed)
+        .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
+        .'It is also possible that drive space has been exhausted. '
+        .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
+        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
+        .'<br>We apologise for any inconvenience</p>';        
+
+        //to add to error log            
+        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
+                .' is missing the following tables: '.implode(', ',$missed));
+        
+        
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
 }
 
 $login_warning = 'To perform this action you must be logged in';
@@ -210,6 +234,7 @@ if($isLocalHost){
  -->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
@@ -340,6 +365,11 @@ if($isLocalHost){
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
                     if(arguments[1]){
+                        
+                        //verify definitions relevance every 20 seconds
+                        if(false){
+                            setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
+                        }
 
                         if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
                             callback(true);

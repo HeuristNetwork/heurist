@@ -6,8 +6,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -576,7 +576,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 
                 
                 $database_dumpfile = FOLDER_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
-                $dump_options = array('skip-triggers' => true,  'quick' =>true, 'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
+                $dump_options = array('skip-triggers' => true,  
+                                      'single-transaction' => true,
+                                      'quick' =>true, 
+                                      'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
                 
                 $res = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false );
                 

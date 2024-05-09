@@ -16,7 +16,7 @@
     /**
     * fixCmsAbsPaths - replace absolute paths in CMS records to relative 
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
     * @version     3.1
@@ -122,7 +122,7 @@ function __correctAbsPaths(){
         
         print '<h4>'.htmlspecialchars($db_name).'</h4><br>';
         
-        print 'Rectypes: '.htmlspecialchars(implode(',',$rty_IDs)).' Field: '.intval($dty_ID).'<br>';
+        print 'Rectypes: '.htmlspecialchars(implode(',',$rty_IDs)).' Fields: '.intval($dty_ID).'<br>';
         
         $dbRecDetails->setData($data);
         $res = $dbRecDetails->detailsReplace();
@@ -168,8 +168,10 @@ foreach ($servers as $srv) {
 }
 //print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
 
-//report
-print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
+//report if anything has been fixed
+if($cnt > 0){
+    print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
+}
 
 
              

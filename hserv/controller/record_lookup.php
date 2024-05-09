@@ -15,7 +15,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -344,7 +344,9 @@
     }
 
     // validate url and query
-    $url = filter_var($params['service'], FILTER_VALIDATE_URL);
+    
+    $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
+    //if(!$url){$url = filter_var($params['service'], FILTER_VALIDATE_URL);}
 
     $clean_query = array();
 
@@ -1443,8 +1445,12 @@
                             if(!in_array($code, $handled_types)){
 
                                 if(strpos($code, 'c_') !== false){
+                                    
+                                    $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code));
+                                    
+                                    $escaped_code = str_replace("'", "&apos;", $escaped_code);
 
-                                    $nodes = $datatypes_xml->xpath("//node[@id='". $code ."']");
+                                    $nodes = $datatypes_xml->xpath("//node[@id='$escaped_code']");
                                     if(is_array($nodes) && count($nodes) > 0){
                                         $label = $nodes[0]->attributes()->label;
                                         $label = ucfirst($label);

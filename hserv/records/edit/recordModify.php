@@ -15,7 +15,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 * 
@@ -2470,7 +2470,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     $insertValues = array();
     $errorValues = array();
     $cntErrors = 0;
-
+    
     foreach ($details2 as $dtyID => $values) {
 
         $splitValues = array();
@@ -2747,7 +2747,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     break;
 
                 case "geo":
-
+                
                     //note geoType can be not defined - detect it from dtl_Geo
                     list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
                     if($dtl_Value===false){
@@ -2820,7 +2820,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
             if($isValid == true){
 
                 if(@$det_required[$dtyID]!=null){
-                    unset($det_required[$dtyID]);
+                    unset($det_required[$dtyID]); //value is valid - removes from list of required
                 }
 
                 $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
@@ -2891,19 +2891,35 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
 
         $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
 
-    }else if (is_array($det_required) && count($det_required)>0) {
-
-        $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
-            .' missing value or '.
-            (count($det_required)>1?'have':'has')
-            .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>');
-
-    }else if (!is_array($insertValues) || count($insertValues)<1) {
-
-        $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
-
     }else{
-        $res = $insertValues;
+    
+        if (is_array($det_required) && count($det_required)>0) {
+            
+            $missed_req_dty = array_keys($det_required);
+            foreach($missed_req_dty as $dty_ID){
+                //try to add default values for missed required fields
+                $query = 'SELECT rst_DefaultValue FROM defRecStructure WHERE rst_RecTypeID='.$rectype
+                                .' and rst_DetailTypeID='.$dty_ID;
+                $defaultValue = mysql__select_value($mysqli, $query);
+                if($defaultValue!=null && $defaultValue!=''){
+                    array_push($insertValues, array('dtl_DetailTypeID'=>$dty_ID, 'dtl_Value'=>$defaultValue));                
+                    unset($det_required[$dty_ID]);
+                }
+            }
+        }
+
+        if (is_array($det_required) && count($det_required)>0) {
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
+                .' missing value or '.
+                (count($det_required)>1?'have':'has')
+                .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>'
+                .' <br>Modify record type structure: change field to "optional" or specify default value');
+
+        }else if (!is_array($insertValues) || count($insertValues)<1) {
+            $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
+        }else{
+            $res = $insertValues;
+        }
     }
 
     return $res;

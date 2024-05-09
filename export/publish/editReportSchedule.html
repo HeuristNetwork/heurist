@@ -20,9 +20,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Stephen White   <stephen.white@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @author      Stephen White 
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     4
@@ -101,14 +101,14 @@
 <div id="detailTypeValues" style="padding:5px;">
 
     <div class="dtyField">
-        <label class="dtyLabel">ID:</label>
-        <label id="rps_ID"></label>
+        <label class="dtyLabel" for="">ID:</label>
+        <span id="rps_ID"></span>
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Title">Title:</label>
         <input id="rps_Title" style="width:150;" maxlength="64" />
         <div class="help prompt help1">
-            <label>The title of scheduled report</label>
+            The title of scheduled report
         </div>
     </div>
     <div class="dtyField" style="display: none;">
@@ -117,45 +117,43 @@
             <option selected="selected">smarty</option>
         </select>
         <div class="help prompt help1">
-            <label>Type of report</label>
+            Type of report
         </div>
     </div>
     <div class="dtyField" style="display: none;">
         <label class="dtyLabel" for="rps_FilePath">File path:</label>
         <input id="rps_FilePath" style="width:400;" maxlength="128" />
         <div class="help prompt help1">
-            <label id="lblFilePathHelp"></label>
+            <span id="lblFilePathHelp"></span>
         </div>
     </div>
     <div class="dtyField">
         <label class="dtyLabel" for="rps_FileName">File name:</label>
         <input id="rps_FileName" style="width:200px;" maxlength="64" disabled="disabled"/>
         <div class="help prompt help1">
-            <label>The base name of the report being published - will be compelted with file types</label>
+            The base name of the report being published - will be compelted with file types
         </div>
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_HQuery" style="vertical-align:top;">Query:</label>
         <textarea id="rps_HQuery" style="width:400;resize: none" maxlength="2000" rows=3 cols=50></textarea>
         <div class="help prompt help1">
-            <label>The Heurist query to be used in generating this report</label>
+            The Heurist query to be used in generating this report
         </div>
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Template">Template:</label>
         <select id="rps_Template" style="max-width:400;"></select>
         <div class="help prompt help1">
-            <label>The name of the template to be used in generating this report</label>
+            The name of the template to be used in generating this report
         </div>
     </div>
     <div class="dtyField">
         <label class="dtyLabel" for="rps_IntervalMinutes">Interval (minutes):</label>
         <input id="rps_IntervalMinutes" style="width:50;" maxlength="5" />
         <div class="help prompt help1">
-            <label>
                 The interval in minutes between regenerations of the report output<br>
                 Enter 0 (zero) to skip this report during automated report regeneration
-            </label>
         </div>
     </div>
     
@@ -173,7 +171,7 @@
             </select>
         
         <div class="help prompt help1">
-            <label>Content type for output</label>
+            Content type for output
         </div>
     </div>
 

@@ -8,8 +8,8 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -75,17 +75,19 @@
     
     }
     else if($action=='usr_log'){
-        
-        $system->initPathConstants($dbname);                                
-        $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
-        $res = true;
-        
-        if(@$_REQUEST['activity']=='impEmails'){
-            $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
+
+        if($system->set_dbname_full($dbname)){
+
+            $system->initPathConstants($dbname);
+            $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
+            $res = true;
+            
+            if(@$_REQUEST['activity']=='impEmails'){
+                $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
+                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
+            }
         }
-        
-        
+
     } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
         if($system->verify_credentials($dbname)>0){
@@ -97,12 +99,12 @@
     
         if($system->set_dbname_full($dbname)){
             
-                $system->initPathConstants($dbname);
-                $system->user_LogActivity('Logout');
+            $system->initPathConstants($dbname);
+            $system->user_LogActivity('Logout');
 
-                if($system->doLogout()){
-                    $res = true;
-                }
+            if($system->doLogout()){
+                $res = true;
+            }
         }
         
     }else if($action == 'check_for_alpha'){ // check if an alpha version is available
@@ -400,6 +402,20 @@
               
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
+              }else if(intval($source)>0){
+
+                  $source = intval($source);
+                  if($source==1){
+                      $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
+                  }else if($source==2){
+                      $lib_path = '/srv/BACKUP';
+                  }else if($source==3){
+                      $lib_path = '/srv/BACKUP/ARCHIVE';
+                  }else if($source==4){
+                      $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
+                  }
+
+                  $lib_path = array($lib_path);
               }else{
                   //default 64px
                   $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
@@ -546,7 +562,7 @@
                     $sp = $_REQUEST['saml_entity'];
                     
                     //check saml session
-                    require_once dirname(__FILE__).'/../utilities/utils_saml.php';
+                    require_once dirname(__FILE__).'/../utilities/uSaml.php';
                     
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     
@@ -563,6 +579,8 @@
                     $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
+
+                    $system->user_LogActivity('Login');
                 }
 
             } else if ($action=="reset_password") {
@@ -671,7 +689,7 @@
                 
             }else if($action == 'get_url_content_type'){
                 
-                $url = @$_REQUEST['url'];
+                $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
                 

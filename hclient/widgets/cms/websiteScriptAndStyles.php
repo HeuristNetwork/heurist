@@ -11,7 +11,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -726,7 +726,7 @@ function assignPageTitle(pageid){
     
     if(!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_NAME])){
         pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);    
-        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span'); //<br>
     }
     
     var is_show_pagetitle = (is_show_pagetitle_main || 
@@ -991,8 +991,9 @@ function afterPageLoad(document, pageid, eventdata){
                 }
                 
             });
-        
-    
+
+    // Log interaction
+    window.hWin.HAPI4.SystemMgr.user_log('VisitPage', pageid);
 }
 
 //
@@ -1121,8 +1122,7 @@ function initLinksAndImages($container, search_data){
                     }
             }else if(href.indexOf('./')===0){
                     //
-                    href = href.substring(2);
-                    rec_id = href;                                  
+                    rec_id = href.substring(2);
             }else if(!isNaN(parseInt(href)) && href>0){ //integer
                     // href="123" - it can be record or page id
                     rec_id = href;
@@ -1328,11 +1328,10 @@ function initHeaderTitle(){
 
     if(website_title){
         
-        var pagetitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
+        var headertitle = window.hWin.HAPI4.getTranslation(website_title, current_language);
 
-        document.title = window.hWin.HEURIST4.util.stripTags(pagetitle);
-        
-        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'i,b,u,em,strong,sup,sub,small'); //<br>
+        document.title = window.hWin.HEURIST4.util.stripTags(headertitle);
+        headertitle = window.hWin.HEURIST4.util.stripTags(headertitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');
         
 
         var ele = $('#main-title');
@@ -1345,7 +1344,7 @@ function initHeaderTitle(){
             css_shadow = ' style="text-shadow: 3px 3px 5px black"';
         }
 
-        ele.empty().append(`<h2${css_shadow}>${pagetitle}</h2>`);
+        ele.empty().append(`<h2${css_shadow}>${headertitle}</h2>`);
             
         if(isFirstInit && ele.parent().is('#main-header')){
             ele.hide();

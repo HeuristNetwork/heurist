@@ -20,9 +20,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White   
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -64,9 +64,8 @@ $mysqli = $system->get_mysqli();
                 <br>&nbsp;<hr>
             </div>
 
-            <table role="none">
+            <table role="presentation">
                 <?php
-
                 function check($text) {
                     global $invalidChars;
                     foreach ($invalidChars as $charCode){

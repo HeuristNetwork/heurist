@@ -17,7 +17,7 @@
     * 
     * Various actions to check/correct data and db structure per all databases on server
     *
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
     * @version     3.1
@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
-exit; 
+//print 'disabled'; 
+//exit; 
 ini_set('max_execution_time', '0');
 
  
@@ -57,12 +57,12 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     exit;
 }
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
+<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
+            <p>This report shows </p>
 */
 ?>            
 
          
-<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
-            <p>This report shows </p>
 <?php            
 
 
@@ -133,9 +133,11 @@ if(false){
 }else if(false){
     __convertTustep();
 }
+    __dropBkpDateIndex();    
+    __findRDF();
 */
     
-    __findRDF();
+__getBelegContext();
 
 //
 // Report database versions
@@ -186,7 +188,7 @@ function __updateDatabase(){
 
         mysql__usedatabase($mysqli, $db_name);
         
-        $db_name = htmlspecialchars($db_name)
+        $db_name = htmlspecialchars($db_name);
         
         if(hasTable($mysqli, 'defRecStructure')){
             
@@ -290,9 +292,8 @@ function findMissedTermLinks() {
             if(!hasColumn($mysqli, 'defTerms', 'trm_VocabularyGroupID', $db_name)){
                 print $db_name.'<br>';
             }
-            */
             continue;
-                    
+            */
             
             //is defTermLinks exist
             if(!hasTable($mysqli, 'defTermsLinks', $db_name)){
@@ -536,8 +537,6 @@ function __findLongTermLabels(){
 
         mysql__usedatabase($mysqli, $db_name);
         
-        if(true){
-            
             $list = mysql__select_assoc($mysqli, 'select trm_ID, trm_Label, CHAR_LENGTH(trm_Label) as chars, length(trm_Label) as len '
             .' from defTerms where length(trm_Label)>255');
 
@@ -550,7 +549,6 @@ function __findLongTermLabels(){
                 }
                 
             }
-        }
     }
     print '[end report]';    
     
@@ -1042,12 +1040,10 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
     
     echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
     
-    return;
-
     
     if(!defined('HEURIST_FILESTORE_ROOT')) return;
 
-
+        /* DISABLED
     foreach ($databases as $idx=>$db_name){
 
         //mysql__usedatabase($mysqli, $db_name);
@@ -1157,7 +1153,8 @@ if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
         
         
 
-    }        
+    }  
+          */
 }
 
 
@@ -1479,6 +1476,15 @@ $html_to_hex = array(
 '&Hmacr;' =>  '&#x0048;&#x0304;'
 );
 
+$tustep_to_html = array(
+'&amp;' =>'#%#%#',
+'#;ou' =>'&#x016F;',
+'#;eo' =>'&#xE4CF;',
+'#;ev' =>'&#x011B;'
+);
+
+
+
 /* test
     $s = '<p>#.ö   &#163; > %/Y#;iv < &#x017F;  &longs; &Ouml;  &#x201E; &ldquo;  &#x201C; &rdquo; &#x0153; &oelig; &Hmacr;  &#x0048;&#x0304;   &wv;</p>';
 
@@ -1511,12 +1517,16 @@ $html_to_hex = array(
     
             $s = ''.$row[1];
 
+            $not_found = true;
+            
             //1. Convert TUSTEP to html entities
             foreach ($tustep_to_html as $tustep=>$entity) {
                 if(strpos($s,$tustep)!==false){
                     $s = str_replace($tustep, $entity, $s);
+                    $not_found = false;
                 }
             }
+            if($not_found) continue;
             
             //2. Decode HTML entities    
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
@@ -1545,7 +1555,7 @@ $html_to_hex = array(
             $m = str_replace('#%#%#', '&amp;', $m); //convert back
             
             //update in database
-            /*
+            /*  
             $update_stmt->bind_param('si', $m, $row[0]);
             $res33 = $update_stmt->execute();
             if(! $res33 )
@@ -1556,6 +1566,7 @@ $html_to_hex = array(
                 break;
             }
             */
+            
             
         }//while
         $res->close();
@@ -1580,7 +1591,7 @@ $html_to_hex = array(
 //
 //
 function __findRDF(){
-     global $system, $mysqli, $databases; 
+    global $system, $mysqli, $databases; 
 
     foreach ($databases as $idx=>$db_name){
     
@@ -1618,4 +1629,166 @@ function __findRDF(){
     }
     print '<br>END';
 }
+
+function __dropBkpDateIndex(){
+    
+    
+    global $system, $mysqli, $databases; 
+
+    foreach ($databases as $idx=>$db_name){
+    
+        if($db_name=='') continue;
+
+        $db_name = htmlspecialchars($db_name);        
+        
+        mysql__usedatabase($mysqli, $db_name);
+        
+        if(hasTable($mysqli, 'bkpDetailsDateIndex')){
+            $mysqli->query('DROP TABLE bkpDetailsDateIndex');
+            print $db_name.'<br>';
+        }
+    }
+    print '<br>END';                                                                           
+}
+
+function __findBelegSpan($context){
+    
+    $context_original = $context;
+
+    $dom = new DomDocument();
+    $dom->preserveWhiteSpace = false;
+    $dom->formatOutput = false;
+
+    //remove ident and formatting
+    $context = preg_replace("/[ \t]+/S", " ", $context);
+    $context = str_replace("\n <",'<',$context);
+    $context = str_replace("\n </",'</',$context);
+    
+    //remove indent spaces after new line before \n...<span
+    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    
+    //$context2 = $dom->documentElement->nodeValue;
+    
+    $finder = new DomXPath($dom);
+    //$classname='Beleg';
+    $nodes = $finder->query("//span[contains(concat(' ', normalize-space(@class), ' '), ' Beleg ')]");
+
+    foreach ($nodes as $idsx=>$node) 
+    {
+        $nvals[] = $dom->saveHTML($node);
+        //if(strpos($nval))
+        //echo '<xmp>'.$dom->saveHTML($node).'</xmp><br>';
+        //echo '<xmp>'.$node->nodeValue.'</xmp><br>';
+    }
+    
+    //if there no characters between spans they merge without space <span>a</span><span>dam</span> => adam
+    $res = '';
+    foreach ($nvals as $idx=>$nval)
+    {
+        //exclude internal spans
+        foreach ($nvals as $nval2)
+        {
+            $k = mb_strpos($nval2, $nval);
+            if($k>19){
+                continue 2;                
+            }
+        }
+        
+        //detect if between this and next node no other characrters
+        $space = '';
+        if($idx>0){
+            $pos2 = mb_strpos($context, $nval);
+            $pos1 = mb_strpos($context, $nvals[$idx-1])+mb_strlen($nvals[$idx-1]);
+            if($pos1<$pos2){
+                $str = mb_substr($context,$pos1,$pos2-$pos1);
+                $str = strip_tags($str);
+                
+                $str = preg_replace("/\s+/S", " ", $str);
+                if(mb_strlen($str)>0){
+                    if($str==' '){
+                        $space = ' ';
+                    }else{
+                        $space = ' […] ';
+                    }
+                }
+            }
+            /*
+            $pos2 = mb_strpos($context2, $nodes[$idx]->nodeValue);
+            $pos1 = mb_strpos($context, $nodes[$idx-1]->nodeValue)+mb_strlen($nodes[$idx-1]->nodeValue);
+            if($pos1<$pos2){
+                $space = ' ';
+            }
+            */
+        }    
+        
+        /* 
+        $str = $nodes[$idx]->nodeValue;
+        $str = $dom->saveHTML($nodes[$idx]);
+        print $str.'  '.mb_detect_encoding($str).'  '.
+                    mb_convert_encoding($str, "UTF-8").'<br>';
+        */
+        
+        //$res = $res.$space.$nval; 
+        $res = $res.$space.$nodes[$idx]->nodeValue;
+    }
+    
+    //print '<xmp>'.$context.'</xmp>';
+    //print $res.'<br><br>';
+    
+    print $res."\t";
+    print $context_original."\n";
+    
+}
+      
+// <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span>      
+      
+                                                                      
+function __getBelegContext(){
+     global $system, $mysqli; 
+
+//print '<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"></head><body>';
+     
+     header('Content-type: text/plain;charset=UTF-8');
+     
+     mysql__usedatabase($mysqli, 'HiFoS');
+     
+     //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
+     $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids')); // 'limit'=>10, 
+//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids')); // 'limit'=>10, 
+//     echo var_dump($res);
+     
+     $ids = @$res['data']['records'];
+     
+     if(is_array($ids) && count($ids)>0){
+         foreach($ids as $recID){
+             $rec = array('rec_ID'=>$recID);
+             recordSearchDetails($system, $rec, array(1094));
+             
+             $val = $rec['details'][1094];
+             $val = array_shift($val);
+             
+//$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';             
+/*
+$val = '<span class="Beleg">
+    <span style="mso-char-type: symbol; mso-symbol-font-family: Mediaevum;">
+      <span style="font-family: Mediaevum;">a
+      </span>
+    </span>
+  </span>
+  <span style="font-family: Times New Roman;">aaaa
+    <span class="Beleg">ů eine
+      <em style="mso-bidi-font-style: normal;">m
+      </em> male
+    </span> da |
+  </span>';
+*/
+             echo intval($recID)."\t";
+             __findBelegSpan($val);
+         }
+     }     
+     
+//print '</body></html>';     
+}
+
+
 ?>

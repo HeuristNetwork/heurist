@@ -5,8 +5,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -29,7 +29,7 @@ set_time_limit(0);
 header('Content-type: text/javascript');
 
 $_DEBUG_NOT_CREATE = false; //set to true to avoid db creation
-$_DEBUG_NOT_EMAIL = false; //set to true to avoid db creation
+$_DEBUG_NOT_EMAIL = false;  //set to true to avoid db creation
 
 $res = false;
 
@@ -137,35 +137,17 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         $database_name = $uName . trim(preg_replace('/[^a-zA-Z0-9_]/', "", $_REQUEST['dbname']));
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
         
-        if(strlen($database_name_full)>64){
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.htmlspecialchars($database_name_full).' is too long. Max 64 characters allowed');
-                print json_encode($system->getError());
-                exit;
-        }
-        $invalidDbName = System::dbname_check($database_name_full);
-        if ($invalidDbName) {
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database name '.htmlspecialchars($database_name_full)
-                        .' is invalid. Only letters, numbers and underscores (_) are allowed in the database name');
-                print json_encode($system->getError());
-                exit;
-        }
-        
-        
-        //verify that database with such name already exists
-        $dblist = mysql__select_list2($mysqli, 'show databases');
-        if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
-            //$mysqli->query('drop database '.$database_name_full);
-                $system->addError(HEURIST_ACTION_BLOCKED, 
-                        'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name');
-                print json_encode($system->getError());
-                exit;
+        //checks that database name is valid, correct length and unique
+        $error_msg = DbUtils::databaseValidateName($database_name_full, 1);
+        if ($error_msg!=null) {
+            $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+            print json_encode($system->getError());
+            exit;
         }
 
         //get path to registered db template and download coreDefinitions.txt
         $reg_url = @$_REQUEST['url_template'];  //NOT USED
-        $exemplar_db = @$_REQUEST['exemplar'];
+        $exemplar_db = @$_REQUEST['exemplar'];  //NOT USED
         $dataInsertionSQLFile = null;
         
         $warnings = array();
@@ -177,43 +159,38 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
         }else if(!$_DEBUG)  { //set to false to debug workflow without actual db creation
 
+            //it returns false or array of warnings
             $res = DbUtils::databaseCreateFull($database_name_full, $user_record);
 
             if(is_bool($res) && $res===false){
+                //to do send email
+                
                 print json_encode($system->getError());
                 exit;
             }else if(is_array($res) && count($res) > 0){
-            
+                /*                 
                 // Catch if db root directory or any sub directory couldn't be created    
                 $warnings = $res;
-                
-                mysql__drop_database($mysqli, $database_name_full);
-
+                //mysql__drop_database($mysqli, $database_name_full);
                 if(!$_DEBUG_NOT_EMAIL){
-                    if(is_array($warnings) && count($warnings) == 2 && $warnings['revert']){
-
-                        sendEmail(HEURIST_MAIL_TO_BUG, 'Unable to create database root folder', $warnings['message']);
-                        if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'Unable to create database root folder', $warnings['message']);
-                        }
+                    
+                    if(count($warnings) == 1 && strpos($warnings,'required database root folder')>0){  ///!!!!!!!! 
+                        $msg_title = 'Unable to create database root folder';
+                        $msg_body  = $warnings[0];
                     }else{
-                        
-                        $sMsg = "Unable to create the sub directories within the database root directory,\nDatabase name: " 
-                                . $database_name    
-                                . ",\nServer url: " . HEURIST_BASE_URL . ",\nWarnings: " . implode(",\n", $warnings);
-                        $sTitle = 'Unable to create database sub directories';
-
-                        sendEmail(HEURIST_MAIL_TO_BUG, $sTitle, $sMsg);
-                                
-                        if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
-                            sendEmail(HEURIST_MAIL_TO_ADMIN,  $sTitle, $sMsg);
-                        }
+                        $msg_title = 'Unable to create database sub directories';
+                        $msg_body  = implode(",\n", $warnings);
+                    }
+                    sendEmail(HEURIST_MAIL_TO_BUG, $msg_title, $msg_body);
+                    if(HEURIST_MAIL_TO_BUG != HEURIST_MAIL_TO_ADMIN){
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, $msg_title, $msg_body);
                     }
                 }
 
-                print json_encode(array('status'=>HEURIST_SYSTEM_CONFIG, 'message'=>'Sorry, we were not able to create all file directories required by the database.<br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.', 'sysmsg'=>'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience', 'error_title'=>null));
-
+                print json_encode(array('status'=>HEURIST_SYSTEM_CONFIG, 
+                    'message'=>'Sorry, we were not able to create all file directories required by the database.<br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.', 'sysmsg'=>'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience', 'error_title'=>null));
                 exit;
+                */
             }
 
 //@TODO                createElasticIndex($database_name_full); // All Elastic methods use the database prefix.
@@ -227,7 +204,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 sendEmail_NewDatabase($user_record, $database_name, null);
             }
             
-            //add sample data
+            //add sample data  - NOT USED 
             if($dataInsertionSQLFile!=null && file_exists($dataInsertionSQLFile)){
                 $res = mysql__script($database_name_full, $dataInsertionSQLFile);
                 if($res!==true){
@@ -235,79 +212,6 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 }
             }
 
-            //ADD DEFAULT LOOKUPS
-            $def_lookups = array();
-
-            $to_replace = array('DB_ID', 'DTY_ID', 'RTY_ID');
-            $dty_CCode = 'SELECT dty_ID FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE dty_OriginatingDBID = DB_ID AND dty_IDInOriginatingDB = DTY_ID AND rst_RecTypeID = RTY_ID';
-
-            // GeoNames
-            $rty_query = 'SELECT rty_ID FROM `'.$database_name_full.'`.defRecTypes WHERE rty_OriginatingDBID = 3 AND rty_IDInOriginatingDB = 1009';
-            $rty_id = mysql__select_value($mysqli, $rty_query);
-            if(!empty($rty_id)){
-
-                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
-                $fld_name = (empty($fld_name)) ? '' : $fld_name;
-
-                $fld_geo = mysql__select_value($mysqli, str_replace($to_replace, array('2', '28', $rty_id), $dty_CCode));
-                $fld_geo = (empty($fld_geo)) ? '' : $fld_geo;
-
-                $fld_cc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '26', $rty_id), $dty_CCode));
-                $fld_cc = (empty($fld_cc)) ? '' : $fld_cc;
-
-                $fld_fname = mysql__select_value($mysqli, str_replace($to_replace, array('3', '1068', $rty_id), $dty_CCode));
-                $fld_fname = (empty($fld_fname)) ? '' : $fld_fname;
-
-                $fld_id = mysql__select_value($mysqli, str_replace($to_replace, array('2', '581', $rty_id), $dty_CCode));
-                $fld_id = (empty($fld_id)) ? '' : $fld_id;
-
-                $key = 'geoName_' . $rty_id;
-                $def_lookups[$key] = array('service' => 'geoName', 'rty_ID' => $rty_id, 'label' => 'GeoName', 'dialog' => 'lookupGN', 'fields' => null);
-                $def_lookups[$key]['fields'] = array('name' => $fld_name, 'lng' => $fld_geo, 'lat' => $fld_geo, 'countryCode' => $fld_cc, 'adminCode1' => "", 'fclName' => $fld_fname, 'fcodeName' => "", 'geonameId' => $fld_id, 'population' => "");
-            }
-
-            // Nakala
-            $rty_query = 'SELECT rty_ID FROM `'. $database_name_full .'`.defRecTypes WHERE rty_OriginatingDBID = 2 AND rty_IDInOriginatingDB = 5';
-            $rty_id = mysql__select_value($mysqli, $rty_query);
-            if(!empty($rty_id)){
-
-                $fld_url = mysql__select_value($mysqli, str_replace($to_replace, array('2', '38', $rty_id), $dty_CCode));
-                $fld_url = (empty($fld_url)) ? '' : $fld_url;
-
-                $fld_title = mysql__select_value($mysqli, str_replace($to_replace, array('2', '1', $rty_id), $dty_CCode));
-                $fld_title = (empty($fld_title)) ? '' : $fld_title;
-
-                $fld_aut = mysql__select_value($mysqli, str_replace($to_replace, array('2', '15', $rty_id), $dty_CCode));
-                $fld_aut = (empty($fld_aut)) ? '' : $fld_aut;
-
-                $fld_date = mysql__select_value($mysqli, str_replace($to_replace, array('2', '10', $rty_id), $dty_CCode));
-                $fld_date = (empty($fld_date)) ? '' : $fld_date;
-
-                $fld_lic = mysql__select_value($mysqli, str_replace($to_replace, array('1144', '318', $rty_id), $dty_CCode));
-                $fld_lic = (empty($fld_lic)) ? '' : $fld_lic;
-
-                $fld_type = mysql__select_value($mysqli, str_replace($to_replace, array('2', '41', $rty_id), $dty_CCode));
-                $fld_type = (empty($fld_type)) ? '' : $fld_type;
-
-                $fld_desc = mysql__select_value($mysqli, str_replace($to_replace, array('2', '3', $rty_id), $dty_CCode));
-                $fld_desc = (empty($fld_desc)) ? '' : $fld_desc;
-
-                $fld_name = mysql__select_value($mysqli, str_replace($to_replace, array('2', '62', $rty_id), $dty_CCode));
-                $fld_name = (empty($fld_name)) ? '' : $fld_name;
-
-                $key = 'nakala_' . $rty_id;
-                $def_lookups[$key] = array('service' => 'nakala', 'rty_ID' => $rty_id, 'label' => 'Nakala Lookup', 'dialog' => 'lookupNakala', 'fields' => null);
-                $def_lookups[$key]['fields'] = array('url' => $fld_url, 'title' => $fld_title, 'author' => $fld_aut, 'date' => $fld_date, 'license' => $fld_lic, 'mime_type' => $fld_type, 'abstract' => $fld_desc, 'rec_url' => '', 'filename' => $fld_name);
-            }
-
-            if(!empty($def_lookups)){
-
-                $lookup_str = json_encode($def_lookups);
-                $upd_query = "UPDATE `$database_name_full`.sysIdentification SET sys_ExternalReferenceLookups = ? WHERE sys_ID = 1";
-                mysql__exec_param_query($mysqli, $upd_query, array('s', $lookup_str));
-            }else{
-                //$warnings.push('Unable to setup default lookup services.');
-            }
         }
 
         

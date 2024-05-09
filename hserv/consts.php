@@ -9,7 +9,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -41,7 +41,7 @@ define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
 define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index and template databases url
 define('HEURIST_INDEX_DBREC', '1-22'); //concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
-define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
+define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index'); 
 define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
 
 if (@$httpProxy != '') {
@@ -352,6 +352,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_ALTERNATE_NAME' => array(3, 1009),
+    'DT_TIMELINE_FIELDS' => array(2, 1105),
     // Map document
     'DT_MAP_LAYER' => array(3, 1081),
     'DT_MAP_BOOKMARK' => array(3, 1082),

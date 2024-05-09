@@ -1,0 +1,68 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;width:530px;font-size:0.95em">
+    <div class="heurist-helper1" style="margin-top:50px">       
+    
+        This function restores a database from a safeguard file in Zip format created either by deletion of a database, 
+        by nightly backup/archiving functions, or by requesting download of an safeguard file 
+        through Publish > Safeguard file. 
+        <br><br>
+        If restoring from a file created on another server, we recommend uploading it to  …/HEURIST_FILESTORE/DBS_TO_RESTORE using sftp. 
+        Older archives (pre 2024) in tar.bz2 will need to be unzipped and loaded manually via the Unix command line.
+        <br><br>
+        After successful completion you will be required to login into the restored database.    
+        
+        
+        <br><br>
+            Select source to browse for database archive<br>
+            <label>
+                <input type="radio" value="1" name="selArchiveFolder" checked/>
+                Deleted database
+            </label>&nbsp;&nbsp;
+            <label>
+                <input type="radio" value="4" name="selArchiveFolder"/>
+                Database to restore
+            </label>
+            <button id="btnSelectZip">Browse for Database Zip</button>
+        
+    </div>
+
+    <div class="entry-box">
+
+        <div id="divSelectedZip" style="display:none;">
+           Archive: <span id="selectedZip" style="font-weight:bold"></span>
+        </div>
+
+        <h3>Enter a name for database</h3>
+        
+        <div>
+            hdb_<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
+                    maxlength="64" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+
+            <button class="ui-button-action" id="btnCreateDb">Restore Database</button>
+        </div>
+        
+    </div>
+    
+    <div class="heurist-helper1">                
+        Do not use punctuation except underscore. Names are case sensitive.<br><br> 
+    </div>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+                <li>Validation database name and archive</li>
+                <li>Database folders creation</li>
+                <li>Unpacking archive and copying data</li>
+                <li>Database creation and import from sql dumpfile</li>
+            </ol>
+        </div>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">Database  [ <span id="newdbname"></span>  ] has been restored from archive</h4>
+    
+    <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
+    <div style="padding-top:20px">Log into the database with the following link:</div>
+    <div style="padding-top:20px"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
+        title="" target="blank"></a></b></div>
+</div>

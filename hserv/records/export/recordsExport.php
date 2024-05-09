@@ -15,8 +15,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -103,6 +103,7 @@ public static function setSession($system){
 //
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //        geofields  - additional filter - get geodata from specified fields only (in facetsearch format rt:dt:rt:dt )
+//        timefields - additional filter - get datetime from specified fields only
 //        suppress_linked_places - do not retriev geodata from linked places 
 //        separate - do not create GeometryCollection for heurist record
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
@@ -167,6 +168,9 @@ public static function output($data, $params){
             'select rst_DetailTypeID, rst_DefaultValue from defRecStructure where rst_RecTypeID='.RT_MAP_DOCUMENT
             .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
     }
+    
+    $find_timefields = prepareIds(@$params['timefields']);
+    if(count($find_timefields)==0) $find_timefields = null;
     
     $find_geo_by_pointer_rty = false;
     $geojson_ids = array(); //simplify array('all'=>array());
@@ -708,6 +712,7 @@ IIIF;
                 $find_by_geofields, 
                 $find_geo_by_pointer_rty,
                 $search_all_geofields?null:$find_geo_by_pointer_dty,
+                $find_timefields,
                 @$params['leaflet'] && @$params['separate']); //separate multi geo values per record as separate entries
                 
             if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in the separate timeline array
@@ -1416,6 +1421,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 $find_by_geofields=null, //search only specified geo fields (in main or linked records)
                 $find_geo_by_pointer_rty=false, 
                 $find_geo_by_pointer_dty=null, 
+                $find_timefields=null,
                 $separate_geo_by_dty){
 
     if(!($detail_mode==0 || $detail_mode==1 || $detail_mode==2)){
@@ -1502,18 +1508,22 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 }
             }else{
                 if($field_type=='date' || $field_type=='year'){
-                    if($dty_ID==DT_START_DATE){
-                        $date_start = $value;
-                    }else if($dty_ID==DT_END_DATE){
-                        $date_end = $value;
-                    }else if($value!=null){
-                        //parse temporal
-                        $ta = new Temporal($value);
-                        $ta = $ta->getTimespan(true);
-                        if($ta!=null){
-                            $ta[] = $dty_ID;
-                            $timevalues[] = $ta;  //temporal json array for geojson
-                            $timevalues_dty[] = $dty_ID;
+                    
+                    if($find_timefields==null || in_array($dty_ID, $find_timefields)){
+                    
+                        if($dty_ID==DT_START_DATE){
+                            $date_start = $value;
+                        }else if($dty_ID==DT_END_DATE){
+                            $date_end = $value;
+                        }else if($value!=null){
+                            //parse temporal
+                            $ta = new Temporal($value);
+                            $ta = $ta->getTimespan(true);
+                            if($ta!=null){
+                                $ta[] = $dty_ID;
+                                $timevalues[] = $ta;  //temporal json array for geojson
+                                $timevalues_dty[] = $dty_ID;
+                            }
                         }
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){

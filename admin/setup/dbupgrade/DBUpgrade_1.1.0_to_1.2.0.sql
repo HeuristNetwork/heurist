@@ -15,8 +15,8 @@
 /**
 * DBUpgrade_1.x.x_to_1.x.x.sql: SQL file to update Heurist database format between indicated versions
 *
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2020 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.5

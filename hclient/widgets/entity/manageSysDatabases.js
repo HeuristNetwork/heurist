@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -201,7 +201,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     filterRecordList: function(event, request){
         if(this.options.except_current==true){
             var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            //except current
             subset = subset.getSubSetByRequest({'sys_Database':'!=hdb_'+window.hWin.HAPI4.database}, this.options.entity.fields);
+            //update
             this.recordList.resultList('updateResultSet', subset, request);   
         }else{
             this._super(event, request); 

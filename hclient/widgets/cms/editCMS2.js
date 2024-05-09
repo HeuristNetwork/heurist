@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -648,7 +648,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
             ],      
 
-            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customHRtag | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help' ],  
+            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristMedia link | align | bullist numlist outdent indent | table | help' ],  
 
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
@@ -669,6 +669,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
             setup:function(editor) {
 
+                // ----- Event handles -----
                 editor.on('change', function(e) {
                     if(tinymce.activeEditor && tinymce.activeEditor.targetElm){
                         var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
@@ -705,6 +706,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         let html = '<span class="tox-tbtn__select-label">URL</span>';
                         $link_btn.append(html);
                     }
+
+                    $toolbar.find('.tox-split-button[title="Background color"]').attr('title', 'Highlight text');
                 });
                     
                 editor.on('focus', function (e) {
@@ -729,6 +732,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     $(editor.bodyElement).css('padding-left', ''); // remove space
                 });
 
+                // ----- Custom buttons -----
+                // Insert Heurist media
                 editor.ui.registry.addButton('customHeuristMedia', {
                     icon: 'image',
                     text: 'Add Media',
@@ -736,10 +741,21 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         __addHeuristMedia();
                     }
                 });
+                // Insert horizontal rule
                 editor.ui.registry.addButton('customHRtag', {
                     text: '&lt;hr&gt;',
                     onAction: function (_) {  //since v5 onAction in v4 onclick
                         tinymce.activeEditor.insertContent( '<hr>' );
+                    }
+                });
+                // Clear text formatting - to replace the original icon
+                editor.ui.registry.addIcon('clear-formatting', `<img style="padding-left: 5px;" src="${window.hWin.HAPI4.baseURL}hclient/assets/clear_formatting.svg" />`)
+                editor.ui.registry.addButton('customClear', {
+                    text: '',
+                    icon: 'clear-formatting',
+                    tooltip: 'Clear formatting',
+                    onAction: function (_) {
+                        tinymce.activeEditor.execCommand('RemoveFormat');
                     }
                 });
             },
@@ -766,12 +782,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                     tinymce.activeEditor.execCommand('mceInsertLink', false, href);
 
-                    let $link = $(tinymce.activeEditor.selection.getNode()); console.log($link);
+                    let $link = $(tinymce.activeEditor.selection.getNode());
                     if(!$link.is('a')){
-                        $link = $link.find(`a[href="${href}"]`); console.log($link);
+                        $link = $link.find(`a[href="${href}"]`);
                     }
                     if($link.length == 0){
-                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`); console.log($link);
+                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
                     }
 
                     $link.attr({

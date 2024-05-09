@@ -23,7 +23,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -103,7 +103,7 @@ use Shapefile\ShapefileReader;
     }
     $isZipArchive = false;
     
-    $record = array("rec_ID"=>$params['recID']);
+    $record = array("rec_ID"=>intval($params['recID']));
     recordSearchDetails($system, $record, $fields);
     
     if (@$record['details'] &&

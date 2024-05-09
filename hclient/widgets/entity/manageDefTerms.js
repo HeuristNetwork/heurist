@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -90,8 +90,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(this.options.isFrontUI &&
                 this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
                 window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', 'opacity':1});                   
-                /*$('<div>Loading Content...</div>').addClass('coverall-div').css({'zIndex':60000, 
-                    'background-color':'#fff', opacity:1}).appendTo(this.element);*/
             }
 
         }
@@ -699,11 +697,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let $show_all = $('<div style="display:inline-block;padding:0.2em" id="div_show_already_in_db">'
                 + '<div class="header4" style="display: inline-block;text-align:right;">'
-                    + '<label for="input_search" accesskey="F" class="slocale">All Find</label>'
+                    + '<label for="input_search" class="slocale">All Find</label>'
                 + '</div>'
                 + '<input id="input_search" class="text ui-widget-content ui-corner-all" slocale-title="Find by name, ID or concept code" style="width: 250px; margin-right:0.2em"/>'
 
-                + '<label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show All&nbsp;'
+                + '<label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" >Show All&nbsp;'
                 + '<input id="chb_show_already_in_db" class="text ui-widget-content ui-corner-all" style="margin-right:0.2em" type="checkbox"/></label>'
             + '</div>');
 

@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -78,7 +78,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
         }
 
-
+        current_cfg = window.hWin.HEURIST4.util.isJSON(current_cfg);
 
     }
     
@@ -87,6 +87,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
     //
     function _initControls(){
         _default_values = {};
+
         $.each($dlg.find('input'), function(idx, item){
             item = $(item);
             _default_values[item.attr('name')] = item.val();
@@ -94,10 +95,9 @@ function imgFilter( current_cfg, main_callback, $container=null ){
             $(item).on({change:function(e){
                 $(e.target).prev().text( $(e.target).val() );
             }});
-            
-            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')]))
-            {
-                var val = parseInt(current_cfg[item.attr('name')]);
+
+            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')])){
+                var val = parseFloat(current_cfg[item.attr('name')]);
                 item.val( val ).change();    
             }
             

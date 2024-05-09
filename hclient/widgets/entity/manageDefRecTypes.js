@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -1305,10 +1305,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     mergeIconThumbnailFields: function(){
         // fields
         var $icon = this._editing.getFieldByName('rty_Icon');
-        var $thumb = this._editing.getFieldByName('rty_Thumb').hide();
-
+        var $thumb = this._editing.getFieldByName('rty_Thumb');
+        
+        if(!$thumb || !$icon){
+            return; //not yet loaded
+        }
+        $thumb.hide();
         var thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
-
+        
         // Alter icon field
         $icon.css('width', '');
 

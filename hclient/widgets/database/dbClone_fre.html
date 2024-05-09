@@ -1,0 +1,76 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;width:540px;font-size:0.95em">
+    <div class="heurist-helper1" style="margin-top:50px">       
+        This function simply copies the current database <b><span class="dbname"></span></b> to a new one with no changes.
+        The new database is identical to the old in all respects including users, access and attachments
+        (beware of making many copies of databases containing many large files, as all uploaded files are copied).
+        The target database is unregistered with the Heurist central index even if the source database is registered.    
+        
+        
+        <p>
+            <label>No data (copy structure definitions only):&nbsp;<input type="checkbox" id="nodata" value="1"></label>
+        </p>
+    </div>
+    
+    
+    <div id="div_need_password" class="heurist-helper1" style="display:none">
+
+        <p style="color:red">
+            Because this database contains new structural elements, you must register it before you can clone it.
+        </p>
+        
+        <p>     
+            This database contains new definitions: <span id="new_defs_warning"></span> which are local to the database.<br>
+            Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
+            This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
+        </p>         
+        
+        <label class="ui-heurist-title" style="display:inline-block" for="pwd">Sysadmin bypass</label>
+        <div style="margin-top: 0px;display:inline-block;">
+            <input type="password" maxlength="64" size="25" id="pwd" name="pwd">
+        </div>
+        <div class="heurist-helper2">
+            The password set by your system administrator to allow clone not registered database with new defintions
+        </div>
+    </div>
+    
+
+    <div class="entry-box">
+        <h3>Enter a name for the cloned database:</h3>
+        
+        <div>
+            hdb_<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
+                    maxlength="64" size="40" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+
+            <button class="ui-button-action" id="btnCreateDb">Clone <span class="dbname"></span></button>
+        </div>
+        
+    </div>
+    
+    <div class="heurist-helper1">                
+        Do not use punctuation except underscore. Names are case sensitive.
+    </div>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+                <li>Database name and template validation</li>
+                <li>Database folders creation and copy</li>
+                <li>Database creation</li>
+                <li>Copying data</li>
+                <li>Addition of Referential Constraints And Triggers</li>
+                <li>Update paths for uploaded files</li>
+            </ol>
+        </div>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">New database  [ <span id="newdbname"></span>  ]  has been created</h4>
+    
+    <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
+    <div style="padding-top:20px">Please access your new database with the following link:</div>
+    <div style="padding-top:20px"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
+        title="" target="blank"></a></b></div>
+    <div>Admin username and password are same as the account you are currently logged in as</div>
+
+</div>

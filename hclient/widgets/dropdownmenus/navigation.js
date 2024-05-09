@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -27,7 +27,7 @@ $.widget( "heurist.navigation", {
        target: 'inline', // inline (#page-content) or poup or target element id
        use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
-       selectable_if_submenu: false, //if item has submenu it is not selectable by default
+       selectable_if_submenu: true, //if item has submenu it is selectable by default
        aftermenuselect: null,
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
@@ -218,7 +218,7 @@ $.widget( "heurist.navigation", {
             let record = resdata.getById(menuitems[0]);
             let selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
             if(selectable!==null){
-                 this.options.selectable_if_submenu = (selectable!==TERM_NO && selectable!==TERM_NO_old);
+                this.options.selectable_if_submenu = (selectable!==TERM_NO && selectable!==TERM_NO_old);
             }
         }
 
@@ -312,15 +312,8 @@ $.widget( "heurist.navigation", {
                 
                 showTitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
                 
-                var selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
-                if(selectable==null){
-                    selectable = this.options.selectable_if_submenu; //from home page
-                }else{
-                    selectable = (selectable!==TERM_NO && selectable!==TERM_NO_old);    
-                }
-                
-                var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
-                
+                let hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION));
+
                 if(!(this.first_not_empty_page_id>0) && hasContent){
                     this.first_not_empty_page_id = page_id;
                 }
@@ -374,9 +367,6 @@ $.widget( "heurist.navigation", {
                             +(iconOnly?'width:20px;':'')
                             +'" data-pageid="'+ page_id + '" data-parentid="'+ parent_id +'"'
                             + (pageTarget?' data-target="' + pageTarget +'"':'')
-                            + (showTitle?' data-showtitle="1"':'')
-                            + (selectable?' data-checksubmenu="1"':'')
-                            + (hasContent?' data-hascontent="1"':'')
                             + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
 
                             + (!nameOnly && menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
@@ -467,7 +457,8 @@ $.widget( "heurist.navigation", {
             +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <div style="margin: 10px 0px">'
             +(s.join('<br>'))
             +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)'
-            +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>');
+            +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>'
+            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true});
             
             /*+'<p>How to fix:<ul><li>Open in record editor</li>'
             +'<li>Find parent menu(s) in "Linked From" section</li>'
@@ -597,19 +588,34 @@ $.widget( "heurist.navigation", {
 
         var data = {
             page_id: $target.attr('data-pageid'), 
-            page_target: $target.attr('data-target'),
-            page_showtitle: ($target.attr('data-showtitle')==1),
-            hasContent: ($target.attr('data-hascontent')==1)
+            page_target: $target.attr('data-target')
         };
 
         //hide submenu
         $target.parents('.ui-menu[data-level!=0]').hide();
 
-        let check_selectable = $target.attr('data-checksubmenu');
-        if(check_selectable!=1 && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
+        const record = this.menuData.getRecord(data.page_id);
+        const DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+              DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
+              TERM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'],
+              TERM_NO_old = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'];
+
+        // show page title
+        let showTitle = this.menuData.fld(record, DT_CMS_PAGETITLE);
+        data.page_showtitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
+        // page has content
+        data.hasContent = !window.hWin.HEURIST4.util.isempty(this.menuData.fld(record, DT_EXTENDED_DESCRIPTION));
+
+        // menu is selectable
+        let is_selectable = this.menuData.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE']);
+        is_selectable = data.hasContent && 
+                        is_selectable !== TERM_NO && is_selectable !== TERM_NO_old && 
+                        this.options.selectable_if_submenu;
+
+        if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
-        
+
         if(!data.hasContent && !$.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
             

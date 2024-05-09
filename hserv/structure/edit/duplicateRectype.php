@@ -10,7 +10,7 @@
 /**
 * Duplicate an existing Record type, creating a new copy with the same description and fields but a different internal code
 *
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     4

@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -408,7 +408,7 @@ class DbDefTerms extends DbEntityBase
     // Validates values before save and sets default values
     //    
     protected function prepareRecords(){
-    
+
         $ret = parent::prepareRecords();
 
         //add specific field values
@@ -416,43 +416,49 @@ class DbDefTerms extends DbEntityBase
 
             //validate duplication on the same level
             $mysqli = $this->system->get_mysqli();
-            
+
             if(@$this->records[$idx]['trm_Label']!=null && $this->records[$idx]['trm_Label']!=''){
-                
+
                 $s2 = null;
-            
+
+                // Strip trailing + double spacing
+                $this->records[$idx]['trm_Label'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['trm_Label']);
+                $this->records[$idx]['trm_Label'] = super_trim($this->records[$idx]['trm_Label']);
+
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
-                    
-                    
+
                     if(isset($this->data['trm_parentID'])){
 						$parent_id = $this->data['trm_parentID']; // Replace with alternative parent, if supplied
                     }else{
                         $parent_id = $this->records[$idx]['trm_ParentTermID']; //getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);
                     }
-					
+
                     if(@$this->records[$idx]['trm_Label'] || @$this->records[$idx]['trm_Code']){
-                    
+
                         $labels = $this->getLabelsAndCodes( $parent_id, false );
-                        
+
                         if(is_array($labels)){
-                                foreach($labels as $id=>$vals){
-                                    if($id!=@$this->records[$idx]['trm_ID'])
+
+                            foreach($labels as $id=>$vals){
+
+                                if($id!=@$this->records[$idx]['trm_ID'])
+                                {
+
+                                    if(@$this->records[$idx]['trm_Label'] && 
+                                        strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
+                                        $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                                        break;
+                                    }else if (@$this->records[$idx]['trm_Code'] && 
+                                        strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
                                     {
-                                        if(@$this->records[$idx]['trm_Label'] && 
-                                            strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
-                                            $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                                            break;
-                                        }else if (@$this->records[$idx]['trm_Code'] && 
-                                            strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
-                                        {
-                                            $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
-                                            break;
-                                        }
+                                        $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
+                                        break;
                                     }
                                 }
+                            }
                         }
                     }
-                    
+
                     $s1 = 'Term';
                     $s3 = ' in the vocabulary';
                 }else{
@@ -1076,7 +1082,7 @@ class DbDefTerms extends DbEntityBase
         if(!$this->system->is_admin()){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
+                    'You are not admin and can\'t edit vocabulary and terms. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
         }
         
@@ -1195,7 +1201,7 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
-    //
+    //    
     //
     private function findRecordWhereTermInUse($trm_ID, $check_dty_IDs){
 

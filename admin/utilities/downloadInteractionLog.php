@@ -50,28 +50,59 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         exit;
     }
 
+    $action_filter = array();
+    $is_all_actions = false;
+    $fileprefix = "interaction";
+
+    switch ($_REQUEST['actionType']) {
+        case 'recuse': // record use [Edit Record, View Record, Custom Report]
+            array_push($action_filter, 'editRec', 'viewRec', 'custRep');
+            $filename = "record";
+            break;
+
+        case 'website': // end user visiting a CMS webpage/homepage
+            array_push($action_filter, 'VisitPage', 'cmsNew', 'cmsEdit');
+            $fileprefix = "website";
+            break;
+
+        case 'accounts': // account actions [Log in, Log off, Reset Password]
+            array_push($action_filter, 'Login', 'Logout', 'ResetPassword', 'profPrefs', 'profTags', 'profReminders', 'profUserinfo', 'profWorkgroups', 'profUsers', 'profImportUser');
+            $fileprefix = "account";
+            break;
+
+        case 'database': // database actions
+            array_push($action_filter, 'dbBrowse', 'dbNew', 'dbClone', 
+                        'dbRename', 'dbRestore', 'dbProperties', 
+                        'dbRegister', 'dbClear', 'dbArchive', 'dbArchiveRepository', 
+                        'stRebuildTitles', 'stRebuildFields', 'profFiles');
+
+            $fileprefix = "database";
+            break;
+
+        case 'import':  // importing actions
+            array_push($action_filter, 'impDelimed', 'syncZotero', 'impKML', 'impRecords', 'impSt');
+            $fileprefix = "import";
+            break;
+
+        case 'export':  // exporting actions
+            array_push($action_filter, 'expCSV', 'expHML', 'expJSON', 'expRDF', 'expGeoJSON', 'expKML', 'expGEPHI', 'expIIIF', 'expXMLHuNI');
+            $fileprefix = "export";
+            break;
+
+        default: // all actions
+            $is_all_actions = true;
+            break;
+    }
+
     // Construct initial headers
-    $filename = "user_log_". $_REQUEST['db'] .".csv";
+    $filename = "{$fileprefix}_logs_{$_REQUEST['db']}.csv";
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="' . $filename . '";');
     header('Pragma: no-cache');
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add column headers
-    fputcsv($csv_fd, array("User", "Function", "Date", "Record ID", "Resultset Size"));
-
-    $action_filter = array();
-    $is_all_actions = false;
-
-    switch ($_REQUEST['actionType']) {
-        case 'recuse': // record use [Edit Record, View Record, Custom Report]
-            array_push($action_filter, 'editRec', 'viewRec', 'custRep');
-            break;
-        
-        default: // all actions
-            $is_all_actions = true;
-            break;
-    }
+    fputcsv($csv_fd, array("User", "Function", "Date", "Operating System", "Browser", "IP Address", "Record ID", "Resultset Size"));
 
     // Prepare user filtering by workgroups
     $users = null;
@@ -92,14 +123,14 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         }
     }
 
-    $processed_ids = array(array(), array()); // 2d array, [0] => found allowed records [1] => found filtered out records
-
     //
     // [0] => User ID
     // [1] => Action
     // [2] => Timestamp
-    // [3] => Record ID(s) ('|' separated, can also be "Record_Count recs: id1,id2,...")
-    // [4] => Record Count
+    // [3] => Operating System
+    // [4] => Web Browser
+    // [5] => Record ID(s) ('|' separated, can also be "Record_Count recs: id1,id2,...")
+    // [6] => Record Count
     //
     while(!feof($log_fd)){
 
@@ -121,13 +152,19 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
             $line_chunks[4] = $part_chunks[0];
             $line_chunks[3] = implode('|', $recids);
-        }else if(count($line_chunks) > 5){ // currently un-supported entry, skip
+        }else if(count($line_chunks) > 7){ // currently un-supported entry, skip
             continue;
         }
 
         // Apply user filter
         if($users != null && !in_array($line_chunks[0], $users)){
             continue;
+        }
+
+        if(empty($line_chunks[3]) || is_numeric($line_chunks[3]) ||
+            $line_chunks[3] == 'Array' || preg_match("/\d\s\d/", $line_chunks[3])){ // older format
+
+            array_splice($line_chunks, 3, 0, ['Unknown', 'Unknown', 'Unknown']);
         }
 
         // Apply date filtering
@@ -159,8 +196,8 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             }
         }
 
-        if(count($line_chunks) < 5){
-            $line_chunks = array_pad($line_chunks, 5, '');
+        if(count($line_chunks) < 7){
+            $line_chunks = array_pad($line_chunks, 7, '');
         }
 
         // Add row
@@ -260,8 +297,13 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                 <label for="completeLog"><input type="radio" name="actionType" id="completeLog" value="all" checked="true"> Download entire log</label>
             </div>
 
-    		<div style="margin-top: 10px;">
-                <label for="recUsage"><input type="radio" name="actionType" id="recUsage" value="recuse"> Download record usage (when a record is viewed, edited, or used within a custom report)</label>
+            <div style="margin-top: 10px;">
+                <label for="recUsage"><input type="radio" name="actionType" id="recUsage" value="recuse"> Download record usage (when a record is viewed, edited, or used within a custom report)</label><br><br>
+                <label for="webUsage"><input type="radio" name="actionType" id="webUsage" value="website"> Download webpage usages (when users view a CMS Homepage or CMS webpage, when the pages were edited)</label><br><br>
+                <label for="accUsage"><input type="radio" name="actionType" id="accUsage" value="accounts"> Download account related actions (when accounts login, logout or request a password reset)</label><br><br>
+                <label for="dbUsage"><input type="radio" name="actionType" id="dbUsage" value="database"> Download database related actions (when renamed, cleared, archived, registered, etc...)</label><br><br>
+                <label for="impUsage"><input type="radio" name="actionType" id="impUsage" value="import"> Download importing related actions (when records are imported by CSV, HML, or JSON)</label><br><br>
+                <label for="expUsage"><input type="radio" name="actionType" id="expUsage" value="export"> Download exporting related actions (when records are exported in various formats)</label>
             </div>
             <!-- Add other actions -->
 

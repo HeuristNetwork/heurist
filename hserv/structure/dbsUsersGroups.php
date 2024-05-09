@@ -8,7 +8,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -83,8 +83,15 @@
     */
     function user_getByField($mysqli, $field, $value, $database=null){
 
+        if($database!=null){
+            list($database_full, $database ) = mysql__get_names($database);
+            $database_full = '`'.$database_full.'`.';
+        }else{
+            $database_full = '';
+        }
+        
         $user = null;
-        $query = 'select * from '.($database!=null?('`'.$database.'`.'):'')
+        $query = 'select * from '.$database_full
             .'sysUGrps where '.$field.' = ?';
             
         $res = mysql__select_param_query($mysqli, $query, array('s',$value));

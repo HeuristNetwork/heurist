@@ -12,9 +12,9 @@
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson@sydney.edu.au>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
 * @version     3.1.0
@@ -1242,7 +1242,7 @@ function print_details($bib) {
             //print_text_details($bib);
         }
         
-        $system->user_LogActivity('viewRec', $bib['rec_ID'], null, TRUE); // log action
+        $system->user_LogActivity('viewRec', $bib['rec_ID']); // log action
     }else{
         
         print 'Sorry, your group membership does not allow you to view the content of this record';

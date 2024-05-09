@@ -9,7 +9,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -237,6 +237,90 @@ class USystem {
             $val += 2.0 * (PHP_INT_MAX + 1);
         }
         return $val;
+    }
+
+    /**
+     * Return array of processed user agent details
+     * 
+     * @return array [os, browser]
+     */
+    public static function getUserAgent(){
+
+        $os = 'Unknown';
+        $browser = 'Unknown';
+
+        $ret = [
+            'os' => $os,
+            'browser' => $browser
+        ];
+        $ua_string = @$_SERVER['HTTP_USER_AGENT'];
+
+        if(empty($ua_string)){
+            return $ret;
+        }
+
+        // Get OS
+        if(preg_match("/Android|ADR/i", $ua_string)){
+            $os = 'Android';
+        }else if(preg_match("/CrOS/i", $ua_string)){
+            $os = 'Chrome OS';
+        }else if(preg_match("/Linux/i", $ua_string)){
+            $os = 'Linux';
+        }else if(preg_match("/Unix/i", $ua_string)){
+            $os = 'Unix';
+        }else if(preg_match("/Win/i", $ua_string)){
+            $os = 'Windows';
+            // Check for version number
+            preg_match("/Windows NT (\d+\.\d+)/i", $ua_string, $parts);
+            if(count($parts) > 1){
+                if($parts[1] == 10.0){ $os .= " 10/11"; }
+                else if($parts[1] >= 6.4){ $os .= " 10"; }
+                else if($parts[1] >= 6.2){ $os .= " 8"; }
+                else if($parts[1] >= 6.1){ $os .= " 7"; }
+            }
+        }else if(preg_match("/CPU (iPhone )?OS/i", $ua_string)){
+            $os = 'iOS';
+        }else if(preg_match("/Mac/i", $ua_string) || preg_match("/Darwin/i", $ua_string)){
+            $os = preg_match("/Darwin/i", $ua_string) ? 'Mac OS X' : 'macOS';
+        }
+        /*
+        else if(preg_match("/Googlebot/i", $ua_string)){
+            $os = 'Google bot';
+        }else if(preg_match("/Yahoo\! Slurp/i", $ua_string)){
+            $os = 'Yahoo bot';
+        }else if(preg_match("/bingbot/i", $ua_string)){
+            $os = 'Bing bot';
+        }
+        */
+
+        $ret['os'] = $os;
+
+        // Get browser
+        if(preg_match("/Firefox|FxiOS/i", $ua_string)){
+            $browser = preg_match("/FxiOS/", $ua_string) ? 'Firefox iOS' : 'Firefox';
+        }else if(preg_match("/Opera|OPR/i", $ua_string)){
+            $browser = 'Opera';
+        }else if(preg_match("/Edge|Edg|EdgA|EdgiOS/i", $ua_string)){
+            $browser = preg_match("/EdgA/", $ua_string) ? 'MS Edge Android' : 'MS Edge';
+            $browser = preg_match("/EdgiOS/", $ua_string) ? 'MS Edge iOS' : $browser;
+        }else if(preg_match("/Vivaldi/i", $ua_string)){
+            $browser = 'Vivaldi';
+        }else if(preg_match("/YaBrowser/i", $ua_string)){
+            $browser = 'Yandex';
+        }else if(preg_match("/Chrome|CriOS/i", $ua_string)){
+            $browser = preg_match("/CriOS/", $ua_string) ? 'Chrome iOS' : 'Chrome';
+        }else if(preg_match("/Safari/i", $ua_string)){
+            $browser = 'Safari';
+        }
+        /*
+        else if(preg_match("/MSIE|Trident/i", $ua_string)){
+            $browser = 'Internet Explorer';
+        }
+        */
+
+        $ret['browser'] = $browser;
+
+        return $ret;
     }
 }
 ?>

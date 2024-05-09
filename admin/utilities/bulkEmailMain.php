@@ -1065,10 +1065,10 @@ if(!$has_emails || empty($emails)) {
         <div style="font-family:Arial,Helvetica,sans-serif;">
             <h3>Heurist System Email</h3>
             
-            <label class="instruction">
+            <span class="instruction">
                 This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br><br>
                 The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br><br>
-            </label>
+            </span>
 
             <form id="emailOptions" action="bulkEmailMain.php" method="POST" target="_blank">
 
@@ -1105,7 +1105,7 @@ if(!$has_emails || empty($emails)) {
 
                     <span style="margin-left: 15px;">
                         <button type="button" id="btnApply">Apply</button>
-                        <label id="filterMsg" style="display: none;">Filtering Databases...</label>
+                        <span id="filterMsg" style="display: none;">Filtering Databases...</span>
                     </span>
 
                 </div>
@@ -1182,12 +1182,12 @@ if(!$has_emails || empty($emails)) {
 
                     <div id="authenContainer">
 
-                        Please enter the System Manager password to comfirm:&nbsp;
+                        Please enter the System Manager password to confirm:&nbsp;
 
                         <input type="password" name="pwd" autocomplete="off" id="sm_pwd" />
                         
                         
-                        <label><input type="checkbox" name="use_native" checked id="use_native" value="1"/>use native mail</label>
+                        <label><input type="checkbox" name="use_native" id="use_native" value="1"/>use native mail</label>
 
                     </div>
                     

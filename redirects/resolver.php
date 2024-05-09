@@ -13,8 +13,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -412,17 +412,19 @@ if($isMediaRequest){
 $database_url = null;    
 
 if ($database_id>0) {
+    include_once dirname(__FILE__).'/../hserv/utilities/dbRegis.php';
     
-    $to_include = dirname(__FILE__).'/../admin/setup/dbproperties/getDatabaseURL.php';
-    if (is_file($to_include)) {
-        include_once $to_include;
+    if(!isset($system)){
+        $system = new System(); //to keep error
     }
     
-    if(isset($error_msg)){
+    $database_url = DbRegis::registrationGet(array('dbID'=>$database_id));
+    if(!$database_url){
+        $err = $system->getError();
+        $error_msg = @$err['message'];
         header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
         exit;
     }
-
 }
 
 

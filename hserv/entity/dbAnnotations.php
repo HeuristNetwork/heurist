@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -55,6 +55,7 @@ class DbAnnotations extends DbEntityBase
     *  Search all annotaions for given uri (IIIF manifest)
     *  or particular annotaion id
     * 
+    *  Mirador requests our Annotation server (via api/annotations) for annotations per page(canvas).
     * 
     *  @todo overwrite
     */
@@ -104,7 +105,7 @@ class DbAnnotations extends DbEntityBase
     }
 
     //
-    //
+    // returns Annotation description by Canvas URI
     //    
     private function findItems_by_Canvas($canvasUri){
         if($this->dty_Annotation_Info>0 && defined('DT_URL')){

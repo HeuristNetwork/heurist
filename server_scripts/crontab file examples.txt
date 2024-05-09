@@ -18,8 +18,8 @@
 
 # CRONTAB FILE FOR SATELLITE SERVER (single server installation, CET time zone)
 
-:MAILTO=ian.johnson@sydney.edu.au
-MAILTO=ian.johnson@sydney.edu.au
+:MAILTO=ian.johnson.heurist@gmail.com
+MAILTO=ian.johnson.heurist@gmail.com
 
 # Monitor server metrics (hourly)
 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
@@ -52,7 +52,7 @@ MAILTO=ian.johnson@sydney.edu.au
 
 # SUMMARISATION AND MAILING OF ERRORS
 
-MAILTO=ian.johnson@sydney.edu.au,abed@sydney.edu.au
+MAILTO=ian.johnson.heurist@gmail.com,abed@mq.edu.au
 
 #Ansible: Email PHP errors logs
 15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php

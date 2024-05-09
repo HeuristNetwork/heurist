@@ -3,7 +3,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -879,17 +879,6 @@ class System {
     
 
     /**
-    * return list of errors
-    */
-    public function getError(){
-        return $this->errors;
-    }
-
-    public function clearError(){
-        $this->errors = array();
-    }
-
-    /**
     * produce json output and 
     * terminate execution of script 
     * 
@@ -912,7 +901,9 @@ class System {
         exit;
     }
 
-
+    //
+    //
+    //
     public function error_exit_api( $message=null, $error_code=null, $is_api=true) {
         
         $this->dbclose();
@@ -972,13 +963,21 @@ class System {
     }
 
     /**
-    * keep error message (for further use with getError)
+    * keeps error message (for further use with getError)
     */
     public function addErrorArr($error) {
         if(!is_array($error)){
-            $error = array(HEURIST_ERROR,$error);
+            //just message - general message
+            $error = array(HEURIST_ERROR, $error);
         }
-        return $this->addError($error[0],$error[1],@$error[2],@$error[3]);
+        if(@$error['message']){
+            //from remote request
+            $status = @$error['status']?$error['status']:HEURIST_ERROR;
+            return $this->addError($status, $error['message'], @$error['sysmsg'], @$error['error_title']);
+        }else{
+            //from mysql__ functions
+            return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
+        }
     }
     
     /**
@@ -1024,6 +1023,22 @@ class System {
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
         return $this->errors;
     }
+    
+    /**
+    * returns error array (status,message,sysmsg,error_title)
+    */
+    public function getError(){
+        return $this->errors;
+    }
+    
+    public function getErrorMsg(){
+        return ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+    }
+
+    public function clearError(){
+        $this->errors = array();
+    }
+    
 
     //
     // returns total records in db and counts of active entries in dashboard  
@@ -1147,7 +1162,7 @@ class System {
             $res = array(
                 "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
-                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'),
+                    "registration_allowed"=>$this->get_system('sys_AllowRegistration'), //allow new user registration
                     "db_registeredid"=>$this->get_system('sys_dbRegisteredID'),
                     "db_managers_groupid"=>($this->get_system('sys_OwnerGroupID')>0?$this->get_system('sys_OwnerGroupID'):1),
                     "help"=>HEURIST_HELP,
@@ -1194,10 +1209,10 @@ class System {
                     
                     'nakala_api_key'=>$this->get_system('sys_NakalaKey'),
                     
-                    'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
-                    'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
+                    'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), //pwd to creaste new database 
+                    'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15),//delete from db statistics
                     'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
-                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),   //allow run multi-db server actions
+                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),  //allow run multi-db server actions
                     'api_Translator' => (!empty($accessToken_DeepLAPI)), // an api key has been setup for Deepl
                     'use_redirect' => @$useRewriteRulesForRecordLink
                 )
@@ -1345,7 +1360,9 @@ class System {
     * @return mixed
     */
     public function is_admin(){
-        return ($this->get_user_id()>0 && $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
+        return ($this->get_user_id()>0 && 
+                   ($this->get_user_id()==2 ||
+                    $this->has_access( $this->get_system('sys_OwnerGroupID') ) ));
     }
     
     /**
@@ -1805,18 +1822,21 @@ class System {
     //
     //
     //    
-    public function user_LogActivity($action, $suplementary = '', $user_id=null, $date_only=false){
-        
+    public function user_LogActivity($action, $suplementary = '', $user_id=null){
+
         if($user_id==null){
             $this->login_verify( false );
             $user_id = $this->get_user_id();
         }
-        
+
         $now = new DateTime();
 
-        $timestamp = $date_only ? $now->format('Y-m-d') : $now->format('Y-m-d H:i:s');
+        $user_agent = USystem::getUserAgent();
 
-        $info = array($user_id, $action, $timestamp);
+        $IPv4 = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        $IPv4 = empty($IPv4) ? 'Unknown' : $IPv4;
+
+        $info = array($user_id, $action, $now->format('Y-m-d H:i:s'), $user_agent['os'], $user_agent['browser'], $IPv4);
 
         if(is_array($suplementary)){
             $info = array_merge($info, $suplementary);
@@ -2017,7 +2037,10 @@ class System {
                 }
        
             }else{
-                $url = ($isAlpha ? HEURIST_MAIN_SERVER . '/h6-alpha/' : HEURIST_INDEX_BASE_URL) . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
+                $url = ($isAlpha 
+                        ? HEURIST_MAIN_SERVER . '/h6-alpha/' 
+                        : HEURIST_INDEX_BASE_URL) 
+                        . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
                 $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
             }
             
@@ -2041,32 +2064,32 @@ class System {
     }
 
     //
-    // return true if password is wrong
+    // returns true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
     {
         
         $is_NOT_allowed = true;
         
-        if(isset($password_entered) && $password_entered!=null) {
+        if(isset($password_entered) && $password_entered!=null && $password_entered!='') {
             $pw = $password_entered;
 
             // Password in configIni.php must be at least $min_length characters
-            if(strlen(@$password_to_compare) > $min_length) {
+            if($password_to_compare!=null && strlen(@$password_to_compare) > $min_length) {
                 $comparison = strcmp($pw, $password_to_compare);  // Check password
                 if($comparison == 0) { // Correct password
                     $is_NOT_allowed = false;
                 }else{
                     // Invalid password
-                    $this->addError(HEURIST_REQUEST_DENIED, 'Password is incorrect'); //'Invalid password');
+                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect'); //'Invalid password');
                 }
             }else{
-                $this->addError(HEURIST_SYSTEM_CONFIG, 
+                $this->addError(HEURIST_ACTION_BLOCKED, 
                     'This action is not allowed unless a challenge password is set - please consult system administrator');
             }
         }else{
             //password not defined
-            $this->addError(HEURIST_INVALID_REQUEST, 'Password is missing'); //'Password not specified');
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing'); //'Password not specified');
         }    
         
         return $is_NOT_allowed;
@@ -2122,7 +2145,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 
                 //add functions for other daily tasks
                 $this->_sendDailyErrorReport();
-                $this->_heuristVersionCheck();   // Check if different local and server versions are different
+                $this->_heuristVersionCheck();  // Check if different local and server code versions are different
                 $this->_getDeeplLanguages();    // Get list of allowed target languages from Deepl API
             }
     }

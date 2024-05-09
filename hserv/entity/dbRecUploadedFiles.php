@@ -7,7 +7,7 @@
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
     */
@@ -767,7 +767,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $size = folderSize2($dest);
                             
                             //get first file from first folder - use it as thumbnail
-                            $filename = folderFirstTileImage($dest);
+                            $filename = folderFirstFile($dest);
                             
                             $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                             

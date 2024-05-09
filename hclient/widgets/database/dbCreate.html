@@ -1,0 +1,74 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;width:540px;font-size:0.95em">
+    <div class="heurist-helper1" style="margin-top:50px">       
+        As creator of a database you become the database owner and can manage the database and other
+        <br>database users, including creation of workgroups and modification of database structure.
+        <br>
+        <br>
+        <b>Please use a <u>concise and informative name</u> of less than ~40 characters</b>
+        <i> <br>(Please avoid very generic names such as JH_test. Aim for a concise subject such as 
+            <br>JH_18CMonksLiguria or compact project names such USyd_CommunityEducationActivism60s70s)
+        </i>
+    </div>
+    
+    <div id="div_need_password" style="display:none">
+        <h3 class="ui-heurist-title" style="display:inline-block">Enter the password</h3>
+        <div style="margin-top: 0px;display:inline-block;">
+            <input type="password" maxlength="64" size="25" id="create_pwd" name="create_pwd">
+        </div>
+        <div class="heurist-helper2">
+            The password set by your system administrator for new database creation
+        </div>
+    </div>
+
+    <div class="entry-box">
+        <h3>Enter a name for the new database</h3>
+        
+        <div>
+            hdb_<input type="text" id="uname"  name="uname" class="text ui-widget-content ui-corner-all" 
+                    maxlength="30" size="6" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+            _<input type="text" id="dbname"  name="dbname" class="text ui-widget-content ui-corner-all"
+                    maxlength="64" size="30" onkeypress="{window.hWin.HEURIST4.ui.preventNonAlphaNumeric(event)}"/>
+
+            <button class="ui-button-action" id="btnCreateDb">Create Database</button>
+        </div>
+        
+    </div>
+    
+    <div class="heurist-helper1">                
+        Do not use punctuation except underscore. Names are case sensitive.<br><br> 
+        <i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal databases so that they are easily identified 
+        and appear together in the search for databases.</i>
+    </div>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+                <li>Database name and template validation</li>
+                <li>Database folders creation</li>
+                <li>Database creation</li>
+                <li>Import definitions from template</li>
+                <li>Update saved searches, addition of default lookups</li>
+            </ol>
+        </div>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">Congratulations, your new database  [ <span id="newdbname"></span> ] has been created</h4>
+    <div id="div_login_info">
+        <div><strong>Admin username:</strong> <span id="newusername"></span></div>
+        <div><strong>Admin password:</strong> &#60;<i>same as the account you are currently logged in as</i>&#62;</div>
+    </div>
+    <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
+    <div style="padding-top:20px">Log into your new database with the following link:</div>
+    <div style="padding-top:20px"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
+        title="" target="blank"></a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></div>
+
+    <div style="padding-top:20px;width:600px">
+        After logging in to your new database, we suggest you import some additional entity types from one of the
+        curated Heurist databases, or from one of the other databases listed in the central database catalogue,
+        using Database &gt; Structure &gt; Browse templates 
+        <!--or Database &gt; Structure &gt; Acquire from Templates -->
+    </div>
+</div>
+

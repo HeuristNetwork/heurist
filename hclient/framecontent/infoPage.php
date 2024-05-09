@@ -6,7 +6,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 */
 
@@ -36,6 +36,12 @@ $is_error_unknown = false;
 if(!isset($message)){
     if( @$_REQUEST['error'] ){
         $message = $_REQUEST['error'];
+        if(is_array($message)){
+            $message = @$message['message'];
+            if(@$message['sysmsg'] && $message!=null){
+                $message = $message.$message['sysmsg'];
+            }
+        }
     }else if( @$_REQUEST['message'] ){
         $message = $_REQUEST['message'];
         $is_error = false;

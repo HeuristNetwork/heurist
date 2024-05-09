@@ -5,8 +5,8 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4
 */
@@ -477,7 +477,9 @@ function hMapLayer2( _options ) {
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
 
-        var layer_geofields = []
+        var layer_geofields = [];
+        var layer_timefields = _recordset.fld(options.rec_layer || _record, 
+                        window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
         var layer_default_style = null;
         if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
             var layer_themes = _recordset.fld(options.rec_layer || _record, 
@@ -543,7 +545,7 @@ function hMapLayer2( _options ) {
             }
         }
         if(layer_geofields.length==0) layer_geofields = null;
-                                    
+        if(window.hWin.HEURIST4.util.isArray(layer_timefields) && layer_timefields.length==0) layer_timefields = null;
                                     
         var origination_db = null;
         
@@ -556,7 +558,8 @@ function hMapLayer2( _options ) {
                 q: request.q,
                 rules: request.rules,
                 w: request.w,
-                geofields: layer_geofields, //additional filter - get geodata from specified fields only
+                geofields: layer_geofields,   //additional filter - get geodata from specified fields only
+                timefields: layer_timefields, //additional filter - get datetime from specified fields only
                 //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID, rec_Title and rec_MinZoom, rec_MaxZoom
                 leaflet: 1, 
                 simplify: 1, //simplify paths with more than 1000 vertices

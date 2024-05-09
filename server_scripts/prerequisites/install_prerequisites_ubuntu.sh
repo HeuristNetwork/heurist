@@ -4,7 +4,7 @@
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
 # @copyright   (C) 2005-2023 University of Sydney
-# @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+# @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 # @author      Brian Ballsun-Stanton   <brian@fedarch.org>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 # @version     3.2

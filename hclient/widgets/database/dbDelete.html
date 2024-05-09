@@ -1,0 +1,39 @@
+<div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
+        
+        <div style="display:inline-block;background-color:yellow;padding:6px;border: 1px solid red; border-radius: 3px;font-size: 14px;color:red;">
+            <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+            DANGER 
+            &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+        </div>
+        <h2 style='display:inline-block;vertical-align: middle;'>DELETION OF CURRENT DATABASE</h2><br>
+        <h2>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h2>
+        <h2>About to delete database: <span class="dbname"></span></h2>
+
+        <label><input type='checkbox' checked id="db-archive"> Archive all database files</label>
+        
+        <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database</p>
+        <p>Type the words above to confirm deletion 
+            <input type='input' maxlength='20' size='20' id='db-password' autocomplete="off" autocorrect="off"/>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="ui-button-action" id="btnDelete">OK to Delete</button>
+        </p>
+</div>
+
+<div id="div_result" class="ent_wrapper" style="margin-left:40px;margin-top:75px;display: none;">
+    <h3 style="margin:0">Database <span class="dbname"></span> has been deleted</h3>
+
+    <p class="archive">Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>
+    <p class="archive">If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>
+</div>
+
+<div class="ent_wrapper progressbar_div" style="display: none; background:white;z-index:60001">
+        <div class="loading" style="display:none;height:100%">
+            <ol type="1" style="margin-top:40px">
+                <li>Permission validation</li>
+                <li class="archive">Create SQL dump</li>
+                <li class="archive">Archive database dump and folders</li>
+                <li>Database drop</li>
+                <li>Delete database folder</li>
+            </ol>
+        </div>
+</div>

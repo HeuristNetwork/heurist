@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -1591,11 +1591,8 @@ $.widget( "heurist.svs_list", {
                             that._getFilterString(node.key, $(node.li));
                             break;    
                         case "embed":   //EMBED - IJ 2022-10-04 Block use here, Publish alternative are to be used instead
+                            that._showEmbedDialog(node.key); // show message about alternatives
                             break;
-                            /*show popup with link
-                            if(!node.folder && node.key>0){
-                                that._showEmbedDialog(node.key);
-                            }*/
                         case "copy":   //duplicate saved search
                         
                             if(!node.folder && node.key>0){
@@ -1746,7 +1743,7 @@ $.widget( "heurist.svs_list", {
             if(that.options.filter_by_type<2){
                 arr_menu.push({title: "----"});
                 arr_menu.push({title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" });
-                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" });
+                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }); // displays message about alternatives
             }
             arr_menu.push({title: "----"});
             arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
@@ -1790,6 +1787,20 @@ $.widget( "heurist.svs_list", {
                             tree.contextmenu('updateEntry', 'favourite', {title: 'Faviourite', uiIcon: 'ui-icon-star-b'});
                         }
                     }
+
+                    let is_filter_rules = !node.folder && node.key;
+                    if(is_filter_rules){
+
+                        let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
+                        if(svs){
+                            let qsearch = svs[_QUERY];
+                            let prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
+
+                            is_filter_rules = prms && prms.type != 3;
+                        }
+                    }
+                    tree.contextmenu('enableEntry', 'query', is_filter_rules);
+                    tree.contextmenu('showEntry', 'query', is_filter_rules);
 
                     node.setActive();
                 },
@@ -2584,7 +2595,7 @@ $.widget( "heurist.svs_list", {
     // IJ 2022-10-04 Block use here, Publish alternative are to be used instead
     //
     _showEmbedDialog: function(svs_ID){
-        window.hWin.HEURIST4.msg.showMsgErr('The embed operation is no longer available from saved lists, please use alternative options available from within the Publisher menus');
+        window.hWin.HEURIST4.msg.showMsgErr('Embed is no longer supported. Please use the much more flexible standalone web page builder or the website builder, which are located under the Publish menu.');
         return;
         //var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
         //window.hWin.HEURIST4.ui.showPublishDialog({mode:'websearch', url: query, url_encoded: query});

@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -223,6 +223,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                              
                             res = res.getIds();                     
                             if(res && res.length>0){
+                                //filter by field group
                                 that.options.dtg_ID = res[0];
                                 that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0])
                             }

@@ -12,7 +12,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -241,7 +241,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      * - `message`: error message or Ajax response
      * - `data`: data returned for request
      */
-    function _callserver(action, request, callback) {
+    function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
 
@@ -268,7 +268,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var request_code = { script: action, action: request.a };
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        $.ajax({
+        var ajax_options = {
             url: url,
             type: "POST",
             data: request,
@@ -326,7 +326,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     callback(response);
                 }
             }
-        });
+        };
+        
+        if(timeout>0){ //default 120000 - 120 seconds
+            ajax_options['timeout'] = timeout;
+        }
+        
+        $.ajax(ajax_options);
 
     }
 
@@ -916,14 +922,22 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     gtag('event', evt_action, { 'event_category': evt_category, 'event_label': evt_label });
                 }
 
-                if (activity.indexOf('search') < 0) {
+                const log_actions = ['editRec', 'VisitPage']; // interactions to add to Heurist's logs
+                const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp']; // interactions w/ prefix to Heurist's logs
+                const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
 
-                    activity = activity.replace('_', '');
+                if (log_actions.includes(activity) || 
+                    ( action_parts.length > 0 && log_prefix.indexOf( action_parts[0].toLowerCase() ) )){
 
-                    //our internal log function it is shelved for now. Since Jan 2019 we use Google Tags
+                    if(action_parts.length > 0){
+                        for(let i = 1; i < action_parts.length; i++){
+                            action_parts[i] = action_parts[i].charAt(0).toUpperCase() + action_parts[i].slice(1);
+                        }
+                        activity = action_parts.join('');
+                    }
+
                     var request = { a: 'usr_log', activity: activity, suplementary: suplementary, user: window.hWin.HAPI4.user_id() };
-                    //_callserver('usr_info', request);
-
+                    _callserver('usr_info', request);
                 }
             },
 
@@ -1348,10 +1362,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         //refresh local definitions
                         if (response.defs) {
                             if (response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
-
+                            
                             if (response.defs.entities)
                                 for (var entityName in response.defs.entities) {
-
                                     //refresh local definitions
                                     window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
                                         response.defs.entities);
@@ -1440,6 +1453,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             
             repositoryAction: function (request, callback) {
                 _callserver('repoController', request, callback);
+            },
+            
+            databaseAction: function (request, callback) {
+                let controller = 'databaseController';
+                if(request.action=='register'){
+                    controller = 'indexController';
+                }
+                _callserver(controller, request, callback, 600000); //5 minutes
             },
 
         }
@@ -1815,6 +1836,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         var entity_configs = {};
         var entity_data = {};
+        var entity_timestamp = 0;
 
         var that = {
 
@@ -1978,13 +2000,28 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             },
 
             //
+            // Check that definitions are up to date on client side
+            //            
+            // It erases db definitions cache on server side (db.json) on every structure change - 
+            // it means that every new heurist window obtains fresh set of definitions.
+            // For existing instances (ie in different browser window) it verifies the  relevance of definitions every 20 seconds.
+            // see initialLoadDatabaseDefintions 
+            //
+            relevanceEntityData: function (callback) {
+                if(entity_timestamp>0){
+                    window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
+                }
+            },
+            
+            //
             // refresh several entity data at once
             // 
             refreshEntityData: function (entityName, callback) {
 
                 var params = { a: 'structure', 'details': 'full'};
-                params['entity'] = entityName
-                
+                params['entity'] = entityName;
+                params['timestamp'] = entity_timestamp;
+
                 /*
                 if($.isPlainObject(opts) && opts['recID']>0){ 
                     //special case - loads defs for particular record only
@@ -2000,12 +2037,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                  
                 _callserver('entityScrud', params,
                     function (response) {
-                        if (response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
+                        
+                        if (response && response['uptodate']) {
+                            
+                            //console.log('definitions are up to date');
+                            if ($.isFunction(callback)) callback(this, true);
+                            
+                        }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
                             var fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
+                            
                             var dbdefs = (response['defRecTypes']?response:response['data']);
-
                             for (var entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
@@ -2078,12 +2121,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // data either recordset or response.data
             //
             setEntityData: function (entityName, data) {
+                
+                if(entityName=='timestamp'){ 
+                    
+                    entity_timestamp = Number(data[entityName]); 
 
-                if (window.hWin.HEURIST4.util.isRecordSet(data)) {
+                }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
                 } else {
-
+                    
                     entity_data[entityName] = new hRecordSet(data[entityName]);
 
                     //build rst index
@@ -2621,8 +2668,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return _regional[key];
                 } else {
                     //if not found take from english version
-                    if (_region != 'ENG' && regional['ENG'] && regional['ENG'][key]) {
-
+                    if (_region != 'ENG' && 
+                       !(typeof regional === 'undefined' || regional==null || !regional['ENG'] || !regional['ENG'][key])) {
+                        //base localization loaded
                         return regional['ENG'][key];
 
                     } else if (key.indexOf('menu-') == 0) {

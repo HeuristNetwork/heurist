@@ -7,7 +7,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -24,6 +24,8 @@ $.widget( "heurist.selectFile", {
 
     // default options
     options: {
+        showFilter: false, //simple filter by name
+        
         isdialog: true, //show in dialog or embedded
 
         onselect: null,
@@ -38,18 +40,35 @@ $.widget( "heurist.selectFile", {
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
+    _cachedRecordset: null,
 
     // the constructor
     _init: function() {
 
         var that = this;
+        
+        var sFilter = '';
+        
+        if(this.options.showFilter){
+            sFilter = '<div class="ent_header">'
+            +'<div class="header4" style="display: inline-block;width:7em;text-align:right;">'+window.hWin.HR('Find')+' </div>'
+            +'<input class="input_search text ui-widget-content ui-corner-all" style="width:90px; margin-right:0.2em" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">'
+            +'</div>';
+        }
 
         $('<div class="ent_wrapper">'
-                +'<div class="ent_content_full recordList" style="top:0"/>'
+                +sFilter
+                +'<div class="ent_content_full recordList"/>'
                 +'</div>').appendTo( this.element );
 
+        if(this.options.showFilter){
+            this._on(this.element.find('.input_search'),  { keyup:this.filterRecordList });            
+        }else{
+            this.element.find('.recordList').css('top',0);
+        }
 
-        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `+this.options.source;
+        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `
+            +(parseInt(this.options.source)>0?'given foldeer':this.options.source);
         
         //resultList with images
 //init record list
@@ -81,11 +100,15 @@ $.widget( "heurist.selectFile", {
                            }
         
                            if(that.options.source.indexOf('assets')<0) {
+                               
+                               var sz = (that.options.extensions=='zip')
+                               ? Math.round(recordset.fld(record, 'file_size')/1024/1024)+'MB'
+                               : Math.round(recordset.fld(record, 'file_size')/1024)+'KB';
 
                                var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                               + '" style="width:200px !important;height:50px !important"><p>'
+                               + '" style="width:250px !important;height:50px !important"><p>'
                                + recordset.fld(record, 'file_name')+'</p>size: '
-                               + (recordset.fld(record, 'file_size')/1024)+'KB</div>';
+                               + sz+'</div>';
 
                            }else{
 
@@ -139,7 +162,7 @@ $.widget( "heurist.selectFile", {
                                     height: 640,
                                     width: 840,
                                     modal: true,
-                                    title: window.HR(that.options.title),
+                                    title: window.hWin.HR(that.options.title),
                                     resizeStop: function( event, ui ) {
                                         var pele = that.element.parents('div[role="dialog"]');
                                         that.element.css({overflow: 'none !important', width:pele.width()-24 });
@@ -152,6 +175,7 @@ $.widget( "heurist.selectFile", {
                                 that._as_dialog = $dlg; 
                             }
                             
+                            that._cachedRecordset = recset;
                             
                             that.recordList.resultList('updateResultSet', recset);
                         }else{
@@ -178,6 +202,21 @@ $.widget( "heurist.selectFile", {
         // remove generated elements
         this.recordList.remove();
     },
-
+    
+    //
+    //
+    //
+    filterRecordList: function(event){
+        
+        var val = this.element.find('.input_search').val().trim();
+        var subset;
+        if(val==''){
+            subset = this._cachedRecordset;
+        }else{
+            subset = this._cachedRecordset.getSubSetByRequest({'file_name':val}, null);
+        }
+            
+        this.recordList.resultList('updateResultSet', subset);
+    },
 
 });

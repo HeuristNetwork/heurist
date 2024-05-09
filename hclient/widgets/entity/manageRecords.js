@@ -4,7 +4,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -78,6 +78,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
     // Record history
     _record_history: null,
+    _check_history: true, // check for record history
 
     _init: function() {
         
@@ -241,7 +242,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.edit_rts_apply = this.rts_actions_menu.find('.edit_rts_btn').button();
             this._on( this.edit_rts_apply, {
                 click: function(e){
-                    
                     if($(e.target).attr('data-apply')){
 
                             var dtId = this.rts_actions_menu.attr('data-did');
@@ -315,30 +315,27 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 mouseleave : function(){ this._rts_selector_flag = false; },
                 change: function(event){
                         this._rts_changed_flag = true;
-                        this.edit_rts_apply[0].click();
+                        $(this.edit_rts_apply[0]).trigger('click');
                         //this.edit_rts_apply.show();
                 }                
             });
                     
             this._on( this.rts_actions_menu, {
-                mouseover : function(){ clearTimeout(this._menuTimeoutId); },
+                mouseover : function(){ if(this._menuTimeoutId>0){ clearTimeout(this._menuTimeoutId); } this._menuTimeoutId=0;},
                 mouseleave : function(){ 
                     if(this._rts_selector_flag || this._rts_changed_flag) return;
                     if($('.ui-selectmenu-menu.ui-selectmenu-open').length>0) return; //do not hide if dropdown is opened
-
                     that._menuTimeoutId = setTimeout(function() {
                         that.rts_actions_menu.hide(); 
                         that.options.rts_editor.manageDefRecStructure('highlightNode', null);
                     }, 800);  
                 },
                 click: function(event){
-            
                         var trg = $(event.target);                     
                         if(trg.parents('.ui-selectmenu-button').length>0) return;
                     
                         if(this._rts_selector_flag || this._rts_changed_flag) return;
                         var dt_id = this.rts_actions_menu.attr('data-did');
-                        
                         this.rts_actions_menu.hide();
                         
                         var ele = $(event.target);
@@ -2349,6 +2346,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //fill with values
         this._currentEditID = recID;
+        this._check_history = true; // reset history check
         
         var that = this;
         
@@ -4366,6 +4364,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             //this.element.find('.rt-info-header img').css('background-image', `url('${rt_icon}')`);
             this.element.find('.rt-info-header span').text(rt_name).attr('title', rt_name);
+
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('.btn-rec-history'), false); // reset get history button
         }
 
         // Toggle record visibility button
@@ -6407,6 +6407,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
     _getRecordHistory: function(){
 
+        if(!this._check_history){
+            window.hWin.HEURIST4.msg.showMsgFlash('No edits found on for this record...', 3000);
+            window.hWin.HEURIST4.util.setDisabled(this.element.find('.btn-rec-history'), true);
+            return;
+        }
+
         const that = this;
         const rectype = this._getField('rec_RecTypeID');
 
@@ -6483,7 +6489,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     let cur_date_stamp = fld_history[fld_idx][0].arc_TimeOfChange;
-                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-m-d');
+                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-M-d');
 
                     history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
                                     + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>: <em style="${date_stamp_css}">${cur_date_stamp}</em> `
@@ -6500,11 +6506,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             prev_value = '';
                         }else if(type == 'freetext' || type == 'blocktext'){
                             prev_value = window.hWin.HEURIST4.util.stripTags(prev_value, 'u, i, b, strong, em');
-                            prev_value = prev_value.replaceAll(/"/g, '\\"');
                         }
     
                         let date_stamp = cur_history['arc_TimeOfChange'];
-                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-m-d');
+                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-M-d');
 
                         history_log += `<div id="${field.id}-${fld_idx}-${idx}">`
                                         + `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}"> <span>${cur_history.arc_Action}</span> <em style="${date_stamp_css}">${date_stamp}</em> `
@@ -6550,6 +6555,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(that.editFormPopup.layout().state['east']['outerWidth'] < width){
                     that.editFormPopup.layout().sizePane('east', width);
                 }
+            }else{
+                that._check_history = false;
+                that._getRecordHistory();
             }
 
             if(Object.keys(rec_ids).length > 0){

@@ -11,7 +11,7 @@
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
@@ -1509,13 +1509,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         // request:  { "sort:fieldName":-1|1 , fieldName:=value, fieldName:value, fieldName:'NULL' }
         // structure [{dtID:fieldname, dtFields:{dty_Type: } }]
+        //    if structure not defined - default type is freetext
         getSubSetByRequest: function(request, structure){
             
             var _records = {}, _order=[], that = this;
             
             //if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
-            
+
+            // if structure not defined - default type is freetext            
             function __getDataType(fieldname, struct){
                 var idx;
                 if(struct!=null){
