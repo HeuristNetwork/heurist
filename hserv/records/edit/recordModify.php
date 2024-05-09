@@ -2913,7 +2913,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                 .' missing value or '.
                 (count($det_required)>1?'have':'has')
                 .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>'
-                .' <br>Modify record type structure: change field to "optional" or sepcify default value');
+                .' <br>Modify record type structure: change field to "optional" or specify default value');
 
         }else if (!is_array($insertValues) || count($insertValues)<1) {
             $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
