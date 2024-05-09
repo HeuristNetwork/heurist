@@ -193,8 +193,36 @@ foreach ($databases as $idx=>$db_name){
                     }
 
                     // Setup file objects
-                    $org_log = new SplFileObject($log_file);
-                    $new_log = new SplFileObject($log_tmp, 'w'); // to replace log, if lines removed
+                    $org_log = null;
+                    $new_log = null;
+                    try{
+                        $org_log = new SplFileObject($log_file);
+                        if(!$org_log->isReadable()){ // check file is readable
+                            throw new Exception("Log file is not readable");
+                        }
+                    }catch(RuntimeException $e){
+                        $report .= "{$tabs}Unable to open log file{$eol}";
+                        continue;
+                    }catch(Exception $e){
+                        $err = $e->getMessage();
+                        $report .= "{$tabs}{$err}{$eol}";
+
+                        continue;
+                    }
+                    try{
+                        $new_log = new SplFileObject($log_tmp, 'w'); // to replace log, if lines removed
+                        if(!$new_log->isWritable()){ // check if file is writable
+                            throw new Exception("Temporary log file is not writable");
+                        }
+                    }catch(RuntimeException $e){
+                        $report .= "{$tabs}Failed to create temporary log file{$eol}";
+                        continue;
+                    }catch(Exception $e){
+                        $err = $e->getMessage();
+                        $report .= "{$tabs}{$err}{$eol}";
+
+                        continue;
+                    }
 
                     $remove_lines = 0;
                     $skip_overwrite = false;
