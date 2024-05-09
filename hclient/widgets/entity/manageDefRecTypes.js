@@ -1305,10 +1305,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     mergeIconThumbnailFields: function(){
         // fields
         var $icon = this._editing.getFieldByName('rty_Icon');
-        var $thumb = this._editing.getFieldByName('rty_Thumb').hide();
-
+        var $thumb = this._editing.getFieldByName('rty_Thumb');
+        
+        if(!$thumb || !$icon){
+            return; //not yet loaded
+        }
+        $thumb.hide();
         var thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
-
+        
         // Alter icon field
         $icon.css('width', '');
 
