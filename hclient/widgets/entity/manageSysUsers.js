@@ -551,9 +551,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                //assign new one
                this._Saml_To_UI( $(event.target).val() );
             }});
-            
+
+            this._editing.setModified(0); // avoid triggering modified flag
+
             saml_sel.change();
-            
+
         }else{
             let content = saml_sel.parents('.ui-accordion-content');
             content.hide();
