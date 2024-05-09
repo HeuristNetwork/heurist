@@ -317,7 +317,7 @@ $mysqli = $system->get_mysqli();
             }//while
             
         if($cnt_unique>0){
-            print '<div>Autorepair: '.$cnt_dupes.' registration for identical files are removed in favour.'
+            print '<div>Autorepair: '.$cnt_dupes.' registration for identical files are removed in favour of '
                         .$cnt_unique.' unique ones. Pointed all details referencing them to the one retained</div>';
         }
         
