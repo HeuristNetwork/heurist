@@ -400,6 +400,7 @@ function __composeDbName(){
     }else{
         $res = $uName . $dbName;
     }
+    
     return $res;
 }
 ?>

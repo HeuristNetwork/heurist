@@ -781,14 +781,24 @@ class DbUtils {
         $error_msg = System::dbname_check($database_name_full);
         
         if ($check_exist_or_unique>0 && $error_msg==null) {
-            //verify that database with such name already exists
-            $dblist = mysql__select_list2(self::$mysqli, 'show databases');
-            if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
-                if($check_exist_or_unique==1){
-                    $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+            
+            if($check_exist_or_unique==1 && 
+               (strcasecmp($database_name,'DELETED_DATABASES')==0 || 
+                strcasecmp($database_name,'DBS_TO_RESTORE')==0 ||
+                strcasecmp($database_name,'AAA_LOGS')==0)){
+
+                $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';    
+                   
+            }else{
+                //verify that database with such name already exists
+                $dblist = mysql__select_list2(self::$mysqli, 'show databases');
+                if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+                    if($check_exist_or_unique==1){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+                    }
+                }else if($check_exist_or_unique==2){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
                 }
-            }else if($check_exist_or_unique==2){
-                    $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
             }
         }
         
@@ -809,7 +819,7 @@ class DbUtils {
         $upload_root = self::$system->getFileStoreRootFolder();
 
         //only from limited list of folders        
-        $source = intval($db_archive_folder);
+        $source = intval($archive_folder);
         if($source==2){
             $lib_path = '/srv/BACKUP/';
         }else if($source==3){
