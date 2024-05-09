@@ -612,7 +612,7 @@ $.widget( "heurist.navigation", {
         data.hasContent = !window.hWin.HEURIST4.util.isempty(this.menuData.fld(record, DT_EXTENDED_DESCRIPTION));
 
         // menu is selectable
-        let is_selectable = this.menuData.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE']); console.log('org_value', is_selectable, this.options.selectable_if_submenu);
+        let is_selectable = this.menuData.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE']);
         is_selectable = data.hasContent && 
                         is_selectable !== TERM_NO && is_selectable !== TERM_NO_old && 
                         this.options.selectable_if_submenu;

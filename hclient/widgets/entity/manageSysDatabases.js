@@ -201,7 +201,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     filterRecordList: function(event, request){
         if(this.options.except_current==true){
             var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
+            //except current
             subset = subset.getSubSetByRequest({'sys_Database':'!=hdb_'+window.hWin.HAPI4.database}, this.options.entity.fields);
+            //update
             this.recordList.resultList('updateResultSet', subset, request);   
         }else{
             this._super(event, request); 

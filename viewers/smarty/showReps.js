@@ -1600,7 +1600,7 @@ function ShowReps( is_snippet_editor ) {
         }else if(show_file_data){
 
             _add_variable_dlg.find('.language_row').hide();
-            _add_variable_dlg.find('.file_row, .empty_ele').show(); console.log(_add_variable_dlg.find('.file_row, .empty_ele'));
+            _add_variable_dlg.find('.file_row, .empty_ele').show();
         }else{
 
             _add_variable_dlg.find('.language_row, .file_row, .empty_ele').hide();

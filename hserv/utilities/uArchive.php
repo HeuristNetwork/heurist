@@ -187,6 +187,10 @@ class UArchive {
         if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
             throw new Exception('Archive file not found');
         }
+        
+        $root_folder = $system->getFileStoreRootFolder();
+        chdir($root_folder);
+        $root_folder = realpath($root_folder);
 
         //set current folder
         chdir($destination);  // relatively db root  or HEURIST_FILES_DIR??        
@@ -199,10 +203,10 @@ class UArchive {
             if( substr($destination_dir, -1, 1) != '/' ){
                 $destination_dir = $destination_dir.'/'; 
             }  
-            if (strpos($destination_dir, $system->getFileStoreRootFolder()) !== 0) {
+            if (strpos($destination_dir, $root_folder) !== 0) {
                 //HEURIST_SCRATCH_DIR
                 //HEURIST_TILESTACKS_DIR
-                throw new Exception('Destination folder must within database storage folder');
+                throw new Exception('Destination folder must within database storage folder ');//$destination_dir.'  '.$root_folder
             }
         }
 

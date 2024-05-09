@@ -428,7 +428,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         ")<br> Please reset the registration ID manually</b></p>";
     }
     //assign origin ID    
-    DbUtils::databaseRegister($sourceRegID);
+    DbUtils::updateOriginatingDB($sourceRegID);
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone

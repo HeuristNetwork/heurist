@@ -28,7 +28,7 @@ define('MANAGER_REQUIRED', 1);
 define('PDIR', '../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/dbaccess/db_recsearch.php'; // for recordSearch()
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php'; // for recordSearch()
 
 $mysqli = $system->get_mysqli();
 

@@ -156,7 +156,7 @@
     }
     
     //
-    //
+    // $db_name - full databas name
     //
     function mysql__create_database( $mysqli, $db_name ){
 
@@ -805,25 +805,23 @@
     * @param mixed $database_name_full
     * @param mixed $script_file
     */
-    function mysql__script($database_name_full, $script_file, $force_scriptmode=0) {
+    function mysql__script($database_name_full, $script_file, $dbfolder=null) {
         global $errorScriptExecution;
         
         $error = '';
         $res = false;
-    
-        
+
         //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-        if($force_scriptmode>0){
-             $dbScriptMode = ($force_scriptmode==2)?2:0;
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        
+        $script_file = basename($script_file);
+        if($dbfolder!=null){
+            $script_file = $dbfolder.$script_file;
         }else{
-            $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
-        }
-        
-        
-        //all scripts are in admin/setup/dbcreate
-        if($script_file = basename($script_file)){
+            //all scripts are in admin/setup/dbcreate
             $script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
         }
+        
         
         if(!file_exists($script_file)){
             $res = 'Unable to find sql script '.htmlspecialchars($script_file);

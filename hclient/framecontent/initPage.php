@@ -50,9 +50,9 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    if(count($system->getError()) > 0){
+    /*if(count($system->getError()) > 0){
         $_REQUEST['error'] = $system->getError();
-    }
+    }*/
     include_once ERROR_REDIR;
     exit;
 }
@@ -226,6 +226,7 @@ $isUpgrade = true;
  -->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>

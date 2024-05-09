@@ -785,12 +785,12 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                     tinymce.activeEditor.execCommand('mceInsertLink', false, href);
 
-                    let $link = $(tinymce.activeEditor.selection.getNode()); console.log($link);
+                    let $link = $(tinymce.activeEditor.selection.getNode());
                     if(!$link.is('a')){
-                        $link = $link.find(`a[href="${href}"]`); console.log($link);
+                        $link = $link.find(`a[href="${href}"]`);
                     }
                     if($link.length == 0){
-                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`); console.log($link);
+                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
                     }
 
                     $link.attr({

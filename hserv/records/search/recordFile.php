@@ -402,59 +402,59 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
 */
 function resolveFilePath($path, $db_name=null){
 
-        if( $path ){
+    if( $path ){
+        
+        if(!file_exists($path) ){
             
-            if(!file_exists($path) ){
-                
-                if($db_name!=null){
-                    $dir_folder = USanitize::sanitizePath(HEURIST_FILESTORE_ROOT . $db_name . '/');
-                    $db_folder_files = $dir_folder . 'file_uploads/';
-                }else{
-                    $dir_folder = HEURIST_FILESTORE_DIR;
-                    $db_folder_files = HEURIST_FILES_DIR;
-                }
-            
-                chdir($dir_folder);  // relatively db root
+            if($db_name!=null){
+                $dir_folder = USanitize::sanitizePath(HEURIST_FILESTORE_ROOT . $db_name . '/');
+                $db_folder_files = $dir_folder . 'file_uploads/';
+            }else{
+                $dir_folder = HEURIST_FILESTORE_DIR;
+                $db_folder_files = HEURIST_FILES_DIR;
+            }
+        
+            chdir($dir_folder);  // relatively db root
+            $fpath = realpath($path);
+            if($fpath!==false && file_exists($fpath)){
+                return $fpath;
+            }else{
+                chdir($db_folder_files);          // relatively file_uploads 
                 $fpath = realpath($path);
                 if($fpath!==false && file_exists($fpath)){
                     return $fpath;
                 }else{
-                    chdir($db_folder_files);          // relatively file_uploads 
-                    $fpath = realpath($path);
-                    if($fpath!==false && file_exists($fpath)){
-                        return $fpath;
-                    }else{
-                        //special case to support absolute path on file server
-                        if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
-                            $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
-                            if(file_exists($fpath)){
-                                return $fpath;
-                            }
-                        }else
-                        if(strpos($path, '/misc/heur-filestore/')===0){
-                            $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $path);
-                            if(file_exists($fpath)){
-                                return $fpath;
-                            }
-                        }else
-                        if(strpos($path, '/data/HEURIST_FILESTORE/')===0){ //for huma-num
-                            $fpath = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
-                            if(file_exists($fpath)){
-                                return $fpath;
-                            }
+                    //special case to support absolute path on file server
+                    if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
+                        }
+                    }else
+                    if(strpos($path, '/misc/heur-filestore/')===0){
+                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
+                        }
+                    }else
+                    if(strpos($path, '/data/HEURIST_FILESTORE/')===0){ //for huma-num
+                        $fpath = str_replace('/data/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
+                        if(file_exists($fpath)){
+                            return $fpath;
                         }
                     }
                 }
-            }else{
-                //current dir already set
-                $fpath = realpath($path);
-                if($fpath!==false && file_exists($fpath)){
-                    return $fpath;
-                }
             }
-
+        }else{
+            //current dir already set
+            $fpath = realpath($path);
+            if($fpath!==false && file_exists($fpath)){
+                return $fpath;
+            }
         }
-        return $path;
+
+    }
+    return $path;
 }
 
 /**

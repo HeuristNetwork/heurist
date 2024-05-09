@@ -21,7 +21,24 @@
 
 $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 
+//validate that instance is ok and database is accessible
+if( @$_REQUEST['isalive']==1){
 
+    require_once dirname(__FILE__).'/hserv/System.php';
+    $system = new System();
+    $is_inited = $system->init(@$_REQUEST['db'], true, false);
+    if($is_inited){
+        $mysqli = $system->get_mysqli();
+        $mysqli->close();
+        print 'ok';
+    }else{
+        $error = $system->getError();
+        print 'error: '.@$error['message'];
+    }
+    //print $is_inited?'ok':'error:'.$system->getErrorMsg();
+    exit;
+    
+}else
 //redirection for CMS 
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
 

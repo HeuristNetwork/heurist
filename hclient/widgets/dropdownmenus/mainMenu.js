@@ -888,6 +888,13 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HEURIST4.ui.showRecordActionDialog('dbCreate', popup_dialog_options);
         
         }
+        else if(action == "menu-database-restore"){
+
+            popup_dialog_options.title = window.hWin.HR('Restore Database');
+            popup_dialog_options.entered_password = entered_password;
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRestore', popup_dialog_options);
+        
+        }
         else if(action == "menu-database-delete"){
         
             popup_dialog_options.title = window.hWin.HR('Delete Database');
@@ -914,6 +921,13 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HEURIST4.ui.showRecordActionDialog('dbClone', popup_dialog_options);
         
         }  
+        else if(action == "menu-database-register"){
+        
+            popup_dialog_options.title = window.hWin.HR('Register database');
+            popup_dialog_options.entered_password = entered_password;
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbRegister', popup_dialog_options);
+        
+        }
         else if(action == "menu-cms-create"){
 
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
@@ -1548,7 +1562,7 @@ $.widget( "heurist.mainMenu", {
 
                     $dlg.dialog({
                         autoOpen: true,
-                        height: 600,
+                        height: 640,
                         width: 600,
                         modal: true,
                         resizable: false,

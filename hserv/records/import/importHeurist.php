@@ -1446,7 +1446,7 @@ EOD;
                 }
                 
                 //update special concept codes 9999-xxx to correct ones
-                DbUtils::updateImportedOriginatingIds();
+                DbUtils::updateImportedOriginatingDB();
             }
         }
         

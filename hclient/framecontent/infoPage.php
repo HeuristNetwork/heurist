@@ -36,6 +36,12 @@ $is_error_unknown = false;
 if(!isset($message)){
     if( @$_REQUEST['error'] ){
         $message = $_REQUEST['error'];
+        if(is_array($message)){
+            $message = @$message['message'];
+            if(@$message['sysmsg'] && $message!=null){
+                $message = $message.$message['sysmsg'];
+            }
+        }
     }else if( @$_REQUEST['message'] ){
         $message = $_REQUEST['message'];
         $is_error = false;
