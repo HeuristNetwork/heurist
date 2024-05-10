@@ -31,14 +31,15 @@ class Heurist_Security_Policy extends Smarty_Security {
   public $static_classes = null;
   
   // disable PHP functions except listed, set to null to disable ALL
-  public $php_functions = array('isset', 'empty', 'count', 'escape',
+  public $php_functions = array('isset', 'empty', 'constant', 'count', 'escape',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 
                     'array_diff', 'array_merge', 'array_unique',
                     'array_multisort', 'array_values', 'asort','json_encode',
                     'time', 'nl2br', 'print_r',
-                    'printf', 'setlocale', 'substr', 'strpos');
-        
+                    'printf', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos', 
+                    'utf8_encode');
+                                           
   // remove PHP tags
   public $php_handling = Smarty::PHP_REMOVE;
   
@@ -47,7 +48,7 @@ class Heurist_Security_Policy extends Smarty_Security {
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
                     'asort', 'array_merge','json_encode', 'time', 'nl2br', 'print_r',
-                    'printf', 'substr', 'strpos'); //array('escape','count');
+                    'printf', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode'); //array('escape','count');
   
   public $allow_super_globals = false; //default true
 
@@ -75,15 +76,15 @@ function initSmarty($smarty_templates_dir=null){
         if(!folderCreate($smarty_templates_dir.'configs/', true)){
             die('Failed to create configs folder for smarty templates');
         }
-        if(!folderCreate($smarty_templates_dir.'templates_c/', true)){
-            die('Failed to create templates_c folder for smarty templates');
+        if(!folderCreate($smarty_templates_dir.'compiled/', true)){
+            die('Failed to create compiled folder for smarty templates');
         }
         if(!folderCreate($smarty_templates_dir.'cache/', true)){
             die('Failed to create cache folder for smarty templates');
         }
 
         $smarty->setTemplateDir($smarty_templates_dir);
-        $smarty->setCompileDir($smarty_templates_dir.'templates_c');
+        $smarty->setCompileDir($smarty_templates_dir.'compiled');
         $smarty->setCacheDir($smarty_templates_dir.'cache');
         $smarty->setConfigDir($smarty_templates_dir.'configs');    
         
