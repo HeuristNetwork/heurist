@@ -933,6 +933,18 @@ class DbUtils {
         
             $upload_root = self::$system->getFileStoreRootFolder();
             $database_folder = $upload_root.$database_name.'/';
+            
+            //remove COLLATE= for huma-num
+            if(defined('HEURIST_SERVER_NAME') && HEURIST_SERVER_NAME=='heurist.huma-num.fr'){
+                $dump_name_full = $database_folder.$dumpfile;
+                $cmd = "sed -i 's/ COLLATE=utf8mb4_0900_ai_ci//g' ".escapeshellarg($dump_name_full);
+                exec($cmd, $arr_out, $res2);
+
+                if ($res2 != 0 ) {
+                    $error = 'Error: '.print_r($res2, true);
+                    error_log($error);
+                }
+            }
         }
         
         $mysqli = self::$mysqli;
@@ -947,7 +959,7 @@ class DbUtils {
             
         }else{
             //restore data from sql dump
-            $res = mysql__script($database_name_full, $dumpfile, $database_folder);
+            $res = mysql__script($database_name_full, $dumpfile, $database_folder); //restore from dump
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
