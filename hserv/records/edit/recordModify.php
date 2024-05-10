@@ -2909,11 +2909,17 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
         }
 
         if (is_array($det_required) && count($det_required)>0) {
-            $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
+            $isMulti = (count($det_required)>1);
+            $query = 'SELECT rty_Name FROM defRecTypes WHERE rty_ID='.$rectype;
+            $rty_Name = mysql__select_value($mysqli, $query);
+            
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.($isMulti?'s':'')
                 .' missing value or '.
                 (count($det_required)>1?'have':'has')
                 .' invalid value:<div style="padding-left:10px;font-style:italic;">'.implode('<br>',array_values($det_required)).'</div>'
-                .' <br>Modify record type structure: change field to "optional" or specify default value');
+                .' <br>Please change '.($isMulti?'these fields':'this field')
+                .' in record type "'.htmlspecialchars($rty_Name)
+                .'" to "optional" or specify default value for the field');
 
         }else if (!is_array($insertValues) || count($insertValues)<1) {
             $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
