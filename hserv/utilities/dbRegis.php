@@ -218,12 +218,18 @@ class DbRegis {
         }
 
         // Validate password
+        $user_pwd = '';
         $valid_password = !empty($usrPassword);
         if($valid_password && $user_id > 0){
             $user_pwd = mysql__select_value($mysqli, 'select ugr_Password from sysUGrps where ugr_ID=' . intval($user_id));
             $valid_password = hash_equals($usrPassword, $user_pwd);
             //hash_equals(crypt($usrPassword, $user_pwd), $user_pwd);
         }
+        
+        //DEBUG
+        //self::addError(HEURIST_ACTION_BLOCKED, 'DEBUG '.$user_id.'  '.$usrPassword.'   '.$user_pwd.'  is valid '.$valid_password);
+        //return false;
+        
 
         // Unable to retrieve existing user or provided password is wrong
         if($user_id <= 0 || !$valid_password){
