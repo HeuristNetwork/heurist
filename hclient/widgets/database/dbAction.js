@@ -383,8 +383,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                }
             );
             
-        }else if(this.options.actionName=='rename'){
-
+        }else if(this.options.actionName=='rename')
+        {
+            if(response.warning){
+                div_res.find('.warning').html(window.hWin.HEURIST4.util.stripTags(response.warning,'p,br'));
+            }
             window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
                null, window.hWin.HR('Database renamed'),
                {

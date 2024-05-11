@@ -1613,9 +1613,9 @@ class DbUtils {
                     'usrEmail'=>$dbowner['ugr_eMail'],
                     'serverURL'=>$serverURL //new url
                 );
-                $res = DbRegis::registrationUpdate($params);    
+                $res2 = DbRegis::registrationUpdate($params);    
                 // if not integer - this is error
-                if(is_bool($res) && $res===false){
+                if(is_bool($res2) && $res2===false){
                     self::$system->addErrorMsg(
                         'Failed to update reference index for #'.$regID.' for renamed database '.$db_target.'<br>');                    
                 }

@@ -336,7 +336,8 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     if($res!==false){
                         $res = array(
                                 'newdbname'  => $db_target, 
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
+                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1',
+                                'warning'    => $system->getErrorMsg());
                     }
                     
                 }else
