@@ -35,5 +35,5 @@ require_once $path;
 
 function smarty_modifier_translate($input, $lang, $field=null)
 {
-    return getTranslation($input, $lang, $field);
+    return getTranslation($input, $lang, $field);  //see uLocale
 }

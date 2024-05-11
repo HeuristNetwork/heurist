@@ -2593,23 +2593,37 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         var val = values[key];
                         
-                        if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                        if(val!=null){
 
-                            if(val.substr(0,3).toUpperCase() == lang){
-                                def_val = val.substr(4).trim();
-                                break;
+                            var val_orig = val, tag_to_remove = null;
+                            if(val.indexOf('<p')===0 || val.indexOf('<span')===0){
+                                tag_to_remove = strpos($val,'<p')===0?'</p>':'</span>';
+                                val = window.hWin.HEURIST4.util.stripTags(val); //remove all tags
                             }
-                        }else if(val != null && val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+                            function __removeFirstTag(){
+                                return window.hWin.HEURIST4.util.stripFirstElement(val_orig);
+                            }
+                        
+                            if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
 
-                            if(val.substr(0, 2).toUpperCase() == a2_lang){
-                                def_val = val.substr(3).trim();
-                                break;
-                            }
-                        }else {
-                            //without prefix
-                            def_val = val;
-                            if(lang=='def'){ //take first without prefix
-                                break;
+                                if(val.substr(0,3).toUpperCase() == lang){
+                                    def_val = (tag_to_remove==null)?val.substr(4).trim() 
+                                                             :__removeFirstTag();
+                                    break;
+                                }
+                            }else if(val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+
+                                if(val.substr(0, 2).toUpperCase() == a2_lang){
+                                    def_val = (tag_to_remove==null)?val.substr(3).trim() 
+                                                                    :__removeFirstTag();
+                                    break;
+                                }
+                            }else{
+                                //without prefix
+                                def_val = val_orig;
+                                if(lang=='def'){ //take first without prefix
+                                    break;
+                                }
                             }
                         }
                     

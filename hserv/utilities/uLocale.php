@@ -112,6 +112,19 @@
     
         if(is_string($val) && mb_strlen($val)>4){
             
+            $val = trim($val);
+            $val_orig = $val;
+            $tag_to_remove = null;
+            if(strpos($val,'<p')===0 || strpos($val,'<span')===0){
+                /*
+                $document = DOMDocument::loadHTML( $val );
+                $childToRemove = $document->getElementsByTagName('p')->item(0);
+                $childToRemove->parentNode->removeChild($childToRemove);
+                $val = $document->saveHTML();
+                */
+                $tag_to_remove = strpos($val,'<p')===0?'</p>':'</span>';
+                $val = trim(strip_tags($val));
+            }
             
             if(substr($val,0,2)=='*:'){
                 $lang = 'ALL';
@@ -136,7 +149,13 @@
             if($lang){
                 
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
-                return array($lang, substr($val, $pos));
+                if($tag_to_remove == null){
+                    return array($lang, substr($val, $pos));        
+                }else{
+                    //remove first p or span
+                    $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));    
+                }
+                
             }
         } 
         

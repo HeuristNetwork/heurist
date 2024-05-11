@@ -470,6 +470,23 @@ window.hWin.HEURIST4.util = {
         
     },
     
+    stripFirstElement: function(text){
+        
+            var link = document.createElement("span");
+            link.style.display = "none";
+            link.innerHTML = text;
+            document.body.appendChild(link);
+            
+            var eles = $(link).find('*');
+            eles.first().remove();
+            text =  $(link).html();
+                
+            document.body.removeChild(link); 
+            link = null;
+            
+            return text;
+    },
+    
     //
     //
     //
