@@ -139,10 +139,6 @@ function checkURLs($system, $return_output, $verbose=false){
                  $rec_url = $rec_url.'&isalive=1';
             }
 
-            if($is_check_heurist_instance && (!$return_output || $verbose)){
-                print intval($rec_id).' : '.htmlspecialchars($rec_url); 
-            }
-
 /*
  https://int-heuristweb-prod.intersect.org.au/heurist/
  https://heuristref.net/heurist/
@@ -165,21 +161,27 @@ function checkURLs($system, $return_output, $verbose=false){
             
             if ($data){
 
-if($is_check_heurist_instance && (!$return_output || $verbose)){
-    if(strpos($data,'error: ')===0){
-        print ' <span style="color:red">'.htmlspecialchars($data).'</span><br>';
-    //}else if(strpos($data,'ok')===0){
-    //    print ' ok<br>'; 
-    }else{
-        print ' ok<br>'; 
-    }
-}else if (!$return_output) {
-        print ' ';
-}
-                $passed_cnt++;
-                $passed_rec_ids[] = intval($rec_id);
-                if(count($passed_rec_ids)>1000){
-                    __updateRecords_lastverified($mysqli);
+                $failed = false;
+
+                if($is_check_heurist_instance && (!$return_output || $verbose) && strpos($data, 'error: ')===0){
+
+                    $rec_url = htmlspecialchars($rec_url);
+                    print intval($rec_id).' : <a href="'. $rec_url .'" target="_blank" rel="noopener">'.$rec_url . '</a>';
+
+                    $data = strpos($data, 'timeout') !== false ? 'Timeout occurred' : $data;
+                    $data = strpos($data, 'does not exist') !== false ? 'Database does not exist' : $data;
+
+                    print ' <span style="color:red">'.htmlspecialchars($data).'</span><br>';
+
+                    $failed = true;
+                }
+
+                if(!$failed){
+                    $passed_cnt++;
+                    $passed_rec_ids[] = intval($rec_id);
+                    if(count($passed_rec_ids)>1000){
+                        __updateRecords_lastverified($mysqli);
+                    }
                 }
             }else{
                 $broken_cnt++;
@@ -192,7 +194,10 @@ if($is_check_heurist_instance && (!$return_output || $verbose)){
                 if($verbose){
                     print '  error:'.(isset($glb_curl_error)?$glb_curl_error:'').'<br>';
                 }else if(!$return_output){
-                    print '<div>'.intval($rec_id).' : '.htmlspecialchars($rec_url).'  '
+
+                    $rec_url = htmlspecialchars($rec_url);
+
+                    print '<div>'.intval($rec_id).' : <a href="'.$rec_url.'" target="_blank" rel="noopener">'.$rec_url.'</a> '
                         .(isset($glb_curl_error)?$glb_curl_error:'').'</div>';
                 }
                 if($return_output){
@@ -288,7 +293,7 @@ if($is_check_heurist_instance && (!$return_output || $verbose)){
     
                     $data = loadRemoteURLContentWithRange($url, "0-1000", true, 10);
     
-                    if ($data){
+                    if($data){
                         $passed_cnt ++;
                     }else{
     
@@ -300,7 +305,7 @@ if($is_check_heurist_instance && (!$return_output || $verbose)){
                         }
     
                         $broken_cnt ++;                            
-                        $broken_field_urls[$rec_id][$dty_id] .= '<div>'.$url.' '.$glb_curl_error.'</div>';
+                        $broken_field_urls[$rec_id][$dty_id] .= '<div><a href="'.$url.'" target="_blank" rel="noopener">'.$url.'</a> '.$glb_curl_error.'</div>';
 
                         if($return_output){
                             if(!array_key_exists($rec_id, $results[1])){

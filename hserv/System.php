@@ -679,6 +679,7 @@ class System {
         $check = folderExists(HEURIST_FILESTORE_DIR, true);
         if($check<0){
 
+            /* mail will be sent from log
             $title = "Cannot access filestore directory for the database ". $dbname ." on server " . HEURIST_SERVER_NAME;
 
             $body = "Cannot access filestore directory for the database <b>". $dbname . "</b> on the server " . HEURIST_SERVER_NAME .
@@ -690,7 +691,8 @@ class System {
                     ."may not have been mounted on the web server.";
 
             // Error needs extra attention, send an email now to Heurist team/Bug report
-            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true);
+            sendEmail(HEURIST_MAIL_TO_BUG, $title, $body, true); 
+            */
 
             $usr_msg = "Cannot access filestore directory for the database <b>". $dbname .
                        "</b><br>The directory "

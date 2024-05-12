@@ -83,7 +83,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('.dbDescription').text('');
                 this._$('span.dbId').text(window.hWin.HAPI4.sysinfo['db_registeredid']);
                 this._$('a.dbLink').attr('href',
-                    window.hWin.HAPI4.baseURL_pro
+                    window.hWin.HAPI4.sysinfo['referenceServerURL']
                         +'?fmt=edit&recID='+window.hWin.HAPI4.sysinfo['db_registeredid']
                         +'&db='+this.Heurist_Reference_Index)
                        
@@ -383,8 +383,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                }
             );
             
-        }else if(this.options.actionName=='rename'){
-
+        }else if(this.options.actionName=='rename')
+        {
+            if(response.warning){
+                div_res.find('.warning').html(window.hWin.HEURIST4.util.stripTags(response.warning,'p,br'));
+            }
             window.hWin.HEURIST4.msg.showMsgDlg(div_res.html(),
                null, window.hWin.HR('Database renamed'),
                {

@@ -32,7 +32,7 @@
 
 define('MAX_FILES', 10000);
 define('MAX_SIZE', 1073741824); // 1 GB
-define('MAX_RATIO', 10);
+define('MAX_RATIO', 90);
 define('READ_LENGTH', 1024);
 define('WRITE_LENGTH', 4096);   //16384
 
@@ -192,6 +192,10 @@ class UArchive {
         chdir($root_folder);
         $root_folder = realpath($root_folder);
 
+        if (strpos($root_folder, '\\')!==false){
+            $root_folder = str_replace('\\','/',$root_folder);  
+        } 
+        
         //set current folder
         chdir($destination);  // relatively db root  or HEURIST_FILES_DIR??        
         $destination_dir = realpath($destination);
@@ -245,10 +249,10 @@ class UArchive {
 
                         // Additional protection: check compression ratio
                         if ($stats['comp_size'] > 0  && $stats['comp_size']>READ_LENGTH) {
-                            $ratio = $currentSize / $stats['comp_size'];
+                            $ratio = floor($currentSize / $stats['comp_size']);
                             if ($ratio > MAX_RATIO) {
                                 // Reached max. compression ratio
-                                throw new Exception('Maximum allowed compression ration detected');
+                                throw new Exception('Maximum allowed compression ration detected ('.$ratio.' > '.MAX_RATIO.')');
                             }
                         }
 

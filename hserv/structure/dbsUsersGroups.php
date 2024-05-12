@@ -1103,7 +1103,7 @@
 
         $user = $system->getCurrentUser(); // ugr_ID
 
-        $notes_user_settings = HEURIST_FILESTORE_DIR . 'user_notifications.json'; // individual user settings
+        $notes_user_settings = HEURIST_FILESTORE_DIR . 'userNotifications.json'; // individual user settings
 
         $today = strtotime('now');
         $usr_id = $user['ugr_ID'];

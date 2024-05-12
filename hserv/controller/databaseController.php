@@ -93,36 +93,41 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                     if($isNewUserRegistration)
                     {
                         //check capture
+                        $captcha_code_ok = true;
+                        $captcha_code = @$_REQUEST['ugr_Captcha'];
                         if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
-                            
-                            $system->addError(HEURIST_ACTION_BLOCKED, 
+                            $system->addError(HEURIST_INVALID_REQUEST, 
                                 'Are you a bot? Please enter the correct answer to the challenge question');
+                            $captcha_code_ok = false;
                         }
                         if (@$_SESSION["captcha_code"]){
                             unset($_SESSION["captcha_code"]);
                         }
-                        unset($_REQUEST['ugr_Captcha']);
                         
-                        //get registration form fields
-                        $usr_owner = array();
-                        foreach($_REQUEST as $name=>$val){
-                            if(strpos($name,'ugr_')===0){
-                                $usr_owner[$name] = $mysqli->real_escape_string($_REQUEST[$name]);
+                        if($captcha_code_ok){
+                            unset($_REQUEST['ugr_Captcha']);
+                            
+                            //get registration form fields
+                            $usr_owner = array();
+                            foreach($_REQUEST as $name=>$val){
+                                if(strpos($name,'ugr_')===0){
+                                    $usr_owner[$name] = $mysqli->real_escape_string($_REQUEST[$name]);
+                                }
                             }
-                        }
-                        
-                        //mandatory fields
-                        $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
-                        foreach($fld_req as $name){
-                            if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
-                                $system->addError(HEURIST_ACTION_BLOCKED, 'Mandatory data for your registration profile '
-                                    .'(first and last name, email, password) are not completed. Please fill out registration form');
-                                $usr_owner = null;
-                                break;
+                            
+                            //mandatory fields
+                            $fld_req = array('ugr_FirstName','ugr_LastName','ugr_eMail','ugr_Name','ugr_Password');
+                            foreach($fld_req as $name){
+                                if(@$usr_owner[$name]==null || $usr_owner[$name]==''){
+                                    $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
+                                        .'(first and last name, email, password) are not completed. Please fill out registration form');
+                                    $usr_owner = null;
+                                    break;
+                                }
                             }
-                        }
-                        if($usr_owner!=null){
-                            $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
+                            if($usr_owner!=null){
+                                $usr_owner['ugr_Password'] = hash_it( $usr_owner['ugr_Password'] );
+                            }
                         }
                         
                     }else{
@@ -336,7 +341,8 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     if($res!==false){
                         $res = array(
                                 'newdbname'  => $db_target, 
-                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1');
+                                'newdblink'  => HEURIST_BASE_URL.'?db='.$db_target.'&welcome=1',
+                                'warning'    => $system->getErrorMsg());
                     }
                     
                 }else
@@ -400,6 +406,7 @@ function __composeDbName(){
     }else{
         $res = $uName . $dbName;
     }
+    
     return $res;
 }
 ?>

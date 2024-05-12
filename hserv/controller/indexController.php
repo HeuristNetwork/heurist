@@ -49,7 +49,7 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
             }
             
             if($allow_action){                
-                //get owner credentials
+                //get database owner credentials
                 $dbowner = user_getByField($system->get_mysqli(), 'ugr_ID', 2);
                 
                 $_REQUEST['usrPassword'] = $dbowner['ugr_Password'];

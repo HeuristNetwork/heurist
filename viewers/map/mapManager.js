@@ -402,7 +402,7 @@ function hMapManager( _options )
             content = '';
         }
         if(window.hWin.HEURIST4.util.isnull(container)){
-            return $('<div>').append(content);
+            return $('<div>', {style: 'width: 98%;'}).append(content);
         }else{
             container.empty();
             container.append(content);
@@ -838,10 +838,13 @@ function hMapManager( _options )
             var parent_span = item_li.children('span.fancytree-node');
             
             var isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
-            
+            let is_image_layer = recid > 0 && recid < 9000000 ? mapDocuments.isImageLayer(mapdoc_id, recid) : false;
+            let is_logged_in = window.hWin.HAPI4.has_access();
+
             var actionspan = '<div class="svs-contextmenu3" '
                     +((mapdoc_id>=0 || mapdoc_id=='temp')?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
+                +(is_image_layer || recid > 0 ? '<span class="ui-icon ui-icon-opacity" title="Change layer\'s opacity"></span>' : '')
                 +'<span class="ui-icon ui-icon-zoom zoom-to-extent" '
                     +((item.data.type=='mapdocument' && !item.data.extent)?'style="color:gray"':'')
                     +' title="Zoom to '+item.data.type+' extent"></span>';
@@ -863,13 +866,13 @@ function hMapManager( _options )
                 }else if(mapdoc_id>0){
 
                     actionspan +=
-                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>';
+                        `<span class="ui-icon ui-icon-pencil" title="Change symbology${is_logged_in ? ' and behaviour of map layer' : ''}"></span>`;
 
                 }else{
                     
                     if(recid<9000000){
                     actionspan +=
-                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>'
+                        `<span class="ui-icon ui-icon-pencil" title="Change symbology${is_logged_in ? ' and behaviour of map layer' : ''}"></span>`
                         +'<span class="ui-icon ui-icon-trash" title="Remove map layer"></span>';
                     
                     }else{
@@ -903,138 +906,283 @@ function hMapManager( _options )
                 setTimeout(function(){                         
                     var recid = ele.parents('.svs-contextmenu3').attr('data-recid');
                     var mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
+
+                    let is_logged_in = !window.hWin.HAPI4.has_access();
+                    let is_image_layer = recid > 0 ? mapDocuments.isImageLayer(mapdoc_id, recid) : false;
                     
-                        if(ele.hasClass('zoom-to-extent')){
+                    if(ele.hasClass('zoom-to-extent')){
 
-                            //zoom to extent
-                            if(recid>0){
-                                
-                                if(mapdoc_id>=0 || mapdoc_id=='temp'){
-                                    var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
-                                    if(layer_rec) (layer_rec['layer']).zoomToLayer();
-                                } 
-                                
-                            }else if(mapdoc_id>0){
-                                    mapDocuments.zoomToMapDocument(mapdoc_id);
-                            }
+                        //zoom to extent
+                        if(recid>0){
+                            
+                            if(mapdoc_id>=0 || mapdoc_id=='temp'){
+                                var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                if(layer_rec) (layer_rec['layer']).zoomToLayer();
+                            } 
+                            
+                        }else if(mapdoc_id>0){
+                            mapDocuments.zoomToMapDocument(mapdoc_id);
+                        }
 
-                            // Update zoom icon
-                            ele.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
-                            ele.addClass('ui-icon-zoom');
+                        // Update zoom icon
+                        ele.removeClass('ui-icon-zoom ui-icon-zoomin ui-icon-zoomout');
+                        ele.addClass('ui-icon-zoom');
 
-                        }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
-                        
-                            var in_progress = __in_progress();
-                            if(mapdoc_id>0 && !in_progress){
+                    }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
+                    
+                        var in_progress = __in_progress();
+                        if(mapdoc_id>0 && !in_progress){
 
-                                mapDocuments.selectLayerRecord(mapdoc_id, function(data){
-                                        parent_span.find('.svs-contextmenu4').hide();
-                                        if(data){
-                                            item.removeChildren();
-                                            item.addChildren( data );
-                                            /*setTimeout(function(){
-                                            $.each(item.children, function( idx, item_ch ){
-                                                _defineActionIcons( item_ch );
-                                                });},500);*/
-                                        }
-                                    });
-                                /*
-                                var dfd = new $.Deferred();
-                                mapDocuments.selectLayerRecord(mapdoc_id, dfd);
-                                $.when( dfd.promise() ).done(
-                                    function(data){
+                            mapDocuments.selectLayerRecord(mapdoc_id, function(data){
+                                    parent_span.find('.svs-contextmenu4').hide();
+                                    if(data){
                                         item.removeChildren();
                                         item.addChildren( data );
+                                        /*setTimeout(function(){
+                                        $.each(item.children, function( idx, item_ch ){
+                                            _defineActionIcons( item_ch );
+                                            });},500);*/
                                     }
-                                );
-                                */
-                            }
-                            
-                        }else if(ele.hasClass('ui-icon-arrowstop-1-s')){ 
-                        
-                                mapDocuments.saveResultSetAsLayerRecord(recid, function(data){
-                                        ele.hide();
-                                        parent_span.find('.svs-contextmenu4').hide();
                                 });
-                            
-                        }else if(ele.hasClass('ui-icon-pencil')){
-                            
-                                if(mapdoc_id>0 || recid<9000000){
+                            /*
+                            var dfd = new $.Deferred();
+                            mapDocuments.selectLayerRecord(mapdoc_id, dfd);
+                            $.when( dfd.promise() ).done(
+                                function(data){
+                                    item.removeChildren();
+                                    item.addChildren( data );
+                                }
+                            );
+                            */
+                        }
+                        
+                    }else if(ele.hasClass('ui-icon-arrowstop-1-s')){ 
+                    
+                            mapDocuments.saveResultSetAsLayerRecord(recid, function(data){
+                                    ele.hide();
+                                    parent_span.find('.svs-contextmenu4').hide();
+                            });
+                        
+                    }else if(ele.hasClass('ui-icon-pencil')){
 
-                                    __in_progress();
-                                    //edit layer or mapdocument record
-                                    window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id, null,
-                                    {selectOnSave:true,
-                                     onClose: function(){ 
-                                         parent_span.find('.svs-contextmenu4').hide();
-                                     },
-                                     onselect:function(event, data){
-                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                            var recset = data.selection;
-                                            var rec = recset.getFirstRecord();
-                                            item.title = recset.fld(rec, 'rec_Title');
-                                            parent_span.find('span.fancytree-title').text( item.title );
-                                            
-                                            var symbology = recset.fld(rec
-                                                            , window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
-                                            if(recid>0 && symbology){
-                                                //apply symbolgy on map
-                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
-                                                if(layer_rec) (layer_rec['layer']).applyStyle( symbology );
-                                                //render new symbology in legend
-                                                item.render(true);
-                                            }
-                                            
-                                        }
-                                    }});
-                                }else{
-                                    // get layer record, take symbology field and title 
-                                    // open symbology editor
-                                    // on exit 1) call mapLayer.applyStyles
-                                    //         2) change title in tree and timeline
-                                    mapDocuments.editSymbology(0, recid, function(new_title, new_style){
-                                        //update layer title in legend and timeline
-                                        if(new_title && item.title != new_title){
-                                            item.title = new_title;
-                                            parent_span.find('span.fancytree-title').text( new_title );
-                                        }
-                                        
+                        let symbology_only = mapdoc_id > 0 && recid < 9000000 && is_logged_in; // only allow user to edit symbology
+
+                        if(!symbology_only && (mapdoc_id>0 || recid<9000000)){
+
+                            __in_progress();
+                            //edit layer or mapdocument record
+                            window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id, null,
+                            {selectOnSave:true,
+                                onClose: function(){ 
+                                    parent_span.find('.svs-contextmenu4').hide();
+                                },
+                                onselect:function(event, data){
+                                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                    var recset = data.selection;
+                                    var rec = recset.getFirstRecord();
+                                    item.title = recset.fld(rec, 'rec_Title');
+                                    parent_span.find('span.fancytree-title').text( item.title );
+                                    
+                                    var symbology = recset.fld(rec
+                                                    , window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+                                    if(recid>0 && symbology){
+                                        //apply symbolgy on map
+                                        var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                        if(layer_rec) (layer_rec['layer']).applyStyle( symbology );
                                         //render new symbology in legend
                                         item.render(true);
-                                        
-                                    });
+                                    }
+                                    
                                 }
-                        }else if(ele.hasClass('ui-icon-refresh') && (mapdoc_id>0) && mapDocuments.isLoaded(mapdoc_id)){
-                               
-                                mapDocuments.closeMapDocument(mapdoc_id);
-                                //remove children from treeview
-                                //item.setSelected(false, {noEvents:true});
-                                item.removeChildren();
-                                item.resetLazy();
+                            }});
+                        }else if(is_image_layer){
+
+                            mapDocuments.editImageFilter(mapdoc_id, recid, function(new_style){
+
+                                let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                if(layer_rec) { layer_rec['layer'].applyStyle(new_style); }
+
+                                item.render(true);
+                            });
+                        }else{
+                            // get layer record, take symbology field and title 
+                            // open symbology editor
+                            // on exit 1) call mapLayer.applyStyles
+                            //         2) change title in tree and timeline
+                            mapdoc_id = symbology_only ? mapdoc_id : 0;
+                            mapDocuments.editSymbology(mapdoc_id, recid, function(new_title, new_style){
+                                //update layer title in legend and timeline
+                                if(new_title && item.title != new_title){
+                                    item.title = new_title;
+                                    parent_span.find('span.fancytree-title').text( new_title );
+                                }
                                 
-                                item.selected = false;
-                                parent_span.removeClass('fancytree-selected fancytree-partsel');
+                                //render new symbology in legend
+                                item.render(true);
                                 
-                                that.toggleMapDocument(mapdoc_id, true);
-                        }else if(ele.hasClass('ui-icon-trash')){
-                            
-                            //mapdocument - remove from map and unload from memory
-                            if(mapdoc_id>0){
-                                mapDocuments.closeMapDocument(mapdoc_id);
-                                //remove children from treeview
-                                //item.setSelected(false, {noEvents:true});
-                                item.removeChildren();
-                                item.resetLazy();
-                                
-                                item.selected = false;
-                                parent_span.removeClass('fancytree-selected fancytree-partsel');
-                            }else if(recid>0){
-                                //search result
-                                mapDocuments.removeLayer(0, recid);
-                                item.remove();
-                            }
-                            
+                            });
                         }
+                    }else if(ele.hasClass('ui-icon-refresh') && (mapdoc_id>0) && mapDocuments.isLoaded(mapdoc_id)){
+                            
+                            mapDocuments.closeMapDocument(mapdoc_id);
+                            //remove children from treeview
+                            //item.setSelected(false, {noEvents:true});
+                            item.removeChildren();
+                            item.resetLazy();
+                            
+                            item.selected = false;
+                            parent_span.removeClass('fancytree-selected fancytree-partsel');
+                            
+                            that.toggleMapDocument(mapdoc_id, true);
+                    }else if(ele.hasClass('ui-icon-trash')){
+                        
+                        //mapdocument - remove from map and unload from memory
+                        if(mapdoc_id>0){
+                            mapDocuments.closeMapDocument(mapdoc_id);
+                            //remove children from treeview
+                            //item.setSelected(false, {noEvents:true});
+                            item.removeChildren();
+                            item.resetLazy();
+                            
+                            item.selected = false;
+                            parent_span.removeClass('fancytree-selected fancytree-partsel');
+                        }else if(recid>0){
+                            //search result
+                            mapDocuments.removeLayer(0, recid);
+                            item.remove();
+                        }
+                        
+                    }else if(ele.hasClass('ui-icon-opacity')){
+                        // quick style edit
+                        // image - opacity, vector - opacity + fillOpacity
+
+                        let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                        const DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
+
+                        if($('#quick-layer-custom').length > 0){ // remove existing popup
+                            $('#quick-layer-custom').remove();
+                        }
+
+                        let $container = $('#quick-layer-custom');
+                        if($container.length == 0){
+                            $container = $('<div>', {
+                                id: 'quick-layer-custom',
+                                class: 'ui-widget-content',
+                                style: `font-size: 10px; width: 200px; padding: 5px; z-index: 1000; border: 1px black solid`
+                            }).appendTo($('body'));
+                        }
+                        $container.empty();
+
+                        let style = null;
+                        let opacity = 1;
+                        let fillOpacity = 1;
+
+                        if(is_image_layer){
+                            
+                            style = layer_rec['d'][DT_SYMBOLOGY][0];
+                            style = window.hWin.HEURIST4.util.isJSON(style);
+
+                            opacity = style && style.opacity ? parseFloat(style.opacity) : 1;
+                            
+                        }else{
+                            
+                            style = mapDocuments.getSymbology( mapdoc_id, recid );
+
+                            opacity = style && style.opacity ? parseFloat(style.opacity) : 1;
+                            fillOpacity = style && style.fillOpacity ? parseFloat(style.fillOpacity) : 1;
+
+                        }
+
+                        // Opacity
+                        let lbl_opacity = is_image_layer ? 'Opacity: ' : 'Outline opacity: ';
+
+                        $('<div>').text(lbl_opacity).appendTo($container);
+                        $('<input>', {
+                            type: 'range', 
+                            min: 0, max: 1, 
+                            step: 0.01, 
+                            value: opacity, 
+                            name: 'opacity', 
+                            style: 'width:85%;vertical-align: middle;'
+                        }).appendTo($container);
+                        $('<span>', {id: 'opacity-slider-val', style: 'padding-left: 5px;'}).text(opacity).appendTo($container);
+
+                        if(!is_image_layer){
+                            // Fill opacity
+                            $('<div>').text('Fill Opacity: ').appendTo($container);
+                            $('<input>', {
+                                type: 'range', 
+                                min: 0, max: 1, 
+                                step: 0.01, 
+                                value: fillOpacity, 
+                                name: 'fill', 
+                                style: 'width:85%;vertical-align: middle;'
+                            }).appendTo($container);
+                            $('<span>', {id: 'fill-slider-val', style: 'padding-left: 5px;'}).text(fillOpacity).appendTo($container);
+                        }
+
+                        const updateStyle = () => {
+                            
+                            style['opacity'] = parseFloat($container.find('[name="opacity"]').val());
+                            $container.find('#opacity-slider-val').text(style['opacity']);
+                            
+                            if(!is_image_layer){
+                                style['fillOpacity'] = parseFloat($container.find('[name="fill"]').val());
+                                $container.find('#fill-slider-val').text(style['fillOpacity']);
+                            }
+
+                            mapDocuments.updateLayerSymbology(mapdoc_id, recid, style);
+
+                            item.render(true);
+                        };
+                        const closePopup = (event) => {
+
+                            let $ele = $(event.target);
+
+                            if($ele.attr('id') != 'quick-layer-custom' &&
+                                $ele.parents('#quick-layer-custom').length == 0){
+
+                                    $container.hide(); // hide popup
+
+                                    updateStyle(); // update styling options
+
+                                    $(document).off('click', closePopup); // remove click handler
+                                }
+                        };
+
+                        let timeout = null;
+                        $container.find('input').on('input', () => { //change
+
+                            if(timeout) { clearTimeout(timeout); }
+
+                            timeout = setTimeout(() => {
+                                updateStyle();
+                            }, 200); // 1/5th of a second delay
+                        });
+                        $container.find('input').on('wheel', (event) => {
+
+                            window.hWin.HEURIST4.util.stopEvent(event);
+
+                            let $ele = $(event.target);
+                            let cur_val = parseFloat($ele.val());
+
+                            if(event.deltaY < 0){
+                                $ele.val(cur_val + 0.01);
+                            }else{
+                                $ele.val(cur_val - 0.01);
+                            }
+
+                            $ele.trigger('input');
+                        });
+
+                        $container.position({
+                            my: 'right top',
+                            at: 'right bottom',
+                            of: parent_span
+                        });
+
+                        $(document).on('click', closePopup);
+                    }
                     
                 },500);
             });

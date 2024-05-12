@@ -781,14 +781,24 @@ class DbUtils {
         $error_msg = System::dbname_check($database_name_full);
         
         if ($check_exist_or_unique>0 && $error_msg==null) {
-            //verify that database with such name already exists
-            $dblist = mysql__select_list2(self::$mysqli, 'show databases');
-            if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
-                if($check_exist_or_unique==1){
-                    $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+            
+            if($check_exist_or_unique==1 && 
+               (strcasecmp($database_name,'DELETED_DATABASES')==0 || 
+                strcasecmp($database_name,'DBS_TO_RESTORE')==0 ||
+                strcasecmp($database_name,'AAA_LOGS')==0)){
+
+                $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';    
+                   
+            }else{
+                //verify that database with such name already exists
+                $dblist = mysql__select_list2(self::$mysqli, 'show databases');
+                if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+                    if($check_exist_or_unique==1){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+                    }
+                }else if($check_exist_or_unique==2){
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
                 }
-            }else if($check_exist_or_unique==2){
-                    $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
             }
         }
         
@@ -809,7 +819,7 @@ class DbUtils {
         $upload_root = self::$system->getFileStoreRootFolder();
 
         //only from limited list of folders        
-        $source = intval($db_archive_folder);
+        $source = intval($archive_folder);
         if($source==2){
             $lib_path = '/srv/BACKUP/';
         }else if($source==3){
@@ -923,6 +933,18 @@ class DbUtils {
         
             $upload_root = self::$system->getFileStoreRootFolder();
             $database_folder = $upload_root.$database_name.'/';
+            
+            //remove COLLATE= for huma-num
+            if(defined('HEURIST_SERVER_NAME') && HEURIST_SERVER_NAME=='heurist.huma-num.fr'){
+                $dump_name_full = $database_folder.$dumpfile;
+                $cmd = "sed -i 's/ COLLATE=utf8mb4_0900_ai_ci//g' ".escapeshellarg($dump_name_full);
+                exec($cmd, $arr_out, $res2);
+
+                if ($res2 != 0 ) {
+                    $error = 'Error: '.print_r($res2, true);
+                    error_log($error);
+                }
+            }
         }
         
         $mysqli = self::$mysqli;
@@ -937,7 +959,7 @@ class DbUtils {
             
         }else{
             //restore data from sql dump
-            $res = mysql__script($database_name_full, $dumpfile, $database_folder);
+            $res = mysql__script($database_name_full, $dumpfile, $database_folder); //restore from dump
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
@@ -1591,9 +1613,9 @@ class DbUtils {
                     'usrEmail'=>$dbowner['ugr_eMail'],
                     'serverURL'=>$serverURL //new url
                 );
-                $res = DbRegis::registrationUpdate($params);    
+                $res2 = DbRegis::registrationUpdate($params);    
                 // if not integer - this is error
-                if(is_bool($res) && $res===false){
+                if(is_bool($res2) && $res2===false){
                     self::$system->addErrorMsg(
                         'Failed to update reference index for #'.$regID.' for renamed database '.$db_target.'<br>');                    
                 }

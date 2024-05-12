@@ -55,6 +55,8 @@ function hMapDocument( _options )
     RT_MAP_LAYER = 0,
     DT_MAP_LAYER = 0,
     DT_DATA_SOURCE = 0,
+    RT_IMAGE_SOURCE = 0,
+    RT_TILED_IMAGE_SOURCE = 0,
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
     DT_SYMBOLOGY = 0, 
@@ -94,6 +96,8 @@ function hMapDocument( _options )
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
         DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
         RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
+        RT_IMAGE_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE'];
+        RT_TILED_IMAGE_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'];
         DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
         DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
@@ -724,6 +728,52 @@ console.log(treedata);
             }
         });        
     }
+
+    function _editImageFilter( mapdoc_id, layer_id, callback ){
+
+        const _recset = map_documents_content[mapdoc_id];
+        const _record = _recset.getById( layer_id );
+
+        let image_filter = _recset.fld(_record, DT_SYMBOLOGY);
+
+        window.hWin.HEURIST4.ui.showImgFilterDialog(image_filter, (new_value) => {
+
+            _recset.setFld(_record, DT_SYMBOLOGY, new_value);
+            (_record['layer']).applyStyle(new_value);
+
+            if($.isFunction(callback)){
+                callback(new_value);
+            }
+        });
+    }
+
+    /**
+     * Apply and save styling (symbology or image filtering) to map layer
+     *  and save to record set
+     * 
+     * @param {int} mapdoc_id - affected map document
+     * @param {int} layer_id - layer to be updated
+     * @param {string|json} new_style - new style to apply and save 
+     * 
+     * @returns {bool} - whether the process was successful
+     */
+    function _updateLayerSymbology(mapdoc_id, layer_id, new_style){
+
+        const _recset = map_documents_content[mapdoc_id];
+        const _record = _recset.getById( layer_id );
+
+        if(!_record){
+            return false;
+        }
+
+        new_style = window.hWin.HEURIST4.util.isJSON(new_style);
+
+        _recset.setFld(_record, DT_SYMBOLOGY, new_style);
+
+        _record['layer'].applyStyle(new_style);
+
+        return true;
+    }
     
     //
     //
@@ -1100,6 +1150,13 @@ console.log(treedata);
             _editSymbology( mapdoc_id, rec_id, callback );    
         },
         
+        editImageFilter: function(mapdoc_id, rec_id, callback){
+            _editImageFilter( mapdoc_id, rec_id, callback );
+        },
+
+        updateLayerSymbology: function(mapdoc_id, rec_id, style){
+            return _updateLayerSymbology(mapdoc_id, rec_id, style);
+        },
         
         //
         //
@@ -1375,6 +1432,16 @@ console.log(treedata);
                         if(window.hWin.HUL.isFunction(callback)) callback.call(that);
                     }
             });
+        },
+
+        isImageLayer: function(mapdoc_id, layer_id){
+
+            const _recset = map_documents_content[mapdoc_id];
+            const _record = _recset.getById( layer_id );
+
+            return window.hWin.HEURIST4.util.isNumber(_record['source_rectype']) && 
+                   (_record['source_rectype'] == RT_IMAGE_SOURCE || 
+                    _record['source_rectype'] == RT_TILED_IMAGE_SOURCE);
         }
           
     }//end public methods

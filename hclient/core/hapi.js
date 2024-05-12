@@ -2592,23 +2592,37 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         var val = values[key];
                         
-                        if(val!=null && val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                        if(val!=null){
 
-                            if(val.substr(0,3).toUpperCase() == lang){
-                                def_val = val.substr(4).trim();
-                                break;
+                            var val_orig = val, tag_to_remove = null;
+                            if(val.indexOf('<p')===0 || val.indexOf('<span')===0){
+                                tag_to_remove = strpos($val,'<p')===0?'</p>':'</span>';
+                                val = window.hWin.HEURIST4.util.stripTags(val); //remove all tags
                             }
-                        }else if(val != null && val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+                            function __removeFirstTag(){
+                                return window.hWin.HEURIST4.util.stripFirstElement(val_orig);
+                            }
+                        
+                            if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
 
-                            if(val.substr(0, 2).toUpperCase() == a2_lang){
-                                def_val = val.substr(3).trim();
-                                break;
-                            }
-                        }else {
-                            //without prefix
-                            def_val = val;
-                            if(lang=='def'){ //take first without prefix
-                                break;
+                                if(val.substr(0,3).toUpperCase() == lang){
+                                    def_val = (tag_to_remove==null)?val.substr(4).trim() 
+                                                             :__removeFirstTag();
+                                    break;
+                                }
+                            }else if(val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+
+                                if(val.substr(0, 2).toUpperCase() == a2_lang){
+                                    def_val = (tag_to_remove==null)?val.substr(3).trim() 
+                                                                    :__removeFirstTag();
+                                    break;
+                                }
+                            }else{
+                                //without prefix
+                                def_val = val_orig;
+                                if(lang=='def'){ //take first without prefix
+                                    break;
+                                }
                             }
                         }
                     
@@ -2682,6 +2696,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
         },
 
+/**
+* Localization in Heurist
+*
+*For widgets we use json from /hlcient/assets/localization/localization[_lang3].js  (function window.hWin.HR)
+*To localize entity edit forms (record types, fields, terms etc) we use localized json from /hserv/entity/defRecTypes[_lang3].json
+*For static context help or html snippets  we take html snippets from /context_help/resultListEmptyMsg_fre.html  (function window.hWin.HRes )
+* 
+*In other words, where content is created dynamically (widgets, edit forms) we take localized strings (mostly for labels and hints) from json arrays 
+*For large static content with a lot of text we load the entire translated html snippet. 
+*/
         //
         //localize all elements with class slocale for given element
         //
@@ -2726,6 +2750,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             //window.hWin.HAPI4.getLocale()
             var sURL = window.hWin.HAPI4.baseURL + '?lang=' + _region + '&asset=' + name;
+        
             if (ele) {
                 ele.load(sURL);
             } else {

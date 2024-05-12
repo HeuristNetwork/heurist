@@ -2341,7 +2341,7 @@ $.widget( "heurist.mainMenu6", {
         
         var that = this;
         this.introductions[section]
-                .load(window.hWin.HAPI4.baseURL+'startup/getting_started.html div.gs-box.ui-heurist-'+section,
+                .load(window.hWin.HAPI4.baseURL+'startup/gettingStarted.html div.gs-box.ui-heurist-'+section,
                 function(){
                     //init images and video
                     that.introductions[section].find('img').each(function(i,img){
@@ -2381,7 +2381,7 @@ $.widget( "heurist.mainMenu6", {
         var that = this;
 
         this.introductions[section]
-                .load(window.hWin.HAPI4.baseURL+'startup/getting_started.html div.gs-box.ui-heurist-'+section,
+                .load(window.hWin.HAPI4.baseURL+'startup/gettingStarted.html div.gs-box.ui-heurist-'+section,
                 function(){
                     // Display Section Img, hide link to YouTube video
                     that.introductions[section].find('img').each(function(i,img){

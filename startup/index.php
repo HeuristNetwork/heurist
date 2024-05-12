@@ -122,7 +122,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }else{
             
             var sForm = (document.location.pathname.indexOf('startup/')>0
-                            ?'':'startup/')+'user_registration.html';
+                            ?'':'startup/')+'userRegistration.html';
             screen.load(sForm,
                 function(){
 
@@ -330,6 +330,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             
             request['uname'] = $('#uname').val();
             request['dbname'] = $('#dbname').val();
+            request['action'] = 'create';
             
             //get user registration data
             var inputs = $(".registration-form").find('input, textarea');
@@ -340,16 +341,16 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                 }
             });
             
-            var url = baseURL+'admin/setup/dboperations/createDB.php';
+            var url = baseURL+'hserv/controller/databaseController.php';
             
             _showStep(4);
             
             window.hWin.HEURIST4.util.sendRequest(url, request, null,
                 function(response){
-                    
+               
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        window.open(response.newdblink, '_self');
+                        window.open(response.data.newdblink, '_self');
                         /*
                         $('#newdbname').text(response.newdbname);
                         $('#newusername').text(response.newusername);
@@ -365,13 +366,13 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         */
                     }else{
                         //either wrong captcha or invalid registration values
-                        if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED){
+                        if(response.status == window.hWin.ResponseStatus.INVALID_REQUEST){
                             _showRegistration(); //back to registration
                         }else{
                             _showStep(3); //back to db form
                         }
                         
-                        window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                        window.hWin.HEURIST4.msg.showMsgErr(response.message, false);
                     }
                 });
             
@@ -386,7 +387,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //    
     function _getDatabases( show_list ){
         
-            var url = baseURL+'hserv/utilities/list_databases.php';
+            var url = baseURL+'startup/listDatabases.php';
             
             var request = {format:'json'};
         
@@ -418,7 +419,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     function _showGetStarted(){
 
         var sForm = (document.location.pathname.indexOf('startup/')>0
-                            ?'':'startup/')+'getting_started.html';
+                            ?'':'startup/')+'gettingStarted.html';
         
         var screen = $('.center-box.screen6');
         screen.load(sForm,
