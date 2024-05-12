@@ -2125,6 +2125,12 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.ui-icon-opacity { 
+    background-image: url(hclient/assets/opacity.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
 
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 

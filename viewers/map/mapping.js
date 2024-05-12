@@ -554,14 +554,59 @@ $.widget( "heurist.mapping", {
         if(image_filter==null){
             image_filter = this.basemaplayer_filter;
         }
-        layerClassName = ('.'+layerClassName);
-        
+
         if(image_filter && $.isPlainObject(image_filter)){
             $.each(image_filter, function(key, val){
                 filter = filter + key+'('+val+') ';
             });
         }
-        $(layerClassName).css('filter', filter); //'.leaflet-layer'+
+
+        let $img = null;
+
+        if(layerClassName instanceof jQuery){
+            $img = layerClassName;
+        }else{
+            $img = $(`.${layerClassName}`);
+        }
+
+        $img.css('filter', filter);
+    },
+
+    //
+    //
+    //
+    getImageMapFilter: function(layerClassName){
+
+        let $img = null;
+
+        if(layerClassName instanceof jQuery){
+            $img = layerClassName;
+        }else{
+            $img = $(`.${layerClassName}`);
+        }
+
+        let filter = $img.css('filter');
+
+        if(!window.hWin.HEURIST4.util.isempty(filter)){
+
+            let parts = filter.split(' ');
+            let filter = {};
+
+            for(let part of parts){
+
+                let val = part.match(/\d+\.?\d*/);
+                if(!val){ continue; }
+
+                val = val[0];
+                let prop = part.replace(`(${val})`, '');
+
+                filter[prop] = val;
+            }
+        }else{
+            filter = this.basemaplayer_filter;
+        }
+
+        return filter;
     },
 
     getBaseMapFilter: function(){
@@ -1704,6 +1749,9 @@ $.widget( "heurist.mapping", {
             }
     },
 
+    //
+    // Return both zoom for provided bounds and the current zoom
+    //
     getBoundsZooms: function(bounds){
 
         if(bounds && !(bounds instanceof L.LatLngBounds)){
@@ -1716,7 +1764,7 @@ $.widget( "heurist.mapping", {
             return {zoom: this.nativemap.getBoundsZoom(bounds), cur_zoom: this.nativemap.getZoom()};
         }
     },
-    
+
     //
     // remove top layer
     // layer_id -  native it
@@ -1841,18 +1889,29 @@ $.widget( "heurist.mapping", {
     // returns style for layer (defined in layer record or via legend)
     //
     getStyle: function(layer_id) {
-        var affected_layer = this.all_layers[layer_id];
+
+        var affected_layer = this.all_layers[layer_id]; console.log(this.all_layers, layer_id, affected_layer);
         if(!affected_layer) return null;
+
+        if(this.isImageLayer(affected_layer)){
+            let element = affected_layer instanceof L.ImageOverlay ? affected_layer.getElement() : affected_layer.getContainer();
+            return this.getImageMapFilter(element);
+        }
+
         var style = window.hWin.HEURIST4.util.isJSON(affected_layer.options.default_style);
         if(!style){ //layer style not defined - get default style
             return this.setStyleDefaultValues({});    
         }else{
             return style;
         }
-    },
-    
+    },    
     
     isImageLayer: function(affected_layer){
+
+        if(window.hWin.HEURIST4.util.isNumber(affected_layer)){
+            affected_layer = this.all_layers[affected_layer];
+        }
+
         return !affected_layer 
             || affected_layer instanceof L.ImageOverlay 
             || affected_layer instanceof L.TileLayer;    
@@ -1875,7 +1934,26 @@ $.widget( "heurist.mapping", {
         var affected_layer = this.all_layers[layer_id];
         
         if(this.isImageLayer(affected_layer)){
-            return; //not applicable for images   
+
+            // Get html element (img => non-tiled)
+            let element = affected_layer instanceof L.ImageOverlay ? affected_layer.getElement() : affected_layer.getContainer();
+
+            // Get class list, look for class that starts with heurist-imageoverlay-
+            let classes = $(element).attr('class').split(' ');
+            let layer_class = '';
+
+            for(const class_name of classes){
+                if(class_name.match(/heurist-imageoverlay-/)){
+                    layer_class = class_name;
+                    break;
+                }
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(layer_class)){
+                this.applyImageMapFilter(layer_class, newStyle); // apply image filter
+            }
+
+            return;  
         } 
 
         this._clearHighlightedMarkers(layer_id);
