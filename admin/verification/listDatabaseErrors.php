@@ -247,7 +247,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
             function openFuncCheckPopup(type){
 
                 let body = $(window.hWin.document).find('body');
-                let opts = {height:body.innerHeight()*0.9, width:body.innerWidth()*0.8};
+
+                let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
+                                    window.innerHeight : body.innerHeight();
+
+                let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
 
                 if(type != 'files' && type != 'urls') { return; }
 
