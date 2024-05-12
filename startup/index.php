@@ -135,7 +135,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }else{
             
             var sForm = (document.location.pathname.indexOf('startup/')>0
-                            ?'':'startup/')+'user_registration.html';
+                            ?'':'startup/')+'userRegistration.html';
             screen.load(sForm,
                 function(){
 
@@ -400,7 +400,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     //    
     function _getDatabases( show_list ){
         
-            var url = baseURL+'hserv/utilities/list_databases.php';
+            var url = baseURL+'startup/listDatabases.php';
             
             var request = {format:'json'};
         
@@ -432,7 +432,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     function _showGetStarted(){
 
         var sForm = (document.location.pathname.indexOf('startup/')>0
-                            ?'':'startup/')+'getting_started.html';
+                            ?'':'startup/')+'gettingStarted.html';
         
         var screen = $('.center-box.screen6');
         screen.load(sForm,

@@ -1,7 +1,7 @@
 <?php
-//@todo move partly to controller and html output to pages
+
 /**
-* list_databases.php: Produces page listing available databases
+* listDatabases.php: Produces page listing available databases
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -19,8 +19,8 @@
 */
 
 if(!defined('PDIR')){
-    define('PDIR','../../');
-    require_once dirname(__FILE__).'/../System.php';
+    define('PDIR','../');
+    require_once dirname(__FILE__).'/../hserv/System.php';
 }
 
 $is_json = (@$_REQUEST['format']=='json');
@@ -71,7 +71,7 @@ if($is_json){
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../hclient/framecontent/initPageCss.php'; ?>
 
         <script type="text/javascript">
         </script>
