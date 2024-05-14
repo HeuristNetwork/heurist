@@ -650,7 +650,7 @@
         }
     }
     //
-    //
+    // Writes $rawdata to the end of $filename
     //
     function fileAdd($rawdata, $filename)
     {

@@ -900,6 +900,11 @@ class DbUtils {
                            
             if(!$res){
                 folderDelete($database_folder);  
+            }else{                
+                $path = realpath(dirname(__FILE__).'/../../../');
+                $now = new DateTime('now', new DateTimeZone('UTC'));
+                fileAdd($database_name.' # restore '.$now->format('Y-m-d'), 
+                            $path.'/databases_not_to_purge.txt');
             }
             return $res;
         }
