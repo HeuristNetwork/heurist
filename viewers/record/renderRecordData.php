@@ -425,10 +425,10 @@ if(!($is_map_popup || $without_header)){
                         $ele.find('img').each(function(i,img){window.hWin.HEURIST4.util.restoreRelativeURL(img);});
                         
                         $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to view web page content in a popup">View web page content</div>').on('click', function(){
-                            window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content'});
+                            window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content', height: '75%', width: '50%'});
                         }).insertBefore($ele);
 
-                        $ele.hide();
+                        $ele.hide().removeClass('detail').css('overflow-wrap', 'anywhere');
                     })
                 }
             }
