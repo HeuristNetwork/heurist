@@ -136,8 +136,18 @@ class USanitize {
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
-            $message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);
-            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
+            
+            $message = strip_tags($message, $allowed_tags);
+            if($allowed_tags!=null){
+                // remove attributes except img.src and a.href a.target
+                //$message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message); //remove all attributes
+                
+                //$clean = preg_replace("/\n(<[^ai]([\w\d]+)?).+/i","\n$1>",$clean);
+                //$clean = preg_replace("/<a.+href='([:\w\d#\/\-\.]+)'.+/i","<a href=\"$1\">",$clean);
+                //$clean = preg_replace("/<img.+src='([\w\d_:?.\/%=\-]+)'.+/i","<img src=\"$1\">",$clean);            
+            }
+            
+            $message = htmlspecialchars($message, ENT_NOQUOTES);
             if($allowed_tags!==false){
                 $message = preg_replace("/&lt;/", '<', $message);
                 $message = preg_replace("/&gt;/", '>', $message);
