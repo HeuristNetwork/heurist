@@ -2440,25 +2440,31 @@ public methods
             $replacement_dtl_id = -1;
             $value_to_translate = null;
             $all_detected = 0;
+            $source_lang = null;
 
             // Cycle through values - find and source and possible replacement
             while( ($values = $res->fetch_row()) && ($all_detected<2)){
 
-                    //detect language
-                    list($lang2, $val) = extractLangPrefix($values[1]);
-                    if($lang2==null){
-                        //source 
-                        $value_to_translate = $val;      // $is_replacement
-                        $all_detected++;
-                    }else if($lang2==$lang){
-                        //already has this translation
-                        if($is_replacement || $is_deletion){
-                            $replacement_dtl_id = intval($values[0]);
-                        }else{
-                            $replacement_dtl_id = 0;
-                        }
-                        $all_detected++;
+                //detect language
+                list($lang2, $val) = extractLangPrefix($values[1]);
+                if($lang2==null){
+                    //source 
+                    $value_to_translate = $val;      // $is_replacement
+                    $all_detected++;
+                    $source_lang = null;
+                }else if($lang2==$lang){
+                    //already has this translation
+                    if($is_replacement || $is_deletion){
+                        $replacement_dtl_id = intval($values[0]);
+                    }else{
+                        $replacement_dtl_id = 0;
                     }
+                    $all_detected++;
+                }else if(empty($value_to_translate)){
+                    // temporary source, is replaced by value w/o language prefix
+                    $value_to_translate = $val;
+                    $source_lang = $lang2;
+                }
             }//while
             
             if($is_deletion){
@@ -2481,8 +2487,7 @@ public methods
             }else {
                 
                 // get translated value
-                // 
-                $translated = getExternalTranslation($this->system, $value_to_translate, $lang);
+                $translated = getExternalTranslation($this->system, $value_to_translate, $lang, $source_lang);
                 
                 //$translated = $lang.': TRNASLATED! '.$value_to_translate;
                 

@@ -555,7 +555,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_language">'
-                + window.hWin.HR('Language')+'</label></div>'
+                + window.hWin.HR('Target language')+'</label></div>'
                 + '<select id="sel_language" style="max-width:30em" data-init="0"></select>'
             + '</div>').appendTo($fieldset);
 
@@ -563,7 +563,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 + '<div class="header" style="padding-right: 16px;"><span>Existing translations: </span></div>'
                 + '<label><input id="cb_translation_asis" type="radio" name="tr_act" checked class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">as is</label>&nbsp;&nbsp;&nbsp;'
                 + '<label><input id="cb_translation_replace" type="radio" name="tr_act" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Replace</label>&nbsp;&nbsp;&nbsp;'
-                + '<label><input id="cb_translation_delete" type="radio" name="tr_act" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Detele</label>'
+                + '<label><input id="cb_translation_delete" type="radio" name="tr_act" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">Delete</label>'
             + '</div>').appendTo($fieldset);
           
             window.hWin.HEURIST4.ui.createLanguageSelect($fieldset.find('#sel_language'), null, null, true);

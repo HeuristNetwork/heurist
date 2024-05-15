@@ -123,6 +123,7 @@ regional['RUS'] = {
     'Preferences' : 'Настройки',
     'Layout configuration file': 'Файл конфигурации интерфейса',
     'Language':'Язык',
+    'Target language':'Язык перевода',
     'Theme':'Тема/стили',
     'Open edit in new window':'Редактировать в новом окне',
     'When exiting record edit, prompt for tags if no tags have been set':'Перед сохранением предлагать определить ярлыки',

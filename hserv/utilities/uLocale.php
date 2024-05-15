@@ -336,7 +336,7 @@
         
         if(!empty($source_language) && in_array($source_language, $deepl_languages)){
             $k = array_search($source_language, $deepl_languages);
-            $url .= '&source_lang=' . $deepl_languages[k];
+            $url .= '&source_lang=' . $deepl_languages[$k];
         }
         
         if(strpos($string, '<?xml') === 0){ // possible xml
