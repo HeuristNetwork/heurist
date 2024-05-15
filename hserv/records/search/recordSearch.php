@@ -264,6 +264,7 @@ function recordSearchFacets($system, $params){
 
         $select_clause = "";
         $grouporder_clause = "";
+        $rec_query = "";
 
         if($dt_type=='date'){
 
@@ -315,6 +316,9 @@ function recordSearchFacets($system, $params){
 
                 $select_clause = "SELECT min(dt0.rdi_estMinDate) as min, max(dt0.rdi_estMaxDate) as max, count(distinct r0.rec_ID) as cnt ";
 
+                if($facet_type==_FT_SELECT){
+                    $rec_query = "SELECT r0.rec_ID ";
+                }
             }
 
         }
@@ -446,6 +450,7 @@ function recordSearchFacets($system, $params){
         }
         
         $query =  $select_clause.$qclauses["from"].$detail_link." WHERE ".$qclauses["where"].$details_where.$grouporder_clause;
+        $rec_query = !empty($rec_query) ? "{$rec_query}{$qclauses["from"]}{$detail_link} WHERE {$qclauses["where"]}{$details_where}" : '';
 
         /*
         if($limit>0){
@@ -496,6 +501,15 @@ function recordSearchFacets($system, $params){
 
                 //value, count, second value(max for range) or search value for firstchar
                 array_push($data, array($row[0], $row[1], $third_element ));
+
+                // Retrieve list of record IDs, for additional functions (histogram)
+                if(!empty($rec_query)){
+
+                    $rec_ids = mysql__select_list2($mysqli, $rec_query, 'intval');
+                    if(!empty($rec_ids)){
+                        array_push($data, implode(',', $rec_ids));
+                    }
+                }
             }
 
             if($missingIds){
@@ -600,35 +614,10 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $months = @$period['months'];
     $days = @$period['days'];
     $fulldays = @$period['fulldays'];
-    
-    //$s_date = Temporal::dateToISO($range[0], 2, false);
-    //$e_date = Temporal::dateToISO($range[1], 2, false);
+
     $s_date = new Temporal($range[0]);
     $e_date = new Temporal($range[1]);
-    
-/*    
-    // Process End Date
-    try{
-        $e_date = new DateTime($range[1]);
-        $e_date->setTime(0, 0);
-    }catch(Exception $e){
-        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
-    }
 
-    // Process Start Date
-    try{
-        $s_date = new DateTime($range[0]);
-        $s_date->setTime(0, 0);
-    }catch(Exception $e){
-        return $system->addError(HEURIST_INVALID_REQUEST, "An invalid ending date has been provided, " . $e->errorMessage());
-    }
-
-    // Get differences between Start and End Date
-    $diff = $s_date->diff($e_date, true);
-    $years = $diff->format('%y');
-    $months = $diff->format('%M');
-    $days = $diff->format('%d');
-*/
     // Control variables
     $org_interval = $interval;
     $lower_level = false;
@@ -822,89 +811,41 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
             $start_interval->add($add_day);
         }
     }
-    
-    // Get record dates
-    //OLD $sql = "SELECT cast(if(cast(concat('00',getTemporalDateString(dtl_Value)) as DATETIME) is null, "
-    //OLD                 ."concat('00',cast(getTemporalDateString(dtl_Value) as SIGNED), '-1-1'), concat('00',getTemporalDateString(dtl_Value))) as DATETIME)"
-            //OLD .' FROM recDetails'
-            //OLD .' WHERE dtl_RecID IN ('
-            //OLD .implode(',', $rec_ids).") AND dtl_DetailTypeID = ".$dty_id
-            //OLD ." AND (NULLIF(dtl_Value, '') is not null) AND (cast(getTemporalDateString(dtl_Value) as DATETIME) is not null OR (cast(getTemporalDateString(dtl_Value) as SIGNED) is not null AND cast(getTemporalDateString(dtl_Value) as SIGNED) != 0))";
 
-    $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '  //', rdi_estMaxDate'
+    $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '
             .' FROM recDetailsDateIndex'
             .' WHERE rdi_estMaxDate<2100 AND rdi_RecID IN ('
                 .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id; 
-                
-    //$res = $mysqli->query($sql);
+
     $res = mysql__select($mysqli, $sql);
     if(!$res){
         return $system->addError(HEURIST_DB_ERROR, "An SQL Error has Occurred => " . $mysqli->error);
-    }else{
+    }
 
-        while($row = $res->fetch_row()){ // cycle through all records
-/*        
-            //convert from decimal to yyyy-01-01
-            if(round($row[0])==$row[0]){
-                $dt = round($row[0]).'-01-01';
-            }else{
-                $month = substr($row[0],5,2);
-                $day = substr($row[0],7);
-                $dt = round($row[0]).'-'.(($month==0)?'01':str_pad($month,2,'0',STR_PAD_LEFT))
-                                    .'-'.(($day==0)?'01':str_pad($day,2,'0',STR_PAD_LEFT));
-            }    
+    while($row = $res->fetch_row()){ // cycle through all records
 
-            $detail_date = new DateTime($dt);
-            $detail_date->setTime(0,0);
-*/            
-            $dt0 = $row[0];
-            $dt1 = $row[1];
+        $dt0 = $row[0];
+        $dt1 = $row[1];
 
-            for($k = 0; $k < count($intervals); $k++){ // cycle through classes, add to required count
+        $class_found = 0;
 
-/*            
-                if($format == 'Y'){ // need separate handle for years
+        for($k = 0; $k < count($intervals); $k++){ // cycle through classes, add to required count
 
-                    $lower = $intervals[$k][0];
-                    $upper = $intervals[$k][1];
+            $lower = $intervals[$k][0];
+            $upper = $intervals[$k][1];
 
-                    $rec_date = $detail_date->format($format);
-
-                    if($lower <= $rec_date && $rec_date <= $upper){
-                        $intervals[$k][2] += 1; 
-                        break;
-                    }
-
-                }else{
-
-                    $lower = new DateTime($intervals[$k][0]);
-                    $upper = new DateTime($intervals[$k][1]);
-
-                    if($lower <= $detail_date && $detail_date <= $upper){
-                        $intervals[$k][2] += 1;
-                        break;
-                    }
-                }
-*/
-                $lower = $intervals[$k][0];
-                $upper = $intervals[$k][1];
-                if($is_between){
-                    if($lower <= $dt0 && $dt1 <= $upper){ //within
-                            $intervals[$k][2] += 1;
-                            break;
-                    }
-                }else{ //overlap
-                    if($dt0>=$lower && $dt1<=$upper){
-                            $intervals[$k][2] += 1;
-                            //break;
-                    }
-                }
-
+            if($lower <= $dt0 && $dt1 <= $upper){
+                $intervals[$k][2] += 1;
+                if($is_between){ break; } // within - exclusive
+                // else overlap - inclusive
+                $class_found = 1;
+            }else if($class_found == 1){
+                break;
             }
         }
-
-        return array("status"=>HEURIST_OK, "data"=>$intervals);
     }
+
+    return array("status"=>HEURIST_OK, "data"=>$intervals);
 
     //return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
 }

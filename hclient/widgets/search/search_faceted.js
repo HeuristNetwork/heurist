@@ -2805,13 +2805,11 @@ $.widget( "heurist.search_faceted", {
                                     higher = t_max.toISOString();
                                 }
 
-                                var ids = response.q.ids; // ids of all relavent records, string separated by commas
+                                var ids = response.data.length > 1 ? response.data[1] : response.q.ids; // ids of all relavent records, string separated by commas
 
                                 if(!window.hWin.HEURIST4.util.isempty(ids)){
 
-                                    var ids_arr = ids.split(','); // transform into array
-
-                                    var dty_ID = field['id']; 
+                                    var dty_ID = field['id'];
                                     if(dty_ID.indexOf('r.')==0){
                                         dty_ID = dty_ID.substr(2);    
                                     }
@@ -2830,7 +2828,7 @@ $.widget( "heurist.search_faceted", {
                                     var $slide_range = $facet_values.find('div.ui-slider-range');
 
                                     window.HAPI4.RecordMgr.get_date_histogram_data(request, function(response){
-                                        
+
                                         if(response.status == window.hWin.ResponseStatus.OK){
                                             
                                             var data = response.data;
@@ -2839,9 +2837,6 @@ $.widget( "heurist.search_faceted", {
 
                                             // Get available width
                                             var slider_width = $slide_range.width();
-
-                                            // Max number of records
-                                            var count_max = ids_arr.length;
 
                                             // Diagram's Container
                                             var $diagram = $('<div id="facet_histo_'+facet_index+'">')
