@@ -16,10 +16,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-import "./editInputBlocktext.js";
-import "./editInputGeo.js";
-import "./editInputRecFile.js";
-//import "./editInputFile.js";
 
 $.widget( "heurist.editing_input", {
 
@@ -57,28 +53,27 @@ $.widget( "heurist.editing_input", {
 
         language: null, // language for term values (3 character ISO639-2 code)
 
-        force_displayheight: null // for textareas height in rows
+        force_displayheight: null // for textareas
     },
 
-    dtwidget:null, //widget name
-    
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
     customClasses:null, //custom classes to manipulate visibility and styles in editing
        
     isFileForRecord:false,
+    entity_image_already_uploaded: false,
+
+    enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
 
     is_disabled: false,
     new_value: '', // value for new input
 
-    entity_image_already_uploaded: false,
     linkedImgInput: null, // invisible textbox that holds icon/thumbnail value
     linkedImgContainer: null, // visible div container displaying icon/thumbnail
     
     selObj: null, //shared selector for all enum field values
     child_terms: null, // array of child terms for current vocabulary 
-    enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
     _enumsHasImages: false, 
     
     is_sortable: false, // values are sortable
@@ -287,11 +282,12 @@ $.widget( "heurist.editing_input", {
 
                         if(is_translation){
 
-                            if(typeof translationSupport!=='undefined' && $.isFunction(translationSupport)){
+                            if(typeof translationSupport!=='undefined' && window.hWin.HUL.isFunction(translationSupport)){
                                 translationSupport(this); //see editing_exts
                             }
                             
-                        }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ // request language, then create new input with language prefix
+                        }else if($(event.target).hasClass('ui-icon-translate') && (that.detailType == 'freetext' || that.detailType == 'blocktext')){ 
+                            // request language, then create new input with language prefix
 
                             let $dlg;
                             let msg = 'Language: <select id="selLang"></select><br>';
@@ -379,7 +375,7 @@ $.widget( "heurist.editing_input", {
                                 this._addInput(this.new_value);
                                 this._refresh();
                                 
-                                if($.isFunction(this.options.onrecreate)){
+                                if(window.hWin.HUL.isFunction(this.options.onrecreate)){
                                     this.options.onrecreate.call(this);
                                 }
                             }
@@ -392,14 +388,14 @@ $.widget( "heurist.editing_input", {
             if(this.options.dtID != 'rst_DefaultValue_resource'){
                 if(this.detailType=="resource" && this.configMode.entity=='records'){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"></span></div>')                
                         .appendTo( this.header );
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
                         
                 }else if(this.detailType=="relmarker"){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"></span></div>')                
                         .appendTo( this.header )
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
@@ -489,7 +485,7 @@ $.widget( "heurist.editing_input", {
         //values are not defined - assign default value
         var values_to_set;
         
-        if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
+        if( !Array.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
             
             var isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
@@ -498,7 +494,7 @@ $.widget( "heurist.editing_input", {
                 // reset default value - default value for new record only
                 // do not assign default values in edit mode                
                 values_to_set = [''];        
-            }else if(window.hWin.HEURIST4.util.isArray(def_value)){
+            }else if(Array.isArray(def_value)){
                 //exclude duplication
                 values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);//.unique();
             }else{
@@ -680,13 +676,24 @@ $.widget( "heurist.editing_input", {
             $.each(this.inputs, function(index, input){ 
 
                     that._removeTooltip(input.attr('id'));
+                    
+                    if(that.detailType=='blocktext'){
+                        var eid = '#'+input.attr('id')+'_editor';
+                        //tinymce.remove('#'+input.attr('id')); 
+                        tinymce.remove(eid);
+                        $(eid).parent().remove(); //remove editor element
+                        //$(eid).remove(); 
 
-                    if(that.detailType=='file'){
+                        eid = '#'+input.attr('id')+'_codemirror';
+                        $(eid).parent().remove(); //remove editor element
+
+                        
+                    }else if(that.detailType=='file'){
                         if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
                     }else{
                         if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
                     }
-                    //check for "between" input (date and freetext)
+                    //check for "between" input
                     that.element.find('#'+$(input).attr('id')+'-2').remove();
                     
                     input.remove();
@@ -769,7 +776,7 @@ $.widget( "heurist.editing_input", {
     _removeInput: function(input_id){
 
         var that = this;
-console.log('_removeInput');
+        
         this._removeTooltip(input_id);        
 
         if(this.inputs.length>1 && this.enum_buttons == null){
@@ -787,7 +794,7 @@ console.log('_removeInput');
                         if($input.fileupload('instance')){
                             $input.fileupload('destroy');
                         }
-                        var $parent = that._getInputDiv($input);
+                        var $parent = $input.parents('.input-div');
                         $input.remove();
                         $parent.remove();
                         
@@ -796,7 +803,7 @@ console.log('_removeInput');
                         if($input.hSelect('instance')!==undefined) $input.hSelect('destroy');
 
                         //remove element
-                        that._getInputDiv($input).remove();
+                        $input.parents('.input-div').remove();
                     }
                     //remove from array
                     that.inputs.splice(idx,1);
@@ -806,8 +813,7 @@ console.log('_removeInput');
 
             });
 
-        }
-        else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
+        }else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
 
             var $input;
 
@@ -821,19 +827,17 @@ console.log('_removeInput');
 
                     this._off($input, 'change');
 
-                    this._getInputDiv($input).remove();
+                    $input.parents('.input-div').remove();
 
                     that.inputs.splice(i,1);
                     i--;
                 }
             }
 
-            this._getInputDiv($(this.inputs[0]))
-                .find('input[type="checkbox"]').prop('checked', false);
+            $(this.inputs[0]).parents('.input-div').find('input[type="checkbox"]').prop('checked', false);
 
             that.onChange();
-        }else{  
-            //and clear last one
+        }else{  //and clear last one
             this._clearValue(input_id, '');
             if(this.options.is_between_mode){
                 this.newvalues[input_id+'-2'] = '';
@@ -857,29 +861,21 @@ console.log('_removeInput');
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
 
-            let max_w = $parent_container.length > 0 ? $parent_container.width() - 280 : 600;
-            max_w = Math.floor(!max_w || max_w <= 0 ? 600 : max_w);
-            
-            var that = this;
-            this.inputs.forEach(function(input){
+            $.each(this.inputs, function(index, input){
 
                 input = $(input);
 
-                let ow;
+                let ow = input.width(); // current width
+                let max_w = $parent_container.length > 0 ? $parent_container.width() - 280 : 600;
+                max_w = !max_w || max_w <= 0 ? 600 : max_w;
 
-                if(that.dtwidget!=null && input[that.dtwidget]('instance')){
-                    input[that.dtwidget]('setAutoWidth', units, max_w);
-                }else{
-                    let ow = input.width(); // current width
+                if(Math.ceil(ow) < Math.floor(max_w)){
 
-                    if(Math.ceil(ow) < max_w){
+                    let nw = `${input.val().length+3}${units}`;
+                    $(input).css('width', nw);
 
-                        let nw = `${input.val().length+3}${units}`;
-                        $(input).css('width', nw);
-
-                        if(input.width() < ow) input.width(ow); // we can only increase - restore
-                        else if(input.width() > max_w) input.width(max_w); // set to max
-                    }
+                    if(input.width() < ow) input.width(ow); // we can only increase - restore
+                    else if(input.width() > max_w) input.width(max_w); // set to max
                 }
             });
         }
@@ -916,7 +912,7 @@ console.log('_removeInput');
         
         this._setAutoWidth();
         
-        if($.isFunction(this.options.change)){
+        if(window.hWin.HUL.isFunction(this.options.change)){
             this.options.change.call( this );    
         }
     },
@@ -952,8 +948,644 @@ console.log('_removeInput');
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
-            this.dtwidget = 'editInputBlocktext';
-            $input = $inputdiv.editInputBlocktext({ container:this, value:value });
+            $input = $( "<textarea>",{rows:2}) //min number of lines
+            .uniqueId()
+            .val(value)
+            .addClass('text ui-widget-content ui-corner-all')
+            .css({'overflow-x':'hidden'})
+            .on('keydown',function(e){
+                if (e.keyCode == 65 && e.ctrlKey) {
+                    e.target.select();
+                }    
+            })
+            .on('keyup',function(){that.onChange();})
+            .on('change',function(){that.onChange();})
+            .appendTo( $inputdiv );
+
+            //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
+            function __adjustTextareaHeight(){
+                $input.attr('rows', 2);
+                var dheight = that.f('rst_DisplayHeight');  //max height 
+                var lht = parseInt($input.css('lineHeight'),10); 
+                if(!(lht>0)) lht = parseInt($input.css('font-size')); //*1.3
+                
+                var cnt = ($input.prop('scrollHeight') / lht).toFixed(); //visible number of lines
+                if(cnt>0){
+                    if(cnt>dheight && dheight>2){
+                        $input.attr('rows', dheight);    
+                    }else{
+                        $input.attr('rows', cnt);        
+                    }
+                }
+            }
+            
+            //count number of lines
+            if(!this.options.force_displayheight){
+                setTimeout(__adjustTextareaHeight, 1000);
+            }else{
+                $input.attr('rows', this.options.force_displayheight);
+            }
+            
+            if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
+
+                    var $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
+                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        
+                            var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                            if(!current_val) current_val = [];
+                            window.hWin.HEURIST4.ui.showRecordActionDialog(
+                            'thematicMapping',
+                            {maplayer_query: this.configMode['thematicmap']===true?null:this.configMode['thematicmap'], //query from map layer
+                            thematic_mapping: current_val,
+                                onClose: function(context){
+                                    if(context){
+                                        var newval = window.hWin.HEURIST4.util.isJSON(context);
+                                        newval = (!newval)?'':JSON.stringify(newval);
+                                        $input.val(newval);
+                                        that.onChange();
+                                    }
+                                }}                     
+                            );
+                    }});
+            }else
+            if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
+            //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
+            && this.options.dtID > 0)
+            {
+                
+                var eid = $input.attr('id')+'_editor';
+                
+                //hidden textarea for tinymce editor
+                $editor = $( "<textarea>")
+                .attr("id", eid)
+                //.addClass('text ui-widget-content ui-corner-all')
+                .css({'overflow':'auto',display:'flex',resize:'both'})
+                .appendTo( $('<div>').css({'display':'inline-block'}).appendTo($inputdiv) );
+                $editor.parent().hide();
+
+                //hidden textarea for codemirror editor
+                var codeEditor = null;
+                if(typeof EditorCodeMirror !== 'undefined'){
+                    codeEditor = new EditorCodeMirror($input);
+                }
+                
+                var $btn_edit_switcher;
+
+                if(this.options.recordset && this.options.recordset.entityName == 'Records'){
+
+                    var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+
+                    $btn_edit_switcher = $('<div class="editor_switcher">').appendTo( $inputdiv );
+
+                    $('<span>text</span>')
+                        .attr('title', 'plain text or source, showing markup')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'text-decoration': 'underline'})
+                        .appendTo($btn_edit_switcher);
+
+                    $('<span>wysiwyg</span>')
+                        .attr('title', 'rendering of the text, taken as html')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'margin-left': '10px'})
+                        .appendTo($btn_edit_switcher);
+
+                    if(codeEditor){
+                        $('<span>codeeditor</span>')
+                            .attr('title', 'direct edit html in code editor')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                            
+
+                        /*DEBUG  
+                        var btn_debug = $('<span>debug</span>')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            .appendTo($btn_edit_switcher);
+                            
+                        this._on( btn_debug, {       
+                            click:function(event){
+                            
+                            if(!window.hWin.layoutMgr){
+                                hLayoutMgr(); //init global var layoutMgr
+                            }
+                                    
+                            //cfg_widgets is from layout_defaults.js
+                            window.hWin.layoutMgr.convertJSONtoHTML(that.getValues()[0]);
+                        }});
+                        */
+                            
+                    }
+                        
+                    $('<span>table</span>')
+                        .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
+                        .addClass('smallbutton')
+                        .css({cursor: 'pointer', 'margin-left': '10px'})
+                        .hide() // currently un-available
+                        .appendTo($btn_edit_switcher);
+                }else{
+                    $btn_edit_switcher = $( '<span>wysiwyg</span>', {title: 'Show/hide Rich text editor'})
+                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
+                        .addClass('smallbutton')
+                        .css({'line-height': '20px','vertical-align':'top', cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+                }
+
+                function __openRecordLink(node){
+
+                    const org_href = $(node).attr('href');
+                    let href = '';
+
+                    if(org_href.indexOf('/') !== -1){ // check if href is in the format of record_id/custom_report
+
+                        let parts = org_href.split('/');
+
+                        if(parts.length == 2 && window.hWin.HEURIST4.util.isNumber(parts[0]) && parts[0] > 0){
+                            href = `${window.hWin.HAPI4.baseURL}viewers/smarty/showReps.php?publish=1&db=${window.hWin.HAPI4.database}&q=ids:${parts[0]}&template=${parts[1]}`
+                        }
+                    }else 
+                    if(window.hWin.HEURIST4.util.isNumber(org_href) && org_href > 0){ // check if href is just the record id
+                        href = `${window.hWin.HAPI4.baseURL}?recID=${org_href}&fmt=html&db=${window.hWin.HAPI4.database}`;
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(href)){ // use different url
+                        $(node).attr('href', href);
+                        setTimeout((ele, org_href) => { $(ele).attr('href', org_href); }, 500, node, org_href);
+                    }
+                }
+
+                function __showEditor(is_manual){
+                    
+                    if(typeof tinymce === 'undefined') return false; //not loaded yet
+
+                    if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
+
+                        window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){
+
+                            if(response.status != window.hWin.ResponseStatus.OK){
+
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                            }else if(!window.hWin.HEURIST4.util.isObject(response.data)){
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                            }else{
+                                window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = response.data;
+                            }
+
+                            __showEditor(is_manual);
+                        });
+
+                        return;
+                    }
+
+                    var eid = '#'+$input.attr('id')+'_editor';
+
+                    $(eid).parent().css({display:'inline-block'}); //.height($input.height()+100)
+                    //to show all toolbar buttons - minimum 768
+                    $(eid).width(Math.max(768, $input.width())).height($input.height()).val($input.val()); 
+
+                    let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
+
+                    let style_formats = Object.hasOwn(custom_formatting, 'style_formats') && custom_formatting.style_formats.length > 0 
+                                            ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : [];
+
+                    if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
+                        style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
+                    }
+
+                    let is_grayed = $input.hasClass('grayed') ? 'background: rgb(233 233 233) !important' : '';
+                    
+                                          
+                        /*
+                        "webfonts":{
+                            "LinuxLibertine":"@import url('settings/linlibertine-webfont.css');"
+                        }
+                        */
+                    let font_family = 'Helvetica,Arial,sans-serif';
+                    let webfonts = '';
+                    if(Object.hasOwn(custom_formatting, 'webfonts')){
+                        let fams = Object.keys(custom_formatting.webfonts);
+                        for(let i=0; i<fams.length; i++){
+                            if(Object.hasOwn(custom_formatting.webfonts, fams[i])){
+                                webfonts = webfonts + custom_formatting.webfonts[fams[i]];
+                                font_family = fams[i];
+                            }
+                        }
+                    }
+                    
+                    let custom_webfonts = `${webfonts} body { font-size: 8pt; font-family: ${font_family}; ${is_grayed} }`;
+
+                    tinymce.init({
+                        //target: $editor, 
+                        //selector: '#'+$input.attr('id'),
+                        selector: eid,
+                        menubar: false,
+                        inline: false,
+                        branding: false,
+                        elementpath: false,
+                        statusbar: true,        
+                        resize: 'both', 
+
+                        //relative_urls : false,
+                        //remove_script_host : false,
+                        //convert_urls : true, 
+                        
+                        relative_urls : true,
+                        remove_script_host: false,
+                        //document_base_url : window.hWin.HAPI4.baseURL,
+                        urlconverter_callback : 'tinymceURLConverter',
+
+                        entity_encoding:'raw',
+                        inline_styles: true,    
+                        content_style: `${custom_webfonts} ${custom_formatting.content_style}`,
+                        
+                        min_height: ($input.height()+110),
+                        max_height: ($input.height()+110),
+                        autoresize_bottom_margin: 10,
+                        autoresize_on_init: false,
+                        image_caption: true,
+
+                        setup:function(editor) {
+
+                            if(editor.ui){
+                                // ----- Custom buttons -----
+                                // Insert Heurist media
+                                editor.ui.registry.addButton('customHeuristMedia', {
+                                    icon: 'image',
+                                    text: 'Media',
+                                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                                        that._addHeuristMedia();
+                                    }
+                                });
+                                // Insert figcaption to image/figure
+                                editor.ui.registry.addButton('customAddFigCaption', {
+                                    icon: 'comment',
+                                    text: 'Caption',
+                                    tooltip: 'Add caption to current media',
+                                    onAction: function (_) {
+                                        that._addMediaCaption();
+                                    },
+                                    onSetup: function (button) {
+
+                                        const activateButton = function(e){
+
+                                            //let is_disabled = e.element.nodeName.toLowerCase() !== 'img'; // is image element
+                                            button.setDisabled(e.element.nodeName.toLowerCase() !== 'img');
+                                        };
+
+                                        editor.on('NodeChange', activateButton);
+                                        return function(button){
+                                            editor.off('NodeChange', activateButton);
+                                        }
+                                    }
+                                });
+                                // Insert link to Heurist record
+                                editor.ui.registry.addButton('customHeuristLink', {
+                                    icon: 'link',
+                                    text: 'Record',
+                                    tooltip: 'Add link to Heurist record',
+                                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                                        selectRecord(null, function(recordset){
+                                            
+                                            let record = recordset.getFirstRecord();
+                                            const record_id = recordset.fld(record,'rec_ID');
+                                            let href = `${record_id}_${window.hWin.HEURIST4.util.random()}`;
+                                            tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+                                            
+                                            let $link = $(tinymce.activeEditor.selection.getNode());
+                                            if(!$link.is('a')){
+                                                $link = $link.find(`a[href="${href}"]`);
+                                            }
+                                            if($link.length == 0){
+                                                $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
+                                            }
+
+                                            $link.attr('href', record_id).attr('data-mce-href', record_id);
+
+                                            // Customise link's target and whether to open in default rec viewer or custom report
+                                            let $dlg;
+                                            let msg = `Inserting a link to ${recordset.fld(record,'rec_Title')}<br><br>`
+                                                    + 'Open record in: <select id="a_recview"></select><br><br>'
+                                                    + 'Open link as: <select id="a_target"><option value="_blank">New tab</option><option value="_self">Within window</option><option value="_popup">Within popup</option></select><br>';
+
+                                            let btns = {};
+                                            btns[window.HR('Insert')] = function(){
+
+                                                let target = $dlg.find('#a_target').val();
+                                                let template = $dlg.find('#a_recview').val();
+
+                                                $link.attr('target', target);
+
+                                                if(!window.hWin.HEURIST4.util.isempty(template)){
+
+                                                    let new_href = record_id + '/' + template;
+
+                                                    $link.attr('href', new_href).attr('data-mce-href', new_href);
+                                                }
+
+                                                if(!$link.text().match(/\w/)){ // if content is empty, replace with href
+                                                    $link.text($link.attr('href'));
+                                                }
+
+                                                $dlg.dialog('close');
+                                            };
+                                            btns[window.HR('Cancel')] = function(){ $dlg.dialog('close'); }
+
+                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting link to Heurist record', ok: window.HR('Insert link'), cancel: window.HR('Cancel')}, 
+                                                {default_palette_class: 'ui-heurist-populate'});
+
+                                            window.hWin.HEURIST4.ui.createTemplateSelector($dlg.find('#a_recview'), [{key: '', title: 'Default record viewer'}]);
+
+                                        });
+                                    }
+                                });
+                                // Insert horizontal rule
+                                editor.ui.registry.addButton('customHRtag', {
+                                    text: '&lt;hr&gt;',
+                                    onAction: function (_) {
+                                        tinymce.activeEditor.insertContent( '<hr>' );
+                                    }
+                                });
+                                // Clear text formatting - to replace the original icon
+                                editor.ui.registry.addIcon('clear-formatting', `<img style="padding-left: 5px;" src="${window.hWin.HAPI4.baseURL}hclient/assets/clear_formatting.svg" />`)
+                                editor.ui.registry.addButton('customClear', {
+                                    text: '',
+                                    icon: 'clear-formatting',
+                                    tooltip: 'Clear formatting',
+                                    onAction: function (_) {
+                                        tinymce.activeEditor.execCommand('RemoveFormat');
+                                    }
+                                });
+                            }else{
+                                editor.addButton('customHeuristMedia', {
+                                    icon: 'image',
+                                    text: 'Media',
+                                    onclick: function (_) {  //since v5 onAction in v4 onclick
+                                        that._addHeuristMedia();
+                                    }
+                                });
+                            }
+
+                            // ----- Event handlers -----
+                            let has_initd = false, is_blur = false;
+                            editor.on('init', function(e) {
+                                let $container = $(editor.editorContainer);
+
+                                if($container.parents('.editForm').length == 1){
+                                    let max_w = $container.parents('.editForm').width(); 
+                                    if($container.width() > max_w - 200){
+                                        $container.css('width', (max_w - 245) + 'px');
+                                    }
+                                }
+
+                                has_initd = true;
+                            });
+
+                            editor.on('change', function(e) {
+
+                                var newval = editor.getContent();
+                                var nodes = $.parseHTML(newval);
+                                if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                    (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                { 
+                                    //remove the only tag
+                                    $input.val(nodes[0].textContent);
+                                }else{
+                                    $input.val(newval);     
+                                }
+
+                                // check if editor is 'expanded'
+                                if(editor.settings.max_height != null){
+                                    editor.settings.max_height = null;
+                                    tinymce.activeEditor.execCommand('mceAutoResize');
+                                }
+
+                                //$input.val( ed.getContent() );
+                                that.onChange();
+                            });
+
+                            editor.on('focus', (e) => { // expand text area
+                                editor.settings.max_height = null;
+                                tinymce.activeEditor.execCommand('mceAutoResize');
+                            });
+
+                            editor.on('blur', (e) => { // collapse text area
+                                is_blur = true;
+                                editor.settings.max_height = editor.settings.min_height;
+                                editor.settings.autoresize_min_height = null;
+                                tinymce.activeEditor.execCommand('mceAutoResize');
+                            });
+
+                            editor.on('ResizeContent', (e) => {
+                                if(is_blur){
+                                    is_blur = false;
+                                }else if(has_initd){
+                                    editor.settings.max_height = null;
+                                    editor.settings.autoresize_min_height = $(editor.container).height();
+                                }
+                            });
+
+                            // Catch links opening
+                            editor.on('contextmenu', (e) => {
+                                setTimeout(() => {
+
+                                    $(document).find('.tox-menu [title="Open link"]').on('click', function(e){
+
+                                        let node = tinymce.activeEditor.selection.getNode();
+
+                                        __openRecordLink(node);
+                                    });
+
+                                }, 500);
+                            });
+
+                            editor.on('click', (e) => {
+
+                                let node = tinymce.activeEditor.selection.getNode();
+
+                                if((e.ctrlKey || e.metaKey) && node.tagName == 'A'){
+                                    __openRecordLink(node);
+                                }
+                            });
+                        },
+                        init_instance_callback: function(editor){
+                            let html = '<span class="tox-tbtn__select-label">URL</span>';
+                            $(editor.container).find('.tox-tbtn[title="Insert/edit link"]').append(html);
+
+                            $(editor.container).find('.tox-split-button[title="Background color"]').attr('title', 'Highlight text');
+                        },
+                        plugins: [ //contextmenu, textcolor since v5 in core
+                            'advlist autolink lists link image preview ', //anchor charmap print 
+                            'searchreplace visualblocks code fullscreen',
+                            'media table paste help autoresize'  //insertdatetime  wordcount
+                        ],      
+                        //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
+                        toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristMedia customAddFigCaption customHeuristLink link | align | bullist numlist outdent indent | table | help'],
+                        formats: custom_formatting.formats,
+                        style_formats_merge: true,
+                        style_formats: style_formats,
+                        //block_formats: 'Paragraph=p;Heading 1=h1;Heading 2=h2;Heading 3=h3;Heading 4=h4;Heading 5=h5;Heading 6=h6;Preformatted=pre;Quotation=blockquote',
+                        content_css: [
+                            '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                            //,'//www.tinymce.com/css/codepen.min.css'
+                        ]
+                    });
+                    $input.hide();
+
+                    if($btn_edit_switcher.is('span')){
+                        $btn_edit_switcher.text('text'); 
+                    }else{
+                        cur_action = 'wysiwyg';
+                        $btn_edit_switcher.find('span').css('text-decoration', '');
+                        $btn_edit_switcher.find('span:contains("wysiwyg")').css('text-decoration', 'underline');
+                    }
+                    
+                    return true;
+                } // _showEditor()
+
+                // RT_ indicates the record types affected, DT_ indicates the fields affected
+                // DT_EXTENDED_DESCRIPTION (field concept 2-4) is the page content or header/footer content
+                var isCMS_content = (( 
+                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
+                        (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
+
+                var cur_action = 'text', cms_div_prompt = null, cms_label_edit_prompt = null;
+
+                if( isCMS_content ){
+                    
+                    cur_action = '';
+                    
+                    var fstatus = '';
+                    var fname = 'Page content';
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
+                        fname = 'Custom header';
+                        fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom header defined'
+                            :'Delete html from this field to use default page header.';
+                    }
+                    
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'] &&
+                       this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
+                        fname = 'Custom footer';
+                        fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom footer defined'
+                            :'Delete html from this field to use default page footer.';
+                    }
+                                
+                    // Only show this for the CMS Home record type and home page content            
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
+                        && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']){
+                            fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
+                    }
+                    
+                    // Only show this message for CONTENT fields (of home page or menu pages) which can be directly edited in the CMS editor 
+                    cms_div_prompt = $('<div style="line-height:20px;display:inline-block;"><b>Please edit the content of the '
+                                + fname
+                                + ' field in the CMS editor.<br>'
+                                + fstatus+'</b></div>')
+                                .insertBefore($input);
+                    $input.hide();
+                    
+                    $('<br>').insertBefore($btn_edit_switcher);
+
+                    cms_label_edit_prompt = $('<span>Advanced users: edit source as </span>')
+                        .css({'line-height': '20px'}).addClass('smallbutton')
+                        .insertBefore( $btn_edit_switcher );
+                    $btn_edit_switcher.css({display:'inline-block'});
+                                        
+                    var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
+                    if($cms_dialog.find('.main_cms').length>0){ 
+                        //opened from cms editor
+                        //$btn_edit_switcher.hide();
+                    }else{
+                        //see manageRecords for event handler
+                        cms_div_prompt.find('span')
+                            .css({cursor:'pointer','text-decoration':'underline'})
+                            .attr('data-cms-edit', 1)
+                            .attr('data-cms-field', this.options.dtID)
+                            .attr('title','Edit website content in the website editor');   
+                            
+                    }
+                }
+                
+                if($btn_edit_switcher.is('div')){
+
+                    this._on($btn_edit_switcher.find('span'), { 
+                        click: function(event){
+                            
+                            if(cms_label_edit_prompt){
+                               cms_label_edit_prompt.hide(); 
+                               cms_div_prompt.hide(); 
+                            }
+
+                            var sel_action = $(event.target).text();
+                            sel_action = sel_action == 'codeeditor' && !codeEditor ? 'text' : sel_action;
+                            if(cur_action == sel_action) return;
+                            
+                            $btn_edit_switcher.find('span').css('text-decoration', '');
+                            $(event.target).css('text-decoration', 'underline');
+
+                            var eid = '#'+$input.attr('id')+'_editor';
+
+                            //hide previous
+                            if(cur_action=='wysiwyg'){
+                                tinymce.remove(eid);
+                                $(eid).parent().hide();
+                            }else if(cur_action=='codeeditor'){
+                                codeEditor.hideEditor();
+                            }
+                            //show now
+                            if(sel_action == 'codeeditor'){
+                                codeEditor.showEditor();
+                            }if(sel_action == 'wysiwyg'){
+                                __showEditor(true); //show tinymce editor
+                            }else if(sel_action == 'text'){
+                                $input.show();
+                                __adjustTextareaHeight();
+                            }
+                           
+                            cur_action = sel_action;
+                        }
+                    });
+
+                }else{
+                    
+                    this._on( $btn_edit_switcher, { 
+                        click: function(){
+                            var eid = '#'+$input.attr('id')+'_editor';                    
+                            if($input.is(':visible')){
+                                if (__showEditor(true)) //show tinymce editor
+                                    $btn_edit_switcher.text('text');
+                            }else{
+                                $btn_edit_switcher.text('wysiwyg');
+                                $input.show();
+                                tinymce.remove(eid);
+                                $(eid).parent().hide();
+                                __adjustTextareaHeight();
+                            }
+                        }
+                    });
+                }
+
+                //what is visible initially
+                if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
+                    var nodes = $.parseHTML(value);
+                    if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html - show editor at once
+                        setTimeout(__showEditor, 1200); 
+                    }
+                }
+                
+            } 
 
         }
         // || this.options.dtID=='tag'
@@ -1082,7 +1714,7 @@ console.log('_removeInput');
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
 
-                            $input.click();
+                            $input.trigger('click');
                             $input.hSelect('close');
                         }
                     });
@@ -1258,10 +1890,10 @@ console.log('_removeInput');
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
-            .change(function(){that.onChange();})
+            .on('change',function(){that.onChange();})
             .appendTo( $inputdiv );
             
-            if($.isArray(this.configMode)){
+            if(Array.isArray(this.configMode)){
                 $input.prop('value', this.configMode[0]);
                 $input.prop('checked', (this.configMode.indexOf(value)==0) );
             }else{
@@ -1285,7 +1917,7 @@ console.log('_removeInput');
             if(value){
                 $input.val(value);
             }
-            $input.change(function(){that.onChange();})
+            $input.on('change',function(){that.onChange();})
 
         }
         else if(this.detailType=="user"){ //special case - only groups of current user
@@ -1295,7 +1927,7 @@ console.log('_removeInput');
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that.onChange();})
+            .on('change',function(){that.onChange();})
             .appendTo( $inputdiv );
             var mode = null;
             
@@ -1320,7 +1952,7 @@ console.log('_removeInput');
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that.onChange();})
+            .on('change',function(){that.onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
@@ -1397,7 +2029,7 @@ console.log('_removeInput');
 
                             }
 
-                            if($.isFunction(that._external_relmarker.callback)){
+                            if(window.hWin.HUL.isFunction(that._external_relmarker.callback)){
                                 that._external_relmarker.callback(context);
                             }
 
@@ -1577,7 +2209,6 @@ console.log('_removeInput');
                         .uniqueId();
                    $input = $inputdiv;
 
-                   var rty_names = '';
                    if(rts.length>0){
                         rty_names = '<div class="truncate" style="max-width:200px;display:inline-block;vertical-align:top">&nbsp;to '
                                 +rts.join(', ') +'</div>';
@@ -1600,7 +2231,7 @@ console.log('_removeInput');
                    }
                         
                    this._on($btn_add_rel_dialog,{click:__show_addlink_dialog});
-                   //$btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
+                   //$btn_add_rel_dialog.on('click',function(){__show_addlink_dialog()});
                    
                    __onRelRemove();                   
                    /*if( this.element.find('.link-div').length>0){ //hide this button if there are links
@@ -1673,8 +2304,8 @@ console.log('_removeInput');
                         .addClass(classes).css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            var __show_select_function = null;
-            if(typeof browseRecords!=='undefined' && $.isFunction(browseRecords)){
+            __show_select_function = null;
+            if(typeof browseRecords!=='undefined' && window.hWin.HUL.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
             
@@ -1891,27 +2522,13 @@ console.log('_removeInput');
             }
 
         }
-        else 
-        if(this.detailType=='geo'){   //----------------------------------------------------
-
-            this.dtwidget = 'editInputGeo';
-            $input = $inputdiv.editInputGeo({ container:this, value:value });
-                
-        }
-        else 
-        if(this.isFileForRecord){   //----------------------------------------------------
-        
-            this.dtwidget = 'editInputRecFile';
-            $input = $inputdiv.editInputRecFile({ container:this, value:value });
-        
-        
-        }else{              //----------------------------------------------------
+        else{              //----------------------------------------------------
             $input = $( "<input>")
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
-            .keyup(function(){that.onChange();})
-            .change(function(){
+            .on('keyup', function(){that.onChange();})
+            .on('change',function(){
                     that.onChange();
             })
             .appendTo( $inputdiv );
@@ -1919,9 +2536,9 @@ console.log('_removeInput');
             window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
-                 this.detailType=='date' || this.detailType=='action')){
+                 this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
                      
-                $input.keydown(function(e){  //Ctrl+A - select all
+                $input.on('keydown',function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
                                         e.target.select()
                     }    
@@ -1950,7 +2567,7 @@ console.log('_removeInput');
                                 }
                             }
                             if(force_edit===true){
-                                $input.focus();   
+                                $input.trigger('focus');   
                             }
                         }else if(window.hWin.HEURIST4.util.isnull($btn_extlink)){
                             
@@ -1985,7 +2602,7 @@ console.log('_removeInput');
             else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                  
-                $input.keypress(function (e) {
+                $input.on('keypress', function (e) {
                     var code = e.charCode || e.keyCode;
                     var charValue = String.fromCharCode(code);
                     var valid = false;
@@ -2022,10 +2639,10 @@ console.log('_removeInput');
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }
@@ -2033,10 +2650,11 @@ console.log('_removeInput');
             }else
             if(this.detailType=="float"){//----------------------------------------------------
 
-                $input.keypress(function (e) {
+                $input.on('keypress', function (e) {
                     var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
                     var charValue = String.fromCharCode(code);
                     var valid = false;
+
 
                     if(charValue=='-' && this.value.indexOf('-')<0){
                         this.value = '-'+this.value;
@@ -2055,7 +2673,7 @@ console.log('_removeInput');
                 });
 
                 $input.on('paste', function(e){
-                    if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                    if(!window.hWin.HEURIST4.util.isNumber(e.originalEvent.clipboardData.getData('text'))){
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
                         window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
@@ -2072,10 +2690,10 @@ console.log('_removeInput');
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }
@@ -2086,7 +2704,7 @@ console.log('_removeInput');
                 this._createDateInput($input, $inputdiv);
                 
                 $input.val(value);    
-                $input.change(); 
+                $input.trigger('change'); 
 
                 let css = 'display: block; font-size: 0.8em; color: #999999; padding: 0.3em 0px;';
 
@@ -2103,12 +2721,454 @@ console.log('_removeInput');
     
                     this._on($help_controls.find('span.fake_link'), {
                         click: function(e){
-                            $input.val(e.target.textContent).change();
+                            $input.val(e.target.textContent).trigger('change');
                         }
                     });
                 }
             }
-            else  //----------------------------------------------------
+            else 
+            if(this.isFileForRecord){ //----------------------------------------------------
+                
+				var $input_img, $gicon;
+                
+                var select_return_mode = 'recordset';
+
+                /* File IDs, needed for processes below */
+                var f_id = value.ulf_ID;
+                var f_nonce = value.ulf_ObfuscatedFileID;
+
+                var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+                
+                $input.css({'padding-left':'30px', cursor:'hand'});
+                //folder icon in the begining of field
+                $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+                    .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
+                
+                /* Image and Player (enalrged image) container */
+                $input_img = $('<br><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:5px 0px;border:none;background:transparent;">'
+                + '<img id="img'+f_id+'" class="image_input" style="max-width:none;">'
+                + '<div id="player'+f_id+'" style="min-height:100px;min-width:200px;display:none;"></div>'
+                + '</div>')
+                .appendTo( $inputdiv )
+                .hide();
+
+				/* Record Type help text for Record Editor */
+				$small_text = $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
+                    + 'Click image to freeze in place</div>')
+                .clone()
+                .insertAfter( $clear_container )
+                .hide();
+
+                /* urls for downloading and loading the thumbnail */
+                var dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=1&download=1&file='+f_nonce;
+                var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview'; 
+
+                /* Anchors (download and show thumbnail) container */
+                $dwnld_anchor = $('<br><div class="download_link" style="font-size: smaller;">'
+                    + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:5px;text-decoration:underline;color:blue"'
+                    + '>show thumbnail</a>'
+                    + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
+                        + '"style="display:inline-block;text-decoration:underline;color:blue" title="Download image"><span class="ui-icon ui-icon-download"></span>download</a>'
+                    + '</div>')
+                .clone()
+                .appendTo( $inputdiv )
+                .hide();
+                
+                // Edit file's metadata
+                $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
+                .insertBefore($clear_container);
+                this._on($edit_details, {
+                    click: (event) => {
+
+                        let popup_opts = {
+                            isdialog: true, 
+                            select_mode: 'manager',
+                            edit_mode: 'editonly',
+                            rec_ID: f_id,
+                            default_palette_class: 'ui-heurist-populate',
+                            width: 950,
+                            onClose: (recset) => {
+
+                                // update external reference, if necessary
+                                if(window.hWin.HEURIST4.util.isRecordSet(recset)){
+
+                                    let record = recset.getFirstRecord();
+
+                                    let newvalue = {
+                                        ulf_ID: recset.fld(record,'ulf_ID'),
+                                        ulf_ExternalFileReference: recset.fld(record,'ulf_ExternalFileReference'),
+                                        ulf_OrigFileName: recset.fld(record,'ulf_OrigFileName'),
+                                        ulf_MimeExt: recset.fld(record,'fxm_MimeType'),
+                                        ulf_ObfuscatedFileID: recset.fld(record,'ulf_ObfuscatedFileID')
+                                    };
+
+                                    that.newvalues[$input.attr('id')] = newvalue;
+                                    that._findAndAssignTitle($input, newvalue);
+                                }
+                            }
+                        };
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                    }
+                });
+                if(!f_id || f_id < 0){
+                    $edit_details.hide();
+                }
+                
+                /* Change Handler */
+                $input.on('change',function(event){
+					
+                    /* new file values */
+                    var val = that.newvalues[$input.attr('id')];
+
+                    if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
+                        $input.val('');
+                    }else{
+                        var n_id = val['ulf_ID'];
+                        var n_nonce = val['ulf_ObfuscatedFileID'];
+                        var n_dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&debug=2&download=1&file='+n_nonce;
+                        var n_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+n_nonce+'&mode=tag&origin=recview';
+                    
+                        if(f_id != n_id){// If the image has been changed from original/or has been newly added
+
+                            $container = $(event.target.parentNode);
+
+                            $show = $($container.find('a#lnk'+f_id)[0]);
+                            $dwnld = $($container.find('a#dwn'+f_id)[0]);
+                            $player = $($container.find('div#player'+f_id)[0]);
+                            $thumbnail = $($container.find('img#img'+f_id)[0]);
+                            $edit_metadata = $($container.find('.edit_metadata')[0]);
+
+                            $show.attr({'id':'lnk'+n_id});
+
+                            $dwnld.attr({'id':'dwn'+n_id, 'href':n_dwnld_link});
+
+                            $player.attr({'id':'player'+n_id});
+
+                            $thumbnail.attr({'id':'img'+n_id});                       
+
+                            f_id = n_id;
+                            f_nonce = n_nonce;
+                            dwnld_link = n_dwnld_link;
+                            url = n_url;
+
+                            if(!n_id || n_id < 1){
+                                $edit_metadata.hide();
+                            }else{
+                                $edit_metadata.show();
+                            }
+                        }
+                        
+                    }
+                    
+                    //clear thumb rollover
+                    if(window.hWin.HEURIST4.util.isempty($input.val())){
+                        $input_img.find('img').attr('src','');
+                    }
+
+                    that.onChange(); 
+                });
+                
+                /* Handler Variables */
+                var hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
+                var isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
+
+                /* Input element's hover handler */
+                function __showImagePreview(event){
+
+                    var imgAvailable = !window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'));
+                    var invalidURL = $inputdiv.find('div.smallText').hasClass('invalidImg');
+
+                    if((imgAvailable || invalidURL) && isClicked == 0){
+                        if (hideTimer) {
+                            window.clearTimeout(hideTimer);
+                            hideTimer = 0;
+                        }
+                        
+                        if($input_img.is(':visible')){
+                            $input_img.stop(true, true).show();    
+                        }else{
+                            if(showTimer==0){
+                                showTimer = window.setTimeout(function(){
+                                    $input_img.show();
+                                    $inputdiv.find('div.smallText').show();
+                                    showTimer = 0;
+                                },500);
+                            }
+                        }
+                    }
+                }
+                this._on($input,{mouseover: __showImagePreview});
+                this._on($input_img,{mouseover: __showImagePreview}); //mouseover
+
+                /* Input element's mouse out handler, attached and dettached depending on user preferences */
+                function __hideImagePreview(event){
+                    if (showTimer) {
+                        window.clearTimeout(showTimer);
+                        showTimer = 0;
+                    }
+
+                    if($input_img.is(':visible')){
+                        
+                        //var ele = $(event.target);
+                        var ele = event.toElement || event.relatedTarget;
+                        ele = $(ele);
+                        if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
+                            return;
+                        }
+                                                
+                        hideTimer = window.setTimeout(function(){
+                            if(isClicked==0){
+                                $input_img.fadeOut(1000);
+                                $inputdiv.find('div.smallText').hide(1000);
+                            }
+                        }, 500);
+                    }
+                }
+                this._on($input, {mouseout:__hideImagePreview});
+                this._on($input_img, {mouseout:__hideImagePreview});
+
+                /* Source has loaded */
+                function __after_image_load(){
+                    setTimeout(() => {
+
+                        let $img = $input_img.find('img');
+                        let $close_icon = $inputdiv.find('.ui-icon-window-close');
+
+                        $close_icon.css('left', $img.outerWidth(true) + 10);
+                    }, 500);
+                };
+
+                /* Thumbnail's click handler */
+                $input_img.on('click',function(event){
+
+                    var elem = event.target;
+                    
+                    if($(elem).hasClass('ui-icon-window-close')){
+                        return;
+                    }
+
+                    if (isClicked==0 && !$inputdiv.find('div.smallText').hasClass('invalidImg')){
+                        isClicked=1;
+                        
+                        that._off($input_img,'mouseout');
+
+                        $inputdiv.find('div.smallText').hide(); // Hide image help text
+
+                        $dwnld_anchor = $($(elem.parentNode.parentNode).find('div.download_link')); // Find the download anchors
+                        
+                        $dwnld_anchor.show();
+                        $inputdiv.find('.ui-icon-window-close').show();
+
+                        if ($dwnld_anchor.find('a#dwnundefined')){  // Need to ensure the links are setup
+                            $dwnld_anchor.find('a#dwnundefined').attr({'id':'dwn'+f_id, 'href':dwnld_link});
+                            $dwnld_anchor.find('a#lnkundefined').attr({'id':'lnk'+f_id, 'onClick':'window.hWin.HEURIST4.ui.hidePlayer('+f_id+', this.parentNode)'})
+                        }
+
+                        $input_img.css('cursor', 'zoom-in');
+
+                        if($input_img.find('img')[0].complete){
+                            __after_image_load();
+                        }else{
+                            $input_img.find('img')[0].addEventListener('load', __after_image_load);
+                        }
+
+                        window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
+                    }
+                    else if (isClicked==1) {
+
+                        /* Enlarge Image, display player */
+                        if ($(elem.parentNode).hasClass("thumb_image")) {
+                            $(elem.parentNode.parentNode).find('.hideTumbnail').hide();
+                            $inputdiv.find('.ui-icon-window-close').hide();
+
+                            $input_img.css('cursor', 'zoom-out');
+
+                            window.hWin.HEURIST4.ui.showPlayer(elem, elem.parentNode, f_id, url);
+                        }
+                        else {  // Srink Image, display thumbnail
+                            $($input_img[1].parentNode).find('.hideTumbnail').show();
+                            $inputdiv.find('.ui-icon-window-close').show();
+
+                            $input_img.css('cursor', 'zoom-in');
+                        }
+                    }
+                }); 
+
+				// for closing inline image when 'frozen'
+                var $hide_thumb = $('<span class="hideTumbnail" style="padding-right:10px;color:gray;cursor:pointer;" title="Hide image thumbnail">'
+                                + 'close</span>').prependTo( $($dwnld_anchor[1]) ).show();
+                // Alternative button for closing inline image
+                var $alt_close = $('<span class="ui-icon ui-icon-window-close" title="Hide image display (image shows on rollover of the field)"'
+                    + ' style="display: none;cursor: pointer;">&nbsp;</span>').appendTo( $input_img[1] ); // .filter('div')
+
+                this._on($hide_thumb.add($alt_close), {
+                    click:function(event){
+
+                        isClicked = 0;
+
+                        that._on($input, {mouseout:__hideImagePreview});
+                        that._on($input_img, {mouseout:__hideImagePreview});
+
+                            $dwnld_anchor.hide();
+                            $inputdiv.find('.ui-icon-window-close').hide();
+
+                            if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
+                            $input_img.hide().css('cursor', '');
+                        }else{
+                            $input_img.hide().css('cursor', 'pointer');
+                        }
+                    }
+                });
+
+				/* Show Thumbnail handler */
+                $('#lnk'+f_id).on("click", function(event){
+                    window.hWin.HEURIST4.ui.hidePlayer(f_id, event.target.parentNode.parentNode.parentNode);
+					
+                    $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
+				});
+                
+                var $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">'
+                    +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
+                    +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
+                    +'"></span>&nbsp;Mirador</a>').appendTo( $dwnld_anchor ).hide();
+                    
+                this._on($mirador_link, {click:function(event){
+                    var obf_recID;
+                    var ele = $(event.target)
+
+                    if(!ele.attr('data-id')){
+                        ele = ele.parents('[data-id]');
+                    }
+                    var obf_recID = ele.attr('data-id');
+                    var is_manifest = (ele.attr('data-manifest')==1);
+
+                    var url =  window.hWin.HAPI4.baseURL
+                    + 'hclient/widgets/viewers/miradorViewer.php?db=' 
+                    +  window.hWin.HAPI4.database
+                    + '&recID=' + that.options.recID
+                    + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
+
+                    if(true){
+                        //borderless:true, 
+                        window.hWin.HEURIST4.msg.showDialog(url, 
+                            {dialogid:'mirador-viewer',
+                                //resizable:false, draggable: false, 
+                                //maximize:true, 
+                                default_palette_class: 'ui-heurist-explore',
+                                width:'90%',height:'95%',
+                                allowfullscreen:true,'padding-content':'0px'});   
+
+                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                        $dlg.parent().css('top','50px');
+                    }else{
+                        window.open(url, '_blank');        
+                    }                      
+
+                    //data-id
+                }});
+
+                /* Check User Preferences, displays thumbnail inline by default if set */
+                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID) {
+
+                    $input_img.show();
+                    $dwnld_anchor.show();
+
+                    $inputdiv.find('.ui-icon-window-close').show();
+
+                    $input_img.css('cursor', 'zoom-in');
+
+                    $input.off("mouseout");
+
+                    if($input_img.find('img')[0].complete){
+                        __after_image_load();
+                    }else{
+                        $input_img.find('img')[0].addEventListener('load', __after_image_load);
+                    }
+
+                    isClicked=1;
+                }
+
+                var __show_select_dialog = null;
+                 
+                var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+                    && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
+                 
+                var popup_options = {
+                    isdialog: true,
+                    select_mode: 'select_single',
+                    additionMode: isTiledImage?'tiled':'any',  //AAAA
+                    edit_addrecordfirst: true, //show editor at once
+                    select_return_mode:select_return_mode, //ids or recordset(for files)
+                    filter_group_selected:null,
+                    filter_groups: this.configMode.filter_group,
+                    default_palette_class: 'ui-heurist-populate',
+                    onselect:function(event, data){
+
+                     if(data){
+                        
+                            if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                var recordset = data.selection;
+                                var record = recordset.getFirstRecord();
+                                
+                                var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                ulf_MimeExt: recordset.fld(record,'fxm_MimeType'),
+                                                ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
+                                
+                                that.newvalues[$input.attr('id')] = newvalue;
+                                that._findAndAssignTitle($input, newvalue);
+                            }
+                        
+                     }//data
+
+                    }
+                };//popup_options
+
+                that._findAndAssignTitle($input, value);
+
+                __show_select_dialog = function(event){
+                    
+                        if(that.is_disabled) return;
+
+                        event.preventDefault();
+                        
+                        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                            {width: null,  //null triggers default width within particular widget
+                            height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+            
+                        popup_options.width = usrPreferences.width;
+                        popup_options.height = usrPreferences.height;
+                        var sels = this.newvalues[$(event.target).attr('id')];
+                        if(!sels && this.options.values && this.options.values[0]){
+                             sels = this.options.values[0];    //take selected value from options
+                        } 
+
+                        if($.isPlainObject(sels)){
+                            popup_options.selection_on_init = sels;
+                        }else if(!window.hWin.HEURIST4.util.isempty(sels)){
+                            popup_options.selection_on_init = sels.split(',');
+                        } else {
+                            popup_options.selection_on_init = null;    
+                        }                                                                                       
+                        //init dialog to select related uploaded files
+                        window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+                }
+                
+                if(__show_select_dialog!=null){
+                    //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+                    this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+                    this._on( $gicon, { click: __show_select_dialog } );
+                }
+                
+                if(this.isFileForRecord && value){
+                    //assign value at once
+                    this.newvalues[$input.attr('id')] = value;
+                }
+            }
+            else
             if( this.detailType=='folder' ){ //----------------------------------------------------
                 
                 $input.css({'padding-left':'30px'});
@@ -2116,7 +3176,7 @@ console.log('_removeInput');
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
-                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv );
+                var $select_folder_dlg = $('<div>').hide().appendTo( $inputdiv );
                 
                 that.newvalues[$input.attr('id')] = value;
                     
@@ -2189,16 +3249,16 @@ console.log('_removeInput');
                                 that.newvalues[$input.attr('id')] = value; 
                             }
                             
-                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
+                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" ></div>')
                                 .appendTo( $inputdiv );                            
 
-                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(function(){that.openIconLibrary()}).appendTo( ele );
+                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"></span>Library</a>')
+                                .on('click',function(){that.openIconLibrary()}).appendTo( ele );
 
                             $('<br><br>').appendTo( ele );
 
-                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
-                                .click(function(){ $input.click() }).appendTo( ele );
+                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"></span><span class="upload-file-text">Upload file</span></a>')
+                                .on('click',function(){ $input.on('click',) }).appendTo( ele );
                         }
                             
                 /* 2017-11-08 no more buttons 
@@ -2224,7 +3284,7 @@ console.log('_removeInput');
                         var $progressLabel = $progress_dlg.find('.progress-label');
                         let $cancelButton = $progress_dlg.find('.cancelButton');
 
-                        this.select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
+                        this.select_imagelib_dlg = $('<div>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
 
                         $progress_bar.progressbar({
                             value: false,
@@ -2424,9 +3484,9 @@ console.log('_removeInput');
                         $input.fileupload( fileupload_opts );
                 
                         //init click handlers
-                        //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
+                        //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.trigger('click'); } } );
                         $input_img.on({click: function(e){ //find('a')
-                            $input.click(); //open file browse
+                            $input.trigger('click'); //open file browse
                         }});
             }
             else //------------------------------------------------------------------------------------
@@ -2463,7 +3523,7 @@ console.log('_removeInput');
                                 if(that.newvalues[$input.attr('id')]==false){
                                     that.newvalues[$input.attr('id')] = {};
                                 }
-                                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).change();
+                                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).trigger('change');
                             }
                         };
                         
@@ -2472,6 +3532,121 @@ console.log('_removeInput');
 
                 this._on( $input, { keypress: __show_action_dialog, click: __show_action_dialog } );
                 this._on( $gicon, { click: __show_action_dialog } );
+            }
+            else 
+            if(this.detailType=='geo'){   //----------------------------------------------------
+                
+                $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
+                
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
+                    .css({position:'absolute',margin:'4px 0 0 8px',cursor:'hand'})
+                    .insertBefore($input);
+
+                var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(value);
+            
+                that.newvalues[$input.attr('id')] = value;
+
+                if(geovalue.summary && geovalue.summary != ''){
+                    $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
+                }else if(!window.hWin.HEURIST4.util.isempty(value)){
+                    var parsedWkt = window.hWin.HEURIST4.geo.getParsedWkt(value, true);
+                    if(parsedWkt == '' || parsedWkt == null){
+                        $input.val('');
+                        $('<span>').addClass('geo-badvalue').css({'display': 'inline-block', 'margin-left': '5px'}).text('Bad value: ' + value).appendTo($inputdiv);
+                    }else{
+                        if(parsedWkt.type == 'Point'){
+
+                            var invalid = '';
+                            if(Math.abs(parsedWkt.coordinates[0]) > 180){
+                                invalid = 'longitude is';
+                            }
+                            if(Math.abs(parsedWkt.coordinates[1]) > 90){
+                                invalid = (invalid != '') ? 'longitude and latitude are' : 'latitude is';
+                            }
+                            $('<span>').addClass('geo-badvalue').css({'display': 'inline-block', 'margin-left': '5px', color: 'red'}).text(invalid + ' outside of range').appendTo($inputdiv);
+                        }
+                    }
+                }
+                      
+                __show_mapdigit_dialog = function (event){
+                        event.preventDefault();
+                        
+                        if(that.is_disabled) return;
+                    
+                        var url = window.hWin.HAPI4.baseURL 
+                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
+                       
+                        var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
+                        if(that.options.is_faceted_search){
+                            wkt_params['geofilter'] = true;
+                        }
+
+                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+
+                            var ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+                            var vals = ele.editing_input('getValues');
+                            if(Array.isArray(vals) && vals.length>0){
+                                vals = vals[0];
+                                if(vals['ulf_ExternalFileReference']){
+                                    wkt_params['imageurl'] = vals['ulf_ExternalFileReference'];
+                                }else{
+                                    wkt_params['imageurl'] = window.hWin.HAPI4.baseURL
+                                        +'?db='+window.hWin.HAPI4.database
+                                        +'&file='+vals['ulf_ObfuscatedFileID'];
+                                }
+                                wkt_params['tool_option'] = 'image';
+                            }else{
+                                wkt_params['tool_option'] = 'rectangle';
+                            }
+                        }
+
+                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] || this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'] || 
+                        this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']) {
+                            // assume bounding box, rectangle tool only
+                            wkt_params['tool_option'] = 'rectangle';
+                        }
+
+                        var d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
+
+                        window.hWin.HEURIST4.msg.showDialog(url, {
+                            height:that.options.is_faceted_search?540:d_height,
+                            width:that.options.is_faceted_search?600:d_width,
+                            window: window.hWin,  //opener is top most heurist window
+                            dialogid: 'map_digitizer_dialog',
+                            default_palette_class: 'ui-heurist-populate',
+                            params: wkt_params,
+                            title: window.hWin.HR('Heurist map digitizer'),
+                            //class:'ui-heurist-bg-light',
+                            callback: function(location){
+                                if( !window.hWin.HEURIST4.util.isempty(location) ){
+                                    //that.newvalues[$input.attr('id')] = location
+                                    that.newvalues[$input.attr('id')] = (that.options.is_faceted_search
+                                                ?'':(location.type+' '))
+                                                +location.wkt;
+                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
+                                    if(that.options.is_faceted_search){
+                                        $input.val(geovalue.summary).trigger('change');
+                                    }else{
+                                        $input.val(geovalue.type+'  '+geovalue.summary);
+                                        $input.trigger('change');
+
+                                        $inputdiv.find('span.geo-badvalue').remove();
+                                    }
+                                    
+                                    //$input.val(location.type+' '+location.wkt)
+                                }
+                            }
+                        } );
+                };
+
+                //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
+                //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
+                this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
+                this._on( $gicon, { click: __show_mapdigit_dialog } );
+
             }
             else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
 
@@ -2485,8 +3660,7 @@ console.log('_removeInput');
 
             }
             else 
-            if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ 
-                // Geo Bookmark, five input form, experimental 
+            if(this.options.dtID && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK']){ // Geo Bookmark, five input form, experimental 
 
                 $input.css({cursor:'hand'});
 
@@ -2521,7 +3695,7 @@ console.log('_removeInput');
 
                     var popele = $(pdiv);
 
-                    popele.find('input[class="bkm_points"]').click(function(e){
+                    popele.find('input[class="bkm_points"]').on('click',function(e){
                         var url = window.hWin.HAPI4.baseURL 
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
 
@@ -2555,8 +3729,8 @@ console.log('_removeInput');
 
                                     var points = geocode.split(/[\s,]+/);
 
-                                    $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).change();
-                                    $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).change();
+                                    $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).trigger('change');
+                                    $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).trigger('change');
                                 }
                             }
                         } );
@@ -2836,14 +4010,11 @@ console.log('_removeInput');
         
         var dwidth = this.f('rst_DisplayWidth');
         
-        if(this.dtwidget!=null && $input[this.dtwidget]('instance')){
-            $input[this.dtwidget]('setWidth', dwidth);
-        }else
         if( typeof dwidth==='string' && dwidth.indexOf('%')== dwidth.length-1){ //set in percents
             
             $input.css('width', dwidth);
             
-        }else if ( this.detailType=='freetext' || this.detailType=='url'   
+        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext'  
                 || this.detailType=='integer' || this.detailType=='float') {  
 
               //if the size is greater than zero
@@ -2930,7 +4101,28 @@ console.log('_removeInput');
                         }
 
                         var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
-console.log('remove ', input_id);                        
+                        
+    					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
+                        {
+                            $parentNode = $(e.target.parentNode);
+                            $parentNode.find('.thumb_image').hide();
+                            $parentNode.find('.fullSize').hide();
+                            $parentNode.find('.download_link').hide();
+                            $parentNode.find('#player'+value.ulf_ID).hide();
+                            
+                            $parentNode.find(".smallText").text("Click image to freeze in place").css({
+                                "font-size": "smaller", 
+                                "color": "grey", 
+                                "position": "", 
+                                "bottom": ""
+                            });						
+    						
+                            that._on($input, {mouseout:__hideImagePreview});
+                            that._on($input_img, {mouseout:__hideImagePreview});
+                            
+                            isClicked = 0;
+                        }
+    					
                         if(that.detailType=="resource" && that.configMode.entity=='records' 
                                 && that.f('rst_CreateChildIfRecPtr')==1){
                             that._clearChildRecordPointer( input_id );
@@ -2966,7 +4158,7 @@ console.log('remove ', input_id);
                         $inputdiv.find('.btn_input_move').css('display', 'inline-block');
                     }
                 },
-                'mouseleave': function(){           
+                'mouseleave': function(){
                     if(that.is_disabled) return;
                     $inputdiv.find('.btn_input_move').css('display', 'none');
                 }
@@ -2992,8 +4184,8 @@ console.log('remove ', input_id);
         btn_field_visibility.hide();
                     
                     
-        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"/> '
-                    +'Hide this value from public<div>', 
+        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
+                    +'Hide this value from public</div>', 
                     {title: 'Per record visibility'})
                     .addClass('field-visibility2 graytext')
                     .attr('data-input-id', $input.attr('id'))
@@ -3305,8 +4497,156 @@ console.log('remove ', input_id);
         
         var that = this;
         
-        if(this.dtwidget!=null && ele[this.dtwidget]('instance')){
-            res = ele[this.dtwidget]('findAndAssignTitle', value);
+        if(this.isFileForRecord){   //FILE FOR RECORD
+            
+            if(!value){   //empty value
+                window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
+                return;
+            }
+
+            if($.isPlainObject(value) && value.ulf_ObfuscatedFileID){
+
+                var rec_Title = value.ulf_ExternalFileReference;
+                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                    rec_Title = value.ulf_OrigFileName;
+                }
+                window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
+
+                //url for thumb
+                if(!window.hWin.HEURIST4.util.isempty(value['ulf_ExternalFileReference']) && value.ulf_MimeExt == 'youtube'){ // retrieve youtube thumbnail
+
+                    var youtube_id = window.hWin.HEURIST4.util.get_youtube_id(value.ulf_ExternalFileReference);
+
+                    if(youtube_id){
+
+                        ele.parent().find('.image_input > img').attr('src', 'https://img.youtube.com/vi/'+ youtube_id +'/default.jpg');
+                        ele.parent().find('.smallText').text("Click image to freeze in place").css({
+                            "font-size": "smaller", 
+                            "color": "grey", 
+                            "position": "", 
+                            "top": ""
+                        })
+                        .removeClass('invalidImg');
+
+                        that.newvalues[ele.attr('id')] = value;
+                    }else{
+
+                        ele.parent().find('.image_input > img').removeAttr('src');
+                        ele.parent().find('.smallText').text("Unable to retrieve youtube thumbnail").css({
+                            "font-size": "larger", 
+                            "color": "black", 
+                            "position": "relative", 
+                            "top": "60px"
+                        })
+                        .addClass('invalidImg');
+
+                        ele.parent().find('.hideTumbnail').trigger('click');
+                    }
+
+                    ele.trigger('change');
+                }else{ // check if image that can be rendered
+
+                    window.hWin.HAPI4.checkImage("Records", value["ulf_ObfuscatedFileID"], null, function(response) {
+
+                        if(response.data && response.status == window.hWin.ResponseStatus.OK) {
+                            
+                            ele.attr('data-mimetype', response.data.mimetype);
+                            
+                            if(response.data.mimetype && response.data.mimetype.indexOf('image/')===0)
+                            {
+                                ele.parent().find('.image_input > img').attr('src',
+								    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+									    value.ulf_ObfuscatedFileID);
+                                        
+                                if(response.data.width > 0 && response.data.height > 0) {
+
+                                    ele.parent().find('.smallText').text('Click image to freeze in place').css({
+                                        "font-size": "smaller", 
+                                        "color": "grey", 
+                                        "position": "", 
+                                        "top": ""
+                                    })
+                                    .removeClass('invalidImg');
+
+                                    that.newvalues[ele.attr('id')] = value;
+                                }else{
+
+                                    ele.parent().find('.image_input > img').removeAttr('src');
+                                    ele.parent().find(".smallText").text("This file cannot be rendered").css({
+                                        "font-size": "larger", 
+                                        "color": "black", 
+                                        "position": "relative", 
+                                        "top": "60px"
+                                    })
+                                    .addClass('invalidImg');
+
+                                    ele.parent().find('.hideTumbnail').trigger('click');
+                                    ele.parent().find('.hideTumbnail').hide();
+                                }
+                                
+                            }else{
+                                ele.parent().find('.image_input').hide();
+                                ele.parent().find('.hideTumbnail').hide();
+                            }
+                            
+                            var mirador_link = ele.parent().find('.miradorViewer_link');
+                            var mimetype = response.data.mimetype;
+                            if(response.data.original_name.indexOf('_iiif')===0){
+                                
+                                if(response.data.original_name=='_iiif'){
+                                    mirador_link.attr('data-manifest', '1');    
+                                }
+                                
+                                mirador_link.show();
+                            }else
+                            if(mimetype.indexOf('image/')===0 || (
+                                    (mimetype.indexOf('video/')===0 || mimetype.indexOf('audio/')===0) &&
+                                 ( mimetype.indexOf('youtube')<0 && 
+                                   mimetype.indexOf('vimeo')<0 && 
+                                   mimetype.indexOf('soundcloud')<0)) ){
+                                   
+                                mirador_link.show();
+                            }else{
+                                mirador_link.hide();           
+                            }
+                            
+                            
+                            ele.trigger('change');
+                        }
+                    });
+                }
+            }else{
+                 //call server for file details
+                 var recid = ($.isPlainObject(value))?value.ulf_ID :value;
+                 if(recid>0){
+                     
+                     var request = {};
+                        request['recID']  = recid;
+                        request['a']          = 'search'; //action
+                        request['details']    = 'list';
+                        request['entity']     = 'recUploadedFiles';
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                        
+                        window.hWin.HAPI4.EntityMgr.doRequest(request,
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+
+                                    var recordset = new hRecordSet(response.data);
+                                    var record = recordset.getFirstRecord();
+
+                                    if(record){
+                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                    ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                    ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                    ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
+
+                                        that.newvalues[ele.attr('id')] = newvalue;
+                                        that._findAndAssignTitle(ele, newvalue, selector_function);
+                                    }
+                                }
+                            });
+                 }
+            }
                     
         }else if(this.detailType=='file'){  // FILE FOR OTHER ENTITIES - @todo test
             
@@ -3395,11 +4735,10 @@ console.log('remove ', input_id);
                 }
                     
                 
-        }
-        else{    
+        }else{    
             //related entity                 
             if(window.hWin.HEURIST4.util.isempty(value)) value = [];
-            value = $.isArray(value)?value
+            value = Array.isArray(value)?value
                 :((typeof  value==='string')?value.split(','):[value]);
                 
             if(value.length==0){
@@ -3412,7 +4751,7 @@ console.log('remove ', input_id);
                 window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value,
                    function( display_value ){
                        ele.empty();
-                       var hasValues = false;
+                       hasValues = false;
                        if(display_value && display_value.length>0){
                            for(var i=0; i<display_value.length; i++){
                                if(display_value[i]){
@@ -3552,7 +4891,7 @@ console.log('remove ', input_id);
             }
             else{
 
-                if (!$.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
+                if (!Array.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
                     //is it CS string - convert to array
                     allTerms = allTerms.split(',');
                 }
@@ -3728,7 +5067,7 @@ console.log('remove ', input_id);
                                                 
                                                 $input.val(trm_id);
                                                 $input.hSelect('refresh');
-                                                $input.change();
+                                                $input.trigger('change');
                                                 
                                             }else{
                                                 $('#div_result').hide();
@@ -3828,9 +5167,6 @@ console.log('remove ', input_id);
                 }
                 $input.removeAttr('data-value');
                 
-                if(that.dtwidget!=null && $input[that.dtwidget]('instance')){
-                    $input[that.dtwidget]('clearValue'); //clear display value
-                }else
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
 
@@ -3842,8 +5178,7 @@ console.log('remove ', input_id);
                     if(that.linkedImgContainer !== null){
                         that.linkedImgContainer.find('img').prop('src', '');
                     }
-                }
-                else if(that.detailType=='resource'){
+                }else if(that.detailType=='resource'){
                     
                     $input.parent().find('.sel_link').hide();
                     $input.parent().find('.sel_link2').show();
@@ -3867,7 +5202,7 @@ console.log('remove ', input_id);
                     }
                 }
                 if(that.detailType=='date' || that.detailType=='file'){
-                    $input.change();
+                    $input.trigger('change');
                 }else{
                     that.onChange();
                 }
@@ -3887,7 +5222,7 @@ console.log('remove ', input_id);
         this.inputs = [];
         this.newvalues = {};
         
-        if(!$.isArray(values)) values = [values];
+        if(!Array.isArray(values)) values = [values];
 
         var isReadOnly = this.isReadonly();
         
@@ -3912,7 +5247,7 @@ console.log('remove ', input_id);
         
         this._setAutoWidth();            
         
-        if($.isFunction(this.options.onrecreate)){
+        if(window.hWin.HUL.isFunction(this.options.onrecreate)){
             this.options.onrecreate.call(this);
         }
         
@@ -3936,17 +5271,14 @@ console.log('remove ', input_id);
         
         var res = null;
         var $input = $(input_id);
-        
-        if(this.dtwidget!=null && $input[this.dtwidget]('instance')){
-            res = $input[this.dtwidget]('getValue');
-        }else
+
         if(!(this.detailType=="resource" || this.detailType=='file' 
-            || this.detailType=='date'))
+            || this.detailType=='date' || this.detailType=='geo'))
         {
             if($input.attr('radiogroup')>0){
                 res = $input.find('input:checked').val();
             }else if(this.detailType=='boolean'){
-                if($.isArray(this.configMode) && this.configMode.length==2) {
+                if(Array.isArray(this.configMode) && this.configMode.length==2) {
                     res = this.configMode[ $input.is(':checked')?0:1 ];
                 }else{
                     res = $input.is(':checked') ?$input.val() :0;        
@@ -3994,7 +5326,7 @@ console.log('remove ', input_id);
         if(this.isReadonly()) return;
         var idx, ele_after = this.firstdiv; //this.error_message;
         for (idx in this.inputs) {
-            var ele = this._getInputDiv(inputs[idx]);
+            var ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
             ele_after = ele;
         }    
@@ -4024,7 +5356,7 @@ console.log('remove ', input_id);
                     var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                     res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
                                         
-                    var ele = this._getInputDiv($input);
+                    var ele = $input.parents('.input-div');
                     var k = ele.index();
                     ress[k] = res;
                 }
@@ -4105,6 +5437,7 @@ console.log('remove ', input_id);
                 
                 var res = this._getValue($input);
 
+
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
 
                     if(this.options.is_between_mode){
@@ -4124,9 +5457,8 @@ console.log('remove ', input_id);
                             }
                         }
                     }
-                 
-                    //to keep order                   
-                    var ele = this._getInputDiv($input);
+                                    
+                    var ele = $input.parents('.input-div');
                     var k = ele.index();
                     
                     ress[k] = res;
@@ -4143,14 +5475,6 @@ console.log('remove ', input_id);
             return ress2;
         }
 
-    },
-    
-    _getInputDiv: function($input){
-        if($input.hasClass('input-div')){
-            return $input;
-        }else{
-            return $input.parents('.input-div');    
-        }
     },
     
     _setHiddenField($input, is_hidden){
@@ -4282,7 +5606,7 @@ console.log('remove ', input_id);
 
                 if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || 
                     ($.isPlainObject(ress[0]) &&  $.isEmptyObject(ress[0])) || 
-                    ($.type(ress[0])=='string' && ress[0].trim()=='')) {
+                    ( (typeof ress[0] ==='string') && ress[0].trim()=='')) {
                     
                     
                     if( data_type=='file' && !this.isFileForRecord && this.entity_image_already_uploaded){
@@ -4367,7 +5691,7 @@ console.log('remove ', input_id);
             && $(this.inputs[0]).is(':visible') 
             && !$(this.inputs[0]).hasClass('ui-state-disabled') )
         {
-            $(this.inputs[0]).focus();   
+            $(this.inputs[0]).trigger('focus');   
             return $(this.inputs[0]).is(':focus');
         } else {
             return false;
@@ -4392,9 +5716,9 @@ console.log('remove ', input_id);
              $inputdiv.css('max-width', Math.round(2 + Math.min(80, Number(dwidth))) + "ex");
         }
                 
-        if($.isArray(value)){
+        if(Array.isArray(value)){
 
-            disp_value = value[1]; //record title, relation description, filename, human readable date
+            disp_value = value[1]; //record title, relation description, filename, human readable date and geo
 
         }else if(this.detailType=="enum" || this.detailType=="relationtype"){
 
@@ -4422,7 +5746,7 @@ console.log('remove ', input_id);
             disp_value = "@todo relation "+value;
 
             //@todo NEW datatypes
-        } else if(this.detailType=='geo'){
+        } else if(this.detailType=="geo"){
 
             /*if(detailType=="query")
             if(detailType=="color")
@@ -4456,14 +5780,115 @@ console.log('remove ', input_id);
 
         $inputdiv.html(disp_value);
 
-    },//_addReadOnlyContent
+    },
     
+    //
+    // browse for heurist uploaded/registered files/resources and add player link
+    //         
+    _addHeuristMedia: function(){
+
+        var that = this;
+
+        var popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        that._addMediaCaption(playerTag);
+
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    },
+
+    //
+    // Add caption to media
+    //
+    _addMediaCaption: function(content = null){
+
+        let is_insert = false;
+        let node = null;
+
+        if(content){
+            is_insert = true;
+        }else{
+
+            node = tinymce.activeEditor.selection.getNode();
+            if(node.parentNode.nodeName.toLowerCase() == 'figure'){ // insert new figcaption
+                node = document.createElement('figcaption');
+                tinymce.activeEditor.selection.getNode().parentNode.appendChild(node);
+            }else{ // replace selected content with new wrapper
+                node = null;
+            }
+
+            content = tinymce.activeEditor.selection.getContent();
+        }
+
+        let $dlg;
+        let msg = 'Enter a caption below, if you want one:<br><br>'
+            + '<textarea rows="6" cols="65" id="figcap"></textarea>';
+        
+        let btns = {};
+        btns[window.HR('Add caption')] = () => {
+            let caption = $dlg.find('#figcap').val();
+
+            if(caption){
+
+                if(node != null){
+                    node.innerText = caption;
+                    return;
+                }
+                content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
+
+                if(is_insert){
+                    tinymce.activeEditor.insertContent( content );
+                }else{
+                    tinymce.activeEditor.selection.setContent( content );
+                }
+            }
+
+            $dlg.dialog('close');
+        };
+        btns[window.HR('No caption')] = () => {
+            if(is_insert){
+                tinymce.activeEditor.insertContent( content );
+            }
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
+            {default_palette_class: 'ui-heurist-populate'}
+        );
+    },
+
     //
     //
     //
     _prepareIds: function(ptrset)
     {
-        if(!$.isArray(ptrset)){
+        if(!Array.isArray(ptrset)){
             if(window.hWin.HEURIST4.util.isempty(ptrset)){
                 ptrset = [];
             }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
@@ -4535,7 +5960,7 @@ console.log('remove ', input_id);
 
         function translateDate(date, from_calendar, to_calendar){
 
-            if(!$.isFunction($('body').calendarsPicker)){
+            if(!window.hWin.HUL.isFunction($('body').calendarsPicker)){
                 return date;
             }
 
@@ -4565,7 +5990,7 @@ console.log('remove ', input_id);
         var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
                         .val(defDate).insertAfter( $input );
 
-        if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
+        if(window.hWin.HUL.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
             var calendar = $.calendars.instance('gregorian');
             var g_calendar = $.calendars.instance('gregorian');
@@ -4652,11 +6077,11 @@ console.log('remove ', input_id);
                     window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
                     __onDateChange();
                 },
-                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
-                        {picker: $.calendars.picker.defaultRenderer.picker.
+                renderer: $.extend({}, $.calendarsPicker.defaultRenderer,
+                        {picker: $.calendarsPicker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-                showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
+                showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar"></span>'}
             );
 
             this._on($input, {
@@ -4739,7 +6164,7 @@ console.log('remove ', input_id);
 
                     },
                     dblclick: function(){
-                        $btn_datepicker.click();
+                        $btn_datepicker.trigger('click');
                     }
                 });
 
@@ -4790,10 +6215,10 @@ console.log('remove ', input_id);
                     callback: function(str){
                         if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
                             $input.val(str);    
-                            $input.change();
+                            $input.trigger('change');
                         }
 
-                        if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+                        if(window.hWin.HUL.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
                             var new_temporal = null;
                             var new_cal = null;
@@ -4838,7 +6263,7 @@ console.log('remove ', input_id);
 
         }//temporal allowed
         
-        $input.change(__onDateChange);
+        $input.on('change',__onDateChange);
     },
 
     //
@@ -4881,7 +6306,7 @@ console.log('remove ', input_id);
             var $input = $(item);
             if(input_id==null || $input.attr('id')==input_id){
                 
-                var $inputdiv = that._getInputDiv($input);
+                var $inputdiv = $input.parents('.input-div');
                 
                 var edash = $('<span class="span-dash">&nbsp;-&nbsp;</span>')
                 //duplicate input for between mode
@@ -4895,7 +6320,7 @@ console.log('remove ', input_id);
                     
                     var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
-                            .change(function(){
+                            .on('change',function(){
                                 that.onChange();
                             })
                             .insertAfter(edash);
@@ -5143,7 +6568,7 @@ console.log('remove ', input_id);
             var isChecked = (values && values.includes(trm_id)) ? true : false;
 
             var $btn = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
-                .change(function(event){ 
+                .on('change',function(event){ 
 
                     var isNewVal = false;
                     var changed_val = $(event.target).val();
@@ -5184,7 +6609,7 @@ console.log('remove ', input_id);
 
                                             $(that.inputs[0]).val($last_ele.val());
 
-                                            that._getInputDiv($last_ele).remove();
+                                            $last_ele.parents('.input-div').remove();
                                             that.inputs.splice(last_idx, 1);
 
                                             return false;
@@ -5196,7 +6621,7 @@ console.log('remove ', input_id);
 
                             that.new_value = changed_val;
 
-                            that.btn_add.click();
+                            that.btn_add.trigger('click');
                         }
                     }
 

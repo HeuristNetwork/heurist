@@ -46,7 +46,7 @@ $.widget( "heurist.baseAction", {
         
     },
 
-    _$: $,
+    _$: $,  //narrow search scope for this widget only
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _toolbar:null,
