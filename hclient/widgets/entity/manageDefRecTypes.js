@@ -1154,7 +1154,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             //open select icon
             ele = this._editing.getFieldByName('rty_Icon');
-            ele.editing_input('openIconLibrary');
+//A13            ele.editing_input('openIconLibrary');
             
             //hide save button
             if(this._toolbar){
@@ -1339,8 +1339,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         $icon.find('.input-div span:first').hide();
 
         // link fields
-        $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
-        $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
+//A13        $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
+//A13        $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
         // link clear buttons, only icon clear button is visible
         this._on($icon.find('span.btn_input_clear'), {
             'click': function(){

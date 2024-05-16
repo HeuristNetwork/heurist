@@ -22,7 +22,6 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
 
     // default options
     options: {
-        force_displayheight: null   //height in rows
     },
     
     _input_img: null,

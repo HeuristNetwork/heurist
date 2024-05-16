@@ -19,7 +19,7 @@
 import "./editInputBlocktext.js";
 import "./editInputGeo.js";
 import "./editInputRecFile.js";
-//import "./editInputFile.js";
+import "./editInputFile.js";
 
 $.widget( "heurist.editing_input", {
 
@@ -72,10 +72,6 @@ $.widget( "heurist.editing_input", {
     is_disabled: false,
     new_value: '', // value for new input
 
-    entity_image_already_uploaded: false,
-    linkedImgInput: null, // invisible textbox that holds icon/thumbnail value
-    linkedImgContainer: null, // visible div container displaying icon/thumbnail
-    
     selObj: null, //shared selector for all enum field values
     child_terms: null, // array of child terms for current vocabulary 
     enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
@@ -527,8 +523,6 @@ $.widget( "heurist.editing_input", {
                   return;
             }
             
-        }else if(this.detailType=='file' || this.detailType=='geo'){
-            values_to_set = this.options.values;
         }else {
             values_to_set = this.options.values; //window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
@@ -681,11 +675,8 @@ $.widget( "heurist.editing_input", {
 
                     that._removeTooltip(input.attr('id'));
 
-                    if(that.detailType=='file'){
-                        if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
-                    }else{
-                        if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
-                    }
+                    if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
+                    
                     //check for "between" input (date and freetext)
                     that.element.find('#'+$(input).attr('id')+'-2').remove();
                     
@@ -769,7 +760,7 @@ $.widget( "heurist.editing_input", {
     _removeInput: function(input_id){
 
         var that = this;
-console.log('_removeInput');
+
         this._removeTooltip(input_id);        
 
         if(this.inputs.length>1 && this.enum_buttons == null){
@@ -784,9 +775,7 @@ console.log('_removeInput');
                     }
                     
                     if(that.detailType=='file'){
-                        if($input.fileupload('instance')){
-                            $input.fileupload('destroy');
-                        }
+                        
                         var $parent = that._getInputDiv($input);
                         $input.remove();
                         $parent.remove();
@@ -1903,7 +1892,12 @@ console.log('_removeInput');
         
             this.dtwidget = 'editInputRecFile';
             $input = $inputdiv.editInputRecFile({ container:this, value:value });
-        
+        }        
+        else
+        if( this.detailType=='file' ){ //----------------------------------------------------
+
+            this.dtwidget = 'editInputFile';
+            $input = $inputdiv.editInputFile({ container:this, value:value });
         
         }else{              //----------------------------------------------------
             $input = $( "<input>")
@@ -1918,7 +1912,7 @@ console.log('_removeInput');
             
             window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
-            if(!(this.options.dtID=='file' || this.detailType=='resource' || 
+            if(!(this.detailType=='resource' || 
                  this.detailType=='date' || this.detailType=='action')){
                      
                 $input.keydown(function(e){  //Ctrl+A - select all
@@ -2133,301 +2127,6 @@ console.log('_removeInput');
                        selectedValues: that.newvalues[$input.attr('id')], 
                        multiselect: that.configMode && that.configMode.multiselect});
                     }} );
-            }
-            else
-            if( this.detailType=='file' ){ //----------------------------------------------------
-                
-                        var fileHandle = null; //to support file upload cancel
-                
-                        this.options.showclear_button = (this.configMode.hideclear!=1);
-                        
-                        if(!this.configMode.version) this.configMode.version = 'thumb';
-                
-                        //url for thumb
-                        var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, 
-                                                        this.options.recID, this.configMode.version, 1);
-                        var dt = new Date();
-                        urlThumb = urlThumb+'&ts='+dt.getTime();
-                        
-                        $input.css({'padding-left':'30px'});
-                        $('<span class="ui-icon ui-icon-folder-open"></span>')
-                                .css({position: 'absolute', margin: '5px 0px 0px 8px'}).insertBefore( $input ); 
-                        
-                        var sz = 0;
-                        if(that.options.dtID=='rty_Thumb'){
-                            sz = 64;
-                        }else if(that.options.dtID=='rty_Icon'){
-                            sz = 16;
-                        }
-                        
-                        //container for image
-                        var $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
-                            + '<img src="'+urlThumb+'" class="image_input" style="'+(sz>0?('width:'+sz+'px;'):'')+'">'
-                            + '</div>').appendTo( $inputdiv );                
-                        if(this.configMode.entity=='recUploadedFiles'){
-                           this.input_img.css({'min-height':'320px','min-width':'320px'});
-                           this.input_img.find('img').css({'max-height':'320px','max-width':'320px'});
-                        }
-                         
-                        window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
-                            this.configMode.version,
-                            function(response){
-                                  if(response.data=='ok'){
-                                      that.entity_image_already_uploaded = true;
-                                  }
-                        });
-                        
-                        //change parent div style - to allow special style for image selector
-                        if(that.configMode.css){
-                            that.element.css(that.configMode.css);
-                        }
-                        
-                        //library browser and explicit file upload buttons
-                        if(that.configMode.use_assets){
-                            
-                            if(value){
-                                that.newvalues[$input.attr('id')] = value; 
-                            }
-                            
-                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
-                                .appendTo( $inputdiv );                            
-
-                            $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(function(){that.openIconLibrary()}).appendTo( ele );
-
-                            $('<br><br>').appendTo( ele );
-
-                            $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
-                                .click(function(){ $input.click() }).appendTo( ele );
-                        }
-                            
-                /* 2017-11-08 no more buttons 
-                        //browse button    
-                        var $btn_fileselect_dialog = $( "<span>", {title: "Click to select file for upload"})
-                        .addClass('smallicon fileupload ui-icon ui-icon-folder-open')
-                        .css('vertical-align','top')
-                        .appendTo( $inputdiv );
-                        //.button({icons:{primary: "ui-icon-folder-open"},text:false});
-                  */                      
-                        //set input as file and hide
-                        $input.prop('type','file').hide();
-                        
-                        //temp file name  it will be renamed on server to recID.png on save
-                        var newfilename = '~'+window.hWin.HEURIST4.util.random();
-
-                        //crate progress dialog
-                        var $progress_dlg = $('<div title="File Upload"><div class="progress-label">Starting upload...</div>'
-                        +'<div class="progressbar" style="margin-top: 20px;"></div>'
-                        +'<div style="padding-top:4px;text-align:center"><div class="cancelButton">Cancel upload</div></div></div>')
-                        .hide().appendTo( $inputdiv );
-                        var $progress_bar = $progress_dlg.find('.progressbar');
-                        var $progressLabel = $progress_dlg.find('.progress-label');
-                        let $cancelButton = $progress_dlg.find('.cancelButton');
-
-                        this.select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
-
-                        $progress_bar.progressbar({
-                            value: false,
-                            change: function() {
-                                $progressLabel.text( "Current Progress: " + $progress_bar.progressbar( "value" ) + "%" );
-                            },
-                            complete: function() {
-                                $progressLabel.html( "Upload Complete!<br>processing on server, this may take up to a minute" );
-                                $cancelButton.hide().off('click');
-                            }
-                        });
-
-                        // Setup abort button
-                        $cancelButton.button();
-                        this._on($cancelButton, {
-                            click: function(){
-
-                                if(fileHandle && fileHandle.abort){
-                                    fileHandle.message = 'File upload was aborted';
-                                    fileHandle.abort();
-                                }
-
-                                //fileHandle = true;
-                            }
-                        });
-                        
-        var max_file_size = Math.min(window.hWin.HAPI4.sysinfo['max_post_size'], window.hWin.HAPI4.sysinfo['max_file_size']);
-
-        var fileupload_opts = {
-    url: window.hWin.HAPI4.baseURL + 'hserv/controller/fileUpload.php',
-    formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
-                {name:'entity', value:this.configMode.entity},
-                {name:'version', value:this.configMode.version},
-                {name:'maxsize', value:this.configMode.size}, //dimension
-                {name:'registerAtOnce', value:this.configMode.registerAtOnce},
-                {name:'recID', value:that.options.recID}, //need to verify permissions
-                {name:'newfilename', value:newfilename }], //unique temp name
-    //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
-    //autoUpload: true,
-    //multipart: (window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1),
-    //to check file size on client side
-    max_file_size: max_file_size,
-    sequentialUploads: true,
-    dataType: 'json',
-    pasteZone: $input_img,
-    dropZone: $input_img,
-    
-    add: function (e, data) {
-        if (e.isDefaultPrevented()) {
-            return false;
-        }
-
-        if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']!=1 && 
-            data.files && data.files.length>0 && data.files[0].size>max_file_size)
-        {
-                data.message = `The upload size of ${data.files[0].size} bytes exceeds the limit of ${max_file_size}`
-                +` bytes.<br><br>If you need to upload larger files please contact the system administrator ${window.hWin.HAPI4.sysinfo.sysadmin_email}`;
-
-                data.abort();
-                
-        }else if (data.autoUpload || (data.autoUpload !== false &&
-                $(this).fileupload('option', 'autoUpload'))) 
-        {
-            fileHandle = data;
-            data.process().done(function () {
-                data.submit();
-            });
-        }
-
-    },
-    submit: function (e, data) { //start upload
-    
-        $progress_dlg = $progress_dlg.dialog({
-            autoOpen: false,
-            modal: true,
-            closeOnEscape: false,
-            resizable: false,
-            buttons: []
-          });                        
-        $progress_dlg.dialog('open'); 
-        $progress_dlg.parent().find('.ui-dialog-titlebar-close').hide();
-    },
-    done: function (e, response) {
-        
-            //hide progress bar
-            $progress_dlg.dialog( "close" );
-        
-            if(response.result){//????
-                response = response.result;
-            }
-            if(response.status==window.hWin.ResponseStatus.OK){
-                var data = response.data;
-
-                $.each(data.files, function (index, file) {
-                    if(file.error){ //it is not possible we should cought it on server side - just in case
-                        $input_img.find('img').prop('src', '');
-                        if(that.linkedImgContainer !== null){
-                            that.linkedImgContainer.find('img').prop('src', '');
-                        }
-
-                        window.hWin.HEURIST4.msg.showMsgErr(file.error);
-                    }else{
-
-                        if(file.ulf_ID>0){ //file is registered at once and it returns ulf_ID
-                            that.newvalues[$input.attr('id')] = file.ulf_ID;
-                            if(that.linkedImgInput !== null){
-                                that.newvalues[that.linkedImgInput.attr('id')] = file.ulf_ID;
-                            }
-                        }else{
-                            
-                            //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
-                            //            newfilename+'.png', 'thumb', 1);
-                            var urlThumb =
-                            (that.configMode.entity=='recUploadedFiles'
-                                ?file.url
-                                :file[(that.configMode.version=='icon')?'iconUrl':'thumbnailUrl'])
-                                +'?'+(new Date()).getTime();
-                            
-                            // file.thumbnailUrl - is correct but inaccessible for heurist server
-                            // we get image via fileGet.php
-                            $input_img.find('img').prop('src', '');
-                            $input_img.find('img').prop('src', urlThumb);
-                            
-                            if(that.configMode.entity=='recUploadedFiles'){
-                                that.newvalues[$input.attr('id')] = file;
-                            }else{
-                                that.newvalues[$input.attr('id')] = newfilename;  //keep only tempname
-                            }
-                        }
-                        $input.attr('title', file.name);
-                        that.onChange();//need call it manually since onchange event is redifined by fileupload widget
-                    }
-                });
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);// .message
-            }
-            var inpt = this;
-            $input_img.off('click');
-            $input_img.on({click: function(){
-                        $(inpt).trigger('click');
-            }});
-    },
-    fail: function(e, data){
-
-        if($progress_dlg.dialog('instance')){
-            $progress_dlg.dialog("close");   
-        }
-        
-        if(!window.hWin.HEURIST4.util.isnull(fileHandle) && fileHandle.message){ // was aborted by user
-            window.hWin.HEURIST4.msg.showMsgFlash(fileHandle.message, 3000);
-        }else if( data.message ) {
-            window.hWin.HEURIST4.msg.showMsgErr( data );
-        }else {
-            
-            var msg = 'An unknown error occurred while attempting to upload your file.'
-            
-            if(data._response && data._response.jqXHR) {
-                if(data._response.jqXHR.responseJSON){
-                    msg = data._response.jqXHR.responseJSON;    
-                }else if(data._response.jqXHR.responseText){
-                    msg = data._response.jqXHR.responseText;    
-                    let k = msg.indexOf('<p class="heurist-message">');
-                    if(k>0){
-                        msg = msg.substring(k);   
-                    }
-                }
-            }
-            
-            window.hWin.HEURIST4.msg.showMsgErr(msg);
-        }
-
-        fileHandle = null;
-    },
-    progressall: function (e, data) { //@todo to implement
-        var progress = parseInt(data.loaded / data.total * 100, 10);
-        //$('#progress .bar').css('width',progress + '%');
-        $progress_bar.progressbar( "value", progress );        
-    }                            
-                        };      
-                        
-    if(window.hWin.HAPI4.sysinfo['is_file_multipart_upload']==1){
-        fileupload_opts['multipart'] = true;
-        fileupload_opts['maxChunkSize'] = 10485760; //10M
-    }
-        
-    var isTiledImage = that.configMode.tiledImageStack ||
-                        (that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
-                        && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
-    if(isTiledImage){
-        fileupload_opts['formData'].push({name:'tiledImageStack', value:1});
-        fileupload_opts['formData'].push({name: 'acceptFileTypes', value:'zip|mbtiles'});
-        
-        $input.attr('accept','.zip, .mbtiles');
-    }                
-       
-                        //init upload widget
-                        $input.fileupload( fileupload_opts );
-                
-                        //init click handlers
-                        //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
-                        $input_img.on({click: function(e){ //find('a')
-                            $input.click(); //open file browse
-                        }});
             }
             else //------------------------------------------------------------------------------------
             if(this.detailType=='action'){
@@ -3154,76 +2853,6 @@ console.log('remove ', input_id);
     },
 
     //
-    // Link to image fields together, to perform actions (e.g. add, change, remove) on both fields, mostly for icon and thumbnail fields
-    //
-    linkIconThumbnailFields: function($img_container, $img_input){
-        this.linkedImgContainer = $img_container;
-        this.linkedImgInput = $img_input;
-    },
-
-    //
-    //
-    //
-    openIconLibrary: function(){                                 
-        
-        if(!(this.detailType=='file' && this.configMode.use_assets)) return;
-        
-        var that = this;
-        
-        this.select_imagelib_dlg.selectFile({
-                source: 'assets'+(that.options.dtID=='rty_Icon'?'16':''), 
-                extensions: 'png,svg',
-                //size: 64, default value
-                onselect:function(res){
-            if(res){
-                that.input_img.find('img').prop('src', res.url);
-                that.newvalues[$(that.inputs[0]).attr('id')] = res.path;  //$input
-                that.onChange(); 
-                
-                
-                //HARDCODED!!!! sync icon or thumb to defRecTypes
-                if(res.path.indexOf('setup/iconLibrary/')>0){
-                    //sync paired value
-                    var tosync = '', repl, toval;
-                    if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
-                    else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
-               
-                    if(tosync!=''){
-                        
-                        var ele = that.options.editing.getFieldByName(tosync);
-                        if(ele){
-                            var s_path = res.path;
-                            var s_url  = res.url;
-                            if(s_path.indexOf('icons8-')>0){
-                                s_path = s_path.replace('-'+repl+'.png','-'+toval+'.png')
-                                s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
-                            }
-                            
-                            var s_path2 = s_path.replace(repl,toval)
-                            var s_url2 = s_url.replace(repl,toval)
-                            
-                            if(that.linkedImgContainer !== null && that.linkedImgInput !== null)
-                            {
-                                if(ele){
-                                    ele.editing_input('setValue', s_path2 );
-                                    ele.hide();
-                                } 
-                                
-                                that.linkedImgInput.val( s_path2 );
-                                that.linkedImgContainer.find('img').prop('src', s_url2 );
-                            }else if(ele && ele.find('.image_input').length > 0){// elements in correct location
-                                ele.find('.image_input').find('img').prop('src', s_url2); 
-                            }                                
-
-                        }
-                    }
-                }
-                
-            }
-        }, assets:that.configMode.use_assets, size:that.configMode.size});
-    },
-    
-    //
     //
     //
     _clearChildRecordPointer: function( input_id ){
@@ -3308,10 +2937,6 @@ console.log('remove ', input_id);
         if(this.dtwidget!=null && ele[this.dtwidget]('instance')){
             res = ele[this.dtwidget]('findAndAssignTitle', value);
                     
-        }else if(this.detailType=='file'){  // FILE FOR OTHER ENTITIES - @todo test
-            
-            window.hWin.HEURIST4.ui.setValueAndWidth(ele, value, 10);
-            
         }else if(this.configMode.entity==='records'){     //RECORD
         
                 var isChildRecord = that.f('rst_CreateChildIfRecPtr');
@@ -3831,19 +3456,7 @@ console.log('remove ', input_id);
                 if(that.dtwidget!=null && $input[that.dtwidget]('instance')){
                     $input[that.dtwidget]('clearValue'); //clear display value
                 }else
-                if(that.detailType=='file'){
-                    that.input_cell.find('img.image_input').prop('src','');
-
-                    if(that.linkedImgInput !== null){
-                        that.linkedImgInput.val('');
-                        that.newvalues[that.linkedImgInput.attr('id')] = '';
-                        that.linkedImgInput.removeAttr('data-value');
-                    }
-                    if(that.linkedImgContainer !== null){
-                        that.linkedImgContainer.find('img').prop('src', '');
-                    }
-                }
-                else if(that.detailType=='resource'){
+                if(that.detailType=='resource'){
                     
                     $input.parent().find('.sel_link').hide();
                     $input.parent().find('.sel_link2').show();
@@ -3866,7 +3479,7 @@ console.log('remove ', input_id);
                         }
                     }
                 }
-                if(that.detailType=='date' || that.detailType=='file'){
+                if(that.detailType=='date'){
                     $input.change();
                 }else{
                     that.onChange();
@@ -3940,7 +3553,7 @@ console.log('remove ', input_id);
         if(this.dtwidget!=null && $input[this.dtwidget]('instance')){
             res = $input[this.dtwidget]('getValue');
         }else
-        if(!(this.detailType=="resource" || this.detailType=='file' 
+        if(!(this.detailType=="resource"
             || this.detailType=='date'))
         {
             if($input.attr('radiogroup')>0){
@@ -4183,7 +3796,7 @@ console.log('remove ', input_id);
             
             var idx;
             for (idx in this.inputs) {
-                if(!this.isFileForRecord) {  //this.detailType=='file'
+                if(!this.isFileForRecord) { 
                     var input_id = this.inputs[idx];
                     var $input = $(input_id);
                     window.hWin.HEURIST4.util.setDisabled($input, is_disabled);

@@ -22,7 +22,6 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
 
     // default options
     options: {
-        force_displayheight: null   //height in rows
     },
     
     _gicon: null,
