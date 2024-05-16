@@ -25,9 +25,13 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 require_once dirname(__FILE__).'/bulkEmailSystem.php';
 
-if (@$_REQUEST["exportCSV"] == "true") {
+if (@$_REQUEST["exportCSV"] == 1) {
 
-    getCSVDownload($_REQUEST);
+    if($system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)){
+        echo "The System Administrator password is invalid, please re-try in the previous tab/window";
+    }else{
+        getCSVDownload($_REQUEST);    
+    }
     exit;
 }
 
@@ -257,6 +261,8 @@ if(!$has_emails || empty($emails)) {
             
             var current_db = "<?php echo $current_db ?>";
             var getting_databases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
+            var run_filter = false;
+            var isFormSubmit = false;
 
             const handled_sort = ['name', 'rec_count', 'last_update'];
             var database_details = null; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
@@ -296,27 +302,37 @@ if(!$has_emails || empty($emails)) {
             //
             // Prepare and run export script
             //
-            function exportCSV(isValid) {
-
-                var action = $("#emailOptions").attr("onsubmit");
-                $("#emailOptions").attr("onsubmit", "");
-                $("input[name='exportCSV']").val(true);
-
-                if(isValid) {
-                    getDbList();
-                    
-                    var data = {};
-
-                    $.map($("#emailOptions").serializeArray(), function(obj, idx) {
-                        data[obj['name']] = obj['value'];
-                    });
-
-                    $("#exportData").val(data);
-                    $("#emailOptions").submit();
+            function doExportCSV(e) {
+                
+                if(!validateForm(e)) { 
+                    return false; 
                 }
 
-                $("#emailOptions").attr("onsubmit", action);
-                $("input[name='exportCSV']").val(false);
+                //prevent dbl click
+                if(isFormSubmit){
+                    return;
+                }
+                isFormSubmit = true;
+
+                var action = $("#emailOptions").attr("onsubmit");
+                //$("#emailOptions").attr("onsubmit", "");
+                $("input[name='exportCSV']").val(1);
+
+                /*
+                var data = {};
+
+                $.map($("#emailOptions").serializeArray(), function(obj, idx) {
+                    data[obj['name']] = obj['value'];
+                });
+                $("#exportData").val(data);
+                */
+                getDbList();
+                $("#emailOptions").submit();
+
+                //$("#emailOptions").attr("onsubmit", action);
+                $("input[name='exportCSV']").val('');
+                
+                setTimeout('isFormSubmit=false', 5000);
 
                 return false;
             }
@@ -325,7 +341,7 @@ if(!$has_emails || empty($emails)) {
             // Valid main form
             //
             function validateForm(e) {
-
+                
                 var isValid = true;
 
                 var err_text = "The following actions are required:<br><br>";
@@ -384,12 +400,10 @@ if(!$has_emails || empty($emails)) {
                 if(!isValid) { 
                     window.hWin.HEURIST4.msg.showMsgFlash(err_text, 5000);
                 }else{
-                    verifySystemAdminPwd();
+                    //verifySystemAdminPwd();
                 }
-                if(isValid && $(e.target).attr("id")=="csvExport") { 
-
-                    return exportCSV(isValid, err_text); 
-                }
+                
+                return isValid;
             }
 
             //
@@ -619,7 +633,7 @@ if(!$has_emails || empty($emails)) {
 
                 $("#btnApply").on({
                     click: function(event, data) {
-
+                        
                         if(getting_databases){
                             run_filter = getting_databases == 1;
                             window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 5000);
@@ -702,8 +716,11 @@ if(!$has_emails || empty($emails)) {
                 });
 
                 $("#btnEmail").on("click", function(event){
-
-                    validateForm(event);
+                    if(validateForm(event)){
+                        getDbList();
+                        $("input[name='exportCSV']").val('');
+                        $("#emailOptions").submit();
+                    }
                 });
 
                 $('.dbSort').on('change', function(event){
@@ -1004,7 +1021,6 @@ if(!$has_emails || empty($emails)) {
                             if(response.data == true){
                                 
                                 getDbList();
-                                
                                 $("#emailOptions").submit();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgFlash("The System Administrator password is incorrect.<br>Please re-enter it.", 5000);
@@ -1031,7 +1047,7 @@ if(!$has_emails || empty($emails)) {
                         of: "#sm_pwd"
                     });
 
-                $("#csvExport")
+                $("#btnCsvExport")
                     .position({
                         my: "left+10 top",
                         at: "right top",
@@ -1202,15 +1218,14 @@ if(!$has_emails || empty($emails)) {
                 <input name="db" value="<?php echo htmlspecialchars($_REQUEST['db']); ?>" style="display: none;" readonly />
 
                 <input id="db_list" name="databases" type="hidden" />
-                <input name="exportCSV" value="false" style="display: none;" readonly />
-
+                <input name="exportCSV" value="0" type="hidden"/>
             </form>
-
-
-            <form id="csvExport" action="bulkEmailMain.php" method="POST" target="_blank" onsubmit="return validateForm(event);" style="display: inline-block;">
+            <input type="button" id="btnCsvExport" value="Export CSV" onclick="doExportCSV(event)"/>
+<!--
+            <form id="csvExportForm" action="#" onsubmit="validateForm(event);return false;" style="display: inline-block;">
                 <input type="hidden" name="exportdata" id="exportData" />
-                <input type="submit" value="Export CSV" />
             </form>
+-->
         </div>
         
     </body>
