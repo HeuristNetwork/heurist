@@ -518,7 +518,7 @@ $.widget( "heurist.editing_input", {
                       }
                   });
                   this.setValue(0);
-                  this.options.values = [0];
+                  this.options.values = [0]; //zero value
                   return;
             }
             
@@ -531,6 +531,7 @@ $.widget( "heurist.editing_input", {
         //recreate input elements and assign given values
         this.setValue(values_to_set);
         this.options.values = this.getValues();
+
         this._refresh();
 
         if(this.f('rst_MayModify') == 'discouraged'){ // && !window.hWin.HAPI4.is_admin()
@@ -5249,7 +5250,6 @@ $.widget( "heurist.editing_input", {
             this.options.onrecreate.call(this);
         }
         
-        
         /*
         if(make_as_nochanged){
             this._setAutoWidth();            
@@ -5533,6 +5533,7 @@ $.widget( "heurist.editing_input", {
 
         if(value===true){
             this.options.values = [''];
+            
             return true;
         }else{
 
@@ -5560,9 +5561,11 @@ $.widget( "heurist.editing_input", {
     },
 
     //
-    //
+    //   Restore values
     //    
     setUnchanged: function(){
+        
+        if(this.isReadonly()) return;
         
         this.options.values = [];
                 
