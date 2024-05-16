@@ -347,7 +347,7 @@ function hexportMenu( container ) {
             if(true){
 
                 if(isEntireDb){
-                    params =  'depth=0';
+                    params =  'depth=0&linkmode=none';
                 }else {
                     if(opts.format!='iiif' && opts.questionResolved!==true){
                         var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
@@ -358,6 +358,8 @@ function hexportMenu( container ) {
 +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
 +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
 +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
++(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names for everything '
+    +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
 +(opts.format=='rdf'?'<p>Since, RDF export is exeprimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
 
                         , function(){ 
@@ -366,9 +368,12 @@ function hexportMenu( container ) {
                             }
                             
                             var val = $expdlg.find('input[name="links"]:checked').val();
-                            
+
                             opts.linksMode = val;
                             opts.questionResolved=true; 
+                            
+                            opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
+
                             _exportRecords( opts ); 
                         },
                         {
@@ -412,6 +417,10 @@ function hexportMenu( container ) {
 
                 //multifile is for HuNI  
                 params =  params + (opts.multifile?'&multifile=1':'');  
+                
+                if(opts.showHumanReadableNames){
+                    params =  params + '&human_readable_names=1';    
+                }
 
             }else{
                 
