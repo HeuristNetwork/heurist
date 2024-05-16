@@ -548,6 +548,10 @@ function hMapManager( _options )
                         //if not expanded, expand, it loads layers (opens mapdocument)
                         if(is_selected){
 
+                            if(!mapDocuments.isLoaded(mapdoc_id)){ // remove context menu to refresh it with extra controls
+                                $(node.span).find('.svs-contextmenu3').remove();
+                            }
+
                             delete mapdoc_visible[mapdoc_id];
                             //hide all other mapdocs
                             that.toggleMapDocument(Object.keys(mapdoc_visible).join(','), false); 
@@ -826,7 +830,7 @@ function hMapManager( _options )
             recid = item.key, 
             mapdoc_id = 0;
             
-        if($(item).find('.svs-contextmenu3').length==0){
+        if($(item.span).find('.svs-contextmenu3').length==0){
             
             if(item.data.type=='layer'){
                 mapdoc_id = item.data.mapdoc_id;
