@@ -64,19 +64,7 @@ var cfg_widgets = [
 
     {id:'heurist_recordAddButton', name:'Add Record', widgetname:'recordAddButton', script:'hclient/widgets/record/recordAddButton.js'},
     {id:'heurist_emailForm', name:'Email Us Form', widgetname:'emailForm', script:'hclient/widgets/admin/emailForm.js'},
-    
-    // DIGITAL HARLEM APPS
-    {id:'dh_search', name:'Search Forms', widgetname:'dh_search', script:'hclient/widgets/digital_harlem/dh_search.js'},
-    {id:'dh_maps', name:'Saved Maps', widgetname:'dh_maps', script:'hclient/widgets/digital_harlem/dh_maps.js'},
-    {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'hclient/widgets/digital_harlem/dh_results.js'}, //not used
-    {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'}, //not used
-
-    //ExpertNation APPS
-    {id:'expertnation_results', name:'Search Result', widgetname:'expertnation_results', script:'hclient/widgets/expertnation/expertnation_results.js'},
-    {id:'expertnation_nav', name:'Navigation', widgetname:'expertnation_nav', script:'hclient/widgets/expertnation/expertnation_nav.js'},
-    {id:'expertnation_place', name:'Place', widgetname:'expertnation_place', script:'hclient/widgets/expertnation/expertnation_place.js'},
-     
-    
+        
     //fake app - reference to another layout to include
     {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}
 
