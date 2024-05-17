@@ -951,6 +951,7 @@ $.widget( "heurist.importStructure", {
             }else if(action=='clone'){
 
                 if(!recURL) return;
+
                 /* todo !!!!!
                 var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
                 +'?db='+window.hWin.HAPI4.database
@@ -977,7 +978,7 @@ $.widget( "heurist.importStructure", {
         var recURL = fld('rec_URL');
         var dbName = fld('rec_Title');
         var recAllowClone = fld('rec_AllowClone');
-        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_ScratchPad'));
+        var recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
 
         var rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');

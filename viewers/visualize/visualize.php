@@ -48,11 +48,15 @@ if(@$isDatabaseStructure == 1){
         <div id="setDivGravity" class="toolbar-section" 
             style="border-left: solid 1px gray; min-width:90px">
             
-            <div id="setGravityMode" style="padding-left:10px">
+            <div id="setGravityMode">
                 <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
                 <button id="gravityMode0" name="gravityMode" value="off">off</button>
                 <button id="gravityMode1" name="gravityMode" value="touch">on</button>           
             </div>
+        </div>
+
+        <div id="divRefresh" class="toolbar-section" style="min-width: 45px">
+            <button id="btnRefreshData">Refresh data</button>
         </div>
         
         <div id="setAdvancedMode" class="toolbar-section" style="border-left: solid 1px gray;padding-left:15px;min-height:22px;vertical-align:middle;font-size:0.8em">

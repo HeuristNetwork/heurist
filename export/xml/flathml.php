@@ -112,11 +112,18 @@ if(@$_REQUEST['postdata']){
     $_REQUEST = json_decode($_REQUEST['postdata'], true);
 }
 
+$human_readable_names = (@$_REQUEST['human_readable_names']==1);
+
 if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
     $rectype_templates = $_REQUEST['rectype_templates']!=null && $_REQUEST['rectype_templates']!=0; //flag to produce rectype templates instead of real records
+    if($rectype_templates){
+        $human_readable_names = true;
+    }
 }else{
     $rectype_templates = false;
 }
+
+
 if(@$_REQUEST['multifile']){ // output manifest + files ??
     $intofile = $_REQUEST['multifile']!=null && $_REQUEST['multifile']!=0; //flag one-record-per-file mode for HuNI  
 }else{
@@ -332,6 +339,7 @@ if(@$_REQUEST['linkmode']){//direct, direct_links, none, all
     if($_REQUEST['linkmode']=='none'){
         $_REQUEST['depth'] = '0';
         $NO_RELATIONSHIPS = true;
+        $_REQUEST['rev'] = 'no';
         
     }else if($_REQUEST['linkmode']=='direct'){
         $_REQUEST['revexpand'] = 'no';
@@ -1152,7 +1160,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
     $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
-    $EXPAND_REV_PTR, $REVERSE, $NO_RELATIONSHIPS, $rectype_templates;
+    $EXPAND_REV_PTR, $REVERSE, $NO_RELATIONSHIPS, $rectype_templates, $human_readable_names;
 
     $hunifile = null;
     
@@ -1301,9 +1309,12 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             foreach ($relations as $rec_id => $rels) {
                 $linkedRecType = $rels['rec_RecTypeID'];
                 foreach ($rels['dty_IDs'] as $dtID) {
-                    $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID), 'basename' => $DTN[$dtID]);
-                    if (array_key_exists($dtID, $RQS[$linkedRecType])) {
-                        $attrs['name'] = $RQS[$linkedRecType][$dtID];
+                    $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID));
+                    if($human_readable_names){
+                        $attrs['basename'] = $DTN[$dtID];
+                        if (array_key_exists($dtID, $RQS[$linkedRecType])) {
+                            $attrs['name'] = $RQS[$linkedRecType][$dtID];
+                        }
                     }
                     makeTag('reversePointer', $attrs, $rec_id);
                 }
@@ -1435,22 +1446,24 @@ function makeFileContentNode($file) {
 function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
     global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
-    $rectype_templates;
+    $rectype_templates, $human_readable_names;
 
     $attrs = array('conceptID' => ConceptCode::getDetailTypeConceptID($dt));
 
-    if (array_key_exists($rt, $RQS) && array_key_exists($dt, $RQS[$rt])) {
-        $attrs['name'] = $RQS[$rt][$dt];    
-    }
-
-    if($rectype_templates){
-        if(!@$attrs['name'] && array_key_exists($dt, $DTN)){
-            $attrs['name'] = $DTN[$dt];
+    if($human_readable_names){
+        if (array_key_exists($rt, $RQS) && array_key_exists($dt, $RQS[$rt])) {
+            $attrs['name'] = $RQS[$rt][$dt];    
         }
-    }else{
-        $attrs['id'] = $dt;
-        if (array_key_exists($dt, $DTN)) {
-            $attrs['basename'] = $DTN[$dt];
+
+        if($rectype_templates){
+            if(!@$attrs['name'] && array_key_exists($dt, $DTN)){
+                $attrs['name'] = $DTN[$dt];
+            }
+        }else {
+            $attrs['id'] = $dt;
+            if (array_key_exists($dt, $DTN)) {
+                $attrs['basename'] = $DTN[$dt];
+            }
         }
     }
 
@@ -1624,13 +1637,15 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             makeTag('detail', $attrs, $value['id']);
         }
     } else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype')) {
-        $attrs['termID'] = $value;
+        if($human_readable_names){
+            $attrs['termID'] = $value;  
+        } 
         if($rectype_templates){        
             makeTag('detail', $attrs, null);
         }else{
             if( array_key_exists($value, $TL) ){
                 $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
-                if (@$TL[$value]['trm_ParentTermID']) {
+                if ($human_readable_names && @$TL[$value]['trm_ParentTermID']) {
                     $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
                 }
             }

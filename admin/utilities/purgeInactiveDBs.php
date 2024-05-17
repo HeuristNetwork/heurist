@@ -174,6 +174,8 @@ define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list();
 
+if($exclusion_list===false) exit;
+
 if(!$arg_no_action){
     if (!folderCreate($backup_root, true)) {
         exit("Failed to create backup folder $backup_root \n");
@@ -264,7 +266,25 @@ foreach ($databases as $idx=>$db_name){
         $vals['mdate'] = mysql__select_value($mysqli, 'select max(rst_Modified) from defRecStructure');
     }
     
-    $datetime2 = date_create($vals['mdate']);
+    $d2 = $vals['mdate'];
+/*    
+    $query = 'SELECT max(rty_Modified) as mdate FROM defRecTypes';
+    $val = mysql__select_value($mysqli, $query);
+    if($d2<$val){ $d2 = $val; }
+
+    $query = 'SELECT max(rst_Modified) as mdate FROM defRecStructure';
+    $val = mysql__select_value($mysqli, $query);
+    if($d2<$val){ $d2 = $val; }
+    
+    $query = 'SELECT max(dty_Modified) as mdate FROM defDetailTypes';
+    $val = mysql__select_value($mysqli, $query);
+    if($d2<$val){ $d2 = $val; }
+    
+    $query = 'SELECT max(trm_Modified) as mdate FROM defTerms';
+    $val = mysql__select_value($mysqli, $query);
+    if($d2<$val){ $d2 = $val; }
+*/    
+    $datetime2 = date_create($d2);
     
     if(!$datetime2){
         echo $tabs0.$db_name.' cannot detect modification date'.$eol;
@@ -278,7 +298,7 @@ foreach ($databases as $idx=>$db_name){
     $interval = date_diff($datetime1, $datetime2);    
     $diff = $interval->format('%y')*12 + $interval->format('%m');
 
-    $archive_db = ($vals['cnt']<11 && $diff>=3) || ($vals['cnt']<51 && $diff>=6) || ($vals['cnt']<101 && $diff>=12);
+    $archive_db = ($vals['cnt']<11 && $diff>=6) || ($vals['cnt']<51 && $diff>=12) || ($vals['cnt']<101 && $diff>=24);
 
     if($archive_db){ // check for structure updates
 
@@ -301,7 +321,7 @@ foreach ($databases as $idx=>$db_name){
         $interval = date_diff($datetime1, $datetime3);
         $diff = $interval->format('%y') * 12 + $interval->format('%m');
 
-        $archive_db = $diff > 3; // more than three months ago
+        $archive_db = $diff > 6; // more than six months ago
     }
 
     if($archive_db){
@@ -651,18 +671,37 @@ if(is_array($email_list) && count($email_list)>0 && $need_email)
 }
 
 function exclusion_list(){
+    global $arg_no_action;
     
     $res = array();
-    $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_purge.txt");
+    $fname_ = dirname(__FILE__)."/../../../databases_not_to_purge.txt";
+    //$fname_ = '/var/www/html/HEURIST/databases_not_to_purge.txt';
+    $fname = realpath($fname_);
     if($fname!==false && file_exists($fname)){
         //ini_set('auto_detect_line_endings', 'true');
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            if($line=='' || substr($line,0,1)=='#') continue;
+            //if($line=='' || substr($line,0,1)=='#') continue; //remark
+            if(strpos($line,'#')!==false){
+                $line = trim(strstr($line,'#',true));
+                if($line=='') continue;
+            }
             $res[] = $line;
         }
         fclose($handle);
+        if($arg_no_action){
+            print '<br>Exclusion list:<br>';
+            print implode('<br>', $res).'<br><br>';
+        }
+    }else{
+        $sMsg = 'The file with purge exclustion list (databases_not_to_purge.txt) '
+            .'was not found and please create it. '.($fname?$fname:$fname_);
+        if($arg_no_action){
+               print $sMsg.'<br>';
+        }
+        sendEmail(HEURIST_MAIL_TO_ADMIN, $sMsg); 
+        return false;
     }
     return $res;
 }

@@ -1,0 +1,8 @@
+# These databases are finished or reference databases which should not be
+# regarded as abandoned even though they receive no updates.
+# List one database per line
+# Add comments after name preceded by #
+
+Heurist_Bibliography  #  this is just an example
+
+

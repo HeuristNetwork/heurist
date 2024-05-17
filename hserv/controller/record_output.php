@@ -302,6 +302,7 @@
             }
         
         }else{
+            //old version
             $res = RecordsExport::output( $response, $params );
         }
     }

@@ -146,16 +146,18 @@
                 }
             }
 
-            if($lang){
+            if($lang){ //lang detected
                 
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
                 if($tag_to_remove == null){
-                    return array($lang, substr($val, $pos));        
+                    return array($lang, substr($val_orig, $pos));        
                 }else{
                     //remove first p or span
                     $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));    
                 }
                 
+            }else{
+                $val = $val_orig;
             }
         } 
         
@@ -336,7 +338,7 @@
         
         if(!empty($source_language) && in_array($source_language, $deepl_languages)){
             $k = array_search($source_language, $deepl_languages);
-            $url .= '&source_lang=' . $deepl_languages[k];
+            $url .= '&source_lang=' . $deepl_languages[$k];
         }
         
         if(strpos($string, '<?xml') === 0){ // possible xml

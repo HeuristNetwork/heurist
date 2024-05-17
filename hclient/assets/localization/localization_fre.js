@@ -148,6 +148,7 @@ regional['FRE'] = {
     'Preferences' : 'Préférences',
     'Layout configuration file': 'Fichier de configuration de la mise en page',
     'Language':'Langue',
+    'Target language':'Langue cible',
     'Theme':'Thème',
     'Open edit in new window':'Ouvrir la fenêtre d\'édition',
     'When exiting record edit, prompt for tags if no tags have been set':'En quittant l\'editeur, demander des tags si aucun a été défini',

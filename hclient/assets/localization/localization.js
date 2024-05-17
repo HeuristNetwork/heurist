@@ -796,6 +796,7 @@ regional['nl'] = {
     'Preferences' : 'Voorkeuren',
     'Layout configuration file': 'Lay-out configuratie bestand',
     'Language':'Taal',
+    'Target language':'Doel taal',
     'Theme':'Thema',
     'Open edit in new window':'Open in een nieuw venster',
     'When exiting record edit, prompt for tags if no tags have been set':'Vraag om nieuwe labels wanneer het bewerken van gegevens geannuleerd wordt, en er nog geen labels ingesteld zijn',

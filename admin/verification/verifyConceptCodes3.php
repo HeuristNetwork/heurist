@@ -137,7 +137,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         
         $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB '
             ." FROM `$db_name`.defRecTypes "
-            .' WHERE (rty_OriginatingDBID="" OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL ' 
+            .' WHERE (rty_OriginatingDBID="" OR rty_OriginatingDBID IS NULL ' 
             .'OR rty_IDInOriginatingDB="" OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)';
             //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
         
@@ -145,20 +145,18 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
         
         while (($row = $res->fetch_row())) {
-               $is_found = true;
-               array_push($rec_types, array_map('htmlspecialchars',$row));
+            $is_found = true;
+            array_push($rec_types, array_map('htmlspecialchars',$row));
         }
-        
-        
-/*      set Ids for registered databases  
-        if($is_found){
-        
-            $query = 'UPDATE '.$db_name.'.defRecTypes set rty_IDInOriginatingDB = rty_ID, rty_NameInOriginatingDB = rty_Name, rty_OriginatingDBID='.$ver
-            ." WHERE (rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL "
-            ."OR rty_IDInOriginatingDB='' OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)";
+
+        // set ids for registered databases, where originating DB id is 0
+        $query = "SELECT rty_ID FROM `$db_name`.defRecTypes WHERE rty_OriginatingDBID = 0";
+        $res = mysql__select_list2($mysqli, $query, 'intval');
+        if(!empty($res)){
+
+            $query = "UPDATE `$db_name`.defRecTypes SET rty_OriginatingDBID = $ver WHERE rty_OriginatingDBID = 0";
             $mysqli->query($query);
         }
-*/
         
 /*   find alternatives              
         if($ver==2){
@@ -183,7 +181,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         if($need_Details){
         $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB '
             ." FROM `$db_name`.defDetailTypes "
-            ." WHERE  dty_OriginatingDBID='' OR dty_OriginatingDBID=0 OR dty_OriginatingDBID IS NULL " //
+            ." WHERE  dty_OriginatingDBID='' OR dty_OriginatingDBID IS NULL " //
             ."OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL ";
             
             //.' OR dty_Name LIKE "% 2" OR dty_Name LIKE "% 3"';
@@ -195,7 +193,15 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
                $is_found = true;
                array_push($det_types, array_map('htmlspecialchars',$row));
         }
-        
+
+        // set ids for registered databases, where originating DB id is 0
+        $query = "SELECT dty_ID FROM `$db_name`.defDetailTypes WHERE dty_OriginatingDBID = 0";
+        $res = mysql__select_list2($mysqli, $query, 'intval');
+        if(!empty($res)){
+
+            $query = "UPDATE `$db_name`.defDetailTypes SET dty_OriginatingDBID = $ver WHERE dty_OriginatingDBID = 0";
+            $mysqli->query($query);
+        }
         if(count($det_types)>0){
             
 /*         
@@ -217,7 +223,7 @@ $mysqli->query($query);
         if($need_Terms){
             $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB '
             ." FROM `$db_name`.defTerms "
-            ." WHERE trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL " //
+            ." WHERE trm_OriginatingDBID='' OR trm_OriginatingDBID IS NULL " //
             ."OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL";
                 
             $res = $mysqli->query($query);
@@ -227,7 +233,15 @@ $mysqli->query($query);
                    $is_found = true;
                    array_push($terms, array_map('htmlspecialchars',$row));
             }
-          
+
+            // set ids for registered databases, where originating DB id is 0
+            $query = "SELECT trm_ID FROM `$db_name`.defTerms WHERE trm_OriginatingDBID = 0";
+            $res = mysql__select_list2($mysqli, $query, 'intval');
+            if(!empty($res)){
+
+                $query = "UPDATE `$db_name`.defTerms SET trm_OriginatingDBID = $ver WHERE trm_OriginatingDBID = 0";
+                $mysqli->query($query);
+            } 
           /*  
         if(count($terms)>0){
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
@@ -257,7 +271,7 @@ $mysqli->query($query);
             $det_types = $data['dty'];
             $terms = $data['trm'];
 
-            print '<h4 style="margin:0;padding-top:20px">'.$data[id].' - '.substr($db_name,4).'</h4><table style="font-size:12px">';    
+            print '<h4 style="margin:0;padding-top:20px">'.$data['id'].' - '.substr($db_name,4).'</h4><table style="font-size:12px">';    
             
             print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';          
             

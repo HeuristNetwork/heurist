@@ -181,6 +181,12 @@ var svg;        // The SVG where the visualisation will be executed on
                  zoomToFit();
             }
         );
+
+        $('#btnRefreshData').button({icons:{primary:'ui-icon-refresh'}}).click(
+            function(){
+                location.reload();
+            }
+        );
  
         return this;
     };

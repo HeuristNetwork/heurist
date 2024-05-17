@@ -22,6 +22,7 @@
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
+require_once dirname(__FILE__).'/../../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -37,7 +38,7 @@ use PHPMailer\PHPMailer\Exception;
 	-4 => File Error
 */
 
-class systemEmailExt {
+class SystemEmailExt {
 
 	private $cur_user; // logged in user's details
 
@@ -47,6 +48,7 @@ class systemEmailExt {
 	public $users; // user options => owner: DB Owners, manager: DB Manager Admins, user: All Users, admin: All Admins
 
 	private $user_details; // list of user details and databases, indexed on user emails
+    private $user_invalid_email; // list of users with invalid emails
 
 	public $email_subject; // email title/subject, from the name/title field from a notes record
 	public $email_body; // email body, from the short summary field from a notes record + final editing
@@ -62,9 +64,10 @@ class systemEmailExt {
     private $use_native_mail_function = false;
     private $debug_run = false;
     
-	private $log; // log of emails, to be placed within a note record within the databases, extended version of receipt
+	private $log = ''; // log of emails, to be placed within a note record within the databases, extended version of receipt
 	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"  
-	private $error_msg; // error message
+    private $emails_sent_count = 0;
+	private $error_msg = ''; // error message
 
 	private $user_options = array("owner", "admin", "manager", "user"); // available user options
 	private $substitute_vals = array("##firstname##", "##lastname##", "##email##", "##database##", "##dburl##", "##records##", "##lastmodified##"); // available email body substitutions
@@ -85,7 +88,7 @@ class systemEmailExt {
 
 		if (!isset($data["db"])) { // A current database is needed
 			// Can only be reached by another php script accessing the class or the outside functions at the end
-			$this->set_error("No current database has been provided<br>Please contact the Heurist team if this problem persists.");
+			$this->set_error('No current database has been provided<br>Please contact the Heurist team if this problem persists.');
 			return -1;
 		}
         
@@ -102,14 +105,15 @@ class systemEmailExt {
 
         if(!(is_array($this->databases) && count($this->databases)>0)){
 			// Here databases is not an array
-			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . $data["databases"];
-			$this->set_error("No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values." . $provided_dbs);
+			$provided_dbs = is_array($data["databases"]) ? "" : "<br>databases => " . htmlspecialchars($data["databases"]);
+			$this->set_error('No valid databases have been provided, these databases are required to retrieve a list of users, the last modified records and record count values.' 
+                    . $provided_dbs);
 			return -1;
 		}
 
 		if(!(is_array($this->databases) && count($this->databases)>0)){
 			// No valid databases found
-			$this->set_error("All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.");
+			$this->set_error('All provided databases are broken or invalid, these databases are required to retrieve a list of users, the last modified records and a record count values.');
 			return -1;
 		}
 		
@@ -117,7 +121,8 @@ class systemEmailExt {
 			$this->users = $data["users"];
 		} else {
 
-			$main_msg = "No valid users have been provided, this is needed to retrieve a list of users to email from the selected databases.<br>users => " . $data["users"];
+			$main_msg = 'No valid users have been provided, this is needed to retrieve a list of users to email from the selected databases.<br>users => ' 
+                        . (isset($data["users"])?htmlspecialchars(print_r($data["users"],true)):' not defined') ;
 			$this->set_error($main_msg); // . "<br>Please contact the Heurist team if this problem persists."
 			return -1;
 		}
@@ -132,7 +137,7 @@ class systemEmailExt {
 			$this->email_body = $data["emailBody"];
 		} else {
 
-			$this->set_error("No email body has been provided, the Heurist team has been notified");
+			$this->set_error('No email body has been provided'); //, the Heurist team has been notified
 			//$system->addError(HEURIST_ERROR, "Bulk Email System: The email's body (emailBody) is missing from the form data. Data => " . print_r($data, TRUE));
 			return -1;
 		}
@@ -146,6 +151,7 @@ class systemEmailExt {
 
 		// Initialise other variables
 		$this->user_details = array();
+        $this->user_invalid_email = array();
 
 		$this->log = "";
 		$this->receipt = null;
@@ -161,7 +167,7 @@ class systemEmailExt {
 			return $rtn;
 		}else if(is_array($this->user_details) && count($this->user_details) == 0){
 
-			$this->set_error("No users have been retrieved, no emails have been sent");
+			$this->set_error('No users have been retrieved, no emails have been sent');
 			return -1;
 		}
 
@@ -192,13 +198,19 @@ class systemEmailExt {
 		$mysqli = $system->get_mysqli();
 
 		$query = "SELECT ugr.ugr_eMail FROM ". HEURIST_DBNAME_FULL .".sysUGrps AS ugr WHERE ugr.ugr_ID = ". $this->cur_user['ugr_ID'];
-
-		$email = $mysqli->query($query);
+        
+        $email = false;
+		$eres = $mysqli->query($query);
+        if($eres){
+            $email = $eres->fetch_row()[0];
+            $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+        }
 
 		if(!$email){
+            //not found or invalid
 			$this->cur_user['ugr_eMail'] = HEURIST_MAIL_TO_ADMIN;
 		}else{
-			$this->cur_user['ugr_eMail'] = filter_var($email->fetch_row()[0], FILTER_SANITIZE_EMAIL);
+			$this->cur_user['ugr_eMail'] = $email;
 		}
 	}
 
@@ -276,11 +288,12 @@ class systemEmailExt {
 			// Execute WHERE Clause
 			if (empty($where_clause)) {
 
-				$this->set_error("Unable to construct WHERE clause for User List query due to an invalid users option<br>users => " . $users);
+				$this->set_error('Unable to construct WHERE clause for User List query due to an invalid users option<br>users => '
+                         . htmlspecialchars($users));
 				return -1;
 			} else {
 
-				$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail 
+				$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail, ugr.ugr_ID  
 						  FROM " . $db . ".sysUsrGrpLinks AS ugl  
 						  INNER JOIN " . $db . ".sysUGrps AS ugr ON ugl.ugl_UserID = ugr.ugr_ID "
 						. $where_clause;
@@ -296,16 +309,23 @@ class systemEmailExt {
 				while ($row = $res->fetch_row()) {
 
 					$db_name = substr($db,strlen(HEURIST_DB_PREFIX));
+                    
+                    $email = $row[2];
 
-					if($row[2]){
-						$row[2] = filter_var($row[2], FILTER_SANITIZE_EMAIL);
+					if($email){
+						$email = filter_var($email, FILTER_VALIDATE_EMAIL); //FILTER_SANITIZE_EMAIL
 					}
+                    
+                    if(!$email){
+                        //email invalid
+                        $this->user_invalid_email[] = array($db, $row[0], $row[1], $row[3], $row[2]);
 
-					if (array_key_exists($row[2], $this->user_details)) { // check if user already has data in user_details array, note: only the first set of first/last name are used
+                    }else
+					if (array_key_exists($email, $this->user_details)) { // check if user already has data in user_details array, note: only the first set of first/last name are used
 
-						if (!in_array($db_name, $this->user_details[$row[2]]["db_list"])) { // add db to list
+						if (!in_array($db_name, $this->user_details[$email]["db_list"])) { // add db to list
 
-							$this->user_details[$row[2]]["db_list"][] = $db_name;
+							$this->user_details[$email]["db_list"][] = $db_name;
 						}
 					} else {
 
@@ -314,7 +334,7 @@ class systemEmailExt {
 						$details["last_name"] = $row[1];
 						$details["db_list"][] = $db_name;
 						
-						$this->user_details[$row[2]] = $details;
+						$this->user_details[$email] = $details;
 					}
 				}
 
@@ -366,7 +386,8 @@ class systemEmailExt {
 		  	$res = $mysqli->query($query);
 		  	if (!$res) { 
 
-		  		$this->set_error("Query Error: Unable to get record count for the $db database<br>Error => " .$mysqli->error); 
+		  		$this->set_error('Query Error: Unable to get record count for the '
+                            .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error)); 
 		  		return -2;
 		  	}
 
@@ -417,7 +438,8 @@ class systemEmailExt {
 
 				if (!$res) {
 
-					$this->set_error("Query Error: Unable to retrieve a last modified record from $db<br>Error => " .$mysqli->error);
+					$this->set_error('Query Error: Unable to retrieve a last modified record from '
+                                .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error)); 
 					return -2;
 				}
 
@@ -447,9 +469,11 @@ class systemEmailExt {
 
 		$email_rtn = 0;
 		$user_cnt = 0;
+        
+        $this->emails_sent_count = 0;
 
         if (empty($this->email_body)) {
-			$this->set_error("The email body is missing, this needs to be provided at class initialisation.");
+			$this->set_error('The email body is missing, this needs to be provided at class initialisation.');
 			return -1;
         }
 
@@ -458,9 +482,16 @@ class systemEmailExt {
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
-        //OLD $mailer->SetFrom($this->cur_user["ugr_eMail"], $this->cur_user["ugr_FullName"]);
         
-        $mailer->SetFrom('no-reply@'.HEURIST_DOMAIN, 'Heurist system');
+        $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
+        $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
+        
+        $mailer->CharSet = 'UTF-8';
+        $mailer->Encoding = 'base64';
+        $mailer->isHTML( true );
+        $mailer->ClearReplyTos();
+        $mailer->addReplyTo($this->cur_user['ugr_eMail'], $this->cur_user["ugr_FullName"]);
+        $mailer->SetFrom($email_from, $email_from_name);
 
 		foreach ($this->user_details as $email => $details) {
 
@@ -502,6 +533,7 @@ class systemEmailExt {
             }else if($this->use_native_mail_function){ //use php native mail
 
                 $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
+                //."\r\nReply-To: ".
                 ."\r\nContent-Type: text/html;charset=utf-8\r\n";
 
                 $title = '=?utf-8?B?'.base64_encode($title).'?=';
@@ -518,7 +550,7 @@ class systemEmailExt {
                     $mailer->AddAddress( $email );
                 } catch (Exception $e) {
                     $email_rtn = -2;
-                    $status_msg = 'Failed, Error Message: Invalid email '.$email;
+                    $status_msg = 'Failed, Error Message: Invalid email '.htmlspecialchars($email);
                     $this->set_error( $status_msg );
                 }
                 if($email_rtn == 0){
@@ -545,29 +577,32 @@ class systemEmailExt {
                 $status_msg = "Failed, Error Message: " . $this->get_error();
             }
             
-			$this->log .= "Values: {databases: {".$db_listed."}, email: $email, name: " .$details['first_name']. " " .$details["last_name"]
-					   .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
-					   ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
-					   . "<br><br>";
+			$this->log .= htmlspecialchars("Values: {databases: {".$db_listed."}, email: $email, name: " 
+                        .$details['first_name']. " " .$details["last_name"]
+					    .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
+					    ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg.'  , '.$email_from )
+					    . '<br><br>';
 
 			$mailer->clearAddresses(); // ensure that the current email is gone
 
 			if ($email_rtn != 0) {
 
 				if ($email_rtn == -3){
-					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => " . $this->error_msg);
+					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => " 
+                            . htmlspecialchars($this->error_msg));
 				}else if($email_rtn == -2){
                     continue;
                 }
-
+                //ERROR
 				$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
 
 				return $email_rtn;
 			}
 
 			$user_cnt++;
-		}
+		} //for users
 
+        //SUCCESS    
 		$this->save_receipt($email_rtn, $this->email_subject, $this->email_body, $user_cnt);
 
 		return $email_rtn;
@@ -590,7 +625,7 @@ class systemEmailExt {
 
 		if ($fd == null) {
 
-			$this->set_error("exportDetailsToCSV() Error: Unable to open temporary files for CSV exporting");
+			$this->set_error('exportDetailsToCSV() Error: Unable to open temporary files for CSV exporting');
 			return -4;
 		}
 
@@ -669,7 +704,7 @@ class systemEmailExt {
 	public function get_error_log() {
 		return array($this->error_msg, $this->log);
 	}
-
+    
 	/*
 	 * Receipt functions:
 	 *
@@ -719,8 +754,17 @@ class systemEmailExt {
 			$user_list .= "&nbsp;&nbsp;". $details["first_name"] ." ". $details["last_name"] .": ". $email ."<br>";
 		}
 		$user_list .= "}";
+        
+        if(count($this->user_invalid_email)>0){
+            $user_list .= "<br>Users with invalid emails: {<br>";
+            foreach ($this->user_invalid_email as $info) {
+                $user_list .= "&nbsp;&nbsp;". $info[0] ." ". $info[1]. '  '. $info[2] .' ('.$info[3].')'.": ". $info[4] ."<br>";
+            }
+            $user_list .= "}"; //.$this->get_log();
+        }
+        
 		$user_list_size = strlen($user_list); // User List part in bytes
-
+        
 		// Check if Main and User List parts can be placed together or in different blocktext fields
 		if ($main_size+$user_list_size > $max_size) { // Save the text in chucks
 
@@ -776,6 +820,7 @@ class systemEmailExt {
 		} else { // Save together
 			$this->receipt = $main . "<br>" . $user_list;
 		}
+        $this->emails_sent_count = $user_count;
 	}
 	private function get_receipt() {
 		return $this->receipt;
@@ -805,8 +850,17 @@ class systemEmailExt {
 			if (!empty($data["data"]) && is_numeric($data["data"])) {
 
 				$rec_id = $data["data"];
+                
+                $title = isset($this->email_subject) ? $this->email_subject :'Heurist System Email Receipt';
+                $title .= '  ['.$this->emails_sent_count.']  ';
+                if(isset($this->error_msg) && $this->error_msg!=''){
+                    $title = 'ERROR. '.$title;    
+                }
 
-				$details = array($title_detailtype_id=>"Heurist System Email Receipt", $date_detailtype_id=>"today", $summary_detailtype_id=>$this->get_receipt(), "rec_ID"=>$rec_id);
+				$details = array($title_detailtype_id=>$title, 
+                                 $date_detailtype_id=>"now", 
+                                 $summary_detailtype_id=>$this->get_receipt(), //content
+                                 "rec_ID"=>$rec_id);
 
 				// Proceed with saving
 				$rtn = recordSave($system, array("ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details));
@@ -821,8 +875,8 @@ class systemEmailExt {
 				}
 			} else {
 
-				$this->set_error("Unable to create Note record for receipt, Error => " . $data["message"]);
-				$system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => " . $data["message"]);
+				$this->set_error("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
+				$system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => " .$data["message"]);
 				return -1;
 			}
 		}
@@ -842,20 +896,19 @@ class systemEmailExt {
 function sendSystemEmail($data) {
 
 	$rtn_value = 0;
-	$email_obj = new systemEmailExt();
+	$email_obj = new SystemEmailExt();
 
 	$rtn_value = $email_obj->processFormData($data);
 	
 	if ($rtn_value == 0) {
 
-		$rtn_value = $email_obj->constructEmails();
+		$rtn_value = $email_obj->constructEmails(); //prepare and send emails
 
 		if ($rtn_value <= -1) {
 
-			echo "An error occurred with preparing and sending the system emails.<br>";// See error log for details
-			$output = $email_obj->get_error_log();
-            //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
-
+			echo '<div style="color:red">An error occurred with preparing and sending the system emails.<br>'
+                    .$email_obj->get_error()
+			        .$email_obj->get_log().'</div>';
 			$rtn_value = -1;
 		}
 
@@ -865,11 +918,8 @@ function sendSystemEmail($data) {
 		return $rtn_value;
 	} else {
 
-		echo "An error occurred with processing the form's data.<br>";
-		$output = $email_obj->get_error();
-        //2024-02-23 Information Exposure echo '<pre>'.print_r($output).'</pre>';
-        //echo print_r(USanitize::sanitizeString($output[1])) ;
-
+		echo '<div style="color:red">An error occurred with processing the form\'s data.<br>'
+		        .$email_obj->get_error().'</div>';
 		return -1;
 	}
 }
@@ -885,7 +935,7 @@ function sendSystemEmail($data) {
 function getCSVDownload($data) {
 
 	$rtn_value = 0;
-	$csv_obj = new systemEmailExt();
+	$csv_obj = new SystemEmailExt();
 
 	$rtn_value = $csv_obj->processFormData($data);
 	

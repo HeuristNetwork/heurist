@@ -136,8 +136,18 @@ class USanitize {
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
-            $message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);
-            $message = htmlspecialchars(strip_tags($message, $allowed_tags), ENT_NOQUOTES);
+            
+            $message = strip_tags($message, $allowed_tags);
+            if($allowed_tags!=null){
+                // remove attributes except img.src and a.href a.target
+                //$message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message); //remove all attributes
+                
+                //$clean = preg_replace("/\n(<[^ai]([\w\d]+)?).+/i","\n$1>",$clean);
+                //$clean = preg_replace("/<a.+href='([:\w\d#\/\-\.]+)'.+/i","<a href=\"$1\">",$clean);
+                //$clean = preg_replace("/<img.+src='([\w\d_:?.\/%=\-]+)'.+/i","<img src=\"$1\">",$clean);            
+            }
+            
+            $message = htmlspecialchars($message, ENT_NOQUOTES);
             if($allowed_tags!==false){
                 $message = preg_replace("/&lt;/", '<', $message);
                 $message = preg_replace("/&gt;/", '>', $message);
@@ -170,22 +180,22 @@ class USanitize {
     }
 
     //
-    // not used
+    // 
     //
     public static function getHTMLPurifier(){
 
             $config = HTMLPurifier_Config::createDefault();  
-            //$config->set('Cache.DefinitionImpl', null);
+
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.DefinitionRev', 1);
+            
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             //$config->set('Core.EscapeNonASCIICharacters', true);
             $config->set('CSS.AllowImportant', true);
             $config->set('CSS.AllowTricky', true);  //allow css
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
-
-            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
-            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
-            $config->set('HTML.DefinitionRev', 1);
 
             $config->set('Attr.AllowedFrameTargets','_blank');
             $config->set('HTML.SafeIframe', true);
@@ -204,7 +214,6 @@ class USanitize {
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
-            
             
             return new HTMLPurifier($config);
         

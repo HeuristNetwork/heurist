@@ -4445,7 +4445,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 sheader = sheader
                     + '&nbsp;<span style="padding:0 20px;">ID: '+this._currentEditID
                     + '</span><h3 style="max-width:900px;margin:0;" class="truncate">'
-                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong, em')+'</h3>';
             }
         }
         sheader = sheader + '</div>';
@@ -5049,7 +5049,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         cur_title = empty_title ? '&lt;not yet set&gt;'
                         : cur_title.replace(/[\r\n]+/g, ' ');
 
-        cur_title = empty_title ? cur_title : window.hWin.HEURIST4.util.stripTags(cur_title,'u, i, b, strong');
+        cur_title = empty_title ? cur_title : window.hWin.HEURIST4.util.stripTags(cur_title,'u, i, b, strong, em');
 
         $title_field.find('input')
                     .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`

@@ -1,0 +1,6 @@
+// This file lists databases on this server which may include JS code in the CMS Home Page or CMS Menu records.
+// It also enables custom CSS which is otherwise stripped. List one datbase per line.
+// All other databases are excluded from executing such code. Order is unimportant.
+
+My_Database
+
