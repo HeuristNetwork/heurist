@@ -35,14 +35,15 @@ if (@$_REQUEST["exportCSV"] == 1) {
     exit;
 }
 
-if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+if ( !isset($_REQUEST['db']) || $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
     ?>
     
     <h3> A Heurist database and Server Manager password are required to enter this function </h3>
 
     <?php
     exit;
-} else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody']) && isset($_REQUEST['db']) && isset($_REQUEST['pwd'])) {
+} else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody']) 
+            && isset($_REQUEST['db']) && isset($_REQUEST['pwd'])) {
 
     if($system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)){
 
@@ -53,7 +54,8 @@ if ( !isset($_REQUEST['db']) && $system->verifyActionPassword(@$_REQUEST['pwd'],
         $rtn = sendSystemEmail($_REQUEST);
 
         if ($rtn["status"] == "ok") {
-            echo "<br><br><div>A receipt of the process has been saved as a Notes Record<br><br>Record ID => ". $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] ."</div>";
+            echo "<br><br><div>A receipt of the process has been saved as a Notes Record<br><br>Record ID => "
+                    . $rtn["data"] ."<br>Record Title => ". $rtn["rec_Title"] ."</div>";
         }
 
         //echo "<script>window.close();</script>";
