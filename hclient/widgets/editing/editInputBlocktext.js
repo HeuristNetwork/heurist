@@ -37,16 +37,19 @@ $.widget( "heurist.editInputBlocktext", $.heurist.editInputBase, {
             .val(this._value)
             .addClass('text ui-widget-content ui-corner-all')
             .css({'overflow-x':'hidden'})
-            .keydown(function(e){
-                if (e.keyCode == 65 && e.ctrlKey) {
-                    e.target.select();
-                }    
-            })
-            .keyup(function(){that.onChange();})
-            .change(function(){that.onChange();})
             .appendTo( $inputdiv );
             
             this._input = $input;
+            
+            this._on( this._input, { 
+                    keyup:this.onChange, 
+                    change:this.onChange,
+                    keydown:function(e){
+                        if (e.keyCode == 65 && e.ctrlKey) {
+                            e.target.select();
+                        }    
+                    } 
+            });
             
             var that = this;
 
@@ -688,6 +691,7 @@ $.widget( "heurist.editInputBlocktext", $.heurist.editInputBase, {
             eid = '#'+this.element.attr('id')+'_codemirror';
             $(eid).parent().remove(); //remove editor element
     
+            if(this._input) this._input.remove();
     },
 
     /**

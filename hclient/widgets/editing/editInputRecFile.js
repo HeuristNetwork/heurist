@@ -25,8 +25,6 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
     },
     
     _input_img: null,
-    _newvalue: '',
-    
     _gicon: null,
     
     /* Handler Variables */
@@ -41,24 +39,19 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
             this._super();
         
             var $inputdiv = this.element;
-            this._newvalue = this._value;
-            
-            if(!this._newvalue) this._newvalue = '';
-
             $inputdiv.uniqueId();
             
             var $input = $( "<input>")
             .addClass('text ui-widget-content ui-corner-all')
             .css('width',200)
-            .keyup(function(){that.onChange();})
-            .change(function(){
-                    that.onChange();
-            })
             .appendTo( $inputdiv );
             
             window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
             this._input = $input;
+            
+            this._on( this._input, { change:this.onChange });
+            
   
                 var select_return_mode = 'recordset';
 
@@ -435,7 +428,10 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
         
        if(this._gicon) this._gicon.remove();
        if(this._input_img) this._input_img.remove();
-       if(this._input && this._input.fileupload('instance')!==undefined) this._input.fileupload('destroy');        
+       if(this._input){
+             if(this._input.fileupload('instance')!==undefined) this._input.fileupload('destroy');        
+             this._input.remove();
+       }
        
     },
 

@@ -40,11 +40,13 @@ $.widget( "heurist.editInputBase", {
         this.options = this._container.options; //editing_input('options'); //getOptions();
         this.configMode = this._container.configMode;
         
+        
+        this._newvalue = this._value;
+        if(!this._newvalue) this._newvalue = '';
     },
     
     _destroy: function() {
-        
-    
+        if(this._input) this._input.remove();
     },
     
     onChange: function(event){

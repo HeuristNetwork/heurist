@@ -33,25 +33,18 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
             this._super();
         
             var $inputdiv = this.element;
-            this._newvalue = this._value;
-            
-            if(!this._newvalue) this._newvalue = '';
-          
             $inputdiv.uniqueId();
             
             var $input = $( "<input>")
             .addClass('text ui-widget-content ui-corner-all')
             .css({'width':'62ex','padding-left':'30px',cursor:'hand'})
-            .keyup(function(){that.onChange();})
-            .change(function(){
-                    that.onChange();
-            })
             .appendTo( $inputdiv );
             
             window.hWin.HEURIST4.ui.disableAutoFill( $input );
             
             this._input = $input;
 
+            this._on( this._input, { keyup:this.onChange, change:this.onChange });
             
             this._gicon = $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'4px 0 0 8px',cursor:'hand'})
@@ -145,10 +138,10 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
                                                 +location.wkt;
                                     var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
                                     if(that.options.is_faceted_search){
-                                        $input.val(geovalue.summary).change();
+                                        $input.val(geovalue.summary).trigger('change');
                                     }else{
                                         $input.val(geovalue.type+'  '+geovalue.summary);
-                                        $input.change();
+                                        $input.trigger('change');
 
                                         $inputdiv.find('span.geo-badvalue').remove();
                                     }
@@ -167,10 +160,8 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
     },
     
     _destroy: function() {
-        
         if(this._gicon) this._gicon.remove();
-        
-        
+        if(this._input) this._input.remove();
     },
 
 

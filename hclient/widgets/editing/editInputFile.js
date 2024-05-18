@@ -25,7 +25,6 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
     },
 
     _input_img: null,
-    _newvalue: '',
     
     select_imagelib_dlg: null,
     progress_dlg: null,
@@ -43,28 +42,26 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
             this._super();
         
             var $inputdiv = this.element;
-            this._newvalue = this._value;
-            
-            if(!this._newvalue) this._newvalue = '';
-          
             $inputdiv.uniqueId();
             
             //set input as file and hide
             var $input = $( '<input type="file">' )
             .addClass('text ui-widget-content ui-corner-all')
-            .change(function(){
-                    that.onChange();
-            })
             .hide()
             .appendTo( $inputdiv );
 
             this._input = $input;
+
+            this._on( this._input, { change:this.onChange });
                 
             var fileHandle = null; //to support file upload cancel
     
             this.options.showclear_button = (this.configMode.hideclear!=1);
             
             if(!this.configMode.version) this.configMode.version = 'thumb';
+    
+    
+            if(this._newvalue=='') this._newvalue = this.options.recID; 
     
             //url for thumb
             var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, 
@@ -86,12 +83,13 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
             //container for image
             this._input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
                 + '<img src="'+urlThumb+'" class="image_input" style="'+(sz>0?('width:'+sz+'px;'):'')+'">'
-                + '</div>').appendTo( $inputdiv );                
+                + '</div>').appendTo( $inputdiv );    
+                            
             if(this.configMode.entity=='recUploadedFiles'){
                this._input_img.css({'min-height':'320px','min-width':'320px'});
                this._input_img.find('img').css({'max-height':'320px','max-width':'320px'});
             }
-                         
+            
             window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
                 this.configMode.version,
                 function(response){
@@ -111,13 +109,16 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
                 var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
                     .appendTo( $inputdiv );                            
 
-                $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"></span>Library</a>')
-                    .click(function(){that.openIconLibrary()}).appendTo( ele );
+                var selLib = $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"></span>Library</a>')
+                    .appendTo( ele );
+                this._on( selLib, { click: this.openIconLibrary });
 
                 $('<br><br>').appendTo( ele );
 
-                $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"></span><span class="upload-file-text">Upload file</span></a>')
-                    .click(function(){ $input.click() }).appendTo( ele );
+                var selFile = $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"></span><span class="upload-file-text">Upload file</span></a>')
+                            .appendTo( ele );
+                this._on( selLib, { click:()=>this._input.trigger('click') });
+                    
             }
                      
             //temp file name  it will be renamed on server to recID.png on save
@@ -333,9 +334,9 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
                         this._input.fileupload( fileupload_opts );
                 
                         //init click handlers
-                        //this._on( $btn_fileselect_dialog, { click: function(){ this._input_img.click(); } } );
+                        //this._on( $btn_fileselect_dialog, { click: function(){ this._input_img.trigger('click'); } } );
                         this._on(this._input_img,{click: function(e){ //find('a')
-                            this._input.click(); //open file browse
+                            this._input.trigger('click'); //open file browse
                         }});
                     
         
@@ -343,7 +344,10 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
     
     _destroy: function() {
         
-        if(this._input && this._input.fileupload('instance')!==undefined) this._input.fileupload('destroy');        
+       if(this._input){
+             if(this._input.fileupload('instance')!==undefined) this._input.fileupload('destroy');        
+             this._input.remove();
+       }
         if(this._input_img) this._input_img.remove();
         if(this._gicon) this._gicon.remove();
         if(this.progress_dlg) this.progress_dlg.remove();
@@ -368,13 +372,14 @@ $.widget( "heurist.editInputFile", $.heurist.editInputBase, {
     },
     
     clearValue: function(){
-        
-        this._newvalue = '';    
+console.log('clearValue', this._newvalue);
+        this._newvalue = 'delete';    
         if(this._input){
             //this._input.val('');   
         }
         
-        this._$('img.image_input').prop('src','');
+        //this._$('img.image_input').prop('src','');
+        this._input_img.find('img').attr('src','');
 
         if(this.linkedImgInput !== null){
             this.linkedImgInput.val('');
