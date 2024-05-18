@@ -350,7 +350,7 @@ class DbSysUsers extends DbEntityBase
                     $thumb_file_name = @$record['ugr_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $ugr_ID);
+                        $this->renameEntityImage($thumb_file_name, $ugr_ID);
                     }
                     
                     //add user to specified group
@@ -465,10 +465,15 @@ class DbSysUsers extends DbEntityBase
                                   
         if($ret){
             $ret = parent::delete();
+            if($ret){
+                //remove assosiated images
+                foreach($this->recordIDs as $usrID)
+                {
+                    $this->renameEntityImage('delete', intval($usrID));
+                }
+            }
         }
         
-        //@todo - remove assosiated images
-
         if($ret){
             $mysqli->commit();
         }else{
@@ -723,12 +728,12 @@ class DbSysUsers extends DbEntityBase
                     
                     $extension = pathinfo($user_image, PATHINFO_EXTENSION);
                     
-                    $user_image_new = parent::getEntityImagePath($userID_new,null,null,$extension); //in this database
+                    $user_image_new = $this->getEntityImagePath($userID_new,null,null,$extension); //in this database
                     
                     fileCopy($user_image, $user_image_new);
                     
-                    $user_thumb = parent::getEntityImagePath($userID, 'thumb', $this->data['sourceDB']); //in source db
-                    $user_thumb_new = parent::getEntityImagePath($userID_new, 'thumb'); //in this db
+                    $user_thumb = $this->getEntityImagePath($userID, 'thumbnail', $this->data['sourceDB']); //in source db
+                    $user_thumb_new = $this->getEntityImagePath($userID_new, 'thumbnail'); //in this db
                     if(file_exists($user_thumb)){
                         fileCopy($user_thumb, $user_thumb_new);    
                     }                        

@@ -624,7 +624,7 @@ abstract class DbEntityBase
         // delete from translation table all fields that starts with current table prefix and with given record ids
         // array('rty','dty','ont','vcb','trm','rst','rtg')
         //
-        if(count($this->multilangFields)>0)
+        if($ret && count($this->multilangFields)>0)
         {
             $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
                                 .$this->config['tablePrefix'].'%" AND trn_Code '
@@ -865,6 +865,8 @@ abstract class DbEntityBase
     // $tempfile - file to be either 
     // 1) renamed to recID (if it is temp file started with ~)
     // 2) copied 
+    //
+    // if $tempfile == 'delete' it removes entity images
     protected function renameEntityImage($tempfile, $recID, $version=null){
 
         $isSuccess = false;
@@ -872,6 +874,8 @@ abstract class DbEntityBase
         $entity_name = $this->config['entityName'];
         if($version==null){  //if version is defined we copy only it (icon or thumbnail)
             $version = '';
+        }else if($version=='thumb'){
+            $version = 'thumbnail';
         }
         $lv = strlen($version);
         
@@ -903,6 +907,15 @@ abstract class DbEntityBase
                       }
                   }
             }
+
+        }else if($tempfile=='delete'){
+            
+            fileDelete( $this->getEntityImagePath($recID, 'thumbnail') );
+            if($entity_name=='defRecTypes'){
+                fileDelete( $this->getEntityImagePath($recID, 'icon') );
+            }else{
+                fileDelete( $this->getEntityImagePath($recID, 'full') );
+            }
             
         }else if(file_exists($tempfile)){
             $path_parts = pathinfo($tempfile);
@@ -916,7 +929,7 @@ abstract class DbEntityBase
                 $isSuccess = fileCopy($tempfile, $new_name);
                 
                 fileDelete($path.$version.'/'.$recID.'.'.$ext2);
-            }else{
+            }else{ //by default
                 $new_name = $path.$recID.'.'.$ext;
                 $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
                 $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
@@ -924,9 +937,6 @@ abstract class DbEntityBase
                 fileDelete($path.$recID.'.'.$ext2);
                 fileDelete($path.'thumbnail/'.$recID.'.'.$ext2);
             }
-
-            
-            
         }
         
         if(!$isSuccess){

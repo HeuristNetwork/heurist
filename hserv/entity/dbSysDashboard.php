@@ -188,7 +188,7 @@ class DbSysDashboard extends DbEntityBase
             
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $dsh_ID);
+                        $this->renameEntityImage($thumb_file_name, $dsh_ID);
                     }
                 }
             }
@@ -203,16 +203,13 @@ class DbSysDashboard extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
         
-        $ret = parent::delete();
+        $ret = parent::delete($disable_foreign_checks);
 
         if($ret){
             
             foreach($this->recordIDs as $recID)  //affected entries
             {
-                    $fname = $this->getEntityImagePath($recID);
-                    if(file_exists($fname)){
-                        unlink($fname);
-                    }
+                $this->renameEntityImage('delete', $recID);
             }
         }
         return $ret;

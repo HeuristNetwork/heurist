@@ -575,21 +575,9 @@ class DbDefTerms extends DbEntityBase
                     
                     
                     $thumb_file_name = @$record['trm_Thumb'];
-                    //rename it to recID.png
-                    if($thumb_file_name == 'delete'){
-
-                        $thumb = parent::getEntityImagePath($trm_ID, 'thumb', HEURIST_DBNAME, 'png');
-                        $icon = parent::getEntityImagePath($trm_ID, 'icon', HEURIST_DBNAME, 'png');
-
-                        if(!empty($thumb) && file_exists($thumb)){
-                            unlink($thumb);
-                        }
-                        if(!empty($icon) && file_exists($icon)){
-                            unlink($icon);
-                        }
-
-                    }elseif($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
+                    //rename it to recID.png or remove if $thumb_file_name==delete
+                    if($thumb_file_name){
+                        $this->renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
                     
                     $inverse_termid = @$record['trm_InverseTermId'];
@@ -618,6 +606,24 @@ class DbDefTerms extends DbEntityBase
         
         return $ret;
     } 
+    
+    //
+    // delete term
+    //
+    public function delete($disable_foreign_checks = false){
+        
+        $ret = parent::delete($disable_foreign_checks);
+
+        if($ret){
+            
+            foreach($this->recordIDs as $recID)  //affected entries
+            {
+                $this->renameEntityImage('delete', $recID);
+            }
+        }
+        return $ret;
+    }
+    
 
     //   Actions:
     //   1) reference=1 - add/move/remove terms by reference      

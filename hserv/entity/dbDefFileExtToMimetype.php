@@ -147,32 +147,6 @@ class DbDefFileExtToMimetype extends DbEntityBase
     }
     
     //
-    //
-    //
-    public function save(){
-        
-        $ret = parent::save();
-
-        /* @todo fo icon and placeholder
-        if($ret!==false){
-            //treat thumbnail image
-            foreach($this->records as $record){
-                if(in_array(@$record['trm_ID'], $ret)){
-                    $thumb_file_name = @$record['trm_Thumb'];
-            
-                    //rename it to recID.png
-                    if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
-                    }
-                }
-            }
-        }
-        */
-        
-        return $ret;
-    } 
-    
-    //
     // since in this table primary key is varchar need special treatment
     //
     public function delete($disable_foreign_checks = false){

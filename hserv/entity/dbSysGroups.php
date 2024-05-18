@@ -254,7 +254,7 @@ class DbSysGroups extends DbEntityBase
             
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $group_ID);
+                        $this->renameEntityImage($thumb_file_name, $group_ID);
                     }
                     
                     if(!in_array($group_ID, $this->recordIDs )){ //add current user as admin for new group
@@ -340,14 +340,10 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0)
-            foreach($affectedUserIds as $usrID)  //affected users
-            if($usrID!=$this->system->get_user_id()){
-                    $usrID = intval($usrID);
-                    $fname = $this->getEntityImagePath($usrID);
-                    if(file_exists($fname)){
-                        unlink($fname);
-                    }
+            //remove images for deleted groups
+            foreach($this->recordIDs as $grpID)  //affected group
+            {
+                $this->renameEntityImage('delete', intval($grpID));
             }
             
             //update user groups for current user

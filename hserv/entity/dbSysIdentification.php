@@ -126,7 +126,7 @@ class DbSysIdentification extends DbEntityBase
                     $thumb_file_name = @$record['sys_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
-                        parent::renameEntityImage($thumb_file_name, $sys_ID);
+                        $this->renameEntityImage($thumb_file_name, $sys_ID);
                     }
                 }
             }
