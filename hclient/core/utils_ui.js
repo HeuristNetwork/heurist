@@ -470,7 +470,7 @@ window.hWin.HEURIST4.ui = {
             options.splice(idx, 1); // remove Trash group
         }
 
-        if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
+        if(!(Array.isArray(topOptions) ||
              window.hWin.HEURIST4.util.isempty(topOptions) ||
              topOptions===false))
         {

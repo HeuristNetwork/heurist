@@ -545,7 +545,7 @@ function hMapLayer2( _options ) {
             }
         }
         if(layer_geofields.length==0) layer_geofields = null;
-        if(window.hWin.HEURIST4.util.isArray(layer_timefields) && layer_timefields.length==0) layer_timefields = null;
+        if(Array.isArray(layer_timefields) && layer_timefields.length==0) layer_timefields = null;
                                     
         var origination_db = null;
         

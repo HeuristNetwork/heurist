@@ -484,7 +484,7 @@ $.widget( "heurist.editing_input", {
         //values are not defined - assign default value
         var values_to_set;
         
-        if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
+        if( !Array.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
             
             var isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
@@ -493,7 +493,7 @@ $.widget( "heurist.editing_input", {
                 // reset default value - default value for new record only
                 // do not assign default values in edit mode                
                 values_to_set = [''];        
-            }else if(window.hWin.HEURIST4.util.isArray(def_value)){
+            }else if(Array.isArray(def_value)){
                 //exclude duplication
                 values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);//.unique();
             }else{
