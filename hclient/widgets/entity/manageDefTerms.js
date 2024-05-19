@@ -595,7 +595,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
 
                                     let icon = window.hWin.HAPI4.getImageUrl(that._entityName, trmid, 'icon', null, null, true);
-                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
+                                    content += `<br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-size:contain; background-repeat:no-repeat; background-image: url("${icon}")' height=64 width=64 />`;
                                 }
 
                                 callback.call(ele_context, content);
@@ -1085,7 +1085,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
             +sLabel+'&nbsp;&nbsp;'
-            +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); vertical-align:bottom;' />`
+            +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); background-size:contain; background-repeat:no-repeat; vertical-align:bottom;' />`
             +'&nbsp;&nbsp;<span class="term_usage"></span></div>';
 
             var html_thumb = '';

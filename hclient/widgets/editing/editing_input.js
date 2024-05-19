@@ -1663,7 +1663,7 @@ $.widget( "heurist.editing_input", {
                         .addClass(classes).css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            __show_select_function = null;
+            var __show_select_function = null;
             if(typeof browseRecords!=='undefined' && window.hWin.HUL.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
@@ -1897,6 +1897,8 @@ $.widget( "heurist.editing_input", {
         else
         if( this.detailType=='file' ){ //----------------------------------------------------
 
+            this.options.showclear_button = (this.configMode.hideclear!=1);
+        
             this.dtwidget = 'editInputFile';
             $input = $inputdiv.editInputFile({ container:this, value:value });
         
@@ -2147,7 +2149,7 @@ $.widget( "heurist.editing_input", {
                 $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).css('cursor','hand');
                 
                       
-                __show_action_dialog = function (event){
+                var __show_action_dialog = function (event){
                         event.preventDefault();
                         
                         if(that.is_disabled) return;
@@ -3841,6 +3843,10 @@ console.log('remove ', input_id);
                     var res = this._getValue(this.inputs[idx]);
                     //both original and current values are not empty
                     if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
+                        
+                        if($.isPlainObject(this.options.values[idx]) && $.isPlainObject(res)){
+                            return JSON.stringify(this.options.values[idx]) !== JSON.stringify(res);
+                        }else
                         if (this.options.values[idx]!=res){
                             return true;
                         }
@@ -3873,7 +3879,19 @@ console.log('remove ', input_id);
     getInputs: function(){
         return this.inputs;
     },
-
+    
+    //
+    // execute method for editInputXXX widget
+    //
+    actionInput: function(args){
+        if(this.inputs && this.inputs[0] && this.dtwidget!=null && args && args.length>0){
+            let input = this.inputs[0];    
+            if (input[this.dtwidget]('instance')){
+                input[this.dtwidget](args);                
+            }
+        }
+    },
+    
     //
     //
     //
@@ -4858,5 +4876,6 @@ console.log('remove ', input_id);
         this._external_relmarker.relation = relation_value;
 
         this._external_relmarker.callback = callback;
-    }
+    },
+    
 });

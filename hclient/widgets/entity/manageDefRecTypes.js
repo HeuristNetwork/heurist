@@ -1154,7 +1154,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             //open select icon
             ele = this._editing.getFieldByName('rty_Icon');
-//A13            ele.editing_input('openIconLibrary');
+            ele.editing_input('actionInput', 'openIconLibrary'); //show select icon at once
             
             //hide save button
             if(this._toolbar){
@@ -1302,14 +1302,21 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // Combine Icon and Thumbnail fields into one, in popup form
     //
+    //
     mergeIconThumbnailFields: function(){
-        // fields
+        
+        return;
+        
         var $icon = this._editing.getFieldByName('rty_Icon');
         var $thumb = this._editing.getFieldByName('rty_Thumb');
         
         if(!$thumb || !$icon){
             return; //not yet loaded
         }
+
+
+        
+        //hide rty_Thumb
         $thumb.hide();
         var thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
         
@@ -1331,19 +1338,20 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
              .insertBefore($icon.find('div.image_input.fileupload'))
              .css('padding-top', '4px');
 
-        // Move thumbnail field
+        // Move thumbnail image field
         var $thumb_img = $thumb.find('div.image_input');
         $thumb_img.css('margin-left', '25px').insertAfter($icon.find('div.image_input.fileupload'));
 
         // Hide open folder icon, usually is hidden by icon image
         $icon.find('.input-div span:first').hide();
 
-        // link fields
-//A13        $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
-//A13        $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
+        // link fields rty_Icon and rty_Thumb
+        $icon.editing_input('linkEditInputFileField', $thumb); //,  $thumb_img);
+        $thumb.editing_input('linkEditInputFileField', $icon); //,  $icon.find('div.image_input'));
         // link clear buttons, only icon clear button is visible
         this._on($icon.find('span.btn_input_clear'), {
             'click': function(){
+                //synk clear 
                 $thumb.find('span.btn_input_clear').trigger('click');
             }
         });

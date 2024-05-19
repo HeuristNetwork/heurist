@@ -100,7 +100,9 @@
                         "dty_Type":"file",
                         "rst_DisplayName":"Icon:",
                         "rst_DisplayHelpText": "The icon which will represent this function in the shortcuts", 
-                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":64, "use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"]},
+                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", 
+                        "versions":{"thumb": 64},
+                        "use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"]},
                         "dty_Role":"virtual",
                         "rst_RequirementType":"required"
                     }

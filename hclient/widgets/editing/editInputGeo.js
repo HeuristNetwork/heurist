@@ -189,10 +189,6 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
     /**
     * put your comment there...
     */
-    getValue: function(){
-        return this._newvalue;    
-    },
-    
     clearValue: function(){
         this._newvalue = '';    
         if(this._input){

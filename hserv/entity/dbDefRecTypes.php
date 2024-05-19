@@ -461,14 +461,14 @@ class DbDefRecTypes extends DbEntityBase
             
             
                     //4. treat thumbnail
-                    $thumb_file_name = @$record['rty_Thumb'];
+                    $thumb_file_name = @$record['rty_Icon'][0]['thumb'];
                     //rename it to recID.png and copy to entity/defRecTypes
                     if($thumb_file_name){
                         $this->renameEntityImage($thumb_file_name, $rty_ID, 'thumbnail');
                     }
                     
                     //treat icon
-                    $icon_file_name = @$record['rty_Icon'];
+                    $icon_file_name = @$record['rty_Icon'][0]['icon'];
                     //rename it to recID.png and copy to entity/defRecTypes
                     if($icon_file_name){
                         $this->renameEntityImage($icon_file_name, $rty_ID, 'icon');

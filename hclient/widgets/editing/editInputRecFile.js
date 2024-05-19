@@ -448,10 +448,6 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
     /**
     * put your comment there...
     */
-    getValue: function(){
-        return this._newvalue;    
-    },
-    
     clearValue: function(){
         
         this._$('.thumb_image').hide();

@@ -81,6 +81,10 @@ $.widget( "heurist.editInputBase", {
         return this._newvalue;    
     },
     
+    setValue: function(val){
+        this._newvalue = val;    
+    },
+    
     clearValue: function(){
         this._newvalue = '';
     },

@@ -919,7 +919,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         "hidden": true
                     }).hide();
 
-                    ele.find('select').hSelect("refresh");
+                    //A13 ele.find('select').hSelect("refresh");
                 }                    
 
                 this._on(ele.find('select'), {

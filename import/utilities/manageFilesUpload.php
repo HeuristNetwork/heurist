@@ -422,6 +422,7 @@ if(!($max_size>0)) $max_size = 0;
         <script src="../../external/jquery-file-upload/js/jquery.fileupload-ui.js"></script>
         <!-- The File Upload jQuery UI plugin -->
         <script src="../../external/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
+        
 
         <script type="text/javascript">
 
