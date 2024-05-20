@@ -1062,9 +1062,6 @@ if(_mapdata.limit_warning){
 
                     var lt = window.hWin.HAPI4.sysinfo['layout'];  
                     var scrollwheel = true;
-                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
-                         scrollwheel = false;
-                    }   
                     
                     // Add controls if the map is not initialized yet
                     var mapOptions = {
@@ -1219,20 +1216,6 @@ if(_mapdata.limit_warning){
             }
             
                     //return;
-
-            
-            var lt = window.hWin.HAPI4.sysinfo['layout'];  
-            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
-                useMarkerClusterer = false;
-
-                if(lt=='Beyond1914' || lt=='UAdelaide'){
-                    customTheme['iconSize']  = [24,24];
-                    customTheme['iconAnchor']  = [12,12];
-                }else{
-                    customTheme['iconSize']  = [16,16];
-                    customTheme['iconAnchor']  = [8,8];
-                }
-            }
             
             // Initialize TimeMap
             tmap = TimeMap.init({

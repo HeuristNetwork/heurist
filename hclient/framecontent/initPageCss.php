@@ -53,7 +53,7 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 <?php 
     $lt = @$_REQUEST['ll'];
-    if(!($lt=='H5Default' || $lt=='Beyond1914' ||  $lt=='UAdelaide')){
+    if($lt!='H5Default'){
 
 //special webfont for database
 $font_styles = '';

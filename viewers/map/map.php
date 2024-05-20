@@ -263,12 +263,6 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         
         if(!success) return;
         
-        var lt = window.hWin.HAPI4.sysinfo['layout'];
-        if(lt=='Beyond1914' || lt=='UAdelaide'){
-                $("head").append($('<link rel="stylesheet" type="text/css" href="'
-                    +window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/expertnation.css?t='+(new Date().getTime())+'">'));
-        }        
-        
         //since 2022-06-09 layout_params as passed via option on map init   
         
         function __gp(name){

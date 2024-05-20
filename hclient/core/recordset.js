@@ -166,6 +166,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                          _getGeoJSON -> (wellknown.js) stringifyWKT ->  back to input
 */    
     /**
+    * @todo - move gmap folder
     * Converts recordSet to OS Timemap dataset
     * 
         * geoType 
@@ -505,11 +506,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 //,infoHTML: (infoHTML || ''),
                             }
                         }; 
-                        
-                        /*suppress default icons for expertnation
-                        if(window.hWin.HAPI4.sysinfo['layout']!='Beyond1914'){ 
-                            item.options.icon = iconImg; 
-                        }*/
                         
                 //keep item object for addition separate items for places
                 if(has_linked_places.length>0){
@@ -1923,32 +1919,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return _request;
         },
         
-        /* record - hRecord or rectypeID
-        getRecordStructure: function(record){
-
-        //record type
-        var rectypeID = null;
-
-        if (record || typeof(record) == "object" )
-        {
-        rectypeID = _getFieldValue(record, 'rty_RecTypeID');
-        }else{
-        rectypeID =  record;
-        }
-
-        if(rectypeID && structures[rectypeID]){
-        return structures[rectypeID];
-        }else{
-        return null;
-        }
-
-        },
-        
-        
-        preprocessForDigitalHarlem: function(){
-          _preprocessForDigitalHarlem();  
-        },
-        */ 
         /**
         * Converts recordSet to geoJSON (for leaflet mapping)
         * 

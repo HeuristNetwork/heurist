@@ -1014,11 +1014,10 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
         
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
-        if(file_exists($old_path) && $db_name!='digital_harlem'){
+        if(file_exists($old_path)){
             folderDelete($old_path, true);    
             $cnt++;
         }
-        
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-icons/';
         if(file_exists($old_path)){

@@ -248,13 +248,6 @@ if($isLocalHost){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 
-<?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
-<!--    
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
--->
-<?php } ?>
-
 <!-- CSS -->
 <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
 
@@ -417,23 +410,7 @@ if($isLocalHost){
         }
         if(!window.hWin.HAPI4.sysinfo['layout']){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-
-            if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
-                /*
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
-                window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for Digital Harlem search');
-                });
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/google_analytics.js').fail(function(){
-                window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
-                });
-                */    
-            }
         }
-
-        if(!(layoutid=='UAdelaide' || layoutid=='Beyond1914')){
-            //A11 $('body').css({'font-size':'0.7em'});
-        }
-
         //add version to title
         //window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
     }

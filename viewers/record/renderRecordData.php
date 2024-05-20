@@ -1107,18 +1107,6 @@ if ($bkm_ID>0 || $rec_id>0) {
             .$rec_id.' and not rec_FlagTemporary');
         }
     
-        if( $layout_name=='Beyond1914' || $layout_name=='UAdelaide' ){
-            
-            exit('<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
-                    .'<div class="bor-map-infowindow">'
-                        .'<div class="bor-map-infowindow-heading">'.$bibInfo['rec_Title'].'</div>'
-                        .'<a href="'
-                        .HEURIST_BASE_URL.'place/'.$rec_id.'/a" '
-                        .'onclick="{window.hWin.enResolver(event);}" class="bor-button bor-map-button">See connections</a>'
-                    .'</div></div>'); 
-                                      
-        }
-
         /*if($is_map_popup){
             print '<div data-recid="'.$bibInfo['rec_ID'].'" style="max-height:250px;overflow-y:auto;">';// style="font-size:0.8em"
         }else{

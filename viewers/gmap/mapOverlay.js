@@ -323,22 +323,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     +err_msg_all
                     +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
                 );
-            }else{
-                
-                //show info popup
-                
-                if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
-                    if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
-                        
-                        var ele = $(window.hWin.document.body).find('#dh_search_2').parents('.ui-layout-pane');
-                        
-                        window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
-                        {resizable:true, modal:false, width:ele.width(), height:ele.height()-100,
-                            my:'left top', at:'left top', of:ele});
-                            
-                    }
-                }
-                
             }
 
 
@@ -1119,8 +1103,7 @@ map.data.addListener('mouseover', function(event) {
     //
     //    
     function _isPublicSite(){
-        var lt = window.hWin.HAPI4.sysinfo['layout'];                                      
-        return lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide');
+        return false;
     }
 
     /**
@@ -1189,100 +1172,15 @@ map.data.addListener('mouseover', function(event) {
                     return;               
                 }
 
-                var lt = window.hWin.HAPI4.sysinfo['layout'];
-                if(lt && lt.indexOf('DigitalHarlem')==0){ 
-                    //for DigitalHarlem we adds 3 dataset 
-                    // For events search: primary events, secondary events+links, residences+links
-                    // For persons search: everything on one layer
-
-                    if(colors_idx>=myColors.length) colors_idx = -1;
-                    colors_idx++;
-                    source.color = myColors[colors_idx];
-
-                    //points  DH_RECORDTYPE
-                    //change last parameter to 1 - to treat links separately
-                    mapdata = recset.toTimemap(source.id, 99913, {iconColor:source.color}, 0); //set to 1 to show main geo only (no links)
-                    mapdata.id = source.id;
-                    mapdata.title = source['title']?source['title']:mapdata.id;
-                    
-                    mapdata.forceZoom = source.forceZoom;
-                    mapdata.min_zoom = source.min_zoom;
-
-                    mapdata.depends = [];
-
-                    //secondary points  DH_RECORDTYPE_SECONDARY
-                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
-                    //change last parameter to 1 - to treat links separately
-                    var mapdata3 = recset.toTimemap(random_name_for_secondary, 99914, {iconColor:source.color}, 0); //records with type "secondary"
-                    mapdata3.id = random_name_for_secondary;
-                    mapdata3.title = 'Secondary locations';
-                    //mapdata3.timeenabled = 0;
-                    //mapdata3.timeline = {items:[]};
-                    if(mapdata3.mapenabled>0){
-                        mapdata.depends.push(mapdata3);
-                    }
-
-                    //residences  DH_RECORDTYPE_RESIDENCES
-                    var random_name_for_secondary = "link_"+window.hWin.HEURIST4.util.random();
-                    //change last parameter to 1 - to treat links separately
-                    var mapdata4 = recset.toTimemap(random_name_for_secondary, 99915, {iconColor:source.color}, 0); //records with type "residence"
-                    mapdata4.id = random_name_for_secondary;
-                    mapdata4.title = 'Residence of participants';
-                    if(mapdata4.mapenabled>0){
-                        mapdata.depends.push(mapdata4);
-                    }
-                    
-                    /* if we wish show links as separate layer need to unremark this section
-                    //links
-                    var mapdata2 = recset.toTimemap(source.id, null, {iconColor:source.color}, 2); //rec_Shape only
-                    mapdata2.id = "link_"+window.hWin.HEURIST4.util.random();
-                    mapdata2.title = 'Links';
-                    mapdata2.timeenabled = 0;
-                    mapdata2.timeline = {items:[]};
-                    if(mapdata2.mapenabled>0){
-                        mapdata.depends.push(mapdata2);
-                    }
-                    */
-
-                }else{
-
                     var symbology = {iconColor:source.color, iconMarker:source.iconMarker};
                     
-                    if(lt=='Beyond1914' || lt=='UAdelaide'){//customized symbology and popup for expertnation
-                    
-                        recset.calcfields['rec_Info'] = function(record, fldname){
-                            
-                            var info_content = this.fld(record, 'rec_Description');
-                            if(window.hWin.HEURIST4.util.isempty(info_content)){
-                                info_content = this.fld(record, 'rec_Title');
-                            }
-
-                            if(info_content.indexOf('bor-map-infowindow-heading')<0){
-                                info_content = '<div class="bor-map-infowindow-heading">'+info_content+'</div>';
-                            }
-                            
-                            return '<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
-                                    +'<div class="bor-map-infowindow">'
-                                        + info_content
-                                        + '<a href="'
-                                        + window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
-                                        + 'onclick="{window.hWin.enResolver(event);}" class="bor-button bor-map-button">See connections</a>'
-                                    +'</div></div>';                            
-                        }
-                        
-                        symbology.stroke = 'rgb(128,0,128)';
-                        symbology.fill   = 'rgb(128,0,128)';
-                        symbology['fill-opacity'] = 0.1;
-                        
-                    }else{
-                        
                         symbology.iconColor = source.color;
                         symbology.fill = source.color;
                         symbology.stroke = source.color;
                         
                         if(!window.hWin.HEURIST4.util.isnull(source.opacity))
                             symbology['fill-opacity'] = source.opacity;
-                    }
+                    
                     
                     
                     mapdata = recset.toTimemap(source.id, null, symbology);
