@@ -493,6 +493,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 selectedFields.push(node.data.code);
             }
         }
+        if(mode_action && selectedFields.undefined){ // remove invalid rectype
+            delete selectedFields.undefined;
+        }
         return {
             'fields': selectedFields,
             'main_record_type_ids': mainRecordTypeIDs,
