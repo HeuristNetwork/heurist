@@ -38,6 +38,7 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);
 define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql');
 define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_hml');
+define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_tsv'); // TSV folder, for standalone download
 
 $mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
 $format = 'zip'; //default
@@ -64,6 +65,8 @@ if($mode>1){
         downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
     }else if($mode=='5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)){  //archived hml file
         downloadFile($mime, FOLDER_HML_BACKUP.'.'.$format);
+    }else if($mode=='6' && folderExists(FOLDER_TSV_BACKUP, false)){  //archived tsv sub directory
+        downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
     }else if($mode=='4'){  //cleanup backup folder on exit
         folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
     }
@@ -366,6 +369,13 @@ if($mode>1){
                     </label>
                 </div>
 
+                <div class="input-row">
+                    <label title="Adds a folder containing the database dump in TSV format">
+                        <input type="checkbox" name="include_tsv" value="1">
+                        Include database dump in TSV format (includes a complete record export in TSV format)
+                    </label>
+                </div>
+
 <!-- 2024-04-09 - we use solely zip
                 <div class="input-row">
                     <label title="Export / Upload the archive in BZip format, instead of Zip">
@@ -442,8 +452,10 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }else{
                 echo_flush2("<br>Beginning archive process<br>");
             }
-            
+
             $separate_sql_zip = !$is_repository;
+            $separate_hml_zip = !$is_repository && @$_REQUEST['include_hml']=='1';
+            $separate_tsv_zip = !$is_repository && @$_REQUEST['include_tsv']=='1';
 
             // 
             if(file_exists(FOLDER_BACKUP)){
@@ -471,6 +483,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
             if($separate_hml_zip && !folderCreate(FOLDER_HML_BACKUP, true)){
                 $separate_hml_zip = false; // hide option
+            }
+            if($separate_tsv_zip && !folderCreate(FOLDER_TSV_BACKUP, true)){
+                $separate_tsv_zip = false; // hide option
+            }
+            if(@$_REQUEST['include_tsv'] == 1 && !folderCreate(FOLDER_BACKUP . '/tsv-output/records', true)){ // create tsv output directory
+                $_REQUEST['include_tsv'] = 0;
+                echo_flush2("Failed to create sub directory for TSV output within backup directory<br>");
             }
 
             $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
@@ -558,6 +577,163 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 }
             
            }//export HML
+
+            if(@$_REQUEST['include_tsv']=='1'){
+
+                require_once dirname(__FILE__).'/../../hserv/records/export/recordsExportCSV.php';
+
+                $mysqli = $system->get_mysqli();
+
+                // Export tables
+                $skip_tables = [ 
+                    'defCalcFunctions', 'recLinks', 
+                    'recSimilarButNotDupes', //'Records', 'recDetails',
+                    'sysArchive', 'sysLocks', 'usrHyperlinkFilters'
+                ]; // tables to skip - woot, import and index are filtered out below
+
+                $tables = mysql__select_list2($mysqli, "SHOW TABLES");
+
+                $field_types = [];
+                $record_types = [];
+
+                echo_flush2("Exporting database tables as TSV<br>");
+
+                foreach ($tables as $table) {
+
+                    if(strpos($table, 'woot') !== false || strpos($table, 'import') === 0 || strpos($table, 'Index') !== false || in_array($table, $skip_tables)){
+                        continue;
+                    }
+
+                    $query = "SELECT * FROM $table";
+                    $res = $mysqli->query($query);
+
+                    $get_headers = true;
+
+                    if(!$res || $res->num_rows == 0){
+                        continue;
+                    }
+
+                    $filename = FOLDER_BACKUP . "/tsv-output/{$table}.tsv";
+                    $fd = fopen($filename, 'w');
+                    if(!$fd){
+                        $msg = error_get_last();
+                        $msg = !empty($msg) ? print_r($msg, true) : "None provided";
+                        echo_flush2("<br>Unable to create TSV file for $table values at $filename<br>Error message: $msg<br><br>");
+                        break;//continue;
+                    }
+
+                    while($row = $res->fetch_assoc()){
+
+                        if($table == 'defDetailTypes'){
+
+                            $field_types[ $row['dty_ID'] ] = [ 'type' => $row['dty_Type'] ];
+
+                        }else if($table == 'defRecStructure'){
+
+                            $rty_ID = $row['rst_RecTypeID'];
+                            $dty_ID = $row['rst_DetailTypeID'];
+
+                            if($field_types[$dty_ID]['type'] == 'separator'){
+                                continue;
+                            }
+
+                            if(!array_key_exists($rty_ID, $record_fields)) { 
+                                $record_fields[$rty_ID] = [ 'rec_ID', 'rec_Title' ]; // add id + title by default
+                            }
+
+                            $record_fields[$rty_ID][] = "$dty_ID";
+                        }
+
+                        if($get_headers){ // get table field names
+
+                            $w_res = fputcsv($fd, array_keys($row), "\t");
+                            if(!$w_res){
+
+                                echo_flush2("Unable to write table headings to TSV file for $table<br>");
+
+                                fclose($fd);
+                                $res->close();
+                                continue;
+                            }
+
+                            $get_headers = false;
+                        }
+
+                        $w_res = fputcsv($fd, $row, "\t");
+                        if(!$w_res){
+
+                            echo_flush2("Unable to write table row to TSV file for $table<br>");
+
+                            fclose($fd);
+                            $res->close();
+                            continue;
+                        }
+
+                    }
+
+                    fclose($fd);
+                    $res->close();
+
+                    if(filesize($filename) == 0){ // remove empty files
+                        fileDelete($filename);
+                    }
+                }
+
+                echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
+
+                // Export records per rectype
+                foreach ($record_fields as $rty_ID => $field_codes) {
+
+                    $rty_CC_ID = ConceptCode::getRecTypeConceptID($rty_ID);
+                    $rty_CC_ID = preg_replace('/^0000\-/', '0', $rty_CC_ID);
+                    $rty_Name = mysql__select_value($mysqli, "SELECT rty_Name FROM defRecTypes WHERE rty_ID = $rty_ID");
+
+                    $request = [
+                        'detail' => 'ids',
+                        'q' => "t:{$rty_ID}"
+                    ];
+
+                    $response = recordSearch($system, $request);
+                    if($response['status'] != HEURIST_OK){
+
+                        echo_flush2("Unable to retrieve records for record type #$rty_ID<br>");
+                        continue;
+                    }else if($response['data']['reccount'] == 0){
+                        continue;
+                    }
+
+                    $options = [
+                        'prefs' => [
+                            'main_record_type_ids' => $rty_ID,
+                            'term_ids_only' => 1,
+                            'include_resource_titles' => 1,
+                            'include_temporals' => 1,
+                            'fields' => [$rty_ID => $field_codes],
+                            'csv_delimiter' => "\t"
+                        ],
+                        'save_to_file' => 1,
+                        'file' => [
+                            'directory' => FOLDER_BACKUP . "/tsv-output/records",
+                            'filename' => "{$rty_CC_ID}_{$rty_ID}_{$rty_Name}.tsv"
+                        ]
+                    ];
+
+                    $res = RecordsExportCSV::output($response, $options);
+                    if($res <= 0){
+
+                        $msg = $res == 0 ? "Failed to write to TSV file for record type #$rty_ID" : "An error occurred while handling the record type #$rty_ID, error was placed within TSV file";
+
+                        echo_flush2("<span style='color: red;margin-left: 5px;'>$msg</span><br>");
+
+                        continue;
+                    }
+                }
+
+                $separate_tsv_zip = $separate_tsv_zip && folderSize2(FOLDER_BACKUP . "/tsv-output") > 0;
+                if($separate_tsv_zip){ // copy tsv dumps to separate directory
+                    $separate_tsv_zip = folderRecurseCopy(FOLDER_BACKUP . '/tsv-output', FOLDER_TSV_BACKUP);
+                }
+            }
             
            // Export database definitions as readable text
 
@@ -640,7 +816,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $res_hml = false;
                 if($separate_hml_zip){
 
-                    $destination_hml = FOLDER_BACKUP.'_hml.'.$format; // SQL dump only
+                    $destination_hml = FOLDER_BACKUP.'_hml.'.$format; // HML dump only
                     if(file_exists($destination_hml)){
                         unlink($destination_hml);
                     }
@@ -652,6 +828,25 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $res_hml = UArchive::zip(FOLDER_BACKUP.'_hml', null, $destination_hml, true);
                     }else{
                         $res_hml = UArchive::createBz2(FOLDER_BACKUP.'_hml', null, $destination_hml, true);
+                    }
+                    
+                }
+
+                $res_tsv = false;
+                if($separate_tsv_zip){
+
+                    $destination_tsv = FOLDER_BACKUP.'_tsv.'.$format; // TSV dump only
+                    if(file_exists($destination_tsv)){
+                        unlink($destination_tsv);
+                    }
+                    if($format == 'tar' && file_exists(FOLDER_BACKUP.'_tsv.tar.bz2')){
+                        unlink(FOLDER_BACKUP.'_tsv.tar.bz2');
+                    }
+
+                    if($format == 'zip'){
+                        $res_tsv = UArchive::zip(FOLDER_BACKUP.'_tsv', null, $destination_tsv, true);
+                    }else{
+                        $res_tsv = UArchive::createBz2(FOLDER_BACKUP.'_tsv', null, $destination_tsv, true);
                     }
                     
                 }
@@ -691,6 +886,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     <?php }else{ ?>
         <br><br>
         <div>Failed to create / set up a standalone HML file. <?php echo $res_hml;?></div>
+    <?php 
+        } 
+    }
+    if($separate_tsv_zip){
+        if($res_tsv===true){ ?>
+        <br><br>
+        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_tsv.<?php echo $format; ?>?mode=6&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
+            target="_blank" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $format;?> folder only</a>
+    <?php }else{ ?>
+        <br><br>
+        <div>Failed to create / set up a standalone TSV folder. <?php echo $res_tsv;?></div>
     <?php 
         } 
     }
@@ -825,6 +1031,7 @@ function report_message($message, $is_error=true, $need_cleanup=false)
                 folderDelete2(FOLDER_BACKUP, true);
                 folderDelete2(FOLDER_SQL_BACKUP, true);
                 folderDelete2(FOLDER_HML_BACKUP, true);
+                folderDelete2(FOLDER_TSV_BACKUP, true);
             }
             //remove lock file
             isActionInProgress('exportDB', -1, HEURIST_DBNAME);
