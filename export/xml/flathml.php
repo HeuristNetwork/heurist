@@ -1907,8 +1907,6 @@ if($rectype_templates){
     }
 }
 
-
-
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
 /*if(@$_REQUEST['offset']){
@@ -2021,7 +2019,8 @@ if($intofile){ // flags HuNI manifest + separate files per record
         }
     }
 
-}else{ // single output stream
+}
+else{ // single output stream
 
     openTag('hml', $hmlAttrs);
 

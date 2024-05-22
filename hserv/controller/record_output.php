@@ -202,7 +202,7 @@
                     $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';    
                     
                     $search_params['detail'] = 'count';
-                    $response = recordSearch($system, $search_params);
+                    $response = recordSearch($system, $search_params); //datatable search - reccount only
                     $search_params['detail'] = 'ids';
                     
                     $params['recordsFiltered'] = $response['data']['count'];
@@ -238,7 +238,7 @@
             }
         }
        
-        $response = recordSearch($system, $search_params);
+        $response = recordSearch($system, $search_params);  //search ids
     }
         
     $system->defineConstant('DT_PARENT_ENTITY');    

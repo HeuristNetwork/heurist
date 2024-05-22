@@ -543,7 +543,6 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $_REQUEST['a'] = '1';
                 $_REQUEST['q'] = $q;
                 $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-                $_REQUEST['rev'] = 'no'; //do not include reverse pointers
                 $_REQUEST['filename'] = '1'; //FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
                 
                 echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
