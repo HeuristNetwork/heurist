@@ -138,7 +138,8 @@ public static function output($data, $params){
     $filename = 'Export_'.self::$system->dbname();
     if(!empty(@$params['file']['filename'])){
 
-        $filename = USanitize::sanitizeFileName($params['file']['filename'], false);
+        $filename = basename($params['file']['filename']);
+        $filename = USanitize::sanitizeFileName($filename, false);
         $directory = @$params['file']['directory'];
 
         if(!empty($directory)){
