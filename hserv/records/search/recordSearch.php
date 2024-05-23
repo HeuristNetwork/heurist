@@ -2025,20 +2025,20 @@ function recordSearch($system, $params, $relation_query=null)
             return $resSearch;
         }
 
-        if($keepMainSet){
-            //find main query results
-            $fin_result = $resSearch;
-            //main result set
+        //find main query results
+        $fin_result = $resSearch;
+        //main result set
+        $has_results = @$fin_result['data']['records'] && is_array($fin_result['data']['records']);
+        if($has_results){
             $flat_rules[0]['results'] = $is_ids_only 
                                 ?$fin_result['data']['records'] 
                                 :array_keys($fin_result['data']['records']); //get ids
         }else{
-            //remove from $fin_result! but keep in $flat_rules[0]['results']?
-            $flat_rules[0]['results'] = $is_ids_only ?$resSearch['data']['records'] 
-            :array_keys($resSearch['data']['records']); //get ids
-
+            $flat_rules[0]['results'] = array();
+        }
+        
+        if(!$has_results || !$keepMainSet){
             //empty main result set
-            $fin_result = $resSearch;
             $fin_result['data']['records'] = array(); //empty
             $fin_result['data']['reccount'] = 0;
             $fin_result['data']['count'] = 0;
