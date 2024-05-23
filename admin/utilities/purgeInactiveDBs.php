@@ -151,8 +151,9 @@ if( !$system->init(null, false, false) ){
 }
 
 if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    $response = $system->getError();
-    print $response['message'];
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    //$response = $system->getError();
+    //print $response['message'];
     exit;
 }
 

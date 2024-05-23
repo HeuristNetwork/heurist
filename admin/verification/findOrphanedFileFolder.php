@@ -32,26 +32,11 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-/*
-if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
-    ?>
-    
-    <form action="verifyConceptCodes4.php" method="POST">
-        <div style="padding:20px 0px">
-            Only an administrator (server manager) can carry out this action.<br>
-            This action requires a special system administrator password (not a normal login password)
-        </div>
-    
-        <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
-        <input type="password" name="pwd" autocomplete="off" />
-
-        <input type="submit" value="OK" />
-    </form>
-
-    <?php
+if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
 }
-*/
+
 if(!@$_REQUEST['mail']){
 ?>            
 <!DOCTYPE html>
