@@ -4,9 +4,10 @@
 * Script is run by daily cronjob
 * It performs the following actions
 * 
-* 1. Send record remainders sepcified in usrReminders
-* 2. Updates reports by schedule specified in usrReportSchedule
-* 3. Checks that rec_URL and URL like values are valid, database is skipped if sys_URLCheckFlag is set to false
+* parameters:
+* 1. reminder   Send record remainders sepcified in usrReminders
+* 2. report     Updates reports by schedule specified in usrReportSchedule
+* 3. url        Checks that rec_URL and URL like values are valid, database is skipped if sys_URLCheckFlag is set to false
 * 
 * Databases in HEURIST/databases_exclude_cronjobs.txt are ignored
 * 
@@ -47,7 +48,8 @@ $func_return = 1; // for checkRecURL.php
 if (@$argv) {
     
 // example:
-//  sudo php -f /var/www/html/heurist/setup/dboperations/dailyCronJobs.php -- reminder report
+//  sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- reminder report
+// sudo php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php -- url
 
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
@@ -128,8 +130,8 @@ set_time_limit(0); //no limit
 
 $datetime1 = date_create('now');
 $cnt_archived = 0;
-$report_list = array();
-$email_list = array();
+$report_list = array(); //reports errors,create,updated,intacted  by database
+$email_list = array();  //reminders 
 $url_list = array();
 $reminders = null;
 
@@ -221,8 +223,8 @@ foreach ($databases as $idx=>$db_name){
         if($is_ok){
             $report_list[$db_name] = $report;
             //echo $tabs0.$db_name;
-            echo $tabs0.htmlspecialchars($db_name).$eol;
-            echo $tabs.' reports: '.htmlspecialchars(implode(' ',$report)).$eol;
+            echo $eol.htmlspecialchars($db_name).$tabs;
+            echo ' reports errors:'.$report[0].' created:'.$report[1].' updated:'.$report[2].' unchanged:'.$report[3].$eol;
         }
             
     }
@@ -281,7 +283,7 @@ foreach ($databases as $idx=>$db_name){
                 echo $invalid_fb_urls;
             }else{
 
-                echo 'fields containing invalid urls: ';
+                echo $eol.'fields containing invalid urls: ';
                 foreach ($invalid_fb_urls as $rec_id => $flds) {
                     echo $eol.$rec_id.': ';
                     foreach($flds as $dty_id => $urls){
@@ -298,7 +300,7 @@ foreach ($databases as $idx=>$db_name){
                 }
             }
         }else if(!empty($invalid_file_urls)){
-            echo 'Record fields contain invalid urls: ';
+            echo $eol.'Record fields contain invalid urls: ';
         }
 
         if(!empty($invalid_file_urls)){
@@ -326,7 +328,9 @@ foreach ($databases as $idx=>$db_name){
 
 
     //echo "   ".$db_name." OK \n"; //.'  in '.$folder
-}//foreach
+    //if($db_name=='catts_medieval_cookbook') break;
+    
+}//foreach database
 
 
 echo $eol.$tabs0.'finished'.$eol;
