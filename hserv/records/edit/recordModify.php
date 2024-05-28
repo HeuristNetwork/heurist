@@ -2541,7 +2541,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         //if(!((defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU) || 
                         //     (defined('RT_CMS_HOME') && $rectype==RT_CMS_HOME) )){
                            
-                        if($det_types[$dtyID]=="freetext"){
+                        if($det_types[$dtyID]=="freetext"){ //remove non standard attributes
                         //(\w+)
                         $allowed = array('src','class','style','href');
                         $allowed2 = implode('=|',$allowed).'=';
