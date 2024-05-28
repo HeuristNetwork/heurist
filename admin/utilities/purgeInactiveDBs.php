@@ -701,7 +701,7 @@ function exclusion_list(){
         if($arg_no_action){
                print $sMsg.'<br>';
         }
-        sendEmail(HEURIST_MAIL_TO_ADMIN, $sMsg); 
+        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg); 
         return false;
     }
     return $res;
