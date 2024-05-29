@@ -745,7 +745,7 @@
         
         $result = false;
         
-        $is_insert = (strpos(strtoupper($query), 'INSERT')===0);
+        $is_insert = (stripos($query, 'INSERT')===0);
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {
