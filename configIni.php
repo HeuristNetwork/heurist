@@ -86,7 +86,7 @@ $version = "6.5.6"; // sets current program version number, determined by Heuris
 
 // ---------------------------------------------------------------------------------
 
-// Releat dates - latest: 6.5.4 21 Feb 2024  
+// 6.5.6  20 May 2024
 
 // 2024 release dates: 6.5.4 21 Feb 2024  6.5.3 05 Feb 2024  6.5.2 19 Jan 2024  6.5.1  1 Jan 2024  
 // Version 6 released early 2021. Version 5 released 25 Jul 2018  Version 4.2.20 5 Jun 2017. Not recorded prior. 
