@@ -399,7 +399,7 @@ class ReportActions {
             if(file_exists($filename)){
                 
                 //read tempfile
-                $template = file_get_contents($filename);
+                $template = file_get_contents($filename, FILE_USE_INCLUDE_PATH);
             
                 $res = $this->convertTemplate($template, 1);
                 
