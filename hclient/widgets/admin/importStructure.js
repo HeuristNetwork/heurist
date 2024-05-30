@@ -1514,6 +1514,8 @@ $.widget( "heurist.importStructure", {
                 + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<h3>Terms:</h3><br>${response.report.terms}<br><hr><br>` : '')
                 + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<h3>Translations:</h3><br>${response.report.translations}<br><hr><br>` : '');
 
-        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, {default_palette_class: 'ui-heurist-design'});        
+        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, {default_palette_class: 'ui-heurist-design'});
+
+        window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', null);
     }
 });
