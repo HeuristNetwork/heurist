@@ -274,7 +274,7 @@ foreach ($databases as $idx=>$db_name){
                     fileDelete($log_tmp); // delete temp file
 
                 }else if ($object[1] != '.' && $object[1] != '..' && 
-                    strpos($object[1],'ulf_')===false && strpos($object[1],'user_notification')===false) {
+                    strpos($object[1],'ulf_')===false && strpos($object[1],'userNotifications')===false) {
                         
                     if(strpos($object[1], 'index.html') === false){
 
