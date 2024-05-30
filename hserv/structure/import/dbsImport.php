@@ -58,6 +58,7 @@ class DbsImport {
 
     private $src_CalcFields = null; 
     
+    private $cloning_template = false;
     private $prime_defType = null; // what is primarily being imported (rectype, detailtype, term)
     
     //report data
@@ -151,8 +152,9 @@ class DbsImport {
         $this->rename_target_entities = (@$data['is_rename_target'] == 1);
         
         $this->prime_defType = $data['defType']; //'rectype','detailtype','term'
+        $this->cloning_template = $this->prime_defType == 'all' && @$data['definitionID'] == 'all';
         
-        $allowed_types = array('rectype','detailtype','term');
+        $allowed_types = array('rectype','detailtype','term','all');
         
         if(!in_array($this->prime_defType, $allowed_types)){
             $this->system->addError(HEURIST_INVALID_REQUEST, $this->prime_defType." is not allowed type to be import");
@@ -236,9 +238,8 @@ class DbsImport {
         }
         
         $this->source_defs['databaseURL'] = $database_url;
-        
 
-/* We require at least version 1.2 for database defintion */
+        /* We require at least version 1.2 for database defintion */
         if(false && @$this->source_defs['terms']){
             if(!@$this->source_defs['terms']['groups'] || 
                 !(@$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID']>0)){
@@ -259,7 +260,10 @@ class DbsImport {
         $this->_createTrmLinks(); //create virtual trm_Links if source db is 1.2
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
-        if($this->prime_defType=='term'){
+        if($this->cloning_template){
+            $def_ids[] = 'all';
+        }else if($this->prime_defType=='term'){
+
             if(is_array($local_ids) && count($local_ids)>0){
                 foreach($local_ids as $local_id){ 
                     $rt = $this->sourceTerms->getTerm($local_id);        
@@ -274,24 +278,24 @@ class DbsImport {
                 $def_ids[] = $this->sourceTerms->findTermByConceptCode($cCode); 
             }
         }else{
-            
+
             if(is_array($local_ids) && count($local_ids)>0){
                 foreach($local_ids as $local_id){ //$local_id either id in source db or concept code
 
-                     if($this->prime_defType=='rt' || $this->prime_defType=='rectypes' || $this->prime_defType=='rectype'){
+                    if($this->prime_defType=='rt' || $this->prime_defType=='rectypes' || $this->prime_defType=='rectype'){
                         $missed_name = @$data['rectypes'][$local_id]['name'];
-                     }
+                    }
                         
-                     $found_local_id = $this->_getLocalCode($this->prime_defType, $this->source_defs, $local_id);
-                     if($found_local_id){
-                         $def_ids[] = $found_local_id;  
-                     }else{
+                    $found_local_id = $this->_getLocalCode($this->prime_defType, $this->source_defs, $local_id);
+                    if($found_local_id){
+                        $def_ids[] = $found_local_id;  
+                    }else{
                         $wrong_id = 'id#'.$local_id;
                         if($missed_name){
                             $wrong_id = $wrong_id.' "'.$missed_name.'"';
                         }
                         break;
-                     } 
+                    } 
                 }       
                 
             }else{
@@ -346,10 +350,35 @@ class DbsImport {
 
         $this->target_defs['terms'] = dbs_GetTerms($this->system);
         $this->targetTerms = new DbsTerms($this->system, $this->target_defs['terms']);
-
     
         // 3. Find what defintions will be imported
-        if($this->prime_defType=='term'){
+        if($this->cloning_template){ // all definitions
+
+            // 3.1 Handle terms
+            $term_ids = [...$this->sourceTerms->treeData('enum', 3), ...$this->sourceTerms->treeData('relation', 3)];
+            $has_terms = !empty($term_ids);
+            foreach($term_ids as $term_id){
+                $this->_getTopMostVocabulary($term_id, 'enum');
+                $this->_getTopMostVocabulary($term_id, 'relation');
+            }
+
+            if($has_terms){
+                $this->_getInverseTerms();
+            }
+
+            // 3.2 Handle base fields
+            $dty_ids = $this->_getLocalCode('detailtype', $this->source_defs, null, true);
+            foreach ($dty_ids as $dty_id) {
+                $this->_findDependentRecordTypesByFieldId($dty_id);
+            }
+
+            // 3.3 Handle record type
+            $rty_ids = $this->_getLocalCode('rectype', $this->source_defs, null, true);
+            foreach ($rty_ids as $rty_id) {
+                $this->_findDependentRecordTypesByFieldId($rty_id);
+            }
+
+        }else if($this->prime_defType=='term'){ // terms only
             
             foreach($def_ids as $def_id){
                 $this->_getTopMostVocabulary($def_id, 'enum');
@@ -359,12 +388,12 @@ class DbsImport {
 
             $this->_getInverseTerms();
 
-        }else{
+        }else{ // record types or base fields
             
             if($this->prime_defType=='rectype'){
                 //find record types
                 foreach($def_ids as $def_id){
-                    $this->_findDependentRecordTypes($def_id, null, 0);
+                    $this->_findDependentRecordTypes($def_id, 0);
                 }
                 
                 if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0 && count($this->imp_terms)==0){
@@ -506,7 +535,7 @@ class DbsImport {
             $mysqli->close();
             return false;
         }
-        
+
         if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
             $mysqli->commit(); 
             return true;
@@ -539,6 +568,7 @@ foreach ($this->imp_recordtypes as $recId){
     }
 
     $grp_id = @$def_rts[$recId]['commonFields'][$idx_rt_grp];
+    $grp_name = null;
 
     if(!$grp_id){
         $this->error_exit2("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");
@@ -701,7 +731,9 @@ $columnNames = array("dtg_Name","dtg_Order","dtg_Description");
 $idx_dt_grp = $def_dts['fieldNamesToIndex']['dty_DetailTypeGroupID'];
 
 foreach ($this->imp_fieldtypes as $ftId){
+    $src_group = [];
     $grp_id = $def_dts[$ftId]['commonFields'][$idx_dt_grp];
+    $grp_name = "";
     if(@$group_ft_ids[$grp_id]){ //already found
         continue;
     }
@@ -2084,8 +2116,6 @@ $mysqli->commit();
 
             foreach ($this->fields_correspondence as $imp_id=>$trg_id){
 
-                if(@$this->fields_correspondence_existed[$imp_id]) continue;
-
                 if($trg_detailtypes==null){
                     $trg_detailtypes = dbs_GetDetailTypes($this->system, null, 0); //only names
                 }
@@ -2105,7 +2135,6 @@ $mysqli->commit();
         $idx_ccode = $def_terms['fieldNamesToIndex']["trm_ConceptID"];
 
         foreach ($this->terms_correspondence as $imp_id=>$trg_id){
-            if(@$this->terms_correspondence_existed[$imp_id]) continue;
 
             if(@$def_terms['termsByDomainLookup']['enum'][$imp_id]){
                 $domain = 'enum';
@@ -2127,7 +2156,17 @@ $mysqli->commit();
         $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms,'translations'=>$this->translations_report) );
 
         // Add updated and added values
-        if($this->prime_defType == 'term'){
+        if($this->prime_defType == 'all'){
+
+            $resp['report']['updated']['terms'] = $this->terms_updated;
+            $resp['report']['added']['terms'] = $this->terms_added;
+
+            $resp['report']['updated']['detailtype'] = $this->detailtypes_updated;
+            $resp['report']['added']['detailtype'] = $this->detailtypes_added;
+
+            $resp['report']['updated']['rectype'] = $this->rectypes_upddated;
+            $resp['report']['added']['rectype'] = $this->rectypes_added;
+        }else if($this->prime_defType == 'term'){
             $resp['report']['updated'] = $this->terms_updated;
             $resp['report']['added'] = $this->terms_added;
         }else if($this->prime_defType == 'detailtype'){
