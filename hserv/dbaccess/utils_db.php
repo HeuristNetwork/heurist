@@ -11,6 +11,7 @@
     * 
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
+    *  mysql__get_names - get database name with and without hdb prefix
     * 
     *  mysql__select - base function
     *  mysql__select_assoc - returns array  key_column(first field)=>array(field=>val,....)
