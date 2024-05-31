@@ -114,13 +114,14 @@ if(@$_REQUEST['postdata']){
 
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
 
-if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
-    $rectype_templates = $_REQUEST['rectype_templates']!=null && $_REQUEST['rectype_templates']!=0; //flag to produce rectype templates instead of real records
-    if($rectype_templates){
-        $human_readable_names = true;
-    }
-}else{
-    $rectype_templates = false;
+$rectype_templates = array_key_exists('rectype_templates', $_REQUEST) && !empty($_REQUEST['rectype_templates']); //flag to produce rectype templates instead of real records
+
+if($rectype_templates){ // output manifest + files ??
+    
+    $rectype_templates = $_REQUEST['rectype_templates']=='y' || $_REQUEST['rectype_templates']=='all' ? true : prepareIds($_REQUEST['rectype_templates']);
+    $rectype_templates = empty($rectype_templates) ? false : $rectype_templates;
+
+    $human_readable_names = $rectype_templates !== false;
 }
 
 
