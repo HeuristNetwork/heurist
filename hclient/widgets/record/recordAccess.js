@@ -55,8 +55,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             function(e, data) { 
                 that._fillAccessControls();
         });
-        
-        
+
+        if(window.hWin.HAPI4.is_admin()){
+            this.element.find('#div_def_user, #div_def_acc').show();
+        }else{
+            this.element.find('#div_def_user, #div_def_acc').remove();
+        }
         
         return this._super();
         
@@ -194,6 +198,34 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 that._onRecordScopeChange();
             }
         );
+
+        let $accountSelect = this.element.find('#sel_def_user');
+        let $pwdInput = this.element.find('#txt_def_pwd');
+        if($accountSelect.length > 0 && $pwdInput.length > 0){
+
+            window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], () => {
+    
+                $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
+    
+                this._off($accountSelect, 'change');
+                this._on($accountSelect, {
+                    change: () => {
+                        if($accountSelect.val() == ''){
+                            $pwdInput.closest("#div_def_pwd").hide();
+                        }else{
+                            $pwdInput.closest("#div_def_pwd").show();
+                        }
+                    }
+                });
+    
+                that._off($pwdInput, 'keyup');
+                that._on($pwdInput, {
+                    keyup: () => {
+                        that._onRecordScopeChange();
+                    }
+                });
+            });
+        }
     },
     
     _adjustHeight: function(){
@@ -302,6 +334,14 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         this.options.currentOwner = ownership;           
         this.options.currentAccess = visibility;
         this.options.currentAccessGroups = visibility_groups;
+
+        let def_user = this.element.find('#sel_def_user').val();
+        let def_pwd = this.element.find('#txt_def_pwd').val();
+        if(!window.hWin.HEURIST4.util.isempty(def_user) && !window.hWin.HEURIST4.util.isempty(def_pwd)){
+
+            this.options.def_user = def_user;
+            this.options.def_pwd = def_pwd;
+        }
         
         return true;
     },

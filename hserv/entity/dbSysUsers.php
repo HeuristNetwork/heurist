@@ -81,10 +81,8 @@ class DbSysUsers extends DbEntityBase
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
         }
-        else if (@$this->data['needRole']){ //not used
-                $needRole = true;
-                array_push($where, '(ugl_UserID = ugr_ID)');
-                array_push($from_table, 'sysUsrGrpLinks');
+        else if (@$this->data['members_only']){ // user's who aren't group admins
+            array_push($where, '(ugr_ID NOT IN (SELECT ugr_ID FROM sysUGrps, sysUsrGrpLinks WHERE (ugl_UserID = ugr_ID) AND (ugl_Role = "admin")))');
         }
         
         //special case - users must not be in given group

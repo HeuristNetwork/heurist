@@ -1005,47 +1005,57 @@ window.hWin.HEURIST4.ui = {
             groups = window.hWin.HAPI4.sysinfo.db_usergroups;
             
         }else 
-        if(groups=='all_users' || groups=='all_users_and_groups'){ //all users
-        
-        
-                if(window.hWin.HEURIST4.allUsersCache && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersCache)){
-                    if(topOptions){
-                        topOptions = window.hWin.HEURIST4.util.cloneJSON(topOptions);
-                        topOptions.push({key:'', title:'──────────',disabled:true});    
-                    } 
-                    if(groups=='all_users_and_groups'){
-                        if(!topOptions) topOptions = [];
-                        $.each(window.hWin.HAPI4.sysinfo.db_usergroups,function(idx,name){
-                            topOptions.push({key:idx, title:name});
-                        })
-                        topOptions.push({key:'', title:'──────────',disabled:true});
-                    }
-                    groups = window.hWin.HEURIST4.allUsersCache;    
-                }else{
-                //It uses It uses window.hWin.HEURIST4.allUsersCache
-        
-                    //get all users
-                    var request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
-                
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            var recordset = new hRecordSet(response.data);
-                            window.hWin.HEURIST4.allUsersCache = [];
-                            recordset.each2(function(id,rec){
-                                window.hWin.HEURIST4.allUsersCache.push({id: id, name: rec['ugr_FullName']});
-                            });
-                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    return;
+        if(groups=='all_users' || groups=='all_users_and_groups' || groups == 'all_users_non_admins'){ //all users
+
+            let all_users_ready = (groups=='all_users' || groups=='all_users_and_groups') && 
+                window.hWin.HEURIST4.allUsersCache && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersCache);
+            
+            let non_admins_ready = groups == 'all_users_non_admins' && 
+                window.hWin.HEURIST4.allUsersNonAdmin && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HEURIST4.allUsersNonAdmin);
+
+            if(all_users_ready || non_admins_ready){
+                if(topOptions){
+                    topOptions = window.hWin.HEURIST4.util.cloneJSON(topOptions);
+                    topOptions.push({key:'', title:'──────────',disabled:true});    
+                } 
+                if(groups=='all_users_and_groups'){
+                    if(!topOptions) topOptions = [];
+                    $.each(window.hWin.HAPI4.sysinfo.db_usergroups,function(idx,name){
+                        topOptions.push({key:idx, title:name});
+                    })
+                    topOptions.push({key:'', title:'──────────',disabled:true});
                 }
-        
-        
+                groups = groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin : window.hWin.HEURIST4.allUsersCache;    
+            }else{
+            //It uses It uses window.hWin.HEURIST4.allUsersCache
+    
+                //get all users
+                let request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
+
+                if(groups == 'all_users_non_admins'){
+                    request['members_only'] = '1';
+                    request['not:ugl_GroupID'] = '1';
+                }
+            
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        var recordset = new hRecordSet(response.data);
+                        groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] : window.hWin.HEURIST4.allUsersCache = [];
+                        recordset.each2(function(id,rec){
+                            let record = {id: id, name: rec['ugr_FullName']};
+                            groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin.push(record) : window.hWin.HEURIST4.allUsersCache.push(record);
+                        });
+                        window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+                return;
+            }
+
         }else
         if(!groups){ //not defined - use groups of current user
         
