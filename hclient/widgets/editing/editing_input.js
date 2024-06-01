@@ -2089,6 +2089,7 @@ $.widget( "heurist.editing_input", {
 
                         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         var headers = relations.headers;
+                        var dtID = this.options.dtID;
                         
                         
                       if(!isInwardRelation){
@@ -2112,7 +2113,7 @@ $.widget( "heurist.editing_input", {
                                         }
                                         
                                         var targetRectypeID = headers[targetID][1];
-                                        if( headers[targetID]['used_in_reverse']!=1 &&
+                                        if( headers[targetID]['used_in_reverse'+dtID]!=1 &&
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
@@ -2130,7 +2131,7 @@ $.widget( "heurist.editing_input", {
                                                 }, !this.isReadonly());
                                             ele.on('remove', __onRelRemove);
                                             
-                                            headers[targetID]['used_in_direct'] = 1;
+                                            headers[targetID]['used_in_direct'+dtID] = 1;
                                         }
                                 }
                             }
@@ -2162,7 +2163,7 @@ $.widget( "heurist.editing_input", {
                                         
                                         var targetRectypeID = headers[targetID][1];
                                         
-                                        if (headers[targetID]['used_in_direct']!=1 && (ptrset.length==0) ||
+                                        if (headers[targetID]['used_in_direct'+dtID]!=1 && (ptrset.length==0) ||
                                                 (window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
                                             if(!isSubHeaderAdded){
@@ -2189,7 +2190,7 @@ $.widget( "heurist.editing_input", {
                                             ele.addClass('reverse-relation', 1)
                                                 .on('remove', __onRelRemove);
                                             
-                                            headers[targetID]['used_in_reverse'] = 1;
+                                            headers[targetID]['used_in_reverse'+dtID] = 1;
                                         }
                                 }
                             }
