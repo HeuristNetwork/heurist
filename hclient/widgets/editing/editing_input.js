@@ -200,7 +200,7 @@ $.widget( "heurist.editing_input", {
             //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
-            .css({'min-width':'22px', display:'table-cell'})
+            .css({'min-width':'40px', display:'table-cell'})
             .appendTo( this.element );
 
         }else{
@@ -218,12 +218,13 @@ $.widget( "heurist.editing_input", {
                 //spacer
                 $( "<span>")
                 .addClass('editint-inout-repeat-button editint-inout-repeat-container')
-                .css({'min-width':'22px', display:'table-cell'})
+                .css({'min-width':'40px', display:'table-cell'})
                 .appendTo( this.element );
                 
             }else{ //multiplier button
             
-                this.is_sortable = !that.is_disabled && !that.options.is_faceted_search; 
+                this.is_sortable = !that.is_disabled && !that.isReadonly() 
+                        && (this.detailType!="relmarker") && !that.options.is_faceted_search; 
             
                 var btn_cont = $('<span>', {class: 'editint-inout-repeat-container'})
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
@@ -2126,7 +2127,7 @@ $.widget( "heurist.editing_input", {
                                                  dtl_StartDate: direct[k]['dtl_StartDate'], 
                                                  dtl_EndDate: direct[k]['dtl_EndDate'],
                                                  is_inward: false
-                                                }, true);
+                                                }, !this.isReadonly());
                                             ele.on('remove', __onRelRemove);
                                             
                                             headers[targetID]['used_in_direct'] = 1;
@@ -2184,7 +2185,7 @@ $.widget( "heurist.editing_input", {
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
                                                  dtl_EndDate: reverse[k]['dtl_EndDate'],
                                                  is_inward: true
-                                                }, true);
+                                                }, !this.isReadonly());
                                             ele.addClass('reverse-relation', 1)
                                                 .on('remove', __onRelRemove);
                                             
@@ -2205,6 +2206,9 @@ $.widget( "heurist.editing_input", {
                         //.addClass('ui-widget-content ui-corner-all')
                         .appendTo( $inputdiv );
                    */  
+                if(this.isReadonly()){
+                   return 0; 
+                }else{
                    $inputdiv
                         .uniqueId();
                    $input = $inputdiv;
@@ -2237,7 +2241,7 @@ $.widget( "heurist.editing_input", {
                    /*if( this.element.find('.link-div').length>0){ //hide this button if there are links
                         $btn_add_rel_dialog.hide();
                    }*/
-
+                }//not readonly   
                 
                 }else{
                     //this is second call - some links are already defined
@@ -4137,7 +4141,9 @@ $.widget( "heurist.editing_input", {
         }
         
         // add visible icon for dragging/sorting field values
-        if(this.is_sortable && !this.is_disabled && !this.enum_buttons && this.f('rst_MultiLang')!=1){
+        if(this.is_sortable && !that.isReadonly() && !this.is_disabled 
+            && (this.detailType!="relmarker")
+            && !this.enum_buttons && this.f('rst_MultiLang')!=1){
 
             var $btn_sort = $('<span>')
                 .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move smallicon')
@@ -5227,7 +5233,7 @@ $.widget( "heurist.editing_input", {
         
         var i;
         for (i=0; i<values.length; i++){
-            if(isReadOnly){
+            if(isReadOnly && this.detailType!='relmarker'){
                 this._addReadOnlyContent(values[i]);
             }else{
                 var inpt_id = this._addInput(values[i]);
@@ -5744,7 +5750,7 @@ $.widget( "heurist.editing_input", {
 
         } else if(this.detailType=="relmarker"){  //combination of enum and resource
 
-            disp_value = "@todo relation "+value;
+            disp_value = ''; //not used 
 
             //@todo NEW datatypes
         } else if(this.detailType=="geo"){

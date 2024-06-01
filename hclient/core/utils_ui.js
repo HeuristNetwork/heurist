@@ -1967,7 +1967,8 @@ window.hWin.HEURIST4.ui = {
         
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="display: table-row;margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
+                        +' style="display: table-row;margin-bottom:0.2em;'
+                        +(isEdit?'background:#F4F2F4 !important;':'')+'">' //padding-bottom:0.2em;
 
                         //relation type
                         
@@ -1981,7 +1982,7 @@ window.hWin.HEURIST4.ui = {
                                 +'child</span>':'')
                             
                         //triangle icon fo
-                        + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
+                        + ((reltype!='')?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
                             +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
 
                         //record type icon for resource
