@@ -73,6 +73,7 @@ $mysqli = $system->get_mysqli();
         
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
+        $ver = intval($ver);
         if(!($ver>0)) continue;
 /* assign values for unregistered databases
         if($db_name=='hdb_johns_test_028') continue;
@@ -137,7 +138,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         $query = "SELECT rty_ID FROM `$db_name`.defRecTypes WHERE rty_OriginatingDBID = 0";
         $res = mysql__select_list2($mysqli, $query, 'intval');
         if(!empty($res)){
-
+            
             $query = "UPDATE `$db_name`.defRecTypes SET rty_OriginatingDBID = $ver WHERE rty_OriginatingDBID = 0";
             $mysqli->query($query);
         }
