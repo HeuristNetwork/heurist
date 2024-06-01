@@ -52,7 +52,8 @@
         
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
-            $reload_user_from_db = (@$_SESSION[$system->dbname_full()]['need_refresh']==1);
+            $db_full_name = $system->dbname_full();
+            $reload_user_from_db = (@$_SESSION[$db_full_name]['need_refresh']==1);
             
             $const_toinit = true;
             if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
@@ -67,6 +68,27 @@
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
+            }
+
+            if($res && !empty(@$_REQUEST['permissions']) && !empty(@$_SESSION[$db_full_name]['ugr_Permissions'])){
+                // Check if user has the required permission
+
+                $required = $_REQUEST['permissions'];
+                $permissions = $_SESSION[$db_full_name]['ugr_Permissions'];
+                $error_msg = "";
+
+                if(strpos($required, 'add') !== false && $permissions['add']){
+                    $error_msg = "create";
+                }
+                if(strpos($required, 'delete') !== false && $permissions['delete']){
+                    $error_msg = (!empty($error_msg) ? " or " : "") . "delete";
+                }
+
+                $res = !empty($error_msg);
+                if(!$res){
+                    $error_msg = "Your account does not have permission to $error_msg records,<br>please contact the database owner for more details.";
+                    $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
+                }
             }
         }else{
             //logged off

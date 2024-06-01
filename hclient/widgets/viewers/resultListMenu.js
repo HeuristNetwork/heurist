@@ -424,15 +424,19 @@ $.widget( "heurist.resultListMenu", {
             
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds( window.hWin.HR('resultList_select_record') );
             if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
-            
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
-               function( context ){
-                   if(context){
-                       // refresh search
-                       that.reloadSearch();                    
-                   }
-               }
-            });
+
+            window.hWin.HAPI4.SystemMgr.verify_credentials(() => {
+
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
+                    function( context ){
+                        if(context){
+                            // refresh search
+                            that.reloadSearch();
+                        }
+                    }
+                });
+
+            }, 0, null, null, 'delete');
 
         }else if(action == "menu-selected-email") {
 

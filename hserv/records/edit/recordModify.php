@@ -3451,11 +3451,11 @@ function checkUserPermissions($system, $action){
     $results = $res->fetch_row();
 
     $permissions = $results[0];
-    $block_msg = 'Database owner has blocked ' . 
-            ($permissions == 'y_no_add' 
-                ? 'addition' 
-                : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) 
-                . ' of records for your profile.';
+    $block_msg = 'Your account does not have permission to ' . 
+            ($action == 'add' ? 'create' : '') .
+            ($action == 'delete' ? 'delete' : '') .
+            ($action == 'add delete' ? 'create or delete' : '') .
+            ' records,<br>please contact the database owner for more details.';
 
     if($permissions == 'n'){
         $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');

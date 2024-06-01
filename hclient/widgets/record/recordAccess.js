@@ -55,12 +55,6 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             function(e, data) { 
                 that._fillAccessControls();
         });
-
-        if(window.hWin.HAPI4.is_admin()){
-            this.element.find('#div_def_user, #div_def_acc').show();
-        }else{
-            this.element.find('#div_def_user, #div_def_acc').remove();
-        }
         
         return this._super();
         
@@ -203,28 +197,37 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         let $pwdInput = this.element.find('#txt_def_pwd');
         if($accountSelect.length > 0 && $pwdInput.length > 0){
 
-            window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], () => {
-    
-                $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
-    
-                this._off($accountSelect, 'change');
-                this._on($accountSelect, {
-                    change: () => {
-                        if($accountSelect.val() == ''){
-                            $pwdInput.closest("#div_def_pwd").hide();
-                        }else{
-                            $pwdInput.closest("#div_def_pwd").show();
+            if(window.hWin.HAPI4.is_admin()){
+
+                this.element.find('#div_def_user, #div_def_acc').show();
+
+                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], () => {
+        
+                    $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
+        
+                    this._off($accountSelect, 'change');
+                    this._on($accountSelect, {
+                        change: () => {
+                            if($accountSelect.val() == ''){
+                                $pwdInput.closest("#div_def_pwd").hide();
+                            }else{
+                                $pwdInput.closest("#div_def_pwd").show();
+                            }
                         }
-                    }
+                    });
+        
+                    that._off($pwdInput, 'keyup');
+                    that._on($pwdInput, {
+                        keyup: () => {
+                            that._onRecordScopeChange();
+                        }
+                    });
                 });
-    
-                that._off($pwdInput, 'keyup');
-                that._on($pwdInput, {
-                    keyup: () => {
-                        that._onRecordScopeChange();
-                    }
-                });
-            });
+            }else{
+                this.element.find('#div_def_user, #div_def_acc').hide();
+                $accountSelect.empty();
+            }
+
         }
     },
     

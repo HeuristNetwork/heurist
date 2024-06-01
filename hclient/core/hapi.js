@@ -587,21 +587,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             response.message = '';
                         }
 
-                        if(window.hWin.HEURIST4.util.isempty(response.message) && requiredPermission){
-
-                            let required = '';
-                            let cur_permissions = window.hWin.HAPI4.currentUser.ugr_Permissions;
-
-                            if(requiredPermission.indexOf('add') !== -1 && !cur_permissions?.add){
-                                required = 'create'
-                            }
-                            if(requiredPermission.indexOf('delete') !== -1 && !cur_permissions?.delete){
-                                required += (required !== '' ? ' and ' : '') + 'delete';
-                            }
-
-                            response.message = required === '' ? '' : `To perform this operation you need permission to ${required} records`;
-                        }
-
                         if (response.message) {
                             window.hWin.HEURIST4.msg.showMsgFlash(response.message, 2000);
                         } else {
@@ -658,7 +643,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 } else {
                     //MODE2 verify via server each time
                     //check if login
-                    _callserver('usr_info', { a: 'verify_credentials' }, __response_handler);
+                    _callserver('usr_info', { a: 'verify_credentials', permissions: requiredPermission }, __response_handler);
                 }
             },
 
