@@ -32,7 +32,8 @@ $.widget( "heurist.navigation", {
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
        onInitComplete: null,
-       language: 'def'   //"xx" means take default - without code: prefix
+       language: 'def',   //"xx" means take default - without code: prefix
+       supp_options: null  //options to init page after load
     },
     
     menuData: null, //hRecordSet
@@ -359,7 +360,7 @@ $.widget( "heurist.navigation", {
                     }
                     iconOnly = iconOnly && !nameOnly && window.hWin.HEURIST4.util.isArrayNotEmpty(menuIcon);
                     
-                    if(menuName.indexOf('<a') !== -1 && menuName.indexOf('</a>') !== -1){
+                    if(menuName && menuName.indexOf('<a') !== -1 && menuName.indexOf('</a>') !== -1){
 
                         let $temp_ele = $('<span>', {style: 'display:none'}).html(menuName);
                         let $a = $temp_ele.find('a[href]:first');
@@ -821,7 +822,7 @@ $.widget( "heurist.navigation", {
                                         $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                                     } 
                                     
-                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target) ); 
+                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
 
                                     if($.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
