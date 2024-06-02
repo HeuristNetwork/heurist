@@ -120,8 +120,17 @@
         $response = recordSearchMinMax($system, $_REQUEST);
 
     }else if(@$_REQUEST['a'] == 'getfacets'){ //returns counts for facets for given query
+    
+        $params = array();
+        foreach($_REQUEST as $key=>$val){
+            if(is_array($val)){
+                $params[$key]  = $val;
+            }else{
+                $params[$key]  = filter_var($val, FILTER_UNSAFE_RAW);
+            }
+        }
 
-        $response = recordSearchFacets($system, $_REQUEST);
+        $response = recordSearchFacets($system, $params);
 
     }else if(@$_REQUEST['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 

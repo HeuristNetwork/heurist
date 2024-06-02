@@ -99,6 +99,27 @@
                 </div>    
             </div>
                 -->
+
+            <div id="div_def_acc" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+                <div class="heurist-helper1" style="display:block;padding-bottom: 1em;">
+                    Provide a default account to use for creating the new record, if the user isn't already logged in<br>
+                    Only accounts that are not the database owner or an administrator can be used here<br>
+                    <strong>BE AWARE</strong> that this will mean the account is publicly accessible
+                </div>
+            </div>
+
+            <div id="div_def_user" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Username:</label></div>
+                <select id="sel_def_user" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                <span class="heurist-helper2" style="padding-left: 5px;">The account used for guest visitors</span>
+            </div>
+
+            <div id="div_def_pwd" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Password:</label></div>
+                <input id="txt_def_pwd" class="text ui-widget-content ui-corner-all" style="max-width:30em;font-size:11px;" />
+                <span class="heurist-helper2" style="padding-left: 5px;">Password for the above account</span>
+            </div>
+
             <span id="div_add_link" style="padding: 0.2em; min-width: 480px;display:none;" class="input add_record">
                 <div class="heurist-helper1" style="padding-bottom: 1em; display: block;">
                     Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records

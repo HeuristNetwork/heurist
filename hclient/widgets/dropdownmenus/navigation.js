@@ -32,7 +32,8 @@ $.widget( "heurist.navigation", {
        toplevel_css:null,  //css for top level items
        expand_levels:0,  //expand levels for treeview
        onInitComplete: null,
-       language: 'def'   //"xx" means take default - without code: prefix
+       language: 'def',   //"xx" means take default - without code: prefix
+       supp_options: null  //options to init page after load
     },
     
     menuData: null, //hRecordSet
@@ -45,6 +46,8 @@ $.widget( "heurist.navigation", {
     ids_menu_entries: {},
     ids_recurred: [],
 
+    //menu external urls
+    menu_item_urls: {},
     
     first_not_empty_page_id:0,
 
@@ -361,6 +364,22 @@ $.widget( "heurist.navigation", {
                     }
                     iconOnly = iconOnly && !nameOnly && window.hWin.HEURIST4.util.isArrayNotEmpty(menuIcon);
                     
+                    if(menuName && menuName.indexOf('<a') !== -1 && menuName.indexOf('</a>') !== -1){
+
+                        let $temp_ele = $('<span>', {style: 'display:none'}).html(menuName);
+                        let $a = $temp_ele.find('a[href]:first');
+
+                        if($a.length > 0){
+
+                            let link = $a.attr('href');
+                            link = !link.match(/^\w+:\/\//) ? `https://${link}` : link;
+
+                            let is_link = link.match(/^https?|^ftps?|^mailto/);
+                            
+                            this.menu_item_urls[page_id] = !is_link ? null : link;
+                            menuName = !is_link ? menuName : $a.text();
+                        }
+                    }
                     menuName = window.hWin.HEURIST4.util.htmlEscape(menuName);
                     menuName = iconOnly ? `<span style="display:none;">${menuName}</span>` : menuName;
 
@@ -617,7 +636,12 @@ $.widget( "heurist.navigation", {
                         is_selectable !== TERM_NO && is_selectable !== TERM_NO_old && 
                         this.options.selectable_if_submenu;
 
-        if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
+        if(Object.hasOwn(this.menu_item_urls, data.page_id) && 
+            !window.hWin.HEURIST4.util.isempty(this.menu_item_urls[data.page_id])){ // open url in new window
+
+            window.open(this.menu_item_urls[data.page_id], '_blank', 'noopener');
+            return;
+        }else if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
         
@@ -803,14 +827,14 @@ $.widget( "heurist.navigation", {
                                         $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                                     } 
                                     
-                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target) ); 
+                                    layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
 
                                     if(window.hWin.HUL.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
                                         /*setTimeout(function(){
                                         that.options.aftermenuselect( data.page_id );
                                         },2000);*/
-                                    }                    
+                                    }
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+data.page_id+')');
                                 }

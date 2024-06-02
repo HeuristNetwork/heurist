@@ -30,13 +30,22 @@ use PHPMailer\PHPMailer\Exception;
     {
         return sendPHPMailer(null, null, $email_to, $email_title, $email_text, $email_attachment, $is_html);
     }
+
+    // in php v8 use str_ends_with
+    function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+    }    
     
     //
     //
     //
     function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment, $is_html){
         
-        global $system;
+        global $system, $mailRelayPwd;
+        
+        $replyTo = null;//$email_from;
+        $replyToName = null;//$email_from_name;
 
         if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
         if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
@@ -50,8 +59,10 @@ use PHPMailer\PHPMailer\Exception;
         }
         
         if(!$email_to){
-            $system->addError(HEURIST_ACTION_BLOCKED, 
+            if(isset($system)){
+                $system->addError(HEURIST_ACTION_BLOCKED, 
                         'Cannot send email. Recipient email address is not defined');
+            }
             return false;
         }else if(!is_array($email_to)){
             $email_to = array($email_to);
@@ -61,6 +72,30 @@ use PHPMailer\PHPMailer\Exception;
        
         // strip all whitespaces
         $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
+        
+        if(isset($mailRelayPwd) && $mailRelayPwd!='' 
+            && count($email_to)==1 && endsWith($email_to[0], '@gmail.com')){
+            
+            $data = array('pwd' => $mailRelayPwd ,
+                          'from_name' => $replyToName,  
+                          'from' => $replyTo,
+                          'to' => implode(',',$email_to),  //cs list of recipients
+                          'title' => $email_title,
+                          'text' => $email_text,
+                          'html' => 1);
+              
+            $data_str = http_build_query($data);
+
+            $ch =  curl_init("https://heuristref.net/HEURIST/mailRelay.php");
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $responce = curl_exec($ch);
+            curl_close($ch);            
+            
+            return ($responce==1);            
+        }
+        
         
         //send an email with attachment
         $email = new PHPMailer();
@@ -80,7 +115,14 @@ use PHPMailer\PHPMailer\Exception;
         $email->CharSet = 'UTF-8';
         $email->Encoding = 'base64';
         $email->isHTML( $is_html ); 
-        $email->SetFrom($email_from, $email_from_name); 
+
+        if($replyTo!=null && $replyTo!=$email_from){
+            $email->ClearReplyTos();
+            $email->addReplyTo($replyTo, $replyToName);
+        }
+        $email->SetFrom($email_from, $email_from_name);
+        
+        
         $email->Subject   = $email_title; //'=?UTF-8?B?'.base64_encode($email_title).'?=';
         $email->Body      = $email_text;
         
@@ -91,8 +133,10 @@ use PHPMailer\PHPMailer\Exception;
 
                 $problem = (($email_address==null) || (trim($email_address)==='')) ? "is not defined" : "$email_address is invalid";
 
-                $system->addError(HEURIST_ACTION_BLOCKED, 
+                if(isset($system)){
+                    $system->addError(HEURIST_ACTION_BLOCKED, 
                         "Cannot send email. Recipient email address $problem.");
+                }
                 return false;
             }
             
@@ -113,9 +157,11 @@ use PHPMailer\PHPMailer\Exception;
             $email->send();
             return true;
         } catch (Exception $e) {
-            $system->addError(HEURIST_SYSTEM_CONFIG, 
+            if(isset($system)){
+                $system->addError(HEURIST_SYSTEM_CONFIG, 
                     'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
                     , $email->ErrorInfo);
+            }
             return false;
         }
         return true;

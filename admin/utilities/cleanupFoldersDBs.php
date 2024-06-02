@@ -34,6 +34,7 @@ $eol = "\n";
 $tabs = "\t\t";
 $tabs0 = '';
 $is_command_line = false;
+$is_shell = true;
 
 if (@$argv) {
     
@@ -70,6 +71,7 @@ if (@$argv) {
     $is_command_line = true;
     
 }else{
+    $is_shell = false;
     //from browser
     define('OWNER_REQUIRED',1);
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
@@ -93,6 +95,10 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 $system = new System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
+}
+if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+        include_once ERROR_REDIR;
+        exit;
 }
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
@@ -268,7 +274,7 @@ foreach ($databases as $idx=>$db_name){
                     fileDelete($log_tmp); // delete temp file
 
                 }else if ($object[1] != '.' && $object[1] != '..' && 
-                    strpos($object[1],'ulf_')===false && strpos($object[1],'user_notification')===false) {
+                    strpos($object[1],'ulf_')===false && strpos($object[1],'userNotifications')===false) {
                         
                     if(strpos($object[1], 'index.html') === false){
 

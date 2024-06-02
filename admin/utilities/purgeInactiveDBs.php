@@ -151,8 +151,9 @@ if( !$system->init(null, false, false) ){
 }
 
 if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    $response = $system->getError();
-    print $response['message'];
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    //$response = $system->getError();
+    //print $response['message'];
     exit;
 }
 
@@ -700,7 +701,7 @@ function exclusion_list(){
         if($arg_no_action){
                print $sMsg.'<br>';
         }
-        sendEmail(HEURIST_MAIL_TO_ADMIN, $sMsg); 
+        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg); 
         return false;
     }
     return $res;

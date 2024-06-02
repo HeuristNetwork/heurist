@@ -45,6 +45,8 @@ $error = System::dbname_check($db);
 
 if(!$error){
     
+        list($db_full, $db) = mysql__get_names( $db );
+    
         $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db); //for snyk
 
         $system = new System(); //without db connection and session - just paths

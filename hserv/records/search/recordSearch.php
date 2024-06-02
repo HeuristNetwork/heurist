@@ -150,7 +150,7 @@ function recordSearchFacets($system, $params){
         $query = 'SELECT svs_ID AS qID, svs_Name AS qName, svs_UGrpID as uID, ugr_Name as uName '
             . 'FROM usrSavedSearches '
             . 'INNER JOIN sysUGrps ON ugr_ID = svs_UGrpID '
-            . 'WHERE svs_ID = ' . $params['qname'];
+            . 'WHERE svs_ID = ' . intval($params['qname']);
 
         $saved_search = mysql__select_row_assoc($mysqli, $query);
 
@@ -169,13 +169,13 @@ function recordSearchFacets($system, $params){
     $missingIds = false;
 
     if(@$params['q'] && @$params['field']){
-
+        
         $currentUser = $system->getCurrentUser();
         $dt_type     = @$params['type'];
-        $step_level  = @$params['step'];
+        $step_level  = intval(@$params['step']);
         $fieldid     = $params['field'];
         $count_query = @$params['count_query'];
-        $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
+        $facet_type =  intval(@$params['facet_type']); //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
         $facet_groupby = @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
         $vocabulary_id = @$params['vocabulary_id'];  //special case for groupby first level
         $limit         = @$params['limit']; //limit for preview
@@ -2025,20 +2025,20 @@ function recordSearch($system, $params, $relation_query=null)
             return $resSearch;
         }
 
-        if($keepMainSet){
-            //find main query results
-            $fin_result = $resSearch;
-            //main result set
+        //find main query results
+        $fin_result = $resSearch;
+        //main result set
+        $has_results = @$fin_result['data']['records'] && is_array($fin_result['data']['records']);
+        if($has_results){
             $flat_rules[0]['results'] = $is_ids_only 
                                 ?$fin_result['data']['records'] 
                                 :array_keys($fin_result['data']['records']); //get ids
         }else{
-            //remove from $fin_result! but keep in $flat_rules[0]['results']?
-            $flat_rules[0]['results'] = $is_ids_only ?$resSearch['data']['records'] 
-            :array_keys($resSearch['data']['records']); //get ids
-
+            $flat_rules[0]['results'] = array();
+        }
+        
+        if(!$has_results || !$keepMainSet){
             //empty main result set
-            $fin_result = $resSearch;
             $fin_result['data']['records'] = array(); //empty
             $fin_result['data']['reccount'] = 0;
             $fin_result['data']['count'] = 0;

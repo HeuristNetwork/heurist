@@ -237,10 +237,6 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
 <script type="text/javascript" src="hclient/widgets/dropdownmenus/navigation.js"></script>
 
-<script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
-<script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
-<script type="text/javascript" src="hclient/widgets/expertnation/expertnation_place.js"></script>
-<script type="text/javascript" src="hclient/widgets/expertnation/expertnation_nav.js"></script>
 <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
 
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
@@ -353,10 +349,9 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
 
-        window.hWin.HAPI4.is_publish_mode = (lt=='Beyond1914' ||  lt=='UAdelaide' ||
-            lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' );
+        window.hWin.HAPI4.is_publish_mode = (lt=='WebSearch');
         
-        if(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch'){
+        if(lt=='WebSearch'){
             $('#layout_panes').css({'height':'100%',width:'100%',position:'absolute'});
             $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
         }

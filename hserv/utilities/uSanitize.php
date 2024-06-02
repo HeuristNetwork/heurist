@@ -211,6 +211,7 @@ class USanitize {
             */
             $def = $config->getHTMLDefinition(true); //non standard attributes
             $def->addAttribute('div', 'id', 'Text');            
+            $def->addAttribute('img', 'data-id', 'Text');            
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');

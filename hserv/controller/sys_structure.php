@@ -117,12 +117,15 @@
 ini_set('max_execution_time', 0);
             $importDef = new DbsImport( $system );
 
-            if($importDef->doPrepare(  array('defType'=>$_REQUEST["import"], 
-                        'databaseID'=>@$_REQUEST["databaseID"], 
-                        'definitionID'=>@$_REQUEST["definitionID"], 
-                        'is_rename_target'=>(@$_REQUEST["is_rename_target"]==1),
-                        'conceptCode'=>@$_REQUEST['conceptCode']) ))
-            {
+            $options = [
+                'defType' => @$_REQUEST["import"],
+                'databaseID' => @$_REQUEST["databaseID"],
+                'definitionID' => @$_REQUEST["definitionID"],
+                'is_rename_target' => @$_REQUEST["is_rename_target"] == 1,
+                'conceptCode'=> @$_REQUEST['conceptCode']
+            ];
+
+            if($importDef->doPrepare( $options )){
                 $isOK = $importDef->doImport();
             }
 

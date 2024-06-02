@@ -1153,7 +1153,7 @@
 
         // Check bug report independently
         if(array_key_exists('bug_report', $user_settings[$usr_id]) && 
-           ($user_settings[$usr_id]['bug_report'] + strtotime('+1 month')) <= $today){
+           strtotime('+1 month', intval($user_settings[$usr_id]['bug_report'])) <= $today){
 
             $user_settings[$usr_id]['bug_report'] = $today;
 

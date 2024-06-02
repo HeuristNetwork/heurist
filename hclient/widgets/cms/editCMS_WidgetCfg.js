@@ -72,6 +72,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.dialog( "close" );    
                         }
         }}];
+
+        if(!$.isFunction(on_change)){
+            on_change = $.noop();
+        }
         
         if($dlg && $dlg.length>0){
             //container provided
@@ -516,7 +520,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
                                 window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                             rst_FieldConfig: {entity:'records', csv:false}
-                        }
+                        },
+                        change: on_change
                     };
 
                     ele.editing_input(ed_options);
@@ -689,6 +694,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#allowed_svsIDs').editing_input('setValue','');
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
+                            on_change();
                         }
                     };
 
@@ -716,6 +722,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#allowed_UGrpID').editing_input('setValue','');
                             $dlg.find('#init_svsID').editing_input('setValue','');
                             __restFilterForInitSearch();
+                            on_change();
                         }
                     };
 
@@ -737,7 +744,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             dty_Type:"resource", rst_MaxValues:1,
                             rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
                             rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
-                        }
+                        },
+                        change: on_change
                     };
 
 
@@ -784,7 +792,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
                                 initial_filter:ifilter, search_form_visible:(ifilter==null)    
                             } 
-                        }
+                        },
+                        change: on_change
                     }); 
                 }
 
@@ -1040,8 +1049,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             rst_DisplayHelpText: 'Defines the field that points to story element records (such as Life event, Ocuppation etc)',
                             rst_FieldConfig: {entity:'defDetailTypes', csv:true, filters:{types:['resource']}}
                         },
-                        change:function(){
-                        }
+                        change: on_change
                     };
 
                 ele.editing_input(ed_options);
@@ -1140,9 +1148,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
             }
 
-            if($.isFunction(on_change)){
-                $dlg.find(`div.${widget_name} input, div.${widget_name} select, div.${widget_name} textarea`).on('change', on_change);
-            }
+            $dlg.find(`div.${widget_name} input, div.${widget_name} select, div.${widget_name} textarea`).on('change', on_change);
         }
     }
     

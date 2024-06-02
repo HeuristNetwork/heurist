@@ -22,9 +22,14 @@
 */
 
 require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
+require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
 
+$system = new System();
+if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

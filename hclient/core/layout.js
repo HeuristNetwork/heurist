@@ -1267,12 +1267,6 @@ console.error('Cardinal layout widget does not have proper options');
             }
         }
         
-        if(layoutid.indexOf('DigitalHarlem')==0 || layoutid=='Beyond1914' || layoutid=='UAdelaide'){
-            //name of application to window title
-            window.hWin.document.title = layout.name;
-        }
-        
-
         //var $container = $(containerid);
         
         //add style to header

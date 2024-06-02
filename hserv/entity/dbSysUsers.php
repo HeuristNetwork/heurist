@@ -81,10 +81,8 @@ class DbSysUsers extends DbEntityBase
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
         }
-        else if (@$this->data['needRole']){ //not used
-                $needRole = true;
-                array_push($where, '(ugl_UserID = ugr_ID)');
-                array_push($from_table, 'sysUsrGrpLinks');
+        else if (@$this->data['members_only']){ // user's who aren't group admins
+            array_push($where, '(ugr_ID NOT IN (SELECT ugr_ID FROM sysUGrps, sysUsrGrpLinks WHERE (ugl_UserID = ugr_ID) AND (ugl_Role = "admin")))');
         }
         
         //special case - users must not be in given group
@@ -504,7 +502,7 @@ class DbSysUsers extends DbEntityBase
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Provided ID is Invalid');
             return false;
         }
-        settype($recID, "integer");     /* For Comparison and Use */
+        $recID = intval($recID);
         if($recID == 2){   /* Check if selected ID is alreay the Owner */
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot transfer Database Ownership to the current Database Owner');
             return false;
@@ -518,8 +516,12 @@ class DbSysUsers extends DbEntityBase
         if($row == null){
             $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve user account status');
             return false;
-        }else if($row[0] == 'n'){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'The selected user is not enabled. Please enable them to transfer database ownership to them.');
+        }else if($row[0] != 'y'){
+
+            $msg = $row[0] == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
+                                    'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';
+
+            $this->system->addError(HEURIST_INVALID_REQUEST, $msg);
             return false;
         }
 

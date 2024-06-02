@@ -5584,57 +5584,19 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                         let completed = []; // completed recpointers/terms
 
-                        if(Array.isArray(newval)){
+                        if(!Array.isArray(newval)){
+                            newval = [newval];
+                        }
 
-                            for(let i = 0; i < newval.length; i++){
+                        for(let i = 0; i < newval.length; i++){
 
-                                // needs additional handling
-                                if(type == 'resource'){
-                                    that.resource_values.push({fld_id: dt_id, values: newval[i]});
-                                }else if(type == 'relmarker'){
-                                    that.relmarker_values.push({fld_id: dt_id, values: newval[i]});
-                                }else{
-
-                                    let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
-
-                                    if(Number.isInteger(+newval[i]) && $Db.trm_InVocab(vocab_id, newval[i])){ // check if 'id' is in vocabulary
-                                        completed.push(newval[i]);
-                                        continue;
-                                    }
-
-                                    if(Array.isArray(newval[i])){
-                                        for(let j = 0; j < newval[i].length; j++){
-
-                                            let label = window.hWin.HEURIST4.util.isObject(newval[i][j]) ? newval[i][j]['label'] : newval[i][j];
-                                            let trm_id = $Db.getTermByLabel(vocab_id, label);
-
-                                            if(trm_id == null){
-                                                that.term_values.push([dt_id, newval[i][j]]);
-                                            }else{
-                                                completed.push(trm_id);
-                                            }
-                                        }
-                                    }else{
-
-                                        let label = window.hWin.HEURIST4.util.isObject(newval[i]) ? newval[i]['label'] : newval[i];
-                                        let trm_id = $Db.getTermByLabel(vocab_id, label);
-
-                                        if(trm_id == null){
-                                            that.term_values.push([dt_id, newval[i]]);
-                                        }else{
-                                            completed.push(trm_id);
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
-
+                            // needs additional handling
                             if(type == 'resource'){
-                                that.resource_values.push({fld_id: dt_id, values: newval});
+                                that.resource_values.push({fld_id: dt_id, values: newval[i]});
                             }else if(type == 'relmarker'){
-                                that.relmarker_values.push({fld_id: dt_id, values: newval});
+                                that.relmarker_values.push({fld_id: dt_id, values: newval[i]});
                             }else{
-                                
+
                                 let vocab_id = $Db.dty(dt_id, 'dty_JsonTermIDTree');
 
                                 if(Number.isInteger(+newval[i]) && $Db.trm_InVocab(vocab_id, newval[i])){ // check if 'id' is in vocabulary
@@ -5642,13 +5604,28 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     continue;
                                 }
 
-                                let label = window.hWin.HEURIST4.util.isObject(newval) ? newval['label'] : newval;
-                                let trm_id = $Db.getTermByLabel(vocab_id, label);
+                                if(window.hWin.HEURIST4.util.isArray(newval[i])){
+                                    for(let j = 0; j < newval[i].length; j++){
 
-                                if(trm_id == null){
-                                    that.term_values.push([dt_id, newval]);
+                                        let label = window.hWin.HEURIST4.util.isObject(newval[i][j]) ? newval[i][j]['label'] : newval[i][j];
+                                        let trm_id = $Db.getTermByLabel(vocab_id, label);
+
+                                        if(trm_id == null){
+                                            that.term_values.push([dt_id, newval[i][j]]);
+                                        }else{
+                                            completed.push(trm_id);
+                                        }
+                                    }
                                 }else{
-                                    completed.push(trm_id);
+
+                                    let label = window.hWin.HEURIST4.util.isObject(newval[i]) ? newval[i]['label'] : newval[i];
+                                    let trm_id = $Db.getTermByLabel(vocab_id, label);
+
+                                    if(trm_id == null){
+                                        that.term_values.push([dt_id, newval[i]]);
+                                    }else{
+                                        completed.push(trm_id);
+                                    }
                                 }
                             }
                         }
@@ -5772,7 +5749,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     if(success){
 
                         for(var fld_id in new_terms){ // pass term ids to respective fields
-                            that._editing.setFieldValueByName(fld_id, new_terms[fld_id]);
+
+                            let values = new_terms[fld_id];
+                            values = values.filter(n => !window.hWin.HEURIST4.util.isempty(n));
+        
+                            if(values.length == 0){
+                                continue;
+                            }
+        
+                            that._editing.setFieldValueByName(fld_id, values);
 
                             var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
                             if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
@@ -5783,7 +5768,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }else{ // no cache updating needed
 
                 for(var fld_id in new_terms){
-                    that._editing.setFieldValueByName(fld_id, new_terms[fld_id]);
+
+                    let values = new_terms[fld_id];
+                    values = values.filter(n => !window.hWin.HEURIST4.util.isempty(n));
+
+                    if(values.length == 0){
+                        continue;
+                    }
+
+                    that._editing.setFieldValueByName(fld_id, values);
 
                     var fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
                     if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }

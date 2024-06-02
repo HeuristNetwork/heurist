@@ -526,11 +526,10 @@ $.widget( "heurist.resultList", {
         if(this.options.search_initial){
             
             var request = {q:this.options.search_initial, w: 'a', detail: 'ids', 
-                        source:'init', search_realm: this.options.search_realm };
-            window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
+                        source:'init', search_realm: this.options.search_realm, is_inital_search: true };
+            setTimeout(() => { window.hWin.HAPI4.RecordSearch.doSearch(this.document, request); }, 1000);
             
         }else{
-
             this.setCollected(null); //to obtain collection
             
             if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){

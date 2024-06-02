@@ -11,6 +11,7 @@
     * 
     *  mysql__getdatabases4 - get list of databases
     *  mysql__check_dbname
+    *  mysql__get_names - get database name with and without hdb prefix
     * 
     *  mysql__select - base function
     *  mysql__select_assoc - returns array  key_column(first field)=>array(field=>val,....)
@@ -745,7 +746,7 @@
         
         $result = false;
         
-        $is_insert = (strpos(strtoupper($query), 'INSERT')===0);
+        $is_insert = (stripos($query, 'INSERT')===0);
 
         if (!is_array($params) || count($params) < 1) {// not parameterised
             if ($result = $mysqli->query($query)) {

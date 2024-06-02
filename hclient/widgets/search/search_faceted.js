@@ -352,7 +352,7 @@ $.widget( "heurist.search_faceted", {
                             
                             if(data.source && data.source==that.element.attr('id') ){   //search from this widget
                                   that._current_query_request_id = data.id;
-                            }else{
+                            }else if(!data.is_inital_search){
                                 //search from outside - close this widget
                                 that.doClose();
                             }
@@ -362,18 +362,18 @@ $.widget( "heurist.search_faceted", {
                     
                     var recset = data.recordset;
                     if(recset && recset.queryid()==that._current_query_request_id) {
-                          //search from this widget
-                          that._current_query_request_id = null;
-                          that._currentRecordset = recset;
-                          that._isInited = false;
-                          that.no_value_facets = [];
+                        //search from this widget
+                        that._current_query_request_id = null;
+                        that._currentRecordset = recset;
+                        that._isInited = false;
+                        that.no_value_facets = [];
 
-                          that._recalculateFacets(-1);       
-                          that.refreshSubsetSign();
+                        that._recalculateFacets(-1);       
+                        that.refreshSubsetSign();
 
-                          if(window.hWin.HUL.isFunction(that.options.params.callback_on_search_finish) && recset){
+                        if(window.hWin.HUL.isFunction(that.options.params.callback_on_search_finish) && recset){
                               that.options.params.callback_on_search_finish.call(this, recset.count_total());
-                          }
+                        }
                     }         
                 }else if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT && data){
                     

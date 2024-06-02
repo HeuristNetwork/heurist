@@ -1690,10 +1690,13 @@ class System {
     * @return  TRUE if login is success
     */
     public function doLogin($username, $password, $session_type, $skip_pwd_check=false){
+        global $passwordForDatabaseAccess;
 
         if($username && ($password || $skip_pwd_check)){
             
-            if($skip_pwd_check || hash_equals(crypt($password, 'sbzR8w7tl02VQ'), 'sbzR8w7tl02VQ'))            
+            if($skip_pwd_check 
+                || (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess)>15 && $passwordForDatabaseAccess==$password)
+              )            
             {
                 $user_id = is_numeric($username)?intval($username):2;
                 $user = user_getById($this->mysqli, $user_id);

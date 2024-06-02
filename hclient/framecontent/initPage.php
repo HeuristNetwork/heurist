@@ -81,6 +81,45 @@ if(defined('IS_INDEX_PAGE')){
     }
 }
 
+if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
+    
+    $mysqli = $system->get_mysqli();
+    $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;
+    $username = "";
+
+    $attempt_login = false;
+
+    if($ugr_ID !== null){
+        $res = $mysqli->query("SELECT ugr_Name FROM sysUGrps WHERE ugr_ID = $ugr_ID");
+        $username = $res ? $res->fetch_row()[0] : null;
+    }else{
+
+        $username = $mysqli->real_escape_string($_REQUEST['user']);
+
+        $res = $mysqli->query("SELECT ugr_ID FROM sysUGrps WHERE ugr_Name = '$username'");
+        $ugr_ID = $res ? intval($res->fetch_row()[0]) : null;
+    }
+
+    // Handle individual cases
+    if(intval($ugr_ID) > 2 && 
+        array_key_exists('rec_rectype', $_REQUEST) && strpos($_SERVER['REQUEST_URI'], 'recordEdit.php') !== false){
+        // Record Edit from non-logged in user, use the provided default account
+        // Cannot be a workgroup admin, a member of the DB managers workgroup or the DB owner
+
+        $query = "SELECT COUNT(ugl_ID) FROM sysUsrGrpLinks WHERE ugl_UserID = $ugr_ID AND (ugl_GroupID = 1 OR ugl_Role = 'admin')";
+
+        $res = $mysqli->query($query);
+        $role_count = $res ? $res->fetch_row()[0] : -1;
+        $res->close();
+
+        $attempt_login = intval($role_count) === 0;
+    }
+    
+    if($attempt_login && !empty($username) && !empty($_REQUEST['pwd'])){
+        $system->doLogin($username, $_REQUEST['pwd'], 'public');
+    }
+}
+
 $login_warning = 'To perform this action you must be logged in';
 $invalid_access = true;
 
@@ -239,13 +278,6 @@ $isUpgrade = true;
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
-
-<?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
-<!--    
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
--->
-<?php } ?>
 
 <!-- CSS -->
 <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>

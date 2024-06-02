@@ -427,7 +427,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             return $system->addError(HEURIST_ACTION_BLOCKED, 
                 'Are you a bot? Please enter the correct answer to the challenge question');
         }else{
-            if($system->get_user_id()<1){ //if captcha is valid allow   (for ExpertNation - submit feedback)
+            if($system->get_user_id()<1){ //if captcha is valid allow
                 $system->setCurrentUser(array('ugr_ID'=>5, 'ugr_FullName'=>'Guest'));
             }
         }
@@ -2541,7 +2541,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         //if(!((defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU) || 
                         //     (defined('RT_CMS_HOME') && $rectype==RT_CMS_HOME) )){
                            
-                        if($det_types[$dtyID]=="freetext"){
+                        if($det_types[$dtyID]=="freetext"){ //remove non standard attributes
                         //(\w+)
                         $allowed = array('src','class','style','href');
                         $allowed2 = implode('=|',$allowed).'=';
@@ -3451,11 +3451,11 @@ function checkUserPermissions($system, $action){
     $results = $res->fetch_row();
 
     $permissions = $results[0];
-    $block_msg = 'Database owner has blocked ' . 
-            ($permissions == 'y_no_add' 
-                ? 'addition' 
-                : ($permissions == 'y_no_delete' ? 'deletion' : 'addition and deletion')) 
-                . ' of records for your profile.';
+    $block_msg = 'Your account does not have permission to ' . 
+            ($action == 'add' ? 'create' : '') .
+            ($action == 'delete' ? 'delete' : '') .
+            ($action == 'add delete' ? 'create or delete' : '') .
+            ' records,<br>please contact the database owner for more details.';
 
     if($permissions == 'n'){
         $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');

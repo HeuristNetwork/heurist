@@ -114,13 +114,14 @@ if(@$_REQUEST['postdata']){
 
 $human_readable_names = (@$_REQUEST['human_readable_names']==1);
 
-if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
-    $rectype_templates = $_REQUEST['rectype_templates']!=null && $_REQUEST['rectype_templates']!=0; //flag to produce rectype templates instead of real records
-    if($rectype_templates){
-        $human_readable_names = true;
-    }
-}else{
-    $rectype_templates = false;
+$rectype_templates = array_key_exists('rectype_templates', $_REQUEST) && !empty($_REQUEST['rectype_templates']); //flag to produce rectype templates instead of real records
+
+if($rectype_templates){ // output manifest + files ??
+    
+    $rectype_templates = $_REQUEST['rectype_templates']=='y' || $_REQUEST['rectype_templates']=='all' ? true : prepareIds($_REQUEST['rectype_templates']);
+    $rectype_templates = empty($rectype_templates) ? false : $rectype_templates;
+
+    $human_readable_names = $rectype_templates !== false;
 }
 
 
@@ -1907,8 +1908,6 @@ if($rectype_templates){
     }
 }
 
-
-
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
 /*if(@$_REQUEST['offset']){
@@ -2021,7 +2020,8 @@ if($intofile){ // flags HuNI manifest + separate files per record
         }
     }
 
-}else{ // single output stream
+}
+else{ // single output stream
 
     openTag('hml', $hmlAttrs);
 

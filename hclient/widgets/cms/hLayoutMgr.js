@@ -493,6 +493,11 @@ function hLayoutMgr(){
         
         if(_supp_options[layout.appid]){
             layout.options = $.extend(layout.options, _supp_options[layout.appid]);        
+            
+            if(layout.appid=='heurist_Navigation'){
+                //keep supp_options separately for Navigation - since they are required for page init 
+                layout.options['supp_options'] = _supp_options;
+            }
         }
         
         //var weblang = window.hWin.HEURIST4.util.getUrlParameter('weblang');

@@ -2501,7 +2501,6 @@ $.widget( "heurist.mainMenu", {
      
     //
     // create popup to guide user for creating a template file w/ rectypes
-    // NOTE: json template file currently unavailable
     //
     _generateHeuristTemplate: function(){
 

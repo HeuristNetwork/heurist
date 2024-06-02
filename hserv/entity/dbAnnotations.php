@@ -309,7 +309,8 @@ class DbAnnotations extends DbEntityBase
                                 
                                 if(@$anno['manifestUrl']){ //sourceRecordId
                                     //find image service uri by canvas in manifest
-                                    $iiif_manifest = loadRemoteURLContent($anno['manifestUrl']); //retrieve iiif manifest into manifest
+                                    $iiif_manifest_url = filter_var($anno['manifestUrl'], FILTER_SANITIZE_URL);
+                                    $iiif_manifest = loadRemoteURLContent($iiif_manifest_url); //retrieve iiif manifest into manifest
                                     $iiif_manifest = json_decode($iiif_manifest, true);
                                     if($iiif_manifest!==false && is_array($iiif_manifest)){
 
@@ -368,7 +369,7 @@ class DbAnnotations extends DbEntityBase
                                 // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
                                 $url = $url.'/'.$region.'/!200,200/0/default.jpg';
 
-                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.$anno['uuid'].'.jpg';
+                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.basename($anno['uuid'].'.jpg'); //basename for snyk
                                 //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
                                 //tempnam()
                                 $res = saveURLasFile($url, $tmp_file);

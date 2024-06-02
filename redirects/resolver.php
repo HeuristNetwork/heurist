@@ -72,7 +72,7 @@ $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["
 if($is_own_domain){
     //'dicobiosport'
     //detect databasename 
-    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);
+    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12); //remove .huma-num.fr
     if(count($requestUri)==0 || $requestUri[0]!=$database_name_from_domain){
         array_unshift($requestUri, $database_name_from_domain);
     }

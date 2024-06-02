@@ -942,7 +942,7 @@ console.log(treedata);
         
         //
         // adds arbitrary recordset
-        // it is used in Digital Harlem and Expert Nation when recordset is generated and prepared in custom way on client side
+        // it was used in Digital Harlem and Expert Nation when recordset is generated and prepared in custom way on client side
         // it converts given recordset to geojson and pass it to to mapping.addGeoJson
         //
         // mapdoc_id - target map document

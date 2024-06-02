@@ -113,7 +113,7 @@ the target database. Only one copy of each relationship marker is needed to
 trigger the download of the definition, duplicates can be deleted if there 
 is a need to limit file size.
 \n
-The XML file may (optionally) specify a Heurist database ID 
+The JSON file may (optionally) specify a Heurist database ID 
 with database=>id. If a database ID is specified, synchronisation 
 of definitions from that database will be performed before the data 
 are imported. Since imported files will normally use a template for 

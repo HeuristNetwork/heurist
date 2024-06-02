@@ -29,26 +29,10 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-
-if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
-    ?>
-    
-    <form action="verifyConceptCodes3.php" method="POST">
-        <div style="padding:20px 0px">
-            Only an administrator (server manager) can carry out this action.<br>
-            This action requires a special system administrator password (not a normal login password)
-        </div>
-    
-        <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
-        <input type="password" name="pwd" autocomplete="off" />
-
-        <input type="submit" value="OK" />
-    </form>
-
-    <?php
+if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
 }
-
 ?>            
 
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          
@@ -89,6 +73,7 @@ $mysqli = $system->get_mysqli();
         
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
+        $ver = intval($ver);
         if(!($ver>0)) continue;
 /* assign values for unregistered databases
         if($db_name=='hdb_johns_test_028') continue;
@@ -153,7 +138,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         $query = "SELECT rty_ID FROM `$db_name`.defRecTypes WHERE rty_OriginatingDBID = 0";
         $res = mysql__select_list2($mysqli, $query, 'intval');
         if(!empty($res)){
-
+            
             $query = "UPDATE `$db_name`.defRecTypes SET rty_OriginatingDBID = $ver WHERE rty_OriginatingDBID = 0";
             $mysqli->query($query);
         }

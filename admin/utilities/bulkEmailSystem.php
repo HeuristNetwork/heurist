@@ -465,7 +465,7 @@ class SystemEmailExt {
 
 	public function constructEmails() {
 
-		global $system;
+		global $system, $mailRelayPwd;
 
 		$email_rtn = 0;
 		$user_cnt = 0;
@@ -544,6 +544,32 @@ class SystemEmailExt {
                     $this->set_error('Unknown error');
                     $email_rtn = -3;
                 }
+            
+            }else if(isset($mailRelayPwd) && $mailRelayPwd!='' 
+                        && endsWith($email, '@gmail.com')){
+            
+                $data = array('pwd' => $mailRelayPwd ,
+                              'from_name' => $this->cur_user["ugr_FullName"],  
+                              'from' => $this->cur_user['ugr_eMail'], 
+                              'to' => $email,
+                              'title' => $title,
+                              'text' => $body,
+                              'html' => 1);
+                  
+                $data_str = http_build_query($data);
+
+                $ch =  curl_init("https://heuristref.net/HEURIST/mailRelay.php");
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $responce = curl_exec($ch);
+                curl_close($ch);            
+            
+                if($responce!=1){
+                    $this->set_error('Unknown error. Sending via heuristref relay');
+                    $email_rtn = -3;
+                }
+                
             }else{
 
                 try {

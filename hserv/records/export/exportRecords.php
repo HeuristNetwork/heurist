@@ -168,7 +168,7 @@ protected function _outputPrepare($data, $params){
     }   
     
     if(intval(@$params['extended'])>0){
-        $this->extended_mode = intval($params['extended']);
+        $this->extended_mode = intval($params['extended']); //prefs for geojson, json
     }else{
         $this->extended_mode = 0;
     }

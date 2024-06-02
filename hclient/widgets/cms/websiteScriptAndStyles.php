@@ -34,11 +34,12 @@
     onHapiInit  - loads defintions and calls initHeaderElements and onPageInit
 
     initHeaderElements - substitute elements in header with values from CMS_HOME record
-    initLinksAndImages - add listeners for internal links and images 
     onPageInit      - 
     initMainMenu    - Inits main menu widget
     loadPageContent - Loads content of specified record to #main-content and inits all widgets   
     afterPageLoad - applies custom css and js for loaded page, assign listeners for interpage binding
+        assignPageTitle
+        initLinksAndImages - add listeners for internal links and images 
         
     _openCMSeditor - opens/hides side panel with CMS editor (listener of #btnOpenCMSeditor)
     */  
@@ -990,7 +991,7 @@ function afterPageLoad(document, pageid, eventdata){
 
     // Log interaction
     window.hWin.HAPI4.SystemMgr.user_log('VisitPage', pageid);
-}
+} //afterPageLoad
 
 //
 // Adds listeners for all "a" elements with href="pageid" for inter page website links (converts links)

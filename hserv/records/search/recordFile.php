@@ -129,18 +129,27 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 function fileGetByFileName($system, $fullname){
     
         $path_parts = pathinfo($fullname);
-        $dirname = $path_parts['dirname'].'/';
+        if($path_parts['dirname']!='.'){
+            $dirname = $path_parts['dirname'].'/';
+            $relative_path = getRelativePath($system->getSysDir(), $dirname);
+        }else{
+            $relative_path = null;
+        }
         $filename = $path_parts['basename'];
         
         // get relative path to db root folder
-        $relative_path = getRelativePath($system->getSysDir(), $dirname);
         
         $mysqli = $system->get_mysqli();
       
-        $file_id = mysql__select_value($mysqli, 'select ulf_ID from recUploadedFiles '
-            .'where ulf_FileName = "'.$mysqli->real_escape_string($filename).'" and '
-            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.$mysqli->real_escape_string($relative_path).'")');
+        $query = 'select ulf_ID from recUploadedFiles '
+            .'where ulf_FileName = "'.$mysqli->real_escape_string($filename).'"';
+        if($relative_path!=null){
+            $query = $query 
+                .' and (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'
+                .$mysqli->real_escape_string($relative_path).'")';
+        }
 
+        $file_id = mysql__select_value($mysqli, $query);
         return $file_id;
         
 }

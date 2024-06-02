@@ -109,7 +109,8 @@
     function extractLangPrefix($val){
         
         //global $glb_lang_codes, $common_languages_for_translation;
-    
+        $lang = null;
+        
         if(is_string($val) && mb_strlen($val)>4){
             
             $val = trim($val);
@@ -130,8 +131,6 @@
                 $lang = 'ALL';
                 $pos = 2;
             }else{
-            
-                $lang = null;
                 
                 if($val[2]==':'){
                     $lang = substr($val,0,2);
@@ -150,7 +149,7 @@
                 
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
                 if($tag_to_remove == null){
-                    return array($lang, substr($val_orig, $pos));        
+                    $val = substr($val_orig, $pos);        
                 }else{
                     //remove first p or span
                     $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));    
@@ -161,7 +160,7 @@
             }
         } 
         
-        return array(null, $val);    
+        return array($lang, $val);    
     }    
     
     //

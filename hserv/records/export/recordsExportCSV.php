@@ -118,9 +118,11 @@ public static function output($data, $params){
         return;
     }
 
-    $include_term_label_and_code = true;
-    $include_term_ids = (@$params['prefs']['include_term_ids']==1);
-    $include_term_codes = (@$params['prefs']['include_term_codes']==1);
+    $save_to_file = @$params['save_to_file'] == 1;
+
+    $term_ids_only = (@$params['prefs']['term_ids_only']==1);
+    $include_term_ids = (@$params['prefs']['include_term_ids']==1) || $term_ids_only;
+    $include_term_codes = (@$params['prefs']['include_term_codes']==1) && !$term_ids_only;
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
     $include_file_url = (@$params['prefs']['include_file_url']==1);
@@ -132,6 +134,29 @@ public static function output($data, $params){
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
 
+    // Handle final filename + directory
+    $filename = 'Export_'.self::$system->dbname();
+    if(!empty(@$params['file']['filename'])){
+
+        $filename = basename($params['file']['filename']);
+        $filename = USanitize::sanitizeFileName($filename, false);
+        $directory = @$params['file']['directory'];
+
+        if(!empty($directory)){
+
+            if(!folderExists($directory, true)){
+
+                if(!$save_to_file) {
+                    print "Unable to write to requested directory";
+                    return;
+                }
+                return "Unable to write to requested directory";
+            }
+
+            $filename = rtrim($directory, '/') . "/$filename"; 
+        }
+    }
+
     if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);    
     
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
@@ -139,8 +164,8 @@ public static function output($data, $params){
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 
-
-    if($include_term_label_and_code){
+    $defTerms = null;
+    if(!$term_ids_only){
         $defTerms = dbs_GetTerms(self::$system);
         $defTerms = new DbsTerms(self::$system, $defTerms);
     }
@@ -274,13 +299,15 @@ public static function output($data, $params){
 
                 if($field_type=='enum' || $field_type=='relationtype'){
 
-                    array_push($headers[$rt], $field_name);  //labels are always included           
-                    $csvColIndex = count($headers[$rt]) - 1;
-                    $columnInfo[$rt][] = [
-                        'index' => $csvColIndex,
-                        'type' => 'value',
-                        'field_id' => $fieldFullID,
-                    ];
+                    if(!$term_ids_only){
+                        array_push($headers[$rt], $field_name);  //labels are always included by default
+                        $csvColIndex = count($headers[$rt]) - 1;
+                        $columnInfo[$rt][] = [
+                            'index' => $csvColIndex,
+                            'type' => 'value',
+                            'field_id' => $fieldFullID,
+                        ];
+                    }
 
                     if($include_term_ids){
                         array_push($headers[$rt], $field_name.' ID');
@@ -658,7 +685,7 @@ public static function output($data, $params){
                             }                        
                         }else if($dt_type=='enum' || $dt_type=='relationtype'){
 
-                            if(is_array($values) && count($values)>0){
+                            if(!empty($defTerms) && is_array($values) && count($values)>0){
                                 foreach($values as $val){
                                     $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
                                     // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
@@ -731,7 +758,7 @@ public static function output($data, $params){
 
 
             if(is_array($enum_label) && count($enum_label)>0){
-                $record_row[] = implode($csv_mvsep,$enum_label);    
+                if(!$term_ids_only) $record_row[] = implode($csv_mvsep,$enum_label);    
                 if($include_term_ids) $record_row[] = $value;
                 if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);    
             }else {
@@ -865,7 +892,7 @@ public static function output($data, $params){
 
     $error_log[] = print_r($rt_counts, true);
 
-    self::writeResults( $streams, 'Export_'.self::$system->dbname(), $headers, $error_log );
+    return self::writeResults( $streams, $filename, $headers, $error_log, $save_to_file );
 } //output
 
 //
@@ -1017,8 +1044,8 @@ public static function output_header($data, $params)
 
                 if($field_type=='enum' || $field_type=='relationtype'){
 
-                    array_push($headers[$rt], $field_name);  //labels are always included           
-                    
+                    array_push($headers[$rt], $field_name);  // labels are always included
+
                     if($include_term_ids){
                         array_push($headers[$rt], $field_name.' ID');            
                     }
@@ -1172,7 +1199,7 @@ public static function output_header($data, $params)
 //
 // save CSV streams into file and zip 
 //        
-private static function writeResults( $streams, $temp_name, $headers, $error_log ) {
+private static function writeResults( $streams, $temp_name, $headers, $error_log, $save_to_file=false ) {
   
     if(is_array($streams) && count($streams)<2){
         
@@ -1184,13 +1211,16 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         }else{
             $rty_ID = array_keys($streams);
             $rty_ID = intval($rty_ID[0]);
-        
-            $filename = $temp_name;
-            if($rty_ID>0){
-                $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
-                $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
+
+            if(!$save_to_file || empty($temp_name)){
+
+                $filename = $temp_name;
+                if($rty_ID>0){
+                    $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
+                    $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
+                }
             }
-            $filename = $filename.'.csv'; //'_'.date("YmdHis").
+            $filename = strpos($filename, '.') !== false ? $filename : $filename.'.csv'; //'_'.date("YmdHis").
         
             $fd = $streams[$rty_ID];
 
@@ -1202,6 +1232,8 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                 fclose($fd);
             }
         }
+
+        $has_error = false;
 
         if( !isset($out) || $out===false || strlen($out)==0){
             $out = "Stream for record type $rty_ID is empty";
@@ -1218,6 +1250,17 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         
         $content_len = strlen($out);
         if(!($content_len>0)) $content_len = 0;
+
+        if($save_to_file){
+            if($content_len > 0){ // save csv/error log to file
+                $content_len = fileSave($out, $temp_name);
+            }
+            if($has_error){
+                $content_len *= -1;
+            }
+            return $content_len;
+        }
+
         $content_len = $content_len+3;
         
         header('Content-Type: text/csv');

@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled'; 
-//exit; 
+print 'disabled'; 
+exit; 
 ini_set('max_execution_time', '0');
 
  
@@ -135,9 +135,11 @@ if(false){
 }
     __dropBkpDateIndex();    
     __findRDF();
-*/
     
 __getBelegContext();
+*/    
+
+__fixDirectPathImages();
 
 //
 // Report database versions
@@ -751,6 +753,11 @@ function getDtyLocalCode($db_id, $id){
     $query = 'select dty_ID from defDetailTypes where dty_OriginatingDBID='.$db_id.' and dty_IDInOriginatingDB='.$id;
     return mysql__select_value($mysqli, $query);
 }
+function getRtyLocalCode($db_id, $id){
+    global $mysqli;
+    $query = 'select rty_ID from defRecTypes where rty_OriginatingDBID='.$db_id.' and rty_IDInOriginatingDB='.$id;
+    return mysql__select_value($mysqli, $query);
+}
 
 //---------------
 function __addOtherSources(){
@@ -1014,11 +1021,10 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
         
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
-        if(file_exists($old_path) && $db_name!='digital_harlem'){
+        if(file_exists($old_path)){
             folderDelete($old_path, true);    
             $cnt++;
         }
-        
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-icons/';
         if(file_exists($old_path)){
@@ -1665,7 +1671,8 @@ function __findBelegSpan($context){
     $context = str_replace("\n </",'</',$context);
     
     //remove indent spaces after new line before \n...<span
-    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$context, 
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     
     //$context2 = $dom->documentElement->nodeValue;
     
@@ -1790,5 +1797,184 @@ $val = '<span class="Beleg">
 //print '</body></html>';     
 }
 
+//
+// detect ./HEURIST_FILESTORE/ references and absence of the obfuscation code, and replace with the correct relative path string
+//
+function __fixDirectPathImages(){
+
+    global $system, $mysqli, $databases; 
+    
+    //$databases = array('osmak_9c');
+    $databases = array('efeo_khmermanuscripts');
+    
+    $doc = new DOMDocument();
+
+    foreach ($databases as $idx=>$db_name){
+
+        mysql__usedatabase($mysqli, $db_name);
+        
+        print "<h4>$db_name</h4>";
+        
+        //find CMS Page content
+        $rty_ID_1 = intval(getRtyLocalCode(99, 51));
+        $rty_ID_2 = intval(getRtyLocalCode(99, 52));
+        $dty_ID = intval(getDtyLocalCode(2, 4));
+        
+        if($rty_ID_1>0 && $rty_ID_2>0 && $dty_ID>0){
+        
+        $query ='select dtl_ID, dtl_Value, rec_ID from recDetails, Records where dtl_RecID=rec_ID'
+                ." AND rec_RecTypeID in ($rty_ID_1, $rty_ID_2) and dtl_DetailTypeID=$dty_ID";
+       
+        $vals = mysql__select_assoc($mysqli, $query);
+        $path = './HEURIST_FILESTORE/'.$db_name.'/file_uploads/';
+        $cnt = 0; //entries
+        $cnt2 = 0; //fields
+        $success = true;
+        
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        foreach($vals as $dtl_ID=>$val){
+            
+            $rec_ID = $val['rec_ID'];
+            $val_orig = $val['dtl_Value'];
+            $val = $val['dtl_Value'];
+            
+            $prevent_endless_loop = 0;
+            $was_replaced = false;
+
+            while(stripos($val, $path)>0 && $prevent_endless_loop<100){
+                
+                $prevent_endless_loop++;
+                
+                $k = stripos($val, $path);
+                
+                $start = strripos(substr($val,0,$k), '<img');
+                $end = strpos($val,'/>',$k); 
+                if($end>0){
+                    $end = $end+2;   
+                }else{
+                    $end = strpos($val,'>',$k); 
+                    if($end>0){
+                         $end = $end+1;   
+                    }
+                }
+                
+                if($end>0){
+                    
+                    $cnt++;
+                
+                    //extract image tag
+                    $img = substr($val, $start, $end-$start);
+                
+                    print $rec_ID.' <xmp>'.$img.'</xmp>';                
+                    
+                    $img2 = str_replace('\"','"',$img);
+                    
+                    $doc->loadHTML( $img2 );
+                    $doc->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'.$img2, 
+                            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                    
+                    $imgele = $doc->getElementsByTagName('img')->item(0);
+                    if($imgele->hasAttribute('data-id')){
+                        $obf = $imgele->getAttribute('data-id');
+                    }else{
+                        //find obfuscation by file name
+                        $filename = $imgele->getAttribute('src');
+                        
+                        $file_id = fileGetByFileName($system, basename($filename));
+                        if($file_id>0){
+                            $file_info = fileGetFullInfo($system, $file_id);
+                            $obf = $file_info[0]['ulf_ObfuscatedFileID'];
+                            
+                            $imgele->setAttribute('data-id',$obf);
+                        }else{
+                            print 'file not found '.$filename.'<br>';
+                            $obf = null;
+                        }
+                    }
+                    
+                    if($obf!=null){
+                        $imgele->setAttribute('src', './?db='.$db_name.'&file='.$obf); //.'&fancybox=1'
+                        $img2 = $doc->saveHTML($imgele);
+                        $img2 = str_replace('"','\"',$img2);
+                        
+                        print '<xmp>'.$img2.'</xmp><br>';                
+                    }
+                    
+                    $was_replaced = true;
+                    $val_orig = str_replace($img,$img2,$val_orig);
+                    
+                    $val = substr($val, $end+1); //rest
+                    //$val = trim(substr(strstr($val, $path), strlen($path)));    
+                
+                }else{
+                    $success = false;
+                    print 'end of tag not found <xmp>'.substr($val, $start, 50).'</xmp>';
+                    break;
+                }
+            }            
+            
+            if($success && $was_replaced){
+                
+                if(!in_array($rec_ID,$affected_recs)){
+                    $affected_recs[] = $rec_ID;   
+                }
+                /*
+                $query = 'update recDetails set dtl_Value=? where dtl_ID='.$dtl_ID;
+                $res = mysql__exec_param_query($mysqli,$query,array('s', $val_orig));
+                if($res!==true){
+                    $success = false;
+                    print 'ERROR: '.$rec_ID.'  '.$res;
+                    break;
+                }
+                */
+                
+                //print '<xmp>'.$val_orig.'</xmp>';
+                $cnt2++;
+            }
+            
+/*                                
+            while(strpos($val, $path)>0){
+                
+                $k = strpos($val, $path);
+                
+                $m = strpos(strstr($val, $path),'\"');
+                
+                if($m>0){
+                    $cnt++;
+                    
+                    $surl = substr($val, $k, $m);
+                
+                    print $rec_ID.' '.$surl.'<br>';                
+                
+                    $val = substr($val, $k+$m+1); //rest
+                    //$val = trim(substr(strstr($val, $path), strlen($path)));    
+                
+                }else{
+                    print 'end of url not found '.substr($val, $k, 50);
+                    break;
+                }
+            }            
+*/            
+            
+        }
+        
+        if($success){
+            $mysqli->commit();
+        }else{
+            $mysqli->rollback();
+        }
+        
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        
+        }else{
+            print 'CMS rectypes not defined '.$rty_ID_1.' '.$rty_ID_2.' '.$dty_ID;
+        }
+    }
+
+    print '<br>'.implode(',',$affected_recs);
+    print '<br>Entries:'.$cnt.'  Fields:'.$cnt2.' [END]';
+    
+}
 
 ?>

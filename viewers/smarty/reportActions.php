@@ -381,7 +381,7 @@ class ReportActions {
             
         }else{
 
-            $origfilename = $params['name'];
+            $origfilename = basename($params['name']);
             $res = array("error"=>'Error occurred during upload - file does not exist');
 
             $filename = null;        
@@ -392,8 +392,8 @@ class ReportActions {
                 if($path!==false){ //does not exist
                     $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);    
                 }
-            }else{
-                $filename = USanitize::sanitizePath(@$params['tmp_name']);                
+            }else if (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
+                    $filename = USanitize::sanitizePath($params['tmp_name']);                
             }
             
             if(file_exists($filename)){

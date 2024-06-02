@@ -241,7 +241,6 @@ $rtDefines = array(
     
     // Spatial data
     'RT_PLACE' => array(3, 1009), 
-    'RT_EN_PLACE' => array(1125, 25), //place for Expert Nation database
     'RT_MAP_ANNOTATION' => array(2, 101),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),     
@@ -343,7 +342,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_JOURNAL_REFERENCE' => array(3, 1034),
     'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
     'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
-    'DT_ORDER' => array(1147, 94), //order of web content - origin Digital Harlem
     
     'DT_EXTERNAL_ID' => array(2, 581), //external non heurist record id
     // Spatial & mapping
