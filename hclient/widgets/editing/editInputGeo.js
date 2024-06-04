@@ -154,8 +154,14 @@ $.widget( "heurist.editInputGeo", $.heurist.editInputBase, {
 
                 //this._on( $link_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
-                this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
-                this._on( this._gicon, { click: __show_mapdigit_dialog } );
+                if(that._container.isReadonly()){
+                     this._input.removeClass('ui-widget-content')
+                        .css({'background-color':'transparent', border:0})
+                        .attr('readonly',true);
+                }else{
+                    this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
+                    this._on( this._gicon, { click: __show_mapdigit_dialog } );
+                }
         
     },
     

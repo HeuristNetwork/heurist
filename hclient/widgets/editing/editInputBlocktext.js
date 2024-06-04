@@ -46,7 +46,7 @@ $.widget( "heurist.editInputBlocktext", $.heurist.editInputBase, {
                     change:this.onChange,
                     keydown:function(e){
                         if (e.keyCode == 65 && e.ctrlKey) {
-                            e.target.select();
+                            e.target.select(); //Ctrl+A => select all 
                         }    
                     } 
             });

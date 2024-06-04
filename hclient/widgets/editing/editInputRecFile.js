@@ -390,7 +390,7 @@ $.widget( "heurist.editInputRecFile", $.heurist.editInputBase, {
 
                 __show_select_dialog = function(event){
                     
-                        if(that.is_disabled) return;
+                        if(that._container.is_disabled) return;
 
                         event.preventDefault();
                         
