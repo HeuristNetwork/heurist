@@ -1042,12 +1042,21 @@ window.hWin.HEURIST4.ui = {
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recordset = new hRecordSet(response.data);
-                        groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] : window.hWin.HEURIST4.allUsersCache = [];
-                        recordset.each2(function(id,rec){
-                            let record = {id: id, name: rec['ugr_FullName']};
-                            groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin.push(record) : window.hWin.HEURIST4.allUsersCache.push(record);
-                        });
-                        window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
+                        groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] 
+                                                         : window.hWin.HEURIST4.allUsersCache = [];
+                        if(recordset.count_total()>0){
+                            recordset.each2(function(id,rec){
+                                let record = {id: id, name: rec['ugr_FullName']};
+                                groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin.push(record) 
+                                                                 : window.hWin.HEURIST4.allUsersCache.push(record);
+                            });
+                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);    
+                        }else{
+                            //ARTEM - avoid endless loop
+                            console.log('nothing found');
+                            console.log(groups); 
+                        }
+                        
                         
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
