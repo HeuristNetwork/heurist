@@ -2915,22 +2915,7 @@ $.widget( "heurist.resultList", {
             // Show 'shopping cart' of collected records, or reset to complete record list
             this._on(this.span_info.find('a#searchCollected'), {
                 click: function(){
-                    if(!this._isCollectionUsed){
-                        
-                        this._isCollectionUsed = true;
-                        
-                        this._fullRecordset = this._currentRecordset;
-                        
-                        let cnt = this._collection.length;
-                        let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
-                        this._currentRecordset = new hRecordSet(rs);             
-                        //this._currentSubset = this._currentRecordset.getSubSetByIds(this._collection);
-                    }else{
-                        //this._currentSubset = null;
-                        this._isCollectionUsed = false;
-                        this._currentRecordset = this._fullRecordset;
-                    }
-                    this._renderPage(0);
+                    this.displayCollection(!this._isCollectionUsed);
                 }
             });
 
@@ -4627,6 +4612,26 @@ $.widget( "heurist.resultList", {
                 //window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
+    },
+
+    displayCollection: function(showCollection = true){
+
+        if(showCollection && this._collection.length > 0){
+
+            this._isCollectionUsed = true;
+
+            this._fullRecordset = this._currentRecordset;
+
+            let cnt = this._collection.length;
+            let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
+            this._currentRecordset = new hRecordSet(rs);
+
+        }else{
+            this._isCollectionUsed = false;
+            this._currentRecordset = this._fullRecordset;
+        }
+
+        this._renderPage(0);
     }
     
 });

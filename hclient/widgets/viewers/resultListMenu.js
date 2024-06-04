@@ -535,6 +535,10 @@ $.widget( "heurist.resultListMenu", {
 
         }else if(action == "menu-collected-show"){
 
+            this.options.resultList.resultList('displayCollection', true);
+
+        }else if(action == "menu-collected-tab"){
+
             window.hWin.HEURIST4.collection.collectionShow();
 
         }else if(action == "menu-collected-save"){
