@@ -1518,9 +1518,9 @@ $.widget( "heurist.importStructure", {
                     + '<div>'
                         + '<ul>'
                             + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<li href="#rty">Record types</li>` : '')
-                            + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<li href="#dty">Base fields</li>` : '')
-                            + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<li href="#trm">Terms</li>` : '')
-                            + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<li href="#translation">Translations</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<li href="#dty">Base fields</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<li href="#trm">Terms</li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<li href="#translation">Translations</li>` : '')
                         + '</ul>'
                     + '</div>'
                     + msg
