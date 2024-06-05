@@ -754,7 +754,15 @@
             } else {
                 $result = $mysqli->error;
                 if ($result == '') {
-                   $result = true;
+                    if($return_affected_rows){
+                        if($is_insert){
+                            $result = $mysqli->insert_id;
+                        }else{
+                            $result = $mysqli->affected_rows;
+                        }    
+                    }else{
+                        $result=true;
+                    }
                 }
             }
         }else{        
@@ -767,19 +775,21 @@
                     $result = $mysqli->error;
                 }else{
                     $result = true;
+                    
+                    if($return_affected_rows){
+                        if($is_insert){
+                            $result = $mysqli->insert_id;
+                        }else{
+                            $result = $mysqli->affected_rows;
+                        }    
+                    }else{
+                        $result=true;
+                    }
                 }
-                $stmt->close();
+                $stmt->close(); //affected_rows and insert_id will be reset after close
             }else{
                 $result = $mysqli->error;
             }
-        }
-        
-        if($result===true && $return_affected_rows){
-            if($is_insert){
-                $result = $mysqli->insert_id;
-            }else{
-                $result = $mysqli->affected_rows;
-            }    
         }
 
         return $result;
@@ -1238,9 +1248,12 @@
                                         $affected = mysql__exec_param_query($mysqli, $query, 
                                                         array('si',$dtl_NewValue_for_update, $dtl_ID),true);
                                         
-                                        if(!($affected>=0)){
-                                            //fails update recDetails
-                                            $system->addError(HEURIST_DB_ERROR, $err_prefix.'Error on recDetails update query:'.$query, $mysqli->error);
+                                        if(!($affected>0)){
+                                            //fails update recDetails  recreateRecDetailsDateIndex
+                                            $system->addError(HEURIST_DB_ERROR, 
+                                                $err_prefix.
+                                                'recreateRecDetailsDateIndex. Error on recDetails update query:'
+                                                .$query.' ('.$dtl_NewValue_for_update.', '.$dtl_ID.')  ', $mysqli->error);
                                             $isok = false;
                                             break;
                                         }
