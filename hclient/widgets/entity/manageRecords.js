@@ -6423,13 +6423,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
 
-            that._record_history = response.data;
+            that._record_history = response.data.history;
 
             let rst_fields = [];
-            let fld_name_css = "font-size: larger;"; //14px
-            let date_stamp_css = "font-size: smaller;"; //10px
-            let header_value_css = "display: inline-block; max-width: 65%; width: 65%;vertical-align: middle;";
-            let value_css = "display: inline-block; max-width: 75%; width: 75%;vertical-align: middle;";
+            let fld_name_css = "font-size: 14px;";
+            let smaller_text_css = "font-size: 10px;";
+            let row_css = "cursor: default; display: grid; grid-template-columns: 25px 45px 15px 15px 125px 20px 60%; align-items: center;";
+            let container_css = "margin: 10px 5px;";
 
             $Db.rst(rectype).each2(function(dty_ID, rst){
 
@@ -6462,6 +6462,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(window.hWin.HEURIST4.util.isempty(fld_history)) continue;
                 
                 for(let fld_idx in cur_values){
+
+                    if(fld_history[fld_idx].length == 0 || fld_history[fld_idx][0]['arc_Action'] != 'revert') continue;
                     
                     let history_head = '';
                     let history_log = '';
@@ -6481,15 +6483,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                         cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
                     }
 
-                    let cur_date_stamp = fld_history[fld_idx][0].arc_TimeOfChange;
-                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-M-d');
-
                     history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
-                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>: <em style="${date_stamp_css}">${cur_date_stamp}</em> `
-                                    + `<span class="truncate" style="${header_value_css}" data-idx="${field.id}-${fld_idx}-0" title="${cur_value}">${cur_value}</span>`
+                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>`
                                  + `</div>`;
 
-                    for(let idx = 1; idx < fld_history[fld_idx].length; idx++){
+                    for(let idx = 0; idx < fld_history[fld_idx].length; idx++){
     
                         let cur_history = fld_history[fld_idx][idx];
                         let prev_value = cur_history.arc_Value;
@@ -6502,26 +6500,39 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
     
                         let date_stamp = cur_history['arc_TimeOfChange'];
-                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-M-d');
+                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('H:m d  MMMM y');
 
-                        history_log += `<div id="${field.id}-${fld_idx}-${idx}">`
-                                        + `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}"> <span>${cur_history.arc_Action}</span> <em style="${date_stamp_css}">${date_stamp}</em> `
-                                        + `<span class="truncate" style="${value_css}" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
+                        history_log += `<div id="${field.id}-${fld_idx}-${idx}" style="${row_css}">`
+                                        + '<span>'
+                                            + (cur_history.arc_Action != 'revert' ? '' : 
+                                                `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}" style="cursor: pointer;"> `)
+                                        + '</span>'
+                                        + `<span>${cur_history.arc_Action}</span> `
+                                        + `<span style="${smaller_text_css}">${cur_history.arc_ChangedByUGrpID}</span> <span style="${smaller_text_css}">@</span>`
+                                        + `<span style="${smaller_text_css}">${date_stamp}</span> <span style="${smaller_text_css}"> >> </span>`
+                                        + `<span class="truncate" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
                                     + `</div>`;
                     }
 
                     if(!window.hWin.HEURIST4.util.isempty(history_log)){
-                        content += `<div data-dtyid="${field.id}" style="margin: 10px 5px;">${history_head}${history_log}</div>`;
+                        content += `<div data-dtyid="${field.id}" style="${container_css}">${history_head}${history_log}</div>`;
                     }
                 }
-
             }
+
+            // String of users
+            let users = `<div style="${container_css}">Users:&nbsp;&nbsp;`;
+            for(let id in response.data.users){
+                users += `${id} = ${response.data.users[id]}&nbsp;&nbsp;&nbsp;&nbsp;`;
+            }
+            users += '</div>';
 
             if(!window.hWin.HEURIST4.util.isempty(content)){
 
                 let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
 
                 content = `Check values to be restored, then click <button id="btn-history-revert">Revert changes</button> <button id="btn-history-cancel">Cancel</button>`
+                        + users
                         + content;
                 $acc_ele.children('div').html(content);
 
