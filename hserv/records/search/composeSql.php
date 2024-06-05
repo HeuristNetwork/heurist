@@ -2271,7 +2271,21 @@ class HPredicate {
                         
             
         }else{
-            $where = $where . "$rl.rl_RelationID is not null AND";
+
+            list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
+            
+            if($reltypes!=null && count($reltypes)>0){
+                if(count($reltypes)==1){
+                    $reltypes = '='.$reltypes[0];       
+                }else{
+                    $reltypes = 'IN ('.implode(',',$reltypes).')';
+                }
+            }else{
+                $reltypes = 'IS NOT NULL';
+            }
+            //@todo add $rty_constraints 
+            
+            $where = $where . "$rl.rl_RelationTypeID $reltypes AND";
         }
             
         if($this->relation_fields!=null){
@@ -2288,6 +2302,26 @@ class HPredicate {
             .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';       //reverse
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
+    }
+    
+    /**
+    * Finds relation type for current reltype field
+    * 
+    */
+    private function _getRelationFieldConstraints(){
+        
+        global $mysqli;
+        if($this->field_id>0){
+            list($vocab_id, $rty_constraints) = mysql__select_row($mysqli, 
+                    'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
+                    .'FROM defDetailTypes WHERE dty_ID='.$this->field_id);
+            $reltypes = getTermChildrenAll($mysqli, $vocab_id);
+            $rty_constraints = explode(',',$rty_constraints);
+
+            return array($reltypes, $rty_constraints);        
+        }else{
+            return array(null, null);        
+        }
     }
     
 
@@ -2330,14 +2364,17 @@ class HPredicate {
             $rd = "rd".$this->qlevel;
             
             if($this->field_id){//relmarker field id
-                //find constraints and all terms 
+                //find rt constraints and all terms 
+                /*
                 list($vocab_id, $rty_constraints) = mysql__select_row($mysqli, 
                         'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
                         .'FROM defDetailTypes WHERE dty_ID='.$this->field_id);
                 $reltypes = getTermChildrenAll($mysqli, $vocab_id);
                 $rty_constraints = explode(',',$rty_constraints);
+                */
+                list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
                 
-                if(count($rty_constraints)>0){
+                if($rty_constraints!=null && count($rty_constraints)>0){
                     if(count($rty_constraints)==1){
                         $rty_constraints = '='.$rty_constraints[0];       
                     }else{
@@ -2349,7 +2386,7 @@ class HPredicate {
                     $rty_constraints = ' where ';
                 }
                 
-                if(count($reltypes)>0){
+                if($reltypes!=null && count($reltypes)>0){
                     if(count($reltypes)==1){
                         $reltypes = '='.$reltypes[0];       
                     }else{
