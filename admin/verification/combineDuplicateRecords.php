@@ -936,7 +936,7 @@ function do_fix_dupe()
 
     // remove duplicate target pointers going to master record
     $refs_to_master = $mysqli->query("SELECT dtl_ID, dtl_DetailType, dtl_RecID FROM recDetails LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID WHERE dtl_Value = $master_rec_id AND dty_Type = 'resource'");
-    if($refs_to_master && $refs_to_master->num_rows() > 0){
+    if($refs_to_master && $refs_to_master->num_rows > 0){
 
         $found_refs = [];
         $refs_to_delete = [];
