@@ -211,7 +211,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                                 + "It is inappropriate to expose an administrator password in a hyperlink.<br>"
                                 + "We do not therefore support the use of an administrator account in a record addition hyperlink.";
 
-                        setTimeout(() => { window.hWin.HEURIST4.msg.showMsgErr(msg); }, 1500); // display message after delay
+//ARTEM REMARKED IT 
+//                        setTimeout(() => { window.hWin.HEURIST4.msg.showMsgErr(msg); }, 1500); // display message after delay
 
                         return;
                     }
