@@ -1027,7 +1027,7 @@ window.hWin.HEURIST4.ui = {
                 }
                 groups = groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin : window.hWin.HEURIST4.allUsersCache;    
             }else{
-            //It uses It uses window.hWin.HEURIST4.allUsersCache
+            //It uses window.hWin.HEURIST4.allUsersCache
     
                 //get all users
                 let request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
@@ -1051,13 +1051,10 @@ window.hWin.HEURIST4.ui = {
                                                                  : window.hWin.HEURIST4.allUsersCache.push(record);
                             });
                             window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);    
-                        }else{
-                            //ARTEM - avoid endless loop
-                            console.log('nothing found');
-                            console.log(groups); 
+                        }else if(typeof callback === "function"){
+                            callback(false);
                         }
-                        
-                        
+
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -1123,7 +1120,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(typeof callback === "function"){
-            callback();
+            callback(true);
         }
     },
     

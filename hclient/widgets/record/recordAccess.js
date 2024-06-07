@@ -201,7 +201,20 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
                 this.element.find('#div_def_user, #div_def_acc').show();
 
-                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], () => {
+                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], (result) => {
+
+                    if(!result){
+
+                        that.element.find('#div_def_acc, #div_def_user, #div_def_pwd').hide();
+
+                        let msg = "Sorry, there are no non-administrator accounts available in this database.<br><br>"
+                                + "It is inappropriate to expose an administrator password in a hyperlink.<br>"
+                                + "We do not therefore support the use of an administrator account in a record addition hyperlink.";
+
+                        setTimeout(() => { window.hWin.HEURIST4.msg.showMsgErr(msg); }, 1500); // display message after delay
+
+                        return;
+                    }
         
                     $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
         
