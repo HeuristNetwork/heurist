@@ -6463,8 +6463,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 for(let fld_idx in cur_values){
 
-                    if(fld_history[fld_idx].length == 0 || fld_history[fld_idx][0]['arc_Action'] != 'revert') continue;
-                    
+                    if(fld_history[fld_idx].length < 2) continue; // no history to display, skip
+
                     let history_head = '';
                     let history_log = '';
                     let cur_value = cur_values[fld_idx];
