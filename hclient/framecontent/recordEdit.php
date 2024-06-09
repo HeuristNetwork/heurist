@@ -176,6 +176,9 @@ else{
         $params['recID'] = intval($_REQUEST['recID']);
     }
 }   
+
+$params['guest_data'] = (@$_REQUEST['guest_data']==1);
+
 print '<script>var prepared_params = '.json_encode($params).';</script>';
 
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){

@@ -180,7 +180,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.load(url, function(){
                 window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
 
-                if(options.use_doc_title){
+                if(options && options.use_doc_title){
                     $dlg.dialog('option', 'title', $dlg.find('title').text());
                 }
             });

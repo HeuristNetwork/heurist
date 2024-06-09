@@ -131,7 +131,7 @@ class System {
 
                         $this->_executeScriptOncePerDay();
 
-                        $this->login_verify( false ); //load user info from session
+                        $this->login_verify( false ); //load user info from session on system init
                         if($this->get_user_id()>0){
                             //set current user for stored procedures (log purposes)
                             $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
@@ -1081,7 +1081,7 @@ class System {
     * 
     * it always reload user info from database
     */
-    public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false )
+    public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false, $is_guest_allowed=false )
     {
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
                $passwordForReservedChanges, $passwordForServerFunctions,
@@ -1137,7 +1137,7 @@ class System {
         }
             
         //current user reset - reload actual info from database
-        $this->login_verify( true );
+        $this->login_verify( true, $is_guest_allowed );
 
         if($this->mysqli){
 
@@ -1527,11 +1527,11 @@ class System {
     * ugr_Preferences are always loaded from database
     *
     */
-    private function login_verify( $user ){
+    private function login_verify( $user, $is_guest_allowed=false ){
         
         $reload_user_from_db = false; 
         
-        if( is_array($user) ){  //user info already found (see login) - need reset session
+        if( is_array($user) ){  //NOT USED user info already found (see login) - need reset session
             $reload_user_from_db = true;            
             $userID = $user['ugr_ID'];
         }else{
@@ -1568,13 +1568,17 @@ class System {
                 $reload_user_from_db = true;
             }
             
-
             if($reload_user_from_db){ //from database
                 
                 if(!$this->updateSessionForUser( $userID )){
                     return false; //not logged in
                 }
-
+                
+                if($is_guest_allowed && @$_SESSION[$this->dbname_full]['ugr_Permissions']['disabled']){
+                    $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
+                    $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
+                    $_SESSION[$this->dbname_full]['ugr_Permissions']['add'] = true;
+                }
             }//$reload_user_from_db from db
             
             $this->current_User = array('ugr_ID'=>intval($userID),
@@ -1614,10 +1618,13 @@ class System {
         $_SESSION[$this->dbname_full]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
         $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
         $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
+        $_SESSION[$this->dbname_full]['ugr_Enabled']  = $user['ugr_Enabled'];
         
         $is_disabled = $user['ugr_Enabled'] == 'n';
-        $_SESSION[$this->dbname_full]['ugr_Permissions'] = array('add' => strpos($user['ugr_Enabled'], 'add') === false && !$is_disabled, 
-                                                                'delete' => strpos($user['ugr_Enabled'], 'del') === false && !$is_disabled);
+        $_SESSION[$this->dbname_full]['ugr_Permissions'] = array(
+                    'disabled' => $is_disabled,
+                    'add' => strpos($user['ugr_Enabled'], 'add') === false && !$is_disabled, 
+                    'delete' => strpos($user['ugr_Enabled'], 'del') === false && !$is_disabled);
         
         return true;
     }
@@ -1689,7 +1696,7 @@ class System {
     *
     * @return  TRUE if login is success
     */
-    public function doLogin($username, $password, $session_type, $skip_pwd_check=false){
+    public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false){
         global $passwordForDatabaseAccess;
 
         if($username && ($password || $skip_pwd_check)){
@@ -1707,7 +1714,7 @@ class System {
 
             if($user){
 
-                if($user['ugr_Enabled'] == 'n'){
+                if(!$is_guest && $user['ugr_Enabled'] == 'n'){
 
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
@@ -1791,6 +1798,9 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_Name']);
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
         if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
+        if(@$_SESSION[$this->dbname_full]['ugr_Permissions']) unset($_SESSION[$this->dbname_full]['ugr_Permissions']);
+        //if(@$_SESSION[$this->dbname_full]['ugr_Enabled']) unset($_SESSION[$this->dbname_full]['ugr_Enabled']);
+        if(@$_SESSION[$this->dbname_full]['ugr_GuestUser']!=null) unset($_SESSION[$this->dbname_full]['ugr_GuestUser']);
         
         // clear
         // even if user is logged to different databases he has the only session per browser

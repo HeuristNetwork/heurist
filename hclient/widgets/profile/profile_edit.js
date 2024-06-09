@@ -31,14 +31,17 @@ $.widget( "heurist.profile_edit", {
         parentwin: null,
 
         needclear: true, //clear input everytime for registration
+        
+        is_guest: false, //guest user registration
 
         // callbacks
-        callback:null
+        callback:null,
+        afterRegistration: null
     },
 
     // the widget's constructor
     _create: function() {
-        
+
         if(!this.options.parentwin){
             this.options.parentwin = window.hWin;  
         }
@@ -141,6 +144,8 @@ $.widget( "heurist.profile_edit", {
         if(key==='ugr_ID'){
             this.options.ugr_ID = value;
             this._init();
+        }else if(key==='is_guest'){
+            this.options.is_guest = value;
         }else if(key==='parentwin'){
             this.options.parentwin = value;
             if(!this.options.parentwin){
@@ -367,8 +372,9 @@ $.widget( "heurist.profile_edit", {
 
             that.options.edit_data['ugr_Type'] = 'user';
             that.options.edit_data['ugr_IsModelUser'] = (that.options.edit_data['ugr_IsModelUser']=='y')?1:0;
+            that.options.edit_data['is_guest'] = that.options.is_guest?1:0;
 
-            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && $.isFunction(that.options.callback) ){
+            if( !window.hWin.HEURIST4.util.isnull(that.options.callback) && window.hWin.HEURIST4.util.isFunction(that.options.callback) ){
 
                 that.edit_form.dialog("close");
                 that.options.callback.call(that);
@@ -385,7 +391,11 @@ $.widget( "heurist.profile_edit", {
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");
                                 if(that.options.isregistration){
-                                    parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    if(that.options.is_guest && window.hWin.HEURIST4.util.isFunction(that.options.afterRegistration)){
+                                        that.options.afterRegistration.call(that, response);
+                                    }else{
+                                        parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    }
                                 }else{
                                     parentWin.HEURIST4.msg.showMsgDlg("User information saved");
                                 }
