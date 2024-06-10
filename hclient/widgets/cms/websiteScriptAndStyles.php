@@ -1447,7 +1447,7 @@ function _openCMSeditor(event){
     
     }else{
         isCMS_active = false;
-        editCMS_instance2.closeCMS();
+        if(editCMS_instance2) editCMS_instance2.closeCMS();
         btn.hide();
     }
 }

@@ -855,7 +855,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     //dig down to the first input text field (being the URL)
                     const urlTextField = dlg.find('.tox-control-wrap .tox-textfield');                    
                     
-                    urlTextField.val(context.RecAddLink);
+                    urlTextField.val(context.RecAddLink+'&guest_data=1');
 
                     },500);    
                 }
