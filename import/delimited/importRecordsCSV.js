@@ -125,6 +125,36 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
             }
         },
+        fail: function(e, data){
+
+            _showStep(1);
+            pbar_div.hide();
+            
+            if(!window.hWin.HEURIST4.util.isnull(uploadData) && uploadData.message){ // was aborted by user
+                window.hWin.HEURIST4.msg.showMsgFlash(uploadData.message, 3000);
+            }else if( data.message ) {
+                window.hWin.HEURIST4.msg.showMsgErr( data );
+            }else {
+                
+                var msg = 'An unknown error occurred while attempting to upload your file.'
+                
+                if(data._response && data._response.jqXHR) {
+                    if(data._response.jqXHR.responseJSON){
+                        msg = data._response.jqXHR.responseJSON;    
+                    }else if(data._response.jqXHR.responseText){
+                        msg = data._response.jqXHR.responseText;    
+                        let k = msg.indexOf('<p class="heurist-message">');
+                        if(k>0){
+                            msg = msg.substring(k);   
+                        }
+                    }
+                }
+                
+                window.hWin.HEURIST4.msg.showMsgErr(msg);
+            }
+
+            uploadData = null;
+        },
         done: function (e, response) {
 
                 //!!! $('#upload_form_div').show();                

@@ -598,8 +598,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         ele.button().on('click',
                             function(){
                                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
-                                    title: 'Select record type',
-                                    height: 520,
+                                    title: 'Select type and other parameters for new record',
+                                    height: 520, width: 540,
                                     get_params_only: true,
                                     onClose: function(context){
                                         if(context && context.RecTypeID>0){

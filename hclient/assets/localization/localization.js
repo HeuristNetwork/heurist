@@ -323,6 +323,8 @@ regional['ENG'] = {
         'menu-collected-save-hint': 'Save current set of records in collection',
         'menu-collected-show': 'Show as search',
         'menu-collected-show-hint': 'Show current set of records in collection',
+        'menu-collected-tab': 'Show in new tab',
+        'menu-collected-tab-hint': 'Show current set of records in collection in a new tab',
             collection_limit: 'The number of selected records is above the limit in ',
             collection_select_hint:  'Please select at least one record to add to collection basket',
             collection_select_hint2: 'Please select at least one record to remove from collection basket',

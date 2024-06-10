@@ -1028,7 +1028,7 @@ window.hWin.HEURIST4.ui = {
                 }
                 groups = groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin : window.hWin.HEURIST4.allUsersCache;    
             }else{
-            //It uses It uses window.hWin.HEURIST4.allUsersCache
+            //It uses window.hWin.HEURIST4.allUsersCache
     
                 //get all users
                 let request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
@@ -1037,19 +1037,25 @@ window.hWin.HEURIST4.ui = {
                     request['members_only'] = '1';
                     request['not:ugl_GroupID'] = '1';
                 }
-            
+                //Note: it searches for all users - including disabled
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recordset = new hRecordSet(response.data);
-                        groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] : window.hWin.HEURIST4.allUsersCache = [];
-                        recordset.each2(function(id,rec){
-                            let record = {id: id, name: rec['ugr_FullName']};
-                            groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin.push(record) : window.hWin.HEURIST4.allUsersCache.push(record);
-                        });
-                        window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);
-                        
+                        groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] 
+                                                         : window.hWin.HEURIST4.allUsersCache = [];
+                        if(recordset.count_total()>0){
+                            recordset.each2(function(id,rec){
+                                let record = {id: id, name: rec['ugr_FullName']};
+                                groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin.push(record) 
+                                                                 : window.hWin.HEURIST4.allUsersCache.push(record);
+                            });
+                            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, groups, topOptions, callback);    
+                        }else if(typeof callback === "function"){
+                            callback(false);
+                        }
+
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -1115,7 +1121,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(typeof callback === "function"){
-            callback();
+            callback(true);
         }
     },
     

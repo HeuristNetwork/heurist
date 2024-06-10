@@ -429,7 +429,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $rec_keys = array_merge(array_slice($rec_keys,$master_index),$temp);
                                 $master_rec_type = $records[$master_rec_id]['rec_RecTypeID'];
                             }
-                            
+
+                            $master_details = [];
+                            $missing_in_master = [];
+
                             foreach($rec_keys as $index) {
                                 
                                 $record = $records[$index];
@@ -486,8 +489,12 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         $repeatCount = intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
                                     else
                                         $repeatCount = 0;
-                                        
-                                    $detail = detail_get_html_input_str( $detail, $repeatCount, $is_master );
+
+                                    $is_missing_master = $repeatCount == 1 && !array_key_exists($rd_type, $master_details);
+                                    if($is_missing_master && !in_array($rd_type, $missing_in_master)){
+                                        $missing_in_master[] = $rd_type;
+                                    }
+                                    $detail = detail_get_html_input_str( $detail, $repeatCount, $is_master, $is_missing_master );
                                     if (is_array($detail)) {
                                         if ($repeatCount != 1){//repeatable
                                             foreach ($detail as $val) {
@@ -556,6 +563,12 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '<tr><td colspan=3><br><hr></td></tr>';
                                 print "</tr>\n\n";
                             }
+
+                            if(!empty($missing_in_master)){
+                                print '<script>'
+                                        . '$(".not_in_master").on("change", (e) => {let name = $(e.target).attr("name"); $(`input[type="checkbox"][name="${name}"]`).prop("checked", false); $(e.target).prop("checked", true);})'
+                                    . '</script>';
+                            }
                         }
                         ?>
                     </tbody></table>
@@ -578,7 +591,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
 <?php
 
-function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
+function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_checkbox = false ) {
     global $mysqli;
     
     $is_type_repeatable = $repeatCount != 1;
@@ -609,13 +622,14 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
 
         $def_checked = $is_master || $is_type_repeatable ? "checked=checked" : "";
 
-        $input = '<input type="'.($is_type_repeatable? "checkbox":"radio").
-        '" name="'.($is_type_repeatable? ($is_master?"keep":"add").$detail_type.'[]':"update".$detail_type).
-        '" title="'.($is_type_repeatable?($is_master?"check to Keep value in Master record - uncheck to Remove value from Master record":"Check to Add value to Master record"):
+        $input = '<input type="'.($is_type_repeatable || $use_checkbox ? "checkbox":"radio").
+        '" name="'.($is_type_repeatable || $use_checkbox ? ($is_master?"keep":"add").$detail_type.'[]':"update".$detail_type).
+        '" title="'.($is_type_repeatable || $use_checkbox ? ($is_master?"check to Keep value in Master record - uncheck to Remove value from Master record":"Check to Add value to Master record"):
             ($is_master?  "Click to Keep value in Master record": "Click to Replace value in Master record")).  
         '" '.($def_checked).
         ' value="'.($is_type_repeatable?  $detail_id :($is_master? "master":$detail_id)).
         '" id="'.($is_type_repeatable? ($is_master?"keep_detail_id":"add_detail_id"):"update").$detail_id.
+        ($use_checkbox ? '" class="not_in_master"' : '').
         '">'.htmlspecialchars( detail_str($detail_type, $detail_val) ).'';
         
         $rv[]= $input;
@@ -920,6 +934,32 @@ function do_fix_dupe()
     // move dup record pointers to master record
     $mysqli->query('update recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID set dtl_Value='.$master_rec_id.
         ' where dtl_Value in '.$dup_rec_list.' and dty_Type="resource"');
+
+    // remove duplicate target pointers going to master record
+    $refs_to_master = $mysqli->query("SELECT dtl_ID, dtl_DetailType, dtl_RecID FROM recDetails LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID WHERE dtl_Value = $master_rec_id AND dty_Type = 'resource'");
+    if($refs_to_master && $refs_to_master->num_rows > 0){
+
+        $found_refs = [];
+        $refs_to_delete = [];
+        while($row = $refs_to_master->fetch_row()){
+
+            if(!array_key_exists($row[1], $found_refs)){ // check if field has been handled
+                $found_refs[$row[1]] = [ $row[2] ];
+                continue;
+            }
+
+            if(!in_array($row[2], $found_refs[$row[1]])){ // check if source record has been handled
+                $found_refs[$row[1]][] = $row[2];
+                continue;
+            }
+
+            $refs_to_delete[] = $row[0]; // duplicate value
+        }
+
+        if(!empty($refs_to_delete)){
+            $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". join(',', prepareIds($refs_to_delete)) .")");
+        }
+    }
 
     //delete dups
     $mysqli->query('delete from Records where rec_ID in '.$dup_rec_list);

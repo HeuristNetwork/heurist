@@ -68,7 +68,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record');    
         this.btn_select_rt = this.element.find( "#btn_select_rt");
         
-        var is_browse = (that.options.pointer_mode == 'browseonly');
+        var is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
         var is_addonly = (that.options.pointer_mode == 'addonly');
         
         if(that.options.pointer_mode != 'addorbrowse'){

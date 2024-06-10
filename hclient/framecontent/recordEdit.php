@@ -176,6 +176,9 @@ else{
         $params['recID'] = intval($_REQUEST['recID']);
     }
 }   
+
+$params['guest_data'] = (@$_REQUEST['guest_data']==1);
+
 print '<script>var prepared_params = '.json_encode($params).';</script>';
 
 ?>

@@ -680,7 +680,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             sys_info: function (callback) {
 
-                _callserver('usr_info', { a: 'sysinfo' },
+                var request = { a: 'sysinfo' };                
+
+                if(typeof prepared_params !== 'undefined' && prepared_params['guest_data']){
+                    request['is_guest'] = 1;  //guest user allowed (self registered - not enabled)
+                }
+
+                _callserver('usr_info', request,
                     function (response) {
                         var success = (response.status == window.hWin.ResponseStatus.OK);
                         if (success) {
@@ -2271,7 +2277,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             var isChanged = (that.currentUser != user);
 
-            if (user) {
+            if (user && user['ugr_Permissions'] && !user['ugr_Permissions']['disabled']) {
                 that.currentUser = user;
             } else {
                 that.currentUser = _guestUser;
@@ -2322,13 +2328,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // However, before start any action or open widget popup need to call 
         // SystemMgr.verify_credentials
 
+        is_guest_user: function(){
+             return window.hWin.HAPI4.currentUser && 
+                    window.hWin.HAPI4.currentUser['ugr_Permissions'] && 
+                    window.hWin.HAPI4.currentUser['ugr_Permissions']['guest_user'];
+        },
+        
         /**
         * Returns true is current user is database admin (admin in group Database Managers)
         */
         is_admin: function () {
             return window.hWin.HAPI4.has_access(window.hWin.HAPI4.sysinfo.db_managers_groupid);
         },
-
+        
         /**
         * Returns true if currentUser is member of given group ID or itself
         * @param ug

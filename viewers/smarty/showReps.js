@@ -1349,7 +1349,9 @@ function ShowReps( is_snippet_editor ) {
         var _text = '';
         var textedit = document.getElementById("edTemplateBody");
 
-        //pattern = document.getElementById("selInsertPattern").value;
+        if(!pattern){
+            pattern = parseInt(document.getElementById("selInsertPattern").value);
+        }
 
         // Update these patterns in synch with pulldown in showReps.html
         switch(pattern) {
@@ -1436,6 +1438,24 @@ function ShowReps( is_snippet_editor ) {
                 '\n\n';
                 break;
 
+            case 98: // add record link
+                
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+                    title: 'Select type and other parameters for new record',
+                    height: 520, width: 540,
+                    get_params_only: true,
+                    onClose: function(context){
+                        if(context && !window.hWin.HEURIST4.util.isempty(context.RecAddLink)){
+                            _text = '\n<a href="'+context.RecAddLink+'&guest_data=1" target="_blank">Add Record</a>\n';
+                            insertAtCursor(_text); // insert text into editor
+                        }
+                    },
+                    default_palette_class: 'ui-heurist-publish'                                        
+                    }
+                );    
+                
+                return;
+                
             default:
                 _text = 'It appears that this choice has not been implemented. Please ask the Heurist team to add the required pattern';
         }

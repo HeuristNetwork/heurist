@@ -752,7 +752,7 @@
     * 
     * @param mixed $system
     * @param mixed $record
-    * @param mixed $allow_registration
+    * @param mixed $allow_registration - force registration despite of sys_AllowRegistration
     * @return {false|null|true}
     */
     function user_Update($system, $record, $allow_registration=false){
@@ -762,6 +762,7 @@
             $recID = intval(@$record['ugr_ID']);
             $rectype = $record['ugr_Type'];
             $is_registration = ($rectype=='user' && $recID<1);
+            $is_guest_registration = ($is_registration && @$record['is_guest']==1);
 
             if($is_registration && !$allow_registration && $system->get_system('sys_AllowRegistration')==0){
 
@@ -814,10 +815,11 @@
                         unset($record['ugr_Password']);
                     }
                     
+                    if($is_guest_registration){
+                        $record['ugr_Enabled'] = "n";
+                    }else
                     if($allow_registration){
-                        
                         $record['ugr_Enabled'] = "y";
-                        
                     }else{
                     
                         if($system->get_user_id()<1){ //not logged in - always disabled

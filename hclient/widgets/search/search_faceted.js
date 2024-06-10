@@ -1995,8 +1995,7 @@ $.widget( "heurist.search_faceted", {
                             vocabulary_id = null;
                             field['groupby'] = null;
                     }
-                    
-                }                
+                } 
                 
                 if(field['type']=='freetext'){
                     if(!field['groupby']){

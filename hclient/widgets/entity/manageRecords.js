@@ -1010,7 +1010,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _initEditForm_step1: function(recID){
 
         this.element.attr('data-recid', recID);
-
         if(this.options.edit_mode=='popup'){
 
             var query = null, popup_options={};
@@ -1306,6 +1305,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     this.editFormSummary.empty();
 
                     var headers = ['Admin','Private','Tags','Linked records','Scratchpad','Discussion','History']; //,'Dates','Text',
+                    
+                    if(window.hWin.HAPI4.is_guest_user()){
+                         headers = ['Admin','Linked records'];  
+                    }
+                    
                     for(var idx in headers){
                         var acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
                         
@@ -1432,6 +1436,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         panel.empty();
         
+        var is_guest_user = window.hWin.HAPI4.is_guest_user();
+        if(idx==1 && is_guest_user){
+            idx = 3;
+        }
+        
         //Admin 0, Private 1, Tags 2, Linked 3, Scratchpad 4, Discussion 5
         
         switch(idx){
@@ -1459,7 +1468,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 + $Db.rty(recRecTypeID, 'rty_Name')+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
-+'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"></div></div>'
++'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable btns-noguest-only"></div></div>'
 
 /* this section is moved on top of editForm 2017-12-21
 +'<div style="display:inline-block;float:right;">'   
@@ -1471,7 +1480,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 +'<div style="padding-bottom:0.5em;width: 100%;">'
 +'<div><label class="small-header">Owner:</label><span id="recOwner">'
-    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"></div>'        
+    +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable btns-noguest-only"></div>'        
 +'</div>'
 +'<div><label class="small-header">Access:</label><span id="recAccess">'
     + that._getField('rec_NonOwnerVisibility')
@@ -1683,7 +1692,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                currentAccess: __getEditFieldValue('rec_NonOwnerVisibility'),
                currentAccessGroups: __getEditFieldValue('rec_NonOwnerVisibilityGroups'),
                scope_types: 'none', onClose: __assignOwnerAccess,
-               height:400,
+               height:400, width: 540,
                default_palette_class: 'ui-heurist-populate'
         });
               
@@ -1938,6 +1947,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(idx>1 && idx!=6 && sContent) $(sContent).appendTo(panel);
         if(idx>0 && idx<7){
             panel.css({'margin-left':'27px'});
+        }
+        
+        if(is_guest_user){
+            this.element.find('.btns-noguest-only').hide();
         }
         
     },
@@ -2542,7 +2555,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
                 } 
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that.options.new_record_params.OwnerUGrpID))) {
-                    that.options.new_record_params.OwnerUGrpID = usr_id; //default to current user   
+                    if(window.hWin.HAPI4.is_guest_user()){
+                        //guest user can add new record to arbitrary group '+that.options.new_record_params.OwnerUGrpID
+                    } else{
+                        //specified ownership is not applicabel for current user - set to current user
+                        that.options.new_record_params.OwnerUGrpID = usr_id;    
+                    }
                 }
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
@@ -3308,6 +3326,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //var no_access = that._getField('rec_OwnerUGrpID')!=0 &&  //0 is everyone
             var no_access = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID')));
                             //!window.hWin.HAPI4.is_admin()
+            if(window.hWin.HAPI4.is_guest_user()){
+                no_access = !that._isInsert && 
+                            that._getField('rec_OwnerUGrpID') != window.hWin.HAPI4.user_id();
+            }
+            //no_access = no_access || window.hWin.HAPI4.is_guest_user();
+                        
+                            
             var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             
             //2. Popup for resource field
@@ -3316,7 +3341,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'
-                            +'<a href="#" style="color:white">edit</a><span><br>click to dismiss</span></div></div>')
+                            +'<a href="#" class="btns-noguest-only" style="color:white">edit</a><span><br>click to dismiss</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
@@ -3340,8 +3365,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 $('<div>').addClass('coverall-div-bare')
                     .css({top:0,height:'100%',left:35,right:0,'zIndex':9999999999})
                     .appendTo(eles);
-                    
-                       
+                
                 if(no_access){
                     ele.find('a').hide();
                     ele.find('.edit-button').button().on('click',function(){
@@ -3363,7 +3387,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         //remove screen
                         
                     });
-                    ele.find('span').hide(); //how no enough rights
+                    ele.find('span').hide(); //have no enough rights
                 }
                 this.options.edit_obstacle = false;
             } 
@@ -4227,7 +4251,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                     +'<span class="gap" style="display:inline-block;width:15px"></span>'
-                    +'<span class="div_workflow_stages"><label>Workflow stage popup: </label>'
+                    +'<span class="div_workflow_stages btns-noguest-only"><label>Workflow stage popup: </label>'
                         +'<select class="sel_workflow_stages">'
                             +'<option value="new">New records only</option>'
                             +'<option value="on">New and existing records</option>'
@@ -4235,7 +4259,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         +'</select>'
                         +'<button id="show_workflow_stages">show</button>'
                     +'</span>'
-                    +'<span id="rec_visibility" style="padding-left: 5px;">'
+                    +'<span id="rec_visibility" style="padding-left: 5px;" class="btns-noguest-only">'
                         +'<span id="icon_rec_visibility" class="ui-icon"></span>'
                         +'<span id="toggle_rec_visibility"></span>'
                     +'</span>'
@@ -4667,6 +4691,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         }
 
+                
+                
+        if(window.hWin.HAPI4.is_guest_user()){
+            this.element.find('.btns-noguest-only').hide();
+        }
+        
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
         //show-hide help text below fields - it overrides comptency level
@@ -6423,13 +6453,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
 
-            that._record_history = response.data;
+            that._record_history = response.data.history;
 
             let rst_fields = [];
-            let fld_name_css = "font-size: larger;"; //14px
-            let date_stamp_css = "font-size: smaller;"; //10px
-            let header_value_css = "display: inline-block; max-width: 65%; width: 65%;vertical-align: middle;";
-            let value_css = "display: inline-block; max-width: 75%; width: 75%;vertical-align: middle;";
+            let fld_name_css = "font-size: 14px;";
+            let smaller_text_css = "font-size: 10px;";
+            let row_css = "cursor: default; display: grid; grid-template-columns: 25px 45px 15px 15px 125px 20px 60%; align-items: center;";
+            let container_css = "margin: 10px 5px;";
 
             $Db.rst(rectype).each2(function(dty_ID, rst){
 
@@ -6462,7 +6492,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(window.hWin.HEURIST4.util.isempty(fld_history)) continue;
                 
                 for(let fld_idx in cur_values){
-                    
+
+                    if(fld_history[fld_idx].length < 2) continue; // no history to display, skip
+
                     let history_head = '';
                     let history_log = '';
                     let cur_value = cur_values[fld_idx];
@@ -6481,15 +6513,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                         cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
                     }
 
-                    let cur_date_stamp = fld_history[fld_idx][0].arc_TimeOfChange;
-                    cur_date_stamp = window.hWin.HEURIST4.util.isempty(cur_date_stamp) ? '...' : TDate.parse(cur_date_stamp).toString('y-M-d');
-
                     history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
-                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>: <em style="${date_stamp_css}">${cur_date_stamp}</em> `
-                                    + `<span class="truncate" style="${header_value_css}" data-idx="${field.id}-${fld_idx}-0" title="${cur_value}">${cur_value}</span>`
+                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>`
                                  + `</div>`;
 
-                    for(let idx = 1; idx < fld_history[fld_idx].length; idx++){
+                    for(let idx = 0; idx < fld_history[fld_idx].length; idx++){
     
                         let cur_history = fld_history[fld_idx][idx];
                         let prev_value = cur_history.arc_Value;
@@ -6502,26 +6530,39 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         }
     
                         let date_stamp = cur_history['arc_TimeOfChange'];
-                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('y-M-d');
+                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('H:m d  MMMM y');
 
-                        history_log += `<div id="${field.id}-${fld_idx}-${idx}">`
-                                        + `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}"> <span>${cur_history.arc_Action}</span> <em style="${date_stamp_css}">${date_stamp}</em> `
-                                        + `<span class="truncate" style="${value_css}" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
+                        history_log += `<div id="${field.id}-${fld_idx}-${idx}" style="${row_css}">`
+                                        + '<span>'
+                                            + (cur_history.arc_Action != 'revert' ? '' : 
+                                                `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}" style="cursor: pointer;"> `)
+                                        + '</span>'
+                                        + `<span>${cur_history.arc_Action}</span> `
+                                        + `<span style="${smaller_text_css}">${cur_history.arc_ChangedByUGrpID}</span> <span style="${smaller_text_css}">@</span>`
+                                        + `<span style="${smaller_text_css}">${date_stamp}</span> <span style="${smaller_text_css}"> >> </span>`
+                                        + `<span class="truncate" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
                                     + `</div>`;
                     }
 
                     if(!window.hWin.HEURIST4.util.isempty(history_log)){
-                        content += `<div data-dtyid="${field.id}" style="margin: 10px 5px;">${history_head}${history_log}</div>`;
+                        content += `<div data-dtyid="${field.id}" style="${container_css}">${history_head}${history_log}</div>`;
                     }
                 }
-
             }
+
+            // String of users
+            let users = `<div style="${container_css}">Users:&nbsp;&nbsp;`;
+            for(let id in response.data.users){
+                users += `${id} = ${response.data.users[id]}&nbsp;&nbsp;&nbsp;&nbsp;`;
+            }
+            users += '</div>';
 
             if(!window.hWin.HEURIST4.util.isempty(content)){
 
                 let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
 
                 content = `Check values to be restored, then click <button id="btn-history-revert">Revert changes</button> <button id="btn-history-cancel">Cancel</button>`
+                        + users
                         + content;
                 $acc_ele.children('div').html(content);
 

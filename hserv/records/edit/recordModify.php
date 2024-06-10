@@ -107,11 +107,11 @@ function recordAddDefaultValues($system, $record=null){
         $rectype = @$record['RecTypeID'];
         $access = @$record['NonOwnerVisibility'];
         $access_grps = @$record['NonOwnerVisibilityGroups'];
-        $ownerid = empty(@$record['OwnerUGrpID']) ? -1 : $record['OwnerUGrpID'];
+        $ownerid = (empty(@$record['OwnerUGrpID']) && @$record['OwnerUGrpID']!=0) ? -1 : $record['OwnerUGrpID'];
 
         if($ownerid == 'current_user'){
             $ownerid = $system->get_user_id();
-        }else if(!empty($ownerid)){
+        }else {  //if(!empty($ownerid))
             $ownerid = prepareIds($ownerid, true);
         }
         
@@ -282,17 +282,28 @@ function recordAdd($system, $record, $return_id_only=false){
     if ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)
     {  
         $access= 'public';
-        $owner_grps = array(1); 
+        $owner_grps = array(1); //database manager group
     }
     
     //@todo correct for multi owners !!!!!!
     //$record['swf'] - ownership is set from swf rules
-    if (!(@$record['swf'] || $system->is_admin() || $system->is_member($owner_grps))){ 
+    if (!(@$record['swf'] || $system->is_admin() || $system->is_member($owner_grps) || $system->is_guest_user() )){ 
         $system->addError(HEURIST_REQUEST_DENIED,
             'Current user does not have sufficient authority to add record with default ownership. '
             .'User must be member of the group that will own this record', 'Default ownership: '.implode(',', $owner_grps));
         return false;
     }  
+    //check that $owner_grps exists
+    $usr_exists = mysql__select_value($mysqli, 'SELECT ugr_ID FROM sysUGrps WHERE ugr_ID='.intval($owner_grps[0]));
+    if($usr_exists==null){
+        $system->addError(HEURIST_REQUEST_DENIED,
+            'Proposed/default record ownership is incorrect. '
+            .'Most probably the specified group or user has been deleted. '
+            .'Change it in "new record" or "workflow" preferences.', 'Proposed ownership: '
+                .implode(',', $owner_grps));
+        return false;
+    }
+    
 
     if(isWrongAccessRights($system, $access)){
         return $system->getError();
@@ -1760,7 +1771,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 
     //1. Can current user edit this record?
     // record is not "everyone" and current user is_admin or itself or member of group
-    if (!$isEveryOne  && !($system->is_admin() || $system->is_member($current_owner_groups))){ 
+    if (!$isEveryOne  && !($system->is_admin() || $system->is_member($current_owner_groups) || $system->is_guest_user() )){ 
 
         $system->addError(HEURIST_REQUEST_DENIED,
             'Current user does not have sufficient authority to change the record ID:'.$recID
@@ -3435,31 +3446,41 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     return array('new_value'=>$new_value, 'curr_value'=>$current_value, 'emails'=>$emails);
 }
 
+//
+// private
+// whether current user can add or delete record
+//
 function checkUserPermissions($system, $action){
 
     $mysqli = $system->get_mysqli();
 
-    $user_query = "SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID = " . $system->get_user_id();
-    $res = $mysqli->query($user_query);
-    if(!$res){
+    $user_query = 'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_ID=' . $system->get_user_id();
+    
+    $res = mysql__select_value($mysqli, $user_query);
+    
+    if($res==null){
         $system->addError(HEURIST_DB_ERROR, 
                 'Cannot check available user permissions.<br>Please contact the Heurist team, if this persists.',
                 $mysqli->error);
         return false;
     }
 
-    $results = $res->fetch_row();
-
-    $permissions = $results[0];
-    $block_msg = 'Your account does not have permission to ' . 
-            ($action == 'add' ? 'create' : '') .
-            ($action == 'delete' ? 'delete' : '') .
-            ($action == 'add delete' ? 'create or delete' : '') .
-            ' records,<br>please contact the database owner for more details.';
-
+    $permissions = $res;
+    $action_msg = ($action == 'add' ? 'create' : '') .
+                  ($action == 'delete' ? 'delete' : '') .
+                  ($action == 'add delete' ? 'create or delete' : '');
+    
+    $block_msg = 'Your account does not have permission to ' . $action_msg
+                .' records,<br>please contact the database owner for more details.';
+            
     if($permissions == 'n'){
-        $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can create records.');
-        return false;
+
+        if($action == 'add' && $system->is_guest_user()){
+            //addition allowed for not enabled/guest user
+        }else{
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
+            return false;
+        }
     }else if(($action == 'add' && strpos($permissions, 'add') !== false) || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
         $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
         return false;

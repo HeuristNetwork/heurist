@@ -372,7 +372,7 @@
         
         if ($action=="sysinfo") { //it call once on hapi.init on client side - so it always need to reload sysinfo
 
-            $res = $system->getCurrentUserAndSysInfo();
+            $res = $system->getCurrentUserAndSysInfo(false, (@$_REQUEST['is_guest']==1));
             
         }else if ($action == "save_prefs"){
            
@@ -576,6 +576,7 @@
                 $username = @$_REQUEST['username'];
                 $password = @$_REQUEST['password'];
                 $session_type = @$_REQUEST['session_type'];
+                $is_guest = (@$_REQUEST['is_guest']==1);
                 $skip_pwd_check = false;
                 $res = false;
                 
@@ -596,9 +597,9 @@
                         $username = null;
                     }
                 }
-
-                if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check)){
-                    $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
+                
+                if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check, $is_guest)){
+                    $res = $system->getCurrentUserAndSysInfo( true, $is_guest ); //including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
 
@@ -645,7 +646,17 @@
             } else if ($action=="usr_save") {
                 
                 USanitize::sanitizeRequest($_REQUEST);
-                $res = user_Update($system, $_REQUEST);
+                
+                $is_guest_registration = (@$_REQUEST['is_guest']==1);
+                
+                $res = user_Update($system, $_REQUEST, $is_guest_registration);
+                
+                if($res!==false && $is_guest_registration){
+                    //login at once
+                    if($system->doLogin($res, null, 'remember', true, true)){
+                        $res = $system->getCurrentUserAndSysInfo( true, $is_guest_registration ); //including reccount and dashboard entries
+                    }
+                }
 
             } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {
 

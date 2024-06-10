@@ -55,19 +55,25 @@
         -->
         </fieldset>
     
-        <div id="login_saml" style="vertical-align: top;padding-top: 13px;display: none; margin-left: -10px;">
-            <span>or:</span>
-            <select id="saml_sp" class="text ui-widget-content ui-corner-all" style="width:142px;background:rgb(232, 240, 254) !important"></select>
+        <div id="login_saml" style="vertical-align: top;padding-top: 13px;display: none; margin-left: -13px;">
+            <span><b>OR:</b></span>
+            <select id="saml_sp" class="text ui-widget-content ui-corner-all" style="margin-left: 10px; width:142px;background:rgb(232, 240, 254) !important"></select>
             <button id="btn_saml_auth" style="width: 85px;margin-left: 10px">Authenticate</button>
             <span class="heurist-helper2" style="display:block;padding:5px 0px 0px 15px;">generally requires specific institutional authorisation and/or VPN</span>
         </div>
     
-        <p id="login_forgot">
+        <div id="login_forgot" style="width: 370px;display: inline-block;padding: 5px;">
             <br><span>Forgotten your password?</span>&nbsp;<a href="#" id="link_restore">Click here to reset it</a>
-        </p>
-        <br><br>
-        <div class="heurist-helper1">All Heurist databases require a login. If you wish to access the data 
-            but do not have a login for this database, please contact the owner or click the Regsiter button (if shown below):<br> 
+        </div>
+        
+        <div id="login_guest" style="vertical-align: top;padding-top: 13px;display:none; margin-left: 133px;">
+            <span><b>OR:</b></span>
+            <button id="btn_guest_auth" style="width: 85px;margin-left: 10px; font-weight:bold">Guest data</button>
+            <span class="heurist-helper2" style="display:block;padding:5px 0px 0px 15px;">Limited access to the record addition of non-public records</span>
+        </div>
+        
+        <div class="heurist-helper1" style="padding-top:20px">All Heurist databases require a login. If you wish to access the data 
+            but do not have a login for this database,<br> please contact the owner or click the Register button (if shown below):<br><br> 
             <span id="span-owner-name"></span>, <span id="span-owner-org"></span>&nbsp;  <span id="span-owner-email"></span>
             <br><br>
             <span id="span-reccount"></span>

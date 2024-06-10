@@ -448,7 +448,7 @@ $.widget( "heurist.resultListMenu", {
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:450, onClose:
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:450, width:540, onClose:
                function( context ){
                    if(context){
                        //@todo refresh page
@@ -534,6 +534,10 @@ $.widget( "heurist.resultListMenu", {
             window.hWin.HEURIST4.collection.collectionClear();
 
         }else if(action == "menu-collected-show"){
+
+            this.options.resultList.resultList('displayCollection', true);
+
+        }else if(action == "menu-collected-tab"){
 
             window.hWin.HEURIST4.collection.collectionShow();
 

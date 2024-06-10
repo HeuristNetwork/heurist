@@ -1181,6 +1181,7 @@ $.widget( "heurist.editing_input", {
                             
                     }
                 
+                    if(!window.hWin.HAPI4.is_guest_user()){
                     
                     var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
                     .addClass('smallicon ui-icon ui-icon-plus btn_add_term show-onhover')
@@ -1211,6 +1212,8 @@ $.widget( "heurist.editing_input", {
 
                         return;
                     }} ); //end btn onclick
+                    
+                    }//not guest user                    
                 }
             }//allow edit terms only for true defTerms enum
             

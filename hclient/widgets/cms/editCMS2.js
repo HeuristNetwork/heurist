@@ -651,7 +651,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
             ],      
 
-            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristMedia link | align | bullist numlist outdent indent | table | help' ],  
+            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristRecordAddLink customHeuristMedia link | align | bullist numlist outdent indent | table | help' ],  
 
             content_css: [
                 '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
@@ -744,6 +744,16 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         __addHeuristMedia();
                     }
                 });
+                
+                // Insert Add Heurist record link
+                editor.ui.registry.addButton('customHeuristRecordAddLink', {
+                    icon: 'comment-add',
+                    text: 'Add Rec',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        __addHeuristRecordAddLink();
+                    }
+                });
+                
                 // Insert horizontal rule
                 editor.ui.registry.addButton('customHRtag', {
                     text: '&lt;hr&gt;',
@@ -827,6 +837,37 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
              _toolbar_Page.hide();
         }
 
+    }     
+    
+    //
+    //
+    //
+    function __addHeuristRecordAddLink(){
+
+        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+            title: 'Select type and other parameters for new record',
+            height: 520, width: 540,
+            get_params_only: true,
+            onClose: function(context){
+                if(context && !window.hWin.HEURIST4.util.isempty(context.RecAddLink)){
+                   
+                    tinymce.activeEditor.execCommand('mceLink');
+                                                            
+                    setTimeout(()=>{
+                    const dlg = $('.tox-dialog__body-content');
+                    //dig down to the first input text field (being the URL)
+                    const urlTextField = dlg.find('.tox-control-wrap .tox-textfield');                    
+                    
+                    urlTextField.val(context.RecAddLink+'&guest_data=1');
+
+                    },500);    
+                }
+            },
+            default_palette_class: 'ui-heurist-publish'                                        
+            }
+        );    
+
+        
     }
     
     //

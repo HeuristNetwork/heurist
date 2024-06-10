@@ -193,6 +193,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
         );
 
+//ARTEM - remarked all this stuff, since it possible to add new record in guest mode        
+        this.element.find('#div_def_user, #div_def_acc').hide();
+/*        
         let $accountSelect = this.element.find('#sel_def_user');
         let $pwdInput = this.element.find('#txt_def_pwd');
         if($accountSelect.length > 0 && $pwdInput.length > 0){
@@ -201,7 +204,21 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
                 this.element.find('#div_def_user, #div_def_acc').show();
 
-                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], () => {
+                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], (result) => {
+
+                    if(!result){
+
+                        that.element.find('#div_def_acc, #div_def_user, #div_def_pwd').hide();
+
+                        let msg = "Sorry, there are no non-administrator accounts available in this database.<br><br>"
+                                + "It is inappropriate to expose an administrator password in a hyperlink.<br>"
+                                + "We do not therefore support the use of an administrator account in a record addition hyperlink.";
+
+//ARTEM REMARKED IT 
+//                        setTimeout(() => { window.hWin.HEURIST4.msg.showMsgErr(msg); }, 1500); // display message after delay
+
+                        return;
+                    }
         
                     $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
         
@@ -229,6 +246,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
 
         }
+*/        
     },
     
     _adjustHeight: function(){

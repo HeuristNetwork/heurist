@@ -45,6 +45,7 @@ Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 //special webfont for database
 $font_styles = '';
 if(isset($system) && $system->is_inited()){
+    
     $webfonts = $system->getDatabaseSetting('Webfonts');
     if(is_array($webfonts) && count($webfonts)>0){
         foreach($webfonts as $font_family => $src){
@@ -57,6 +58,7 @@ if(isset($system) && $system->is_inited()){
             $font_families[] = $font_family;
         }
     }
+    
 }  
 if(!empty($font_styles)){ // add extra font-faces
     echo "<style> $font_styles </style>";

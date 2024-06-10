@@ -51,6 +51,7 @@ $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup'
 $without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 $layout_name = @$_REQUEST['ll'];
 $is_production = !$is_map_popup && $layout_name=='WebSearch';
+$primary_language = !empty(@$_REQUEST['lang']) ? $_REQUEST['lang'] : null;
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
@@ -1525,7 +1526,8 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $defTerms, $is_map_popup, $without_header, $is_production, 
+
+    global $system, $defTerms, $is_map_popup, $without_header, $is_production, $primary_language,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
     
     $has_thumbs = false;
@@ -1583,6 +1585,8 @@ function print_public_details($bib) {
 
     $bds_res = $mysqli->query($query); //0.8 sec
 
+    $translations = [];
+
 //ok so far
 
     if($bds_res){
@@ -1626,26 +1630,14 @@ function print_public_details($bib) {
             
             if ($bd['dty_Type'] == 'enum' || $bd['dty_Type'] == 'relationtype') {
                 
-                $bd['val'] = output_chunker($defTerms->getTermLabel($bd['val'], true));
-/*                
+                $trm_label = $defTerms->getTermLabel($bd['val'], true);
 
-                if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
-                    $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
-                    $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'enum', false));
-                    //$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
-                }else{
-                    $bd['val'] = "";
+                if(!empty($primary_language)){ // check for translation
+                    $translated_label = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'trm_Label' AND trn_Code = {$bd['val']}");
+                    $trm_label = !empty($translated_label) ? $translated_label : $trm_label;
                 }
 
-            }else if ($bd['dty_Type'] == 'relationtype') {
-
-                $term = @$terms['termsByDomainLookup']['relation'][$bd['val']];
-                if($term){
-                    $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'relation', false));    
-                }else{
-                    $bd['val'] = 'Term '.$bd['val'].' not found';
-                }
-*/                
+                $bd['val'] = output_chunker($trm_label);
 
             }else if ($bd['dty_Type'] == 'date') {
 
@@ -1660,8 +1652,29 @@ function print_public_details($bib) {
 
             }else if ($bd['dty_Type'] == 'blocktext') {
 
-                $bd['val'] = html_entity_decode($bd['val']);
-                $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
+                $bd['val'] = html_entity_decode($bd['val']); // @todo: get translation
+                list($lang, $value) = output_chunker($bd['val'], true);
+                $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', $value));
+
+                if(!empty($primary_language)){
+
+                    if(!array_key_exists($bd['dty_ID'], $translations)){
+                        $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
+                    }
+
+                    if((!$lang && $translations[$bd['dty_ID']]['lang'] != $primary_language && $translations[$bd['dty_ID']]['lang'] != $lang) || 
+                        $lang != $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language){
+
+                        $translations[$bd['dty_ID']]['lang'] = $lang; // set language
+                        $translations[$bd['dty_ID']]['values'] = []; // reset value tracker
+                    }
+
+                    if($lang == $translations[$bd['dty_ID']]['lang']){
+                        $translations[$bd['dty_ID']]['values'][] = $bd['dtl_ID'];
+                    }else{
+                        continue;
+                    }
+                }
                 //replace link <a href="[numeric]"> to record view links
                 
                 $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
@@ -1849,7 +1862,27 @@ function print_public_details($bib) {
                     $bd['val'] = $geoimage.$bd['val'];
 
                 } else {
-                    $bd['val'] = output_chunker($bd['val']);
+                    list($lang, $bd['val']) = output_chunker($bd['val'], true);
+
+                    if(!empty($primary_language)){
+
+                        if(!array_key_exists($bd['dty_ID'], $translations)){
+                            $translations[$bd['dty_ID']] = [ 'lang' => $lang, 'values' => [] ];
+                        }
+
+                        if((!$lang && $translations[$bd['dty_ID']]['lang'] != $primary_language && $translations[$bd['dty_ID']]['lang']) || 
+                            ($lang == $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language)){
+
+                            $translations[$bd['dty_ID']]['lang'] = $lang; // set language
+                            $translations[$bd['dty_ID']]['values'] = []; // reset value tracker
+                        }
+
+                        if($lang == $translations[$bd['dty_ID']]['lang']){
+                            $translations[$bd['dty_ID']]['values'][] = $bd['dtl_ID'];
+                        }else{
+                            continue;
+                        }
+                    }
                 }
             }
 
@@ -2111,6 +2144,8 @@ function print_public_details($bib) {
     }
 
     $prevLbl = null;
+    $has_translations = !empty($translations);
+
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) {
             continue;
@@ -2125,6 +2160,9 @@ function print_public_details($bib) {
 
         if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
 
+        if( $has_translations && isset( $translations[$bd['dty_ID']] ) && !in_array($bd['dtl_ID'], $translations[$bd['dty_ID']]['values']) ){
+            continue;
+        }
 
         $is_cms_content = !$is_map_popup &&  
                           (defined('RT_CMS_MENU') && $bib['rec_RecTypeID']==RT_CMS_MENU ||
@@ -2558,12 +2596,12 @@ function print_text_details($bib) {
         print '</div><br>&nbsp;'; // avoid ugly spacing
 }
 
-function output_chunker($val) {
+function output_chunker($val, $return_lang = false) {
 
-    list(, $val) = extractLangPrefix($val); // remove possible language prefix
+    list($lang, $val) = extractLangPrefix($val); // remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
     $val = USanitize::sanitizeString($val); 
-    return $val;
+    return $return_lang ? [$lang, $val] : $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
     */

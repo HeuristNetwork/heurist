@@ -445,11 +445,13 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 arc_Compare => For comparing indexes (Move to separate structure, so it's not returned)
                 arc_Action => 'added', 'modified', 'deleted'
              */
-            $complete_history = array();
+            $complete_history = [];
+            $last_editor = [];
+            $user_list = [];
 
             while($row_date = $res_date->fetch_row()){
 
-                $query_changes = "SELECT arc_ID, arc_ChangedByUGrpID, arc_TimeOfChange, arc_DataBeforeChange " .
+                $query_changes = "SELECT arc_PriKey, arc_ID, arc_ChangedByUGrpID, arc_TimeOfChange, arc_DataBeforeChange " .
                                  "FROM sysArchive " .
                                  "WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? " .
                                  "ORDER BY arc_ID";
@@ -466,13 +468,16 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 while($row_changes = $res_changes->fetch_assoc()){
 
+                    $arc_ID = intval($row_changes['arc_ID']);
+                    $ugr_ID = intval($row_changes['arc_ChangedByUGrpID']);
+
                     $res_row = array(
-                        'arc_ID' => intval($row_changes['arc_ID']),
-                        'arc_ChangedByUGrpID' => intval($row_changes['arc_ChangedByUGrpID']),
+                        'arc_ID' => $arc_ID,
+                        'arc_ChangedByUGrpID' => 0,
                         'arc_TimeOfChange' => $row_changes['arc_TimeOfChange'],
                         'arc_Value' => '',
                         'arc_Compare' => '',
-                        'arc_Action' => 'mod'
+                        'arc_Action' => 'revert'
                     );
 
                     list($value, $dty_ID) = $__get_value($row_changes['arc_DataBeforeChange'], $record_fields);
@@ -481,7 +486,8 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     }
 
                     if(!array_key_exists($dty_ID, $complete_history)){
-                        $complete_history[$dty_ID] = array();
+                        $complete_history[$dty_ID] = [];
+                        $last_editor[$dty_ID] = [];
                     }
                     if(!array_key_exists($dty_ID, $cur_set)){
                         $cur_set[$dty_ID] = array();
@@ -503,13 +509,28 @@ own"0","viewable",NULL,NULL,NULL,NULL
                         continue;
                     }
 
-                    $res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
+                    //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
 
                     if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
                         $complete_history[$dty_ID][$dty_idx] = array();
                     }
+
+                    if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
+                        $res_row['arc_ChangedByUGrpID'] = $last_editor[$dty_ID][$dty_idx];
+                    }else if(mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_ID = " . intval($row_changes['arc_PriKey'])) > 0){
+                        // was updated outside of standard record editor
+                        $res_row['arc_ChangedByUGrpID'] = $ugr_ID;
+                    }else{
+
+                        $query_arc_rec = "SELECT arc_ChangedByUGrpID FROM sysArchive WHERE arc_ID < $arc_ID AND arc_Table = 'rec' AND arc_RecID = $rec_ID ORDER BY arc_ID DESC LIMIT 1";
+                        $intial_ugr_ID = mysql__select_value($mysqli, $query_arc_rec);
+
+                        $res_row['arc_ChangedByUGrpID'] = intval($intial_ugr_ID) > 0 ? intval($intial_ugr_ID) : 0;
+                    }
+
+                    $last_editor[$dty_ID][$dty_idx] = $ugr_ID;
                     array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
-                    //$complete_history[$dty_ID][] = $res_row;
+                    $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
                 }
 
                 $res_changes->close();
@@ -535,11 +556,11 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 $res_row = array(
                     'dtl_ID' => $dtl_ID,
-                    'arc_ChangedByUGrpID' => -1,
+                    'arc_ChangedByUGrpID' => 0,
                     'arc_TimeOfChange' => $row_current['dtl_Modified'],
                     'arc_Value' => '',
                     'arc_Compare' => '',
-                    'arc_Action' => 'mod'
+                    'arc_Action' => 'current'
                 );
 
                 $value = !empty($row_current['dtl_Value']) ? $row_current['dtl_Value'] : null;
@@ -570,21 +591,44 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip, add dtl_ID
                     $complete_history[$dty_ID][$dty_idx][0]['dtl_ID'] = $dtl_ID;
+                    $complete_history[$dty_ID][$dty_idx][0]['arc_Action'] = 'current';
                     continue;
                 }
 
-                $res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
+                //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
 
                 if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
                     $complete_history[$dty_ID][$dty_idx] = array();
                 }
+
+                if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
+                    $res_row['arc_ChangedByUGrpID'] = $last_editor[$dty_ID][$dty_idx];
+                }
+
+                $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
                 array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
-                //$complete_history[$dty_ID][] = $res_row;
+            }
+
+            if(!empty($user_list)){
+
+                foreach($user_list as $ugr_ID => $name){
+                    $ugr_ID = intval($ugr_ID);
+                    if($ugr_ID < 1){
+                        continue;
+                    }
+
+                    $user_row = mysql__select_row_assoc($mysqli, "SELECT ugr_Type, ugr_Name, CONCAT(ugr_FirstName, ' ', ugr_LastName) AS ugr_FullName FROM sysUGrps WHERE ugr_ID = $ugr_ID");
+                    if(empty($user_row)){
+                        continue;
+                    }
+
+                    $user_list[$ugr_ID] = $user_row['ugr_Type'] == 'user' && !empty($user_row['ugr_FullName']) ? $user_row['ugr_FullName'] : $user_row['ugr_Name'];
+                }
             }
 
             $res_existing->close();
 
-            $ret = $complete_history;
+            $ret = ['history' => $complete_history, 'users' => $user_list];
 
         }else if(array_key_exists('revert_record_history', $this->data)){
 
