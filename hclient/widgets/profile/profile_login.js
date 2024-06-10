@@ -648,7 +648,6 @@ function doRegister( parentwin, is_guest=false ){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
         
-console.log('1>>>', is_guest);
         profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
                  'is_guest':is_guest, 'afterRegistration': onAuthentication});
         

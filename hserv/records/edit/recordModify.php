@@ -3477,6 +3477,15 @@ function checkUserPermissions($system, $action){
 
         if($action == 'add' && $system->is_guest_user()){
             //addition allowed for not enabled/guest user
+            //verify daily limit for guest users
+            $cnt_added_by_guests = mysql__select_value($mysqli,
+            'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
+            
+            if($cnt_added_by_guests>199){
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Number of new records added by guest users for current database exceeded daily limit');
+                return false;
+            }
+            
         }else{
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
