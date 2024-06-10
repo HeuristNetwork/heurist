@@ -448,7 +448,7 @@ $.widget( "heurist.resultListMenu", {
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:450, onClose:
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:450, width:540, onClose:
                function( context ){
                    if(context){
                        //@todo refresh page

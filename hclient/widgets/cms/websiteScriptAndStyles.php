@@ -536,6 +536,10 @@ if($website_custom_css!=null){
             function __loadPageContent(){
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(!window.hWin.HAPI4.is_admin()){
+                    isCMS_active = false;
+                }
 
                 $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
                 
@@ -1415,30 +1419,40 @@ function performCaptcha(){
 //  opens/hides side panel with NEW CMS editor controls  (see link #btnOpenCMSeditor in cmsTemplate.php)
 //
 function _openCMSeditor(event){
+
     var btn = $(event.target);
     
-    if(isCMS_active){
-        //close
+    if(window.hWin.HAPI4.is_admin()){
+    
+        if(isCMS_active){
+            //close
+            isCMS_active = false;
+            editCMS_instance2.closeCMS();
+            //btn.show();
+        }else{
+            $('#main-recordview').hide();
+            $('#main-content').show();
+
+            isCMS_active = true;
+            if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init
+            editCMS_instance2.startCMS({record_id: current_page_id, 
+                //content: page_cache[current_page_id],  //html or json
+                container:'#main-content',
+                close: function(){
+                    isCMS_active = false;
+            }}); //see editCMS2.js
+        }
+
+        btn.html(isCMS_active?'close editor':'website editor');
+    
+    }else{
         isCMS_active = false;
         editCMS_instance2.closeCMS();
-        //btn.show();
-    }else{
-        $('#main-recordview').hide();
-        $('#main-content').show();
-
-        isCMS_active = true;
-        if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init
-        editCMS_instance2.startCMS({record_id: current_page_id, 
-            //content: page_cache[current_page_id],  //html or json
-            container:'#main-content',
-            close: function(){
-                isCMS_active = false;
-        }}); //see editCMS2.js
+        btn.hide();
     }
-
-    btn.html(isCMS_active?'close editor':'website editor');
 }
 
+var prepared_params = {guest_data:true};//allow guest login
 //
 // Init HAPI 
 //
@@ -1452,7 +1466,8 @@ $(document).ready(function() {
                 
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
+            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', 
+                        onHapiInit<?php print array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'';?>);
         }else{
             // Not standalone, use HAPI from parent window
             initHeaderElements();

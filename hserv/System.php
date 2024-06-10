@@ -1367,6 +1367,12 @@ class System {
                     $this->has_access( $this->get_system('sys_OwnerGroupID') ) ));
     }
     
+    public function is_guest_user(){
+        $user = $this->current_User;
+        return $user!=null && @$user['ugr_Permissions']['guest_user'];
+    }
+    
+    
     /**
     * check if current user is system administrator
     */
@@ -1577,7 +1583,6 @@ class System {
                 if($is_guest_allowed && @$_SESSION[$this->dbname_full]['ugr_Permissions']['disabled']){
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['disabled'] = false;
                     $_SESSION[$this->dbname_full]['ugr_Permissions']['guest_user'] = true;
-                    $_SESSION[$this->dbname_full]['ugr_Permissions']['add'] = true;
                 }
             }//$reload_user_from_db from db
             

@@ -681,7 +681,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             sys_info: function (callback) {
 
                 var request = { a: 'sysinfo' };                
-                
+
                 if(typeof prepared_params !== 'undefined' && prepared_params['guest_data']){
                     request['is_guest'] = 1;  //guest user allowed (self registered - not enabled)
                 }

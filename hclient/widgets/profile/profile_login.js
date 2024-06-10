@@ -184,7 +184,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             
             var iWidth = 450;
             
-            var show_guest_login = (window.hWin.HEURIST4.util.getUrlParameter('guest_data')==1);
+            var show_guest_login = (typeof prepared_params !== 'undefined' && prepared_params['guest_data']);
             
             if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
                 var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
@@ -779,8 +779,10 @@ function doImport(){
 //
 function doAuthentication(login_data, login_dialog)
 {
-    var show_guest_login = (window.hWin.HEURIST4.util.getUrlParameter('guest_data')==1);
-    login_data['is_guest'] = show_guest_login?1:0;
+    //allow guest login
+    if(typeof prepared_params !== 'undefined' && prepared_params['guest_data']){
+        login_data['is_guest'] = 1;
+    }
 
     //get hapi and perform login
     window.hWin.HAPI4.SystemMgr.login(login_data,

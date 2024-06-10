@@ -448,7 +448,7 @@ $.widget( "heurist.search", {
             }
         });
 
-        // Add record button
+        // Add record button - NOT USED FOR A LONG TIME IN MAIN UI
         if(this.options.btn_visible_newrecord){
 
             /* on right hand side

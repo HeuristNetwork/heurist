@@ -1036,7 +1036,7 @@ window.hWin.HEURIST4.ui = {
                     request['members_only'] = '1';
                     request['not:ugl_GroupID'] = '1';
                 }
-            
+                //Note: it searches for all users - including disabled
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){

@@ -59,7 +59,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
             //get all users
             var request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
             var that = this;
-        
+            //Note: it searches for all users - including disabled
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){

@@ -348,6 +348,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         if(this.options.get_params_only==true){
             //return values as context
             new_record_params.RecTags = this.options.currentRecTags;
+            new_record_params.RecAddLink = this._onRecordScopeChange();
+            
             this._context_on_close =  new_record_params;
         }else{
             
@@ -490,7 +492,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     _onRecordScopeChange: function () 
     {
         var isdisabled = !this.getSelectedParameters( false );
-     
+
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
         window.hWin.HEURIST4.util.setDisabled( this.element.find('#btnAddRecordInNewWin'), isdisabled);
         window.hWin.HEURIST4.util.setDisabled( this.element.find('#btnAddRecord'), isdisabled);
@@ -516,11 +518,13 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 url = url + '&tag='+this.options.currentRecTags;    
             }
 
+            /* ARTEM disabled
             if(!window.hWin.HEURIST4.util.isempty(this.options.def_user) &&
                 !window.hWin.HEURIST4.util.isempty(this.options.def_pwd)){
 
                 url += `&user=${this.options.def_user}&pwd=${this.options.def_pwd}`;
             }
+            */
             
         }
         $('#txt_add_link').val(url);

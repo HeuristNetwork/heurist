@@ -193,6 +193,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
         );
 
+//ARTEM - remarked all this stuff, since it possible to add new record in guest mode        
+        this.element.find('#div_def_user, #div_def_acc').hide();
+/*        
         let $accountSelect = this.element.find('#sel_def_user');
         let $pwdInput = this.element.find('#txt_def_pwd');
         if($accountSelect.length > 0 && $pwdInput.length > 0){
@@ -243,6 +246,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
 
         }
+*/        
     },
     
     _adjustHeight: function(){

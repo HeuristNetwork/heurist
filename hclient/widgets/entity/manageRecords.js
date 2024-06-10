@@ -1010,7 +1010,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _initEditForm_step1: function(recID){
 
         this.element.attr('data-recid', recID);
-
         if(this.options.edit_mode=='popup'){
 
             var query = null, popup_options={};
@@ -1693,7 +1692,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                currentAccess: __getEditFieldValue('rec_NonOwnerVisibility'),
                currentAccessGroups: __getEditFieldValue('rec_NonOwnerVisibilityGroups'),
                scope_types: 'none', onClose: __assignOwnerAccess,
-               height:400,
+               height:400, width: 540,
                default_palette_class: 'ui-heurist-populate'
         });
               
@@ -2556,7 +2555,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
                 } 
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that.options.new_record_params.OwnerUGrpID))) {
-                    that.options.new_record_params.OwnerUGrpID = usr_id; //default to current user   
+                    if(window.hWin.HAPI4.is_guest_user()){
+                        //guest user can add new record to arbitrary group '+that.options.new_record_params.OwnerUGrpID
+                    } else{
+                        //specified ownership is not applicabel for current user - set to current user
+                        that.options.new_record_params.OwnerUGrpID = usr_id;    
+                    }
                 }
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
