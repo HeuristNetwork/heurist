@@ -456,6 +456,12 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                 }else if (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
+
+                }else if ($this->datatable_session_id > 0 && $field_type=='date'){
+
+                    $temporal = new Temporal($field_value);
+                    $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
+
                 }
                 
                 if($field_value!=null){
