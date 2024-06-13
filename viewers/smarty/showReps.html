@@ -98,9 +98,8 @@
                 font-weight: bold;
                 text-shadow: 1px 1px 0 #fff;
             }
-            
+
 #editorcontainer {
-    background-color:#F2F2F2;
     border-bottom:1px solid #CCC;
 }
 #editorcontainer h3 {
@@ -397,6 +396,17 @@ ul#rep_list.menu li ul {
             <h3>Template <span id="edTemplateName"></span></h3>
             
             <label id="lblFormula" style="font-size:12px;left: 296px;position: absolute;font-weight:bold;display:none">Formula (Smarty code)</label>
+            <span id="lblHelp" style="position: absolute; left: 475px; font-size: 12px; top: 2px;">
+                <a href="https://heuristref.net/heurist/?db=Heurist_Help_System&website&id=39&pageid=758#h_14642843621941655708110650" target="_blank" rel="noopener">
+                    View help here
+                </a> 
+                or search for Calculate in the online documentation
+            </span>
+
+            <div style="display: inline-block;position: absolute;left: 310px;font-size: 12px;top: 20px;">
+                Enclose formula in { } and use $r.fnnnn for a field in the current record type<br>
+                For example: {$r.f1179 + $r.f1267} will generate the sum of these fields
+            </div>
             
             <div style="position:absolute;top:4px;right:20px;">
                 <button onClick="doEditor(2)" id="btnSave" title="Save, Close and Execute the updated template">Save</button>

@@ -2034,6 +2034,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         $errors[$rty_ID.'.'.$dty_ID] = $new_value[1];
                         break; 
                     }
+                }else if($new_value == 'NAN' || $new_value == 'INF' || $new_value == 'NULL'){
+                    // relpace not a number, infinite, and null with an empty string
+                    $new_value = '';
                 }
                 
                 $current_value = mysql__select_value($mysqli,

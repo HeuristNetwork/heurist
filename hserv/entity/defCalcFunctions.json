@@ -12,11 +12,11 @@
         "entityTitle": "Field Calculation",
         "entityTitlePlural": "Field Calculations",
         "empty_remark":"None of function defined",
-        "entityDescription": "This form allows you to add/edit field calculations",
+        "entityDescription": "",
 
         "sel_actions": [{"key":"edit", "title":"Edit"},
                         {"key":"delete", "title":"Delete"}],
-        "btn_actions": [{"key":"add", "title":"Add New Calculation"}],
+        "btn_actions": [{"key":"add", "title":"Add New Formula"}],
 
         "reference_query": {},
         
@@ -38,7 +38,7 @@
                         "dty_Type":"freetext",
                         "dty_Role":"title",
                         "dty_Size":63,
-                        "rst_DisplayName": "Calculation name:",
+                        "rst_DisplayName": "Formula name:",
                         "rst_DisplayHelpText": "", 
                         "rst_RequirementType":"required",
                         "rst_DisplayWidth":40 
@@ -67,8 +67,8 @@
                     "dtID": "cfn_RecTypeIDs",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_DisplayName":"Record type(s):",
-                        "rst_DisplayHelpText": "The set of record types which participate in calculations. Any update of record of specified type will rebuild this field across the database", 
+                        "rst_DisplayName":"Additional record type(s):",
+                        "rst_DisplayHelpText": "The set of record types, apart from the record type containing the result, which participate in calculations.<br>Any update of record of specified type will rebuild this field across the database", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
                     }
                 }

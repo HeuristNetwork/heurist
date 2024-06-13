@@ -42,6 +42,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             this.options.width = 790;
             if(!(this.options.height>0)) this.options.height = 600;
             this.options.beforeClose = function(){}; //to supress default warning
+
         }else{
             this.options.edit_mode = 'popup'; 
             this.options.list_header = true; //show header for resultList
@@ -49,6 +50,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                 this.options.width = 790;
                 this.options.height = 600;
             }
+            this.options.title = "Select formula for calculated field";
         }
         
         this.options.edit_height =640;
@@ -102,8 +104,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             }
         }else{
             this.searchForm.searchDefCalcFunctions(this.options);
-            
-            
+
             var iheight = 6;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
@@ -198,7 +199,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         this.dosframe.on('load', function(){
             
            var showReps = that.dosframe[0].contentWindow.showReps; 
-            
+
            showReps.initSnippetEditor( that._editing.getValue('cfn_FunctionSpecification')[0], null, 
             function(instance){
                 that._editing.setFieldValueByName2('cfn_FunctionSpecification', instance.getValue());
@@ -206,14 +207,18 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         });
         
         this.dosframe.attr('src', surl).show();
-    
+
+        let $dlg = this._getEditDialog(true);
+        if($dlg && $dlg.length > 0 && $dlg.parent().find('.ui-dialog-title').length > 0){
+            $dlg.parent().find('.ui-dialog-title').text('Add and apply formulae');
+        }
     },
 
     //
     // header for resultList
     //     
     _recordListHeaderRenderer:function(){
-        return '';
+        return '<span style="height:10px;background:none;"></span>'; // add space above result list
         /*
         function __cell(colname, width){
           //return '<div style="display:table-cell;width:'+width+'ex">'+colname+'</div>';            
