@@ -772,7 +772,7 @@
                 $res = mysql__select_value($mysqli,
                     "select count(ugr_ID) from sysUGrps where ugr_Enabled='n' AND DATE(ugr_Modified)=CURDATE()");
                 if($res>19){
-                    $system->addError(HEURIST_ACTION_BLOCKED, 'Registration guest users for current database exceeded daily limit');
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Sorry, registration of guest users for the current database exceeds allowed daily limit');
                     return false;
                 }
             }

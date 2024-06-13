@@ -297,10 +297,9 @@ function recordAdd($system, $record, $return_id_only=false){
     $usr_exists = mysql__select_value($mysqli, 'SELECT ugr_ID FROM sysUGrps WHERE ugr_ID='.intval($owner_grps[0]));
     if($usr_exists==null){
         $system->addError(HEURIST_REQUEST_DENIED,
-            'Proposed/default record ownership is incorrect. '
-            .'Most probably the specified group or user has been deleted. '
-            .'Change it in "new record" or "workflow" preferences.', 'Proposed ownership: '
-                .implode(',', $owner_grps));
+'Proposed record ownership for record addition is invalid. Most probably the specified group or user has been deleted, or a non-existent  user or group has been specified.'
+.'<br><br>Change the specified ownership  in the record addition link in the custom report or website, or in setup of the workflow (in Design menu).', 
+'Proposed ownership: '.implode(',', $owner_grps));
         return false;
     }
     
@@ -3485,7 +3484,7 @@ function checkUserPermissions($system, $action){
             'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
             
             if($cnt_added_by_guests>199){
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Number of new records added by guest users for current database exceeded daily limit');
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Number of records added by guest users for the current database exceeds allowed daily limit');
                 return false;
             }
             
