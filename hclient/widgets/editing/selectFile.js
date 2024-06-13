@@ -30,7 +30,7 @@ $.widget( "heurist.selectFile", {
 
         onselect: null,
         
-        source:'assets', //or uploaded_tilestacks
+        source:'assets', //or uploaded_tilestacks or id of archive folder
         
         extensions: null,
         
@@ -41,6 +41,7 @@ $.widget( "heurist.selectFile", {
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _cachedRecordset: null,
+    _is_archive_folder: false,
 
     // the constructor
     _init: function() {
@@ -66,9 +67,11 @@ $.widget( "heurist.selectFile", {
         }else{
             this.element.find('.recordList').css('top',0);
         }
+        
+        this._is_archive_folder = parseInt(this.options.source)>0;
 
         var emptyMessage = `Specified files (${this.options.extensions}) are not found in `
-            +(parseInt(this.options.source)>0?'given foldeer':this.options.source);
+            +(this._is_archive_folder?'given folder':this.options.source);
         
         //resultList with images
 //init record list
@@ -83,7 +86,7 @@ $.widget( "heurist.selectFile", {
                        show_toolbar: false,
                        
                        entityName: this._entityName,
-                       view_mode: 'thumbs',
+                       view_mode: this._is_archive_folder?'list':'thumbs',
                        
                        pagesize: 500,
                        empty_remark: emptyMessage,
@@ -98,6 +101,8 @@ $.widget( "heurist.selectFile", {
                                             + recordset.fld(record, 'file_dir')
                                             + recordset.fld(record, 'file_name');
                            }
+                           
+                           var html;
         
                            if(that.options.source.indexOf('assets')<0) {
                                
@@ -105,18 +110,25 @@ $.widget( "heurist.selectFile", {
                                ? Math.round(recordset.fld(record, 'file_size')/1024/1024)+'MB'
                                : Math.round(recordset.fld(record, 'file_size')/1024)+'KB';
 
-                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                               + '" style="width:250px !important;height:50px !important"><p>'
-                               + recordset.fld(record, 'file_name')+'</p>size: '
-                               + sz+'</div>';
-
+                               if(that._is_archive_folder){
+                                   html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                                   + '" style="height:20px !important"><p style="margin-top: 4px;">'
+                                   + recordset.fld(record, 'file_name')+'<span style="float:right">'
+                                   + sz+'</span></p></div>';
+                               }else{
+                                   html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                                   + '" style="width:250px !important;height:50px !important"><p>'
+                                   + recordset.fld(record, 'file_name')+'</p>size: '
+                                   + sz+'</div>';
+                               }
+                               
                            }else{
 
                                var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
                                +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
                                +'</div>';
 
-                               var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                               html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                                + '" style="width:'+(that.options.size+4)+'px !important;height:'
                                + (that.options.size+4)+'px !important">'
                                + html_thumb + '</div>';
