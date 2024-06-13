@@ -65,7 +65,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
         $system->error_exit_api(); //exit from script
     }
     //get baseURL
-    $baseUrl = HEURIST_SERVER_URL; //HEURIST_BASE_URL;
+    $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null; //HEURIST_BASE_URL;
     
     //detect is this mirador image or annotation
     if($system->defineConstant('RT_MAP_ANNOTATION')){
