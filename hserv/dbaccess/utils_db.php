@@ -823,7 +823,7 @@
         $res = false;
 
         //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :0;
         
         $script_file = basename($script_file);
         if($dbfolder!=null){
@@ -839,7 +839,7 @@
         }else{
             
             if($dbScriptMode==2){
-                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+                if (!defined('HEURIST_DB_MYSQLPATH') || !file_exists(HEURIST_DB_MYSQLPATH)){
                 
                     $msg = 'The path to mysql executable has not been correctly specified. '
                     .'Please ask your system administrator to fix this in the heuristConfigIni.php file';

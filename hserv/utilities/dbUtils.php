@@ -418,7 +418,7 @@ class DbUtils {
             }
 
             //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :2;
+            $dbScriptMode = defined('HEURIST_DB_MYSQL_DUMP_MODE')?HEURIST_DB_MYSQL_DUMP_MODE :0;
 
             if($dbScriptMode==2){  //use native mysqldump
                 if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
