@@ -20,6 +20,7 @@
     * folderTreeToFancyTree - NOT USED
     * folderFirstFile - returns first file from first folder (search first file given ext or just first file in subfolders 
     *                   used for tiled image stack
+    * folderGetSubFolders - Returns array of subfolders
     *     
     * fileCopy
     * fileSave
@@ -359,7 +360,7 @@
     }
     
     //
-    //
+    // Returns summary size of all files in folder in bytes
     //
     function folderSize2($dir){
         
@@ -470,6 +471,30 @@
         return null;
     }
 
+    //
+    // Returns array of subfolders
+    //
+    function folderGetSubFolders($dir){
+        $dir = realpath($dir);
+        
+        $res = array();
+        
+        if($dir!==false){
+        
+            $dirs = scandir($dir);
+            foreach ($dirs as $node) {
+                if (($node == '.' ) || ($node == '..' )) {
+                    continue;
+                }
+                $file = $dir.'/'.$node;
+                if(is_dir($file)){
+                    $res[] = $node;            
+                }
+            }
+        }
+        
+        return $res;        
+    }
     
     /**
      * Creates a tree-structured array of directories and files from a given root folder.

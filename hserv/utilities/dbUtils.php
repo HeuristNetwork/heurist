@@ -823,7 +823,11 @@ class DbUtils {
         if($source==2){
             $lib_path = '/srv/BACKUP/';
         }else if($source==3){
-            $lib_path = '/srv/BACKUP/ARCHIVE/';
+            if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
+                $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
+            }else{
+                $lib_path = '/srv/BACKUP/ARCHIVE';    
+            }
         }else if($source==4){
             $lib_path = $upload_root.'DBS_TO_RESTORE/';
         }else{
@@ -850,7 +854,7 @@ class DbUtils {
 
         self::setSessionVal(1); //database name and archive validated
         
-        //create folders 
+        //create folders and all subfolders with default content
         $database_folder = $upload_root.$database_name.'/';
         
         $warnings = self::databaseCreateFolders($database_name);
@@ -863,10 +867,28 @@ class DbUtils {
         
         self::setSessionVal(2); //folders created
 
+        $needCopyCurrentDbFolder = false; 
         //unpack archive into this folder
         $unzip_error = null;
         try{
-            UArchive::unzip(self::$system, $archive_file, $database_folder);
+            $path_parts = pathinfo($archive_file);
+            $ext = 'zip';
+            if(array_key_exists('extension', $path_parts)){
+                $ext = $path_parts['extension'];                
+            }
+            
+            if(strcasecmp($ext, 'bz2')==0){
+                if(extension_loaded('bz2')){
+                    $needCopyCurrentDbFolder = true;    
+                    UArchive::bunzip2($archive_file, $database_folder.'dump.sql');        
+                }else{
+                    throw new Exception('bz2 extension is not detected');
+                }
+            }else{
+                $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);    
+                $needCopyCurrentDbFolder = ($fileCount==1);
+            }
+            
         }catch(Exception $e){
             folderDelete($database_folder);  
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
@@ -875,7 +897,7 @@ class DbUtils {
         }
 
         self::setSessionVal(3); //unpack archive
-        
+
         //find dump file 
         $dumpfile = folderFirstFile($database_folder, 'sql', false);
         
@@ -888,6 +910,28 @@ class DbUtils {
             
         }else{
         
+            $dumpfile_from_archive = $database_folder.basename($dumpfile);
+            $filecontent = file_get_contents($dumpfile_from_archive);
+            
+            //$subs = folderGetSubFolders($database_folder);
+            if($needCopyCurrentDbFolder){
+                //archive does not contain any file but database dump
+                //copy folders from current database
+                
+                if(folderRecurseCopy( HEURIST_FILESTORE_DIR, $database_folder )){
+                    self::databaseUpdateFilePaths(self::$system->dbname() , $database_name);
+                }else{
+                    folderDelete($database_folder);  
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Sorry, we were not able to copy file directories for restoring database.');
+                    return false;
+                }                
+            }
+            
+            fileDelete($dumpfile_from_archive); //remove temp dump file
+            $dumpfile = $database_folder.'_temp_dump.sql';
+            file_put_contents($dumpfile, preg_replace('/DEFINER=`\w+`@`[\w.]+`/m', 'DEFINER=CURRENT_USER', $filecontent));            
+            
             $script_file = basename($dumpfile);
             //$script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
             //fileCopy($dumpfile, $script_file);
@@ -896,16 +940,17 @@ class DbUtils {
 
             self::setSessionVal(4); //database restored from dump
             
-            //fileDelete($script_file); //remove temp dump file
+            fileDelete($dumpfile); //remove temp dump file
                            
             if(!$res){
                 folderDelete($database_folder);  
-            }else{                
+            }else{        
                 $path = realpath(dirname(__FILE__).'/../../../');
                 $now = new DateTime('now', new DateTimeZone('UTC'));
                 fileAdd($database_name.' # restore '.$now->format('Y-m-d'), 
                             $path.'/databases_not_to_purge.txt');
             }
+            
             return $res;
         }
     }
@@ -1521,6 +1566,22 @@ class DbUtils {
         if(self::setSessionVal(5)) return false; //triggers and constraints
         
         // 7. Update file path in target database  with absolute paths
+        self::databaseUpdateFilePaths($db_source, $db_target);
+
+        if(self::setSessionVal(6)) return false; //triggers and constraints
+        
+        return true;
+    }
+    
+    /**
+    * Update ulf_FilePath in recUploadedFiles for new database
+    * 
+    * @param mixed $db_source
+    * @param mixed $db_target
+    */
+    private static function databaseUpdateFilePaths($db_source, $db_target)
+    {
+        $mysqli = self::$mysqli;
         $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_FILESTORE_ROOT.$db_target.
         "/' where ulf_FilePath='".HEURIST_FILESTORE_ROOT.$db_source."/' and ulf_ID>0";
         $res1 = $mysqli->query($query1);
@@ -1531,11 +1592,8 @@ class DbUtils {
 //        "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
 
         }
-
-        if(self::setSessionVal(6)) return false; //triggers and constraints
-        
-        return true;
     }
+    
     
     /**
     * Removes registration info and assign originID for definitions

@@ -330,10 +330,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
         var that = this;
         
+        var src_folder = this._$('input[name=selArchiveFolder]:checked').val();
+        
         this._select_file_dlg.selectFile({
            showFilter: true, 
-           source: this._$('input[name=selArchiveFolder]:checked').val(),     
-           extensions: 'zip',
+           source: src_folder,     
+           extensions: (src_folder==3)?'zip,bz2':'zip',
            title: window.HR('Select database archive'),
            onselect:function(res){
                 if(res && res.filename){

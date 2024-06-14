@@ -432,7 +432,11 @@
                   }else if($source==2){
                       $lib_path = '/srv/BACKUP';
                   }else if($source==3){
-                      $lib_path = '/srv/BACKUP/ARCHIVE';
+                      if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
+                          $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
+                      }else{
+                          $lib_path = '/srv/BACKUP/ARCHIVE';    
+                      }
                   }else if($source==4){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
                   }

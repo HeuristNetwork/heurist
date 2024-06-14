@@ -168,7 +168,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                 
                     $archive_file = @$_REQUEST['file'];
                     $archive_folder = intval(@$_REQUEST['folder']);
-                    
+
                     $res = DbUtils::databaseRestoreFromArchive($database_name, $archive_file, $archive_folder);
 
                     if($res!==false){
