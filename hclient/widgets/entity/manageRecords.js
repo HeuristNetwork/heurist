@@ -80,6 +80,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _record_history: null,
     _check_history: true, // check for record history
 
+    // Record type information
+    _source_db: {
+        id: 0, // database ID
+        url: '' // URL to source
+    },
+    _source_def: null, // source def from source db
+
     _init: function() {
         
         this.options.entity = window.hWin.entityRecordCfg;
@@ -2360,7 +2367,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //fill with values
         this._currentEditID = recID;
         this._check_history = true; // reset history check
-        
+        this._source_db = { id: 0, url: '' };
+        this._source_def = null;
+
         var that = this;
         
         //clear content of accordion
@@ -4267,6 +4276,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 +'<div style="padding:10px 50px 0px 0px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
+                    +'<span class="btn-update-struct btns-admin-only">Update structure from source</span>'
                     +'<span class="btn-rec-history btns-admin-only">History</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
@@ -4278,6 +4288,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 
             this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'});
+            this.element.find('.btn-update-struct').button({icon:'ui-icon-pencil'});
             
             if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
             {
@@ -4286,6 +4297,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 this.element.find('.btn-edit-rt').css(btn_css)
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
+
+                this.element.find('.btn-update-struct').css(btn_css)
+                        .click(function(){that._updateStructureFromSource(false);}); // update record structure from source
                 
                 var btn = this.element.find('.btn-edit-rt2');        
                 if(this.options.edit_structure){
@@ -4629,6 +4643,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         .position({
                             my: 'left+20 center', at: 'right center', of: this.element.find('.chb_show_help').parent().parent()
                         });
+            
+            this.element.find('.btn-update-struct')
+                        .css('position', 'absolute');
+
+            if(this._source_db.id == 0){
+                this._checkStructureFromSource();
+            }
 
             // Highlight current focus in tree structure
             this._on(this.editForm.find('div[data-dtid] input, div[data-dtid] select, div[data-dtid] textarea'), {
@@ -4674,6 +4695,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         .hide()
                         .button('option', 'label', 'Attributes')
                         .css({top: '', left: '', position: ''});
+
+            this.element.find('.btn-update-struct').hide();
 
             $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
@@ -6693,6 +6716,306 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
             {title: 'Revert record changes', yes: window.HR('OK'), no: window.HR('Cancel')}, {default_palette_class: 'ui-heurist-populate'}
+        );
+    },
+
+    /**
+     * Check source database for any structure updates
+     */
+    _checkStructureFromSource: function(org_DBID = -1){
+
+        const that = this;
+
+        if(this._source_db.id == -1){ // was unable to get source
+            return;
+        }
+
+        const rty_ID = this._currentEditRecTypeID;
+        const current_fields = $Db.rst(rty_ID).getRecords(); // current fields in rectype
+        const rty_ConceptCode = $Db.getConceptID('rty', rty_ID); // complete concept code
+        org_DBID = org_DBID == -1 ? $Db.rty(rty_ID, 'rty_OriginatingDBID') : org_DBID; // database ID for source
+        const org_ID = $Db.rty(rty_ID, 'rty_IDInOriginatingDB'); // ID in source database
+
+        if(!window.hWin.HEURIST4.util.isNumber(org_DBID) ||
+            org_DBID == window.hWin.HAPI4.sysinfo.db_registeredid ||
+            org_DBID == 0){
+            // Couldn't determine the source, source is self or an un-registered database
+
+            this.element.find('.btn-update-struct').hide();
+            this._source_db.id = -1;
+
+            return;
+        }
+        
+        const NEXT_ATTEMPT = org_DBID == 2 ? 0 : 2; // attempt to also check core definitions
+
+        if(this._source_db.id == 0){ // retrieve source details
+
+            let request = {
+                remote: 'master',
+                detail: 'header',
+                q: `ids:${parseInt(org_DBID)}`
+            };
+
+            window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    //window.hWin.HEURIST4.msg.showMsgErr(response);
+                    that._checkStructureFromSource(NEXT_ATTEMPT);
+                    return;
+                }
+
+                let recset = new hRecordSet(response.data);
+
+                if(recset.length() == 0){
+                    that._checkStructureFromSource(NEXT_ATTEMPT);
+                    return;
+                }
+
+                let record = recset.getFirstRecord();
+
+                that._source_db.id = recset.fld(record, 'rec_ID');
+                that._source_db.url = recset.fld(record, 'rec_URL');
+
+                that._checkStructureFromSource(that._source_db.id);
+            });
+
+            return;
+        }
+
+        let rty_request = {
+            rectypes: this._source_db.id == $Db.rty(rty_ID, 'rty_OriginatingDBID') ? org_ID : rty_ConceptCode,
+            mode: 2,
+            remote: this._source_db.url.replace("/heurist/", "/h6-bm/")
+        };
+
+        window.hWin.HAPI4.SystemMgr.get_defs(rty_request, (response) => {
+
+            if(response.status != window.hWin.ResponseStatus.OK ||
+                !response?.data?.rectypes?.names ||
+                Object.keys(response?.data?.rectypes?.names).length == 0){
+
+                //window.hWin.HEURIST4.msg.showMsgErr(response);
+                that._source_db.id = 0;
+                that._checkStructureFromSource(NEXT_ATTEMPT);
+                return;
+            }
+
+            that._source_def = response.data.rectypes;
+
+            let rty_cc_idx = that._source_def.typedefs.commonNamesToIndex.rty_ConceptID;
+            let dty_cc_idx = that._source_def.typedefs.dtFieldNamesToIndex.dty_ConceptID;
+
+            const rty_IDs = Object.keys(that._source_def.typedefs);
+            let source_rty_id = 0;
+
+            for(let i = 0; i < rty_IDs.length; i ++){
+
+                const curr_id = rty_IDs[i];
+
+                if(that._source_def.typedefs[curr_id].commonFields[rty_cc_idx] == rty_ConceptCode){
+                    source_rty_id = curr_id;
+                    break;
+                }
+            }
+
+            if(source_rty_id < 1){
+                that._source_db.id = 0;
+                that._source_def = null;
+                that._checkStructureFromSource(NEXT_ATTEMPT);
+                return;
+            }
+
+            let missing_field = false;
+
+            for(let dty_ID in that._source_def.typedefs[source_rty_id].dtFields){
+
+                let concept_code = that._source_def.typedefs[source_rty_id].dtFields[dty_ID][dty_cc_idx];
+                let local_code = $Db.getLocalID('dty', concept_code);
+
+                if(local_code == 0 || !Object.hasOwn(current_fields, local_code)){ console.log(that._source_def.typedefs[source_rty_id].dtFields[dty_ID]);
+                    missing_field = true;
+                    break;
+                }
+            }
+
+            // Toggle visibility of button
+            missing_field ? that.element.find('.btn-update-struct').show() : that.element.find('.btn-update-struct').hide();
+            that.element.find('.btn-update-struct').position({
+                my: 'left+10 center', at: 'right center', of: that.element.find('.btn-edit-rt')
+            })
+        });
+    },
+
+    _updateStructureFromSource: function(confirmed = false){
+
+        const that = this;
+
+        if(this._source_db.id < 1){
+            window.hWin.HEURIST4.msg.showMsgFlash('Source database couldn\'t be found...', 2000);
+            return;
+        }
+
+        if(!confirmed){ // confirm request
+
+            let msg = 'Do you wish to proceed with the structure updating? This will import the following:<br><br>'
+                    + '<ul>'
+                        + '<li>any fields and vocabularies that are not yet in the database, new fields will be placed at the end.</li>'
+                        + '<li>any unrecognised record types (and their fields and vocabularies) connected to the selected record type.</li>'
+                        + '<li>'
+                            + 'additional fields and vocabularies defined for record types already in your database which are connected<br>'
+                            + 'to any of the record types above (the fields will be added to the end of the record type and may be removed or<br>'
+                            + 'customised as desired; they will have no effect on existing data).'
+                        + '</li>'
+                    + '</ul>';
+
+            let lbl = {title: 'Update record structure', yes: 'Proceed', no: 'Cancel'};
+            window.hWin.HEURIST4.msg.showMsgDlg(msg, () => { that._updateStructureFromSource(true); }, lbl, {default_palette_class: 'ui-heurist-design'});
+
+            return;
+        }
+
+        const rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
+
+        this.element.find('.btn-update-struct').hide();
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, "<span>Updating record structure...</span>");
+
+        // Update structure
+        window.hWin.HAPI4.SystemMgr.import_definitions(this._source_db.id, rty_ConceptCode, false, 'rectype',
+            (response) => {
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(!response.report && !response.extra){
+                    window.hWin.HEURIST4.msg.showMsgFlash('No changes have been made...', 2000);
+                    return;
+                }
+
+                // Refresh entity
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', () => {
+
+                    let msg = '';
+                    let reports = response.report;
+
+                    // Record types
+                    let names = [];
+                    let add_to_list = false;
+                    for(const idx in reports.updated){
+                        let id = reports.updated[idx];
+                        let name = $Db.rty(id, 'rty_Name');
+
+                        if(name){
+                            names.push(`${id}: ${name}`);
+                            add_to_list = true;
+                        }
+                    }
+                    if(add_to_list){
+                        msg += `Updated record types:<br>${names.join('<br>')}<br><br>`;
+                        add_to_list = false;
+                    }
+
+                    names = [];
+                    for(const idx in reports.added){
+                        let id = reports.added[idx];
+                        let name = $Db.rty(id, 'rty_Name');
+
+                        if(name){
+                            names.push(`${id}: ${name}`);
+                            add_to_list = true;
+                        }
+                    }
+                    if(add_to_list){
+                        msg += `Added record types:<br>${names.join('<br>')}<br>`;
+                        add_to_list = false;
+                    }
+
+                    if(reports.extra){ // get additional results
+
+                        let list = '';
+                        // Detail types
+                        names = [];
+                        for(const idx in reports.extra.detailtypes.added){
+                            let id = reports.extra.detailtypes.added[idx];
+                            let name = $Db.dty(id, 'dty_Name');
+
+                            if(name){
+                                names.push(`${id}: ${name}`);
+                                add_to_list = true;
+                            }
+                        }
+                        if(add_to_list){
+                            list += `Added base fields:<br>${names.join('<br>')}<br><hr><br>`;
+                            add_to_list = false;
+                        }
+
+                        names = [];
+                        for(const idx in reports.extra.detailtypes.updated){
+                            let id = reports.extra.detailtypes.updated[idx];
+                            let name = $Db.dty(id, 'dty_Name');
+
+                            if(name){
+                                names.push(`${id}: ${name}`);
+                                add_to_list = true;
+                            }
+                        }
+                        if(add_to_list){
+                            list += `Upated base fields:<br>${names.join('<br>')}<br><hr><br>`;
+                            add_to_list = false;
+                        }
+
+                        // Terms
+                        names = [];
+                        for(const idx in reports.extra.terms.added){
+                            let id = reports.extra.terms.added[idx];
+                            let name = $Db.trm(id, 'trm_Label');
+
+                            if(name){
+                                names.push(`${id}: ${name}`);
+                                add_to_list = true;
+                            }
+                        }
+                        if(add_to_list){
+                            list += `Added terms:<br>${names.join('<br>')}<br><hr><br>`;
+                            add_to_list = false;
+                        }
+
+                        names = [];
+                        for(const idx in reports.extra.terms.updated){
+                            let id = reports.extra.terms.updated[idx];
+                            let name = $Db.trm(id, 'trm_Label');
+
+                            if(name){
+                                names.push(`${id}: ${name}`);
+                                add_to_list = true;
+                            }
+                        }
+                        if(add_to_list){
+                            list += `Upated terms:<br>${names.join('<br>')}<br><hr><br>`;
+                            add_to_list = false;
+                        }
+
+                        if(list !== ''){
+                            msg += `<br><hr><br>${list}`;
+                        }
+                    }
+
+                    if(msg !== ''){
+                        window.hWin.HEURIST4.msg.showMsgDlg(msg, () => {
+                            that._initEditForm_step3(that._currentEditID);
+                        }, {title: 'Structure updated'}, {default_palette_class: 'ui-heurist-design'});
+                        return;
+                    }
+
+                    that._initEditForm_step3(that._currentEditID); // refresh record editor
+                });
+
+                return;
+            }
         );
     }
 });

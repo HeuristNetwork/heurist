@@ -144,6 +144,17 @@
         " from defRecStructure".
         " left join defDetailTypes on rst_DetailTypeID = dty_ID".
         " left join defDetailTypeGroups on dtg_ID = if(rst_DisplayDetailTypeGroupID is not null,rst_DisplayDetailTypeGroupID,dty_DetailTypeGroupID)";
+
+        if(!is_array($rectypeids) && !is_numeric($rectypeids) && strpos($rectypeids, '-') !== false){ // concept code, get local id
+
+            $concept_code = explode('-', $rectypeids);
+            $concept_code[0] = is_numeric($concept_code[0]) && $concept_code[0] > 0 ? intval($concept_code[0]) : $dbID;
+            $concept_code[1] = intval($concept_code[1]);
+
+            $rectypeids = mysql__select_value($mysqli, "SELECT rty_ID FROM defRecTypes WHERE rty_OriginatingDBID = ? AND rty_IDInOriginatingDB = ?", ["ii", $concept_code[0], $concept_code[1]]);
+            $rectypeids = !$rectypeids ? 0 : intval($rectypeids);
+        }
+
         if($rectypeids){
             $querywhere = " where rst_RecTypeID in (".(is_array($rectypeids)?implode(",", $rectypeids) :$rectypeids).")";
         } else {
