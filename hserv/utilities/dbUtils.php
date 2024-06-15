@@ -424,7 +424,8 @@ class DbUtils {
                 if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
 
                     $msg = 'The path to mysqldump has not been correctly specified. '
-                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php '
+                    .'(note the settings required for a single server vs mysql running on a separate server)';
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     if($verbose) echo '<br>'.$msg;

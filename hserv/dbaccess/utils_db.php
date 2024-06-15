@@ -842,7 +842,8 @@
                 if (!defined('HEURIST_DB_MYSQLPATH') || !file_exists(HEURIST_DB_MYSQLPATH)){
                 
                     $msg = 'The path to mysql executable has not been correctly specified. '
-                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php '
+                    .'(note the settings required for a single server vs mysql running on a separate server)';
 
                     return array(HEURIST_SYSTEM_CONFIG, $msg);
                 }                
