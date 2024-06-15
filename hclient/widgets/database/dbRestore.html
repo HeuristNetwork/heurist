@@ -25,27 +25,27 @@
           <h2>-----</h2>
      
 
-            Select source folder in HEURIST_FILESTORE to browse for database archive:
+            Select source folder to browse for database archives (zip format, or bz2 of sql files only):
             <br>
             <br>
             <label>
                 <input type="radio" value="1" name="selArchiveFolder" checked/>
-                Deleted database (in DELETED_DATABASES)
+                Deleted database (in HEURIST_FILESTORE/DELETED_DATABASES)
             </label>
             <br>
             <label>
                 <input type="radio" value="4" name="selArchiveFolder"/>
-                Safeguards uploaded (in DBS_TO_RESTORE)
+                Safeguards uploaded (in HEURIST_FILESTORE/DBS_TO_RESTORE)
             </label>
             <br>
             <label>
                 <input type="radio" value="3" name="selArchiveFolder"/>
-                Archived backups (in BACKUP/ARCHIVE)
+                Archived backups (in /srv/BACKUP/ARCHIVE, or in HEURIST_FILESTORE/BACKUP/ARCHIVE on localhost)
             </label>
            
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="btnSelectZip">Browse for file</button>
+            <br><br><button id="btnSelectZip">Browse for file</button>
             
-            <div class="heurist-helper1" style="padding-top:10px"><i>In case archive contains database dump only, filestore of current database will be used</i></div>
+            <div class="heurist-helper1" style="padding-top:10px"><i>If the archive contains only the SQL dump, the filestore of the current database will be copied</i></div>
         
     </div>
 
