@@ -302,7 +302,11 @@ $.widget( "heurist.editing_input", {
 
                             if(!window.hWin.HEURIST4.util.isempty(first_val) && window.hWin.HAPI4.sysinfo.api_Translator){ // allow external API translations
 
-                                msg += '<span style="display:inline-block;margin-top:10px;">Translate will translate the first value</span>';
+                                msg += '<span style="display:inline-block;margin-top:10px;">'
+                                        + 'Translate will translate the first value'
+                                        + 'You may block translation of some part of the text by adding an html tag with translate="no",<br>'
+                                        + 'for example:  &lt;p translate=”no”&gt;text not to be translated&lt;/p&gt;'
+                                    + '</span>';
 
                                 btns[window.HR('Translate')] = function(){
 
