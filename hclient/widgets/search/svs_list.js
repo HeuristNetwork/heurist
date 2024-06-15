@@ -2170,6 +2170,11 @@ $.widget( "heurist.svs_list", {
                         }
                         
                         this.search_faceted.show();
+                        if(this.search_faceted.height() == 0 && this.search_tree.height() != 0){ // set facet container height to avoid invisible search
+                            let min_height = this.search_tree.height();
+                            this.search_faceted.css('min-height', min_height);
+                        }
+
                         this.search_tree.hide();
                     
                         //function to be called on close faceted search
