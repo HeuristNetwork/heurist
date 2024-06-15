@@ -313,7 +313,9 @@
                 //in database filestore
                 $folder = $dir;
                 $url = null;
-                
+            }else if(strpos($dir, '/srv/BACKUP')===0){  //in /srv/BACKUP
+                $folder = $dir;
+                $url = null;
             }else{
                 //relative to heurist folder
                 $folder =  HEURIST_DIR.$dir;
