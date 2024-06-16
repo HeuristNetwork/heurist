@@ -52,7 +52,7 @@ $.widget( "heurist.selectFile", {
         
         if(this.options.showFilter){
             sFilter = '<div class="ent_header">'
-            +'<div class="header4" style="display: inline-block;width:7em;text-align:right;">'+window.hWin.HR('Find')+' </div>'
+            +'<div class="header4" style="display: inline-block;width:7em;text-align:right;">'+window.hWin.HR('Find')+'&nbsp;&nbsp;</div>'
             +'<input class="input_search text ui-widget-content ui-corner-all" style="width:90px; margin-right:0.2em" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">'
             +'</div>';
         }
@@ -158,10 +158,16 @@ $.widget( "heurist.selectFile", {
          
 
             //search for images in given array of folder
-            var that = this;                                                
+            var that = this;           
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
+            $('body').css('cursor','progress');
        
             window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
                 function(response){
+                    $('body').css('cursor','auto');
+                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         let recset = new hRecordSet(response.data);
