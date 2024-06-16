@@ -32,20 +32,33 @@ $.widget( "heurist.selectFile", {
         
         source:'assets', //or uploaded_tilestacks or id of archive folder
         
-        extensions: null,
+        extensions: null, //string comma separated list of exts
         
         title: 'Select Image',
         
-        size: 64
+        size: 64,
+        
+        keep_dialogue: false
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     _cachedRecordset: null,
     _is_archive_folder: false,
+    _is_source_changed: false,
 
     // the constructor
     _init: function() {
 
+        if(this.options.isdialog && this._as_dialog){
+            
+            if(this._is_source_changed){
+                this._gettingFiles();    
+            }else{
+                this._as_dialog.dialog('open');
+            }
+            return;
+        }
+        
         var that = this;
         
         var sFilter = '';
@@ -83,12 +96,15 @@ $.widget( "heurist.selectFile", {
                        multiselect: false,
 
                        select_mode: 'select_single',
-                       show_toolbar: false,
+                       show_toolbar: true,
+                       show_viewmode: false,
+                       
                        
                        entityName: this._entityName,
                        view_mode: this._is_archive_folder?'list':'thumbs',
                        
                        pagesize: 500,
+                       
                        empty_remark: emptyMessage,
                        renderer: function(recordset, record){ 
                            
@@ -156,57 +172,7 @@ $.widget( "heurist.selectFile", {
                                 }
                         });        
          
-
-            //search for images in given array of folder
-            var that = this;           
-            
-            window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
-            $('body').css('cursor','progress');
-       
-            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
-                function(response){
-                    $('body').css('cursor','auto');
-                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        let recset = new hRecordSet(response.data);
-                        if(recset.length()>0){
-                            
-                            if(that.options.isdialog){
-
-                                var $dlg = that.element.dialog({
-                                    autoOpen: true,
-                                    height: 640,
-                                    width: 840,
-                                    modal: true,
-                                    title: window.hWin.HR(that.options.title),
-                                    resizeStop: function( event, ui ) {
-                                        var pele = that.element.parents('div[role="dialog"]');
-                                        that.element.css({overflow: 'none !important', width:pele.width()-24 });
-                                    },
-                                    close:function(){
-                                        that._as_dialog.remove();    
-                                    }
-                                });
-                                
-                                that._as_dialog = $dlg; 
-                            }
-                            
-                            that._cachedRecordset = recset;
-                            
-                            that.recordList.resultList('updateResultSet', recset);
-                        }else{
-                            if(that._as_dialog) that._as_dialog.dialog('close');
-                            window.hWin.HEURIST4.msg.showMsgFlash(emptyMessage);    
-                        }
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                });
-     
-         
+                this._gettingFiles();
          
     }, //end _create
 
@@ -219,6 +185,21 @@ $.widget( "heurist.selectFile", {
     _destroy: function() {
         // remove generated elements
         this.recordList.remove();
+        if(this._as_dialog) this._as_dialog.remove();        
+    },
+    
+    _setOption: function( key, value ){
+        if(key==='extensions'){
+            if(this.options.extensions!=value){
+                this.options.extensions = value;
+                this._is_source_changed = true;
+            }
+        }else if(key==='source'){
+            if(this.options.source!=value){
+                this.options.source = value;
+                this._is_source_changed = true;
+            }
+        }
     },
     
     //
@@ -236,5 +217,74 @@ $.widget( "heurist.selectFile", {
             
         this.recordList.resultList('updateResultSet', subset);
     },
+    
+    //
+    //
+    //
+    _gettingFiles: function(){
+        
+            //search for images in given array of folder
+            var that = this;           
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
+            $('body').css('cursor','progress');
+       
+            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
+                function(response){
+                    $('body').css('cursor','auto');
+                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        that._is_source_changed = false;
+                        
+                        let recset = new hRecordSet(response.data);
+                        if(recset.length()>0){
+                            
+                            if(that.options.isdialog){
+                                
+                                if(that._as_dialog){
+                                    that._as_dialog.dialog('open');
+                                }else{
+
+                                    var $dlg = that.element.dialog({
+                                        autoOpen: true,
+                                        height: 640,
+                                        width: 840,
+                                        modal: true,
+                                        title: window.hWin.HR(that.options.title),
+                                        resizeStop: function( event, ui ) {
+                                            var pele = that.element.parents('div[role="dialog"]');
+                                            that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                                        },
+                                        close:function(){
+                                            if(that.option.keep_dialogue){
+                                                that._as_dialog.remove();        
+                                            }else{
+                                                that._as_dialog.dialog('close');
+                                            }
+                                        }
+                                    });
+                                    
+                                    that._as_dialog = $dlg; 
+                                    
+                                }
+                            }
+                            
+                            that._cachedRecordset = recset;
+                            
+                            that.recordList.resultList('updateResultSet', recset);
+                        }else{
+                            if(that._as_dialog) that._as_dialog.dialog('close');
+                            window.hWin.HEURIST4.msg.showMsgFlash(emptyMessage);    
+                        }
+
+                    }else{
+                        if(that._as_dialog) that._as_dialog.dialog('close');
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        
+    }
 
 });

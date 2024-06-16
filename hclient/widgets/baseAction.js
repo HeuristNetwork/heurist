@@ -94,7 +94,7 @@ $.widget( "heurist.baseAction", {
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + this.options.path + this.options.htmlContent
                         +'?t='+window.hWin.HEURIST4.util.random();
-console.log(url);        
+//console.log(url);        
             
             this.element.load(url, 
             function(response, status, xhr){
