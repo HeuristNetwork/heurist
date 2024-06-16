@@ -878,7 +878,7 @@ class DbUtils {
                 $ext = $path_parts['extension'];                
             }
             
-            if(strcasecmp($ext, 'bz2')==0){
+            if(strcasecmp($ext, 'bz2')==0 || strpos($archive_file,'.sql.bz2.')>0){
                 if(extension_loaded('bz2')){
                     $needCopyCurrentDbFolder = true;    
                     UArchive::bunzip2($archive_file, $database_folder.'dump.sql');        

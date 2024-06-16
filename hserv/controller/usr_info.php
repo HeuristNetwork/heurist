@@ -421,6 +421,7 @@
                     $exts = array('png','svg');    
               }
               
+              $include_dates = false;
               
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
@@ -431,7 +432,9 @@
                       $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
                   }else if($source==2){
                       $lib_path = '/srv/BACKUP';
+                      $include_dates = true;
                   }else if($source==3){
+                      $include_dates = true;
                       if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                           $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
                       }else{
@@ -446,7 +449,7 @@
                   //default 64px
                   $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
               }
-              $res = folderContent($lib_path, $exts);
+              $res = folderContent($lib_path, $exts, $include_dates);
               
         }
         else if ($action=="folders") { //get list of system images

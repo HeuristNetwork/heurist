@@ -345,7 +345,17 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     
                     //suggest database name
                     if(that._$('#dbname').val().trim()==''){
-                        that._$('#dbname').val(res.filename.substr(0,res.filename.length-24));
+                        var sname = res.filename; 
+                        if(sname.indexOf('hdb_')==0){
+                            sname = sname.substring(4);
+                        }
+                        if(sname.indexOf('.')>0){
+                            sname = sname.substring(0,sname.indexOf('.'));
+                        }
+                        if(sname.length>24){
+                            sname = sname.substring(0,23);
+                        }
+                        that._$('#dbname').val(sname);
                     }
                     
                 }else{

@@ -290,9 +290,11 @@
     // get list of files in folder as search result (record list)
     // It is used to get 1) all cfg files for entity configuration
     //                   2) browse for available icons in iconLibrary   
+    // $include_dates  search for old archives in form hdb_ztucs_passages.sql.bz2.2022-08-17 
+    //
     // @todo , $is_reqursive=false
     //
-    function folderContent($dirs, $exts=null) {
+    function folderContent($dirs, $exts=null, $include_dates=false) {
         
         $records = array();
         $order = array();
@@ -333,6 +335,14 @@
                     if(array_key_exists('extension', $path_parts))
                     {
                         $ext = strtolower($path_parts['extension']);
+                        if($include_dates && (strlen($ext)==10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)){
+                            $fname = substr($filename, 0, -11);
+                            $path_parts = pathinfo($fname);
+                            if(array_key_exists('extension', $path_parts)){
+                                $ext = strtolower($path_parts['extension']);
+                            }
+                        }
+                        
                         if(file_exists($folder.$filename) && ($exts==null || in_array($ext, $exts)))
                         {
                             $fsize = (is_file($folder.$filename))?filesize($folder.$filename):0;
