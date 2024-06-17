@@ -3969,17 +3969,32 @@ $.widget( "heurist.search_faceted", {
                 if(window.hWin.HEURIST4.dbs.hasFields(primary_rt, 'geo', null)){
                     this._hasLocation = 'yes';
                 }else{
-                    var RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];
-                    
-                    
-                    var linked_rt = window.hWin.HEURIST4.dbs.getLinkedRecordTypes(primary_rt, null, true);
-                    if ( window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, linked_rt['linkedto'])>=0 )
-                    {
-                        this._hasLocation = 'linkedto';   
-                    }else 
-                    if ( window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, linked_rt['relatedto'])>=0 )
-                    {
-                        this._hasLocation = 'relatedto';
+
+                    var linked_rt = window.hWin.HEURIST4.dbs.getLinkedRecordTypes_cache(primary_rt, true);
+
+                    if(linked_rt['linkedto'].length > 0){
+
+                        for(let rty_ID of linked_rt['linkedto']){
+
+                            if(window.hWin.HEURIST4.dbs.hasFields(rty_ID, 'geo', null)){
+                                this._hasLocation = 'linkedto';
+                                break;
+                            }
+                        }
+                    }
+                    if(this._hasLocation == 'none' && linked_rt['relatedto'].length > 0){
+
+                        for(let rty_ID of linked_rt['relatedto']){
+
+                            if(linked_rt['linkedto'].length > 0 && linked_rt['linkedto'].indexOf(rty_ID) != -1){
+                                continue;
+                            }
+
+                            if(window.hWin.HEURIST4.dbs.hasFields(rty_ID, 'geo', null)){
+                                this._hasLocation = 'relatedto';
+                                break;
+                            }
+                        }
                     }
                 }
                 
