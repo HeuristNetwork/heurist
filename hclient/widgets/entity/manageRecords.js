@@ -4592,11 +4592,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             that.reloadEditForm( true );
                         });
                     if(btn_css) btn.css(btn_css);
+
+                    // Flash button
+                    btn.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
                 }
             }
             if(!this.options.edit_structure){
                 this.element.find('.btn-edit-rt2').hide();
-                this.element.find('.rt-info-header').hide();
             }
             
             //switch on optional fields, disable checckbox and hide
@@ -4683,7 +4685,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $(this.element).find('.separator-hidden').hide();
 
-            this.element.find('.rt-info-header').show();
             this.element.find('.btn-edit-rt2').show();
             this.element.find('.btn-edit-rt-back').hide();
             this.element.find('.chb_opt_fields').attr('disabled', false);
