@@ -1444,7 +1444,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 ele.editing_input('setValue', this.options.trm_ParentTermID>0
                     ?this.options.trm_ParentTermID
                     :this.options.trm_VocabularyID, true);
-            }else if(this.options.select_mode == 'manager' && $trm_image.parents('div.ui-accordion:first').length > 0){
+            }else if(this.options.select_mode == 'manager' && $trm_image && $trm_image.parents('div.ui-accordion:first').length > 0){
                 // Expand 'more...' accordion if there is a term image
                 window.hWin.HAPI4.checkImage('defTerms', this._currentEditID, 'thumb', function(response){
                     if(response.data=='ok'){
@@ -2775,11 +2775,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.util.stopEvent(event);
 
                             var ele = $(event.target).hide();
-                            var trm_IDs = ele.attr('trm_IDs').split(',');
-
-                            if(trm_IDs){
+                            var trm_IDs = ele.attr('trm_IDs');
+                            if(!trm_IDs) trm_IDs = ele.parent().attr('trm_IDs');
+                            if(trm_IDs) trm_IDs = trm_IDs.split(',');
+                            
+                            if(Array.isArray(trm_IDs) && trm_IDs.length>0){
+                                
                                 that.fields_list_div.hide();
-
                                 //select vocabulary group, select vocab
                                 var vocab_id  = trm_IDs[trm_IDs.length-1];
 
