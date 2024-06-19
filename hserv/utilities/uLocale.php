@@ -226,8 +226,8 @@
                     $cnt++;
                 }
                 
-            }
-            if($fnd && ($cnt==count($input)-1)){
+            } //foreach
+            if($fnd && ($cnt>=count($input)-1)){
                 $res = $fnd;
             }else{
                 $res = $def;
