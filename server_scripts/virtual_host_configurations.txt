@@ -2,15 +2,13 @@
 Setting up virtual hosts
 ------------------------
 
-CONTENT TO BE CREATED
+CONTENT TO BE CREATED  20/6/24
 
-TODO:  for each of these, labelled with the general settup eg. redhat, rhel, debian etc. and replace anything like passwords with xxxxxxxxxxxxxx  
-
-It's meant to be a template, which means that the server manager can simply see what is required and copy and paste a bit of code into the right file and then configure it. Since you already know how it works, that makes the job much easier than if someone has to go and look it all up.
+TODO:  for each of these, label with the general settup eg. redhat, rhel, debian etc. and replace anything like passwords with xxxxxxxxxxxxxx  
 
 EXAMPLES:
 
-for herusit.huma-num.fr virtual hosts are defined in the separate file
+for herusit.huma-num.fr virtual hosts are defined in the separate file - what file?
 And ssl configuration (for https) are defined within <VirtualHost>
 
 For intersect all :80 <VirtualHost>s are within main httpd.conf and :443 and ssl settings are are in the separate file httpd-le-ssl.conf. 
