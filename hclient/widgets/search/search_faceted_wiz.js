@@ -1842,6 +1842,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         + '<label><input type="radio" data-search="between" data-id="'
                         + idd+'" style="vertical-align: middle;margin-left:16px" name="smode'+idd+'">'
                         + window.hWin.HR("Between")+'</label>'
+                        + '<label><input type="radio" data-search="text" data-id="'
+                        + idd+'" style="vertical-align: middle;margin-left:16px" name="smode'+idd+'">'
+                        + window.hWin.HR("Text based")+'</label>'
                         +'</span>';
 
                     sGroupBy = sGroupBy
@@ -1958,6 +1961,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('input[data-sort="count"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='count'));
                 listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').prop('checked', (facets[k].orderby=='desc'));
                 listdiv.find('input[data-search="between"][data-id="'+idd+'"]').prop('checked', (facets[k].srange=='between'));
+                listdiv.find('input[data-search="text"][data-id="'+idd+'"]').prop('checked', (facets[k].srange=='text'));
 
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
@@ -2106,6 +2110,7 @@ $.widget( "heurist.search_faceted_wiz", {
             
             this._on( listdiv.find('input[data-search]'), {change: function(e){
                 this._assignFacetParams();
+                this._refresh_FacetsPreview();
             }});
             
             return true;
@@ -2155,13 +2160,14 @@ $.widget( "heurist.search_faceted_wiz", {
                 }else if(listdiv.find('input[data-sort="desc"][data-id="'+idd+'"]').is(':checked')){
                     this.options.params.facets[k].orderby = 'desc';    
                 }
-                    
-                this.options.params.facets[k].srange = null;    
-                if(listdiv.find('input[data-search="between"][data-id="'+idd+'"]').is(':checked'))
-                {
-                    this.options.params.facets[k].srange = 'between';    
+
+                this.options.params.facets[k].srange = null;
+                if(listdiv.find('input[data-search="between"][data-id="'+idd+'"]').is(':checked')){
+                    this.options.params.facets[k].srange = 'between';
+                }else if(listdiv.find('input[data-search="text"][data-id="'+idd+'"]').is(':checked')){
+                    this.options.params.facets[k].srange = 'text';
                 }
-                
+
                 if(this.options.params.facets[k].type=='date' 
                   || this.options.params.facets[k].type=='year'){
                     if(this.options.params.facets[k].isfacet>1){
