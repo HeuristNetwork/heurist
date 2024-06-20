@@ -1,0 +1,21 @@
+
+Setting up virtual hosts
+------------------------
+
+CONTENT TO BE CREATED
+
+TODO:  for each of these, labelled with the general settup eg. redhat, rhel, debian etc. and replace anything like passwords with xxxxxxxxxxxxxx  
+
+It's meant to be a template, which means that the server manager can simply see what is required and copy and paste a bit of code into the right file and then configure it. Since you already know how it works, that makes the job much easier than if someone has to go and look it all up.
+
+EXAMPLES:
+
+for herusit.huma-num.fr virtual hosts are defined in the separate file
+And ssl configuration (for https) are defined within <VirtualHost>
+
+For intersect all :80 <VirtualHost>s are within main httpd.conf and :443 and ssl settings are are in the separate file httpd-le-ssl.conf. 
+
+On greek server both :80 and :443 are in separate files.
+
+On sydney uni server, there are neither virtual hosts nor ssl configuration in apache configuration files. 
+I assume all configuration has been done by ICT and it is out of our control and my comprehension
