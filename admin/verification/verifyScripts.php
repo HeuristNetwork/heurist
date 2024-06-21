@@ -1743,7 +1743,7 @@ function __findBelegSpan($context){
     //print $res.'<br><br>';
     
     print $res."\t";
-    print $context_original."\n";
+    print htmlspecialchars($context_original)."\n";
     
 }
       

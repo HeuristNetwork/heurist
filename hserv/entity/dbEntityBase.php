@@ -131,7 +131,7 @@ abstract class DbEntityBase
         
         
         //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hserv/entity/'.$this->entityName.'.json';
+        $entity_file = HEURIST_DIR.'hserv/entity/'.basename($this->entityName.'.json');
         
         if(file_exists($entity_file)){
             

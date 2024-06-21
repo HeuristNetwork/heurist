@@ -1934,6 +1934,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }
         
+        $newname = basename($newname);
+        
         $filename = USanitize::sanitizeFileName($newname.'.'.$type);
 
         file_put_contents(HEURIST_SCRATCH_DIR.$filename, $data);        

@@ -995,7 +995,9 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             echo_flush2('failed<br>');
                         }else{
                             echo_flush2('finished<br>');
-                            $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
+                            $rtn = htmlspecialchars($rtn);
+                            $rtn = 'The uploaded archive is at <a href="' . $rtn . '" target="_blank">' 
+                                        . $rtn . '&nbsp;<span class="ui-icon ui-icon-extlink" /> </a>';
                         }
 
                         echo_flush2('<br>'. $rtn .'<br>');
