@@ -30,7 +30,12 @@ $options = array();
 
 $system = null;
 
-$params = filter_input_array(INPUT_POST);
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $params = filter_input_array(INPUT_POST);
+}else{
+    $params = filter_input_array(INPUT_GET);    
+}
+
 
 if(@$params['db']){
     $system = new System(); //to init folder const without actual coonection to db
@@ -41,13 +46,8 @@ if(@$params['db']){
         header('HTTP/1.1 400 Bad Request');
         exit;
     }else{
-        
-        if(preg_match('/[A-Za-z0-9_\$]/', @$params['db'])){ //validatate database name
-           exit;
-        }else{
-            $dbname = $params['db'];
-            $system->initPathConstants($dbname);
-        }
+        $dbname = $params['db'];
+        $system->initPathConstants($dbname);
     }
     $options['database'] = $dbname;
 }else{
