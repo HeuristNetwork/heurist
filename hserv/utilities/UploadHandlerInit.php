@@ -35,9 +35,16 @@ if(@$_REQUEST['db']){
     $dbname = @$_REQUEST['db'];
     $error = System::dbname_check($dbname);
     if($error){
+        //database name is wrong
+        header('HTTP/1.1 400 Bad Request');
         exit;
     }else{
-        $system->initPathConstants($dbname);
+        
+        if(preg_match('/[A-Za-z0-9_\$]/', $dbname)){ //validatate database name
+           exit;
+        }else{
+            $system->initPathConstants($dbname);
+        }
     }
     $options['database'] = $dbname;
 }else{

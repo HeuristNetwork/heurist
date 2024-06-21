@@ -124,18 +124,6 @@
         $params = array();
         
         $params = filter_input_array(INPUT_POST);
-        
-        /*
-        foreach($_REQUEST as $key=>$val){
-            if(is_array($val)){
-                foreach($val as $key2=>$val2){
-                    $params[$key]  = filter_var($val2, FILTER_UNSAFE_RAW);
-                }
-            }else{
-                $params[$key]  = filter_var($val, FILTER_UNSAFE_RAW);
-            }
-        }
-        */
 
         $response = recordSearchFacets($system, $params);
 
