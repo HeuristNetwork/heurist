@@ -1214,13 +1214,15 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
             if(!$save_to_file || empty($temp_name)){
 
-                $filename = $temp_name;
+                $csv_filename = $temp_name;
                 if($rty_ID>0){
                     $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
-                    $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
+                    $csv_filename = $csv_filename.'_t'.$rty_ID.'_'.$rty_Name;
                 }
             }             
-            $filename = basename(strpos($filename, '.') !== false ? $filename : $filename.'.csv'); //'_'.date("YmdHis").
+            $csv_filename = basename(strpos($csv_filename, '.') !== false 
+                                    ? $csv_filename 
+                                    : $csv_filename.'.csv'); //'_'.date("YmdHis").
         
             $fd = $streams[$rty_ID];
 
@@ -1264,7 +1266,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         $content_len = $content_len+3;
         
         header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.rawurlencode($filename));
+        header('Content-Disposition: attachment; filename='.rawurlencode($csv_filename));
         header('Content-Length: ' . $content_len);
         echo "\xEF\xBB\xBF"; // Byte Order Mark        
         exit($out);

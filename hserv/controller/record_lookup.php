@@ -1088,7 +1088,9 @@
     header('Content-Type: application/json');
     header('Content-Length: ' . strlen($remote_data));
 
-    exit($remote_data);
+    echo $remote_data;
+    
+//------------------------------------------------------------------------------    
 
     function getOpenthesoThesauruses($system, $params){
 
