@@ -310,6 +310,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $kml_content =  $encoded_filename;    
             $encoded_filename = null;
         }else{
+            $encoded_filename = HEURIST_SCRATCH_DIR.basename($encoded_filename); //for snyk
             $kml_content = file_get_contents($encoded_filename);
         }
             
