@@ -2,18 +2,54 @@
 Setting up virtual hosts
 ------------------------
 
-CONTENT TO BE CREATED  20/6/24
+1) Purpose of VirtualHost. If your webserver runs several website/application you need to specify Virtual Host. So 
+your domain heurist.example.com will refer to correct installation folder of Heurist.
+                                       
+2) Add to your apache httpd.conf
 
-TODO:  for each of these, label with the general settup eg. redhat, rhel, debian etc. and replace anything like passwords with xxxxxxxxxxxxxx  
+<VirtualHost *:80>
+    DocumentRoot "/var/www/html/HEURIST/"
+    ServerName heurist.example.com
+    ServerAlias heurist.example.com
+    AddDefaultCharset utf-8
+    
+    RedirectPermanent / https://heurist.example.com
+</VirtualHost>
 
-EXAMPLES:
+Where 
+DocumentRoot - Heurist installation path 
+ServerName and ServerAlias - Hostname that the server uses to identify itself
+RedirectPermanent - means that all request to http will be redirected to https - specify this directive to avoid usage of http protocol.
 
-for herusit.huma-num.fr virtual hosts are defined in the separate file - what file?
-And ssl configuration (for https) are defined within <VirtualHost>
+If your server has many virtual hosts, it is better to specify them in the separate file.
 
-For intersect all :80 <VirtualHost>s are within main httpd.conf and :443 and ssl settings are are in the separate file httpd-le-ssl.conf. 
+Include conf/extra/httpd-vhosts.conf
 
-On greek server both :80 and :443 are in separate files.
+3) https. If your hosting provider has HTTPS built in, follow their documentation how to include SSL certificate. 
+Otherwise we recommend to use "Letsencrypt"> It is a free, automated, and open certificate authority.
 
-On sydney uni server, there are neither virtual hosts nor ssl configuration in apache configuration files. 
-I assume all configuration has been done by ICT and it is out of our control and my comprehension
+https://letsencrypt.org/getting-started/
+https://certbot.eff.org/
+
+With the help of certbot your webserver will be configured and https version of your current http host be added.
+
+<VirtualHost *:443>
+    DocumentRoot "/var/www/html/HEURIST/"
+    ServerName heurist.example.com
+    ServerAlias heurist.example.com
+    AddDefaultCharset utf-8
+    
+    SSLEngine on
+    SSLCerificateFile /etc/letsencrypt/live/heurist.example.com/cert.pem
+    SSLCerificateKeyFile /etc/letsencrypt/live/heurist.example.com/privkey.pem
+    SSLCACerificateFile /etc/letsencrypt/live/heurist.example.com/chain.pem
+    SSLProtocol all SSLv2 -SSLv3
+    SSLHonorCipherOrder on
+    SSLCipherSuite "EECFH+........"
+</VirtualHost>
+
+-----------------
+For more details please refer Apache documentation
+
+https://httpd.apache.org/docs/2.4/vhosts/
+https://httpd.apache.org/docs/2.4/vhosts/examples.html
