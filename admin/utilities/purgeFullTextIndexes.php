@@ -212,7 +212,7 @@ foreach ($databases as $idx=>$db_name){
     }
     
     if($report!=''){
-        echo $tabs0.$db_name.$tabs.$report.$eol;
+        echo $tabs0.htmlspecialchars($db_name).$tabs.htmlspecialchars($report).$eol;
     }
 
 

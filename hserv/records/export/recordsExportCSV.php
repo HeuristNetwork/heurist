@@ -1219,8 +1219,8 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
                     $rty_Name = mb_ereg_replace('\s', '_', self::$defRecTypes['names'][$rty_ID]);
                     $filename = $filename.'_t'.$rty_ID.'_'.$rty_Name;
                 }
-            }
-            $filename = strpos($filename, '.') !== false ? $filename : $filename.'.csv'; //'_'.date("YmdHis").
+            }             
+            $filename = basename(strpos($filename, '.') !== false ? $filename : $filename.'.csv'); //'_'.date("YmdHis").
         
             $fd = $streams[$rty_ID];
 

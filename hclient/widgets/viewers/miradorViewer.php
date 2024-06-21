@@ -230,7 +230,7 @@ if($use_custom_mirador){
     id: 'demo',
     windows: [{
       //canvasIndex: 2,  
-      canvasId: '<?php echo $canvasUri; ?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
+      canvasId: '<?php echo htmlspecialchars($canvasUri); ?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
       imageToolsEnabled: true,
       imageToolsOpen: false,
       manifestId: window.manifestUrl,
