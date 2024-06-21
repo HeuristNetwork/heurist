@@ -798,7 +798,7 @@ private static function _getEncodedFilename($encoded_filename_id){
     $encoded_filename = mysql__select_value($mysqli, 
         'SELECT imp_filename FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id));
         
-    return HEURIST_SCRATCH_DIR.basename($encoded_filename)
+    return HEURIST_SCRATCH_DIR.basename($encoded_filename);
 }
 
 private static function _deleteEncodedFilename($encoded_filename_id){
