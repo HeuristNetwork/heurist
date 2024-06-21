@@ -26,7 +26,9 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 
 // POST request
 if(isset($_POST['data'])) {
-    $data = json_decode($_POST['data']);
+    $params = filter_input_array(INPUT_POST);
+    
+    $data = json_decode($params['data']);
     $response = "";
 
     $subject = htmlspecialchars(filter_var($data->subject));  // Email subject

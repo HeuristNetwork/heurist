@@ -918,7 +918,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $msg = $msg . '<br><br><i>This is the first of multiple records'. ($modeImport > 0 ? ' imported' : '') .'. Please visit database for additional records.</i>';
         }
 
-        $res = sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
+        $res = sendPHPMailer(HEURIST_MAIL_TO_ADMIN, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
                     $swf_emails, $title, $msg, null, true);
 
         if($total_record_count > 1 && $res){ // block further emails for imports, only if the email was sent

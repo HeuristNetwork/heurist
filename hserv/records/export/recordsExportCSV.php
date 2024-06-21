@@ -135,7 +135,7 @@ public static function output($data, $params){
     $relmarker_details = array(); //relmarker fields included into output
 
     // Handle final filename + directory
-    $filename = 'Export_'.self::$system->dbname();
+    $filename = basename('Export_'.self::$system->dbname());
     if(!empty(@$params['file']['filename'])){
 
         $filename = basename($params['file']['filename']);
