@@ -195,14 +195,14 @@ if(!$format) $format='csv';
 
         <fieldset style="width:380px;"><legend style="display:none"></legend>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
+                    <div class="header" style="min-width: 50px;">Encoding:</div>
                     <div class="input-cell">        
                         <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         </select>
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Field separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Field separator:</div>
                     <div class="input-cell">  
                         <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="," selected>comma ,</option>
@@ -227,7 +227,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Fields enclosed in:</label></div>
+                    <div class="header" style="min-width: 50px;">Fields enclosed in:</div>
                     <div class="input-cell">   
                         <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='2'>"</option><option value="1">'</option>
@@ -236,7 +236,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Line separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Line separator:</div>
                     <div class="input-cell">        
                         <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option value="auto">auto detect</option>
@@ -247,7 +247,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Multivalue separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Multivalue separator:</div>
                     <div class="input-cell">        
                         <select id="csv_mvsep" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="|" selected>pipe |</option>
@@ -273,7 +273,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Date format:</label></div>
+                    <div class="header" style="min-width: 50px;">Date format:</div>
                     <div class="input-cell">        
                         <select id="csv_dateformat" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
@@ -313,9 +313,9 @@ if(!$format) $format='csv';
                     <div id="btnParseStep2" style="bottom:5px"
                     title="Start upload your CSV data into temporary database table, converts it to UTF8, parses data and verifies ID columns for valid integer values"
                     >Continue</div>
-                    <label id="lblParseStep2" style="font-style:italic">
+                    <span id="lblParseStep2" style="font-style:italic">
                         If Continue is disabled, you need to select record types in the list above
-                    </label>
+                    </span>
                 </div>
         </div>
         
@@ -374,8 +374,8 @@ if(!$format) $format='csv';
         <fieldset style="position: absolute;left: 0;right: 0;top:80px;"><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
-                <label style="vertical-align: top;">Importing:</label><br>
-                <label style="vertical-align: bottom;font-size:0.8em">(rollover for details)</label>
+                <span style="vertical-align: top;">Importing:</span><br>
+                <span style="vertical-align: bottom;font-size:0.8em">(rollover for details)</span>
             </div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
@@ -631,7 +631,7 @@ if(!$format) $format='csv';
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset><legend style="display:none"></legend>
         <div>
-            <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
+            <div class="header optional" style="min-width: 150px; width: 150px;">Select record type:</div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
@@ -655,7 +655,7 @@ if(!$format) $format='csv';
         </div>                    
         <div>
             <div id="lbl_dependencies_preview" class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
-                <label>Dependencies:</label>
+                Dependencies:
             </div>
             <div class="input-div">
                 <div id="dependencies_preview" xclass="ui-widget-content" 

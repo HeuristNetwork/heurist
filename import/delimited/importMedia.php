@@ -167,31 +167,31 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     <fieldset style="padding-top:1em;"><legend style="display:none"></legend>
            
             <div>
-                <label style="color:red">URL/Path</label><br>
+                <span style="color:red">URL/Path</span><br>
                 <select id="field_url" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
                 <br>
                 <input id="field_download" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:0px"/>
-                <label>Get file from URL, upload and register as a local file in the database</label>
+                <span>Get file from URL, upload and register as a local file in the database</span>
             </div>
             <div>
                 <br>
-                <label>Description</label><br>
+                <span>Description</span><br>
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <!-- Separator for description field for multivalue 
             <div>
-                <label>Description separator</label><br>
+                <span>Description separator</span><br>
                 <input id="field_desc_sep" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px" value=", Download "/>
             </div>
             -->
             <div>
                 <br>
                 <input id="field_desc_concat" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:0px"/>
-                <label> Concatenate additional fields past first delimiter with Description</label>
+                <span> Concatenate additional fields past first delimiter with Description</span>
             </div>
             
             

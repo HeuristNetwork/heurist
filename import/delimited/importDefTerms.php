@@ -172,22 +172,22 @@ separate term and each of these values with comma or tab.
     <fieldset style="padding-top:1em;" class="trm_import"><legend style="display:none"></legend>
            
             <div>
-                <label style="color:red">Term (Label)</label><br>
+                <span style="color:red">Term (Label)</span><br>
                 <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
-                <label>Standard Code</label><br>
+                <span>Standard Code</span><br>
                 <select id="field_code" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
-                <label>Description</label><br>
+                <span>Description</span><br>
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
-                <label>Semantic/Reference URI</label><br>
+                <span>Semantic/Reference URI</span><br>
                 <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
@@ -196,24 +196,24 @@ separate term and each of these values with comma or tab.
     <fieldset style="padding-top:1em;display:none" class="trm_translation">
             <legend>Define field for reference</legend>
             <div>
-                <label>Term (Label)</label><br>
+                <span>Term (Label)</span><br>
                 <select id="field_ref_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div style="display:none">
-                <label>OR Term ID</label><br>
+                <span>OR Term ID</span><br>
                 <select id="field_ref_id" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             
-            <br><label>Define fields with translated values</label>
+            <br><span>Define fields with translated values</span>
             <div>
-                <label>Term (Label)</label><br>
+                <span>Term (Label)</span><br>
                 <select id="field_trn_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
-                <label>Description</label><br>
+                <span>Description</span><br>
                 <select id="field_trn_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>

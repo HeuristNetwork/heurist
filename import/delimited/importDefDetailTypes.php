@@ -168,32 +168,32 @@
 					<p style="padding-top:0.4em; margin-bottom: 10px;">and, select field assignment<br>(Name, Description and Type are required)</p>
 
 					<div>
-						<label style="color:red">Name</label><br>
+						<span style="color:red">Name</span><br>
 						<select id="field_name" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label style="color: red;">Description</label><br>
+						<span style="color: red;">Description</span><br>
 						<select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label style="color: red;">Type</label><br>
+						<span style="color: red;">Type</span><br>
 						<select id="field_type" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Vocabulary ID</label><br>
+						<span>Vocabulary ID</span><br>
 						<select id="field_vocab" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Record Type Target</label><br>
+						<span>Record Type Target</span><br>
 						<select id="field_target" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Semantic/Reference URI</label><br>
+						<span>Semantic/Reference URI</span><br>
 						<select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
