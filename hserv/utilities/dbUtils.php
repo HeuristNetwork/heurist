@@ -1453,7 +1453,7 @@ class DbUtils {
     * @param $db_source - source database by default current one (HEURIST_DBNAME)
     * @param mixed $db_target - target database
     * @param mixed $nodata - if true only defintions will be clone (no Records)
-    * @param false $isCloneTemplate - clone from curated registered datbase -
+    * @param false $isCloneTemplate - clone from curated registered datbase -NOT USED ANYMORE
     *           db onwer will be changed to current user
     */
     public static function databaseCloneFull($db_source, $db_target, $nodata=false, $isCloneTemplate=false)
@@ -1466,7 +1466,6 @@ class DbUtils {
             $db_source = HEURIST_DBNAME;
         }
         
-        $isCloneTemplate = false;
         //$system = self::$system;
         $mysqli = self::$mysqli;
         $ugr_ID = self::$system->get_user_id(); //current user

@@ -1735,7 +1735,7 @@ if($active_all || in_array('expected_terms', $active)) {
                         $is_first = false;
                         ?>
                         <h3 style="padding-left:2px">Records with terms not in the list of terms specified for the field</h3>
-                        <span><a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
+                        <span><a target="_new" href="#show_all" onclick="{document.getElementById('link_wrongterms').click(); return false;}">(show results as search)</a></span>
                         <table role="presentation">
                         <tr>
                             <td style="width: 30px;text-align:left">Record</td>
@@ -2633,7 +2633,7 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
                     
 <?php                    if(count($ids2_lng)>0){ ?>
 
-                    <label><input type=checkbox onclick="{mark_all_by_class(event.target, 'invalid_lng');}">Mark with wrong longitudes</label>
+                    <label><input type=checkbox onchange="{mark_all_by_class(event.target, 'invalid_lng');}">Mark with wrong longitudes</label>
                     &nbsp;&nbsp;
                     <span style="font-size:0.9em">To fix longitudes (less than -180 or greater than 180 deg) click here:
                         <button
