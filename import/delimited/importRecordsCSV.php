@@ -190,7 +190,7 @@ if(!$format) $format='csv';
 
         <div id="file_name2" style="display: inline-block;"> 
             <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span> 
-            <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+            <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
         </div>
 
         <fieldset style="width:380px;"><legend style="display:none"></legend>
@@ -337,7 +337,7 @@ if(!$format) $format='csv';
                     Back to start</div>
 
                 <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
-                    Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+                    Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;">&nbsp;</h2>
                     <a href="#" id="btnSetPrimaryRecType"
                                 title="Change primary record type"
                     style="margin-left:10px;font-size:0.9em;text-decoration:none;color:blue;font-style:italic">change target</a>
@@ -346,7 +346,7 @@ if(!$format) $format='csv';
             </div>
             <div id="file_name" style="display: inline-block;"> 
                 <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>  
-                <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+                <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
             </div>
             
             <div id="btnClearFile"  style="float: right;margin-right:80px;"

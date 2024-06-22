@@ -154,7 +154,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             <div id="mapToolbarDiv" style="height:50px;padding:1em 0.2em">
                     
                 <div class="div-table-cell">
-                    <label>Find:</label>
+                    <label for="input_search">Find:</label>
                     <input id="input_search" class="text ui-widget-content ui-corner-all" 
                             style="max-width: 100px; min-width: 6em; width: 100px; margin-right:0.2em"/>
                     <div id="btn_search_start"></div>
@@ -191,8 +191,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                 
                 <div style="padding-top:20px">
-                    <label>Select shape to draw</label><br>
-                    <label>Click to add points</label><br><br>
+                    <span>Select shape to draw</span><br>
+                    <span>Click to add points</span><br><br>
                     <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
@@ -226,7 +226,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             
             -->
             <div>
-                <label>Paste geo data in supported format (GeoJSON,.....)</label>
+                <span>Paste geo data in supported format (GeoJSON,.....)</span>
             </div>
             <textarea cols="" rows="" id="geodata_textarea"
                 style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>

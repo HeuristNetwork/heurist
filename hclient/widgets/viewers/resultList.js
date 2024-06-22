@@ -3827,6 +3827,9 @@ $.widget( "heurist.resultList", {
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
+        
+        if(!this._currentRecordset) return;
+        
         if(response.status == window.hWin.ResponseStatus.OK){
 
             if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 

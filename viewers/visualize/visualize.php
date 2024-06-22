@@ -49,7 +49,7 @@ if(@$isDatabaseStructure == 1){
             style="border-left: solid 1px gray; min-width:90px">
             
             <div id="setGravityMode">
-                <label class="ui-controlgroup-label" style="border:none;background:none">gravity</label> 
+                <span class="ui-controlgroup-label" style="border:none;background:none">gravity</span> 
                 <button id="gravityMode0" name="gravityMode" value="off">off</button>
                 <button id="gravityMode1" name="gravityMode" value="touch">on</button>           
             </div>
@@ -67,7 +67,7 @@ if(@$isDatabaseStructure == 1){
         <!-- -->
         <div id="setDivNodes" class="toolbar-section advanced" 
             style="display:none;padding-left:15px; min-width:190px">
-            <label>Nodes</label>
+            <span>Nodes</span>
             <div class="colorblock" style="margin-top:-4px;width:auto;" title="Color of nodes">
                 <input id="entityColor" style="width:0px;border:none"/></div>
                 
@@ -85,14 +85,14 @@ if(@$isDatabaseStructure == 1){
         <!-- add advanced class to toggle this section -->
         <div id="setDivLinks" class="toolbar-section advanced" 
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
-            <label>Links</label>
+            <span>Links</span>
             <label><input id="linksEmpty" title="Show empty links" type="checkbox"/>&nbsp;empty</label>
             <label><input id="expand-links" title="Expand all links" type="checkbox"/>&nbsp;expand</label>
         </div>
         
         <div id="setDivLinks2" class="toolbar-section" 
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
-            <label>Links</label>
+            <span>Links</span>
 
             <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/<input id="linksPathColor_inpt" style="width:0px;border:none"/></div>
             
@@ -118,7 +118,7 @@ if(@$isDatabaseStructure == 1){
         <!-- add advanced class to toggle this section -->
         <div id="setDivLabels" class="toolbar-section" 
             style="display:none;border-left: solid 1px gray; padding-left: 10px; min-width:140px;">
-            <label>Labels</label>
+            <span>Labels</span>
 
             <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden" style="margin: 5px;">
             <div id="textColor" class="xcolorblock" title="Text color">Text</div>
@@ -157,17 +157,17 @@ if(@$isDatabaseStructure == 1){
     <ul class="split_bar">
         <div class="dropdown1" style="position:absolute;left:0px;top:10px;">
 
-            <label id="nodecontrolbox">Node Control</label>
+            <span id="nodecontrolbox">Node Control</span>
             <div class="dropdown-content1"></a></li>
 
                 <div>
-                    <label>Select Mode: </label>
+                    <span>Select Mode: </span>
                     <button id="btnSingleSelect" name="selectMode" value="single">"Select and drag nodes"</button>
                     <button id="btnMultipleSelect" name="selectMode" value="multi">Select multiple nodes</button>
                 </div>
 
                 <div>
-                    <label style="border:none;background:none">Gravity:</label>
+                    <span style="border:none;background:none">Gravity:</span>
                     <div id="setGravityMode" style="padding-left:10px">
                         <button id="gravityMode0" name="gravityMode" value="off">off</button>
                         <button id="gravityMode1" name="gravityMode" value="touch">on</button> <!-- onclick="refreshButton();" -->
@@ -183,10 +183,10 @@ if(@$isDatabaseStructure == 1){
 
     <ul class="split_bar">
         <div class="dropdown2" style="position: absolute;left: 130px;top:10px; ">
-            <label id="nodecontrolbox">Link Control</label>
+            <span id="nodecontrolbox">Link Control</span>
             <div class="dropdown-content2">
                 <div>
-                    <label>Links</label>
+                    <span>Links</span>
                     <label><input id="linksEmpty" title="Show empty links" type="checkbox" />&nbsp;empty</label>
                     <label><input id="expand-links" title="Expand all links" type="checkbox" />&nbsp;expand</label>
                 </div>
@@ -207,7 +207,7 @@ if(@$isDatabaseStructure == 1){
 
     <ul class="split_bar">
         <div class="dropdown3" style="position: absolute;left: 250px;top:10px;">
-            <label id="nodecontrolbox">Graph Control</label>
+            <span id="nodecontrolbox">Graph Control</span>
             <div class="dropdown-content3">
                 <!-- Added Refresh Graph Buttons - Travis Doyle 19/9-->
                 <div>
@@ -216,22 +216,22 @@ if(@$isDatabaseStructure == 1){
                     <button type="button" id="closegraphbutton" onclick="window.close();">Close Fullscreen</button>
                 </div>
                 <div>
-                    <label id="viewnode" class="ui-controlgroup-label" style="border:none;background:none">View Mode:
-                    </label>
+                    <span id="viewnode" class="ui-controlgroup-label" style="border:none;background:none">View Mode:
+                    </span>
                     <button id="btnViewModeIcon" name="videMode" value="icons">Icons</button>
                     <button id="btnViewModeInfo" name="videMode" value="infoboxes">Info</button>
                     <button id="btnViewModeFull" name="videMode" value="infoboxes_full">Info + Links</button>
                 </div>
 
                 <div>
-                    <label class="ui-controlgroup-label" style="border:none;background:none">Set Zoom: </label>
+                    <span class="ui-controlgroup-label" style="border:none;background:none">Set Zoom: </span>
                     <button id="btnZoomIn" style="width:20px">Zoom In</button>
                     <button id="btnZoomOut" style="width:20px">Zoom Out</button>
                     <button id="btnFitToExtent" style="width:20px">Fit to extent</button>
                 </div>
 
                 <div id="setDivExport">
-                    <label class="ui-controlgroup-label" style="border:none;background:none">Export:</label>
+                    <span class="ui-controlgroup-label" style="border:none;background:none">Export:</span>
                     <button type="button" id="gephi-export" onclick="getGephiFormat()">GEPHI</button>
                     <button type="button" id="embed-export">Embed</button>
                 </div>
@@ -239,7 +239,7 @@ if(@$isDatabaseStructure == 1){
 
             <!-- add advanced class to toggle this section -->
             <div id="setDivLabels" style="display:none; padding-left: 10px; min-width:140px;">
-                <label>Labels</label>
+                <span>Labels</span>
                 <input type="checkbox" id="textOnOff" value="on" title="Show labels when infobox is hidden"
                     style="margin: 5px;">
                 <div id="textColor" class="xcolorblock" title="Text color">Text</div>
@@ -288,8 +288,8 @@ if(@$isDatabaseStructure == 1){
      <p>Embed this Network Diagram in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; 
  for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
      <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the graph, or use the URL on its own. The graph will be generated live from the database using the current search criteria whenever the graph is loaded. Use the web-safe version if the readable version does not work</p>
-     <label style="font-size:0.9em">Readable code:</label>
+     <label style="font-size:0.9em" for="code-textbox">Readable code:</label>
      <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
-     <label style="font-size:0.9em">Web-safe code:</label>
+     <label style="font-size:0.9em" for="code-textbox2">Web-safe code:</label>
      <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
 </div>

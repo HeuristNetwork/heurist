@@ -452,7 +452,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                     To save this map for future access or embedding in websites, enter a title and click Save Map. We suggest using a concise but informative title. The map layers and style can be edited later.
                 </div>
                 <div style="padding:6px;display:inline-block">
-                    <label>Map title</label>
+                    <label for="mapspace_name">Map title</label>
                     <input size="60" id="mapspace_name"/>
                     <button id="save-button">Save Map</button>
                 </div>

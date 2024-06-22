@@ -156,7 +156,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 
                     });
 
-                    var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
+                    var ele = $('#ugr_CaptchaCode')
                     ele.parent().css({
                         display: 'inline-block', float: 'left', 'min-width': 90, width: 90});            
 
@@ -233,7 +233,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         var $dd = $('#imgdiv');
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
-            var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
+            var ele = $('#ugr_CaptchaCode')
             ele.load(baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty(); //find("#img").remove();
@@ -849,12 +849,12 @@ a{
                     <h3>Congratulations, your new database <span id="newdbname"></span> has been created</h3>
                     
                     <div style="padding:5px 0px">
-                        <label style="text-align:right;min-width:180px;display:inline-block">Owner:&nbsp;&nbsp;</label>
+                        <span style="text-align:right;min-width:180px;display:inline-block">Owner:&nbsp;&nbsp;</span>
                         <span style="font-weight:bold" id="newusername"></span>
                     </div>
                     
                     <div style="padding:5px 0px">
-                        <label style="text-align:right;min-width:180px;display:inline-block">URL:&nbsp;&nbsp;</label>
+                        <span style="text-align:right;min-width:180px;display:inline-block">URL:&nbsp;&nbsp;</span>
                         <span style="font-weight:bold" id="newdblink"></span>
                     </div>
                     
@@ -894,7 +894,7 @@ a{
             <!-- SCREEN#8 Terms and conditions --> 
             <div class="center-box screen8" style="width:1330;height:auto;margin:10px;width:auto;">
                 <h1 style="display:none">Databases</h1>
-                <label>Filter: </label>
+                <span>Filter: </span>
                 <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>
                 <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="float:right;display:none">New Database</button>
 
