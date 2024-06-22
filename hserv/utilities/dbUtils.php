@@ -1151,7 +1151,7 @@ class DbUtils {
             
             $error_msg = 'Unable to clean '.htmlspecialchars($remark);
             
-            $system->addError(HEURIST_ACTION_BLOCKED, $error_msg, $mysqli->error);
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg, $mysqli->error);
             if($verbose) {
                 echo "<br><p>Warning: $error_msg - SQL error: ".$mysqli->error."</p>";
             }
@@ -1479,7 +1479,7 @@ class DbUtils {
         
         $sErrorMsg = DbUtils::databaseValidateName($db_target, 1); //unique
         if ($sErrorMsg!=null) {
-            $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
+            self::$system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
             return false;
         }
         
@@ -1510,12 +1510,12 @@ class DbUtils {
                 return false;
             }
             
-            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
-                        HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
-            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/xsl-templates", 
-                        HEURIST_FILESTORE_ROOT.$targetdbname."/xsl-templates" );
-            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/entity", 
-                        HEURIST_FILESTORE_ROOT.$targetdbname."/entity" );
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source."/smarty-templates", 
+                        HEURIST_FILESTORE_ROOT.$db_target."/smarty-templates" );
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source."/xsl-templates", 
+                        HEURIST_FILESTORE_ROOT.$db_target."/xsl-templates" );
+            folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source."/entity", 
+                        HEURIST_FILESTORE_ROOT.$db_target."/entity" );
 
         }else if(!folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source, HEURIST_FILESTORE_ROOT.$db_target )){
                 folderDelete($database_folder);  

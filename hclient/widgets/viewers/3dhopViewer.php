@@ -101,7 +101,7 @@ define('EDIR','../../../external/3DHOP/');
 <script type="text/javascript" src="<?php echo EDIR;?>js/init.js"></script>
 </head>
 <body>
-<div id="3dhop" class="tdhop" onmousedown="if (event.preventDefault) event.preventDefault()"><div id="tdhlg"></div>
+<div id="3dhop" class="tdhop" onmousedown="if (event.preventDefault) event.preventDefault()" role="button" tabIndex={0}><div id="tdhlg"></div>
  <div id="toolbar">
   <img alt id="home"     title="Home"                  src="<?php echo EDIR;?>skins/dark/home.png"            /><br>
   <img alt id="zoomin"   title="Zoom In"               src="<?php echo EDIR;?>skins/dark/zoomin.png"          /><br>
