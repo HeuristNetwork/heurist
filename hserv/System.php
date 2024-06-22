@@ -864,16 +864,16 @@ class System {
     */
     public function set_dbname_full($db, $dbrequired=true){
         
-        $error = mysql__check_dbname($db);
+        $db_check_result = mysql__check_dbname($db);
         
-        if($error===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
+        if($db_check_result===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
             list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }else{
             $this->dbname = null;
             $this->dbname_full = null;
             
             if($dbrequired){
-                $this->addErrorArr($error);
+                $this->addErrorArr($db_check_result);
                 $this->mysqli = null;
                 return false;
             }

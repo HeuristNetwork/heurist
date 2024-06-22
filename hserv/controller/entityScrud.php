@@ -54,8 +54,11 @@ if (@$argv) {
     $system = new System();
     
     $dbdef_cache = null;
-    $error = System::dbname_check($dbname);
-    if($error==null 
+    
+    $db_check_result = mysql__check_dbname( $dbname );
+    
+    if($db_check_result===true 
+        && preg_match('/[A-Za-z0-9_\$]/', $dbname)   //addtional check for snyk
         && isset($defaultRootFileUploadURL)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
     {
@@ -76,7 +79,7 @@ if (@$argv) {
         && (@$_REQUEST['entity']=='all' || @$_REQUEST['entity']=='relevance')
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
-            if($error==null){
+            if($db_check_result===true){
                 
                 if($_REQUEST['entity']=='relevance'){
                     $_REQUEST['entity'] = 'all';
