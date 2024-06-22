@@ -58,7 +58,7 @@ if (@$argv) {
     $db_check_result = mysql__check_dbname( $dbname );
     
     if($db_check_result===true 
-        //&& preg_match('/[A-Za-z0-9_\$]/', $dbname)   //addtional check for snyk
+        && preg_match('/[A-Za-z0-9_\$]/', $dbname)   //addtional check for snyk
         && isset($defaultRootFileUploadURL)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
     {
