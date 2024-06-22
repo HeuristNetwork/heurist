@@ -307,6 +307,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     }
     
     var iconSize = 16;
+    let is_admin = window.hWin.HAPI4.is_admin();
     
     var overlay = null;
 
@@ -622,236 +623,248 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     //drag and edit icons and actions for records
     if(type=='record'){
                  
-      var drag2 = d3.behavior.drag()
-         .on("dragstart", function(d, i){
-            d3.event.sourceEvent.stopPropagation();
+        var drag2 = d3.behavior.drag()
+            .on("dragstart", function(d, i){
+                d3.event.sourceEvent.stopPropagation();
 
-            drag_link_source_id = d.id;
-           
-            var node = $(".node.id"+d.id);
-            var x = node.offset().left - 5;
-            var y = node.offset().top - 55;
-
-            var svgPos = $("svg").position();
-            var dx = (x < (event.clientX - svgPos.left))?-2:2;
-            var dy = (y < (event.clientY - svgPos.top))?-2:2;
+                drag_link_source_id = d.id;
             
-            drag_link_line = svg.append("svg:line")
-               .attr("stroke","#ff0000")
-               .attr("stroke-width",4)
-               .attr("x1", x).attr("y1", y)
-               .attr("x2", event.clientX - svgPos.left+dx)
-               .attr("y2", event.clientY - svgPos.top+dy);
-         })
-         .on("drag", function(){
-            if(drag_link_line){
-                //drag_link_line
-                //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
-                //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
+                var node = $(".node.id"+d.id);
+                var x = node.offset().left - 5;
+                var y = node.offset().top - 55;
+
                 var svgPos = $("svg").position();
-
-            var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
-            var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
-
-                drag_link_line
-                    .attr("x2", event.clientX - svgPos.left+dx)
-                    .attr("y2", event.clientY - svgPos.top+dy);
+                var dx = (x < (event.clientX - svgPos.left))?-2:2;
+                var dy = (y < (event.clientY - svgPos.top))?-2:2;
                 
-            }
-            
-         })
-         .on("dragend", function(){
-             if(drag_link_source_id!=null && drag_link_target_id!=null){
-                    _addNewLinkField(drag_link_source_id, drag_link_target_id);  
-                    setTimeout(function(){drag_link_line.attr("stroke","#00ff00");}, 500);
-             }else{
-                drag_link_source_id = null;
-                if(drag_link_line) drag_link_line.remove();
-                drag_link_line = null;
-             }
-         });
+                drag_link_line = svg.append("svg:line")
+                .attr("stroke","#ff0000")
+                .attr("stroke-width",4)
+                .attr("x1", x).attr("y1", y)
+                .attr("x2", event.clientX - svgPos.left+dx)
+                .attr("y2", event.clientY - svgPos.top+dy);
+            })
+            .on("drag", function(){
+                if(drag_link_line){
+                    //drag_link_line
+                    //.attr("x2", Number(drag_link_line.attr("x2"))+d3.event.dx)
+                    //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
+                    var svgPos = $("svg").position();
 
-      var icons_cnt = settings.isDatabaseStructure?4:3;
+                var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
+                var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
 
-      widthTitle = widthTitle+(iconSize+3)*2;
-      if(widthTitle>maxWidth) maxWidth = widthTitle;
+                    drag_link_line
+                        .attr("x2", event.clientX - svgPos.left+dx)
+                        .attr("y2", event.clientY - svgPos.top+dy);
+                    
+                }
+                
+            })
+            .on("dragend", function(){
+                if(drag_link_source_id!=null && drag_link_target_id!=null){
+                        _addNewLinkField(drag_link_source_id, drag_link_target_id);  
+                        setTimeout(function(){drag_link_line.attr("stroke","#00ff00");}, 500);
+                }else{
+                    drag_link_source_id = null;
+                    if(drag_link_line) drag_link_line.remove();
+                    drag_link_line = null;
+                }
+            });
 
-      var menuarrow_transform = "translate("+(maxWidth-iconSize)+",3)";
-      var divider, field_dividers;
+        var icons_cnt = settings.isDatabaseStructure?4:3;
 
-      var menuButton = overlay
-                .append("svg:image")
-                .attr("class", "icon info-mode menu-close")
-                .attr("xlink:href", function(d){
-                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_1.png'
-                })
-                .attr("transform", menuarrow_transform)
-                .attr("height", iconSize)
-                .attr("width", iconSize)
-                .on("mouseup", function(d) {
+        widthTitle = widthTitle+(iconSize+3)*2;
+        if(widthTitle>maxWidth) maxWidth = widthTitle;
 
-                    var $icon = $(this);
-                    var dem = this.getBBox();
+        var menuarrow_transform = "translate("+(maxWidth-iconSize)+",3)";
+        var divider, field_dividers;
 
-                    if($icon.hasClass('menu-close')){
+        if(!settings.isDatabaseStructure || is_admin){
 
-                        var x = dem.x + dem.width / 2;
-                        var y = dem.y + dem.height / 2;
-
-                        $icon.attr('transform', menuarrow_transform + 'rotate(180,'+x+','+y+')');
-
-                        // Set optimal width & height
-                        rect_full.attr("width", maxWidth+icons_cnt*iconSize-3);  
-                        rect_info.attr("width", maxWidth+icons_cnt*iconSize-3);
-
-                        if(divider != null) divider.attr("x2", maxWidth+icons_cnt*iconSize-3);
-
-                        if(field_dividers != null) field_dividers.attr("x2", maxWidth+icons_cnt*iconSize-3);
-
-                        $(overlay.node()).find('.addLink, .editBtn, .close').show();
-                    }else{
-
-                        $icon.attr('transform', menuarrow_transform);
-
-                        // Set optimal width & height
-                        rect_full.attr("width", maxWidth);  
-                        rect_info.attr("width", maxWidth);
-
-                        if(divider != null) divider.attr("x2", maxWidth);
-
-                        if(field_dividers) field_dividers.attr("x2", maxWidth);
-
-                        $(overlay.node()).find('.addLink, .editBtn, .close').hide();
-                    }
-                    $icon.toggleClass('menu-open menu-close');
-                    tick();
-                });
-      
-      if( !settings.isDatabaseStructure ||  settings.onRefreshData){
-      
-          //link button      
-          var btnAddLink = overlay
-                    .append("svg:image")
-                    .attr("class", "icon node-action addLink")
-                    .attr("xlink:href", function(d) {
-                          return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
+            overlay.append("svg:image")
+                    .attr("class", "icon info-mode menu-close")
+                    .attr("xlink:href", function(d){
+                        return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_1.png'
                     })
-                    .attr("transform", "translate("+(maxWidth+(icons_cnt-3)*iconSize-3)+",3)")
+                    .attr("transform", menuarrow_transform)
                     .attr("height", iconSize)
                     .attr("width", iconSize)
-                    .style('display', 'none')
-                    .on("mousedown", function(d) {
-                        
-                        var svgPos = $("svg").position();
-                        var x = event.clientX - svgPos.left;
-                        var y = event.clientY + 26 - svgPos.top 
-                        
-                        var hintoverlay = svg.append("g")
-                                             .attr("class", "hintoverlay")
-                                             .attr("transform", "translate(" +x +','+y+')');
-                        
-                        var hintrect = hintoverlay.append("rect")
-                                                  .attr("class", "semi-transparant")              
-                                                  .attr("x", 0)
-                                                  .attr("y", 0)
-                                                  .attr("rx", 0)
-                                                  .attr("ry", 0)
-                                                  .style('stroke','#000000')
-                                                  .style("stroke-width", 0.5);
-                           
-                        var hinttext = hintoverlay.append("text")
-                                                  .text('drag me to another node …')
-                                                  .attr('x',3)                
-                                                  .attr('y',10)
-                                                  .attr("fill", fontColor)
-                                                  .style("font-style", 'italic', "important")
-                                                  .style("font-size", 10, "important");
+                    .style('cursor', 'pointer')
+                    .on("mouseup", function(d) {
 
-                        var bbox = hinttext[0][0].getBBox();
+                        var $icon = $(this);
+                        var dem = this.getBBox();
 
-                        hintrect.attr("width", bbox.width+6)
-                                .attr("height", bbox.height+4);
+                        if($icon.hasClass('menu-close')){
 
-                        $('.hintoverlay').fadeOut(3000, function() {
-                              $(this).remove();
-                        });
-                    })
-                    .call(drag2);
+                            var x = dem.x + dem.width / 2;
+                            var y = dem.y + dem.height / 2;
 
-          btnAddLink.append("title")
-                    .text(function(d) {
-                         return 'Click and drag to another node to create link';
+                            let box_width = maxWidth + icons_cnt * iconSize - (settings.isDatabaseStructure ? 3 : 12);
+
+                            $icon.attr('transform', menuarrow_transform + 'rotate(180,'+x+','+y+')');
+
+                            // Set optimal width & height
+                            rect_full.attr("width", box_width);
+                            rect_info.attr("width", box_width);
+
+                            if(divider != null) divider.attr("x2", box_width);
+
+                            if(field_dividers != null) field_dividers.attr("x2", box_width);
+
+                            $(overlay.node()).find('.addLink, .editBtn, .close').show();
+                        }else{
+    
+                            $icon.attr('transform', menuarrow_transform);
+    
+                            // Set optimal width & height
+                            rect_full.attr("width", maxWidth);  
+                            rect_info.attr("width", maxWidth);
+    
+                            if(divider != null) divider.attr("x2", maxWidth);
+    
+                            if(field_dividers) field_dividers.attr("x2", maxWidth);
+    
+                            $(overlay.node()).find('.addLink, .editBtn, .close').hide();
+                        }
+                        $icon.toggleClass('menu-open menu-close');
+                        tick();
                     });
-      }
-
-      //edit button
-      var btnEdit = overlay
-            .append("svg:image")
-            .attr("class", "icon node-action editBtn")
-            .attr("xlink:href", function(d) {
-                  return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
-            })
-            .attr("transform", "translate("+(maxWidth+(icons_cnt-2)*iconSize-3)+",3)")
-            .attr("height", iconSize)
-            .attr("width", iconSize)
-            .style('display', 'none')
-            .on("mouseup", function(d) {
-
-                event.preventDefault();
-                
-                if(settings.isDatabaseStructure){
-                    if(window.hWin.HAPI4.is_admin())
-                      _editRecStructure(rty_ID);    
-                }else{
-                      window.open(window.hWin.HAPI4.baseURL
-                          +'?fmt=edit&db='+window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
-                }  
-            });  
-                
-      if(settings.isDatabaseStructure){ 
-
-        if (window.hWin.HAPI4.is_admin()) { // add edit button
-
-            btnEdit.append("title")
-                   .text(function(d) {
-                        return 'Click to edit the entity / record type structure';
-                   });
-        }else{ // disabled buttons
-
-            btnEdit.style('display', 'none');
-            btnAddLink.style('display', 'none');
         }
-      }else{ // add edit button
+
+        if(!settings.isDatabaseStructure || settings.onRefreshData){
         
-        btnEdit.append("title")
-               .text(function(d) {
-                    return 'Click to edit the record';
-               });
-      }
-                
+            //link button      
+            var btnAddLink = overlay
+                        .append("svg:image")
+                        .attr("class", "icon node-action addLink")
+                        .attr("xlink:href", function(d) {
+                            return window.hWin.HAPI4.baseURL+'hclient/assets/edit-link.png';
+                        })
+                        .attr("transform", "translate("+(maxWidth+(icons_cnt-3)*iconSize-3)+",3)")
+                        .attr("height", iconSize)
+                        .attr("width", iconSize)
+                        .style('display', 'none')
+                        .style('cursor', 'pointer')
+                        .on("mousedown", function(d) {
 
-      if(settings.isDatabaseStructure){
+                            var svgPos = $("svg").position();
+                            var x = event.clientX - svgPos.left;
+                            var y = event.clientY + 26 - svgPos.top;
 
-        // Close button
-        var close = overlay.append("g")
-                           .attr("class", "close node-action")
-                           .attr("transform", "translate("+(maxWidth+(icons_cnt-1)*iconSize-3)+",3)")  //position of icon maxWidth-iconSize
-                           .style('display', 'none')
-                           .on("mouseup", function(d) {
-                               $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();
+                            var hintoverlay = svg.append("g")
+                                                .attr("class", "hintoverlay")
+                                                .attr("transform", "translate(" +x +','+y+')');
+                            
+                            var hintrect = hintoverlay.append("rect")
+                                                    .attr("class", "semi-transparant")              
+                                                    .attr("x", 0)
+                                                    .attr("y", 0)
+                                                    .attr("rx", 0)
+                                                    .attr("ry", 0)
+                                                    .style('stroke','#000000')
+                                                    .style("stroke-width", 0.5);
+                            
+                            var hinttext = hintoverlay.append("text")
+                                                    .text('drag me to another node …')
+                                                    .attr('x',3)                
+                                                    .attr('y',10)
+                                                    .attr("fill", fontColor)
+                                                    .style("font-style", 'italic', "important")
+                                                    .style("font-size", 10, "important");
+
+                            var bbox = hinttext[0][0].getBBox();
+
+                            hintrect.attr("width", bbox.width+6)
+                                    .attr("height", bbox.height+4);
+
+                            $('.hintoverlay').fadeOut(3000, function() {
+                                $(this).remove();
                             });
-                           
-        // Close rectangle                                                                     
-        close.append("rect")
-             .attr("class", "close-button");
-        
-        // Close text        
-        close.append("text")
-             .attr("class", "close-text")
-             .text("x")
-             .attr("x", iconSize/4-3)
-             .attr("y", 7);       
-      }
+                        })
+                        .call(drag2);
+
+            btnAddLink.append("title")
+                        .text(function(d) {
+                            return 'Click and drag to another node to create link';
+                        });
+        }
+
+        //edit button
+        var btnEdit = overlay
+                .append("svg:image")
+                .attr("class", "icon node-action editBtn")
+                .attr("xlink:href", function(d) {
+                    return window.hWin.HAPI4.baseURL+'hclient/assets/edit-pencil.png';
+                })
+                .attr("transform", "translate("+(maxWidth+(icons_cnt-2)*iconSize-3)+",3)")
+                .attr("height", iconSize)
+                .attr("width", iconSize)
+                .style('display', 'none')
+                .style('cursor', 'pointer')
+                .on("mouseup", function(d) {
+
+                    event.preventDefault();
+                    
+                    if(settings.isDatabaseStructure){
+                        if(window.hWin.HAPI4.is_admin())
+                        _editRecStructure(rty_ID);    
+                    }else{
+                        window.open(window.hWin.HAPI4.baseURL
+                            +'?fmt=edit&db='+window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
+                    }  
+                });
+
+        if(settings.isDatabaseStructure){ 
+
+            if (is_admin) { // add edit button
+
+                btnEdit.append("title")
+                    .text(function(d) {
+                            return 'Click to edit the entity / record type structure';
+                    });
+            }else{ // disabled buttons
+
+                btnEdit.style('display', 'none');
+                btnAddLink.style('display', 'none');
+            }
+        }else{ // add edit button
+            
+            btnEdit.append("title")
+                .text(function(d) {
+                        return 'Click to edit the record';
+                });
+        }
+                    
+
+        if(settings.isDatabaseStructure){
+
+            let x_pos = is_admin ? maxWidth + (icons_cnt - 1) * iconSize - 3 : maxWidth - 13;
+
+            // Close button
+            var close = overlay.append("g")
+                            .attr("class", "close node-action")
+                            .attr("transform", `translate(${x_pos}, 7)`)
+                            .on("mouseup", function(d) {
+                                $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();
+                            });
+
+            // Close rectangle                                              
+            close.append("rect")
+                .attr("class", "close-button");
+
+            // Close text
+            close.append("text")
+                .attr("class", "close-text")
+                .text("x")
+                .attr("x", iconSize/4-3)
+                .attr("y", 7);
+                
+            if(is_admin){
+                close.style('display', 'none');
+            }
+        }
                 
     }else{
         maxHeight = maxHeight + 12;

@@ -76,7 +76,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 <div class="ft_preview">
                     <label class="small-header" style="min-width: 30px;vertical-align: super">From:</label>
                     <div style="display:inline-block;">
-                        <img alt src='../../assets/16x16.gif' id="source_rectype_img" 
+                        <img alt src='../../hclient/assets/16x16.gif' id="source_rectype_img" 
                             style="vertical-align:top;margin-left:10px;" />
                     
                         <h3 id="source_rectype" class="truncate" 
@@ -87,7 +87,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     
                     <label class="small-header" style="min-width: 30px;vertical-align: super">To:</label>
                     <div id="target_rectype_div" style="display:inline-block;">
-                        <img alt src='../../assets/16x16.gif' id="target_rectype_img" 
+                        <img alt src='../../hclient/assets/16x16.gif' id="target_rectype_img" 
                             style="vertical-align:top;margin-left:10px;" />
                     
                         <h3 id="target_rectype" class="truncate" 
