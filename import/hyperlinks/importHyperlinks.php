@@ -670,7 +670,7 @@ function print_link($url, $title) {
 <div class="input-row">
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="-1" checked="checked" onClick="selectExistingLink(<?php echo  $linkno ?>);">
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="-1" checked="checked" onchange="selectExistingLink(<?php echo  $linkno ?>);">
 			<b>New (add this URL to the database)</b>
 		</span>
 	</div>
@@ -684,7 +684,7 @@ function print_link($url, $title) {
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id); ?>" onClick="selectExistingLink(<?php echo  $linkno ?>);">
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id); ?>" onchange="selectExistingLink(<?php echo  $linkno ?>);">
 			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?php echo  htmlspecialchars($row[1]) ?>"><?php

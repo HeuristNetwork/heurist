@@ -488,7 +488,7 @@ if(!$format) $format='csv';
             <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
             <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
             
-            <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none"
+            <a href="#imp3" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
                 <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
             </a>           
@@ -555,15 +555,15 @@ if(!$format) $format='csv';
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                        <td width="50" class="mrr_update"><a href="#imp" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
+                                        <td width="50" class="mrr_update"><a href="#imp" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
-                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
-                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
+                                        <td width="50" class="mrr_insert"><a href="#imp" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
+                                        <td width="50" class="mrr_insert"><a href="#imp" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left>Blank match fields:</td>
                                         <td width="50" id="mrr_cnt_ignore"></td>

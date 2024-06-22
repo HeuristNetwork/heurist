@@ -186,7 +186,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
             <div id="rightpanel">
 
-                <label style="display:inline-block;">Draw color:</label>
+                <span style="display:inline-block;">Draw color:</span>
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
 
                 

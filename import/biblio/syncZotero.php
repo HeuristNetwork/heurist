@@ -153,7 +153,7 @@ if($fh_data==null || is_string($fh_data)){
         ?>            
                 <p class="ui-state-error" style="padding:20px;text-align:center">
                     Library key for Zotero synchronisation is not defined.<br><br>
-                    <a href="#" onclick="open_sysIdentification()">
+                    <a href="#dbprop" onclick="open_sysIdentification()">
                     Click here to edit properties which determine Zotero connection</a>
                 </p>                
                 </body>

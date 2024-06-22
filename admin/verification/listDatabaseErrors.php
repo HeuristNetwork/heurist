@@ -143,14 +143,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
             
             function open_selected_by_name(sname) {
                 var ids = get_selected_by_name( sname );
-                //var link = document.getElementById('selected_link');
-                //if (link) return false;
+                
                 if(ids){
                     window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
                 }
                 return false;
             }
 
+            /*
             function open_selected() {
                 var cbs = document.getElementsByName('bib_cb');
                 if (!cbs  ||  ! cbs instanceof Array)
@@ -165,7 +165,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     return false;
                 link.href = '<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids;
                 return true;
-            }
+            }*/
 
             function onEditFieldType(dty_ID){
                 
@@ -601,7 +601,7 @@ if($active_all || in_array('field_type', $active)) {
             <?php 
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                <div class="msgline"><b><a href="#invalid_terms1" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
                     <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidTermIDs'])?> invalid term ID<?=(count($row['invalidTermIDs'])>1?"s":"")?>
                     (code: <?= htmlspecialchars(implode(",",$row['invalidTermIDs']))?>)
@@ -610,7 +610,7 @@ if($active_all || in_array('field_type', $active)) {
             }//for
             foreach ($dtysWithInvalidNonSelectableTerms as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                <div class="msgline"><b><a href="#invalid_terms2" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
                     <?php echo htmlspecialchars($row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidNonSelectableTermIDs'])?> invalid non selectable term ID<?=(count($row['invalidNonSelectableTermIDs'])>1?"s":"")?>
                     (code: <?= htmlspecialchars(implode(",",$row['invalidNonSelectableTermIDs']))?>)
@@ -619,7 +619,7 @@ if($active_all || in_array('field_type', $active)) {
             }
             foreach ($dtysWithInvalidRectypeConstraint as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
+                <div class="msgline"><b><a href="#invalid_constr1" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
                     <?php echo htmlspecialchars( $row['dty_Name']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) has
                     <?= count($row['invalidRectypeConstraint'])?> invalid record type constraint<?=(count($row['invalidRectypeConstraint'])>1?"s":"")?>
                     (code: <?= htmlspecialchars(implode(",",$row['invalidRectypeConstraint']))?>)
@@ -660,7 +660,8 @@ if($active_all || in_array('default_values', $active)) {
             <?php 
             foreach ($rtysWithInvalidDefaultValues as $row) {
                 ?>
-                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= intval($row['rst_RecTypeID']) ?>); return false}'>
+                <div class="msgline"><b><a href="#ivalid_defval" 
+                     onclick='{ onEditRtStructure(<?= intval($row['rst_RecTypeID']) ?>); return false}'>
                     <?php echo htmlspecialchars($row['rst_DisplayName']); ?></a></b> field (code <?= intval($row['dty_ID']) ?>) in record type <?= htmlspecialchars($row['rty_Name']) ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').htmlspecialchars($row['rst_DefaultValue']) ?>)
                     <span style="font-style:italic"><?php echo htmlspecialchars($row['reason']); ?></span>
                 </div>
@@ -743,7 +744,8 @@ if($active_all || in_array('pointer_targets', $active)) {
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB');">(show selected as search)</a>
+                    <a target=_new href="#selected_link" 
+                        onClick="return open_selected_by_name('recCB');">(show selected as search)</a>
                 </span>
                 <div>To fix the inconsistencies, please click here:
                     <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixpointers=1','_self')">
@@ -753,7 +755,7 @@ if($active_all || in_array('pointer_targets', $active)) {
             <table role="presentation">
                 <tr>
                     <td colspan="6">
-                        <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
+                        <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
                     </td>
                 </tr>
                 <?php
@@ -1132,8 +1134,8 @@ if($active_all || in_array('empty_fields', $active)) {
             <div>
                 <h3>Records with empty fields</h3>
                 <span>
-                    <a target=_new href="javascript:void(0)" onclick="{document.getElementById('link_empty_values').click(); return false;}">(show results as search)</a>
-                    <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB6');">(show selected as search)</a>
+                    <a target="_new" href="#emptyfields1" onclick="{document.getElementById('link_empty_values').click(); return false;}">(show results as search)</a>
+                    <a target="_new" href="#selected_link" onClick="return open_selected_by_name('recCB6');">(show selected as search)</a>
                 </span>
 
                 <div>To REMOVE empty fields, please click here:
@@ -1146,7 +1148,7 @@ if($active_all || in_array('empty_fields', $active)) {
             <table role="presentation">
             <tr>
                 <td colspan="5">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
                 </td>
             </tr>
             <?php
@@ -1346,9 +1348,9 @@ if($active_all || in_array('date_values', $active)) {
                 ?>
 
                     <span style="margin-left:10px;">
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_corrected)) ?>'>
+                        <a target="_new" href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_corrected)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                        <a target="_new" href="#selected_link" style="display: inline-block;"
                                     onClick="return open_selected_by_name('datesCorrected');">(show selected as search)</a>
                     </span>
 
@@ -1358,7 +1360,7 @@ if($active_all || in_array('date_values', $active)) {
                     <tr>
                         <td colspan="7">
                             <label><input type=checkbox 
-                                        onclick="{mark_all_by_name(event.target, 'datesCorrected');}">Mark all</label>
+                                        onchange="{mark_all_by_name(event.target, 'datesCorrected');}">Mark all</label>
                         </td>
                     </tr>
 
@@ -1406,9 +1408,9 @@ if($active_all || in_array('date_values', $active)) {
                 ?>
 
                     <span style="margin-left:10px;">
-                        <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_suggested)) ?>'>
+                        <a target="_new" href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($was_suggested)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                        <a target="_new" href="#selected_link" style="display: inline-block;"
                                     onClick="return open_selected_by_name('datesSuggestion');">(show selected as search)</a>
                     </span>
 
@@ -1418,7 +1420,7 @@ if($active_all || in_array('date_values', $active)) {
                     <tr>
                         <td colspan="6">
                             <label><input type=checkbox 
-                                        onclick="{mark_all_by_name(event.target, 'datesSuggestion');}">Mark all</label>
+                                        onchange="{mark_all_by_name(event.target, 'datesSuggestion');}">Mark all</label>
                         </td>
                     </tr>
 
@@ -1451,7 +1453,7 @@ if($active_all || in_array('date_values', $active)) {
                     <span style="margin-left:10px;">
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($needs_manualfix)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                        <a target=_new href="#selected_link" style="display: inline-block;"
                                     onClick="return open_selected_by_name('datesManual');">(show selected as search)</a>
                     </span>
 
@@ -1461,7 +1463,7 @@ if($active_all || in_array('date_values', $active)) {
                     <tr>
                         <td colspan="6">
                             <label><input type=checkbox 
-                                        onclick="{mark_all_by_name(event.target, 'datesManual');}">Mark all</label>
+                                        onchange="{mark_all_by_name(event.target, 'datesManual');}">Mark all</label>
                         </td>
                     </tr>
 
@@ -1496,7 +1498,7 @@ if($active_all || in_array('date_values', $active)) {
                     <span style="margin-left:10px;">
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_values($is_ambigious)) ?>'>
                             (show results as search)</a>
-                        <a target=_new href='#' id=selected_link style="display: inline-block;"
+                        <a target=_new href="#selected_link" style="display: inline-block;"
                                     onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                     </span>
 
@@ -1527,7 +1529,7 @@ if($active_all || in_array('date_values', $active)) {
                     <tr>
                         <td>
                             <label><input type=checkbox 
-                                        onclick="{mark_all_by_name(event.target, 'datesAmbig');}">Mark all</label>
+                                        onchange="{mark_all_by_name(event.target, 'datesAmbig');}">Mark all</label>
                         </td>
                     </tr>
                 <?php
@@ -1629,7 +1631,7 @@ if($active_all || in_array('term_values', $active)) {
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB1');">(show selected as search)</a>
+                    <a target=_new href="#selected_link" onClick="return open_selected_by_name('recCB1');">(show selected as search)</a>
                 </span>
                 <div>To fix the inconsistencies, please click here:
                     <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
@@ -1640,7 +1642,7 @@ if($active_all || in_array('term_values', $active)) {
             <table role="presentation">
             <tr>
                 <td colspan="5">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
                 </td>
             </tr>
 
@@ -1891,7 +1893,7 @@ if($active_all || in_array('single_value', $active)) {
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link2 onClick="return open_selected_by_name('recCB2');">(show selected as search)</a>
+                    <a target=_new href="#selected_link" onClick="return open_selected_by_name('recCB2');">(show selected as search)</a>
                 </span>
             </div>
 
@@ -1899,7 +1901,7 @@ if($active_all || in_array('single_value', $active)) {
 
                 <tr>
                     <td colspan="5">
-                        <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB2');}">Mark all</label>
+                        <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB2');}">Mark all</label>
                     </td>
                 </tr>
 
@@ -1992,14 +1994,14 @@ if($active_all || in_array('required_fields', $active)) {
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-                    <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                    <a target=_new href="#selected_link" onClick="return open_selected_by_name('recCB3');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
             </div>
 
             <table role="presentation">
                 <tr>
                     <td colspan="4">
-                        <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB3');}">Mark all</label>
+                        <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB3');}">Mark all</label>
                     </td>
                 </tr>
 
@@ -2093,13 +2095,13 @@ if($active_all || in_array('nonstandard_fields', $active)) {
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-                    <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+                    <a target=_new href="#selected_link" onClick="return open_selected_by_name('recCB4');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
                 </span>
                 <table role="presentation">
 
                     <tr>
                         <td colspan="6">
-                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB4');}">Mark all</label>
+                            <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'recCB4');}">Mark all</label>
                         </td>
                     </tr>
 
@@ -2494,14 +2496,14 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids3) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href="#selected_link" onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="presentation">
 
             <tr>
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
                 </td>
             </tr>
 
@@ -2557,14 +2559,14 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids1) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href="#selected_link" onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="presentation">
 
             <tr>
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
                 </td>
             </tr>
 
@@ -2620,14 +2622,14 @@ if($active_all || in_array('geo_values', $active)){ // Check for geo fields that
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href="#selected_link" onClick="return open_selected_by_name('invalid_geo');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
         </span>
 
         <table role="presentation">
 
             <tr>
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'invalid_geo');}">Mark all</label>
                     
 <?php                    if(count($ids2_lng)>0){ ?>
 
@@ -2819,7 +2821,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $ids2) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_spaces');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href="#selected_link" onClick="return open_selected_by_name('multi_spaces');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
@@ -2827,7 +2829,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
 
             <tr>
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'multi_spaces');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'multi_spaces');}">Mark all</label>
                 </td>
             </tr>
 
@@ -2963,7 +2965,7 @@ if($active_all || in_array('multi_swf_values', $active)) {
         <span>
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= htmlspecialchars(implode(',', array_keys($completedRecords))) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <a target=_new href='#' id=selected_link5 onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
+            <a target=_new href="#selected_link" onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
@@ -2971,7 +2973,7 @@ if($active_all || in_array('multi_swf_values', $active)) {
 
             <tr>
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'multi_swf_values');}">Mark all</label>
+                    <label><input type=checkbox onchange="{mark_all_by_name(event.target, 'multi_swf_values');}">Mark all</label>
                 </td>
             </tr>
         <?php 

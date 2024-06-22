@@ -218,7 +218,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
                         <input type="radio" name="sa_upd" id="sa_upd21" value="1" class="text">&nbsp;
                         <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
                         
-                        <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none" onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
+                        <a href="#imp" style="margin: 0.3em;line-height: 17px;text-decoration:none" onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
                             <span class="ui-icon ui-icon-triangle-1-s" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
                         </a>           
                         

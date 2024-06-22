@@ -154,7 +154,7 @@ if(isset($_POST['data'])) {
        <div style="display:block;padding-top:1em;text-align:right;width:100%">
             <button type="button" id="prepare"
                     class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-                    role="button" aria-disabled="false" onClick="prepare()">
+                    aria-disabled="false" onClick="prepare()">
                     <span class="ui-button-text">Prepare emails</span>
             </button>
        </div>

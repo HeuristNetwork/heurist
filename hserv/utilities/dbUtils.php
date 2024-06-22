@@ -1265,7 +1265,7 @@ class DbUtils {
     * 
     * @todo make private and rename to databaseCopyTables
     */
-    public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate){
+    public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate=false){
 
         self::initialize();
         
@@ -1456,7 +1456,7 @@ class DbUtils {
     * @param false $isCloneTemplate - clone from curated registered datbase -
     *           db onwer will be changed to current user
     */
-    public static function databaseCloneFull($db_source, $db_target, $nodata=false, $isCloneTemplate)
+    public static function databaseCloneFull($db_source, $db_target, $nodata=false, $isCloneTemplate=false)
     {
         global $passwordForServerFunctions;
         
