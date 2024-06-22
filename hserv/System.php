@@ -620,12 +620,12 @@ class System {
                             
         $database_name = $database_name==null?$this->dbname:$database_name;
 
-        $error = mysql__check_dbname($database_name);//System::dbname_check($database_name);
-        if($error!==true) return null; //invalid database name
+        //$error = mysql__check_dbname($database_name);
+        //if($error!==true) return null; //invalid database name
 
-        //if(preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
-        //    return null; //invalid database name
-        //}
+        if(preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
+            return null; //invalid database name
+        }
 
         $dbfolder = $upload_root.$database_name.'/';
         
