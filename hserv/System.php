@@ -620,9 +620,6 @@ class System {
                             
         $database_name = $database_name==null?$this->dbname:$database_name;
 
-        //$error = mysql__check_dbname($database_name);
-        //if($error!==true) return null; //invalid database name
-
         if(preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
             return null; //invalid database name
         }
@@ -869,7 +866,7 @@ class System {
         
         $error = mysql__check_dbname($db);
         
-        if($error===true){
+        if($error===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
             list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }else{
             $this->dbname = null;

@@ -492,7 +492,7 @@ window.hWin.HEURIST4.query = {
         }        
         
         window.hWin.HEURIST4.msg.showPrompt(
-            '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
+            '<label for="dlg-prompt-value">Edit and copy the string and paste into the Mappable Query filter field</label>'
             + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
             + ' style="min-width: 200px; margin-left:0.2em;margin-top:10px;" rows="3" cols="70">'
             + res
