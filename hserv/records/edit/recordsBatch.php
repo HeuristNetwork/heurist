@@ -174,6 +174,13 @@ class RecordsBatch
             return false;
         }
         
+        // Check that the user is allowed to edit records
+        $is_allowed = checkUserPermissions($this->system, 'edit');
+        if(!$is_allowed){
+            return false;
+        }
+        
+        
         if(@$this->data['a']!='reset_thumbs' && !$this->_validateDetailType()){
             return false;
         }

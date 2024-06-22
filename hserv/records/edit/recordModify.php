@@ -446,6 +446,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to edit the record');
     }
+    
+    // Check that the user is allowed to edit records
+    $is_allowed = checkUserPermissions($system, 'edit');
+    if(!$is_allowed){
+        return false;
+    }
 
     $recID = intval(@$record['ID']);
     if ( @$record['ID']!=='0' && @$record['ID']!==0 && $recID==0 ) {
@@ -2998,6 +3004,12 @@ function recordDuplicate($system, $id){
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to duplicate the record');
     }
+    
+    // Check that the user is allowed to create records
+    $is_allowed = checkUserPermissions($system, 'add');
+    if(!$is_allowed){
+        return false;
+    }
 
     $mysqli = $system->get_mysqli();
 
@@ -3469,6 +3481,7 @@ function checkUserPermissions($system, $action){
 
     $permissions = $res;
     $action_msg = ($action == 'add' ? 'create' : '') .
+                  ($action == 'edit' ? 'modify' : '') .
                   ($action == 'delete' ? 'delete' : '') .
                   ($action == 'add delete' ? 'create or delete' : '');
     
@@ -3492,7 +3505,12 @@ function checkUserPermissions($system, $action){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
-    }else if(($action == 'add' && strpos($permissions, 'add') !== false) || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+    }else if(  ($permissions = 'y_no_add')
+            || ($action == 'add' && strpos($permissions, 'add') !== false) 
+            || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+            
+        //  y_no_add - means readonly
+                
         $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
         return false;
     }

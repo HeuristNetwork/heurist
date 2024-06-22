@@ -114,7 +114,13 @@ if(!$system->init(@$_REQUEST['db'])){
     
    if(!$system->is_admin()){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'Administrator permissions are required');
+        
+   }else if(!checkUserPermissions($system, 'add')){ // Check that the user is allowed to edit records
+        
+        $response = $system->getError();
+        
    }else{
+       
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["action"];
         $res = false;        
