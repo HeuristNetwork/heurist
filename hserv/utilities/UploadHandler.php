@@ -1521,11 +1521,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 }
             } else {
                 // Non-multipart uploads (PUT method support)
+                /*
+                Artem Osmakov  2024-06-23 HEURIST DOES NOT USE THIS MODE
                 file_put_contents(
                     $file_path,
                     fopen($this->options['input_stream'], 'r'),
                     $append_file ? FILE_APPEND : 0
                 );
+                */
             }
             
             //file does not exist
