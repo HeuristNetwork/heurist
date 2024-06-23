@@ -282,7 +282,7 @@ if($isWebPage){ //set in websiteRecord.php
              document.getElementById('wrapper-video').style.display = 'none';
              -->
              
-        <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}">
+        <div id="wrapper-video" onclick="{$('#wrapper-video').fadeOut(4000);}" role="button" tabIndex={0}>
           <video autoplay="" loop="" muted="" 
           poster="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=62c18d37f7d63b7777e5dc0add9c5ea669d78ec7" id="video-background">
             <source src="https://heurist.huma-num.fr/heurist/?db=MBH_Manuscripta_Bibliae_Hebraicae&file=d6d20c9e1243394fe13cbf427a11143a480f3fa5" type="video/mp4">

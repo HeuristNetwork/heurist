@@ -254,14 +254,14 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
                 let options = [];
 
                 if(!Object.hasOwn(that._collections, server)){
-                    that._collections[ser_id] = {};
+                    that._collections[server] = {};
                 }
 
                 for(const key in theso){
                     options.push({key: key, title: theso[key]['name']});
 
-                    if(!Object.hasOwn(that._collections[ser_id], key)){
-                        that._collections[ser_id][key] = [];
+                    if(!Object.hasOwn(that._collections[server], key)){
+                        that._collections[server][key] = [];
                     }
 
                     if(theso[key]['groups'].length > 0){

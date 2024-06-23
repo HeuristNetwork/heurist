@@ -226,8 +226,8 @@
                     $cnt++;
                 }
                 
-            }
-            if($fnd && ($cnt==count($input)-1)){
+            } //foreach
+            if($fnd && ($cnt>=count($input)-1)){
                 $res = $fnd;
             }else{
                 $res = $def;
@@ -327,7 +327,58 @@
             return false;
         }
 
+        $is_xml = strpos($string, '<?xml') === 0;
+        $handling_encoding = false;
+        $handling_copyright = false;
 
+        
+        // Add no translate flags where necessary
+        /**
+         * &[a-zA-Z]; html entity
+         * &#[0-9]; html code
+         * &#x[a-fA-F0-9]; hex code
+         */
+        $regex_entities = '&(?:[a-zA-Z]+|#[0-9]+|#x[a-fA-F0-9]+);';
+
+        $add_tags = function($matches) use ($is_xml) {
+            $response = $is_xml ? '<notranslate>'. $matches[0] .'</notranslate>' : '<p translate="no">'. $matches[0] .'</p>';
+            return $response;
+        };
+        $remove_tags = function($matches){
+
+            if(count($matches) == 1){
+                return $matches[0];
+            }
+
+            return $matches[1];
+        };
+
+        $org_string = $string; // backup string before processing
+
+        if(preg_match("/$regex_entities/", $string)){ // html encoded entities
+
+            $string = mb_ereg_replace_callback($regex_entities, $add_tags, $string);
+
+            $handling_encoding = true;
+
+            $string = $string !== false ? $string : $org_string;
+            $org_string = $string; // update backup string
+        }
+
+        if(preg_match("/©/", $string)){ // copyright symbol, sometimes gets removed by Deepl during translation
+
+            $replacement = $is_xml ? '<notranslate>©</notranslate>' : '<p translate="no">©</p>';
+            $string = mb_ereg_replace("©", $replacement, $string);
+
+            $handling_copyright = true;
+
+            $string = $string !== false ? $string : $org_string;
+        }
+
+        /**
+         * free => api-free.deepl.com
+         * pro => api.deepl.com
+         */
         $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
         
         // Handle source language
@@ -339,13 +390,13 @@
             $k = array_search($source_language, $deepl_languages);
             $url .= '&source_lang=' . $deepl_languages[$k];
         }
-        
-        if(strpos($string, '<?xml') === 0){ // possible xml
-            $url .= '&tag_handling=xml';
+
+        if($is_xml){ // possible xml
+            $url .= '&tag_handling=xml&ignore_tags=notranslate';
         }else{ // assume html
             $url .= '&tag_handling=html';
         }
-        
+
         $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
 
         if(is_array($additional_headers) && !empty($additional_headers)){
@@ -432,6 +483,25 @@
         $translation = $data['translations'];
         if(is_array($translation) && !empty($translation)){
             $res = $translation[0]['text'];
+        }
+
+        // Remove notranslate tags
+        $org_res = $res; // backup original result
+        if($handling_encoding && !empty($res)){
+
+            $match = $is_xml ? "<notranslate>($regex_entities)<\/notranslate>" : "<p translate=\"no\">($regex_entities)<\/p>";
+            $res = mb_ereg_replace_callback($match, $remove_tags, $res);
+
+            $res = $res !== false ? $res : $org_res;
+            $org_res = $res; // update backup string
+        }
+
+        if($handling_copyright && !empty($res)){
+
+            $match = $is_xml ? '<notranslate>©<\/notranslate>' : '<p translate="no">©<\/p>';
+            mb_ereg_replace($match, "©", $res);
+
+            $res = $res !== false ? $res : $org_res;
         }
 
         return $res;

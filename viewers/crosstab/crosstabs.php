@@ -198,7 +198,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
                                 <div style="margin-top: 10px;">
                                     <div style="margin-right: 10px;">
-                                        <label>Show fields for</label>
+                                        Show fields for
                                     </div>
 
                                     <div>
@@ -219,7 +219,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                             </div>
 
                                             <div>
-                                                <span id="rowTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
+                                                <span id="rowTooltip" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt='row' class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
@@ -241,7 +241,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                             </div>
 
                                             <div>
-                                                <span id="columnTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
+                                                <span id="columnTooltip" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt="column" class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
@@ -263,7 +263,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                             </div>
 
                                             <div>
-                                                <span id="pageTooltip" tabindex="0" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
+                                                <span id="pageTooltip" data-bs-toggle="tooltip" title="Select field to set intervals" style="margin-left: 5px;">
                                                     <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
@@ -292,7 +292,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                 <!-- Bottom Container -->
                 <div class="d-none" id="bottomContainer">
                     <!--Tab Bar for table and visualisation -->
-                    <ul class="nav nav-tabs" id="tabs" role="tablist">
+                    <ul class="nav nav-tabs" id="tabs">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table" type="button" role="tab" aria-controls="table" aria-selected="true">Table</button>
                         </li>
@@ -334,7 +334,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
         <div class="modal-dialog modal-dialog-width" id="rowDialog">
             <div class="modal-content">
                 <div class="modal-header" id="rowIntervalHeader">
-                    <h4 id="rowHeader"></h4>
+                    <h4 id="rowHeader">&nbsp;</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="rowIntervalsBody">
@@ -348,7 +348,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
         <div class="modal-dialog modal-dialog-width" id="columnDialog">
             <div class="modal-content">
                 <div class="modal-header" id="columnIntervalHeader">
-                    <h4 id="columnHeader"></h4>
+                    <h4 id="columnHeader">&nbsp;</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="columnIntervalsBody">
@@ -362,7 +362,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
         <div class="modal-dialog modal-dialog-width" id="pageDialog">
             <div class="modal-content">
                 <div class="modal-header" id="pageIntervalHeader">
-                    <h4 id="pageHeader"></h4>
+                    <h4 id="pageHeader">&nbsp;</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="pageIntervalsBody">

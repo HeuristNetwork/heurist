@@ -18,13 +18,20 @@
             <label>
                 <input type="radio" value="1" name="selArchiveFolder" checked/>
                 Deleted database
-            </label>&nbsp;&nbsp;
+            </label>
+            <br>
             <label>
                 <input type="radio" value="4" name="selArchiveFolder"/>
                 Database to restore
             </label>
-            <button id="btnSelectZip">Rechercher le zip</button>
+            <br>
+            <label>
+                <input type="radio" value="3" name="selArchiveFolder"/>
+                Archived backups (in BACKUP/ARCHIVE)
+            </label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="btnSelectZip">Rechercher le zip</button>
         
+            <br>In case archive contains database dump only, filestore of current database will be used
     </div>
 
     <div class="entry-box">

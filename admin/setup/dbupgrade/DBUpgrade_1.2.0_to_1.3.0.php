@@ -418,16 +418,6 @@ $query = "CREATE TABLE defTermsLinks (
         
         if($list && is_array(@$list['rt_defvalues']) && count($list['rt_defvalues'])>0){
             $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
-/*            
-            $list = $list['rt_defvalues'];
-            foreach ($list as $row) {
-?>                
-                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
-                    <span style="font-style:italic"><?=$row['reason'] ?></span>
-                </div>
-<?php                
-            }//for
-*/            
         }
         
         

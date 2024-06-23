@@ -298,6 +298,9 @@ div.input-div > .show-onhover, .show-onhover {
 div.input-div > .btn_input_move, .btn_input_move {
     display: none;
     cursor: grab;
+
+    vertical-align: top;
+    margin-top: 3px;
 }
 div.input-div:active > .btn_input_move, .btn_input_move:active {
     cursor: grabbing;

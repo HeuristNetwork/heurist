@@ -162,13 +162,13 @@ class DbRegis {
                         'Database url does not have a trusted scheme');
                 return false;
             }
-/*DEBUG            
+           
             if(strpos($serverURL_lc, '://localhost')>0 ||  strpos($serverURL_lc, '://127.0.0.1')>0 || strpos($serverURL_lc, '://web.local')>0){
                 self::addError(HEURIST_ACTION_BLOCKED, 
                         'Registered databases cannot be on local server '.htmlspecialchars($serverURL));
                 return false;
             }
-*/            
+
             //sanitize URL
             $serverURL = USanitize::sanitizeURL($serverURL);
             if($serverURL==null){

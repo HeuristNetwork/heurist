@@ -20,6 +20,7 @@
     * folderTreeToFancyTree - NOT USED
     * folderFirstFile - returns first file from first folder (search first file given ext or just first file in subfolders 
     *                   used for tiled image stack
+    * folderGetSubFolders - Returns array of subfolders
     *     
     * fileCopy
     * fileSave
@@ -289,9 +290,11 @@
     // get list of files in folder as search result (record list)
     // It is used to get 1) all cfg files for entity configuration
     //                   2) browse for available icons in iconLibrary   
+    // $include_dates  search for old archives in form hdb_ztucs_passages.sql.bz2.2022-08-17 
+    //
     // @todo , $is_reqursive=false
     //
-    function folderContent($dirs, $exts=null) {
+    function folderContent($dirs, $exts=null, $include_dates=false) {
         
         $records = array();
         $order = array();
@@ -312,7 +315,9 @@
                 //in database filestore
                 $folder = $dir;
                 $url = null;
-                
+            }else if(strpos($dir, '/srv/BACKUP')===0){  //in /srv/BACKUP
+                $folder = $dir;
+                $url = null;
             }else{
                 //relative to heurist folder
                 $folder =  HEURIST_DIR.$dir;
@@ -330,6 +335,14 @@
                     if(array_key_exists('extension', $path_parts))
                     {
                         $ext = strtolower($path_parts['extension']);
+                        if($include_dates && (strlen($ext)==10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)){
+                            $fname = substr($filename, 0, -11);
+                            $path_parts = pathinfo($fname);
+                            if(array_key_exists('extension', $path_parts)){
+                                $ext = strtolower($path_parts['extension']);
+                            }
+                        }
+                        
                         if(file_exists($folder.$filename) && ($exts==null || in_array($ext, $exts)))
                         {
                             $fsize = (is_file($folder.$filename))?filesize($folder.$filename):0;
@@ -359,7 +372,7 @@
     }
     
     //
-    //
+    // Returns summary size of all files in folder in bytes
     //
     function folderSize2($dir){
         
@@ -470,6 +483,30 @@
         return null;
     }
 
+    //
+    // Returns array of subfolders
+    //
+    function folderGetSubFolders($dir){
+        $dir = realpath($dir);
+        
+        $res = array();
+        
+        if($dir!==false){
+        
+            $dirs = scandir($dir);
+            foreach ($dirs as $node) {
+                if (($node == '.' ) || ($node == '..' )) {
+                    continue;
+                }
+                $file = $dir.'/'.$node;
+                if(is_dir($file)){
+                    $res[] = $node;            
+                }
+            }
+        }
+        
+        return $res;        
+    }
     
     /**
      * Creates a tree-structured array of directories and files from a given root folder.

@@ -1,0 +1,55 @@
+
+Setting up virtual hosts
+------------------------
+
+1) Purpose of VirtualHost. If your webserver runs several website/application you need to specify Virtual Host. So 
+your domain heurist.example.com will refer to correct installation folder of Heurist.
+                                       
+2) Add to your apache httpd.conf
+
+<VirtualHost *:80>
+    DocumentRoot "/var/www/html/HEURIST/"
+    ServerName heurist.example.com
+    ServerAlias heurist.example.com
+    AddDefaultCharset utf-8
+    
+    RedirectPermanent / https://heurist.example.com
+</VirtualHost>
+
+Where 
+DocumentRoot - Heurist installation path 
+ServerName and ServerAlias - Hostname that the server uses to identify itself
+RedirectPermanent - means that all request to http will be redirected to https - specify this directive to avoid usage of http protocol.
+
+If your server has many virtual hosts, it is better to specify them in the separate file.
+
+Include conf/extra/httpd-vhosts.conf
+
+3) https. If your hosting provider has HTTPS built in, follow their documentation how to include SSL certificate. 
+Otherwise we recommend to use "Letsencrypt"> It is a free, automated, and open certificate authority.
+
+https://letsencrypt.org/getting-started/
+https://certbot.eff.org/
+
+With the help of certbot your webserver will be configured and https version of your current http host be added.
+
+<VirtualHost *:443>
+    DocumentRoot "/var/www/html/HEURIST/"
+    ServerName heurist.example.com
+    ServerAlias heurist.example.com
+    AddDefaultCharset utf-8
+    
+    SSLEngine on
+    SSLCerificateFile /etc/letsencrypt/live/heurist.example.com/cert.pem
+    SSLCerificateKeyFile /etc/letsencrypt/live/heurist.example.com/privkey.pem
+    SSLCACerificateFile /etc/letsencrypt/live/heurist.example.com/chain.pem
+    SSLProtocol all SSLv2 -SSLv3
+    SSLHonorCipherOrder on
+    SSLCipherSuite "EECFH+........"
+</VirtualHost>
+
+-----------------
+For more details please refer Apache documentation
+
+https://httpd.apache.org/docs/2.4/vhosts/
+https://httpd.apache.org/docs/2.4/vhosts/examples.html

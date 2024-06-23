@@ -54,15 +54,17 @@ if (@$argv) {
     $system = new System();
     
     $dbdef_cache = null;
-    $error = System::dbname_check($dbname);
-    if($error==null 
+    
+    $db_check_result = mysql__check_dbname( $dbname );
+    
+    if($db_check_result===true 
         && isset($defaultRootFileUploadURL)
         && strpos($defaultRootFileUploadURL,'sydney.edu.au')===false )
     {
-        $path = $system->getFileStoreRootFolder().$dbname.'/entity/';
-        if(is_dir($path) && file_exists($path)){
-            $dbdef_cache = $path.'db.json';    
-        }
+            $path = $system->getFileStoreRootFolder().basename($dbname).'/entity/';
+            if(is_dir($path) && file_exists($path)){
+                $dbdef_cache = $path.'db.json';    
+            }
     }
     
     //
@@ -76,7 +78,7 @@ if (@$argv) {
         && (@$_REQUEST['entity']=='all' || @$_REQUEST['entity']=='relevance')
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
-            if($error==null){
+            if($db_check_result===true){
                 
                 if($_REQUEST['entity']=='relevance'){
                     $_REQUEST['entity'] = 'all';

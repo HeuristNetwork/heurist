@@ -581,6 +581,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var $fieldset = $('#div_widget>fieldset');
 
         var dtID = $('#sel_fieldtype').val();//
+        
+        var rectypeID;
 
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
 
@@ -602,6 +604,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             }
         }
+
+        if(window.hWin.HEURIST4.util.isempty(rectypeID)) return;
+
    
         var field_type = $Db.dty(dtID, 'dty_Type');
         if(field_type=='geo'){

@@ -297,7 +297,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         var ele = this.element.find('#'+input_id);
         ele.editing_input(ed_options);
         ele.find('.editint-inout-repeat-button').hide();
-        ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px'});
+        ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px', display:'inline-block'});
+        ele.find('.input-cell').css({display:'inline-block'});
         
         ele.find('.entity_selector').css('max-width',200);
         

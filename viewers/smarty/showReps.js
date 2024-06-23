@@ -129,6 +129,10 @@ function ShowReps( is_snippet_editor ) {
     function _updateReps(context) {
 
         window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+        if(context == 'NAN' || context == 'INF' || context == 'NULL'){
+            context = 'No value';
+        }
         
         if(_is_snippet_editor){
             
@@ -532,13 +536,24 @@ function ShowReps( is_snippet_editor ) {
                 });
         }
 
+        let using_default = false;
+        if(window.hWin.HEURIST4.util.isempty(content)){
+            content = "{ }";
+            using_default = true;
+        }
+
         codeEditor.setValue(content);
 
         setTimeout(function(){
-                    $('div.CodeMirror').css('height','100%').show();
-                    codeEditor.refresh();
-                    _keepTemplateValue = codeEditor.getValue();
-                },1000);
+            $('div.CodeMirror').css('height','100%').show();
+            $('div.CodeMirror .CodeMirror-scroll').css('padding-top', '5px');
+            codeEditor.refresh();
+            _keepTemplateValue = codeEditor.getValue();
+
+            if(using_default){
+                codeEditor.setCursor({line: 0, char: 0});
+            }
+        },1000);
     }
 
 
@@ -911,13 +926,11 @@ function ShowReps( is_snippet_editor ) {
  
         var mylayout = $('#layout_container').layout();
         mylayout.sizePane('north', '100%');
-        mylayout.hide('center');    
+        mylayout.hide('center');
         $('.ui-layout-resizer').hide();
-        
-        $('#editorcontainer').css({background:'none'});
-        $('.actionButtons').css({'right':'0px', left:'280px', top:'50%',padding:'10px'});
+
+        $('.actionButtons').css({right: '0px', left: '280px', top: '65%', padding: '10px'});
         $('#templateTree').css({'bottom':'0px', top:'0px'});
-        $('#templateCode').css({'bottom':'50%', margin:'10px'});
         $('.rtt-tree').css({top:'60px'});
         $('#edTemplateName').parent().hide();
         $('#selInsertPattern').parent().hide();
@@ -928,13 +941,15 @@ function ShowReps( is_snippet_editor ) {
         if(onChangeEvent){
             $('.rtt-tree').css({top:'60px'});
             $('#btnSaveAs').parent().hide();
-            $('#templateCode').css({'bottom':'50%', top:'10px'});
+            $('#templateCode').css({bottom: '35%', margin: '10px', top: '45px'});
             $('#divHelpLink').hide();
             $('#templateTree').css({'padding-top':'0px'});
             $('#rectype_selector').parent().css({'margin-top':'0px'});
         }else{
-            $('#lblFormula').css({top:'20px'});
+            $('#lblFormula, #lblHelp').css({top:'20px'});
             $('.rtt-tree').css({top:'85px'});
+            $('#templateCode').css({bottom: '30%', margin: '10px', top: '65px'});
+            $('.actionButtons').css('top', '70%');
         }
         
         
@@ -1248,35 +1263,35 @@ function ShowReps( is_snippet_editor ) {
     //
     function _addMagicLoopOperator2(_nodep, varname, language_handle = '', file_handle = ''){
         
-            var _remark = '{* ' + _getRemark(_nodep) + ' *}';
-            
-            var codes = varname.split('.');
-            var field = codes[codes.length-1];
-            
-            
-            var loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
-            var getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        
+        var codes = varname.split('.');
+        var field = codes[codes.length-1];
+        
+        
+        var loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
+        var getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
 
-            if(!window.hWin.HEURIST4.util.isempty(language_handle)){
-                language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
-            }
-            if(!window.hWin.HEURIST4.util.isempty(file_handle)){
-                file_handle = '\n\t' + file_handle.replace('replace_id', field) + '\n';
-            }
+        if(!window.hWin.HEURIST4.util.isempty(language_handle)){
+            language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
+        }
+        if(!window.hWin.HEURIST4.util.isempty(file_handle)){
+            file_handle = '\n\t' + file_handle.replace('replace_id', field) + '\n';
+        }
+        
+        if(codes[1]=='Relationship'){
+            insertGetRelatedRecords();
             
-            if(codes[1]=='Relationship'){
-                insertGetRelatedRecords();
-                
-                return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
-                
-            }else{
-                return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
-                        +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
-                        + language_handle
-                        + file_handle
-                        +'\n{/foreach} '+_remark;
-            }
+            return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
             
+        }else{
+            return '{foreach $'+varname+'s as $'+field+' name='+loopname+'}'+_remark
+                    +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                    + language_handle
+                    + file_handle
+                    +'\n{/foreach} '+_remark;
+        }
+
     }
     //
     //
@@ -2021,43 +2036,43 @@ this_id       : "term"
     */
     function insertAtCursor(myValue) {
 
-            //for codemirror
-            var crs = codeEditor.getCursor();
-            //calculate required indent
-            var l_no = crs.line;
-            var line = "";
-            var indent = 0;
+        //for codemirror
+        var crs = codeEditor.getCursor();
+        //calculate required indent
+        var l_no = crs.line;
+        var line = "";
+        var indent = 0;
 
-            while (line=="" && l_no>0){
-                line = codeEditor.getLine(l_no);
+        while (line=="" && l_no>0){
+            line = codeEditor.getLine(l_no);
 
-                l_no--;
-                if(line=="") continue;
+            l_no--;
+            if(line=="") continue;
 
-                indent = CodeMirror.countColumn(line, null, codeEditor.getOption("tabSize"));
+            indent = CodeMirror.countColumn(line, null, codeEditor.getOption("tabSize"));
 
-                if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
-                    indent = indent + 2;
-                }
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                indent = indent + 2;
             }
+        }
 
-            var off = new Array(indent + 1).join(' ');
+        var off = new Array(indent + 1).join(' ');
 
-            myValue = "\n" + myValue;
-            myValue = myValue.replace(/\n/g, "\n"+off);
+        myValue = "\n" + myValue;
+        myValue = myValue.replace(/\n/g, "\n"+off);
 
-            codeEditor.replaceSelection(myValue);
+        codeEditor.replaceSelection(myValue);
 
-            if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
-                crs.line = crs.line+2;
-                crs.ch = indent + 2;
-                //crs.ch = 0;
-            }else{
-                crs = codeEditor.getCursor();
-            }
+        if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
+            crs.line = crs.line+2;
+            crs.ch = indent + 2;
+            //crs.ch = 0;
+        }else{
+            crs = codeEditor.getCursor();
+        }
 
-            codeEditor.setCursor(crs);
-            setTimeout(function(){codeEditor.focus();},200);
+        codeEditor.setCursor(crs);
+        setTimeout(function(){codeEditor.focus();},200);
 
     }
 

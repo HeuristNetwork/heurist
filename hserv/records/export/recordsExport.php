@@ -794,7 +794,7 @@ IIIF;
                    $record['typename'] = $type;
                 }
 */
-                $feature = self::_getJsonFlat( $record, $columns, $row_placeholder );
+                $feature = self::_getJsonFlat( $record, $columns, $row_placeholder, 0, true );
                 
                 fwrite($fd, $comma.json_encode($feature));
                 
@@ -1836,7 +1836,7 @@ $columns:
 3: ["rec_ID", "rec_RecTypeID", "1", "949", "9", "61"]
 5: ["1", "38"]
 */
-private static function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
+private static function _getJsonFlat( $record, $columns, $row_placeholder, $level=0, $is_datatables = false ){
 
     $res = ($level==0)?$row_placeholder:array();
 
@@ -1974,8 +1974,14 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                 }else if (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
+
+                }else if ($is_datatables && $field_type=='date'){
+
+                    $temporal = new Temporal($field_value);
+                    $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
+
                 }
-                
+
                 if($field_value!=null){
                     array_push($res[$col_name], $field_value);
                 }

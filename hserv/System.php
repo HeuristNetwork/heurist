@@ -617,12 +617,15 @@ class System {
         $upload_root = defined('HEURIST_FILESTORE_ROOT')
                             ?HEURIST_FILESTORE_ROOT 
                             :$this->getFileStoreRootFolder();
+                            
+        $database_name = $database_name==null?$this->dbname:$database_name;
 
-        if($database_name==null){
-            $dbfolder = $upload_root.$this->dbname.'/';
-        }else{
-            $dbfolder = $upload_root.$database_name.'/';
+        if(preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
+            return null; //invalid database name
         }
+
+        $dbfolder = $upload_root.$database_name.'/';
+        
         if($folder_name!=null){
             $dbfolder = $dbfolder . $folder_name . '/';
         }
@@ -861,20 +864,19 @@ class System {
     */
     public function set_dbname_full($db, $dbrequired=true){
         
-        $error = System::dbname_check($db);
+        $db_check_result = mysql__check_dbname($db);
         
-        if($error){
+        if($db_check_result===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
+            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
+        }else{
             $this->dbname = null;
             $this->dbname_full = null;
             
             if($dbrequired){
-                $this->addError(HEURIST_INVALID_REQUEST, $error);
+                $this->addErrorArr($db_check_result);
                 $this->mysqli = null;
                 return false;
             }
-        }else{
-            //list($this->dbname_full, $this->dbname) = DbUtils::databaseGetNames($db
-            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }
         return true;
     }

@@ -297,10 +297,9 @@ function recordAdd($system, $record, $return_id_only=false){
     $usr_exists = mysql__select_value($mysqli, 'SELECT ugr_ID FROM sysUGrps WHERE ugr_ID='.intval($owner_grps[0]));
     if($usr_exists==null){
         $system->addError(HEURIST_REQUEST_DENIED,
-            'Proposed/default record ownership is incorrect. '
-            .'Most probably the specified group or user has been deleted. '
-            .'Change it in "new record" or "workflow" preferences.', 'Proposed ownership: '
-                .implode(',', $owner_grps));
+'Proposed record ownership for record addition is invalid. Most probably the specified group or user has been deleted, or a non-existent  user or group has been specified.'
+.'<br><br>Change the specified ownership  in the record addition link in the custom report or website, or in setup of the workflow (in Design menu).', 
+'Proposed ownership: '.implode(',', $owner_grps));
         return false;
     }
     
@@ -446,6 +445,12 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to edit the record');
+    }
+    
+    // Check that the user is allowed to edit records
+    $is_allowed = checkUserPermissions($system, 'edit');
+    if(!$is_allowed){
+        return false;
     }
 
     $recID = intval(@$record['ID']);
@@ -919,7 +924,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $msg = $msg . '<br><br><i>This is the first of multiple records'. ($modeImport > 0 ? ' imported' : '') .'. Please visit database for additional records.</i>';
         }
 
-        $res = sendPHPMailer('info@HeuristNetwork.org', 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
+        $res = sendPHPMailer(HEURIST_MAIL_TO_ADMIN, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification', 
                     $swf_emails, $title, $msg, null, true);
 
         if($total_record_count > 1 && $res){ // block further emails for imports, only if the email was sent
@@ -2034,6 +2039,9 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         $errors[$rty_ID.'.'.$dty_ID] = $new_value[1];
                         break; 
                     }
+                }else if($new_value == 'NAN' || $new_value == 'INF' || $new_value == 'NULL'){
+                    // relpace not a number, infinite, and null with an empty string
+                    $new_value = '';
                 }
                 
                 $current_value = mysql__select_value($mysqli,
@@ -2996,6 +3004,12 @@ function recordDuplicate($system, $id){
     if ( $system->get_user_id()<1 ) {
         return $system->addError(HEURIST_REQUEST_DENIED, 'User should be looged in to duplicate the record');
     }
+    
+    // Check that the user is allowed to create records
+    $is_allowed = checkUserPermissions($system, 'add');
+    if(!$is_allowed){
+        return false;
+    }
 
     $mysqli = $system->get_mysqli();
 
@@ -3467,6 +3481,7 @@ function checkUserPermissions($system, $action){
 
     $permissions = $res;
     $action_msg = ($action == 'add' ? 'create' : '') .
+                  ($action == 'edit' ? 'modify' : '') .
                   ($action == 'delete' ? 'delete' : '') .
                   ($action == 'add delete' ? 'create or delete' : '');
     
@@ -3477,11 +3492,25 @@ function checkUserPermissions($system, $action){
 
         if($action == 'add' && $system->is_guest_user()){
             //addition allowed for not enabled/guest user
+            //verify daily limit for guest users
+            $cnt_added_by_guests = mysql__select_value($mysqli,
+            'SELECT count(rec_ID) FROM Records, sysUGrps WHERE ugr_ID=rec_AddedByUGrpID and ugr_Enabled="n" AND DATE(rec_Added)=CURDATE()');
+            
+            if($cnt_added_by_guests>199){
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Number of records added by guest users for the current database exceeds allowed daily limit');
+                return false;
+            }
+            
         }else{
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
-    }else if(($action == 'add' && strpos($permissions, 'add') !== false) || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+    }else if(  ($permissions = 'y_no_add')
+            || ($action == 'add' && strpos($permissions, 'add') !== false) 
+            || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
+            
+        //  y_no_add - means readonly
+                
         $system->addError(HEURIST_ACTION_BLOCKED, $block_msg);
         return false;
     }

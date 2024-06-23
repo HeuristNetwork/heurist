@@ -51,7 +51,7 @@ $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup'
 $without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 $layout_name = @$_REQUEST['ll'];
 $is_production = !$is_map_popup && $layout_name=='WebSearch';
-$primary_language = !empty(@$_REQUEST['lang']) ? $_REQUEST['lang'] : null;
+$primary_language = !empty(@$_REQUEST['lang']) ? getLangCode3($_REQUEST['lang']) : null;
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
@@ -1633,7 +1633,8 @@ function print_public_details($bib) {
                 $trm_label = $defTerms->getTermLabel($bd['val'], true);
 
                 if(!empty($primary_language)){ // check for translation
-                    $translated_label = mysql__select_value($mysqli, "SELECT trn_Translation FROM defTranslations WHERE trn_Source = 'trm_Label' AND trn_Code = {$bd['val']}");
+                    $translated_label = mysql__select_value($mysqli, 'SELECT trn_Translation FROM defTranslations '
+                        ."WHERE trn_Source = 'trm_Label' AND trn_Code = {$bd['val']} AND trn_LanguageCode='".$primary_language.'\'');
                     $trm_label = !empty($translated_label) ? $translated_label : $trm_label;
                 }
 
@@ -1663,7 +1664,7 @@ function print_public_details($bib) {
                     }
 
                     if((!$lang && $translations[$bd['dty_ID']]['lang'] != $primary_language && $translations[$bd['dty_ID']]['lang'] != $lang) || 
-                        $lang != $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language){
+                        ($lang == $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language)){
 
                         $translations[$bd['dty_ID']]['lang'] = $lang; // set language
                         $translations[$bd['dty_ID']]['values'] = []; // reset value tracker
@@ -1675,8 +1676,8 @@ function print_public_details($bib) {
                         continue;
                     }
                 }
-                //replace link <a href="[numeric]"> to record view links
                 
+                //replace link <a href="[numeric]"> to record view links
                 $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
                         function($matches){
                             global $system;
@@ -1905,7 +1906,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.$bd['val'].'</div></div>';
+            .' '.htmlspecialchars($bd['val']).'</div></div>';
             break;
         }
     }
@@ -2194,8 +2195,8 @@ function print_public_details($bib) {
         $is_grayed_out = ( (@$bd['dtl_HideFromPublic']!=null && intval($bd['dtl_HideFromPublic']) == 1) 
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
-        print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.$bd['rollover'].'"':'')
-                .'>' . $bd['val'] . '</span>'; // add value
+        print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
+                .'>' . htmlspecialchars($bd['val']) . '</span>'; // add value
         $prevLbl = $bd['name'];
     }
 

@@ -7,6 +7,7 @@
 *   unzipFlat
 *   
 *   createBz2
+*   extractBz2 - if bz2 archive contains the only file
 * 
 * At the moment we have 3 places where we use archives
 * DbUtils::databaseDrop  - optionally archive the entire dbfolder+sql dump into single archive
@@ -268,6 +269,8 @@ class UArchive {
             }
             $zip->close();
         }
+        
+        return $fileCount;
 
     }
     //
@@ -473,7 +476,7 @@ class UArchive {
         } catch (Exception  $e){
             error_log( $e->getMessage() );
             return $verbose? ('Cannot create archive '.htmlspecialchars($destination).' '.$e->getMessage()) :false;
-        }                            
+        }                     
     }
     
     /**
@@ -514,5 +517,35 @@ class UArchive {
 
         return true;
     }    
+    
+    
+    /**
+     * @return bool
+     * @param string $in
+     * @param string $out
+     * @desc uncompressing the file with the bzip2-extension
+    */
+    public static function bunzip2($in, $out)
+    {
+        if (!file_exists ($in) || !is_readable ($in)){
+             throw new Exception('Archive file doesn\'t exists');
+        }
+
+        if ((!file_exists ($out) && !is_writeable (dirname ($out)) || (file_exists($out) && !is_writable($out)) )){
+             throw new Exception('Destination folder or file is not writeable');
+        }
+
+        $in_file = bzopen ($in, "r");
+        $out_file = fopen ($out, "wb");
+
+        while ($buffer = bzread ($in_file, 4096)) {
+            fwrite ($out_file, $buffer, 4096);
+        }
+
+        bzclose ($in_file);
+        fclose ($out_file);
+
+        return true;
+    }
 }
 ?>

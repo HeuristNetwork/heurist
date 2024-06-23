@@ -190,19 +190,19 @@ if(!$format) $format='csv';
 
         <div id="file_name2" style="display: inline-block;"> 
             <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span> 
-            <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+            <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
         </div>
 
         <fieldset style="width:380px;"><legend style="display:none"></legend>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Encoding:</label></div>
+                    <div class="header" style="min-width: 50px;">Encoding:</div>
                     <div class="input-cell">        
                         <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         </select>
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Field separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Field separator:</div>
                     <div class="input-cell">  
                         <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="," selected>comma ,</option>
@@ -227,7 +227,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Fields enclosed in:</label></div>
+                    <div class="header" style="min-width: 50px;">Fields enclosed in:</div>
                     <div class="input-cell">   
                         <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='2'>"</option><option value="1">'</option>
@@ -236,7 +236,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Line separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Line separator:</div>
                     <div class="input-cell">        
                         <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option value="auto">auto detect</option>
@@ -247,7 +247,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Multivalue separator:</label></div>
+                    <div class="header" style="min-width: 50px;">Multivalue separator:</div>
                     <div class="input-cell">        
                         <select id="csv_mvsep" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="|" selected>pipe |</option>
@@ -273,7 +273,7 @@ if(!$format) $format='csv';
                     </div>
                 </div>
                 <div>
-                    <div class="header" style="min-width: 50px;"><label>Date format:</label></div>
+                    <div class="header" style="min-width: 50px;">Date format:</div>
                     <div class="input-cell">        
                         <select id="csv_dateformat" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
@@ -313,9 +313,9 @@ if(!$format) $format='csv';
                     <div id="btnParseStep2" style="bottom:5px"
                     title="Start upload your CSV data into temporary database table, converts it to UTF8, parses data and verifies ID columns for valid integer values"
                     >Continue</div>
-                    <label id="lblParseStep2" style="font-style:italic">
+                    <span id="lblParseStep2" style="font-style:italic">
                         If Continue is disabled, you need to select record types in the list above
-                    </label>
+                    </span>
                 </div>
         </div>
         
@@ -337,7 +337,7 @@ if(!$format) $format='csv';
                     Back to start</div>
 
                 <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
-                    Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+                    Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;">&nbsp;</h2>
                     <a href="#" id="btnSetPrimaryRecType"
                                 title="Change primary record type"
                     style="margin-left:10px;font-size:0.9em;text-decoration:none;color:blue;font-style:italic">change target</a>
@@ -346,7 +346,7 @@ if(!$format) $format='csv';
             </div>
             <div id="file_name" style="display: inline-block;"> 
                 <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>  
-                <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;"></h2>
+                <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
             </div>
             
             <div id="btnClearFile"  style="float: right;margin-right:80px;"
@@ -374,8 +374,8 @@ if(!$format) $format='csv';
         <fieldset style="position: absolute;left: 0;right: 0;top:80px;"><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
-                <label style="vertical-align: top;">Importing:</label><br>
-                <label style="vertical-align: bottom;font-size:0.8em">(rollover for details)</label>
+                <span style="vertical-align: top;">Importing:</span><br>
+                <span style="vertical-align: bottom;font-size:0.8em">(rollover for details)</span>
             </div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
@@ -488,7 +488,7 @@ if(!$format) $format='csv';
             <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
             <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
             
-            <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none"
+            <a href="#imp3" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
                 <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
             </a>           
@@ -555,15 +555,15 @@ if(!$format) $format='csv';
                                         <td width="50" id="mrr_cnt_update"></td>
                                         <td width="50" class="mrr_update">rows:</td>
                                         <td width="50" class="mrr_update" id="mrr_cnt_update_rows"></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
-                                        <td width="50" class="mrr_update"><a href="#" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
+                                        <td width="50" class="mrr_update"><a href="#imp" onclick="importRecordsCSV.showRecords2('update',false)">show</a></td>
+                                        <td width="50" class="mrr_update"><a href="#imp" onclick="importRecordsCSV.showRecords2('update',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left>New:</td>
                                         <td width="50" id="mrr_cnt_insert"></td>
                                         <td width="50" class="mrr_insert">rows:</td>
                                         <td width="50" class="mrr_insert" id="mrr_cnt_insert_rows"></td>
-                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
-                                        <td width="50" class="mrr_insert"><a href="#" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
+                                        <td width="50" class="mrr_insert"><a href="#imp" onclick="importRecordsCSV.showRecords2('insert',false)">show</a></td>
+                                        <td width="50" class="mrr_insert"><a href="#imp" onclick="importRecordsCSV.showRecords2('insert',true)">download</a></td>
                                     </tr>
                                     <tr><td align=left>Blank match fields:</td>
                                         <td width="50" id="mrr_cnt_ignore"></td>
@@ -631,7 +631,7 @@ if(!$format) $format='csv';
 <div id="divSelectPrimaryRecType" style="display:none;height:100%;" class="">
         <fieldset><legend style="display:none"></legend>
         <div>
-            <div class="header optional" style="min-width: 150px; width: 150px;"><label>Select record type:</label></div>
+            <div class="header optional" style="min-width: 150px; width: 150px;">Select record type:</div>
             <div class="input-cell">
                 <div class="heurist-prompt ui-state-error" style="display: none; height: auto; padding: 0.2em; margin-bottom: 0.2em;"></div>
                 <div class="input-div">
@@ -655,7 +655,7 @@ if(!$format) $format='csv';
         </div>                    
         <div>
             <div id="lbl_dependencies_preview" class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
-                <label>Dependencies:</label>
+                Dependencies:
             </div>
             <div class="input-div">
                 <div id="dependencies_preview" xclass="ui-widget-content" 

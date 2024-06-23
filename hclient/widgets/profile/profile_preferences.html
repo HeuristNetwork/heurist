@@ -97,12 +97,12 @@
 
     <h3 style="margin:0">Bookmarklet</h3>
     <div>
-        <label class="header">Drag this link to your browser bookmarks bar</label><b><u>
-                <a style="color: blue;" id="bookmarklet-link"
+        <span class="header">Drag this link to your browser bookmarks bar</span><b><u>
+                <a href="bookmarklet-link" style="color: blue;" id="bookmarklet-link"
                     onclick="{alert('Heurist Bookmarklet <br><br>drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. <br><br>Clicking on the bookmarklet link when in a page will give options for creating a new Web page (or other) Heurist record, copying any highlighted text to an appropriate field. It also allows capturing of hyperlinks in the page as new Web page records.');return false;}"
                     title="Heurist Bookmarklet: Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. "
                     href="#"></a>
-            </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
+            </u></b><span>&nbsp;to allow bookmarking of web pages</span><br><br>
     </div>
 
     <!-- Deprecated in version  6
@@ -202,7 +202,7 @@
         <div class="header"><label for="mapSelectTools">Map select tools (by click, in rect, in shape)</label></div>
         <input type="checkbox" name="mapSelectTools " id="mapSelectTools" checked class="text ui-widget-content ui-corner-all"/>
         -->
-        <div class="header"><label>Controls</label></div>
+        <div class="header">Controls</div>
             <label><input type="checkbox" id="mctrl_bookmark" value="bookmark">bookmark</label>&nbsp;
             <label><input type="checkbox" id="mctrl_geocoder" value="geocoder">geocoder</label>&nbsp;
             <label title="Map select tools (by click, in rect, in shape)">
@@ -212,7 +212,7 @@
     </div>
     
     <div>
-        <div class="header"><label>Map popup template</label></div>
+        <div class="header"><label for="map_template">Map popup template</label></div>
         <select id="map_template" name="map_template" class="text ui-widget-content ui-corner-all" 
             title="" style="width:250px;min-width:300px;max-width:300px">
         </select>
@@ -220,12 +220,12 @@
     </div>
 
     <div id="map_default_style_div">
-        <div class="header"><label>Symbology for results (aka Current Query) on map </label></div>
+        <div class="header"><label for="map_default_style">Symbology for results (aka Current Query) on map </label></div>
         <input id="map_default_style" name="map_default_style" class="text ui-widget-content ui-corner-all"/>
     </div>
 
     <div id="map_select_style_div">
-        <div class="header"><label>Symbology for selection on map </label></div>
+        <div class="header"><label for="map_select_style">Symbology for selection on map </label></div>
         <input id="map_select_style" name="map_select_style" class="text ui-widget-content ui-corner-all"/>
     </div>
     
@@ -338,7 +338,7 @@
     </div>
     
     <div id="custom_theme_div">
-        <div class="header"><label>Interface colour scheme (detailed):</label></div>
+        <div class="header"><label for="custom_theme">Interface colour scheme (detailed):</label></div>
         <input id="custom_theme" name="custom_theme" class="text ui-widget-content ui-corner-all"/>
     </div>
 	

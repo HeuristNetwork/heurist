@@ -144,8 +144,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
         //add and init record type selector
         $('<div id="div_sel_rectype" style="padding: 0.2em;" class="input">'
-            + '<div class="header_narrow" style="padding: 0px 16px 0px 0px;"><label for="sel_recordtype">'
-            + window.hWin.HR('Type of record to add') +':</label></div>'
+            + '<div class="header_narrow" style="padding: 0px 16px 0px 0px;">'
+            + window.hWin.HR('Type of record to add') +':</div>'
             + '<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
 
             //+'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'

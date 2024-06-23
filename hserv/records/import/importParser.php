@@ -97,8 +97,8 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     
     self::initialize();
     
-    $original_filename =  $upload_file_name;
-    $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.$upload_file_name;
+    $original_filename =  basename($upload_file_name);
+    $upload_file_name = HEURIST_SCRATCH_DIR.$upload_file_name;
     
     $s = null;
     if($upload_file_name==null){
@@ -178,7 +178,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
             return false;
         }
         
-        $encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);
+        $encoded_file_name = tempnam(HEURIST_SCRATCH_DIR, $original_filename);
         $res = file_put_contents($encoded_file_name, $content);
         unset($content);
         if(!$res){
@@ -279,7 +279,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     if($limit==0){ //if limit no defined prepare data and write into temp csv file
         //get filename for prepared filename with converted dates and removed spaces
         //    $encoded_filename = basename($encoded_filename);
-        $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', "prepared");  //basename($encoded_filename)
+        $prepared_filename = tempnam(HEURIST_SCRATCH_DIR, "prepared");  //basename($encoded_filename)
         if (!is_writable($prepared_filename)) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot save prepared data: '.$prepared_filename);                
             return false;
@@ -310,6 +310,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $kml_content =  $encoded_filename;    
             $encoded_filename = null;
         }else{
+            $encoded_filename = HEURIST_SCRATCH_DIR.basename($encoded_filename); //for snyk
             $kml_content = file_get_contents($encoded_filename);
         }
             
@@ -728,7 +729,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 ImportParser::_deleteEncodedFilename($encoded_filename_id);
                 if(file_exists($encoded_filename)) unlink($encoded_filename);
                 //delete original
-                $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.basename($original_filename);
+                $upload_file_name = HEURIST_SCRATCH_DIR.basename($original_filename);
                 if(file_exists($upload_file_name)) unlink($upload_file_name);
             }
             return $res;
@@ -761,17 +762,23 @@ private static function _saveEncodedFilename($encoded_filename){
             if(is_array($filenames) && count($filenames)>0){
                 //cleanup
                 foreach ($filenames as $fname){
+                    $fname = HEURIST_SCRATCH_DIR.basename($fname);                    
+                    if(file_exists($fname)){
+                        unlink($fname);
+                    }
+                    /*
                     $fname = USanitize::sanitizePath($fname);
                     if(strpos($fname, HEURIST_SCRATCH_DIR)===0 && file_exists($fname)){ 
                         unlink($fname);
                     }
+                    */
                 }
                 $query = 'DELETE FROM `import_tmp_file` WHERE imp_Date <  NOW() - INTERVAL 2 DAY';
                 $mysqli->query($query);
             }
         }
-    
-        $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>$encoded_filename));
+        
+        $res = mysql__insertupdate($mysqli, 'import_tmp_file', 'imp', array('imp_filename'=>basename($encoded_filename)));
         //$query = 'INSERT INTO `import_tmp_file` (imp_filename) VALUES ("'.$mysqli->real_escape_string($encoded_filename).'")';
         //$res = $mysqli->query($query);
         if(is_numeric($res) && intval($res)>0){
@@ -791,7 +798,8 @@ private static function _getEncodedFilename($encoded_filename_id){
     $mysqli = self::$system->get_mysqli();
     $encoded_filename = mysql__select_value($mysqli, 
         'SELECT imp_filename FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id));
-    return $encoded_filename;
+        
+    return HEURIST_SCRATCH_DIR.basename($encoded_filename);
 }
 
 private static function _deleteEncodedFilename($encoded_filename_id){

@@ -763,6 +763,19 @@
             $rectype = $record['ugr_Type'];
             $is_registration = ($rectype=='user' && $recID<1);
             $is_guest_registration = ($is_registration && @$record['is_guest']==1);
+            
+            $mysqli = $system->get_mysqli();
+            
+            if($is_guest_registration && $recID<1 && $rectype=='user'){
+                //verify max allowed count of guest registrations per day
+                $res = mysql__select_value($mysqli,
+                    "select count(ugr_ID) from sysUGrps where ugr_Enabled='n' AND DATE(ugr_Modified)=CURDATE()");
+                if($res>19){
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Sorry, registration of guest users for the current database exceeds allowed daily limit');
+                    return false;
+                }
+            }
+            
 
             if($is_registration && !$allow_registration && $system->get_system('sys_AllowRegistration')==0){
 
@@ -788,8 +801,6 @@
                 if(@$record['ugr_Captcha']){
                     unset($record['ugr_Captcha']);
                 }
-
-                $mysqli = $system->get_mysqli();
 
                 $res = mysql__select_value($mysqli,
                     "select ugr_ID from sysUGrps  where ugr_Name='"
@@ -841,7 +852,7 @@
                     if($rectype=='user'){
                         $rv = true;
                         if($recID<1 && $system->get_user_id()<1){
-                            $rv = user_EmailAboutNewUser($system, $new_recID);
+                            $rv = user_EmailAboutNewUser($system, $new_recID, false, $is_guest_registration);
                         }else if($recID<1 || $is_approvement){
                             $rv = user_EmailApproval($system, $new_recID, $tmp_password, $is_approvement);
                             
@@ -993,7 +1004,7 @@
     /**
     * Send emails to DB Onwer and  System admin about new user
     */
-    function user_EmailAboutNewUser($system, $recID, $fromImport = false){
+    function user_EmailAboutNewUser($system, $recID, $fromImport = false, $is_guest_registration=false){
 
         $mysqli = $system->get_mysqli();
         
@@ -1020,6 +1031,10 @@
             "Go to the address below and navigate in menu Admin > Manage Users to review further details". 
             ($fromImport ? "" : " and approve the registration") .":\n".
             HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //."&recID=$recID&mode=users";
+            
+            if($is_guest_registration){
+                $email_text .= ("\n\n".'WARNING: Guest users can add up to 200 records per day');
+            }
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
 

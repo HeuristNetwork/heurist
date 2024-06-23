@@ -74,24 +74,24 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 			<div class="ft_col">
                 
                 <div class="ft_preview">
-                    <label class="small-header" style="min-width: 30px;vertical-align: super">From:</label>
+                    <span class="small-header" style="min-width: 30px;vertical-align: super">From:</span>
                     <div style="display:inline-block;">
-                        <img alt src='../../assets/16x16.gif' id="source_rectype_img" 
+                        <img alt src='../../hclient/assets/16x16.gif' id="source_rectype_img" 
                             style="vertical-align:top;margin-left:10px;" />
                     
                         <h3 id="source_rectype" class="truncate" 
-                            style="max-width:550px;display:inline-block;margin: 0px 10px;"></h3>
+                            style="max-width:550px;display:inline-block;margin: 0px 10px;">&nbsp;</h3>
                     </div>    
                     <div  id="source_rectype_desc" class="heurist-helper3" style="max-width:550px;margin-left:80px;"></div>
                     <br>
                     
-                    <label class="small-header" style="min-width: 30px;vertical-align: super">To:</label>
+                    <span class="small-header" style="min-width: 30px;vertical-align: super">To:</span>
                     <div id="target_rectype_div" style="display:inline-block;">
-                        <img alt src='../../assets/16x16.gif' id="target_rectype_img" 
+                        <img alt src='../../hclient/assets/16x16.gif' id="target_rectype_img" 
                             style="vertical-align:top;margin-left:10px;" />
                     
                         <h3 id="target_rectype" class="truncate" 
-                            style="max-width:550px;display:inline-block;margin:0px 10px;"></h3>
+                            style="max-width:550px;display:inline-block;margin:0px 10px;">&nbsp;</h3>
                     </div>    
                     
                     <select id="sel_target_rectype_id" style="margin-left: 25px;display:none"></select>

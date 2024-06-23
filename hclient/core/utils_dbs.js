@@ -1133,7 +1133,26 @@ window.hWin.HEURIST4.dbs = {
         
     },
 
+    getLinkedRecordTypes_cache: function(rty_ID, need_separate){
 
+        let combined = {'linkedto': [], 'relatedto': []};
+        let rectypes = [];
+
+        let links = $Db.rst_links();
+
+        if(Object.keys(links.direct).length > 0 && links.direct[rty_ID]){
+            combined['linkedto'] = links.direct[rty_ID].all;
+            rectypes.push(...links.direct[rty_ID].all);
+        }
+        if(Object.keys(links.rel_direct).length > 0 && links.rel_direct[rty_ID]){
+            combined['relatedto'] = links.rel_direct[rty_ID].all;
+            rectypes.push(...links.rel_direct[rty_ID].all);
+        }
+
+        rectypes = [...new Set(rectypes)]; // remove dups from array version
+
+        return need_separate ? combined : rectypes;
+    },
 
     /**
      * @function hasFields

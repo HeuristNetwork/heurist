@@ -323,34 +323,51 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _selectArchive: function(){
         
+        var that = this;
+        var src_folder = this._$('input[name=selArchiveFolder]:checked').val();
+        
         
         if(!this._select_file_dlg){
             this._select_file_dlg = $('<div>').hide().appendTo( this.element );
-        }
         
-        var that = this;
-        
-        this._select_file_dlg.selectFile({
-           showFilter: true, 
-           source: this._$('input[name=selArchiveFolder]:checked').val(),     
-           extensions: 'zip',
-           title: window.HR('Select database archive'),
-           onselect:function(res){
-                if(res && res.filename){
-                    that._$('#selectedZip').text(res.filename);
-                    that._$('#divSelectedZip').show();
-                    //alert(res.path, res.filename);
-                    
-                    //suggest database name
-                    if(that._$('#dbname').val().trim()==''){
-                        that._$('#dbname').val(res.filename.substr(0,res.filename.length-24));
+            this._select_file_dlg.selectFile({
+               keep_dialogue: true,
+               showFilter: true, 
+               source: src_folder,     
+               extensions: (src_folder==3)?'zip,bz2':'zip',
+               title: window.HR('Select database archive'),
+               onselect:function(res){
+                    if(res && res.filename){
+                        that._$('#selectedZip').text(res.filename);
+                        that._$('#divSelectedZip').show();
+                        //alert(res.path, res.filename);
+                        
+                        //suggest database name
+                        if(that._$('#dbname').val().trim()==''){
+                            var sname = res.filename; 
+                            if(sname.indexOf('hdb_')==0){
+                                sname = sname.substring(4);
+                            }
+                            if(sname.indexOf('.')>0){
+                                sname = sname.substring(0,sname.indexOf('.'));
+                            }
+                            if(sname.length>24){
+                                sname = sname.substring(0,23);
+                            }
+                            that._$('#dbname').val(sname);
+                        }
+                        
+                    }else{
+                        that._$('#selectedZip').text('');
+                        that._$('#divSelectedZip').hide();
                     }
-                    
-                }else{
-                    that._$('#selectedZip').text('');
-                    that._$('#divSelectedZip').hide();
-                }
-           }});        
+               }});        
+        }else{
+            this._select_file_dlg.selectFile({
+               source: src_folder,     
+               extensions: (src_folder==3)?'zip,bz2':'zip'
+            });
+        }
 
     },
 

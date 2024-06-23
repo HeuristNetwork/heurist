@@ -225,10 +225,15 @@
                              $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
         
-        if($starts_with!=null && (mysql__check_dbname($starts_with)===true))
+        if($starts_with!=null)
         {
-            //$starts_with = $mysqli->real_escape_string($starts_with);
-            $where = 'hdb_'.$starts_with.'%';
+            if(mysql__check_dbname($starts_with)===true
+              && preg_match('/[A-Za-z0-9_\$]/', $starts_with)){
+            
+                $where = 'hdb_'.$starts_with.'%';
+            }else{
+                $where = ''; //invalid dbname   
+            }
         }else{
             $where = 'hdb_%';    
         }
@@ -244,15 +249,16 @@
                 if ($test === 0) {
                     $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);  //for snyk
                     if ($isFilter) {
+                        $query2 = null;
                         if ($role == 'user') {
-                            $query = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
+                            $query2 = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         } else if ($role == 'admin') {
-                            $query = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
+                            $query2 = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
                             " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
                             " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
                         }
-                        if ($query) {
-                            $res2 = $mysqli->query($query);
+                        if ($query2!=null) {
+                            $res2 = $mysqli->query($query2);
                             $cnt = $res2->num_rows; // mysql_num_rows($res2);
                             $res2->close();
                             if ($cnt < 1) {
@@ -823,7 +829,7 @@
         $res = false;
 
         //0: use 3d party PDO mysqldump, 2 - call mysql via shell (default)
-        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :2;
+        $dbScriptMode = defined('HEURIST_DB_MYSQL_SCRIPT_MODE')?HEURIST_DB_MYSQL_SCRIPT_MODE :0;
         
         $script_file = basename($script_file);
         if($dbfolder!=null){
@@ -839,10 +845,11 @@
         }else{
             
             if($dbScriptMode==2){
-                if (!defined('HEURIST_DB_MYSQLDUMP') || !file_exists(HEURIST_DB_MYSQLDUMP)){
+                if (!defined('HEURIST_DB_MYSQLPATH') || !file_exists(HEURIST_DB_MYSQLPATH)){
                 
                     $msg = 'The path to mysql executable has not been correctly specified. '
-                    .'Please ask your system administrator to fix this in the heuristConfigIni.php file';
+                    .'Please ask your system administrator to fix this in the heuristConfigIni.php '
+                    .'(note the settings required for a single server vs mysql running on a separate server)';
 
                     return array(HEURIST_SYSTEM_CONFIG, $msg);
                 }                

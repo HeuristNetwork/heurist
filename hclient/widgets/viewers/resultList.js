@@ -216,6 +216,7 @@ $.widget( "heurist.resultList", {
             }
             else{
                 this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+                if(!this.options.pagesize) this.options.pagesize = 50;
             }
         }
 
@@ -3087,8 +3088,8 @@ $.widget( "heurist.resultList", {
 
 
                     this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">
-                    .css({position:'absolute', zIndex:9999, 'font-size':'0.7em'})
-                    .appendTo( this.document.find('body') )
+                    .css({position:'absolute', zIndex:9999999, 'font-size':'0.7em'})
+                    .appendTo( this.element )  //this.document.find('body')
                     .menu({
                         select: function( event, ui ) {
                             var page =  Number(ui.item.attr('id').substring(4)); 
@@ -3831,6 +3832,9 @@ $.widget( "heurist.resultList", {
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
+        
+        if(!this._currentRecordset) return;
+        
         if(response.status == window.hWin.ResponseStatus.OK){
 
             if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 

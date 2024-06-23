@@ -30,13 +30,23 @@ $options = array();
 
 $system = null;
 
-if(@$_REQUEST['db']){
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $params = filter_input_array(INPUT_POST);
+}else{
+    $params = filter_input_array(INPUT_GET);    
+}
+
+
+if(@$params['db']){
     $system = new System(); //to init folder const without actual coonection to db
-    $dbname = @$_REQUEST['db'];
-    $error = System::dbname_check($dbname);
+
+    $error = System::dbname_check(@$params['db']);
     if($error){
+        //database name is wrong
+        header('HTTP/1.1 400 Bad Request');
         exit;
     }else{
+        $dbname = $params['db'];
         $system->initPathConstants($dbname);
     }
     $options['database'] = $dbname;
@@ -47,17 +57,17 @@ if(@$_REQUEST['db']){
 }
 
 
-if(@$_REQUEST['acceptFileTypes']!=null){
-    $options['accept_file_types'] = $_REQUEST['acceptFileTypes'];   
+if(@$params['acceptFileTypes']!=null){
+    $options['accept_file_types'] = $params['acceptFileTypes'];   
 }
-if(@$_REQUEST['unique_filename']!=null){
-    $options['unique_filename'] = ($_REQUEST['unique_filename']!='0');   
+if(@$params['unique_filename']!=null){
+    $options['unique_filename'] = ($params['unique_filename']!='0');   
 }
-if(@$_REQUEST['max_file_size']>0){
-    $options['max_file_size'] = $_REQUEST['max_file_size']; 
+if(@$params['max_file_size']>0){
+    $options['max_file_size'] = $params['max_file_size']; 
 }
-if(@$_REQUEST['upload_subfolder']){
-    $options['upload_subfolder'] = $_REQUEST['upload_subfolder']; 
+if(@$params['upload_subfolder']){
+    $options['upload_subfolder'] = $params['upload_subfolder']; 
 }
 
 //if(@$_REQUEST['upload_folder']){

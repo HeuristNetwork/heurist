@@ -122,7 +122,10 @@ $.widget( "heurist.editTranslations", {
 
                 let $dlg;
 
-                let msg = 'Language: <select id="selLang"></select><br>';
+                let msg = 'Language: <select id="selLang"></select><br><br>'
+                        + 'You may block translation of some part of the text by adding an html tag with translate="no",<br>'
+                        + 'for example:  &lt;p translate=”no”&gt;text not to be translated&lt;/p&gt;';
+
                 let btns = {};
                 let labels = {yes: window.HR('Add'), no: 'Cancel', title: 'Add automatic translation'};
 
@@ -244,7 +247,7 @@ $.widget( "heurist.editTranslations", {
             
         
         var _is_default = false;    
-        var lang = '';;
+        var lang = '';
         
         if(check_default){
             
@@ -255,8 +258,8 @@ $.widget( "heurist.editTranslations", {
                 }else if(value.substr(2,1)==':'){ //ISO639-1
                     lang = value.substr(0,2);
                     value = value.substr(3).trim();
-                    //convert to ISO639-2
-                    
+
+                    lang = window.hWin.HAPI4.getLangCode3(lang); //convert to ISO639-2
                 }
                 lang = lang.toUpperCase();
             }

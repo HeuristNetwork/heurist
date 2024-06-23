@@ -678,7 +678,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             -->
             <div>
             <div id="set-coordinates-helper" style="display:inline-block;width:80%">
-                <label>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</label>
+                <span>Paste geo data as Simple points (X,Y or X Y), GeoJSON or WKT</span>
                 <div class="heurist-helper1" style="padding:5px 0">
                     WKT:  POINT(x y)   LINESTRING(x1 y1, x2 y2, x3 y3)   POLYGON((x1 y1, x2 y2, x3 y3)) see 
                     <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank" rel="noopener">wikipedia</a> for more.<br>
@@ -686,7 +686,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 </div>
             </div>
             <div id="get-coordinates-helper" style="display:inline-block;width:80%">
-                <label>Select format: </label>
+                <span>Select format: </span>
                 <label><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
                 <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
             </div>

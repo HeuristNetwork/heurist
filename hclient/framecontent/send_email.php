@@ -26,7 +26,9 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 
 // POST request
 if(isset($_POST['data'])) {
-    $data = json_decode($_POST['data']);
+    $params = filter_input_array(INPUT_POST);
+    
+    $data = json_decode($params['data']);
     $response = "";
 
     $subject = htmlspecialchars(filter_var($data->subject));  // Email subject
@@ -155,7 +157,7 @@ if(isset($_POST['data'])) {
        <div style="display:block;padding-top:1em;text-align:right;width:100%">
             <button type="button" id="prepare"
                     class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"
-                    role="button" aria-disabled="false" onClick="prepare()">
+                    aria-disabled="false" onClick="prepare()">
                     <span class="ui-button-text">Prepare emails</span>
             </button>
        </div>

@@ -2175,6 +2175,11 @@ $mysqli->commit();
         }else{
             $resp['report']['updated'] = $this->rectypes_upddated;
             $resp['report']['added'] = $this->rectypes_added;
+
+            $resp['extra'] = [
+                'detailtypes'=>[ 'added' => $this->detailtypes_added, 'updated' => $this->detailtypes_updated ],
+                'terms'=>[ 'added' => $this->terms_added, 'updated' => $this->terms_updated ]
+            ];
         }
             
         if(count($this->broken_terms_reason)>0){

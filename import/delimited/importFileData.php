@@ -160,12 +160,12 @@
 					<p style="margin: 0px 0px 10px;">Select field assignment<br>(ID and Descriptor fields)</p>
 
 					<div>
-						<label style="color:red">ID Field</label><br>
+						<span style="color:red">ID Field</span><br>
 						<select id="file_id" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
                     <div>
-						<label style="color:red">ID Type</label><br>
+						<span style="color:red">ID Type</span><br>
 						<select id="file_id_type" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                             <option value="ulf_ID">Heurist File ID</option>
                             <option value="ulf_ObfuscatedFileID">Obfuscated ID</option>
@@ -174,22 +174,22 @@
 						</select>
 					</div>
 					<div>
-						<label>Description</label><br>
+						<span>Description</span><br>
 						<select id="file_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Caption</label><br>
+						<span>Caption</span><br>
 						<select id="file_cap" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Copyright</label><br>
+						<span>Copyright</span><br>
 						<select id="file_rights" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>
 					<div>
-						<label>Copy owner</label><br>
+						<span>Copy owner</span><br>
 						<select id="file_owner" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
 						</select>
 					</div>

@@ -10,7 +10,7 @@
 <!-- <hr style="margin:5px" id="hr_sel_record_scope"/> -->
 
 <div id="div_sel_ownership" style="min-width: 410px;" class="input">
-    <div class="header_narrow" style="padding:  0px 16px 0px 0px;"><label>Record is editable by:</label></div>
+    <div class="header_narrow" style="padding:  0px 16px 0px 0px;">Record is editable by:</div>
 
     <div class="detailRow" style="padding-bottom:1em;display:none;">
         <label><input type="radio" name="rb_Owner" value="everyone" id="rb_Owner-everyone">
@@ -34,7 +34,7 @@
 <!-- <hr style="margin:5px"/> -->
 
 <div id="div_sel_access" class="input">
-    <div class="header_narrow" style="padding:  0px 16px 0px 0px;"><label>Record is viewable by:</label></div>
+    <div class="header_narrow" style="padding:  10px 16px 0px 0px;">Record is viewable by:</div>
     <div></div>
 </div>
 <div id="div_sel_access2" style="min-width: 410px;display:block;padding-left:80px" class="input">
@@ -44,7 +44,7 @@
         User or group specified above</label>
     </div>
     <div id="div_AccessGroups" class="detailRow access-hidden" style="padding-bottom:1em;display:none">
-        <label class="heurist-helper3">Members of the following groups can also view the record(s)</label><br><br>
+        <span class="heurist-helper3">Members of the following groups can also view the record(s)</span><br><br>
         <div id="sel_AccessGroups"  style="padding:0.2em;min-width:480px;display:table-row" class="input"></div>
     </div>
 </div>
@@ -79,11 +79,11 @@
             <hr class="add_record" style="display:none;color:#6A7C99"/>
             
             <div style="padding: 0.2em; max-width: 480px;display:none;border-top:1px solid #6A7C99" class="add_record">
-                <div class="header" style="padding:0 16px;padding-top:20px;text-align:left"><label>ADVANCED</label></div>
+                <div class="header" style="padding:0 16px;padding-top:20px;text-align:left">ADVANCED</div>
             </div>
             
             <div id="div_sel_tags" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Add these tags:</label></div>
+                <div class="header_narrow" style="display:inline-block;width:115px;">Add these tags:</div>
                 <div id="div_sel_tags2" style="display:inline-block;padding-bottom:20px;"></div>
             </div>
                 <!--
@@ -109,13 +109,13 @@
             </div>
 
             <div id="div_def_user" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Username:</label></div>
+                <div class="header_narrow" style="display:inline-block;width:115px;">Username:</div>
                 <select id="sel_def_user" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                 <span class="heurist-helper2" style="padding-left: 5px;">The account used for guest visitors</span>
             </div>
 
             <div id="div_def_pwd" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="header_narrow" style="display:inline-block;width:115px;"><label>Password:</label></div>
+                <div class="header_narrow" style="display:inline-block;width:115px;">Password:</div>
                 <input id="txt_def_pwd" class="text ui-widget-content ui-corner-all" style="max-width:30em;font-size:11px;" />
                 <span class="heurist-helper2" style="padding-left: 5px;">Password for the above account</span>
             </div>

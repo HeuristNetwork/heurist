@@ -29,6 +29,7 @@ $response = null;
 $system = new System();
 
 $post_max_size = USystem::getConfigBytes('post_max_size');
+$params = null;
 
 if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
     
@@ -39,22 +40,28 @@ if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
         */
 }else
 if($system->init(@$_REQUEST['db'])){
-
-    //define upload folder   HEURIST_FILESTORE_DIR/ $_REQUEST['entity'] /
-    $entity_name = null;
-    $is_autodect_csv = (@$_REQUEST['autodect']==1);
-    $recID = @$_REQUEST['recID'];
-    $registerAtOnce = (@$_REQUEST['registerAtOnce']==1);
-    $tiledImageStack = (@$_REQUEST['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
     
-    $new_file_name = @$_REQUEST['newfilename'];
+    if(@$_SERVER['REQUEST_METHOD']=='POST'){
+        $params = filter_input_array(INPUT_POST);
+    }else{
+        $params = filter_input_array(INPUT_GET);    
+    }
+
+    //define upload folder   HEURIST_FILESTORE_DIR/ $params['entity'] /
+    $entity_name = null;
+    $is_autodect_csv = (@$params['autodect']==1);
+    $recID = @$params['recID'];
+    $registerAtOnce = (@$params['registerAtOnce']==1);
+    $tiledImageStack = (@$params['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
+    
+    $new_file_name = @$params['newfilename'];
     if($new_file_name){
         $new_file_name = basename($new_file_name);
         $new_file_name = USanitize::sanitizeFileName($new_file_name, false); 
     }
     
-    if(@$_REQUEST['entity']){
-        $entity_name = entityResolveName($_REQUEST['entity']);
+    if(@$params['entity']){
+        $entity_name = entityResolveName($params['entity']);
         if(!$entity_name){
             $response = $system->addError(HEURIST_INVALID_REQUEST,'Wrong entity parameter');
         }
@@ -88,7 +95,7 @@ if($system->init(@$_REQUEST['db'])){
         
         
         $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
-        $file_length = (int)(@$_REQUEST['fileSize']>0?@$_REQUEST['fileSize']:$content_length);
+        $file_length = (int)(@$params['fileSize']>0?@$params['fileSize']:$content_length);
 
         if($usage + $file_length > $quota){ //check quota
             
@@ -165,7 +172,7 @@ if($response!=null){
     if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
            
-        $max_file_size = intval(@$_REQUEST['max_file_size']);                           
+        $max_file_size = intval(@$params['max_file_size']);                           
         if($max_file_size>0){
 // it does not work             
 //            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess', 
@@ -214,8 +221,8 @@ if($response!=null){
         
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
         
-        $version = @$_REQUEST['version']!='icon'?'thumbnail':'icon';
-        $maxsize = intval(@$_REQUEST['maxsize'])>0?intval($_REQUEST['maxsize']):120; //dimension
+        $version = @$params['version']!='icon'?'thumbnail':'icon';
+        $maxsize = intval(@$params['maxsize'])>0?intval($params['maxsize']):120; //dimension
 
         $options = array(
                 'upload_dir' => $entityDir,
@@ -243,11 +250,11 @@ if($response!=null){
     
     }
 
-    if(@$_REQUEST['acceptFileTypes']){
+    if(@$params['acceptFileTypes']){
         /*
         //all these complexity needs to avoid Path Traversal warning
         $allowed_exts = array();
-        $allowed_exts_2 = explode('|', $_REQUEST['acceptFileTypes']);
+        $allowed_exts_2 = explode('|', $params['acceptFileTypes']);
         foreach($allowed_exts_2 as $ext){
             if(in_array(strtolower($ext), $allowed_exts_all)){
                 $idx = array_search(strtolower($ext), $allowed_exts_all);
@@ -255,7 +262,7 @@ if($response!=null){
             }    
         }
         */
-        $options['accept_file_types'] = 'zip|mbtiles';//$_REQUEST['acceptFileTypes'];
+        $options['accept_file_types'] = 'zip|mbtiles';//$params['acceptFileTypes'];
     }else{
         $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
         $options['accept_file_types'] = implode('|', $allowed_exts);

@@ -892,28 +892,28 @@ $.widget( "heurist.navigation", {
 
    //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
+   _setOptions: function( ) {
         this._superApply( arguments );
-    },
+   },
 
 
 
-    /*
+   /*
     * private function
     * show/hide buttons depends on current login status
     */
-    _refresh: function(){
+   _refresh: function(){
 
-    },
+   },
 
-    //
-    // custom, widget-specific, cleanup.
-    _destroy: function() {
+   //
+   // custom, widget-specific, cleanup.
+   _destroy: function() {
         if(this.divMainMenu) this.divMainMenu.remove();
-    },
+   },
     
-    getFirstPageWithContent: function(){
+   getFirstPageWithContent: function(){
         return this.first_not_empty_page_id;
-    }
+   }
     
 });

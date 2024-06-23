@@ -355,8 +355,8 @@ class DbDefRecStructure extends DbEntityBase
             $order = $orders[$idx];
             
             $query = 'UPDATE '.$this->config['tableName'].' SET rst_DisplayOrder='.$order
-                    .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $dty_ID )
-                    .' AND rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID  );
+                    .' WHERE rst_DetailTypeID='.intval( $dty_ID )
+                    .' AND rst_RecTypeID='.intval( $rty_ID  );
             $res = $mysqli->query($query);
                 if(!$res){
                     $ret = false;

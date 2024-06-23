@@ -122,13 +122,8 @@
     }else if(@$_REQUEST['a'] == 'getfacets'){ //returns counts for facets for given query
     
         $params = array();
-        foreach($_REQUEST as $key=>$val){
-            if(is_array($val)){
-                $params[$key]  = $val;
-            }else{
-                $params[$key]  = filter_var($val, FILTER_UNSAFE_RAW);
-            }
-        }
+        
+        $params = filter_input_array(INPUT_POST);
 
         $response = recordSearchFacets($system, $params);
 

@@ -916,8 +916,8 @@ class Temporal {
                 $res = strval(abs($date['year']));
 
                 //year must be four digit for CE and 6 for BCE
-                if(false && $isbce){
-                    $res = str_pad($res,6,'0',STR_PAD_LEFT); //WAS 6
+                if($isbce){
+                    $res = str_pad($res,6,'0',STR_PAD_LEFT); // timeline requires 6 digits for BCE years
                 }else if(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
 

@@ -188,10 +188,14 @@ class DbSysImportFiles extends DbEntityBase
         
         $rec_ID = @$this->data[$this->primaryField];
         $rec_ID = intval(@$rec_ID);
+        
+        $delete_all_import_tables = false;
+        
         if($rec_ID>0){        
             $where = " where sif_ID=".$rec_ID;
         }else{
             $where = " where sif_ID>0";
+            $delete_all_import_tables = true;
         }
         
         $mysqli = $this->system->get_mysqli();
@@ -225,9 +229,17 @@ class DbSysImportFiles extends DbEntityBase
         if (!$mysqli->query("delete from sysImportFiles ".$where)) {
                 $this->system->addError(HEURIST_DB_ERROR, 
                         'Cannot delete data from list of imported files', $mysqli->error);
-              return false;
+                return false;
         }else{
-              return true;
+                if($delete_all_import_tables){
+
+                    $tables = mysql__select_list2($mysqli, "SHOW TABLES LIKE 'import20%'");
+                    foreach($tables as $table_name){
+                        $query = "drop table IF EXISTS `$table_name`";
+                        $mysqli->query($query);
+                    }
+                }
+                return true;
         }
     }
 
