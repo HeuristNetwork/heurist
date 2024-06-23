@@ -318,13 +318,12 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
                 $mysqli->query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
                 if ($has_detail_160) {
                     $query = "update recDetails set dtl_Value=? where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id;
-                        
-                    mysql__exec_param_query($mysqli, $query, array('s', $rec['rec_Title']));
                 }else{
-                    $mysqli->query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                        .$rec_id . ','. $titleDT  .',"'.$mysqli->real_escape_string($rec['rec_Title']) . '")');
+                    $query = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
+                        .intval($rec_id) . ','. intval($titleDT)  .',?)';
                 }
                 
+                mysql__exec_param_query($mysqli, $query, array('s', $rec['rec_Title']));
                 
                 ++$repair_count;
             }else{

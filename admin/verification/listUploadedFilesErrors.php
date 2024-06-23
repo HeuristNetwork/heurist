@@ -252,10 +252,17 @@ $mysqli = $system->get_mysqli();
             //find id with duplicated path+filename 
             while ($res = $res2->fetch_row()) {
                 $query3 = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName  FROM recUploadedFiles '
-                    .' where ulf_OrigFileName="'.$mysqli->real_escape_string($res[0]).'"'
+                    .' where ulf_OrigFileName=?'
                     .' ORDER BY ulf_ID DESC';
-                $res3 = $mysqli->query($query3);
-        
+                
+                $res3 = mysql__select_param_query($mysqli, $query3, array('s', $res[0]));
+                
+                if(!$res3){
+                    //$this->system->addError(HEURIST_DB_ERROR, 'Unable to query recUploadedFiles for file ' 
+                    //                    . $res[0], $mysqli->error);
+                    continue;
+                }
+
                 $dups_files = array(); //id=>path,size,md,array(dup_ids)
                 
                 while ($res4 = $res3->fetch_assoc()) {

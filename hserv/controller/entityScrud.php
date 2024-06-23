@@ -49,7 +49,10 @@ if (@$argv) {
     require_once dirname(__FILE__).'/../System.php';
     require_once 'entityScrudSrv.php';
     
-    $dbname = @$_REQUEST['db'];
+    $dbname = filter_input(INPUT_POST,'db');//@$_REQUEST['db'];
+    if(!$dbname){
+        $dbname = filter_input(INPUT_GET,'db');
+    }
 
     $system = new System();
     
