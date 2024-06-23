@@ -3505,7 +3505,7 @@ function checkUserPermissions($system, $action){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
-    }else if(  ($permissions = 'y_no_add')
+    }else if(  ($permissions == 'y_no_add')
             || ($action == 'add' && strpos($permissions, 'add') !== false) 
             || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
             
