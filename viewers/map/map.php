@@ -486,6 +486,6 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     </div>
     
     <!-- Heurist map printing out -->
-    <div class="grid-map-print-title" leaflet-browser-print-content><h3></h3></div>    
+    <div class="grid-map-print-title" style="display:none;" leaflet-browser-print-content><h3></h3></div>    
 </body>
 </html>

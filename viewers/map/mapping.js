@@ -1760,9 +1760,13 @@ $.widget( "heurist.mapping", {
             }
         }
 
+        const current_zoom = this.nativemap.getZoom();
+
         if(bounds && bounds.isValid()){
-            return {zoom: this.nativemap.getBoundsZoom(bounds), cur_zoom: this.nativemap.getZoom()};
+            return {zoom: this.nativemap.getBoundsZoom(bounds), cur_zoom: current_zoom};
         }
+
+        return {zoom: null, cur_zoom: current_zoom};
     },
 
     //
@@ -1890,7 +1894,7 @@ $.widget( "heurist.mapping", {
     //
     getStyle: function(layer_id) {
 
-        var affected_layer = this.all_layers[layer_id]; console.log(this.all_layers, layer_id, affected_layer);
+        var affected_layer = this.all_layers[layer_id];
         if(!affected_layer) return null;
 
         if(this.isImageLayer(affected_layer)){
@@ -2487,7 +2491,7 @@ $.widget( "heurist.mapping", {
     //
     _onLayerSelect: function(layer, latlng){
 
-        if(layer.options && layer.options.selectable===false)        
+        if(layer.options && layer.options.selectable===false)
         {
             return;  
         } 
@@ -4041,9 +4045,9 @@ $.widget( "heurist.mapping", {
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
                         var sTitle = $dlg.find('#dlg-prompt-title').val().trim();
                         $('div.grid-map-print-title > h3').text(sTitle);
-                        if(sTitle==''){
-                            $('div.grid-map-print-title').hide();    
-                        }
+
+                        !window.hWin.HEURIST4.util.isempty(sTitle) ? // show print title if there is a title
+                            $('div.grid-map-print-title').show() : $('div.grid-map-print-title').hide();
 
                         that.printScaleMode = $dlg.find('#dlg-prompt-scale').val();
                         
