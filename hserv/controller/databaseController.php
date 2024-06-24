@@ -217,7 +217,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                     }
                     
                 }else if(!$allow_action && (!isset($passwordForDatabaseDeletion) || $passwordForDatabaseDeletion=='')) { 
-                    $this->addError(HEURIST_REQUEST_DENIED, 
+                    $system->addError(HEURIST_REQUEST_DENIED, 
                         'This action is not allowed unless a password is provided - please consult system administrator');
                 }
             }
