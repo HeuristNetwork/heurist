@@ -1934,7 +1934,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.htmlspecialchars($bd['val']).'</div></div>';
+            .' '.($bd['val']).'</div></div>';
             break;
         }
     }
@@ -2224,7 +2224,7 @@ function print_public_details($bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . htmlspecialchars($bd['val']) . '</span>'; // add value
+                .'>' . ($bd['val']) . '</span>'; // add value
         $prevLbl = $bd['name'];
     }
 
