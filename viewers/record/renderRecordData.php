@@ -898,7 +898,7 @@ if($isLocalHost){
                 }
 
                 //let t = `&t=${new Date().getTime()}`;
-                const URL = `https://heuristref.net/h6-bm/viewers/map/map.php?q=ids%3A${rec_id}&db=${database}&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none`;
+                const URL = `${baseURL}viewers/map/map.php?q=ids%3A${rec_id}&db=${database}&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none`;
 
                 $map_frame.attr('src', URL);
             }
