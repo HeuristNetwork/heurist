@@ -1934,7 +1934,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.($bd['val']).'</div></div>';
+            .' '.($bd['val']).'</div></div>';  // htmlentities  
             break;
         }
     }

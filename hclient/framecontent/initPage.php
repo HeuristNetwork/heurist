@@ -83,6 +83,8 @@ if(defined('IS_INDEX_PAGE')){
 
 if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
     
+    $user_pwd = System::getAdminPwd();
+    
     $mysqli = $system->get_mysqli();
     $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;
     $username = "";
@@ -115,8 +117,8 @@ if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pw
         $attempt_login = intval($role_count) === 0;
     }
     
-    if($attempt_login && !empty($username) && !empty($_REQUEST['pwd'])){
-        $system->doLogin($username, $_REQUEST['pwd'], 'public');
+    if($attempt_login && !empty($username) && $user_pwd!=null){
+        $system->doLogin($username, $user_pwd, 'public');
     }
 }
 
@@ -187,6 +189,7 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
+//header("Content-Security-Policy: frame-ancestors 'self'");    
 ?>
 <!DOCTYPE html>
 <?php    
@@ -203,7 +206,10 @@ if(defined('IS_INDEX_PAGE')){
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!--
+<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self'; frame-src 'self' https://test-idp.federation.renater.fr;" />
+
 <meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
 -->
 <!--

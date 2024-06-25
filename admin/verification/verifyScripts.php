@@ -30,41 +30,11 @@ exit;
 ini_set('max_execution_time', '0');
 
  
-//define('OWNER_REQUIRED', 1);   
+//define('ADMIN_PWD_REQUIRED', 1); 
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/utils_db_load_script.php';
-
-/*
-//print htmlspecialchars($_REQUEST['db']).'<br>';
-if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
-    ?>
-    
-    <form action="verifyConceptCodes4.php" method="POST">
-        <div style="padding:20px 0px">
-            Only an administrator (server manager) can carry out this action.<br>
-            This action requires a special system administrator password (not a normal login password)
-        </div>
-    
-        <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
-        <input type="password" name="pwd" autocomplete="off" />
-
-        <input type="submit" value="OK" />
-    </form>
-
-    <?php
-    exit;
-}
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
-<div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
-            <p>This report shows </p>
-*/
-?>            
-
-         
-<?php            
-
 
 $mysqli = $system->get_mysqli();
     

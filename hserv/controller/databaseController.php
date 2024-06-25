@@ -36,6 +36,11 @@ $system = new System();
 $action = @$_REQUEST['a'];
 $locale = @$_REQUEST['locale'];
 
+//sysadmin protection - reset from request to avoid exposure in possible error/log messages
+$create_pwd = System::getAdminPwd('create_pwd');
+$sysadmin_pwd = System::getAdminPwd('chpwd');
+$sysadmin_pwd = System::getAdminPwd('pwd');
+
 if($action==null){
     $action = @$_REQUEST['action'];
 }
@@ -81,7 +86,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
         
             if( !isset($passwordForDatabaseCreation) 
                 || $passwordForDatabaseCreation==''
-                || !$system->verifyActionPassword(@$_REQUEST['create_pwd'], $passwordForDatabaseCreation, 6)){
+                || !$system->verifyActionPassword($create_pwd, $passwordForDatabaseCreation, 6)){
             
             
                 //compose database name
@@ -159,8 +164,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
             $database_name = __composeDbName();
             if($database_name!==false){
                 
-                $pwd = @$_REQUEST['pwd']; //sysadmin protection
-                if($system->verifyActionPassword($pwd, $passwordForServerFunctions)){    
+                if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){    
                     $allow_action = false;
                     $system->addErrorMsg('This action requires a special system administrator password<br>');                        
                     
@@ -197,18 +201,17 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                 $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
             }else{
 
-                $pwd = @$_REQUEST['pwd']; //sysadmin protection
                 $is_current_db = ($_REQUEST['db']==$db_target);
                 
-                //validate premissions
-                if($pwd!=null){
-                    $allow_action = !$system->verifyActionPassword($pwd, $passwordForDatabaseDeletion, 15);        
+                //validate premissions - sysadmin protection
+                if($sysadmin_pwd!=null){
+                    $allow_action = !$system->verifyActionPassword($sysadmin_pwd, $passwordForDatabaseDeletion, 15);        
                 }
                 
                 if($is_current_db) {
                     
                     if($system->is_dbowner() || $allow_action){ 
-                        $challenge_pwd  = @$_REQUEST['chpwd'];
+                        
                         $challenge_word = ($action=='clear')?'CLEAR ALL RECORDS':'DELETE MY DATABASE';
                         $allow_action = !$system->verifyActionPassword($challenge_pwd, $challenge_word);
                     }else{
@@ -288,12 +291,8 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                         //   owner will be replaced with current owner
                         //   must be curated (regID<21) or <1000?
                 
-                        // sysadmin_protection
-                        $pwd = @$_REQUEST['pwd']; //sysadmin protection
-
                         list($db_source_full, $db_source ) = mysql__get_names($db_source);
                         $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from `'.$db_source_full.'`.sysIdentification where 1'); 
-        
                     
                         if($is_current_db){
                             if(!$system->is_admin()){ 
@@ -302,9 +301,9 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
                             }else{
                                 $allow_action = true;
                                 if($action=='clone' && !($sourceRegID>0)){
-                                    //check for new definitions
+                                    //check for new definitions - sysadmin protection
                                     $hasWarning = DbUtils::databaseCheckNewDefs();
-                                    if($hasWarning!=false && $system->verifyActionPassword($pwd, $passwordForServerFunctions)){    
+                                    if($hasWarning!=false && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){    
                                         $allow_action = false;
                                         //add prefix 
                                         $system->addErrorMsg(
@@ -320,7 +319,7 @@ if(!$system->init(@$_REQUEST['db'], ($action!='create'))){ //db required, except
 $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
                             }
                             
-                        }else if (!$system->verifyActionPassword($pwd, $passwordForServerFunctions)){
+                        }else if (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
                             //cloned by sysadmin (sourcedb=) from list of databases
                             $allow_action = true;
                         }

@@ -27,6 +27,8 @@
     */
     if(!@$_REQUEST['db']) $_REQUEST['db'] = 'Heurist_Bibliographic';
 
+    $sysadmin_pwd = System::getAdminPwd();
+
     if(@$_REQUEST['verbose']!=1){
         
         define('OWNER_REQUIRED',1);   
@@ -59,7 +61,7 @@
 <?php        
     }
     
-    if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+    if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
         print $response = $system->getError()['message'];
         $system->clearError();
     }else{

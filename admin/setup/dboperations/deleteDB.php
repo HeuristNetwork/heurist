@@ -30,7 +30,9 @@ $res = false;
 
 $system = new System();
 
-if(!@$_REQUEST['pwd']){
+$sysadmin_pwd = System::getAdminPwd();
+
+if($sysadmin_pwd==null){
     $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
 }else{
     
@@ -51,10 +53,10 @@ if(!@$_REQUEST['pwd']){
     }
 
 //if user deletes its own database
-    $is_delete_current_db = (@$_REQUEST['db']==$database_to_delete && @$_REQUEST['pwd']=='DELETE MY DATABASE');
+    $is_delete_current_db = (@$_REQUEST['db']==$database_to_delete && $sysadmin_pwd=='DELETE MY DATABASE');
 
 // Password check for system administrator who can delete any database
-    if($is_delete_current_db || !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion, 14)) 
+    if($is_delete_current_db || !$system->verifyActionPassword($sysadmin_pwd, $passwordForDatabaseDeletion, 14)) 
     {
         if($database_to_delete){
             

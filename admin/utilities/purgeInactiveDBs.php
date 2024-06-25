@@ -146,16 +146,22 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();
+
+if(!$is_shell){
+    $sysadmin_pwd = System::getAdminPwd();
+    if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
+        include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        //$response = $system->getError();
+        //print $response['message'];
+        exit;
+    }
+}
+
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
 
-if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    //$response = $system->getError();
-    //print $response['message'];
-    exit;
-}
+
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
 if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'

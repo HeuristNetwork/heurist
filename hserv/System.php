@@ -1007,6 +1007,14 @@ class System {
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
 
+            //clear sensetive info
+            $sensetive = array('pwd','','chpwd','create_pwd','usrPassword','password');
+            array_walk($sensetive,function($key){
+                if(array_key_exists($key,$_REQUEST)){
+                    unset($_REQUEST[$key]);
+                }   
+            });
+                    
             $sMsg = "\nMessage: ".preg_replace("/[\r\n]/", ' ', $message)."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
@@ -2084,7 +2092,20 @@ class System {
         
         return $version_last_check; 
     }
-
+    
+    //
+    //
+    //
+    public static function getAdminPwd($name='pwd'){
+        if(@$_REQUEST[$name]){
+            $sysadmin_pwd  = $_REQUEST[$name];
+            unset($_REQUEST[$name]);   
+        }else{
+            $sysadmin_pwd = null;
+        }
+        return $sysadmin_pwd;
+    }
+    
     //
     // returns true if password is wrong
     //

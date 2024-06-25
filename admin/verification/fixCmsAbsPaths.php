@@ -25,15 +25,12 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
  
+define('ADMIN_PWD_REQUIRED',1); 
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordsBatch.php';
 
-if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    exit;
-}
 //clear url parameters
 ?>            
 <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          

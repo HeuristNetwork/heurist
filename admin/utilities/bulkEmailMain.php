@@ -25,9 +25,11 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 require_once dirname(__FILE__).'/bulkEmailSystem.php';
 
+$sysadmin_pwd = System::getAdminPwd();
+
 if (@$_REQUEST["exportCSV"] == 1) {
 
-    if($system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)){
+    if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
         echo "The System Administrator password is invalid, please re-try in the previous tab/window";
     }else{
         getCSVDownload($_REQUEST);    
@@ -35,7 +37,7 @@ if (@$_REQUEST["exportCSV"] == 1) {
     exit;
 }
 
-if ( !isset($_REQUEST['db']) || $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+if ( !isset($_REQUEST['db']) || $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     ?>
     
     <h3> A Heurist database and Server Manager password are required to enter this function </h3>
@@ -43,9 +45,9 @@ if ( !isset($_REQUEST['db']) || $system->verifyActionPassword(@$_REQUEST['pwd'],
     <?php
     exit;
 } else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody']) 
-            && isset($_REQUEST['db']) && isset($_REQUEST['pwd'])) {
+            && isset($_REQUEST['db']) && isset($sysadmin_pwd)) {
 
-    if($system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)){
+    if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
 
         echo "The System Administrator password is invalid, please re-try in the previous tab/window";
         exit;

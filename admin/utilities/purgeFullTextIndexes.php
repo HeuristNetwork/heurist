@@ -82,14 +82,19 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();
-if( !$system->init(null, false, false) ){
-    exit("Cannot establish connection to sql server\n");
+
+if(!$is_shell){
+    $sysadmin_pwd = System::getAdminPwd();
+    
+    if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
+        $response = $system->getError();
+        print $response['message'];
+        exit;
+    }
 }
 
-if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    $response = $system->getError();
-    print $response['message'];
-    exit;
+if( !$system->init(null, false, false) ){
+    exit("Cannot establish connection to sql server\n");
 }
 
 $mysqli = $system->get_mysqli();
