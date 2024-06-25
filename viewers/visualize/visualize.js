@@ -166,19 +166,19 @@ var svg;        // The SVG where the visualisation will be executed on
 
         $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
             function(){
-                 zoomBtn(true);
+                zoomBtn(true);
             }
         );
 
         $('#btnZoomOut').button({icons:{primary:'ui-icon-minus'},text:false}).click(
             function(){
-                 zoomBtn(false);
+                zoomBtn(false);
             }
         );
 
         $('#btnFitToExtent').button({icons:{primary:'ui-icon-fullscreen'},text:false}).click(
             function(){
-                 zoomToFit();
+                zoomToFit();
             }
         );
 
@@ -377,38 +377,38 @@ function getDataFromServer(){
 
 function filterData(json_data) {
     
-        if(!json_data) json_data = settings.data; 
-        var names = [];
-        $(".show-record").each(function() {
-            var name = $(this).attr("name");
-            if(!$(this).is(':checked')){ //to exclude
-                names.push(name);
-            }
-        });    
-        
-        // Filter nodes
-        var map = {};
-        var size = 0;
-        var nodes = json_data.nodes.filter(function(d, i) {
-            if($.inArray(d.name, names) == -1) {
-                map[i] = d;
-                return true;
-            }
-            return false;
-        });      
-        
-        // Filter links
-        var links = [];
-        json_data.links.filter(function(d) {
-            if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
-                var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
-                links.push(link);
-            }
-        });
+    if(!json_data) json_data = settings.data; 
+    var names = [];
+    $(".show-record").each(function() {
+        var name = $(this).attr("name");
+        if(!$(this).is(':checked')){ //to exclude
+            names.push(name);
+        }
+    });    
+    
+    // Filter nodes
+    var map = {};
+    var size = 0;
+    var nodes = json_data.nodes.filter(function(d, i) {
+        if($.inArray(d.name, names) == -1) {
+            map[i] = d;
+            return true;
+        }
+        return false;
+    });      
+    
+    // Filter links
+    var links = [];
+    json_data.links.filter(function(d) {
+        if(map.hasOwnProperty(d.source) && map.hasOwnProperty(d.target)) {
+            var link = {source: map[d.source], target: map[d.target], relation: d.relation, targetcount: d.targetcount};
+            links.push(link);
+        }
+    });
 
-        var data_visible = {nodes: nodes, links: links};
-        settings.getData = function(all_data) { return data_visible; }; 
-        visualizeData();
+    var data_visible = {nodes: nodes, links: links};
+    settings.getData = function(all_data) { return data_visible; }; 
+    visualizeData();
 }
 
 function visualizeData() {
@@ -468,7 +468,6 @@ function visualizeData() {
     }
 
     tick()// update display
-    //setTimeout(function(){tick();},10000); 
     
 } //end visualizeData
 
@@ -581,8 +580,6 @@ function onZoom( transform ){
     
     var scale = this.zoomBehaviour.scale();
     if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
-
-    updateOverlays();
 }
 
 //
@@ -938,9 +935,7 @@ function tick() {
     var bottomLines = d3.selectAll(".bottom-lines");
     var rolloverLines = d3.selectAll(".rollover-lines");
 
-    // Junze: no removal for those exsiting object just update their attributes to improve performance
-    // remove additional visible lines
-    // $(".offset_line").remove();
+    //$(".offset_line").hide(); // hide additional lines
 
     var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
@@ -962,9 +957,6 @@ function tick() {
 
     // Update node locations
     updateNodes();
-    
-    // Update overlay
-    updateOverlays(); 
 
     // Update the furthest possible zoom
     if(!settings.isDatabaseStructure){
@@ -992,45 +984,42 @@ function updateCurvedLines(lines) {
     // Calculate the curved segments
     lines.attr("d", function(d) {
         
-       var key = d.source.id+'_'+d.target.id; 
-       if(!pairs[key]){
-           pairs[key] = 1.5;
-       }else{
-           pairs[key] = pairs[key]+0.25;
-       } 
-       var k = pairs[d.source.id+'_'+d.target.id];
-       
-       var target_x = d.target.x,
-           target_y = d.target.y;
-       if(d.target.id==d.source.id){
-           // Self Link, Affects Loop Size
-           target_x = d.source.x+70;
-           target_y = d.source.y-70;
-       }
+        var key = d.source.id+'_'+d.target.id; 
+        if(!pairs[key]){
+            pairs[key] = 1.5;
+        }else{
+            pairs[key] = pairs[key]+0.25;
+        } 
+        var k = pairs[d.source.id+'_'+d.target.id];
         
+        var target_x = d.target.x,
+            target_y = d.target.y;
+
+        if(d.target.id==d.source.id){
+            // Self Link, Affects Loop Size
+            target_x = d.source.x+70;
+            target_y = d.source.y-70;
+        }
+
         var dx = target_x - d.source.x,
             dy = target_y - d.source.y,
             dr = Math.sqrt(dx * dx + dy * dy)/k,
             mx = d.source.x + dx,
             my = d.source.y + dy;
 
-       if(d.target.id==d.source.id){ // Self Linking Node
+        if(d.target.id==d.source.id){ // Self Linking Node
 
-            return [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              "A",dr,dr,0,0,1,target_x,target_y,
-              "A",dr,dr,0,0,1,d.source.x,d.source.y
-            ].join(" ");
-           
-       }else{ // Node to Node Link
+            return `M ${d.source.x} ${d.source.y} `
+                 + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                 + `A ${dr} ${dr} 0 0 1 ${target_x} ${target_y} `
+                 + `A ${dr} ${dr} 0 0 1 ${d.source.x} ${d.source.y}`;
             
-            return [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              "A",dr,dr,0,0,1,target_x,target_y
-            ].join(" ");
-       }
+        }else{ // Node to Node Link
+            
+            return `M ${d.source.x} ${d.source.y} `
+                 + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                 + `A ${dr} ${dr} 0 0 1 ${target_x} ${target_y}`;
+        }
     });
 
 }
@@ -1084,7 +1073,7 @@ function updateStraightLines(lines, type) {
         }
 
         var R = pairs[key];
-        var pnt = [];
+        var pnt = '';
 
         var s_x = d.source.x,
             s_y = d.source.y,
@@ -1132,7 +1121,7 @@ function updateStraightLines(lines, type) {
                         .attr("marker-start", "url(#self-link)");
                     }
 
-                    selectedLine
+                    selectedLine.style('display', 'inline')
                             .attr("x1", s_x)
                             .attr("y1", s_y)
                             .attr("x2", s_x2)
@@ -1150,12 +1139,10 @@ function updateStraightLines(lines, type) {
                 mx = s_x + dx;
                 my = s_y + dy;
 
-                pnt = [
-                    "M",s_x,s_y,
-                    "A",dr,dr,0,0,1,mx,my,
-                    "L",s_x+35,s_y-35,
-                    "L",s_x,s_y
-                ];
+                return `M ${s_x} ${s_y} `
+                     + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                     + `L ${s_x + 35} ${s_y - 35} `
+                     + `L ${s_x} ${s_y}`;
             }
         }else{ // Node to Node Link
 
@@ -1257,7 +1244,7 @@ function updateStraightLines(lines, type) {
                         .attr("marker-end", "url(#blob)");
                     }
 
-                    selectedLine
+                    selectedLine.style('display', 'inline')
                             .attr("x1", s_x)
                             .attr("y1", s_y)
                             .attr("x2", s_x2)
@@ -1279,10 +1266,10 @@ function updateStraightLines(lines, type) {
                             .attr("id", id)
                             .attr("stroke", linecolour)
                             .attr("stroke-linecap", "round")
-                            .style("stroke-width", linewidth)
+                            .style("stroke-width", linewidth);
                         }
                         // Junze: update the coordinates
-                        selectedLine
+                        selectedLine.style('display', 'inline')
                                 .attr("x1", t_x)
                                 .attr("y1", t_y)
                                 .attr("x2", t_x2)
@@ -1303,13 +1290,13 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("class", "offset_line")
                                 .attr("stroke-linecap", "round")
-                                .attr("fill", "none")
+                                .attr("fill", "none");
                             }
-                            selectedLine
+
+                            selectedLine.style('display', 'inline')
                                 .attr("stroke-width", linewidth)
                                 .attr("stroke", linecolour)
                                 .style("display", null)
-                                //   .attr("d", "M " + t_x2 + " " + (t_y+5) + " L " + t_x + " " + t_y + " L " + t_x2 + " " + (t_y-5))
                                 .attr("d", `M ${t_x2} ${t_y + 5} L ${t_x} ${t_y} L ${t_x2} ${t_y - 5}`);
                         }
                     }else{
@@ -1322,10 +1309,10 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("stroke", linecolour)
                                 .attr("stroke-linecap", "round")
-                                .style("stroke-width", linewidth)
+                                .style("stroke-width", linewidth);
                             }
                             // add extra ending line
-                            selectedLine
+                            selectedLine.style('display', 'inline')
                                     .attr("x1", t_x)
                                     .attr("y1", t_y)
                                     .attr("x2", t_x)
@@ -1342,16 +1329,13 @@ function updateStraightLines(lines, type) {
                                 .attr("id", id)
                                 .attr("class", "offset_line")
                                 .attr("stroke-linecap", "round")
-                                .attr("fill", "none")
+                                .attr("fill", "none");
                             }
-                            selectedLine
-                                .style("display", null)
+
+                            selectedLine.style("display", 'inline')
                                 .attr("stroke", linecolour)
                                 .attr("stroke-width", linewidth)
                                 .attr("fill", "none")
-
-                                //   .attr("d", "M " + (t_x+5) + " " + t_y2 + " L " + t_x + " " + t_y + " L " + (t_x-5) + " " + t_y2);
-                                // Junze: use format to improve performance and reduce GC pressure
                                 .attr("d", `M ${t_x + 5} ${t_y2} L ${t_x} ${t_y} L ${t_x - 5} ${t_y2}`);
                         }else{
 
@@ -1374,11 +1358,6 @@ function updateStraightLines(lines, type) {
                 mdx = s_x + dx;
                 mdy = s_y + dy;
 
-                pnt = [
-                    "M", s_x, s_y,
-                    "L", mdx, mdy,
-                    "L", t_x, t_y 
-                ];
             }else{
 
                 dx = (t_x-s_x)/2;
@@ -1391,121 +1370,106 @@ function updateStraightLines(lines, type) {
 
                 mdx = s_x + dx2;
                 mdy = s_y + dy2;
-                
-                pnt = [
-                    "M", s_x, s_y,
-                    "L", mdx, mdy,
-                    "L", t_x, t_y 
-                ];
 
             }
 
+            pnt = `M ${s_x} ${s_y} `
+                + `L ${mdx} ${mdy} `
+                + `L ${t_x} ${t_y}`;
+
         }
        
-        return pnt.join(' '); 
+        return pnt; 
     });
     
 }
 
 function updateSteppedLines(lines, type){
+
     var pairs = {};
-    
-    
+
     $(".hidden_line_for_markers").remove();
-    
-    var mode = 0; //
-    
+
     // Calculate the straight points
     lines.attr("d", function(d) {
-        
-       var dx = (d.target.x-d.source.x)/2,
-           dy = (d.target.y-d.source.y)/2;
-       
-       var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
-       
-       var key = d.source.id+'_'+d.target.id;
-       if(pairs[d.target.id+'_'+d.source.id]){
-           key = d.target.id+'_'+d.source.id;
-       }else if(!pairs[key]){
-           pairs[key] = 1-indent;
-       }
-       
-       pairs[key] = pairs[key]+indent;
-       var k = pairs[key];
-       
-       var target_x = d.target.x,
-           target_y = d.target.y;
-       var res = [];
 
-       var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr-mid)' : 'url(#marker-rel-mid)';
-           
+        var dx = (d.target.x-d.source.x)/2,
+            dy = (d.target.y-d.source.y)/2;
+
+        var indent = ((Math.abs(dx)>Math.abs(dy))?dx:dy)/4;
+
+        var key = d.source.id+'_'+d.target.id;
+        if(pairs[d.target.id+'_'+d.source.id]){
+            key = d.target.id+'_'+d.source.id;
+        }else if(!pairs[key]){
+            pairs[key] = 1-indent;
+        }
+
+        pairs[key] = pairs[key]+indent;
+        var k = pairs[key];
+
+        var target_x = d.target.x,
+            target_y = d.target.y;
+        var res = [];
+
+        var marker_type = (d.relation.type == 'resource') ? 'url(#marker-ptr-mid)' : 'url(#marker-rel-mid)';
+
        if(d.target.id==d.source.id){ // Self Linking Node
-           // Affects Loop Size
-           target_x = d.source.x+65;
-           target_y = d.source.y-65;
-           
-           var dx = target_x - d.source.x,
-               dy = target_y - d.source.y,
-               dr = Math.sqrt(dx * dx + dy * dy)/1.5,
-               mx = d.source.x + dx,
-               my = d.source.y + dy;
-           
-            res = [
-              "M",d.source.x,d.source.y,
-              "A",dr,dr,0,0,1,mx,my,
-              //"A",dr,dr,0,0,1,target_x,target_y,
-              "L",d.source.x+35,d.source.y-35,
-              "L",d.source.x,d.source.y
-              //"A",dr,dr,0,0,1,d.source.x,d.source.y
-            ];
-            
+            // Affects Loop Size
+            target_x = d.source.x+65;
+            target_y = d.source.y-65;
+
+            var dx = target_x - d.source.x,
+                dy = target_y - d.source.y,
+                dr = Math.sqrt(dx * dx + dy * dy)/1.5,
+                mx = d.source.x + dx,
+                my = d.source.y + dy;
+
+            res = `M ${d.source.x} ${d.source.y} `
+                + `A ${dr} ${dr} 0 0 1 ${mx} ${my} `
+                + `L ${d.source.x + 35} ${d.source.y -35} `
+                + `L ${d.source.x} ${d.source.y}`;
+
             if($.isFunction($(this).attr)){
                 $(this).attr("marker-mid", marker_type);
             }
-           
-       }else{  // Node to Node Link
-      
-           var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
-           var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
 
-           //path
-           res = [
-                  "M",d.source.x,d.source.y,
-                  "L",(d.source.x + dx2),(d.source.y + dy2 ),
-                  "L",(d.source.x + dx2 + dx + k),(d.source.y + dy2),
-                  "L",(d.source.x + dx2 + dx + k),target_y,
-                  "L",target_x,target_y
-                ];
-           
-           
-           if(type=='bottom'){
+       }else{  // Node to Node Link
+
+            var dx2 = 45*(dx==0?0:((dx<0)?-1:1));
+            var dy2 = 45*(dy==0?0:((dy<0)?-1:1));
+
+            //path
+            res = `M ${d.source.x} ${d.source.y} `
+                + `L ${d.source.x + dx2} ${d.source.x + dy2} `
+                + `L ${d.source.x + dx2 + dx + k} ${d.source.y + dy2} `
+                + `L ${d.source.x + dx2 + dx + k} ${target_y} `
+                + `L ${target_x} ${target_y}`;
+
+            if(type=='bottom'){
                 //add 3 lines - specially for markers
                 var g = d3.select("#container").append("svg:g").attr("class", "hidden_line_for_markers");
                 
-                var pnt = [
-                  "M",(d.source.x + dx2),(d.source.y + dy2 ),
-                  "L",(d.source.x + dx2 + dx/2 + k),(d.source.y + dy2)];
-                
+                var pnt = `M ${d.source.x + dx2} ${d.source.y + dy2} `
+                        + `L M ${d.source.x + dx2 + dx / 2 + k} ${d.source.y + dy2}`;
+
                 g.append("svg:path")
-                        .attr("d", pnt.join(' '))
+                        .attr("d", pnt)
                         //reference to marker id
                         .attr("marker-end", marker_type);
 
-                pnt = [
-                  "M",(d.source.x + dx2 + dx + k), (d.source.y + dy2),
-                  "L",(d.source.x + dx2 + dx + k), d.source.y + dy2 + (target_y - d.source.y - dy2)/2 ];
-                        
+                pnt = `M ${d.source.x + dx2 + dx + k} ${d.source.y + dy2} `
+                    + `L ${d.source.x + dx2 + dx + k} ${d.source.y + dy2 + (target_y - d.source.y - dy2) / 2}`;
                 g.append("svg:path")
                         //.attr("class", "hidden_line_for_markers")
                         .attr("d", pnt.join(' '))
                         //reference to marker id
                         .attr("marker-end", marker_type);
-
-           }
-           dx = dx + k;
-       }
-       
-       return res.join(' ');      
+            }
+            dx = dx + k;
+        }
+        
+        return res;      
     });
     
 }
@@ -1622,34 +1586,27 @@ function inIframe() {
     let fullscreenbtn = document.getElementById("windowPopOut");
     let closewindowbtn = document.getElementById("closegraphbutton");
     let refreshData = document.getElementById("resetbutton");
-    //let refreshbuttonfullscreen = document.getElementById("resetbuttonfullscreen");
 
     let gravitymodeZero = document.getElementById("gravityMode0");
     let gravitymodeOne = document.getElementById("gravityMode1");
-    //let gravitymodeTwo = document.getElementById("gravityMode2");
-    //let gravitymodeThree = document.getElementById("gravityMode3");
 
     if (window.location !== window.parent.location) {
         //Page is in iFrame
         fullscreenbtn.style.visibility = 'visible';
         closewindowbtn.style.display = 'none';
         refreshData.style.visibility = 'visible';
-        //refreshbuttonfullscreen.style.display = 'none';
+
         gravitymodeZero.style.visibility = 'visible';
         gravitymodeOne.style.visibility = 'visible';
-        //gravitymodeTwo.style.display = 'none';
-        //gravitymodeThree.style.display = 'none';
 
     } else {
         //Page is not in iFrame
         fullscreenbtn.style.display = 'none';
         closewindowbtn.style.visibility = 'visible';
         refreshData.style.display = 'visible';
-        //refreshbuttonfullscreen.style.visibility = 'visible';
+
         gravitymodeZero.style.display = 'visible';
         gravitymodeOne.style.display = 'visible';
-        //gravitymodeTwo.style.visibility = 'visible';
-        //gravitymodeThree.style.visibility = 'visible';
 
     }
 
@@ -1666,35 +1623,6 @@ function refreshButton() {
     }
 }
 
-//refresh graph while in fullscreen mode - Travis Doyle 28/9
-function refreshButtonFullscreen() {
-    return;
-    //var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    //location.href = url2;
-}
-//Gravity Fullscreen Button Fix - Travis Doyle 6/10
-function refreshGravityOn() {
-    return;
-    /*var gravitystat = getSetting(setting_gravity);
-
-    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    location.href = url2;
-
-    if (gravitystat == 'off') {
-        setGravity('touch');
-    }*/
-}
-function refreshGravityOff() {
-    return;
-    /*var gravitystat = getSetting(setting_gravity);
-
-    var url2 = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php' + window.location.search;
-    location.href = url2;
-
-    if (gravitystat == 'touch') {
-        setGravity('off');
-    }*/
-}
 //open graph in fullscreen - Travis Doyle 28/9
 function openWin() {
     var hrefnew = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
