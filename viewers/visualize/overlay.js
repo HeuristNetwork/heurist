@@ -357,10 +357,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         })
         .on("mouseout", function(d) {
             if(drag_link_source_id!=null){
-            drag_link_timer = setTimeout(function(){
-                drag_link_target_id = null;
-                if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
-            },300);
+                drag_link_timer = setTimeout(function(){
+                    drag_link_target_id = null;
+                    if(drag_link_line) drag_link_line.attr("stroke","#ff0000");
+                },300);
             }            
         });
     }
@@ -419,26 +419,26 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           return d.text;
                       })
                       .attr("class", function(d, i) {
-                          if(i>0 && d.subheader==1){ // d.style=='italic'
-                                return 'info-mode-full namelabel';
-                          }else{
-                                return (i>0?'info-mode ':'nodelabel ')+'namelabel';     
-                          }
+                        if(i>0 && d.subheader==1){ // d.style=='italic'
+                            return 'info-mode-full namelabel';
+                        }else{
+                            return (i>0?'info-mode ':'nodelabel ')+'namelabel';     
+                        }
                       })
                       .attr("x", function(d, i) {
-                          return offset;
-                      })        // Some left padding
+                        return offset;
+                      }) // Some left padding
                       .attr("y", function(d, i) {
-                          // Multiline check
-                          if(d.multiline) {
-                              if(position == 16){
+                        // Multiline check
+                        if(d.multiline) {
+                            if(position == 16){
                                 position += 3;
-                              }
-                              if(d.xpos>0){
+                            }
+                            if(d.xpos>0){
                                 position = position + d.xpos;
-                              }
-                          }
-                          return position; // Position calculation
+                            }
+                        }
+                        return position; // Position calculation
                       })
                       .attr("fill", function(d){
                         if(d.subheader == 1){ 
@@ -451,7 +451,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         return fontColor;
                       })
                       .attr("font-weight", function(d) {  // Font weight based on weight property
-                          return d.weight;
+                        return d.weight;
                       })
                       .attr("rtyid", function(d) { // Record type id
                         return d.rtyid;
@@ -460,10 +460,10 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                         return d.dtyid;
                       })
                       .style("font-style", function(d) {   // Font style based on style property
-                          return d.style;
+                        return d.style;
                       }, "important")
                       .style("font-size", function(d) {   // Font size based on size property
-                          return d.size;
+                        return d.size;
                       }, "important");
 
         if(settings.isDatabaseStructure){
@@ -471,125 +471,80 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 			// Display rectypes used by selected fields
 			overlay.selectAll("text.info-mode-full").on("click", function(event){
 
+                if(d3.event.defaultPrevented){
+                    return;
+                }
+
 				if(event.dtyid == null || event.dtyid == 0 || isNaN(event.dtyid)){
 					return;
 				}
-				
-				var ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
 
-				if(ids.indexOf(',') != -1){
+				let ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
 
-					ids.split(',').forEach(function(id){
-						$('#records').find('#'+id).prop('checked', true).change();
-					});
-				}else{
-					$('#records').find('#'+ids).prop('checked', true).change();
-				}
+				ids = ids.indexOf(',') !== -1 ? ids.replaceAll(/,/g, ', #') : ids;
+
+				ids = `#${ids}`;
+				$('#records').find(ids).prop('checked', true).change();
+
 			}).style('cursor', 'pointer');
-        }else{
-
-            // Display record in popup on click of record title
-            var startX, startY;
-            overlay.selectAll('text.info-mode')
-                .on('mousedown', function(event){
-                    startX = event.x;
-                    startY = event.y;
-                })
-                .on('mouseup', function(event){
-                    var diffX = Math.abs(startX - event.x);
-                    var diffY = Math.abs(startY - event.y);
-
-                    if(diffX < 1 && diffY < 1){
-                        window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false);
-                    }
-                });
-
-            overlay.selectAll('text.nodelabel')
-                .on('mousedown', function(event){
-                    startX = event.x;
-                    startY = event.y;
-                })
-                .on('mouseup', function(event){
-                    var diffX = Math.abs(startX - event.x);
-                    var diffY = Math.abs(startY - event.y);
-
-                    if(diffX < 2 && diffY < 2){
-                        window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false);
-                    }
-                });
         }
     }else{ // link information, onhover
-      
-      position = 0;
-      var k, text = [[]];
-      // Prepare icon + label combo prepare
-      for(k = 0; k < info.length; k++){
-          
-        /* ICON */
-        var linkicon = overlay
-            .append("svg:image")
-            .attr("class", 'icon info-mode')
-            .attr("xlink:href", function(d) { // pick relation icon
-                  
-                if(info[k].type=='resource'){ // single arrow
-                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_1.png'; 
-                }
-                else if(info[k].type=='relmarker'){ // double arrow
-                    return window.hWin.HAPI4.baseURL+'viewers/visualize/assets/arrow_2.png';
-                }
-                else{
-                    return '';
-                }
-            })
-            .attr("x", function(d) { // if the icon has been rotated it needs to be moved left to keep it next to text
-                if(info[k].dir=='to' || $('#expand-links').is(':Checked')){
-                    return 2;
-                }else{
-                    return -18;
-                }
-            }) 
-            .attr("y", function(d, i) { // move relation icon down to sit next to text
-                if(settings.isDatabaseStructure && $('#expand-links').is(':Checked')){
-                    return position;
-                }else{
-                    return position + 7.5;
-                }
-            })
-            .attr("height", iconSize)
-            .attr("width", iconSize);
 
-        if(info[k].dir == 'from'){ // rotate icon
-            linkicon.style("transform", "scaleX(-1)");
+        position = 0;
+        var k, text = [[]];
+        // Prepare icon + label combo prepare
+        for(k = 0; k < info.length; k++){
+
+            /* ICON */
+            var linkicon = overlay
+                .append("svg:image")
+                .attr("class", 'icon info-mode')
+                .attr("xlink:href", function(d) { // pick relation icon
+
+                    let type = info[k].type;
+                    if(type != 'resource' && type != 'relmarker'){
+                        return '';
+                    }
+
+                    // arrow_1 - single arrow for record pointers
+                    // arrow_2 - double arrow for relationships
+                    return `${window.hWin.HAPI4.baseURL}viewers/visualize/assets/arrow_${type == 'resource' ? 1 : 2}.png`;
+                })
+                .attr("x", function(d) { // if the icon has been rotated it needs to be moved left to keep it next to text
+                    return info[k].dir=='to' || $('#expand-links').is(':Checked') ?
+                                2 : -18;
+                }) 
+                .attr("y", function(d, i) { // move relation icon down to sit next to text
+                    return settings.isDatabaseStructure && $('#expand-links').is(':Checked') ? 
+                                position : (position + 7.5);
+                })
+                .attr("height", iconSize)
+                .attr("width", iconSize);
+
+            if(info[k].dir == 'from'){ // rotate icon
+                linkicon.style("transform", "scaleX(-1)");
+            }
+
+            text[0].push(linkicon[0][0]);
+
+            /* LABEL */
+            var linkline = overlay.append("text")
+                .text(info[k].text)
+                .attr("class", 'info-mode')
+                .attr("x", iconSize+2)
+                .attr("y", function(d, i) { // calculate position
+                    return position + (iconSize * (info[k].subheader == 1 ? 0.8 : 1.2));
+                })
+                .attr("fill", function(d){
+                    return info[k].subheader == 1 ? 'gray' : fontColor;
+                })
+                .attr("font-weight", info[k].style)
+                .style("font-style", info[k].style, "important")
+                .style("font-size", info[k].size, "important");
+
+            text[0].push(linkline[0][0]);
         }
-
-        text[0].push(linkicon[0][0]);
-
-        /* LABEL */
-        var linkline = overlay.append("text")
-            .text(info[k].text)
-            .attr("class", 'info-mode')
-            .attr("x", iconSize+2)
-            .attr("y", function(d, i) { // calculate position
-                if(info[k].subheader == 1){
-                    position = position + (iconSize*0.8);
-                }else{
-                    position = position + (iconSize*1.2);
-                }
-                return position;
-            })
-            .attr("fill", function(d){
-                if(info[k].subheader == 1){
-                    return 'gray';
-                }
-                return fontColor;
-            })
-            .attr("font-weight", info[k].style)
-            .style("font-style", info[k].style, "important")
-            .style("font-size", info[k].size, "important");
-
-        text[0].push(linkline[0][0]);
-      }
-    }      
+    }
         
     // Calculate Box sizes
     var maxWidth = 1;
@@ -619,16 +574,16 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
     maxWidth  += ((type=='record')?(offset):10)*2;
     maxHeight = maxHeight + offset*1;
-      
+
     //drag and edit icons and actions for records
     if(type=='record'){
-                 
+
         var drag2 = d3.behavior.drag()
             .on("dragstart", function(d, i){
                 d3.event.sourceEvent.stopPropagation();
 
                 drag_link_source_id = d.id;
-            
+
                 var node = $(".node.id"+d.id);
                 var x = node.offset().left - 5;
                 var y = node.offset().top - 55;
@@ -636,7 +591,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 var svgPos = $("svg").position();
                 var dx = (x < (event.clientX - svgPos.left))?-2:2;
                 var dy = (y < (event.clientY - svgPos.top))?-2:2;
-                
+
                 drag_link_line = svg.append("svg:line")
                 .attr("stroke","#ff0000")
                 .attr("stroke-width",4)
@@ -651,15 +606,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     //.attr("y2", Number(drag_link_line.attr("y2"))+d3.event.dy); //scale is not used
                     var svgPos = $("svg").position();
 
-                var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
-                var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
+                    var dx = (drag_link_line.attr('x1') < (event.clientX - svgPos.left))?-2:2;
+                    var dy = (drag_link_line.attr('y1') < (event.clientY - svgPos.top))?-2:2;
 
                     drag_link_line
                         .attr("x2", event.clientX - svgPos.left+dx)
                         .attr("y2", event.clientY - svgPos.top+dy);
-                    
+
                 }
-                
+
             })
             .on("dragend", function(){
                 if(drag_link_source_id!=null && drag_link_target_id!=null){
@@ -715,17 +670,17 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 
                             $(overlay.node()).find('.addLink, .editBtn, .close').show();
                         }else{
-    
+
                             $icon.attr('transform', menuarrow_transform);
-    
+
                             // Set optimal width & height
                             rect_full.attr("width", maxWidth);  
                             rect_info.attr("width", maxWidth);
-    
+
                             if(divider != null) divider.attr("x2", maxWidth);
-    
+
                             if(field_dividers) field_dividers.attr("x2", maxWidth);
-    
+
                             $(overlay.node()).find('.addLink, .editBtn, .close').hide();
                         }
                         $icon.toggleClass('menu-open menu-close');
@@ -734,7 +689,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
 
         if(!settings.isDatabaseStructure || settings.onRefreshData){
-        
+
             //link button      
             var btnAddLink = overlay
                         .append("svg:image")
@@ -885,64 +840,64 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     
     if(type=='record'){
 
-      if(currentMode=='infoboxes'){
+        if(currentMode=='infoboxes'){
 
-        rect_full.style('display', 'none');
-        overlay.selectAll(".info-mode-full").style('display', 'none');
+            rect_full.style('display', 'none');
+            overlay.selectAll(".info-mode-full").style('display', 'none');
 
-      }else if(currentMode=='infoboxes_full'){
+        }else if(currentMode=='infoboxes_full'){
 
-        rect_info.style('display', 'none');
+            rect_info.style('display', 'none');
 
-        if(info.length > 2){
+            if(info.length > 2){
 
-            var rectype_details = info.shift(); // ignore rectangle "title" (rectype name)
-            var last_field = info.pop(); // ignore last field
-            var position1 = 26, position2 = 26; // for y1 and y2 values
+                var rectype_details = info.shift(); // ignore rectangle "title" (rectype name)
+                var last_field = info.pop(); // ignore last field
+                var position1 = 26, position2 = 26; // for y1 and y2 values
 
-            field_dividers = overlay.selectAll("line")
-                                    .data(info)
-                                    .enter()
-                                    .append("svg:line")
-                                    .attr("class", "inner_divider")
-                                    .attr("X1", 0)
-                                    .attr("y1", function(d){
-                                        position1 += d.xpos;
-                                        return position1;
-                                    })
-                                    .attr("x2", maxWidth)
-                                    .attr("y2", function(d){
-                                        position2 += d.xpos
-                                        return position2;
-                                    })
-                                    .attr("stroke", "gray")
-                                    .attr("stroke-width", 0.75);
+                field_dividers = overlay.selectAll("line")
+                                        .data(info)
+                                        .enter()
+                                        .append("svg:line")
+                                        .attr("class", "inner_divider")
+                                        .attr("X1", 0)
+                                        .attr("y1", function(d){
+                                            position1 += d.xpos;
+                                            return position1;
+                                        })
+                                        .attr("x2", maxWidth)
+                                        .attr("y2", function(d){
+                                            position2 += d.xpos
+                                            return position2;
+                                        })
+                                        .attr("stroke", "gray")
+                                        .attr("stroke-width", 0.75);
 
-            info.unshift(rectype_details); // re-add the shifted item
-            info.push(last_field); // re-add the pop'd item
+                info.unshift(rectype_details); // re-add the shifted item
+                info.push(last_field); // re-add the pop'd item
+            }
+
+            if(info.length > 1){
+
+                // Add line between rectype and fields here
+                divider = overlay.append("svg:line")
+                                .attr("class", "inner_divider")
+                                .attr("x1", 0)
+                                .attr("y1", 23)
+                                .attr("x2", maxWidth)
+                                .attr("y2", 23)
+                                .attr("stroke", "#666")
+                                .attr("stroke-width", 1.25)
+                                .attr("id", "line_divider");
+            }
+
+        }else if(currentMode=='icons'){
+            
+            overlay.selectAll('.info-mode').style('display', 'none');
+            overlay.selectAll('.info-mode-full').style('display', 'none');
+            overlay.selectAll(".rect-info-full").style('display', 'none');
+            overlay.selectAll(".rect-info").style('display', 'none');
         }
-
-        if(info.length > 1){
-
-            // Add line between rectype and fields here
-            divider = overlay.append("svg:line")
-                             .attr("class", "inner_divider")
-                             .attr("x1", 0)
-                             .attr("y1", 23)
-                             .attr("x2", maxWidth)
-                             .attr("y2", 23)
-                             .attr("stroke", "#666")
-                             .attr("stroke-width", 1.25)
-                             .attr("id", "line_divider");
-        }
-
-      }else if(currentMode=='icons'){
-          
-        overlay.selectAll('.info-mode').style('display', 'none');
-        overlay.selectAll('.info-mode-full').style('display', 'none');
-        overlay.selectAll(".rect-info-full").style('display', 'none');
-        overlay.selectAll(".rect-info").style('display', 'none');
-      }
     } 
    
    return overlay;     
@@ -958,46 +913,6 @@ function _editRecStructure(rty_ID) {
     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
     
-}
-
-/** Repositions all overlays */
-function updateOverlays() {
-    return;
-    /*   
-    $(".overlay").each(function() {
-        // Get information
-        var pieces = $(this).attr("class").split(" ");
-        var type = pieces[1];
-        var id = pieces[2];
-        
-        // Select element to align to
-        var bbox;
-        if(type == "record") {
-            bbox = $(".node."+id + " .foreground")[0].getBoundingClientRect(); //was icon  
-        }else{
-            bbox = $(".link."+id)[0].getBoundingClientRect();
-        }
-        
-        // Update position 
-        var svgPos = $("svg").position();
-        x = bbox.left + bbox.width/2 - svgPos.left;
-        y = bbox.top + bbox.height/2 - svgPos.top;  
-        //var iconSize = 16;
-        $(this).attr("transform", "translate("+(x - iconSize/2 -3)+","+(y-iconSize/2 -3)+")");
-        //$(this).attr("transform", "translate("+(x)+","+(y)+")");
-        
-        
-    });
-    */
-    /*
-    
-    
-    if(pos && svgPos) {
-        var x = pos.left - svgPos.left;
-        var y = pos.top - svgPos.top;
-        $(".overlay.id"+id).attr("transform", "translate("+x+","+y+")");   
-    }
-    */
 }
 
 /** Removes the overlay with the given ID */
@@ -1021,87 +936,85 @@ function removeOverlays() {
 // open popup dialog to define new link or relationship
 //
 function _addNewLinkField(source_ID, target_ID){
-    
-            var body = $(this.document).find('body');
-            var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
-            
-            //ar target_ID = 10;
-            
-            var url = window.hWin.HAPI4.baseURL;
-            var dlg_title = '';
-            
-            if(settings.isDatabaseStructure){
-                
-                url = url + "viewers/visualize/selectLinkField.php?&db="
-                    + window.hWin.HAPI4.database
-                    + '&source_ID='+source_ID;
-               
-               dlg_title = 'Select or Create new link field type';   
-            }else{
-                
-                _linkTwoRecords(source_ID, target_ID);
-                return;
-            }
-                   
-            if(target_ID>0){
-                url = url +'&target_ID='+target_ID;
-            }
-            
-            var hWin = window.hWin?window.hWin:top;
-                
-            hWin.HEURIST4.msg.showDialog(url, 
-                {
-                    "close-on-blur": false,
-                    title: dlg_title,
-                    height: dim.h,
-                    width: dim.w,
-                    afterclose: function(){
-                        //remove link line
-                        drag_link_source_id = null;
-                        if(drag_link_line) drag_link_line.remove();
-                        drag_link_line = null;
-                    },
-                    callback: function(context) {
-                        
-                        if(context!="" && context!=undefined) {
-                            var sMsg = (context==true)?'Link created...':context;
-                            hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
-                            if(settings.isDatabaseStructure){
-                                getDataFromServer();    
-                            }else if(settings.onRefreshData){
-                                // Trigger refresh
-                                settings.onRefreshData.call(this);
-                            }
-                            
-                        }
-                    },
-                    default_palette_class:'ui-heurist-design'
-              });
-                
-}
 
-function _linkTwoRecords(source_ID, target_ID){
-    
-        function __onCloseAddLink(context){
-                if(context && context.count>0 && settings.onRefreshData){
-                            // Trigger refresh
-                            settings.onRefreshData.call(this);
-                }
-                
+    var body = $(this.document).find('body');
+    var dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
+
+    //ar target_ID = 10;
+
+    var url = window.hWin.HAPI4.baseURL;
+    var dlg_title = '';
+
+    if(settings.isDatabaseStructure){
+
+        url = url + "viewers/visualize/selectLinkField.php?&db="
+            + window.hWin.HAPI4.database
+            + '&source_ID='+source_ID;
+
+        dlg_title = 'Select or Create new link field type';   
+    }else{
+
+        _linkTwoRecords(source_ID, target_ID);
+        return;
+    }
+
+    if(target_ID>0){
+        url = url +'&target_ID='+target_ID;
+    }
+
+    var hWin = window.hWin?window.hWin:top;
+
+    hWin.HEURIST4.msg.showDialog(url, 
+        {
+            "close-on-blur": false,
+            title: dlg_title,
+            height: dim.h,
+            width: dim.w,
+            afterclose: function(){
+                //remove link line
                 drag_link_source_id = null;
                 if(drag_link_line) drag_link_line.remove();
                 drag_link_line = null;
-        }                            
-        
-        var opts = {
-            source_ID: source_ID,
-            onClose: __onCloseAddLink 
-        };
-        if(target_ID){
-            opts['target_ID'] = target_ID;
+            },
+            callback: function(context) {
+                
+                if(context!="" && context!=undefined) {
+                    var sMsg = (context==true)?'Link created...':context;
+                    hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
+                    if(settings.isDatabaseStructure){
+                        getDataFromServer();    
+                    }else if(settings.onRefreshData){
+                        // Trigger refresh
+                        settings.onRefreshData.call(this);
+                    }
+                    
+                }
+            },
+            default_palette_class:'ui-heurist-design'
+        });
+
+}
+
+function _linkTwoRecords(source_ID, target_ID){
+
+    function __onCloseAddLink(context){
+        if(context && context.count>0 && settings.onRefreshData){
+            // Trigger refresh
+            settings.onRefreshData.call(this);
         }
-    
-        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
-    
-    
+
+        drag_link_source_id = null;
+        if(drag_link_line) drag_link_line.remove();
+        drag_link_line = null;
+    }                            
+
+    var opts = {
+        source_ID: source_ID,
+        onClose: __onCloseAddLink 
+    };
+    if(target_ID){
+        opts['target_ID'] = target_ID;
+    }
+
+    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);    
 }
