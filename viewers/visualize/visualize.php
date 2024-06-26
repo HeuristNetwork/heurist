@@ -170,11 +170,7 @@ if(@$isDatabaseStructure == 1){
                     <span style="border:none;background:none">Gravity:</span>
                     <div id="setGravityMode" style="padding-left:10px">
                         <button id="gravityMode0" name="gravityMode" value="off">off</button>
-                        <button id="gravityMode1" name="gravityMode" value="touch">on</button> <!-- onclick="refreshButton();" -->
-                        <!-- <button id="gravityMode2" name="gravityMode" value="off"
-                            onclick="refreshGravityOff()">off</button>
-                        <button id="gravityMode3" name="gravityMode" value="touch"
-                            onclick="refreshGravityOn()">on</button> -->
+                        <button id="gravityMode1" name="gravityMode" value="touch">on</button>
                     </div>
                 </div>
             </div>
@@ -276,7 +272,9 @@ if(@$isDatabaseStructure == 1){
     *ADDED BY ISH
 -->
 <div id="iframeDiv">
-    <button id="closeButton" onclick="hideNodeInformation()">X</button>
+    <button id="btnCtrlNewtab" class="iframeControls" onclick="handleNodeAction('tab')" title="Open in new tab"><span class="ui-icon ui-icon-newwin"></span></button>
+    <button id="btnCtrlPopup" class="iframeControls" onclick="handleNodeAction('popup')" title="Open in popup"><span class="ui-icon ui-icon-comment"></span></button>
+    <button id="btnCtrlClose" class="iframeControls" onclick="handleNodeAction('close')" title="Close record viewer"><span class="ui-icon ui-icon-close"></span></button>
     <iframe title id="iframeInfo"></iframe>
 </div>
 

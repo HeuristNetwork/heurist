@@ -469,24 +469,36 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         if(settings.isDatabaseStructure){
 
 			// Display rectypes used by selected fields
-			overlay.selectAll("text.info-mode-full").on("click", function(event){
+            overlay.selectAll("text.info-mode-full, text.nodelabel").on("click", function(event){
 
                 if(d3.event.defaultPrevented){
                     return;
                 }
 
-				if(event.dtyid == null || event.dtyid == 0 || isNaN(event.dtyid)){
-					return;
-				}
+                let dtyid = event.dtyid;
+                let rtyid = event.rtyid;
 
-				let ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
+                let ids = '';
 
-				ids = ids.indexOf(',') !== -1 ? ids.replaceAll(/,/g, ', #') : ids;
+                if(rtyid && rtyid > 0){
 
-				ids = `#${ids}`;
-				$('#records').find(ids).prop('checked', true).change();
+                    ids = $Db.getLinkedRecordTypes_cache(rtyid, false, 'from');
+                    ids = ids.join(', #');
 
-			}).style('cursor', 'pointer');
+                    ids = !window.hWin.HEURIST4.util.isempty(ids) ? `#${ids}` : '';
+                }else if(dtyid && dtyid > 0){
+
+                    ids = $Db.dty(event.dtyid, 'dty_PtrTargetRectypeIDs');
+                    ids = ids.indexOf(',') !== -1 ? ids.replaceAll(/,/g, ', #') : ids;
+
+                    ids = !window.hWin.HEURIST4.util.isempty(ids) ? `#${ids}` : '';
+                }
+
+                if(!window.hWin.HEURIST4.util.isempty(ids)){ // display linked record types
+                    $('#records').find(ids).prop('checked', true).change();
+                }
+
+            }).style('cursor', 'pointer');
         }
     }else{ // link information, onhover
 
