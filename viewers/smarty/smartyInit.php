@@ -37,7 +37,7 @@ class Heurist_Security_Policy extends Smarty_Security {
                     'array_diff', 'array_merge', 'array_slice', 'array_unique', 
                     'array_multisort', 'array_values', 'asort','json_encode',
                     'time', 'nl2br', 'print_r',
-                    'printf', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos', 
+                    'printf', 'range', 'setlocale', 'sort', 'strstr', 'substr', 'strlen', 'strpos', 
                     'utf8_encode');
                                            
   // remove PHP tags
