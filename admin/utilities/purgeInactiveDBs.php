@@ -399,7 +399,7 @@ if($need_email){
             $email_list[] = $db_name.'  '.$usr_owner.'  '
                 .$vals['cnt'].' records. Last update: '.$datetime2->format('Y-m-d').' ('.$diff.' months ago)';
                 
-            $report =  $diff.' months, n='.$vals['cnt'].' EMAIL';
+            $report =  $diff.' months, n='.$vals['cnt'].' INACTIVE';
         }else{
             //echo ' '.$vals['cnt'].' records '.$diff.' months. OK'."\n";
             //no report for db without action echo $eol;
@@ -484,6 +484,8 @@ if($need_email){
                 
                 if(hasTable($mysqli,$sif_table)){
                     $file_name = USanitize::sanitizeFileName($sif_list[$sif_id]);
+                    
+                    $file_name = preg_replace('/[()]/g','',$file_name);
                     
 //echo $file_name."\n";                    
 //echo strlen($file_name)."\n";                        
