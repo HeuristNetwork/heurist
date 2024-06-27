@@ -1795,6 +1795,7 @@
     * 
     * @param mixed $mysqli
     * @param mixed $db_name
+    * @return either array of missed tables or SQL error
     */
     function hasAllTables($mysqli, $db_name=null){
 
@@ -1806,29 +1807,37 @@
 
         $list = mysql__select_list2($mysqli, "SHOW TABLES $query", 'strtolower');
         
-/*not used        
-defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
-recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
-woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
-*/
-
-//auto recreated
-//'reclinks'
-
-//recreated via upgrade
-//'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
-
-        $check_list = array(
-'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
-'defrecstructure','defrectypegroups','defrectypes','defterms','deftermslinks',
-'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
-'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
-'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
-'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
-
-        $missed = array_diff($check_list, $list);
         
-        return $missed;
+        if($mysqli->error){
+            
+            return $mysqli->error;
+            
+        }else{
+            
+    /*not used        
+    defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
+    recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
+    woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
+    */
+
+    //auto recreated
+    //'reclinks'
+
+    //recreated via upgrade
+    //'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+
+            $check_list = array(
+    'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
+    'defrecstructure','defrectypegroups','defrectypes','defterms','deftermslinks',
+    'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
+    'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
+    'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
+    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
+
+            $missed = array_diff($check_list, $list);
+            
+            return $missed;
+        }
     }
     
     

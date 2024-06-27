@@ -1026,8 +1026,13 @@ class System {
                 fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
             }
 
-            $message = 'Heurist was unable to process this request. '.$message;
-            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
+            if($mysqli && $mysqli->errno==2006){
+                $message =  $message
+                            .' There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+            }else{
+                $message = 'Heurist was unable to process this request. '.$message;
+                $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
+            }
 
             error_log($Title.'  '.$sMsg);     
         }
@@ -1889,8 +1894,10 @@ class System {
             
             $mysqli = $this->mysqli;
             $this->system_settings = getSysValues($mysqli);
+            
             if(!$this->system_settings){
-                $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
+                //HEURIST_SYSTEM_FATAL
+                $this->addError(HEURIST_DB_ERROR, 'Unable to read sysIdentification', $mysqli->error);
                 return null;
             }
             

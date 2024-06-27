@@ -61,20 +61,25 @@ if(defined('IS_INDEX_PAGE')){
     //check for missed tables
     $missed = hasAllTables($system->get_mysqli());
     
-    if(count($missed)>0){
-        $message = 'Database <b>'.HEURIST_DBNAME
-        .'</b> is missing the following tables:<br><br><i>'
-        .implode(', ',$missed)
-        .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
-        .'It is also possible that drive space has been exhausted. '
-        .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
-        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
-        .'<br>We apologise for any inconvenience</p>';        
-
-        //to add to error log            
-        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
-                .' is missing the following tables: '.implode(', ',$missed));
+    if(is_array($missed)){
+        if(count($missed)>0){
+            $message = 'Database <b>'.HEURIST_DBNAME
+            .'</b> is missing the following tables:<br><br><i>'
+            .implode(', ',$missed)
+            .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
+            .CRITICAL_DB_ERROR_CONTACT_SYSADMIN.'</p>';
+            
+            //to add to error log            
+            $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
+                    .' is missing the following tables: '.implode(', ',$missed));
+            
+            include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+            exit;
+        }
+    }else{
+        $message = 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
         
+        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
         
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;
@@ -168,6 +173,12 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 if(defined('IS_INDEX_PAGE')){
     
     $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
+    
+    if($subsubVer==null){
+        $message = $system->getErrorMsg();
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
     
     if (version_compare(HEURIST_MIN_DBVERSION,
     $system->get_system('sys_dbVersion').'.'

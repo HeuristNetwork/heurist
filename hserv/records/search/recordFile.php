@@ -586,7 +586,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                         }            
                     }
                 }else{
-                    error_log('file not found: '.htmlspecialchars($filename));
+                    //error_log('file not found: '.htmlspecialchars($filename));
                 }
             }
         }
