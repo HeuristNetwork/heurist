@@ -45,7 +45,7 @@ function samlLogout($system, $sp, $back_url)
 //                 false -  returns 0 if not authenticated
 // $noframe - load SAML login in place of Heurist 
 //
-function samlLogin($system, $sp, $dbname, $require_auth=true, $noframe=false){
+function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
     global $is_debug;
   
     $user_id = 0;
@@ -112,9 +112,45 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
             //DEBUG  $user_id = 0;
             
             if(!($user_id>0)){
-                $errMessage = 'Heurist Database '.$dbname
-                    .' does not have an user with provided attributes ('.$attr_uid.','.$attr_mail.')';
+                
+                if($system->get_system('sys_AllowRegistration')){
+                    //register new user 
+                    list($givenName, $surName) = explode(' ',
+                        @$attr['displayName'][0]?$attr['displayName'][0]
+                                                :@$attr['urn:oid:2.16.840.1.113730.3.1.241'][0]);
+
+                                                
+                    if(!$givenName){
+                        $givenName = @$attr['urn:oid:2.5.4.42'][0]?$attr['urn:oid:2.5.4.4'][0]:'John';
+                    }
+                    if(!$surName){
+                        $surName = @$attr['urn:oid:2.5.4.4'][0]?$attr['urn:oid:2.5.4.4'][0]:'Doe';
+                    }                    
                     
+                    $ext_auth = array();
+                    $ext_auth[$sp] = array('uid'=>$attr_uid, 'mail'=>'y');
+
+                    $bytes = random_bytes(5);
+                    $rand_pwd = bin2hex($bytes);
+                    
+                    // displayName, givenName, sn, department
+                    $record = array('ugr_ID'=>-1, 'ugr_Type'=>'user', 
+                        'ugr_Name'=>$attr_uid, //login
+                        'ugr_eMail'=>$attr_mail, 'ugr_Password'=>$rand_pwd, 
+                        'ugr_FirstName'=>$givenName, //$attr['givenName'][0],
+                        'ugr_LastName'=>$surName,  //$attr['sn'][0],
+                        'ugr_Department'=>'na',
+                        'ugr_Organisation'=>'na',
+                        'ugr_Interests'=>'na',
+                        'ugr_IncomingEmailAddresses'=>substr(print_r($attr,true),0,3999),
+                        'ugr_Enabled'=>'y',
+                        'usr_ExternalAuthentication'=> json_encode($ext_auth) );
+                    $user_id = user_Update($system, $record, true);
+                    
+                }else{
+                    $errMessage = 'Heurist Database '.$dbname
+                    .' does not have an user with provided attributes ('.$attr_uid.','.$attr_mail.')';
+                }
             }
             
             /*
