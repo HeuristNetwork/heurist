@@ -49,69 +49,35 @@ function samlLogin($system, $sp, $dbname, $require_auth=true, $noframe=false){
     global $is_debug;
   
     $user_id = 0;
+    $errMessage = null;
+    $attr = null;
     
-    if($is_debug){
-        if(!@$_REQUEST['auth'] && $require_auth){ //fake/debug authorization
-                ?>
-                <!DOCTYPE>
-                <html lang="en">
-                    <head>
-                        <title>Heurist external authentification</title>
-                    </head>
-                    <body>
-                    <?php  echo htmlspecialchars($_SERVER['PHP_SELF']); ?><br>
-                    <a href="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?a=login&auth=1&db='.htmlspecialchars($dbname); ?>">LOGIN</a>
-                    </body>
-                </html>
-                <?php
-                exit;
-        }
-    }else{    
+    $as = new \SimpleSAML\Auth\Simple($sp);
+    //$as = new SimpleSAML_Auth_Simple($sp);
+    if(!$as->isAuthenticated()){
         
-//        header("Content-Security-Policy: frame-src 'self' https://test-idp.federation.renater.fr");
-//header("Content-Security-Policy: frame-ancestors 'self'");
-        
-//<meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://test-idp.federation.renater.fr;" />
-// content="default-src 'self'; img-src https://*; child-src 'none';" />        
-        
-        $as = new \SimpleSAML\Auth\Simple($sp);
-        //$as = new SimpleSAML_Auth_Simple($sp);
-        if(!$as->isAuthenticated()){
-            
-            if($require_auth){
-                $as->requireAuth();    //after saml login - it returns to this page again
-                exit;
-            }else{
-                $system->addError(HEURIST_REQUEST_DENIED, 'Not externally authenticated');
-                return 0;
-            }
+        if($require_auth){
+            $as->requireAuth();    //after saml login - it returns to this page again
+            exit;
+        }else{
+            $errMessage = 'Not externally authenticated';
         }
     }
     
+    if($errMessage==null){
     
-    if($is_debug){
-        $attr = array();
-    }else{
         $attr = $as->getAttributes();
-    }
-
-    if($is_debug){
-        //test login data
-        $attr = array(
-                    'uid'=>array('BNF_FAKEID'),
-                    'mail'=>array('aaaa.bbbb@bnf.fr'));
-    }
-    if(count($attr)==0){
-        $system->addError(HEURIST_REQUEST_DENIED, 
-            'External authentication returns empty attributes. Please contact Service provider admin');
-    }      
-
         
-        //$idp = $as->getAuthData('saml:sp:IdP');
-        //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
+        if(!is_array($attr) || count($attr)==0){
+            $errMessage = 'External authentication returns empty attributes. Please contact Service provider admin';
+        }      
+    }
+        
+    //$idp = $as->getAuthData('saml:sp:IdP');
+    //$nameId = $as->getAuthData('saml:sp:NameID')['Value'];
 
     //find user in sysUGrps by email and/or uid
-    if(count($attr)>0 && ($system->is_inited() || $system->init( $dbname )) ){
+    if(is_array($attr) && count($attr)>0 && ($system->is_inited() || $system->init( $dbname )) ){
         
             $mysqli = $system->get_mysqli();
             
@@ -142,31 +108,17 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
 
             $user_id = mysql__select_value($system->get_mysqli(), $query);
             */
-
-            $errMsg = null;
+            
+            //DEBUG  $user_id = 0;
+            
             if(!($user_id>0)){
-                $errMsg = 'Heurist Database '.$dbname
-                    .' does not have an user with provided attributes ('.@$attr['uid'].','.@$attr['mail'][0].')';
+                $errMessage = 'Heurist Database '.$dbname
+                    .' does not have an user with provided attributes ('.$attr_uid.','.$attr_mail.')';
                     
             }
             
-            if($noframe) { //reload heurist
-                if($user_id>0){
-                    //perform authorization 
-                    $system->doLogin($user_id, null, 'remember', true, false);//skip pwd check
-                    $params = '&usr='.$attr_uid.'&usrid='.$user_id;
-                }else{
-                    $params = '&msg='.$errMsg;
-                }
-                
-                //reload page
-                header('Location: ' . HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME.$params);
-            }else if($errMsg) {
-                //show error
-                //.htmlspecialchars(print_r($attr, true))
-                $system->addError(HEURIST_REQUEST_DENIED, $errMsg );
-            }
             /*
+            REGISTER 
             $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'
                 .$attr['mail'][0].'"');
             if(false && !($user_id>0)){
@@ -191,9 +143,33 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                 $user_id = user_Update($system, $record, true);
             }
             */
+    }
+
+
+    if($noframe) { //load heurist again
+
+        if($user_id>0){
+            //perform authorization 
+            $system->doLogin($user_id, null, 'remember', true, false);//skip pwd check
+            //reload page
+            header('Location: ' . HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME);
+            //DEBUG $params = '&usr='.$attr_uid.'&usrid='.$user_id;
+        }else{
+            $try_login = true;
+            $message = $errMessage.'<br><br> '
+            .' Please <a class="login-link" reload="home">try login again</a>';
+
+            //define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+            include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        }
         
+                    
+    }else if($errMessage!=null){
+        
+        $system->addError(HEURIST_REQUEST_DENIED, $errMessage );
     }
     
-    return $user_id;
+    return $user_id;        
+    
 }
 ?>

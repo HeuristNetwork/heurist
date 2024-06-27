@@ -72,7 +72,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         
         var surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
         
-console.log(surl); 
+//console.log(surl); 
         var isFrameAllowed = false;
         if(!isFrameAllowed){
             surl = surl + '&noframe=1';
