@@ -70,11 +70,22 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             
         var sp_entity = sel.val();
         
+        var surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
+        
+console.log(surl); 
+        var isFrameAllowed = false;
+        if(!isFrameAllowed){
+            surl = surl + '&noframe=1';
+            window.hWin.location = surl;
+            return;
+        }
+
+
         //loads saml dialog into iframe
         window.hWin.HEURIST4.msg.showDialog(
-        window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
+        surl,
         {
-            title: 'BnF Authentification',
+            title: 'External Authentification',
             width: 980,
             height: 420,
             //noClose: true,

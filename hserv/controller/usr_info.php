@@ -577,7 +577,6 @@
                 $system->addError(HEURIST_ACTION_BLOCKED, $msg);
                 $res = false;
             }
-            
         }
         else{
 
@@ -600,6 +599,7 @@
                     //check saml session
                     require_once dirname(__FILE__).'/../utilities/uSaml.php';
                     
+                    //if currently authenticated - take username 
                     $username = samlLogin($system, $sp, $system->dbname(), false);
                     
                     if($username>0){

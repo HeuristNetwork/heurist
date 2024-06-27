@@ -55,7 +55,7 @@ if($error){
         }
     }else if ($action == "login"){
 
-            $user_id = samlLogin($system, $sp, $dbname, true);
+            $user_id = samlLogin($system, $sp, $dbname, true, (@$_REQUEST['noframe']==1));
             
             if($user_id>0){
                 $msg = $user_id;

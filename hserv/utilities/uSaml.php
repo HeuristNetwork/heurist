@@ -43,8 +43,9 @@ function samlLogout($system, $sp, $back_url)
 //
 // $require_auth - true - opens saml login page 
 //                 false -  returns 0 if not authenticated
+// $noframe - load SAML login in place of Heurist 
 //
-function samlLogin($system, $sp, $dbname, $require_auth=true){
+function samlLogin($system, $sp, $dbname, $require_auth=true, $noframe=false){
     global $is_debug;
   
     $user_id = 0;
@@ -66,6 +67,13 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
                 exit;
         }
     }else{    
+        
+//        header("Content-Security-Policy: frame-src 'self' https://test-idp.federation.renater.fr");
+//header("Content-Security-Policy: frame-ancestors 'self'");
+        
+//<meta http-equiv="Content-Security-Policy" content="frame-src 'self' https://test-idp.federation.renater.fr;" />
+// content="default-src 'self'; img-src https://*; child-src 'none';" />        
+        
         $as = new \SimpleSAML\Auth\Simple($sp);
         //$as = new SimpleSAML_Auth_Simple($sp);
         if(!$as->isAuthenticated()){
@@ -107,14 +115,17 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
         
             $mysqli = $system->get_mysqli();
             
+            $attr_mail = @$attr['mail'][0]?$attr['mail'][0]:@$attr['urn:oid:0.9.2342.19200300.100.1.3'][0];
+            $attr_uid = @$attr['uid'][0]?$attr['uid'][0]:@$attr['urn:oid:0.9.2342.19200300.100.1.1'][0];
+            
             $query = 'SELECT ugr_ID,ugr_eMail,usr_ExternalAuthentication FROM sysUGrps where usr_ExternalAuthentication is not null';
             $res = $system->get_mysqli()->query($query);
             if ($res){
                 while ($row = $res->fetch_row()){
                     $prm = json_decode($row[2],true);
                     if( @$prm[$sp] 
-                        && ($prm[$sp]['uid']=='' || $prm[$sp]['uid']==$attr['uid'][0])
-                        && (@$prm[$sp]['mail']=='n' || $row[1]==$attr['mail'][0]) ){
+                        && ($prm[$sp]['uid']=='' || $prm[$sp]['uid']==$attr_uid)
+                        && (@$prm[$sp]['mail']=='n' || $row[1]==$attr_mail) ){
                     
                         $user_id = $row[0];
                         break;        
@@ -122,7 +133,6 @@ function samlLogin($system, $sp, $dbname, $require_auth=true){
                 }
                 $res->close();
             }
-            
             
             /*using MySQL feature to query fields with JSON - unfortunately it does not work for MariaDB
             $spe = $mysqli->real_escape_string($sp);
@@ -133,10 +143,28 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
             $user_id = mysql__select_value($system->get_mysqli(), $query);
             */
 
+            $errMsg = null;
             if(!($user_id>0)){
+                $errMsg = 'Heurist Database '.$dbname
+                    .' does not have an user with provided attributes ('.@$attr['uid'].','.@$attr['mail'][0].')';
+                    
+            }
+            
+            if($noframe) { //reload heurist
+                if($user_id>0){
+                    //perform authorization 
+                    $system->doLogin($user_id, null, 'remember', true, false);//skip pwd check
+                    $params = '&usr='.$attr_uid.'&usrid='.$user_id;
+                }else{
+                    $params = '&msg='.$errMsg;
+                }
+                
+                //reload page
+                header('Location: ' . HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME.$params);
+            }else if($errMsg) {
                 //show error
-                $system->addError(HEURIST_REQUEST_DENIED, 'Heurist Database '.$dbname
-                    .' does not have an user with provided attributes ('.@$attr['uid'].','.@$attr['mail'][0].')');
+                //.htmlspecialchars(print_r($attr, true))
+                $system->addError(HEURIST_REQUEST_DENIED, $errMsg );
             }
             /*
             $user_id = mysql__select_value($system->get_mysqli(),'SELECT ugr_ID FROM sysUGrps WHERE ugr_eMail="'
