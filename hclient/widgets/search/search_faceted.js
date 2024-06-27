@@ -1736,7 +1736,7 @@ $.widget( "heurist.search_faceted", {
                         (isform_empty && this.options.params.ui_temporal_filter_initial)
                             ?this.options.params.ui_temporal_filter_initial: ''
                         );
-                        
+
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
         var sort_clause;
         if(this.options.params.sort_order){
@@ -1776,7 +1776,7 @@ $.widget( "heurist.search_faceted", {
         }
 
         this._expanded_count_cancel = this._expanded_count_order.length > 0;
-        
+
         //perform search
         window.hWin.HAPI4.RecordSearch.doSearch( this, request );
         
@@ -1985,7 +1985,7 @@ $.widget( "heurist.search_faceted", {
                             vocabulary_id = null;
                             field['groupby'] = null;
                     }
-                } 
+                }
                 
                 if(field['type']=='freetext'){
                     if(!field['groupby']){
@@ -4196,6 +4196,10 @@ $.widget( "heurist.search_faceted", {
     
     _addFacetToExpandedCount: function(facet_index, facet_value, $container, $facet){
 
+        if(!this.options.params.rules){
+            return;
+        }
+
         if(!Object.hasOwn(this._expanded_count_facets, facet_index)){
 
             this._expanded_count_facets[facet_index] = {
@@ -4223,7 +4227,7 @@ $.widget( "heurist.search_faceted", {
 
         const that = this;
 
-        if(this._expanded_count_order.length == 0){
+        if(!this.options.params.rules || this._expanded_count_order.length == 0){
             return;
         }
 
