@@ -115,16 +115,18 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                 
                 if($system->get_system('sys_AllowRegistration')){
                     //register new user 
-                    list($givenName, $surName) = explode(' ',
+                    $givenName = @$attr['urn:oid:2.5.4.42'][0]?$attr['urn:oid:2.5.4.42'][0]:@$attr['givenName'][0]; 
+                    $surName = @$attr['urn:oid:2.5.4.4'][0]?$attr['urn:oid:2.5.4.4'][0]:@$attr['sn'][0]; 
+                    
+                    list($givenName2, $surName2) = explode(' ',
                         @$attr['displayName'][0]?$attr['displayName'][0]
                                                 :@$attr['urn:oid:2.16.840.1.113730.3.1.241'][0]);
-
                                                 
                     if(!$givenName){
-                        $givenName = @$attr['urn:oid:2.5.4.42'][0]?$attr['urn:oid:2.5.4.4'][0]:'John';
+                        $givenName = $givenName2?$givenName2:'Unknown';
                     }
                     if(!$surName){
-                        $surName = @$attr['urn:oid:2.5.4.4'][0]?$attr['urn:oid:2.5.4.4'][0]:'Doe';
+                        $surName = $surName2?$surName2:'Unknown';
                     }                    
                     
                     $ext_auth = array();
@@ -142,7 +144,7 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                         'ugr_Department'=>'na',
                         'ugr_Organisation'=>'na',
                         'ugr_Interests'=>'na',
-                        'ugr_IncomingEmailAddresses'=>substr(print_r($attr,true),0,3999),
+                        //DEBUG 'ugr_IncomingEmailAddresses'=>substr(print_r($attr,true),0,3999),
                         'ugr_Enabled'=>'y',
                         'usr_ExternalAuthentication'=> json_encode($ext_auth) );
                     $user_id = user_Update($system, $record, true);
