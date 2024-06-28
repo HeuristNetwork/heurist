@@ -230,38 +230,6 @@ if(defined('IS_INDEX_PAGE')){
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php 
-// Do not use google analytics unless requested in heuristConfigIni.php
-$allowGoogleAnalytics = false; //this is deprecated version of google analytics that will be disabled in June 2024
-if($allowGoogleAnalytics && !$isLocalHost) {
-    $host = strtolower($_SERVER["SERVER_NAME"]);
-    
-    if (strpos('heuristref.net', $host===0) 
-        || strpos('heuristref', $host)===0) {// Operating on Heurist reference server
-        ?>     
-        <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-131444459-1'); 
-        </script>
-        <?php  
-    } else {
-        ?>
-        <!-- Other Heurist server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-132203312-1'); 
-        </script>
-        <?php  
-
-    }
-}
-
 if($isLocalHost){
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>

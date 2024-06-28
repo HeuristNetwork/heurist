@@ -124,8 +124,6 @@ $passwordForDatabaseDeletion =''; // if blank = no one can delete db except db o
 $passwordForReservedChanges  =''; // if blank = no-one can modify reserved fields, otherwise password challenge
 $passwordForServerFunctions  =''; // if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
 
-$allowGoogleAnalytics = false;
-
 $defaultRootFileUploadPath ='';
 $defaultRootFileUploadURL = '';
 $sysAdminEmail = '';

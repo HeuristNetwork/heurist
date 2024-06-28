@@ -279,7 +279,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      * 
      * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
      *  the value must ONLY BE THE URL
-     *  e.g. res['ext_url'] = 'www.google.com'
+     *  e.g. res['ext_url'] = 'www.example.com'
      * 
      * Param: None
      */
