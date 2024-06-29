@@ -88,7 +88,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         +'&db='+this.Heurist_Reference_Index)
                        
                 this._$('.ent_wrapper').hide();
-                var div_res = this._$("#div_result").show();
+                this._$("#div_result").show();
                         
             }else{
             
@@ -422,7 +422,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             this._$('.dbDescription').text(response.dbTitle);
             this._$('span.dbId').text(response.dbID);
             this._$('a.dbLink').attr('href',
-                window.hWin.HAPI4.baseURL_pro
+                window.hWin.HAPI4.sysinfo['referenceServerURL']
                     +'?fmt=edit&recID='+response.dbID
                     +'&db='+this.Heurist_Reference_Index);
             
