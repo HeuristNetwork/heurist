@@ -4371,13 +4371,17 @@ $.widget( "heurist.mapping", {
     
     //
     // zoom to drawn items
+    // callback - single use callback, for using dom-to-image to avoid invalid images
     //    
-    drawZoomTo: function(){
-        
-            var bounds = this.drawnItems.getBounds();
-            
-            this.zoomToBounds(bounds);
-            
+    drawZoomTo: function(callback = null){
+
+        var bounds = this.drawnItems.getBounds();
+
+        if(window.hWin.HEURIST4.util.isFunction(callback)){//$.isFunction(callback)
+            this.nativemap.once('zoomend moveend', callback); // call once
+        }
+
+        this.zoomToBounds(bounds);
     },
 
     //
