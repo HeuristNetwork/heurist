@@ -85,7 +85,7 @@ if (@$argv) {
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
             if($db_check_result===true){
-                
+
                 $dbdef_cache_is_uptodate = true;
                 
                 if($_REQUEST['entity']=='relevance'){
@@ -108,7 +108,7 @@ if (@$argv) {
                             $db_time  = $dbdef_mod->getTimestamp();
                             $file_time = filemtime($dbdef_cache);
                             
-                            //date_default_timezone_get();
+//error_log('DEBUG '.($db_time>$file_time).'  '.$dbdef_mod->format('Y-m-d h:i').' > '.date ('Y-m-d h:i UTC',$file_time).'  '.date_default_timezone_get());                            
                             
                             if($db_time>$file_time){ //db def cache is outdated
                                   $_REQUEST['entity'] = 'force_all';                    
@@ -144,6 +144,7 @@ if (@$argv) {
                     }else{
                         downloadFile('application/json', $dbdef_cache);
                     }
+                    exit;
                 }
             }else{
                 exit;//wrong db name    
