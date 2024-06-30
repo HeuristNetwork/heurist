@@ -2337,7 +2337,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     * Remove database definition cache file
     */
     public function cleanDefCache(){
-            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json');
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json'); //old name
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/dbdef_cache.json');
     }
     
     /**

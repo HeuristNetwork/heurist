@@ -540,8 +540,9 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            }
            
            
-           //remove db.json (database def cache) from entity
-           fileDelete(FOLDER_BACKUP.'/entity/db.json');
+           //remove dbdef_cache.json (database definitions cache) from entity folder
+           fileDelete(FOLDER_BACKUP.'/entity/db.json'); //old name
+           fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
             
 
            if(@$_REQUEST['include_hml']=='1'){

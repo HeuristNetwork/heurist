@@ -308,17 +308,8 @@ foreach ($databases as $idx=>$db_name){
     $archive_db = ($vals['cnt']<11 && $diff>=6) || ($vals['cnt']<51 && $diff>=12) || ($vals['cnt']<101 && $diff>=24);
 
     if($archive_db){ // check for structure updates
-
-        $rst_mod = mysql__select_value($mysqli, 'SELECT MAX(rst_Modified) FROM defRecStructure');
-        $rty_mod = mysql__select_value($mysqli, 'SELECT MAX(rty_Modified) FROM defRecTypes');
-        $dty_mod = mysql__select_value($mysqli, 'SELECT MAX(dty_Modified) FROM defDetailTypes');
-        $trm_mod = mysql__select_value($mysqli, 'SELECT MAX(trm_Modified) FROM defTerms');
-
-        $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
-        $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
-        $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
-
-        $datetime3 = date_create($last_mod);
+    
+        $datetime3 = getDefinitionsModTime($mysqli); //see utils_db
 
         if(!$datetime3){
             echo $tabs0.$db_name.' cannot detect last structure modification date'.$eol;

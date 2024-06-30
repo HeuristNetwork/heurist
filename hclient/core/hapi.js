@@ -1993,7 +1993,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             // Check that definitions are up to date on client side
             //            
-            // It erases db definitions cache on server side (db.json) on every structure change - 
+            // It erases db definitions cache on server side (dbdef_cache.json) on every structure change - 
             // it means that every new heurist window obtains fresh set of definitions.
             // For existing instances (ie in different browser window) it verifies the  relevance of definitions every 20 seconds.
             // see initialLoadDatabaseDefintions 
@@ -2029,7 +2029,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 _callserver('entityScrud', params,
                     function (response) {
                         
-                        if (response && response['uptodate']) {
+                        if (response && response['uptodate']) { //relevance db definitions
                             
                             //console.log('definitions are up to date');
                             if ($.isFunction(callback)) callback(this, true);
@@ -2115,8 +2115,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 if(entityName=='timestamp'){ 
                     
-                    entity_timestamp = Number(data[entityName]); 
-
+                    entity_timestamp = Number(data[entityName]); //db structure cache file last update time
+                    //console.log('entity_timestamp: ', entity_timestamp)
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
