@@ -315,6 +315,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+<script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
 
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
