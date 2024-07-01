@@ -193,7 +193,7 @@ $.widget( "heurist.importStructure", {
         .click(function(){
             that.panel_report.hide();
             that.panel_defs.show();
-
+            
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
@@ -561,7 +561,8 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
-                            +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(rectypes.groups[idx].description)?'':rectypes.groups[idx].description)+'</i></div></div></div>'):'';
                     },
                     renderer: this._recordtypeListItemRenderer
                 }
@@ -630,7 +631,9 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+' '+detailtypes.groups[idx].name+'</h2>'
-                            +'<div style="padding-top:4px;"><i>'+detailtypes.groups[idx].description+'</i></div></div></div>';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(detailtypes.groups[idx].description)?'':detailtypes.groups[idx].description)
+                            +'</i></div></div></div>';
                         }
 
                         return output;
@@ -699,7 +702,9 @@ $.widget( "heurist.importStructure", {
                             +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+terms.groups[grp_val].vcg_Name+'</h2>' //+grp_val+' '
-                            +'<div style="padding-top:4px;"><i>'+terms.groups[grp_val].vcg_Description+'</i></div></div></div>'):'';
+                            +'<div style="padding-top:4px;"><i>'
+                            +(window.hWin.HEURIST4.util.isempty(terms.groups[grp_val].vcg_Description)?'':terms.groups[grp_val].vcg_Description)
+                            +'</i></div></div></div>'):'';
                     },
                     renderer: this._termsListItemRenderer
                 }

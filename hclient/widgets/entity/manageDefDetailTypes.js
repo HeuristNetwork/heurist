@@ -319,7 +319,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this.use_remote && this.options.import_structure){
 
             this.recordList.resultList('resetGroups');
-
+            this.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                + 'Loading detail fields from template database</div>');
+            this.recordList.resultList('option', 'empty_remark', '');
             
             //@todo - obtain definitions in new format
             //get definitions (in old format) from REMOTE database

@@ -831,8 +831,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var that = this;
 
         if(this.use_remote && this.options.import_structure){
-
             this.recordList.resultList('resetGroups');
+            
+            this.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                + 'Loading terms from template database</div>');
+            this.recordList.resultList('option', 'empty_remark', '');
 
             window.hWin.HAPI4.SystemMgr.get_defs(
                 {terms:'all', mode: 0, remote: that.options.import_structure.database_url}, function(response){
@@ -3208,7 +3212,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             cursor: 'grabbing'
         });
     },
-
+    
     getRecordsetFromRemote: function( terms, hideDisabled, vocab_only ){
         
         var rdata = { 
@@ -3281,7 +3285,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._cachedRecordset = new hRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
         
-        this.filterRecordList(null, {'trm_ID_local': '=0'});
+        if(this.options.import_structure){
+//            this.filterRecordList(null, {'trm_ID_local': '=0'});
+        }
         
         return this._cachedRecordset;
     }

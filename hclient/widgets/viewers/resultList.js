@@ -1380,7 +1380,7 @@ $.widget( "heurist.resultList", {
                 .insertAfter( this.div_toolbar );
             }
             
-            this.div_content[0].innerHTML = message?message:'';//.empty();  //clear
+            this.div_content[0].innerHTML = window.hWin.HEURIST4.util.isempty(message)?'':message;//.empty();  //clear
         }
 
         if(new_title!=null){

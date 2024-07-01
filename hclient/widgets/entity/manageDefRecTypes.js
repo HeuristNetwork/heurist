@@ -369,6 +369,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
                     
                     this.recordList.resultList('resetGroups');
+                    this.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                        + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                        + 'Loading record types from template database</div>');
+                    this.recordList.resultList('option', 'empty_remark', '');
                     
                     var sMsg = window.hWin.HR('manageDefRectypes_longrequest');
                     sMsg = sMsg.replaceAll( '[url]', this.options.import_structure.database_url); 
