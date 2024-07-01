@@ -600,7 +600,7 @@ regional['RUS'] = {
     Error_Title: 'Heurist',
     Error_Empty_Message: 'Сервер не предоставил текст сообщения об ошибке, пожалуйста сообщите об этом команде раработчиков Heurist.',
     Error_Report_Code: 'Cообщите код ошибки команде раработчиков',
-    Error_Report_Team: 'Если эта ошибка случается регулярно, пожалуйста сообщите Вашему сисадмину или свяжитесь с нами (support at HeuristNetwork dot org) и опишите обстаятельства при которых появляется эта ошибка.',
+    Error_Report_Team: 'Если эта ошибка случается регулярно, пожалуйста сообщите Вашему сисадмину (#sysadmin_email#) или свяжитесь с нами (support at HeuristNetwork dot org) и опишите обстаятельства при которых появляется эта ошибка.',
     Error_Wrong_Request: 'Значения и/или количество параметров запроса неверны.',
     Error_System_Config: 'May result from a network outage, or because the system is not properly configured. If the problem persists, please report to your system administrator',
     Error_Json_Parse: 'Невозможно разобрать ответ сервера',

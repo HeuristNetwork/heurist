@@ -496,7 +496,7 @@ regional['ENG'] = {
     Error_Title: 'Heurist',
     Error_Empty_Message: 'No error message was supplied, please report to Heurist developers.',
     Error_Report_Code: 'Report this code to Heurist team',
-    Error_Report_Team: 'If this error occurs repeatedly, please contact your system administrator or email us (support at HeuristNetwork dot org) and describe the circumstances under which it occurs so that we/they can find a solution',
+    Error_Report_Team: 'If this error occurs repeatedly, please contact your system administrator (#sysadmin_email#) or email us (support at HeuristNetwork dot org) and describe the circumstances under which it occurs so that we/they can find a solution',
     Error_Wrong_Request: 'The value, number and/or set of request parameters is not valid.',
     Error_System_Config: 'May result from a network outage, or because the system is not properly configured. If the problem persists, please report to your system administrator',
     Error_Json_Parse: 'Cannot parse server response',
