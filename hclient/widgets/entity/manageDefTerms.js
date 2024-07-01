@@ -837,6 +837,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             window.hWin.HAPI4.SystemMgr.get_defs(
                 {terms:'all', mode: 0, remote: that.options.import_structure.database_url}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
+
+                        if(!window.hWin.HEURIST4.remote){
+                            window.hWin.HEURIST4.remote = {};
+                        }
                         window.hWin.HEURIST4.remote.terms = response.data.terms;
 
                         that._cachedRecordset = that.getRecordsetFromRemote(response.data.terms, true, true);
@@ -1048,7 +1052,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var sLabelHint = sLabel;
             sLabel = sRef + sLabel;
 
-            var inv_id = $Db.trm(recID, 'trm_InverseTermId');
+            var inv_id = $Db.trm(recID, 'trm_InverseTermID');
             if ( inv_id>0 ){
                 var sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
                 if(sInvLabel) {
@@ -1366,7 +1370,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             //hide fields for vocab    
-            this._editing.getFieldByName('trm_InverseTermId').hide();
+            this._editing.getFieldByName('trm_InverseTermID').hide();
             this._editing.getFieldByName('trm_InverseSymmetrical').hide();
             this._editing.getFieldByName('trm_Code').hide();
             this._editing.getFieldByName('trm_Thumb').hide();
@@ -1461,10 +1465,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             currentDomain = $Db.trm(vocab_ID, 'trm_Domain');
 
             if( currentDomain=='enum' ){
-                this._editing.getFieldByName('trm_InverseTermId').hide();
+                this._editing.getFieldByName('trm_InverseTermID').hide();
                 this._editing.getFieldByName('trm_InverseSymmetrical').hide();
             }else{
-                ele = this._editing.getFieldByName('trm_InverseTermId');
+                ele = this._editing.getFieldByName('trm_InverseTermID');
                 ele.show();
                 var cfg = ele.editing_input('getConfigMode');
                 cfg.initial_filter = vocab_ID;
@@ -1480,9 +1484,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(this._currentEditID>0){
                     //detect: is it symmetrical?
                     var val = '1';
-                    var trm_InverseTermId = $Db.trm(this._currentEditID, 'trm_InverseTermId');
-                    if(trm_InverseTermId>0){
-                        this.inverse_termid_old = $Db.trm(trm_InverseTermId, 'trm_InverseTermId');
+                    var trm_InverseTermID = $Db.trm(this._currentEditID, 'trm_InverseTermID');
+                    if(trm_InverseTermID>0){
+                        this.inverse_termid_old = $Db.trm(trm_InverseTermID, 'trm_InverseTermID');
                         val = (this._currentEditID == this.inverse_termid_old)?'1':'0';
                     }
                     ele.editing_input('setValue', val, true);
@@ -1810,7 +1814,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         {
 
             //update inverse terms
-            var inverse_termid = fieldvalues['trm_InverseTermId'];
+            var inverse_termid = fieldvalues['trm_InverseTermID'];
             //var inverse_termid_old = @$record['old_inverse_id'];
             var is_symmetrical = (fieldvalues['trm_InverseSymmetrical']!=0);
 
@@ -1818,13 +1822,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             {
                 if(inverse_termid>0){
                     //set mutual inversion for inverse term
-                    $Db.trm(inverse_termid, 'trm_InverseTermId', recID);
+                    $Db.trm(inverse_termid, 'trm_InverseTermID', recID);
                 }
                 if (this.inverse_termid_old>0){
                     //clear mutual inversion for previous inversion
-                    var invid = $Db.trm(this.inverse_termid_old, 'trm_InverseTermId');
+                    var invid = $Db.trm(this.inverse_termid_old, 'trm_InverseTermID');
                     if(invid==recID){
-                        $Db.trm(this.inverse_termid_old, 'trm_InverseTermId', null);
+                        $Db.trm(this.inverse_termid_old, 'trm_InverseTermID', null);
                     }
                 }
             }

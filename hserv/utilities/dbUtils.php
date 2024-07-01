@@ -1392,9 +1392,9 @@ class DbUtils {
 
                     //cleanup target database to avoid issues with addition of constraints
 
-                    //1. cleanup missed trm_InverseTermId
-                    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
-                        set t1.trm_InverseTermId=null
+                    //1. cleanup missed trm_InverseTermID
+                    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermID=t2.trm_ID
+                        set t1.trm_InverseTermID=null
                     where t1.trm_ID>0 and t2.trm_ID is NULL');
                     
                     //3. remove missed rl_SourceID and rl_TargetID

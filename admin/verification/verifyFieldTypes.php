@@ -205,7 +205,7 @@ function getTermsWithIssues($mysqli){
     
     //terms with missed inverse terms
     $query = 'SELECT t1.trm_ID FROM defTerms t1 left join defTerms t2 '
-    .'on t1.trm_InverseTermId = t2.trm_ID where t1.trm_InverseTermId>0  and t2.trm_ID is null';
+    .'on t1.trm_InverseTermID = t2.trm_ID where t1.trm_InverseTermID>0  and t2.trm_ID is null';
 
     $missed_inverse = mysql__select_list2($mysqli, $query);
     

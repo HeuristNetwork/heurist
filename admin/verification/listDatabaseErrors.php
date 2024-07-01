@@ -454,7 +454,7 @@ if($active_all || in_array('dup_terms', $active)) {
                 }
 
                 if(is_array($trmWithWrongInverse) && count($trmWithWrongInverse)>0){
-                    $query = 'UPDATE defTerms set trm_InverseTermId=NULL '
+                    $query = 'UPDATE defTerms set trm_InverseTermID=NULL '
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
                     $res = $mysqli->query( $query );
                     if(! $res )

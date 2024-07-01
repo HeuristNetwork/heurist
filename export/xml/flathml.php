@@ -658,7 +658,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     $nlrIDs = array();
     $query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, ' . // from detail
     'IF( f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . '),1,0) as srcIsFrom, ' .
-    't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' .
+    't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermID as invRelType ' .
     ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' .
     'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . intval($relSrcDT) . ' ' .
     'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . intval($relTrgDT) . ' ' .

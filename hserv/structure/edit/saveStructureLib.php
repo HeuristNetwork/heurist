@@ -153,7 +153,7 @@ $dtgColumnNames = array(
 $trmColumnNames = array(
     "trm_ID"=>"i",
     "trm_Label"=>"s",
-    "trm_InverseTermId"=>"i",
+    "trm_InverseTermID"=>"i",
     "trm_Description"=>"s",
     "trm_Status"=>"s",
     "trm_OriginatingDBID"=>"i",
@@ -1484,7 +1484,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
         $inverse_termid_old = null;
         if(!$isInsert){//find inverse term id
-            $res = $ext_db->query("select trm_InverseTermId from defTerms where trm_ID=".$trmID);
+            $res = $ext_db->query("select trm_InverseTermID from defTerms where trm_ID=".$trmID);
             if($res){
                 if ( $row = $res->fetch_row() ) {
                     $inverse_termid_old = $row[0];
@@ -1504,7 +1504,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
 
         foreach ($colNames as $colName) {
-
+            
             $val = array_shift($values);
 
             if (array_key_exists($colName, $trmColumnNames)) {
@@ -1522,7 +1522,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     $ch_code = $val;
                 }else if($colName=="trm_Label"){
                     $ch_label = $val;
-                }else if($colName=="trm_InverseTermId"){
+                }else if($colName=="trm_InverseTermID"){
                     if(!($val>0)) $val = null;
                     $inverse_termid = $val;   //set null value, otherwise we get mysql error
                 }else if($colName=="trm_Status"){
@@ -1620,12 +1620,12 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                 if($inverse_termid_old!=$inverse_termid){
                     if($inverse_termid!=null){
                         //set mutual inversion for inverse term
-                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
+                        $query = "update defTerms set trm_InverseTermID=$trmID where trm_ID=$inverse_termid";
                         mysql__exec_param_query($ext_db, $query, null, true);
                     }
                     if ($inverse_termid_old!=null){
                         //clear mutual inversion
-                        $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old and trm_InverseTermId=$trmID";
+                        $query = "update defTerms set trm_InverseTermID=null where trm_ID=$inverse_termid_old and trm_InverseTermID=$trmID";
                         mysql__exec_param_query($ext_db, $query, null, true);
                     }
                 }

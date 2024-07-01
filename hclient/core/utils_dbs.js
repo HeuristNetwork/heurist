@@ -206,7 +206,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-     * Returns empty string if term is not found. trm_InverseTermId if inverse term is found or termID if it is not  
+     * Returns empty string if term is not found. trm_InverseTermID if inverse term is found or termID if it is not  
      * (used in record edit for relmarker fields)
      * 
      * @function getInverseTermById
@@ -218,7 +218,7 @@ window.hWin.HEURIST4.dbs = {
     getInverseTermById: function(termID){
         var term = $Db.trm(termID);
         if(term){
-            var invTermID = term['trm_InverseTermId'];
+            var invTermID = term['trm_InverseTermID'];
             if(invTermID>0) return invTermID;
             return termID;
         }

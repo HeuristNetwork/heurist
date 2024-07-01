@@ -331,7 +331,7 @@ CREATE TABLE defVocabularyGroups (
 CREATE TABLE defTerms (
   trm_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key, the term code used in the detail record',
   trm_Label varchar(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank',
-  trm_InverseTermId int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
+  trm_InverseTermID int(10) unsigned default NULL COMMENT 'ID for the inverse value (relationships), null if no inverse',
   trm_Description varchar(1000) default NULL COMMENT 'A description/gloss on the meaning of the term',
   trm_Status enum('reserved','approved','pending','open') NOT NULL default 'open' COMMENT 'Reserved Heurist codes, approved/pending by ''Board'', and user additions',
   trm_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this detail type originated, 0 = locally',
@@ -353,7 +353,7 @@ CREATE TABLE defTerms (
   trm_OrderInBranch smallint(5) NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
-  KEY trm_InverseTermIDKey (trm_InverseTermId)
+  KEY trm_InverseTermIDKey (trm_InverseTermID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
