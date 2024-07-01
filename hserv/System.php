@@ -1026,15 +1026,20 @@ class System {
                 fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
             }
 
-            if($mysqli && $mysqli->errno==2006){
+            $mysql_error = $this->mysqli && $this->mysqli->errno==2006;
+            if($mysql_error){
                 $message =  $message
                             .' There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
             }else{
-                $message = 'Heurist was unable to process this request. '.$message;
+                $message = 'Heurist was unable to process this request. ' . $message;
                 $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
             }
 
-            error_log($Title.'  '.$sMsg);     
+            error_log($Title.'  '.$sMsg);
+
+            if(!$mysql_error){
+                $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
+            }
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);

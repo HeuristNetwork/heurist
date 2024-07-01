@@ -464,7 +464,7 @@ regional['POR'] = {
     Error_Title: 'Heurist',
     Error_Empty_Message: 'Nenhuma mensagem de erro foi fornecida, por favor informe os desenvolvedores do Heurist.',
     Error_Report_Code: 'Informar este código à equipa Heurist',
-    Error_Report_Team: 'Se este erro ocorrer repetidamente, contacte o administrador do seu sistema ou envie-nos um e-mail (support em HeuristNetwork dot org) e descreva as circunstâncias em que ocorre para que possamos encontrar uma solução',
+    Error_Report_Team: 'Se este erro ocorrer repetidamente, contacte o administrador do seu sistema (#sysadmin_email#) ou envie-nos um e-mail (support em HeuristNetwork dot org) e descreva as circunstâncias em que ocorre para que possamos encontrar uma solução',
     Error_Wrong_Request: 'O valor, número e/ou conjunto de parâmetros solicitados não é válido.',
     Error_System_Config: 'Pode resultar de uma falha de rede, ou porque o sistema não está devidamente configurado. Se o problema persistir, por favor informe o administrador do seu sistema',
     Error_Json_Parse: 'Não é possível analisar a resposta do servidor',

@@ -83,7 +83,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             if(response.sysmsg && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
-                msg = msg + '<br><br>System error: ';
+                msg = msg + '<br><br>System error:<br>';
                 if(typeof response.sysmsg['join'] === "function"){
                     msg = msg + response.sysmsg.join('<br>');
                 }else{
@@ -99,7 +99,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }else if(response.status==window.hWin.ResponseStatus.INVALID_REQUEST){
 
                 msg = msg + '<br><br>' + window.hWin.HR('Error_Wrong_Request') 
-                    +'<br><br>' + window.hWin.HR('Error_Report_Team');
+                    +'<br><br>' + window.hWin.HR('Error_Report_Team').replace('#sysadmin_email#', window.hWin.HAPI4.sysinfo.sysadmin_email);
 
             }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 
@@ -123,7 +123,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 } 
                 
             }else if(response.status==window.hWin.ResponseStatus.DB_ERROR){
-                msg = msg + '<br><br>'+window.hWin.HR('Error_Report_Team');
+                msg = msg + '<br><br>'+window.hWin.HR('Error_Report_Team').replace('#sysadmin_email#', window.hWin.HAPI4.sysinfo.sysadmin_email);
             }else  if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
                 // No enough rights or action is blocked by constraints
                 
