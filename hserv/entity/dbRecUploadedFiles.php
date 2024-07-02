@@ -464,9 +464,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     
                                 }
 
-                                if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                    $this->records[$idx]['ulf_OrigFileName'] = '_iiif';   
-                                }
+                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';   
+                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -485,9 +485,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;      
                                 
-                                if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                    $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
-                                }
+                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
+                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -2097,6 +2097,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
        $this->setData($fileinfo);
+       $this->setRecords(null); //reset
        $ulf_ID = $this->save();
        if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
        
