@@ -233,6 +233,7 @@ $.widget( "heurist.mapping", {
     timeline_height: 0,
     
     selected_rec_ids:[],
+    highlightedMarkers:[],
 
     myIconRectypes:{},  //storage for rectype icons by color and rectype id
 
@@ -2036,7 +2037,7 @@ $.widget( "heurist.mapping", {
                                 }
                             });
                             
-                            that._showMultiSelectionPopup(latlng, sText, selected_layers);
+                            that._showMultiSelectionPopup(latlng, sText, selected_layers, false);
                             
                         }else{
                            a.layer.spiderfy(); 
@@ -2396,7 +2397,9 @@ $.widget( "heurist.mapping", {
         var layer = (event.target);
         if(layer && layer.feature){
 
-
+            //add selected to other selected features
+            var add_to_selection = (event.originalEvent.ctrlKey);
+            
             if(layer.feature.properties.rec_ID>0){
                 //find all overlapped polygones under click point
                 if(layer instanceof L.Polygon || layer instanceof L.Circle || layer instanceof L.Rectangle){
@@ -2423,23 +2426,23 @@ $.widget( "heurist.mapping", {
                         
                         if(found_cnt>1){
                             //show popup with selector
-                            this._showMultiSelectionPopup(latlng, sText, selected_layers);
+                            this._showMultiSelectionPopup(latlng, sText, selected_layers, add_to_selection);
                             return;
                         }
                         
                 }
 
             }                
-            
-            this._onLayerSelect( layer, event.latlng );
+
+            this._onLayerSelect( layer, event.latlng, add_to_selection );
             
         }
     },
 
     //
-    //
+    // select layer among several selected
     //    
-    _showMultiSelectionPopup: function(latlng, sText, selected_layers){
+    _showMultiSelectionPopup: function(latlng, sText, selected_layers, add_to_selection){
         
         var found_cnt = Object.keys(selected_layers).length;        
         
@@ -2464,7 +2467,7 @@ $.widget( "heurist.mapping", {
             }
 
             let leaflet_id = $ele.attr('data-id');
-            that._onLayerSelect(selected_layers[leaflet_id], latlng);
+            that._onLayerSelect(selected_layers[leaflet_id], latlng, add_to_selection);
         },'mousemove':function(evt){
             let $ele = $(evt.target);
             if(!$ele.hasClass('leaflet_layer_opt')){
@@ -2476,7 +2479,7 @@ $.widget( "heurist.mapping", {
                 $ele.siblings().removeClass('selected');
                 $ele.addClass('selected');
                 let layer = selected_layers[leaflet_id];
-                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
+                that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight from popup
             }
         }});
     },
@@ -2489,7 +2492,7 @@ $.widget( "heurist.mapping", {
     //   2. layer.options.popup_template
     //   3. mapPopUpTemplate
     //
-    _onLayerSelect: function(layer, latlng){
+    _onLayerSelect: function(layer, latlng, add_to_selection){
 
         if(layer.options && layer.options.selectable===false)
         {
@@ -2588,10 +2591,12 @@ $.widget( "heurist.mapping", {
             
             //if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
-            that.setFeatureSelection([layer.feature.properties.rec_ID], false); //highlight without zoom
-            if($.isFunction(that.options.onselect)){
-                that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
-            }
+            that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight without zoom
+            //if($.isFunction(that.options.onselect)){
+            //    that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
+            //}
+            
+            if(!add_to_selection){
 
             var info = layer.feature.properties.rec_Info; //popup info may be already prepared
             if(info){
@@ -2658,6 +2663,8 @@ $.widget( "heurist.mapping", {
             }else{
                 __showPopup(info, latlng);
             }
+            
+            }  // !add_to_selection
     
         }else{
             // show multiple selection
@@ -2867,12 +2874,21 @@ $.widget( "heurist.mapping", {
     // triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     // is_external - true - public call (from app_timemap for example)  - perform zoom
     //    
-    setFeatureSelection: function( _selection, _need_zoom, _from_timeline ){
+    setFeatureSelection: function( _selection, _need_zoom, _from_timeline, add_to_selection){
         var that = this;
         
-        this._clearHighlightedMarkers();
+        if(add_to_selection){
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)){
+                //to avoid duplication in highlightedMarkers
+                _selection = _selection.filter(function(i) {return that.selected_rec_ids.indexOf(i) < 0;});
+                this.selected_rec_ids = this.selected_rec_ids.concat(_selection);
+            }
+        }else{
+            this._clearHighlightedMarkers();
+            this.highlightedMarkers = [];
+            this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
+        }
         
-        this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup){  //apply only for geojson
                 top_layer.setStyle(function(feature) { return that._stylerForPoly(feature); });
@@ -2880,8 +2896,7 @@ $.widget( "heurist.mapping", {
         });
         
         //find selected markers by id
-        this.highlightedMarkers = [];
-        var selected_markers = this._getMarkersByRecordID(_selection);
+        var selected_markers = this._getMarkersByRecordID(_selection); //new selected markers
         for(var idx in selected_markers){
             var layer = selected_markers[idx];
             if(!(layer.hidden_by_filter || layer.hidden_by_theme || layer.hidden_by_zoom)){
@@ -2911,6 +2926,10 @@ $.widget( "heurist.mapping", {
         }
         if(_need_zoom){    
             this.zoomToSelection();        
+        }
+        
+        if($.isFunction(this.options.onselect)){
+            this.options.onselect.call(this, this.selected_rec_ids );
         }
         
     },
@@ -3494,10 +3513,10 @@ $.widget( "heurist.mapping", {
                 this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
-                        that.setFeatureSelection(selected_rec_ids, true, true); //timeline select - highlight on map and zoom
-                        if($.isFunction(that.options.onselect)){ //trigger global event
-                            that.options.onselect.call(that, selected_rec_ids);
-                        }
+                        that.setFeatureSelection(selected_rec_ids, true, true, false); //timeline select - highlight on map and zoom
+                        //if($.isFunction(that.options.onselect)){ //trigger global event
+                        //    that.options.onselect.call(that, selected_rec_ids);
+                        //s}
                     },                
                     onfilter: function(show_rec_ids, hide_rec_ids){
                         
