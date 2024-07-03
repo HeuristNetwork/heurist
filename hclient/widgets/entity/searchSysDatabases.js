@@ -32,7 +32,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         this.input_sort_type.parent().hide();
         this._on(this.input_sort_type,  { change:this.startSearch });
 
-        this._on(this.input_search,  { keyup:this.startSearch });
+        this._on(this.input_search,  { keydown: window.hWin.HEURIST4.ui.preventNonAlphaNumeric, keyup:this.startSearch });
         
         this.input_search.focus();         
         
@@ -49,28 +49,27 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
-            this._super();
-            
-            var request = {};
-            
-            if(this.input_search.val()!=''){
-                request['sys_Database'] = this.input_search.val();
-            }
-            
-            if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
-                request['sus_Role'] = this.input_search_type.val();
-            }
-            
-            
-            if(this.input_sort_type.val()=='name'){
-                request['sort:sys_Database'] = 1;
-            }else if(this.input_sort_type.val()=='register'){
-                request['sort:sys_dbRegisteredID'] = -1;
-            }else  if(this.input_sort_type.val()=='member'){
-                request['sort:sus_Count'] = -1;
-            }
-            
-            this._trigger( "onfilter", null, request);
+        this._super();
+        
+        var request = {};
+        
+        if(this.input_search.val()!=''){
+            request['sys_Database'] = this.input_search.val();
+        }
+        
+        if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
+            request['sus_Role'] = this.input_search_type.val();
+        }
+        
+        if(this.input_sort_type.val()=='name'){
+            request['sort:sys_Database'] = 1;
+        }else if(this.input_sort_type.val()=='register'){
+            request['sort:sys_dbRegisteredID'] = -1;
+        }else  if(this.input_sort_type.val()=='member'){
+            request['sort:sus_Count'] = -1;
+        }
+        
+        this._trigger( "onfilter", null, request);
     }
 
 

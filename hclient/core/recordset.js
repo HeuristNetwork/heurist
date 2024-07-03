@@ -1554,7 +1554,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             || dataTypes[fieldName]=='integer'
                             || dataTypes[fieldName]=='enum')
                         {
-                            request[fieldName] = String(request[fieldName]);
+                            request[fieldName] = String(request[fieldName]).trim();
                             
                             request[fieldName] = request[fieldName].toLowerCase();
                             
