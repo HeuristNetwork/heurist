@@ -6042,6 +6042,41 @@ $.widget( "heurist.editing_input", {
 
             $tinpt.val(defDate);
 
+            let minDate = '';
+            let maxDate = '';
+            let current_era = 0;
+            let value_era = current_era; // to reset current era
+
+            function setMinMaxDatesJPN(calendar, era, resetDefDate = false){
+
+                let limits = calendar.getEraLimits(era);
+
+                let new_options = {
+                    minDate: calendar.newDate(...limits[0]),
+                    maxDate: limits[1].length > 0 ? calendar.newDate(...limits[1]) : ''
+                };
+
+                let defDate = null;
+                if(resetDefDate === true){
+                    defDate = '';
+                }else if(resetDefDate !== false){
+                    defDate = resetDefDate;
+                }
+                if(resetDefDate !== null) { new_options['defaultDate'] = defDate; }
+
+                current_era = era;
+
+                $tinpt.calendarsPicker('option', new_options);
+            }
+
+            let $japanese_era = $('<select>', {class: 'calendars-eras'});
+            let eras = $.calendars.instance('japanese').getEras();
+            for(let i = 0; i < eras.length; i ++){
+                window.hWin.HEURIST4.ui.addoption($japanese_era[0], i, eras[i]);
+            }
+
+            fixCalendarPickerCMDs();
+
             $tinpt.calendarsPicker({
                 calendar: calendar,
                 defaultDate: defDate,
@@ -6049,8 +6084,56 @@ $.widget( "heurist.editing_input", {
                 showOnFocus: false,
                 dateFormat: 'yyyy-mm-dd',
                 pickerClass: 'calendars-jumps',
+                minDate: minDate,
+                maxDate: maxDate,
                 onShow: function($calendar, calendar_locale, config){
                     config.div.css('z-index', 9999999);
+
+                    if(calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
+
+                        let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
+                        let $era_sel = $japanese_era.clone().insertAfter($year_dropdown);
+
+                        function updateYearTitle(){ // update year's rollover
+
+                            let era_name = $era_sel.find(`option[value="${$era_sel.val()}"]`).text();
+                            if(window.hWin.HEURIST4.util.isempty(era_name)){
+                                $year_dropdown.attr('title', 'Change the year');
+                                return;
+                            }
+                            era_name = era_name.split(' (')[0];
+
+                            let cur_year = $year_dropdown.find('option[selected="selected"]').text();
+                            if(window.hWin.HEURIST4.util.isempty(cur_year)){
+                                $year_dropdown.attr('title', 'Change the year');
+                                return;
+                            }
+                            cur_year = cur_year.split(' (');
+                            cur_year[1] = cur_year[1].slice(0, -1);
+
+                            $year_dropdown.attr('title', `Change the year\n${era_name} ${cur_year[0]}\nGregorian year: ${cur_year[1]}`);
+                        }
+
+                        $year_dropdown.find('option').each((idx, option) => {
+                            let year = $(option).text();
+                            $(option).text(`${idx+1} (${year})`);
+                        });
+
+                        current_era = current_era >= 0 ? current_era : 0;
+
+                        $era_sel.val(current_era).attr('title', `Change the era\nCurrent era: ${eras[current_era]}`);
+                        updateYearTitle();
+
+                        that._on($year_dropdown, {
+                            change: updateYearTitle
+                        });
+                        that._on($era_sel, {
+                            change: () => {
+                                // Update min + max dates
+                                setMinMaxDatesJPN(calendar_locale, $era_sel.val(), true);
+                            }
+                        });
+                    }
                 },
                 onSelect: function(date){
 
@@ -6058,6 +6141,7 @@ $.widget( "heurist.editing_input", {
                     let value = $tinpt.val();
                     const org_value = value;
                     if(cur_cal.name.toLowerCase() === 'japanese'){
+                        value_era = cur_cal.getEraFromJapaneseStr(value);
                         value = cur_cal.japaneseToGregorianStr(value);
                     }
                     let val_parts = value != '' ? value.split('-') : '';
@@ -6092,12 +6176,28 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
                     __onDateChange();
                 },
+                onClose: function(){
+                    let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                    if(cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
+
+                        let date = true;
+                        try{
+                            date = new Temporal(that.newvalues[$input.attr('id')]).getTDate('DAT').toString('y-M-d');
+                        }catch(error){}
+                        setMinMaxDatesJPN(cur_cal, value_era, date);
+                    }
+                },
                 renderer: $.extend({}, $.calendars.picker.defaultRenderer,
                         {picker: $.calendars.picker.defaultRenderer.picker.
                             replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                             replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
             );
+
+            if(cal_name && cal_name.toLowerCase() === 'japanese'){
+                value_era = calendar.getEraFromGregorian(...$tinpt.val().split('-'));
+                setMinMaxDatesJPN(calendar, value_era);
+            }
 
             this._on($input, {
                 'blur': function(event){ //update to changed value

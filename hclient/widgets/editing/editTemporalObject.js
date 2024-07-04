@@ -602,7 +602,7 @@ var TemporalPopup = (function () {
 	};
 
     var calendar = null;
-	let setup_era_sel = true;
+	let $eras_sel = null;
 
     function _initJqCalendar(temporal){
 
@@ -626,6 +626,60 @@ var TemporalPopup = (function () {
 
             dateFormat: 'yyyy-mm-dd',
             pickerClass: 'calendars-jumps',
+			onShow: function($calendar, calendar_locale, config){
+
+				let $ele = $(config.target);
+				if($ele.length > 0 && calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
+
+					let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
+					let $era_sel = $eras_sel.clone().insertAfter($year_dropdown);
+
+					function updateYearTitle(){ // update year's rollover
+
+						let era_name = $era_sel.find(`option[value="${$era_sel.val()}"]`).text();
+						if(window.hWin.HEURIST4.util.isempty(era_name)){
+							$year_dropdown.attr('title', 'Change the year');
+							return;
+						}
+						era_name = era_name.split(' (')[0];
+
+						let cur_year = $year_dropdown.find('option[selected="selected"]').text();
+						if(window.hWin.HEURIST4.util.isempty(cur_year)){
+							$year_dropdown.attr('title', 'Change the year');
+							return;
+						}
+						cur_year = cur_year.split(' (');
+						cur_year[1] = cur_year[1].slice(0, -1);
+
+						$year_dropdown.attr('title', `Change the year\n${era_name} ${cur_year[0]}\nGregorian year: ${cur_year[1]}`);
+					}
+
+					let current_era = !window.hWin.HEURIST4.util.isempty($ele.attr('data-era')) && $ele.attr('data-era') > 0 ? $ele.attr('data-era') : 0;
+
+					$year_dropdown.find('option').each((idx, option) => {
+						let year = $(option).text();
+						$(option).text(`${idx+1} (${year})`);
+					});
+
+					let label = $eras_sel.find(`option[value="${current_era}"]`).text();
+					$era_sel.val(current_era).attr('title', `Change the era\nCurrent era: ${label}`);
+					updateYearTitle();
+
+					$year_dropdown.on('change', () => { updateYearTitle(); });
+					$era_sel.on('change', () => {
+						// Update min + max dates
+
+						let era = $era_sel.val();
+						$ele.attr('data-era', era);
+						let limits = calendar_locale.getEraLimits(era);
+						let new_options = {
+							minDate: calendar_locale.newDate(...limits[0]),
+							maxDate: limits[1].length > 0 ? calendar_locale.newDate(...limits[1]) : ''
+						};
+						$ele.calendarsPicker('option', new_options);
+					});
+				}
+			},
             onSelect: function(dates){ 
 				_updateGeorgianDate(); 
                 if($('#display-div').tabs('option', 'active') == _type2TabIndexMap["f"]){
@@ -639,13 +693,8 @@ var TemporalPopup = (function () {
             showTrigger: '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/cal.gif" alt="Popup" class="trigger">'
         };
 
-        if(calendar_type == 'japanese'){ // first era dates
-
-			if(setup_era_sel){
-
-				setupEras();
-				setup_era_sel = false;
-			}
+        if(calendar_type == 'japanese' && !$eras_sel){ // first era dates
+			setupEras();
         }
 
         $('.withCalendarsPicker').calendarsPicker(calendar_options);
@@ -659,13 +708,9 @@ var TemporalPopup = (function () {
             calendar = $.calendars.instance(new_calendar);
             if(!calendar) return;
 
-            if(new_calendar == 'japanese'){
-
-				if(setup_era_sel){
-
-					setupEras();
-					setup_era_sel = false;
-				}
+			let is_japanese_cal = new_calendar == 'japanese';
+            if(is_japanese_cal && !$eras_sel){
+				setupEras();
             }
 
             let changed_options = {
@@ -680,68 +725,36 @@ var TemporalPopup = (function () {
 					changed_options['defaultDate'] = convert($(this), false);
                 }catch(e){}
 
+				if(is_japanese_cal){
+
+					let era = 0;
+					if(!window.hWin.HEURIST4.util.isempty(changed_options['defaultDate'])){
+						let date = changed_options['defaultDate'];
+						era = calendar.getEraFromGregorian(date.year(), date.month(), date.day());
+					}
+					let limits = calendar.getEraLimits(era);
+					$(this).attr('data-era', era);
+
+					changed_options['minDate'] = calendar.newDate(...limits[0]);
+					changed_options['maxDate'] = limits[1].length > 0 ? calendar.newDate(...limits[1]) : '';
+				}
+
                 $(this).calendarsPicker('option', changed_options);
 
             });
-
-            if(new_calendar == 'japanese'){
-
-                $(".withCalendarsPicker").each(function(idx, ele){
-					ele = $(ele);
-					if(ele.val() != '' && ele.val().match(/\D*/)){
-						let era = ele.val().match(/\D*/)[0];
-
-						era = $('#era_sel').find(`option:contains("(${era})")`).val();
-
-						$('#era_sel').val(era).change();
-
-						return false;
-					}
-                });
-
-                $('#era_sel').show();
-            }else{
-                $('#era_sel').hide();
-            }
         }); //end change calendar
 
         $('#selectCLD').val(calendar_type);
         $('#selectCLD').change();
-
-        if(calendar_type == 'japanese'){
-			$('#era_sel').show();
-        }else{
-			$('#era_sel').hide();
-        }
     }
 
 	function setupEras(){
 
+		$eras_sel = $('<select>', {class: 'calendars-eras'});
 		let options = calendar.getEras();
-
 		for(let i = 0; i < options.length; i ++){
-			window.hWin.HEURIST4.ui.addoption($('#era_sel')[0], i, options[i]);
+			window.hWin.HEURIST4.ui.addoption($eras_sel[0], i, options[i]);
 		}
-
-		$('#era_sel').change(function(){
-
-			let limits = calendar.getJapaneseEraLimits($(this).val());
-
-			let changed_options = {
-				minDate: calendar.newDate(limits[0][0], limits[0][1], limits[0][2]),
-				defaultDate: ''
-			};
-
-			if(limits[1].length > 0){
-				changed_options['maxDate'] = calendar.newDate(limits[1][0], limits[1][1], limits[1][2])
-			}else{
-				changed_options['maxDate'] = '';
-			}
-
-			$('.withCalendarsPicker').each(function() {
-				$(this).calendarsPicker('option', changed_options);
-			});
-		});
 	}
 
     // mode 0 - to gregorian (no assign), 1 - to
@@ -799,7 +812,7 @@ var TemporalPopup = (function () {
 		let newval = '';
 		if(value){
 
-			let tocalendar = togregorian ?$.calendars.instance('gregorian') :calendar;
+			let tocalendar = togregorian ? $.calendars.instance('gregorian') :calendar;
 			if(noNeedConvert(value._calendar, tocalendar)){
 				if(togregorian){
 					newval = $inpt.val();
