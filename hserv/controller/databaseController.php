@@ -38,7 +38,7 @@ $locale = @$_REQUEST['locale'];
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
 $create_pwd = System::getAdminPwd('create_pwd');
-$sysadmin_pwd = System::getAdminPwd('chpwd');
+$challenge_pwd = System::getAdminPwd('chpwd');
 $sysadmin_pwd = System::getAdminPwd('pwd');
 
 if($action==null){
