@@ -500,7 +500,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         if(all_li.length>0){
             all_li.css('color','lightgray');
             $(all_li[0]).css('color','black');
-            $('<span class="ui-icon ui-icon-loading-status-balls"></span>').appendTo( $(all_li[0]) );
+            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  processing...</span>').appendTo( $(all_li[0]) );
         }
         
         var that = this;
@@ -528,10 +528,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                             var all_li = div_loading.find('li');
                             var arr = all_li.slice(0,prevStep+1);
                             arr.css('color','black');
-                            arr.find('span.ui-icon').remove(); 
+                            arr.find('span.processing').remove(); 
                             //set current step (if exists) with loading icon
                             if(prevStep+1<all_li.length){
-                                $('<span class="ui-icon ui-icon-loading-status-balls"></span>').appendTo( $(all_li[prevStep+1]) );
+                                $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  processing...</span>').appendTo( $(all_li[prevStep+1]) );
                                 $(all_li[prevStep+1]).css('color','black');
                             }
                             
