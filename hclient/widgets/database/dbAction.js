@@ -63,6 +63,19 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         else if(this.options.actionName=='clone')
         {
             this._checkNewDefinitions();
+            
+            if(window.hWin.HAPI4.sysinfo.db_total_records<50000){
+                this._$('.large-db').hide();
+            }else{
+                this._on(this._$('#nodata'), {click:()=>{
+                    if(this._$('#nodata').is(':checked')){
+                        this._$('.large-db').hide();
+                    }else{
+                        this._$('.large-db').show();
+                    }
+                }});
+            }
+            
         }else if(this.options.actionName=='restore')
         {
             this._on(this._$('#btnSelectZip'),{click:this._selectArchive});
@@ -483,7 +496,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var progress_div = this._$('.progressbar_div').show();
         
         var div_loading = progress_div.find('.loading').show();
-        div_loading.find('li').css('color','lightgray');
+        var all_li = div_loading.find('li');
+        if(all_li.length>0){
+            all_li.css('color','lightgray');
+            $(all_li[0]).css('color','black');
+            $('<span class="ui-icon ui-icon-loading-status-balls"></span>').appendTo( $(all_li[0]) );
+        }
+        
         var that = this;
         var prevStep = 0;
         
@@ -504,8 +523,18 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     }else if(prevStep!=response){
                         prevStep = response;
                         if(window.hWin.HEURIST4.util.isNumber(prevStep)){
-                            var arr = div_loading.find('li').slice(0,prevStep);
-                            arr.css('color','black'); 
+                            //set finished step in solid black
+                            prevStep = parseInt(prevStep);
+                            var all_li = div_loading.find('li');
+                            var arr = all_li.slice(0,prevStep+1);
+                            arr.css('color','black');
+                            arr.find('span.ui-icon').remove(); 
+                            //set current step (if exists) with loading icon
+                            if(prevStep+1<all_li.length){
+                                $('<span class="ui-icon ui-icon-loading-status-balls"></span>').appendTo( $(all_li[prevStep+1]) );
+                                $(all_li[prevStep+1]).css('color','black');
+                            }
+                            
                         }else{
                             $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
                         }
