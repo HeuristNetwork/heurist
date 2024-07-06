@@ -168,7 +168,7 @@ $.widget( "heurist.search", {
         .html('<span style="font-size:1em;padding:3px;display:inline-block;">'+window.hWin.HR("filter")
             +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
         .css({ height:isNotFirefox?28:24, 'margin':'1px '+(isNotFirefox?'4px':'7px')+' 1px 2px',
-            'position':'relative', 'text-align':'left', display:'block'})
+            'position':'absolute', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
             this.input_search_prompt2.css({visibility:'hidden'});//hide();
@@ -181,13 +181,12 @@ $.widget( "heurist.search", {
                 this.input_search.css({'height':'27px','min-height':'27px','padding':'2px 0px','width':'100%'}); //, 'width':'400'
             }
 
-            var sTop = isNotFirefox?'-35px':'-28px';
-            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:sTop});
+            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'52px'});
 
             this.input_search_prompt2.css({height:'calc(100%-2px)',
                 width:'calc(100%-2px)'});    
         }else{
-            this.input_search_prompt2.css({top:'-35px'}); //'background':'#F4F2F4',
+            this.input_search_prompt2.css({top:'52px'}); //'background':'#F4F2F4',
             this.input_search.css('padding-right', '28px');
         }
 
@@ -330,7 +329,7 @@ $.widget( "heurist.search", {
             // Filter builder button
             this.btn_filter_wiz = $('<a>',{href:'#',
                 title:window.hWin.HR('filter_builder_hint')})
-            .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //,top:'-3px'
+            .css({display:'inline-block','padding-right':'5px'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" />')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -342,7 +341,7 @@ $.widget( "heurist.search", {
             // Facet builder button
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('filter_facetbuilder_hint')})
-            .css({display:'inline-block',position:'relative',top:'-10px','padding-right':'5px'}) //width:90,,top:'-3px'
+            .css({display:'inline-block','padding-right':'5px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -361,7 +360,7 @@ $.widget( "heurist.search", {
             // Save filter button
             this.btn_save_filter = $('<a>', {href: '#', title: window.hWin.HR('filter_save_hint')})
             .addClass('ui-main-color btn-aux logged-in-only')
-            .css({display:'inline-block',position:'relative',top:'-10px'})  //width:'70px',
+            .css({display:'inline-block'})  //width:'70px',
             .append('<span class="ui-icon ui-icon-save" />')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
             + window.hWin.HR('Save filter') +'</span>')
@@ -377,7 +376,7 @@ $.widget( "heurist.search", {
             }});
 
             this.div_search_input.find('#search_help_link').parent()
-            .css({position:'relative',top:'-10px','margin-left':'-10px'})
+            .css({'margin-left':'-10px'})
             .appendTo(this.div_buttons);
         }
 
@@ -720,7 +719,7 @@ $.widget( "heurist.search", {
 
         }
 
-        //ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
+        this.input_search_prompt2.height(this.input_search.height()); // adjust veil height
 
         this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
@@ -809,28 +808,29 @@ $.widget( "heurist.search", {
                 }else{
                     this.div_buttons.show();
                 }
-    
+
                 if(!this.options.btn_visible_newrecord){
-    
+
                     let parent_width = this.element.width() * (showing_label ? 0.65 : 0.75);
-    
+
                     this.input_search.parent().width(parent_width);
                     this.input_search.width(parent_width - 52);
+                    this.input_search_prompt2.width(parent_width);
                 }
-    
+
                 this.div_buttons.position({
-                    my: 'left bottom',
+                    my: 'left top+5',
                     at: 'left bottom',
                     of: this.div_search_input
                 });
-    
+
                 this.btn_save_filter.position({
                     my: 'left top+10',
                     at: 'left bottom',
                     of: this.btn_search_as_user
                 });
-    
-                // Move 'saved filters' dropdown
+
+            // Move 'saved filters' dropdown
             if(this.btn_saved_filters && this.btn_saved_filters.length != 0){
 
                 this.btn_saved_filters.position({
