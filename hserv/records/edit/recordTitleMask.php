@@ -329,15 +329,14 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
             $puncts = '-:;,.@#|+=&(){}'; // These are stripped from begining and end of title
             $puncts2 = '-:;,@#|+=&'; // same less period
 
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
-            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts.'/\\s]*\\)!s', '(\\1)', $title);
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
-            $title = preg_replace('!,\\s*,+!s', ',', $title);
-            $title = preg_replace('!\\s+,!s', ',', $title);
-            
-            
+            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title); // remove leading and trailing punctuation
+            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title); // remove brackets containing only punctuation
+            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*\\)!s', '(\\1)', $title); // remove leading and trailing punctuation within brackets
+            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title); // remove brackets containing only punctuation
+            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title); // remove leading and trailing punctuation
+            $title = preg_replace('!,\\s*,+!s', ',', $title); // replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
+            $title = preg_replace('!\\s+,!s', ',', $title); // remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
+
         }
         $title = trim(preg_replace('!  +!s', ' ', $title)); //remove double spaces
 
@@ -783,11 +782,8 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     $search_fieldname = mb_strtolower($search_fieldname, 'UTF-8');
     //$search_fieldname = strtolower($search_fieldname);
 
-    if(mb_strpos($search_fieldname, 'parent entity')===0 
-        || mb_strpos($search_fieldname, 'record parent')===0 
-        || (defined('DT_PARENT_ENTITY') && $search_fieldname==DT_PARENT_ENTITY) 
-        || $search_fieldname=='2-247'){ 
-            
+    if(self::_is_parent_entity($search_fieldname)){ 
+
         if (defined('DT_PARENT_ENTITY')){    
             $rdt = self::__get_detail_types();
             if(@$rdt[DT_PARENT_ENTITY]){
@@ -948,22 +944,22 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         //parse human readable with double fullstops
         $matches = explode($fullstop, $field_name);
         
-            if (count($matches)>0) {
-                // fix rare case when we have more than 2 fullstops
-                // in this case redundant fullstops are added to previous field
-                //  AAA...BBB  =>  AAA. and BB
-                $i = 1;
-                while ($i<count($matches)){
-                    while(mb_strpos($matches[$i],'.')===0){
-                        //move fullstop to the end of previous field
-                        $matches[$i-1] = $matches[$i-1].'.';
-                        $matches[$i] = mb_substr($matches[$i],1);
-                    }
-                    $i++;
+        if (count($matches)>0) {
+            // fix rare case when we have more than 2 fullstops
+            // in this case redundant fullstops are added to previous field
+            //  AAA...BBB  =>  AAA. and BB
+            $i = 1;
+            while ($i<count($matches)){
+                while(mb_strpos($matches[$i],'.')===0){
+                    //move fullstop to the end of previous field
+                    $matches[$i-1] = $matches[$i-1].'.';
+                    $matches[$i] = mb_substr($matches[$i],1);
                 }
-                //add full string to the begining
-                array_unshift($matches, $field_name);
+                $i++;
             }
+            //add full string to the begining
+            array_unshift($matches, $field_name);
+        }
         
     }
     
@@ -1066,6 +1062,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             $ishift = 0;
             $pos = mb_strpos($inner_field_name, '{'); //{Organization}..Name - name of target rectype is defined
             $pos2 = mb_strpos($inner_field_name, '}');
+            $is_parent_entity = !empty($inner_field_name) ? self::_is_parent_entity($inner_field_name) : false;
             if($pos===0 && $pos2==mb_strlen($inner_field_name)-1){
                 $inner_rectype_search = mb_substr($inner_field_name, 1, -1);     
                 
@@ -1075,7 +1072,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 
                 $inner_rectype = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
                 $inner_rectype = explode(",", $inner_rectype); //mb_split
-                if(count($inner_rectype)==1 && $inner_rectype[0]>0){
+                if(count($inner_rectype)==1 && $inner_rectype[0]>0 || $is_parent_entity){
                     $inner_rectype = $inner_rectype[0];
                     $ishift = 2;
                 }else{
@@ -1085,7 +1082,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 }
                 
             }
-            if($inner_rectype==0){
+            if($inner_rectype==0 && !$is_parent_entity){
                 list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
                 if(!($inner_rectype>0)){
                     return array("error_title" => "Syntax error", 
@@ -1111,24 +1108,24 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 $res = implode(", ", $res);
             }else{
                 
-                    if($mode==1){
-                        $s1 = $rdt_id; //parent detail id
-                        if($multi_constraint){
-                            $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_cc.'}';
-                        }
-                    }else{
-                        $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
-                        if($multi_constraint){
-                            $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_name. '}';
-                        }
+                if($mode==1){
+                    $s1 = $rdt_id; //parent detail id
+                    if($multi_constraint){
+                        $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_cc.'}';
                     }
+                }else{
+                    $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                    if($multi_constraint){
+                        $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_name. '}';
+                    }
+                }
 
-                    $s2 = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id);
-                    if(is_array($s2)){
-                        $res = $s2; //error  
-                    } else {
-                        $res = $s1. $fullstop_concat .$s2; //recursion;                    
-                    }
+                $s2 = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id);
+                if(is_array($s2)){
+                    $res = $s2; //error  
+                } else {
+                    $res = $s1. $fullstop_concat .$s2; //recursion;                    
+                }
             }
             
             
@@ -1245,6 +1242,19 @@ private static function __replaceInCaseOfImport($dty_ID){
         }
     }
     return $dty_ID;
+}
+
+//
+// Check if provided field is for a record's parent entity
+//
+private static function _is_parent_entity($field_name){
+
+    $field_name = mb_strtolower($field_name, 'UTF-8');
+
+    return mb_strpos($field_name, 'parent entity')===0 
+        || mb_strpos($field_name, 'record parent')===0 
+        || (defined('DT_PARENT_ENTITY') && $field_name==DT_PARENT_ENTITY) 
+        || $field_name=='2-247';
 }
 
 }//end of class
