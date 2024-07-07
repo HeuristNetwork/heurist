@@ -14,6 +14,7 @@
     */
 
     /**
+    * @todo REMOVE aong with listDatabaseErrors.php
     * Write out corrected version of field definitions
     *
     * see listDatabaseErrors
@@ -63,7 +64,7 @@ $rv = array();
         print json_encode($response);
         exit;
     }
-
+    
     $k = 0;
     foreach ($data as $dt) {
 

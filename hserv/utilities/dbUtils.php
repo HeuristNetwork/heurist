@@ -88,12 +88,16 @@ class DbUtils {
         self::$initialized = true;
     }
 
+    // 
+    // init progress session
+    //
     public static function setSessionId($id){
         self::$session_id = $id;
         self::$progress_step = 0;
     }
 
     //
+    // update progress session value
     // returns true if session has been terminated
     //
     public static function setSessionVal($session_val){

@@ -932,6 +932,12 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HEURIST4.ui.showRecordActionDialog('dbRegister', popup_dialog_options);
         
         }
+        else if(action == "menu-database-verify"){
+        
+            popup_dialog_options.title = window.hWin.HR('Verify Database Integrity');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('dbVerify', popup_dialog_options);
+        
+        }
         else if(action == "menu-cms-create"){
 
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){

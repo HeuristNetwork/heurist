@@ -1711,7 +1711,8 @@
     }    
     
     //
-    //  returns value of session file
+    // returns value of session file
+    // if $value is not set, it returns current value
     //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
         
@@ -1743,7 +1744,7 @@
     }    
 
     // 
-    // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
+    // For Subversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
     // This method updates from 1.3.14 to 1.3.xxxx
     //

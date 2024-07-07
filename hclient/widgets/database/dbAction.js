@@ -32,6 +32,18 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _select_file_dlg:null,
     Heurist_Reference_Index: 'Heurist_Reference_Index',
 
+    _verification_actions: {
+            owner_ref:{name:'Record Owner/Creator'},
+            dup_terms:{name:'Invalid/Duplicate Terms'},           
+            field_type:{name:'Field Types'},
+            default_values:{name:'Default Values'},
+            pointer_targets:{name:'Pointer Targets'},
+            target_types:{name:'Target Types'},
+            target_parent:{name:'Invalid Parents'}
+    },
+        
+    
+    
     _init: function() {
 
         if(this.options.htmlContent=='' && this.options.actionName){
@@ -79,6 +91,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }else if(this.options.actionName=='restore')
         {
             this._on(this._$('#btnSelectZip'),{click:this._selectArchive});
+            
+        }else if(this.options.actionName=='verify')
+        {
+            this._initVerification();
         
         }else if(this.options.actionName=='register')
         {
@@ -263,6 +279,18 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 } 
                 request['pwd'] = pwd;
            }
+           
+        }else if(this.options.actionName=='verify'){
+            
+            var actions=[];
+            
+            this._$('.verify-actions:checked').each((i, item)=>{
+                actions.push($(item).val());
+            });
+
+            request = {checks: actions.join(',')};
+
+            
         }//end switch
 
         
@@ -274,8 +302,16 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('.archive').show();
            }
         }
-        
-        
+
+        this._sendRequest(request);        
+
+    },
+    
+    //
+    //
+    //    
+    _sendRequest: function(request)
+    {
         //unique session id    ------------------------
         var session_id = Math.round((new Date()).getTime()/1000);
         
@@ -302,8 +338,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 }
               
         });
-
-        return;
     },
     
     // Action: Clone
@@ -453,6 +487,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                }
             );
             
+        }else if(this.options.actionName=='verify'){
+            
+            this._initVerificationResponse(response);
+            
         }else{
             
             
@@ -562,6 +600,102 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
     },
     
+    //
+    //
+    //
+    _initVerification: function(){
+        
+        var cont = this._$('#actions');
+        var cont_steps = this._$('.progressbar_div > .loading > ol');
+        cont_steps.empty();
+        
+        for (const action in this._verification_actions){
+           $('<li><label><input type="checkbox" class="verify-actions" value="'+action+'">'
+                +this._verification_actions[action].name+'</label></li>').appendTo(cont);
+           $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
+        }  
+        
+    },
+    
+    //
+    //
+    //
+    _initVerificationResponse: function(response){
+    
+            var div_res = this._$("#div_result");
+            var is_reload = false;
+            
+            if(response['reload']){
+                is_reload = response['reload'];
+                delete response['reload'];
+            }
+            
+            if(is_reload){
+                
+                var action = Object.keys(response)[0];
+                var res = response[action];
+                
+                div_res.find('a[href="#'+action+'"]').parent()
+                    .css("background-color", res['status']?'#6AA84F':'#E60000');                
+                div_res.find('#'+action).empty().append($(res['message']));
+                
+                div_res.find('#linkbar').tabs('refresh');
+                
+            }else{            
+            
+                div_res.empty();
+                
+                var tabs = $('<div id="linkbar" style="margin:5px;"><ul id="links"></ul></div>').appendTo(div_res);
+                
+                var tab_header = div_res.find('#links');
+
+                for (const [action, res] of Object.entries(response)) {
+                    // add tab header
+                    $('<li style="background-color:'+(res['status']?'#6AA84F':'#E60000')+'"><a href="#'+action
+                        +'" style="white-space:nowrap;padding-right:10px;color:black;">'
+                        + this._verification_actions[action].name +'</a></li>')
+                        .appendTo(tab_header);
+                    // add content
+                    $('<div id="'+action+'" style="top:110px;padding:5px !important">'+res['message']+'</div>').appendTo(tabs);
+                }
+                tabs.tabs();
+            
+            }
+            
+            this._on(this._$('button[data-fix]').button(),{click:(event)=>{
+            
+                var action = $(event.target).attr('data-fix');
+                this._sendRequest({checks: action, fix:1, reload:1});
+            }});
+            
+            this._on(this._$('input[data-mark-all]'),{click:(event)=>{
+                
+                var ele = $(event.target)
+                var name = ele.attr('data-mark-all');
+                var is_checked = ele.is(':checked');
+                
+                this._$('input[name="'+name+'"]').prop('checked',is_checked);
+            }});
+
+            this._on(this._$('a[data-show-selected]'),{click:(event)=>{
+                
+                var name = $(event.target).attr('data-show-selected');
+                var sels = this._$('input[name="'+name+'"]:checked');
+                var ids = [];
+
+                sels.each((i,item)=>{
+                    ids.push(item.value);
+                });
+                
+                if(ids.length>0){
+                    window.open( window.hWin.HAPI4.baseURL_pro+'?db='
+                                +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
+                }
+                
+                return false;
+            }});
+            
+    }            
+
 
 });
-

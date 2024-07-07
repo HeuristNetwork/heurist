@@ -52,7 +52,10 @@ $active_all = true; //all part are active
 $active = array('relationship_cache', 'defgroups', 'dateindex'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
-    $lists = json_decode($_REQUEST['data'], true);
+    
+    $lists = filter_input(@$_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'data');
+    
+    $lists = json_decode($lists);
     
     $lists2 = $lists;
     
@@ -60,10 +63,13 @@ if(@$_REQUEST['data']){
     $lists = getInvalidFieldTypes($mysqli, intval(@$_REQUEST['rt'])); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
         if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
-        && count($lists["rt_contraints"])==0  && count($lists["rt_defvalues"])==0){
+        && count($lists["rt_contraints"])==0){
             $lists = array();
         }
     }
+    
+    $lists3 = getInvalidDefaultValues($mysqli, intval(@$_REQUEST['rt']));
+    $rtysWithInvalidDefaultValues = @$lists3["rt_defvalues"];
     
     $lists2 = getTermsWithIssues($mysqli);
 }
@@ -78,13 +84,13 @@ if(count($recids)>0){
 
 //see getInvalidFieldTypes in verifyFieldTypes.php
 $dtysWithInvalidTerms = @$lists["terms"];
-$dtysWithInvalidNonSelectableTerms = prepareIds(filter_var(@$lists["terms_nonselectable"], FILTER_SANITIZE_STRING));
-$dtysWithInvalidRectypeConstraint = prepareIds(filter_var(@$lists["rt_contraints"], FILTER_SANITIZE_STRING));
+$dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
+$dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
 $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-$trmWithWrongParents = prepareIds(filter_var(@$lists2["trm_missed_parents"], FILTER_SANITIZE_STRING));
-$trmWithWrongInverse = prepareIds(filter_var(@$lists2["trm_missed_inverse"], FILTER_SANITIZE_STRING));
+$trmWithWrongParents = prepareIds(@$lists2["trm_missed_parents"]);
+$trmWithWrongInverse = prepareIds(@$lists2["trm_missed_inverse"]);
 $trmDuplicates = @$lists2["trm_dupes"];
 
 ?>
@@ -169,7 +175,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditFieldType(dty_ID){
                 
-                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 return;
 
                 var sURL = "<?=HEURIST_BASE_URL?>admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
@@ -194,7 +200,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditRtStructure(rty_ID){
 
-                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 return;
                 
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
@@ -359,7 +365,7 @@ if($active_all || in_array('owner_ref', $active)) {
                 }
 
                 $query = 'UPDATE Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID '
-                .' SET rec_AddedByUGrpID=2 WHERE ugr_ID is null';
+                .' SET rec_OwnerUGrpID=2 WHERE ugr_ID is null';
                 $res = $mysqli->query( $query );
                 if(! $res )
                 {
@@ -386,7 +392,7 @@ if($active_all || in_array('owner_ref', $active)) {
             }
 
             if($wrongUser_Add==0 && $wrongUser_Owner==0){
-                print '<div><h3 class="res-valid">OK: All record have valid Owner and Added by User references</h3></div>';
+                print '<div><h3 class="res-valid">OK: All records have valid Owner and Added by User references</h3></div>';
                 echo '<script>$(".owner_ref").css("background-color", "#6AA84F");</script>';
                 if($wasassigned1>0){
                     print "<div>$wasassigned1 records 'Added by' value were set to user # 2 Database Manager</div>";
@@ -596,9 +602,10 @@ if($active_all || in_array('field_type', $active)) {
 
             The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br><br>
             To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br>&nbsp;<br>
-            You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
             <hr>
             <?php 
+// You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
+
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
                 <div class="msgline"><b><a href="#invalid_terms1" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
