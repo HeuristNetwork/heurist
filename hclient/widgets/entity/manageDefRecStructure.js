@@ -1695,6 +1695,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             if(requirement_sel.hSelect('instance') != undefined){
                 window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
             }
+            var vis_sel = this._editing.getFieldByName('rst_NonOwnerVisibility').find('select');
+            if(vis_sel.hSelect('instance') != undefined){
+                window.hWin.HEURIST4.ui.initHSelect(vis_sel.get(0), false);
+            }
 
         }
             
