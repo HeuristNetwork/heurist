@@ -217,18 +217,14 @@ $.widget( "heurist.search", {
 
         //help link and quick access of saved filters
         if(!this._is_publication && this.options.is_h6style){
-            var div_search_help_links = $('<div>')
-            //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
-            .css({position: 'absolute',top:'85px','font-size':'10px',display:'inline-block'})
-            .appendTo(this.div_search_input);
 
             var link = $('<span title="'+window.hWin.HR('filter_help_hint')+'">'
                 + window.hWin.HR('Filter help')
                 + ' <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
             .addClass('graytext')
-            .css({'text-decoration':'none','outline':0, cursor:'pointer'})
-            .appendTo(div_search_help_links);
+            .css({'font-size':'10px',display:'inline-block','text-decoration':'none','outline':0, cursor:'pointer'})
+            .appendTo(this.div_search_input);
 
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
@@ -375,7 +371,7 @@ $.widget( "heurist.search", {
                 }            
             }});
 
-            this.div_search_input.find('#search_help_link').parent()
+            this.div_search_input.find('#search_help_link')
             .css({'margin-left':'-10px'})
             .appendTo(this.div_buttons);
         }
@@ -819,7 +815,7 @@ $.widget( "heurist.search", {
                 }
 
                 this.div_buttons.position({
-                    my: 'left top+5',
+                    my: 'left+10 top+5',
                     at: 'left bottom',
                     of: this.div_search_input
                 });
