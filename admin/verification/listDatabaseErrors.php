@@ -1117,12 +1117,11 @@ if($active_all || in_array('empty_fields', $active)) {
 
         $total_count_rows = 0;
 
-        //find all fields with faulty dates
+        //find all fields with empty values
         $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_RecTypeID, a.rec_Title, dty_Name, dty_Type
             from recDetails, defDetailTypes, Records a
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
         and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
-
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 

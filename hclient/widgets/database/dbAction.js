@@ -39,7 +39,14 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             default_values:{name:'Default Values'},
             pointer_targets:{name:'Pointer Targets'},
             target_types:{name:'Target Types'},
-            target_parent:{name:'Invalid Parents'}
+            target_parent:{name:'Invalid Parents'},
+            empty_fields:{name:'Empty Fields'},
+            //date_values:{name:'Date Values'},
+            term_values:{name:'Term Values'},
+            //expected_terms
+            single_value:{name:'Single Value Fields'},
+            required_fields:{name:'Required Fields'},
+            nonstandard_fields:{name:'Non-Standard Fields'}
     },
         
     
@@ -283,12 +290,16 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }else if(this.options.actionName=='verify'){
             
             var actions=[];
+            var cont_steps = this._$('.progressbar_div > .loading > ol');
+            cont_steps.empty();
             
             this._$('.verify-actions:checked').each((i, item)=>{
-                actions.push($(item).val());
+                var action = item.value
+                actions.push(action);
+                $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
             });
-
-            request = {checks: actions.join(',')};
+            
+            request = {checks: actions.length==Object.keys(this._verification_actions).length?'all':actions.join(',')};
 
             
         }//end switch
@@ -606,15 +617,22 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _initVerification: function(){
         
         var cont = this._$('#actions');
-        var cont_steps = this._$('.progressbar_div > .loading > ol');
-        cont_steps.empty();
         
         for (const action in this._verification_actions){
            $('<li><label><input type="checkbox" class="verify-actions" value="'+action+'">'
                 +this._verification_actions[action].name+'</label></li>').appendTo(cont);
-           $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
-        }  
+        } 
         
+        //
+        // Mark all checkbox
+        //
+        this._on(this._$('input[data-mark-actions]'),{click:(event)=>{
+            var is_checked = $(event.target).is(':checked');
+            this._$('input.verify-actions').prop('checked',is_checked);
+        }});
+
+                
+        this._$("#div_result").css('overflow-y','auto');
     },
     
     //
@@ -662,12 +680,23 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
             }
             
+            //
+            // FIX button
+            //
             this._on(this._$('button[data-fix]').button(),{click:(event)=>{
             
                 var action = $(event.target).attr('data-fix');
+                
+                var cont_steps = this._$('.progressbar_div > .loading > ol');
+                cont_steps.empty();
+                $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
+                
                 this._sendRequest({checks: action, fix:1, reload:1});
             }});
             
+            //
+            // Mark all checkbox
+            //
             this._on(this._$('input[data-mark-all]'),{click:(event)=>{
                 
                 var ele = $(event.target)
@@ -677,6 +706,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('input[name="'+name+'"]').prop('checked',is_checked);
             }});
 
+            //
+            // Show selected link
+            //
             this._on(this._$('a[data-show-selected]'),{click:(event)=>{
                 
                 var name = $(event.target).attr('data-show-selected');

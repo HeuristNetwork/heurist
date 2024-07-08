@@ -401,10 +401,13 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                 $res = array();        
                 if(count($actions)>0){
                     
+                    $counter = 0;
                     foreach($actions as $action){
                         $method = 'check_'.$action;
                         if(method_exists($dbVerify, $method) && is_callable(array($dbVerify, $method))){
                             $res[$action] = $dbVerify->$method($req_params);
+                            DbUtils::setSessionVal($counter);                            
+                            $counter++;
                         }    
                     }
                 }

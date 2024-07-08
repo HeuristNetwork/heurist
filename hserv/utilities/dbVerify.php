@@ -63,40 +63,10 @@ class DbVerify {
     private $mysqli = null;
     private $system = null;
 
-    private $session_id = 0;
-    private $progress_step = 0;
-
     public function __construct($system) {
        $this->system = $system;
        $this->mysqli = $system->get_mysqli();
     }    
-    
-    // 
-    // init progress session
-    //
-    public function setSessionId($id){
-        $this->session_id = $id;
-        $this->progress_step = 0;
-    }
-
-    //
-    // update progress session value
-    // returns true if session has been terminated
-    //
-    public function setSessionVal($session_val){
-        
-        if($this->progress_step>0 && intval($session_val)>0){
-            $session_val = $this->progress_step+$session_val;
-        }
-        
-        $current_val = mysql__update_progress($this->mysqli, $this->session_id, false, $session_val);
-        if($current_val=='terminate'){ //session was terminated from client side
-            $this->session_id = 0;
-            return true;
-        }else{
-            return false;
-        }
-    }
     
     /**
     * Check that records have valid Owner and Added by User references
@@ -524,7 +494,8 @@ class DbVerify {
             array_push($bibs, $row);
             $ids[$row['dtl_RecID']] = 1;
         }
-
+        $res->close();
+        
         if(count($bibs)==0){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
             
@@ -558,7 +529,7 @@ class DbVerify {
 
                 $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
                 $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-                
+            
                 foreach ($bibs as $row) {
 
                     $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
@@ -610,7 +581,8 @@ class DbVerify {
         while ($row = $res->fetch_assoc()){
             $bibs[$row['dtl_RecID']] = $row;
         }
-
+        $res->close();
+        
         if(count($bibs)==0){
             $resMsg = '<div><h3 class="res-valid">OK: All record pointers point to the correct record type</h3></div>';
         }
@@ -682,7 +654,7 @@ class DbVerify {
         $mysqli = $this->mysqli;
         $this->system->defineConstant('DT_PARENT_ENTITY');
         
-        if(false && is_array($params) && @$params['fix']==1){ //OLW WAY DISABLED
+        if(false && is_array($params) && @$params['fix']==1){ //OLD WAY DISABLED
 
             //remove pointer field in parent records that does not have reverse in children
             $query = 'DELETE parent FROM Records parentrec, defRecStructure, recDetails parent '
@@ -733,7 +705,8 @@ class DbVerify {
                 $prec_ids1[] = $row['rec_ID'];
             }
 
-        }
+        }//while
+        $res->close();
         
         //find children without reverse pointer in parent record               
         $query2 = 'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
@@ -768,6 +741,7 @@ class DbVerify {
                 }
                 */
             }//while
+            $res->close();
         }else{
              $resMsg .= '<div class="error">Cannot execute query "find children without reverse pointer in parent record".</div>';
              $resStatus = false;
@@ -825,6 +799,9 @@ class DbVerify {
                 </tr>
             HEADER;
 
+                $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+                $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            
                 foreach ($bibs1 as $row) {
 
                     $url_icon_parent = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
@@ -920,6 +897,494 @@ class DbVerify {
         
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }       
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_empty_fields($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $wascorrected = 0;
+        $mysqli = $this->mysqli;
+        
+        
+        if(is_array($params) && @$params['fix']==1){
+            
+            $mysqli->query('SET SQL_SAFE_UPDATES=0');
+            $mysqli->query('DELETE d.* FROM recDetails d, defDetailTypes, Records a '
+                .'WHERE (dtl_ID>0) and (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
+            and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');                
+
+            $wascorrected = $mysqli->affected_rows;     
+            $mysqli->query('SET SQL_SAFE_UPDATES=1');
+        }
+
+        $total_count_rows = 0;
+
+        //find all fields with empty values
+        $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_RecTypeID, a.rec_Title, dty_Name, dty_Type
+            from recDetails, defDetailTypes, Records a
+            where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
+        and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
+
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+
+        if($total_count_rows<1){
+            $resMsg .= '<div><h3 class="res-valid">OK: There are no fields containing null values</h3></div>';
+        }
+        if($wascorrected>0){
+            $resMsg .= "<div>$wascorrected empty fields were deleted</div>";
+        }
+
+        if($total_count_rows>0)
+        {
+            $resStatus = false;
+            $resMsg .= <<<'HEADER'
+            <div>
+                <h3>Records with empty fields</h3>
+                <div>To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button><br><br></div>
+                <span>
+                    <a target=_new href="$url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="recCB5">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="5">
+                        <label><input type="checkbox" data-mark-all="recCB5">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            
+            while ($row = $res->fetch_assoc()){
+  
+                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
+                    $rec_title = strip_tags($row['rec_Title']);
+                    
+                    $resMsg .= <<<EOT
+                    <tr>
+                        <td><input type=checkbox name="recCB5" value={$row['dtl_RecID']}></td>
+                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                            </a></td>
+                        <td class="truncate" style="max-width:400px">$rec_title</td>
+                        <td>{$row['dty_Name']}</td>
+                    </tr>
+                    EOT;
+                    $ids[$row['dtl_RecID']] = 1; //to avoid duplications
+            } //while            
+            $res->close();
+            $resMsg .= '</table><br>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
+            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
+            
+        }   
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }
+
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_term_values($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $wasdeleted = 0;
+        $mysqli = $this->mysqli;
+        
+        
+        if(is_array($params) && @$params['fix']==1){
+            
+            $query = 'DELETE d FROM recDetails d
+            left join defDetailTypes dt on dt.dty_ID = d.dtl_DetailTypeID
+            left join defTerms b on b.trm_ID = d.dtl_Value
+            where dt.dty_Type = "enum" or  dt.dty_Type = "relmarker"
+            and b.trm_ID is null';
+            $res = $mysqli->query( $query );
+            
+            if(! $res )
+            {
+                $resStatus = false;
+                $resMsg = '<div class="error">Cannot delete invalid term values from Records. SQL error: '.$mysqli->error.'</div>';
+            }else{
+                $wasdeleted = $mysqli->affected_rows;
+            }
+        }
+
+        $total_count_rows = 0;
+
+        //find non existing term values
+        $res = $mysqli->query('SELECT dtl_ID, dtl_RecID, dty_Name, a.rec_RecTypeID, a.rec_Title
+            FROM recDetails
+            left join defDetailTypes on dty_ID = dtl_DetailTypeID
+            left join Records a on a.rec_ID = dtl_RecID
+            left join defTerms b on b.trm_ID = dtl_Value
+            where (dty_Type = "enum" or dty_Type = "relmarker") and dtl_Value is not null
+            and a.rec_ID is not null
+        and b.trm_ID is null');
+
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+
+        if($total_count_rows<1){
+            $resMsg .= '<div><h3 class="res-valid">OK: All records have recognisable term values</h3></div>';
+        }
+        if($wasdeleted>0){
+            $resMsg .= "<div>$wasdeleted invalid term value(s) were removed from database</div>";
+        }
+
+        if($total_count_rows>0)
+        {
+            $resStatus = false;
+            $resMsg .= <<<'HEADER'
+            <div>
+                <h3>Records with non-existent term values</h3>
+                <div>To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button><br><br></div>
+                <span>
+                    <a target=_new href="$url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="recCB6">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="5">
+                        <label><input type="checkbox" data-mark-all="recCB6">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            
+            while ($row = $res->fetch_assoc()){
+  
+                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
+                    $rec_title = strip_tags($row['rec_Title']);
+                    
+                    $resMsg .= <<<EOT
+                    <tr>
+                        <td><input type=checkbox name="recCB6" value={$row['dtl_RecID']}></td>
+                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                            </a></td>
+                        <td class="truncate" style="max-width:400px">$rec_title</td>
+                        <td>{$row['dty_Name']}</td>
+                    </tr>
+                    EOT;
+                    $ids[$row['dtl_RecID']] = 1;
+            } //while  
+            $res->close();          
+            $resMsg .= '</table><br>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
+            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
+            
+        }   
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_single_value($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+
+        $total_count_rows = 0;
+
+        //find repetative single value fields
+        $res = $mysqli->query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
+            from recDetails, Records, defRecStructure
+            where rec_ID = dtl_RecID  and rec_FlagTemporary!=1 
+            and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+            and rst_MaxValues=1
+            GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
+        HAVING COUNT(*) > 1');
+
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+
+        if($total_count_rows<1){
+            $resMsg .= '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
+        }else
+        {
+            $resStatus = false;
+            $resMsg .= <<<'HEADER'
+            <div>
+                <h3>Single value fields with multiple values</h3>
+                <span>
+                    <a target=_new href="$url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="recCB7">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="5">
+                        <label><input type="checkbox" data-mark-all="recCB7">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            $rec_id = null;
+            
+            while ($row = $res->fetch_assoc()){
+  
+                    if($rec_id!=$row['dtl_RecID']){
+                    
+                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
+                        $rec_title = strip_tags($row['rec_Title']);
+                    
+                        $resMsg .= <<<EOT
+                        <tr>
+                            <td><input type=checkbox name="recCB7" value={$row['dtl_RecID']}></td>
+                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                    {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                                </a></td>
+                            <td class="truncate" style="max-width:400px">$rec_title</td>
+                            <td>{$row['rst_DisplayName']}</td>
+                        </tr>
+                        EOT;
+                        $rec_id = $row['dtl_RecID'];
+                        $ids[$row['dtl_RecID']] = 1;
+                    }else{
+                        $resMsg .= '<tr><td colspan="4"></td><td>'.$row['rst_DisplayName'].'</td></tr>';
+                    }
+            } //while  
+            $res->close();          
+            $resMsg .= '</table><br>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
+            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
+            
+        }   
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }    
+    
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_required_fields($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+
+        $total_count_rows = 0;
+
+        //find missed required fields
+        $res = $mysqli->query(
+            "select rec_ID, rec_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type, rty_Name
+            from Records
+            left join defRecStructure on rst_RecTypeID = rec_RecTypeID
+            left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
+            left join defDetailTypes on dty_ID = rst_DetailTypeID
+            left join defRecTypes on rty_ID = rec_RecTypeID
+            where rec_FlagTemporary!=1 and rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
+            and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator' and dty_Type!='relmarker'
+        order by rec_ID");
+
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+
+        if($total_count_rows<1){
+            $resMsg .= '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
+        }else
+        {
+            $resStatus = false;
+            $resMsg .= <<<'HEADER'
+            <div>
+                <h3>Records with missing or empty required values</h3>
+                <span>
+                    <a target=_new href="$url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="recCB8">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="5">
+                        <label><input type="checkbox" data-mark-all="recCB8">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            $rec_id = null;
+            
+            while ($row = $res->fetch_assoc()){
+  
+                    if($rec_id!=$row['rec_ID']){
+                    
+                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['rec_ID'];
+                        $rec_title = strip_tags($row['rec_Title']);
+                    
+                        $resMsg .= <<<EOT
+                        <tr>
+                            <td><input type=checkbox name="recCB8" value={$row['rec_ID']}></td>
+                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                    {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                                </a></td>
+                            <td class="truncate" style="max-width:400px">$rec_title</td>
+                            <td>{$row['rst_DisplayName']}</td>
+                        </tr>
+                        EOT;
+                        $rec_id = $row['rec_ID'];
+                        $ids[$row['rec_ID']] = 1;
+                    }else{
+                        $resMsg .= '<tr><td colspan="4"></td><td>'.$row['rst_DisplayName'].'</td></tr>';
+                    }
+            } //while  
+            $res->close();          
+            $resMsg .= '</table><br>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
+            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
+            
+        }   
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }   
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_nonstandard_fields($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+
+        $total_count_rows = 0;
+
+        //find non standard fields
+        $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title, rty_Name
+        from Records
+        left join recDetails on rec_ID = dtl_RecID
+        left join defDetailTypes on dty_ID = dtl_DetailTypeID
+        left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+        left join defRecTypes on rty_ID = rec_RecTypeID
+        where rec_FlagTemporary!=1 AND rst_ID is null";            
+
+        if($this->system->defineConstant('DT_PARENT_ENTITY')){
+            $query .= " AND dty_ID != ".DT_PARENT_ENTITY;
+        }    
+        if($this->system->defineConstant('DT_WORKFLOW_STAGE')){
+            $query .= " AND dty_ID != ".DT_WORKFLOW_STAGE;
+        }
+        if($this->system->defineConstant('DT_ORIGINAL_RECORD_ID')){
+            $query .= " AND dty_ID != ".DT_ORIGINAL_RECORD_ID;
+        }
+        
+        $query .= ' order by rec_ID';
+        
+        $res = $mysqli->query( $query );
+
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+
+        if($total_count_rows<1){
+            $resMsg .= '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';
+        }else
+        {
+            $resStatus = false;
+            $resMsg .= <<<'HEADER'
+            <div>
+                <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
+                <span>
+                    <a target=_new href="$url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="recCB9">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="7">
+                        <label><input type="checkbox" data-mark-all="recCB9">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            $rec_id = null;
+            
+            while ($row = $res->fetch_assoc()){
+  
+                    $fld_value = substr(htmlspecialchars($row['dtl_Value']),0,50);
+                    
+                    if($rec_id!=$row['rec_ID']){
+                    
+                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['rec_ID'];
+                        $rec_title = strip_tags($row['rec_Title']);
+                        
+                        $resMsg .= <<<EOT
+                        <tr>
+                            <td><input type=checkbox name="recCB9" value={$row['rec_ID']}></td>
+                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                    {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                                </a></td>
+                            <td class="truncate" style="max-width:400px">$rec_title</td>
+                        EOT;
+                        $rec_id = $row['rec_ID'];
+                        $ids[$row['rec_ID']] = 1;
+                    }else{
+                        $resMsg .= '<tr><td colspan="4">&nbsp;</td>';
+                    }
+                    $resMsg .= "<td>{$row['dty_ID']}</td><td>{$row['dty_Name']}</td><td>$fld_value</td></tr>";
+            } //while  
+            
+            $res->close();          
+            $resMsg .= '</table><br>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
+            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
+            
+        }   
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }    
+    
 }
 
 
