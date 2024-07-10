@@ -97,7 +97,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             
             
                 //compose database name
-                $database_name = __composeDbName($req_params);
+                $database_name = __composeDbName($system, $req_params);
                 if($database_name!==false){
                 
                     $usr_owner = null;
@@ -168,7 +168,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
         else if($action=='restore')  
         {
             //compose database name
-            $database_name = __composeDbName($req_params);
+            $database_name = __composeDbName($system, $req_params);
             if($database_name!==false){
                 
                 if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){    
@@ -280,7 +280,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             }else{
                 
                 //target database
-                $db_target = __composeDbName($req_params);
+                $db_target = __composeDbName($system, $req_params);
                 if($db_target!==false){//!is_bool($db_target)
                     $sErrorMsg = DbUtils::databaseValidateName($db_target, 1); //unique
                     if ($sErrorMsg!=null) {
@@ -450,7 +450,7 @@ print json_encode($response);
 //
 //
 //
-function __composeDbName($req_params){
+function __composeDbName($system, $req_params){
 
     $uName = '';
     if(@$req_params['uname']){

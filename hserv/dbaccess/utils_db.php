@@ -1726,8 +1726,8 @@
         
         $session_file = HEURIST_SCRATCH_DIR.'session'.$session_id;
         $is_exist = file_exists($session_file);
-        
-        if($value=='REMOVE'){
+
+        if($value==='REMOVE'){
             if($is_exist) fileDelete($session_file);
             $res = 'terminate';
         }else{
@@ -1739,7 +1739,6 @@
                 $res = $value;
             }
         }
-   
         return $res;
     }    
 
