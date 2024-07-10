@@ -29,6 +29,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
     
     _progressInterval:0,
+    _session_id:0,
     _select_file_dlg:null,
     Heurist_Reference_Index: 'Heurist_Reference_Index',
 
@@ -299,6 +300,23 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
             });
             
+            var btn_stop = $('<button class="ui-button-action">Terminate</button>').appendTo(cont_steps);
+            btn_stop.button();
+            this._on(btn_stop,{click:function(){
+                var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
+                var that = this;
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    that._session_id = 0;
+                    that._hideProgress();
+                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    //    console.error(response);                   
+                    //}
+                });
+                
+                
+            }});
+            
             request = {checks: actions.length==Object.keys(this._verification_actions).length?'all':actions.join(',')};
 
             
@@ -324,14 +342,14 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _sendRequest: function(request)
     {
         //unique session id    ------------------------
-        var session_id = Math.round((new Date()).getTime()/1000);
+        this._session_id = Math.round((new Date()).getTime()/1000);
         
         request['action'] = this.options.actionName;       
         request['db'] = window.hWin.HAPI4.database;
         request['locale'] = window.hWin.HAPI4.getLocale();
-        request['session'] = session_id;
+        request['session'] = this._session_id;
 
-        this._showProgress( session_id, false, (this.options.actionName=='register')?0:1000 );
+        this._showProgress( this._session_id, false, (this.options.actionName=='register')?0:1000 );
         var that = this;
         
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
@@ -345,7 +363,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     that._$('.ent_wrapper').hide();
-                    that._$('#div_header').show();
+                    that._$('#div_header').show(); //show first page
                 }
               
         });
@@ -639,6 +657,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     //
     _initVerificationResponse: function(response){
+        
+            if(this._session_id==0) return;
     
             var div_res = this._$("#div_result");
             var is_reload = false;

@@ -653,6 +653,7 @@ class DbVerify {
         
         $mysqli = $this->mysqli;
         $this->system->defineConstant('DT_PARENT_ENTITY');
+        $dt_parent_entity_field_id = DT_PARENT_ENTITY;
         
         if(false && is_array($params) && @$params['fix']==1){ //OLD WAY DISABLED
 
@@ -676,40 +677,61 @@ class DbVerify {
         }
 
         //find parents with pointer field rst_CreateChildIfRecPtr=1) without reverse pointer in child record               
-        $query1 = 'SELECT parentrec.rec_ID, parentrec.rec_RecTypeID, parentrec.rec_Title as p_title, '  //'parent.dtl_DetailTypeID, rst_DisplayName, '
-            .'parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_RecID as f247 '
-            .'FROM Records parentrec, defRecStructure, recDetails parent '
-            .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
-            .'LEFT JOIN Records childrec ON parent.dtl_Value=childrec.rec_ID '
-            .'WHERE '
-            .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 AND parentrec.rec_FlagTemporary!=1 '
-            .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
-            .'AND child.dtl_RecID is NULL ORDER BY parentrec.rec_ID'; 
-
-
+        $query1 = <<<QUERY
+            SELECT parentrec.rec_ID, parentrec.rec_RecTypeID, parentrec.rec_Title as p_title, 
+            parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_Value as f247, child.dtl_ID
+            FROM Records parentrec, defRecStructure, recDetails parent, Records childrec
+            LEFT JOIN recDetails child ON child.dtl_DetailTypeID=$dt_parent_entity_field_id AND child.dtl_RecID=childrec.rec_ID
+            WHERE 
+            rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=parentrec.rec_RecTypeID AND parentrec.rec_FlagTemporary!=1 
+            AND parentrec.rec_ID=parent.dtl_RecID AND rst_DetailTypeID=parent.dtl_DetailTypeID 
+            AND parent.dtl_Value=childrec.rec_ID 
+            AND (child.dtl_Value!=parent.dtl_RecID OR child.dtl_Value IS NULL)
+            ORDER BY parentrec.rec_ID
+            QUERY;
+        
         $res = $mysqli->query( $query1 );
         $bibs1 = array();
         $prec_ids1 = array();
         while ($row = $res->fetch_assoc()){
 
-            $child_ID = intval($row['dtl_Value']);
-
             if(@$params['fix']==1){ 
                 //new way: add missed reverse link to alleged children
-                $query2 = 'INSERT into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                .$child_ID . ','. DT_PARENT_ENTITY  .', '.intval($row['rec_ID']) . ')';
+                $dtl_ID = intval($row['dtl_ID']); //reference to parent ifd with wrong value
+                if($dtl_ID>0){
+                    $query2 = 'UPDATE recDetails set dtl_Value='.intval($row['rec_ID']).' WHERE dtl_ID='.$dtl_ID;
+                }else{
+                    $child_ID = intval($row['dtl_Value']); //child record ID
+                    $query2 = 'INSERT into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
+                        .$child_ID . ','. DT_PARENT_ENTITY  .', '.intval($row['rec_ID']) . ')';
+                }
                 $mysqli->query($query2);
                 $wasadded1++;
             }else{
                 $bibs1[] = $row;
-                $prec_ids1[] = $row['rec_ID'];
+                $prec_ids1[$row['rec_ID']] = 1;
             }
 
         }//while
         $res->close();
         
         //find children without reverse pointer in parent record               
-        $query2 = 'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
+        $query2 = 
+"SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value,
+parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr,
+childrec.rec_FlagTemporary 
+FROM recDetails child 
+LEFT JOIN  Records childrec ON childrec.rec_ID=child.dtl_RecID 
+LEFT JOIN Records parentrec ON child.dtl_Value=parentrec.rec_ID 
+LEFT JOIN recDetails parent ON parent.dtl_RecID=parentrec.rec_ID AND parent.dtl_Value=childrec.rec_ID 
+LEFT JOIN defDetailTypes ON parent.dtl_DetailTypeID=dty_ID AND dty_Type='resource' AND parent.dtl_DetailTypeID!=$dt_parent_entity_field_id
+LEFT JOIN defRecStructure ON rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=dty_ID AND rst_CreateChildIfRecPtr=1
+WHERE child.dtl_DetailTypeID=$dt_parent_entity_field_id  AND childrec.rec_FlagTemporary!=1 and parent.dtl_Value IS NULL
+ORDER BY child.dtl_RecID";
+
+        
+/*        
+        'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
             .'parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr, '
             .'childrec.rec_FlagTemporary '
             .' FROM recDetails child '
@@ -720,7 +742,7 @@ class DbVerify {
             .'LEFT JOIN defRecStructure ON rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=dty_ID AND rst_CreateChildIfRecPtr=1 '
             .'WHERE child.dtl_DetailTypeID='.DT_PARENT_ENTITY .' AND parent.dtl_DetailTypeID!='.DT_PARENT_ENTITY
             .' AND dty_Type="resource" AND (rst_CreateChildIfRecPtr IS NULL OR rst_CreateChildIfRecPtr!=1) ORDER BY child.dtl_RecID';
-
+*/
         $res = $mysqli->query( $query2 );
         
         $bibs2 = array();
@@ -731,7 +753,7 @@ class DbVerify {
                 if($row['rec_FlagTemporary']==1) continue;
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
                 $bibs2[] = $row;
-                $prec_ids2[] = $row['dtl_Value'];  //remove DT_PARENT_ENTITY from orphaned children
+                $prec_ids2[$row['dtl_Value']] = 1;  //remove DT_PARENT_ENTITY from orphaned children
                 array_push($det_ids, intval($row['child_d_id'])); 
                 /*
                 if($row['parent_d_id']>0){
@@ -797,7 +819,7 @@ class DbVerify {
                         <label><input type="checkbox" data-mark-all="recCB">Mark all</label>
                     </td>
                 </tr>
-            HEADER;
+HEADER;
 
                 $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
                 $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
@@ -877,17 +899,17 @@ class DbVerify {
                     $resMsg .= <<<EOT
                     <tr>
                         <td><input type=checkbox name="recCB4" value={$row['dtl_Value']}></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
-                                {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title_parent</td>
-
-                        <td>has reverse 'pointer to parent' in </td>
-
                         <td style="white-space: nowrap;"><a target=_new href="$url_rec_child">
                                 {$row['child_id']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
                             </a></td>
                         <td class="truncate" style="max-width:400px">$rec_title_child</td>
+
+                        <td>has reverse 'pointer to parent' in </td>
+
+                        <td style="white-space: nowrap;"><a target=_new href="$url_rec_parent">
+                                {$row['dtl_Value']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                            </a></td>
+                        <td class="truncate" style="max-width:400px">$rec_title_parent</td>
                     </tr>
                     EOT;
             }

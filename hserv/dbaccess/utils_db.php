@@ -1734,7 +1734,7 @@
             //get    
             if($is_exist) $res = file_get_contents($session_file);
             
-            if($value!=null && $res!='terminate'){
+            if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);
                 $res = $value;
             }

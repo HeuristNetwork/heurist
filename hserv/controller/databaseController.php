@@ -406,16 +406,24 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                         $method = 'check_'.$action;
                         if(method_exists($dbVerify, $method) && is_callable(array($dbVerify, $method))){
                             $res[$action] = $dbVerify->$method($req_params);
-                            DbUtils::setSessionVal($counter);                            
+                            if(DbUtils::setSessionVal($counter)){
+                                //terminated by user
+                                $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');                
+                                $res = false;
+                                break;
+                            };                            
                             $counter++;
                         }    
                     }
+                    
                 }
-                if(!(count($res)>0)){
-                    $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");                
-                    $res = false;
-                }else if(@$req_params['reload']==1){
-                    $res['reload'] = true;
+                if(is_array($res)){
+                    if(!(count($res)>0)){
+                        $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");                
+                        $res = false;
+                    }else if(@$req_params['reload']==1){
+                        $res['reload'] = true;
+                    }
                 }
             }
         }
