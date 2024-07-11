@@ -30,6 +30,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         currentOwner: 0,
         currentAccess: null,
         currentAccessGroups: null,
+        show_modes: false,
         
         htmlContent: 'recordAccess.html',
         helpContent: '' //'recordAccess.html' //in context_help folder
@@ -193,60 +194,28 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
         );
 
-//ARTEM - remarked all this stuff, since it possible to add new record in guest mode        
         this.element.find('#div_def_user, #div_def_acc').hide();
-/*        
-        let $accountSelect = this.element.find('#sel_def_user');
-        let $pwdInput = this.element.find('#txt_def_pwd');
-        if($accountSelect.length > 0 && $pwdInput.length > 0){
+        if(this.options.show_modes){
+            this.element.find('#div_operation_mode').show();
 
-            if(window.hWin.HAPI4.is_admin()){
+            this._on(this.element.find('#div_operation_mode input[type="radio"]'), {
+                change: (event) => {
+                    let mode = $(event.target).val();
 
-                this.element.find('#div_def_user, #div_def_acc').show();
-
-                window.hWin.HEURIST4.ui.createUserGroupsSelect($accountSelect[0], 'all_users_non_admins', [{key: '', title: 'None'}], (result) => {
-
-                    if(!result){
-
-                        that.element.find('#div_def_acc, #div_def_user, #div_def_pwd').hide();
-
-                        let msg = "Sorry, there are no non-administrator accounts available in this database.<br><br>"
-                                + "It is inappropriate to expose an administrator password in a hyperlink.<br>"
-                                + "We do not therefore support the use of an administrator account in a record addition hyperlink.";
-
-//ARTEM REMARKED IT 
-//                        setTimeout(() => { window.hWin.HEURIST4.msg.showMsgErr(msg); }, 1500); // display message after delay
-
-                        return;
+                    that.element.find('#div_sel_ownership, #sel_OwnerGroups, #div_sel_access, #div_sel_access2, #div_sel_access3').hide();
+                    if(mode == 0 || mode == 1){
+                        that.element.find('#div_sel_ownership, #sel_OwnerGroups').show();
                     }
-        
-                    $accountSelect = window.hWin.HEURIST4.ui.initHSelect($accountSelect, false);
-        
-                    this._off($accountSelect, 'change');
-                    this._on($accountSelect, {
-                        change: () => {
-                            if($accountSelect.val() == ''){
-                                $pwdInput.closest("#div_def_pwd").hide();
-                            }else{
-                                $pwdInput.closest("#div_def_pwd").show();
-                            }
-                        }
-                    });
-        
-                    that._off($pwdInput, 'keyup');
-                    that._on($pwdInput, {
-                        keyup: () => {
-                            that._onRecordScopeChange();
-                        }
-                    });
-                });
-            }else{
-                this.element.find('#div_def_user, #div_def_acc').hide();
-                $accountSelect.empty();
-            }
+                    if(mode == 0 || mode == 2){
+                        that.element.find('#div_sel_access, #div_sel_access2, #div_sel_access3').show();
+                    }
 
+                    that._onRecordScopeChange();
+                }
+            });
+        }else{
+            this.element.find('#div_operation_mode').hide();
         }
-*/        
     },
     
     _adjustHeight: function(){
@@ -327,15 +296,16 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 return false;
             }
         }
-        */        
+        */
+
+        let mode = this.options.show_modes ? this.element.find('#div_operation_mode [name="mode"]:checked').val() : 0;
         var ownership = this.element.find('#sel_Ownership').val();
         
-        
         var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
-        if(!visibility){
-                if(showWarning)
-                    window.hWin.HEURIST4.msg.showMsgFlash('Select access permission');
-                return false;
+        if(!visibility && (mode == 0 || mode == 2)){
+            if(showWarning)
+                window.hWin.HEURIST4.msg.showMsgFlash('Select access permission');
+            return false;
         }
         
         var visibility_groups = '';
@@ -356,14 +326,6 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         this.options.currentOwner = ownership;           
         this.options.currentAccess = visibility;
         this.options.currentAccessGroups = visibility_groups;
-
-        let def_user = this.element.find('#sel_def_user').val();
-        let def_pwd = this.element.find('#txt_def_pwd').val();
-        if(!window.hWin.HEURIST4.util.isempty(def_user) && !window.hWin.HEURIST4.util.isempty(def_pwd)){
-
-            this.options.def_user = def_user;
-            this.options.def_pwd = def_pwd;
-        }
         
         return true;
     },
@@ -411,12 +373,25 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             var request = {
                 request_id : window.hWin.HEURIST4.util.random(),
                 ids  : scope.join(','),
-                session: session_id,
-                OwnerUGrpID: this.options.currentOwner,
-                NonOwnerVisibility: this.options.currentAccess,
-                NonOwnerVisibilityGroups: this.options.currentAccessGroups,
-                };
-                
+                session: session_id
+            };
+
+            if(this.options.show_modes){
+                let mode = this.element.find('#div_operation_mode [name="mode"]:checked').val();
+                if(mode == 0 || mode == 1){
+                    request['OwnerUGrpID'] = this.options.currentOwner;
+                }
+                if(mode == 0 || mode == 2){
+                    request['NonOwnerVisibility'] = this.options.currentAccess;
+                    request['NonOwnerVisibilityGroups'] = this.options.currentAccessGroups;
+                }
+            }else{
+
+                request['OwnerUGrpID'] = this.options.currentOwner;
+                request['NonOwnerVisibility'] = this.options.currentAccess;
+                request['NonOwnerVisibilityGroups'] = this.options.currentAccessGroups;
+            }
+
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
