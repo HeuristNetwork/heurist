@@ -47,7 +47,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //expected_terms
             single_value:{name:'Single Value Fields'},
             required_fields:{name:'Required Fields'},
-            nonstandard_fields:{name:'Non-Standard Fields'}
+            nonstandard_fields:{name:'Non-Standard Fields'},
+            invalid_chars:{name:'Invalid Characters'},
+            title_mask:{name:'Title Masks'},
+            relationship_cache:{name:'Relationship Cache'},
+            dateindex:{name:'Date Index'},
+            defgroups:{name:'Definitions Groups'},
+            geo_values:{name:'Geo Values'}
     },
         
     
@@ -300,7 +306,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
             });
             
-            var btn_stop = $('<button class="ui-button-action">Terminate</button>').appendTo(cont_steps);
+            var btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
             btn_stop.button();
             this._on(btn_stop,{click:function(){
                 var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
@@ -567,11 +573,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         if(all_li.length>0){
             all_li.css('color','lightgray');
             $(all_li[0]).css('color','black');
-            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  processing...</span>').appendTo( $(all_li[0]) );
+            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  <span class="percentage">processing...</span></span>').appendTo( $(all_li[0]) );
         }
         
         var that = this;
-        var prevStep = 0;
+        var currStep = 0;
         
         if(t_interval>900){
 
@@ -587,24 +593,56 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         that._hideProgress();
                     }else if(response=='terminate' && is_autohide){
                         that._hideProgress();
-                    }else if(prevStep!=response){
-                        prevStep = response;
-                        if(window.hWin.HEURIST4.util.isNumber(prevStep)){
-                            //set finished step in solid black
-                            prevStep = parseInt(prevStep);
-                            var all_li = div_loading.find('li');
-                            var arr = all_li.slice(0,prevStep+1);
-                            arr.css('color','black');
-                            arr.find('span.processing').remove(); 
-                            //set current step (if exists) with loading icon
-                            if(prevStep+1<all_li.length){
-                                $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  processing...</span>').appendTo( $(all_li[prevStep+1]) );
-                                $(all_li[prevStep+1]).css('color','black');
-                            }
-                            
+                    }else if(response && currStep!=response){
+
+                        currStep = response;
+            
+                        let percentage = 0, newStep = 0;
+                        if(response.indexOf(',')>0){
+                            [newStep, percentage] = response.split(',');
                         }else{
-                            $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
+                            newStep = response;    
                         }
+                        
+                        if(window.hWin.HEURIST4.util.isNumber(newStep)){
+                            //set finished step in solid black
+                            newStep = parseInt(newStep);
+                            var all_li = div_loading.find('li');
+                            if(newStep>0){
+                                var arr = all_li.slice(0,newStep);
+                                arr.css('color','black');
+                                arr.find('span.processing').remove(); //remove rotation icon
+                                //set current step (if exists) with loading icon
+                            }
+                            if(newStep<all_li.length){
+                                    if(percentage>0){
+                                        if(percentage>100) percentage = 100;
+                                        percentage = percentage+'%'; 
+                                    }else{
+                                        percentage = 'processing...'
+                                    }
+                                    var ele = $(all_li[newStep]).find('span.percentage');
+                                    if(ele.length==0){
+                                        percentage = '<span class="percentage">'+percentage+'</span>';
+                                        $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span> '
+                                            +percentage+'</span>')
+                                            .appendTo( $(all_li[newStep]) );
+                                        $(all_li[newStep]).css('color','black');
+                                    }else{
+                                        ele.text(percentage);
+                                    }
+                            }
+                        }else{
+                            let cont = div_loading.find('ol');
+                            var li_ele = cont.find('li:contains("'+newStep+'")');
+                            if(li_ele.length==0){
+                                $('<li>'+newStep+'</li>').appendTo(cont);    
+                            }else if(percentage>0){
+                                
+                            }
+                        }
+                            
+                        
                     }
                 },'text');
             

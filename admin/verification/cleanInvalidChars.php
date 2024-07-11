@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* @TODO remove as soon as listDatabaseErrors will be replaced
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -103,14 +103,14 @@ $is_not_found = true;
                                             
                                 $newText = str_replace($invalidChars ,$replacements,$textDetail['dtl_Value']);
                                 
-                                $res = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+                                $res2 = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
                                             array('dtl_ID'=>intval($textDetail['dtl_ID']), 'dtl_Value'=>$newText) );
                                 
                                 
-                                if ($res>0) {
+                                if ($res2>0) {
                                     print "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
                                 }else{
-                                    print "<tr><td><pre>" . "Error ". res."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                                    print "<tr><td><pre>" . "Error ". res2."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
                                 }
                                 
                                 $is_not_found = false;

@@ -405,14 +405,24 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     foreach($actions as $action){
                         $method = 'check_'.$action;
                         if(method_exists($dbVerify, $method) && is_callable(array($dbVerify, $method))){
-                            $res[$action] = $dbVerify->$method($req_params);
-                            if(DbUtils::setSessionVal($counter)){
-                                //terminated by user
-                                $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');                
+                            
+                            $req_params['progress_report_step'] = $counter;
+                            
+                            $res2 = $dbVerify->$method($req_params);
+                            
+                            if(is_bool($res2) && $res2==false){
                                 $res = false;
                                 break;
-                            };                            
-                            $counter++;
+                            }else{
+                                $counter++;
+                                $res[$action] = $res2;
+                                if(DbUtils::setSessionVal($counter)){
+                                    //terminated by user
+                                    $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');                
+                                    $res = false;
+                                    break;
+                                }
+                            }
                         }    
                     }
                     

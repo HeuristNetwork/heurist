@@ -140,8 +140,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
     
     return array("terms"=>$dtysWithInvalidTerms, 
                  "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, 
-                 "rt_contraints"=>$dtysWithInvalidRectypeConstraint,
-                 "rt_defvalues"=>$rtysWithInvalidDefaultValues);  //wrong default values
+                 "rt_contraints"=>$dtysWithInvalidRectypeConstraint);  //wrong default values
 }
 
 //

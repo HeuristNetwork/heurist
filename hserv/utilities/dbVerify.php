@@ -52,6 +52,8 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
+require_once dirname(__FILE__).'/../utilities/Temporal.php';
+require_once dirname(__FILE__)."/../utilities/geo/mapCoordinates.php";
 
 class DbVerify {
 
@@ -67,7 +69,85 @@ class DbVerify {
        $this->system = $system;
        $this->mysqli = $system->get_mysqli();
     }    
+
     
+    //
+    //
+    //
+    private function _printList($title, $resList, $marker){
+        
+          $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+          $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+
+            $resMsg = <<<HEADER
+            <div>
+                <h3>$title</h3>
+                <span>
+                    <a target=_new href="url_all">(show results as search)</a>
+                    <a target=_new href="#selected_link" data-show-selected="$marker">(show selected as search)</a>
+                </span>
+            </div>
+            <table role="presentation">
+                <tr>
+                    <td colspan="7">
+                        <label><input type="checkbox" data-mark-all="$marker">Mark all</label>
+                    </td>
+                </tr>
+            HEADER;
+
+            $ids = array();
+            $rec_id = null;
+            $idx = 0;
+            
+            while ($row = is_array($resList)?@$resList[$idx]:$resList->fetch_assoc()){
+            //foreach ($resList as $row) {
+                $idx++;
+                if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                    
+                    $rec_id = $row['rec_ID'];
+                    
+                    array_push($ids, $rec_id);
+                    
+                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$rec_id;
+                    $rec_title = strip_tags($row['rec_Title']);
+                    if(@$row['wkt']){
+                        $dtl_value = $row['wkt'];
+                    }else{
+                        $dtl_value = strip_tags($row['dtl_Value']);    
+                    }
+                    
+                    
+                    $resMsg = $resMsg . <<<EOT
+                    <tr>
+                        <td><input type=checkbox name="$marker" value={$rec_id}></td>
+                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                {$rec_id} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                            </a></td>
+                        <td class="truncate" style="max-width:400px">$rec_title</td>
+                    EOT;
+                }else{
+                    $resMsg .= '<tr><td colspan="4"></td>';
+                }
+                $resMsg = $resMsg . <<<EOT
+                        <td>{$row['dty_ID']}</td>
+                        <td width="150px" style="max-width:150px" class="truncate">{$row['dty_Name']}</td>
+                        <td style="max-width:400px" class="truncate">{$dtl_value}</td></tr>
+                        EOT;
+            }//foreach
+            $resMsg .= '</table>';
+
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids);
+            $resMsg = str_replace('href="url_all"','href="'.$url_all.'"',$resMsg);
+            
+            if(!is_array($resList)){
+                $resList->close();
+            }
+            
+            return $resMsg;
+    }    
+
     /**
     * Check that records have valid Owner and Added by User references
     * 
@@ -480,19 +560,19 @@ class DbVerify {
             }
         }
 
-        $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title, a.rec_RecTypeID, dtl_Value
+        $res = $mysqli->query('select a.rec_ID, dty_ID, dty_Name, a.rec_Title, a.rec_RecTypeID, dtl_Value
             from recDetails
             left join defDetailTypes on dty_ID = dtl_DetailTypeID
             left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
             left join Records b on b.rec_ID = dtl_Value and b.rec_FlagTemporary!=1
             where dty_Type = "resource"
             and a.rec_ID is not null
-        and b.rec_ID is null');
+            and b.rec_ID is null ORDER BY a.rec_ID');
         $bibs = array();
         $ids = array();
         while ($row = $res->fetch_assoc()) {
             array_push($bibs, $row);
-            $ids[$row['dtl_RecID']] = 1;
+            //$ids[$row['rec_ID']] = 1;
         }
         $res->close();
         
@@ -503,54 +583,12 @@ class DbVerify {
                 $resMsg .= "<div>$wasdeleted invalid pointer(s) were removed from database</div>";
             }
         }
-        
         else
         {
             $resStatus = false;
-            
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            
-            $resMsg .= <<<HEADER
-            <div>
-                <h3>Records with record pointers to non-existent records</h3>
-                <div>To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button><br><br></div>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="6">
-                        <label><input type="checkbox" data-mark-all="recCB">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
+            $resMsg .= $this->_printList('Records record pointers to non-existent records', $bibs, 'recCB0');
 
-                $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-                $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            
-                foreach ($bibs as $row) {
-
-                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
-                    $rec_title = strip_tags($row['rec_Title']);
-                    
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB" value={$row['dtl_RecID']}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title</td>
-                        <td>{$row['dtl_Value']}</td>
-                        <td>{$row['dty_Name']}</td>
-                    </tr>
-                    EOT;
-                    
-                }//foreach
-                $resMsg .= "</table>\n";
+            $resMsg .= '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
         }
         
         return array('status'=>$resStatus,'message'=>$resMsg);        
@@ -580,6 +618,7 @@ class DbVerify {
         $bibs = array();
         while ($row = $res->fetch_assoc()){
             $bibs[$row['dtl_RecID']] = $row;
+            //$row['dtl_Value'] = "{$row['rec_ID']} ({$row['rty_Name']}) - $rec_title"
         }
         $res->close();
         
@@ -948,10 +987,10 @@ HEADER;
         $total_count_rows = 0;
 
         //find all fields with empty values
-        $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_RecTypeID, a.rec_Title, dty_Name, dty_Type
+        $res = $mysqli->query('select a.rec_ID, a.rec_RecTypeID, a.rec_Title, dty_ID, dty_Name
             from recDetails, defDetailTypes, Records a
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
-        and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
+        and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null)) ORDER BY a.rec_ID');
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
@@ -965,53 +1004,10 @@ HEADER;
         if($total_count_rows>0)
         {
             $resStatus = false;
-            $resMsg .= <<<'HEADER'
-            <div>
-                <h3>Records with empty fields</h3>
-                <div>To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button><br><br></div>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB5">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="5">
-                        <label><input type="checkbox" data-mark-all="recCB5">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
+            
+            $resMsg .= $this->_printList('Records with empty fields', $res, 'recCB5');
 
-            $ids = array();
-            
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            
-            while ($row = $res->fetch_assoc()){
-  
-                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
-                    $rec_title = strip_tags($row['rec_Title']);
-                    
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB5" value={$row['dtl_RecID']}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title</td>
-                        <td>{$row['dty_Name']}</td>
-                    </tr>
-                    EOT;
-                    $ids[$row['dtl_RecID']] = 1; //to avoid duplications
-            } //while            
-            $res->close();
-            $resMsg .= '</table><br>';
-
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
-            
+            $resMsg .= '<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
@@ -1051,14 +1047,14 @@ HEADER;
         $total_count_rows = 0;
 
         //find non existing term values
-        $res = $mysqli->query('SELECT dtl_ID, dtl_RecID, dty_Name, a.rec_RecTypeID, a.rec_Title
+        $res = $mysqli->query('SELECT a.rec_ID, a.rec_RecTypeID, a.rec_Title, dty_ID, dty_Name
             FROM recDetails
             left join defDetailTypes on dty_ID = dtl_DetailTypeID
             left join Records a on a.rec_ID = dtl_RecID
             left join defTerms b on b.trm_ID = dtl_Value
             where (dty_Type = "enum" or dty_Type = "relmarker") and dtl_Value is not null
             and a.rec_ID is not null
-        and b.trm_ID is null');
+            and b.trm_ID is null ORDER BY a.rec_ID');
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
@@ -1072,53 +1068,8 @@ HEADER;
         if($total_count_rows>0)
         {
             $resStatus = false;
-            $resMsg .= <<<'HEADER'
-            <div>
-                <h3>Records with non-existent term values</h3>
-                <div>To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button><br><br></div>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB6">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="5">
-                        <label><input type="checkbox" data-mark-all="recCB6">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
-
-            $ids = array();
-            
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            
-            while ($row = $res->fetch_assoc()){
-  
-                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
-                    $rec_title = strip_tags($row['rec_Title']);
-                    
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB6" value={$row['dtl_RecID']}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title</td>
-                        <td>{$row['dty_Name']}</td>
-                    </tr>
-                    EOT;
-                    $ids[$row['dtl_RecID']] = 1;
-            } //while  
-            $res->close();          
-            $resMsg .= '</table><br>';
-
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
-            
+            $resMsg .= $this->_printList('Records with non-existent term values', $res, 'recCB6');
+            $resMsg .= '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
@@ -1139,13 +1090,13 @@ HEADER;
         $total_count_rows = 0;
 
         //find repetative single value fields
-        $res = $mysqli->query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
+        $res = $mysqli->query('select rec_ID, rec_RecTypeID, dtl_DetailTypeID as dty_ID, rst_DisplayName as dty_Name, rec_Title, count(*)
             from recDetails, Records, defRecStructure
             where rec_ID = dtl_RecID  and rec_FlagTemporary!=1 
             and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
             and rst_MaxValues=1
             GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
-        HAVING COUNT(*) > 1');
+            HAVING COUNT(*) > 1 ORDER BY rec_ID');
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
@@ -1154,59 +1105,8 @@ HEADER;
         }else
         {
             $resStatus = false;
-            $resMsg .= <<<'HEADER'
-            <div>
-                <h3>Single value fields with multiple values</h3>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB7">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="5">
-                        <label><input type="checkbox" data-mark-all="recCB7">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
-
-            $ids = array();
             
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            $rec_id = null;
-            
-            while ($row = $res->fetch_assoc()){
-  
-                    if($rec_id!=$row['dtl_RecID']){
-                    
-                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
-                        $rec_title = strip_tags($row['rec_Title']);
-                    
-                        $resMsg .= <<<EOT
-                        <tr>
-                            <td><input type=checkbox name="recCB7" value={$row['dtl_RecID']}></td>
-                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                    {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                                </a></td>
-                            <td class="truncate" style="max-width:400px">$rec_title</td>
-                            <td>{$row['rst_DisplayName']}</td>
-                        </tr>
-                        EOT;
-                        $rec_id = $row['dtl_RecID'];
-                        $ids[$row['dtl_RecID']] = 1;
-                    }else{
-                        $resMsg .= '<tr><td colspan="4"></td><td>'.$row['rst_DisplayName'].'</td></tr>';
-                    }
-            } //while  
-            $res->close();          
-            $resMsg .= '</table><br>';
-
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
-            
+            $resMsg .= $this->_printList('Single value fields with multiple values', $res, 'recCB7');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
@@ -1229,12 +1129,11 @@ HEADER;
 
         //find missed required fields
         $res = $mysqli->query(
-            "select rec_ID, rec_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type, rty_Name
+            "select rec_ID, rec_RecTypeID, rec_Title, rst_DetailTypeID as dtyID, rst_DisplayName as dty_Name, dtl_Value 
             from Records
             left join defRecStructure on rst_RecTypeID = rec_RecTypeID
             left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
             left join defDetailTypes on dty_ID = rst_DetailTypeID
-            left join defRecTypes on rty_ID = rec_RecTypeID
             where rec_FlagTemporary!=1 and rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
             and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator' and dty_Type!='relmarker'
         order by rec_ID");
@@ -1246,59 +1145,7 @@ HEADER;
         }else
         {
             $resStatus = false;
-            $resMsg .= <<<'HEADER'
-            <div>
-                <h3>Records with missing or empty required values</h3>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB8">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="5">
-                        <label><input type="checkbox" data-mark-all="recCB8">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
-
-            $ids = array();
-            
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            $rec_id = null;
-            
-            while ($row = $res->fetch_assoc()){
-  
-                    if($rec_id!=$row['rec_ID']){
-                    
-                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['rec_ID'];
-                        $rec_title = strip_tags($row['rec_Title']);
-                    
-                        $resMsg .= <<<EOT
-                        <tr>
-                            <td><input type=checkbox name="recCB8" value={$row['rec_ID']}></td>
-                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                    {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                                </a></td>
-                            <td class="truncate" style="max-width:400px">$rec_title</td>
-                            <td>{$row['rst_DisplayName']}</td>
-                        </tr>
-                        EOT;
-                        $rec_id = $row['rec_ID'];
-                        $ids[$row['rec_ID']] = 1;
-                    }else{
-                        $resMsg .= '<tr><td colspan="4"></td><td>'.$row['rst_DisplayName'].'</td></tr>';
-                    }
-            } //while  
-            $res->close();          
-            $resMsg .= '</table><br>';
-
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
-            
+            $resMsg .= $this->_printList('Records with missing or empty required values', $res, 'recCB8');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }   
@@ -1319,22 +1166,21 @@ HEADER;
         $total_count_rows = 0;
 
         //find non standard fields
-        $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title, rty_Name
+        $query = 'select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
         from Records
         left join recDetails on rec_ID = dtl_RecID
-        left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
-        left join defRecTypes on rty_ID = rec_RecTypeID
-        where rec_FlagTemporary!=1 AND rst_ID is null";            
+        left join defDetailTypes on dtl_DetailTypeID = dty_ID
+        where rec_FlagTemporary!=1 AND rst_ID is null';
 
         if($this->system->defineConstant('DT_PARENT_ENTITY')){
-            $query .= " AND dty_ID != ".DT_PARENT_ENTITY;
+            $query .= " AND dtl_DetailTypeID != ".DT_PARENT_ENTITY;
         }    
         if($this->system->defineConstant('DT_WORKFLOW_STAGE')){
-            $query .= " AND dty_ID != ".DT_WORKFLOW_STAGE;
+            $query .= " AND dtl_DetailTypeID != ".DT_WORKFLOW_STAGE;
         }
         if($this->system->defineConstant('DT_ORIGINAL_RECORD_ID')){
-            $query .= " AND dty_ID != ".DT_ORIGINAL_RECORD_ID;
+            $query .= " AND dtl_DetailTypeID != ".DT_ORIGINAL_RECORD_ID;
         }
         
         $query .= ' order by rec_ID';
@@ -1348,65 +1194,637 @@ HEADER;
         }else
         {
             $resStatus = false;
-            $resMsg .= <<<'HEADER'
-            <div>
-                <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB9">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="7">
-                        <label><input type="checkbox" data-mark-all="recCB9">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
-
-            $ids = array();
-            
-            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-            $rec_id = null;
-            
-            while ($row = $res->fetch_assoc()){
-  
-                    $fld_value = substr(htmlspecialchars($row['dtl_Value']),0,50);
-                    
-                    if($rec_id!=$row['rec_ID']){
-                    
-                        $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                        $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['rec_ID'];
-                        $rec_title = strip_tags($row['rec_Title']);
-                        
-                        $resMsg .= <<<EOT
-                        <tr>
-                            <td><input type=checkbox name="recCB9" value={$row['rec_ID']}></td>
-                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                    {$row['rec_ID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                                </a></td>
-                            <td class="truncate" style="max-width:400px">$rec_title</td>
-                        EOT;
-                        $rec_id = $row['rec_ID'];
-                        $ids[$row['rec_ID']] = 1;
-                    }else{
-                        $resMsg .= '<tr><td colspan="4">&nbsp;</td>';
-                    }
-                    $resMsg .= "<td>{$row['dty_ID']}</td><td>{$row['dty_Name']}</td><td>$fld_value</td></tr>";
-            } //while  
-            
-            $res->close();          
-            $resMsg .= '</table><br>';
-
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($ids));
-            $resMsg = str_replace('href="$url_all"','href="'.$url_all.'"',$resMsg);
-            
+            $resMsg .= $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', $res, 'recCB9');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
     
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_invalid_chars($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+
+        $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
+        $replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
+        $charlist = implode('',$invalidChars);
+        
+        $now = date('Y-m-d H:i:s');
+        $prevInvalidRecId = 0;
+        $is_finished = true;
+        $is_error = false;
+        $offset = 0;
+        $cnt = 0;
+        $cnt2 = 0;
+        
+        $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
+        
+        $keep_autocommit = mysql__begin_transaction($mysqli);        
+        
+        while(true){
+        
+            $is_finished = true;
+
+            $res = $mysqli->query('SELECT dtl_ID,dtl_RecID,dtl_Value,dty_Name '.
+            'FROM recDetails, defDetailTypes '.
+            'WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') '
+            .' ORDER BY dtl_RecID  limit 10000 offset '.$offset);
+            if($res){
+                while ($row = $res->fetch_assoc()) {
+                    
+                    $is_finished = false;
+                    
+                    $text = $row['dtl_Value']; //.chr(17);
+                    /*
+                    $is_found = false;
+                    foreach ($invalidChars as $charCode){
+                        if (strpos($text, $charCode)!==false) {
+                            $is_found = true;
+                            break;
+                        }
+                    }
+                    */
+                    
+                    $is_found = (strpbrk($text, $charlist)!==false);
+            
+                    if ($is_found)
+                    {
+                        $resStatus = false;
+                        
+                        if ($prevInvalidRecId < $row['dtl_RecID']) {
+                            
+                            $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
+                            $resMsg .= '<tr><td><a target=_blank href="'.$url_rec. '"> ' . $row['dtl_RecID']. "</a></td></tr>\n";
+                            $prevInvalidRecId = $row['dtl_RecID'];
+                            
+                            //update record header
+                            mysql__insertupdate($mysqli, 'Records', 'rec_', 
+                                    array('rec_ID'=>intval($row['dtl_RecID']), 'rec_Modified'=>$now) );
+                            
+                            $cnt++;
+                        }
+                        $resMsg .= "<tr><td> field: ".htmlspecialchars($row['dty_Name']). "</td></tr>\n";
+                                    
+                        $newText = str_replace($invalidChars ,$replacements, $text);
+                        
+                        $res2 = mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+                                    array('dtl_ID'=>intval($row['dtl_ID']), 'dtl_Value'=>$newText) );
+                        
+                        
+                        if ($res>0) {
+                            //$resMsg .= "<tr><td><pre>" . "Updated to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
+                        }else{
+                            $is_error = true;
+                            $resMsg .= "<tr><td>Error ". res2. " while updating to : ".htmlspecialchars($newText) . "</td></tr>\n";
+                            break 2;
+                        }
+                        
+                        $cnt2++;
+                        
+                    }
+                }//while
+            }
+        
+            if($is_finished){
+                break;
+            }
+            
+            $offset = $offset + 10000;
+            
+            if(@$params['progress_report_step']>=0){
+                $percentage = intval($offset*100/$total_count);
+                if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
+                    //terminated by user
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
+                    $mysqli->rollback();                
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    return false;
+                }
+            }
+            
+        }//limit by 10000
+  
+  
+        if($resStatus){
+            
+                $resMsg = '<div><h3 class="res-valid">OK: All records have valid characters in freetext and blocktext fields.</h3></div>';
+          
+        }else{
+                if($is_error){
+                    $mysqli->rollback();    
+                }else{
+                    $mysqli->commit();      
+                }
+            
+                $resMsg = '<div><h3>'.$cnt.' Records with invalid characters in '.$cnt2
+                    .' freetext and blocktext fields</h3></div><table role="presentation">'
+                    .$resMsg.'</table>';
+        }
+        
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return array('status'=>$resStatus,'message'=>$resMsg);        
+    }    
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_title_mask($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+        $rectypes = mysql__select_assoc($mysqli, 'select rty_ID, rty_Name, rty_TitleMask from defRecTypes order by rty_ID');
+        //check all rectypes
+        foreach ($rectypes as $rty_ID => $rectype) {
+            
+            $mask = $rectype['rty_TitleMask'];
+            
+            if($mask==null || trim($mask)==""){
+                $res = array();
+                $res[0] = "Title mask is not defined";
+            }else{
+                //get human readable
+                $res = TitleMask::execute($mask, $rty_ID, 2, null, _ERR_REP_MSG);
+            }
+                        
+            if(is_array($res)){ //error
+                $resStatus = false;
+                $resMsg .= "<div style=\"padding:15px 0px 10px 4px;\"><b> $rty_ID : <i>".htmlspecialchars($rectype['rty_Name'])."</i></b> <br> </div>";
+                $resMsg .= '<div class="maskCell">Mask: <i>'.htmlspecialchars($mask).'</i></div>';
+                $resMsg .= '<div class="errorCell" style="padding:10px 40px"><b>'.(@$res['message']?$res['message']:$res[0]).'</b></div>';
+            }
+                        
+        }//for
+        
+        if($resStatus){
+            $resMsg = '<div><h3 class="res-valid">OK: All record type have valid title masks.</h3></div>';
+          
+        }else{
+            $resMsg = '<div><h3>Record types with invalid title masks</h3></div>'
+                    .$resMsg;
+        }
+
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    } 
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_relationship_cache($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+
+        if(is_array($params) && @$params['fix']==1){
+
+            if(recreateRecLinks($this->system, true)){
+                $resMsg = '<div><h3 class="res-valid">Relationship cache has been successfully recreated</h3></div>';
+            }else{
+                $response = $this->system->getError();    
+                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resStatus = false;
+            }
+        }
+
+        if($resStatus){
+
+            $is_table_exist = hasTable($mysqli, 'recLinks');    
+            
+            if($is_table_exist){
+
+                if(!defined('RT_RELATION')) $this->system->defineConstant('RT_RELATION');
+
+                //count of relations 
+                $query = 'SELECT count(rec_ID) FROM Records '
+                        .'where rec_RecTypeID='.RT_RELATION
+                        .' and rec_FlagTemporary=0';
+                $cnt_relationships = intval(mysql__select_value($mysqli, $query));
+
+                //count of missed relations in recLinks                    
+                $query = 'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
+                        .'where rec_RecTypeID='.RT_RELATION
+                        .' and rec_FlagTemporary=0 and rl_RelationID is null';
+                $missed_relationships = intval(mysql__select_value($mysqli, $query));
+                
+
+                //count of links
+                $query = 'SELECT count(dtl_ID) FROM Records, recDetails, defDetailTypes '
+                        .' where rec_ID=dtl_RecID and dtl_DetailTypeID=dty_ID and dty_Type="resource"'
+                        .' and rec_FlagTemporary=0';
+                $cnt_links = intval(mysql__select_value($mysqli, $query));
+
+                //count of missed links
+                $query = 'SELECT count(dtl_ID) FROM Records, defDetailTypes, recDetails left join recLinks on dtl_ID=rl_DetailID'
+                        .' where rec_RecTypeID!='.RT_RELATION
+                        .' and rec_ID=dtl_RecID and dtl_DetailTypeID=dty_ID and dty_Type="resource"'
+                        .' and rec_FlagTemporary=0 and rl_DetailID is null';
+                $missed_links = intval(mysql__select_value($mysqli, $query));
+                    
+                    
+                $resMsg .= '<div style="padding:5px">Total count of relationships:&nbsp;<b>'.$cnt_relationships.'</b>'
+                        .($missed_relationships>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All relationships are in cache. Cache is OK.').'</div>';
+                
+                if($missed_relationships>0){
+                    $resMsg .='<div style="padding:5px;color:red">Missed relationships in cache:&nbsp;<b>'.$missed_relationships.'</b></div>';
+                }
+                
+                $resMsg .= '<br><div style="padding:5px">Total count of links/resources:&nbsp;<b>'.$cnt_links.'</b>'
+                        .($missed_links>0?'':'&nbsp;&nbsp;&nbsp;&nbsp;All links are in cache. Cache is OK.').'</div>';
+
+                if($missed_links>0){
+                    $resMsg .= '<div style="padding:5px;color:red">Missed links in cache:&nbsp;<b>'.$missed_links.'</b></div>';
+                }
+
+            }else{
+                $resMsg .= '<div><h3 class="error">Relationship cache is not found</h3></div>';        
+            }
+
+            $cache_missed = ((!$is_table_exist) || $missed_relationships>0 || $missed_links>0);
+
+            if($cache_missed){
+                $resStatus = false;
+                $resMsg .= '<div>Recreate Relationship cache to restore missing entriese:</div>';        
+            }else{
+                $resMsg .= '<div><h3 class="res-valid">OK: Relationship cache is valid</h3></div>';        
+            }
+            $resMsg .= '<div><button data-fix="relationship_cache">Recreates Relationship Cache</button></div>';        
+        }    
+
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    } 
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_dateindex($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        if(is_array($params) && @$params['fix']==1){
+
+            $rep = recreateRecDetailsDateIndex($this->system, true, false, 0); //see utils_db
+            
+            if(is_bool($rep) && $rep==false){
+                $response = $this->system->getError();    
+                $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
+                $resStatus = false;
+            }else{
+                $resMsg = '<div><h3 class="res-valid">Record Details Date Index has been successfully recreated</h3></div>';
+                if(is_array($rep)){
+                    $resMsg .= implode('<br>', $rep);
+                }
+            }
+        }
+
+        if($resStatus){
+            
+            $mysqli = $this->mysqli;
+
+            //count of date fields
+            $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
+            $fld_dates = mysql__select_list2($mysqli, $query);
+            $fld_dates = implode(',',prepareIds($fld_dates));
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
+            $cnt_dates = intval(mysql__select_value($mysqli, $query));
+
+            $query = 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID in ('.$fld_dates.') AND dtl_Value LIKE "%estMinDate%"';
+            $cnt_fuzzy_dates = mysql__select_value($mysqli, $query);
+
+            $resMsg .= '<div style="padding:5px">Total count of date fields:&nbsp;<b>'.$cnt_dates.'</b></div>';
+            $resMsg .= '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.intval($cnt_fuzzy_dates).'</b></div>';
+            
+
+            $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
+            
+            if($is_table_exist){
+        
+                //count of index 
+                $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex';
+                $cnt_index = intval(mysql__select_value($mysqli, $query));
+
+                $query = 'SELECT count(rdi_DetailID) FROM recDetailsDateIndex WHERE rdi_estMinDate=0 AND rdi_estMaxDate=0';
+                $cnt_empty = intval(mysql__select_value($mysqli, $query));
+
+                if($cnt_dates==$cnt_index && $cnt_empty==0){
+                    $resMsg .= '<div style="padding:5px">'
+                        .'&nbsp;&nbsp;&nbsp;&nbsp;All date entries are in index. Index values are OK</div>';
+                }
+                
+                if($cnt_dates > $cnt_index || $cnt_empty>0){
+                    if($cnt_dates > $cnt_index){
+                        $resMsg .= '<div style="padding:5px;color:red">Missed entries in index:&nbsp;<b>'.($cnt_dates - $cnt_index).'</b></div>';
+                    }
+                    if($cnt_empty > 0){
+                        $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b></div>';
+                    }
+
+                    $resMsg .= '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';        
+                    
+                    $resStatus = false; //index is outdated 
+                }else{
+                    $resMsg .= '<div><h3 class="res-valid">OK: Record Details Date Index is valid</h3></div>';        
+                }
+
+            }else{
+                    $resStatus = false;
+                    $resMsg .= '<div><h3 class="error">Record Details Date Index table does not exist</h3></div>';        
+            }            
+            
+            $resMsg .= '<div><button data-fix="dateindex">Recreate Date Index</button></div>';        
+        }    
+
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    } 
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_defgroups($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+
+        // record types =========================
+        $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
+        if($cnt>0){
+            
+            $resStatus = false;
+            $resMsg .= '<div><h3 class="error">Found '.$cnt.' record types that are not belong any group</h3></div>';
+            
+            //find trash group
+            $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
+            if($trash_id>0){
+        
+                $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.intval($trash_id).' WHERE rtg_ID is null');        
+                
+                $cnt2 = $mysqli->affected_rows;
+                
+                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
+            }else{
+                $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';                    
+            }
+        }else{
+            $resMsg .= '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';        
+        }
+
+        // fields types =========================
+        $cnt = intval(mysql__select_value($mysqli, 'select count(dty_ID) from defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID WHERE dtg_ID is null'));
+        if($cnt>0){
+            
+            $resStatus = false;
+            $resMsg .= '<div><h3 class="error">Found '.$cnt.' base field types that are not belong any group</h3></div>';
+            
+            //find trash group
+            $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
+            if($trash_id>0){
+        
+                $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.intval($trash_id).' WHERE dtg_ID is null');        
+                
+                $cnt2 = $mysqli->affected_rows;
+                
+                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
+            }else{
+                $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';                    
+            }
+        }else{
+            $resMsg .= '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';        
+        }
+
+        // vocabularies =========================
+        $cnt = intval(mysql__select_value($mysqli, 'select count(trm_ID) from defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID WHERE trm_ParentTermID is null and vcg_ID is null'));
+        if($cnt>0){
+            
+            $resStatus = false;
+            $resMsg .= '<div><h3 class="error">Found '.$cnt.' vocabularies that are not belong any group</h3></div>';
+            
+            //find trash group
+            $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
+            if($trash_id>0){
+                $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.intval($trash_id).' WHERE trm_ParentTermID is null and vcg_ID is null');        
+                
+                $cnt2 = $mysqli->affected_rows;
+                
+                $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
+            }else{
+                $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';                    
+            }
+        }else{
+            $resMsg .= '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';        
+        }
+    
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    } 
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_geo_values($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+        
+        $query = 'SELECT dtl_ID, rec_ID, rec_Title, rec_RecTypeID, dtl_Value, dtl_Geo, ST_asWKT(dtl_Geo) AS wkt, dty_Name, rty_Name  
+                  FROM Records 
+                  LEFT JOIN recDetails ON rec_ID = dtl_RecID 
+                  LEFT JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID 
+                  LEFT JOIN defRecTypes ON rty_ID = rec_RecTypeID 
+                  WHERE dty_Type = "geo"';
+
+        $res = $mysqli->query($query);
+
+        // missing dtl_Geo value or values missing geoType
+        $bibs1 = array();
+        //$ids1 = array();
+        // values that are out of bounds (out of bounds abs(lat)>90 abs(lng)>180)
+        $bibs2 = array();
+        //$ids2 = array();
+        $ids2_lng = array(); //with wrong longitudes - because wrong digitizing in continual word
+        // invalid coordinates 
+        $bibs3 = array();
+        //$ids3 = array();
+        
+        $need_correct_long = (@$params['fix']=="1");
+        $geojson_adapter = null;
+        $wkt_adapter = null;
+        $update_stmt = null;
+        $keep_autocommit = null;
+        if($need_correct_long){
+            if(method_exists('geoPHP','getAdapter')){
+                $wkt_adapter = geoPHP::getAdapter('wkt');
+                $geojson_adapter = geoPHP::getAdapter('json');
+            }else{
+                $wkt_adapter = new WKT();
+                $geojson_adapter = new GeoJSON();
+            }
+            $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
+            $keep_autocommit = mysql__begin_transaction($mysqli);    
+        }
+        $isOk = true;
+
+        while ($row = $res->fetch_assoc()){
+
+            if($row['dtl_Geo'] == null){ // Missing geo data
+                array_push($bibs1, $row);
+                array_push($ids1, $row['rec_ID']);
+                continue;
+            }
+
+            $dtl_Value = $row['dtl_Value'];
+
+            $geoType = super_trim(substr($dtl_Value, 0, 2));
+            $hasGeoType = false;
+
+            if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
+                $geoValue = super_trim(substr($dtl_Value, 2));
+                $hasGeoType = true;
+            }else{
+                $geoValue = super_trim($dtl_Value);
+                if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
+                    $geoType = "m";
+                    $hasGeoType = true;
+                }else if(strpos($geoValue,'POINT')!==false){
+                    $geoType = "p";
+                    $hasGeoType = true;
+                }else if(strpos($geoValue,'LINESTRING')!==false){
+                    $geoType = "l";
+                    $hasGeoType = true;
+                }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
+                    $geoType = "pl";
+                    $hasGeoType = true;
+                }
+            }
+
+            if(!$hasGeoType){ // invalid geo type
+                array_push($bibs1, $row);
+                array_push($ids1, $row['rec_ID']);
+                continue;
+            }
+
+            try{
+
+                $geom = geoPHP::load($row['wkt'], 'wkt');
+                if($geom!=null && !$geom->isEmpty()){ // Check that long (x) < 180 AND lat (y) < 90
+
+                    $bbox = $geom->getBBox();
+                    $within_bounds = (abs($bbox['minx'])<=180) && (abs($bbox['miny'])<=90)
+                                  && (abs($bbox['maxx'])<=180) && (abs($bbox['maxy'])<=90);
+
+                    if (!$within_bounds){
+                        
+                        $is_wrong_long = abs($bbox['minx'])>180 && abs($bbox['maxx'])>180 
+                                            && abs($bbox['minx'])<1080 && abs($bbox['maxx'])<1080;
+                        
+                        if( $is_wrong_long && $need_correct_long){
+                            
+                                $json = $geojson_adapter->write($geom, true);
+                                $json = geo_CorrectLng_JSON($json);
+                                $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
+                                list($r_type, $r_value) = prepareGeoValue($mysqli, $r_value);
+                                if($r_type===false){
+                                    $isOk = false;
+                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. '.$r_value.'</div>';
+                                    $mysqli->rollback();
+                                    break;
+                                }
+                                
+                                $update_stmt->bind_param('si', $r_value, $row['dtl_ID']);
+                                $res33 = $update_stmt->execute();
+                                if(! $res33 )
+                                {
+                                    $isOk = false;
+                                    $resMsg .=  '<div class="error" style="color:red">Record #'.$row['rec_ID'].'. Cannot replace geo in record details. SQL error: '.$mysqli->error.'</div>';
+                                    $mysqli->rollback();
+                                    break;
+                                }
+                        }else{
+                            array_push($bibs2, $row);
+                            //array_push($ids2, $row['rec_ID']);
+                            if( $is_wrong_long ){
+                                array_push($ids2_lng, $row['rec_ID']);    
+                            }
+                        }
+                        
+                        continue;
+                    }
+                }else{ // is invalid
+                    array_push($bibs3, $row);
+                    //array_push($ids3, $row['rec_ID']);
+                    continue;
+                }
+            }catch(Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
+                array_push($bibs3, $row);
+                //array_push($ids3, $row['rec_ID']);
+                continue;
+            }
+        } //while
+        if($res) $res->close();
+        
+        if($isOk){
+            $mysqli->commit();  
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            
+        // Invalid wkt values
+        if(count($bibs3) == 0){
+            $resMsg .=  '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>';
+        }else{
+            $resStatus = false;
+            $resMsg .= $this->_printList('Records with invalid geospatial values', $bibs3, 'recCB10');
+        }
+
+        // Missing wkt or general invalid value
+        if(count($bibs1) == 0){
+            $resMsg .=  '<h3 class="res-valid">OK: No missing geospatial values</h3><br>';
+        }else{
+            $resStatus = false;
+            $resMsg .= $this->_printList('Records with missing geospatial values', $bibs1, 'recCB11');
+        }
+
+        // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
+        if(count($bibs2) == 0){
+            $resMsg .= '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>';
+        }else{
+            $resStatus = false;
+            $resMsg .= $this->_printList('Records with geospatial data that is out of bounds', $bibs2, 'recCB12');
+
+            if(count($ids2_lng)>0){
+                $resMsg .= '<div>There are '.count($ids2_lng)
+                        .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
+                        .' <button data-fix="geo_values">Fix longitudes</button></div>';
+            }
+        }            
+    
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    } 
+             
 }
 
 
