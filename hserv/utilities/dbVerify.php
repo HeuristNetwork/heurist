@@ -74,14 +74,17 @@ class DbVerify {
     //
     //
     //
-    private function _printList($title, $resList, $marker){
+    private function _printList($title, $sub_title, $resList, $marker){
         
           $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
           $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+          
+          if(!$sub_title) $sub_title = '';
 
             $resMsg = <<<HEADER
             <div>
                 <h3>$title</h3>
+                $sub_title
                 <span>
                     <a target=_new href="url_all">(show results as search)</a>
                     <a target=_new href="#selected_link" data-show-selected="$marker">(show selected as search)</a>
@@ -586,9 +589,9 @@ class DbVerify {
         else
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records record pointers to non-existent records', $bibs, 'recCB0');
+            $fixMsg = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
+            $resMsg .= $this->_printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
 
-            $resMsg .= '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
         }
         
         return array('status'=>$resStatus,'message'=>$resMsg);        
@@ -1005,9 +1008,9 @@ HEADER;
         {
             $resStatus = false;
             
-            $resMsg .= $this->_printList('Records with empty fields', $res, 'recCB5');
+            $fixMsg = '<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
+            $resMsg .= $this->_printList('Records with empty fields', $fixMsg, $res, 'recCB5');
 
-            $resMsg .= '<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
@@ -1068,8 +1071,8 @@ HEADER;
         if($total_count_rows>0)
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with non-existent term values', $res, 'recCB6');
-            $resMsg .= '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
+            $fixMsg  = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
+            $resMsg .= $this->_printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
@@ -1106,7 +1109,7 @@ HEADER;
         {
             $resStatus = false;
             
-            $resMsg .= $this->_printList('Single value fields with multiple values', $res, 'recCB7');
+            $resMsg .= $this->_printList('Single value fields with multiple values', null, $res, 'recCB7');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
@@ -1145,7 +1148,7 @@ HEADER;
         }else
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with missing or empty required values', $res, 'recCB8');
+            $resMsg .= $this->_printList('Records with missing or empty required values', null, $res, 'recCB8');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }   
@@ -1194,7 +1197,7 @@ HEADER;
         }else
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', $res, 'recCB9');
+            $resMsg .= $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
         }   
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
@@ -1309,13 +1312,11 @@ HEADER;
                 }
             }
             
-        }//limit by 10000
+        }//while limit by 10000
   
   
         if($resStatus){
-            
                 $resMsg = '<div><h3 class="res-valid">OK: All records have valid characters in freetext and blocktext fields.</h3></div>';
-          
         }else{
                 if($is_error){
                     $mysqli->rollback();    
@@ -1797,7 +1798,7 @@ HEADER;
             $resMsg .=  '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>';
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with invalid geospatial values', $bibs3, 'recCB10');
+            $resMsg .= $this->_printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
         }
 
         // Missing wkt or general invalid value
@@ -1805,7 +1806,7 @@ HEADER;
             $resMsg .=  '<h3 class="res-valid">OK: No missing geospatial values</h3><br>';
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with missing geospatial values', $bibs1, 'recCB11');
+            $resMsg .= $this->_printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
         }
 
         // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
@@ -1813,17 +1814,284 @@ HEADER;
             $resMsg .= '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>';
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with geospatial data that is out of bounds', $bibs2, 'recCB12');
-
+            $fixMsg = null;
             if(count($ids2_lng)>0){
-                $resMsg .= '<div>There are '.count($ids2_lng)
+                $fixMsg = '<div style="padding:20px 0px">There are '.count($ids2_lng)
                         .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
                         .' <button data-fix="geo_values">Fix longitudes</button></div>';
             }
+            $resMsg .= $this->_printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
+
         }            
     
         return array('status'=>$resStatus, 'message'=>$resMsg);        
     } 
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_fld_spacing($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+  
+        $is_finished = true;
+        $offset = 0;
+        
+        $records_to_fix = array();
+        if(@$params['fix'] == 1 && isset($params['recids'])){
+            $records_to_fix = explode(',', $params['recids']);
+        }
+
+        // values that have double, leading, and/or trailing spaces
+        $bibs1 = array(0 => array(), 1 => array());
+        $ids1 = array();
+        // values that have multiple spaces
+        $bibs2 = array();
+        $ids2 = array();
+        $fixed2 = array();
+        
+        $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
+
+        $keep_autocommit = mysql__begin_transaction($mysqli);        
+  
+        while(true){
+        
+            $is_finished = true;
+
+            $res = $mysqli->query('SELECT dtl_ID,dtl_RecID as rec_ID,dty_ID,dty_Name,dtl_Value '
+            .'FROM recDetails, defDetailTypes '
+            .'WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') '
+            .' ORDER BY dtl_RecID  limit 10000 offset '.$offset);
+            
+            if($res){
+                while ($row = $res->fetch_assoc()) {
+                    
+                    $is_finished = false;
+                    
+                    $fixed_multi = false;
+                    $org_val = $row['dtl_Value'];
+                    $new_val = $org_val;
+                    $rec_id = intval($row['rec_ID']);
+
+                    if(empty($org_val) || empty(super_trim($org_val)) || preg_match('/\s/', $org_val) === false){ // empty value, or no spaces
+                        continue;
+                    }
+                    
+                    if(preg_match('/(\S)\s\s(\S)/', $new_val) > 0){ // Double spaces
+
+                        $new_val = preg_replace('/(\S)\s\s(\S)/', '$1 $2', $new_val);
+                        $bibs1[0][] = $row['dtl_ID'];
+                    }
+                    if(super_trim($new_val) != $new_val){ // Leading/Trailing spaces
+
+                        $new_val = super_trim($new_val);
+                        $bibs1[1][] = $row['dtl_ID'];
+                    }
+
+                    if(preg_match('/\s\s\s+/', $new_val) > 0){ // Multiple spaces (3 or more)
+
+                        if(in_array($rec_id, $records_to_fix)){
+                            $new_val = preg_replace('/\s\s\s+/', ' ', $new_val);
+                            $fixed_multi = true;
+                        }else{
+
+                            $row2 = mysql__select_row_assoc($mysqli,'SELECT rec_Title, rec_RecTypeID FROM Records WHERE rec_ID='.$rec_id);
+                            $row['rec_Title'] = $row2['rec_Title'];
+                            $row['rec_RecTypeID'] = $row2['rec_RecTypeID'];
+                            $row['dtl_Value'] = $new_val;
+                            $bibs2[] = $row;
+                
+                            if(!in_array($rec_id, $ids2)){
+                                $ids2[] = $rec_id;
+                            }
+                        }
+                    }
+
+                    if($new_val != $org_val){ // update existing value
+
+                        $upd_query = 'UPDATE recDetails SET dtl_Value = "' . $new_val . '" WHERE dtl_ID = ' . intval($row['dtl_ID']);
+                        $mysqli->query($upd_query);
+
+                        if($fixed_multi && !in_array($rec_id, $fixed2)){
+                            $fixed2[] = $rec_id;
+                        }else if(!in_array($rec_id, $ids1)){
+                            $ids1[] = $rec_id;
+                        }
+                    }
+                    
+                }//while
+                $res->close();
+            }
+            if($is_finished){
+                break;
+            }
+            
+            $offset = $offset + 10000;
+            
+            if(@$params['progress_report_step']>=0){
+                $percentage = intval($offset*100/$total_count);
+                if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
+                    //terminated by user
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
+                    $mysqli->rollback();                
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    return false;
+                }
+            }
+        }//while limit by 10000
+
+        $mysqli->commit();                
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+  
+        
+  
+        // Value has double, leading, and/or trailing spaces; [0] => Double, [1] => Leading/Trailing
+        if(count($ids1) == 0){
+            $resMsg .= '<h3 class="res-valid">OK: No double, leading, or trailing spaces found in field values</h3><br>';
+        }else{
+            $resStatus = false;
+
+            if(count($bibs1[0]) > 0){
+                $resMsg .= '<h3>'. count($bibs1[0]) .' double spaces in text fields have been converted to single spaces.</h3><br>';
+                $resMsg .= '<span>Double spaces are almost always a typo and in any case they are ignored by html rendering.</span><br>';
+            }
+            if(count($bibs1[1]) > 0){
+                $resMsg .= '<h3>'. count($bibs1[1]) .' leading or trailing spaces have been removed.</h3><br>';
+                $resMsg .= '<span>Leading and trailing spaces should never exist in data.</span><br>';
+            }
+          
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids1);
+            
+            $resMsg .= '<a target=_new href="'.$url_all.'">Search for updated values '
+                       .'<img alt src="'.$url_icon_extlink.'" style="vertical-align:middle"></a>';
+        }
+
+        // Value that has multi-spaces, except double spacing
+        if(count($bibs2) == 0){
+            $resMsg .= '<h3 class="res-valid">OK: No multiple spaces found in field values</h3>';
+        }else{
+            $resStatus = false;
+
+            $fixMsg = <<<FIX
+            <div style="padding:20px 0px">
+            <span>
+                We recommend reducing these to single spaces.<br>
+                If these spaces are intended as formatting eg. for indents, removing them could throw out some formatting.<br>
+                However we strongly discourage the use of spaces in this way, as they are ignored by html rendering<br>
+                and will not necessarily work consistently in case of varying fonts.
+            </span>
+            <button data-fix="fld_spacing" data-selected="recCB14">Fix selected records</button></div>
+            FIX;
+            
+            $resMsg .= $this->_printList('Multiple consecutive spaces detected', $fixMsg, $bibs2, 'recCB14');
+        }  
+  
+        if(count($fixed2) > 0){
+            $resMsg .= '<br><h3>'. count($fixed2) .' multi-spaced values changed to single space</h3><br>';
+        }
+        
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    }
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_multi_swf_values($params=null){
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+        
+        $this->system->defineConstant('TRM_SWF_IMPORT');
+        
+        $completedRecords = array();
+        if( $this->system->defineConstant('DT_WORKFLOW_STAGE') ){
+
+            $recsWithManySWF = mysql__select_assoc($mysqli, 
+                'SELECT dtl_RecID, rec_RecTypeID, rec_Title '
+                .' FROM recDetails INNER JOIN Records ON rec_ID = dtl_RecID '
+                .' WHERE dtl_DetailTypeID = '. DT_WORKFLOW_STAGE 
+                .' GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1');
+
+            if($recsWithManySWF && !empty($recsWithManySWF)){
+
+                foreach($recsWithManySWF as $rec_ID => $rec){
+
+                    $rectype_ID = intval($rec['rec_RecTypeID']);
+                    $rec_Title = $rec['rec_Title'];
+
+                    $rec_ID = intval($rec_ID);
+                    $rectype_ID = intval($rectype_ID);
+
+                    $repeatability = mysql__select_value($mysqli, 
+                        "SELECT rst_MaxValues FROM defRecStructure WHERE rst_RecTypeID = $rectype_ID AND rst_DetailTypeID = " . DT_WORKFLOW_STAGE);
+                    $repeatability = $repeatability === null ? 1 : intval($repeatability);
+
+                    if($repeatability > 1 || $repeatability == 0){
+                        unset($recsWithManySWF[$rec_ID]);
+                        continue;
+                    }
+
+                    $stages = mysql__select_assoc2($mysqli, 
+                        "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID="
+                        .DT_WORKFLOW_STAGE." ORDER BY dtl_ID", 'intval');
+
+                    $final_stage = [];
+                    $found_import = [];
+
+                    foreach($stages as $dtl_ID => $swf_ID){
+
+                        if(defined('TRM_SWF_IMPORT') && $swf_ID == TRM_SWF_IMPORT){
+                            $found_import = empty($found_import) ? [$dtl_ID, $swf_ID] : $found_import;
+                            continue;
+                        }
+
+                        $final_stage = [$dtl_ID, $swf_ID]; // use the oldest
+                    }
+
+                    $final_stage = empty($final_stage) ? $found_import : $final_stage;
+                    if(empty($final_stage)){
+                        unset($recsWithManySWF[$rec_ID]); // $strangeRecs[] = $rec_ID;
+                        continue;
+                    }
+
+                    unset( $stages[$final_stage[0]] );
+                    $dtl_IDs = array_keys($stages);
+                    $dtl_IDs = prepareIds($dtl_IDs);
+                    if(count($dtl_IDs) > 1){
+                        $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
+                    }else{
+                        $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]}");
+                    }
+                    
+                    $swf_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = {$final_stage[1]}");
+
+                    $completedRecords[] = array('rec_ID'=>$rec_ID, 'rec_Title'=>$rec_Title, 'rec_RecTypeID'=>$rectype_ID,
+                                        'dtl_Value'=>'was set to stage: '.htmlspecialchars($swf_Label));
+                }
+            }
+        }
+
+        if(count($completedRecords)==0){
+            $resMsg .= '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
+        }else{
+            $resStatus = false;
+            $resMsg .= $this->_printList('Records were found to have multiple workflow stages', 
+                '<div style="padding:20px 0px">There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).</div>',
+                $completedRecords, 'recCB15');
+        }
+    
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    }
              
 }
 

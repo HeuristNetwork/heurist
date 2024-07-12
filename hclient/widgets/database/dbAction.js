@@ -34,26 +34,31 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     Heurist_Reference_Index: 'Heurist_Reference_Index',
 
     _verification_actions: {
-            owner_ref:{name:'Record Owner/Creator'},
             dup_terms:{name:'Invalid/Duplicate Terms'},           
             field_type:{name:'Field Types'},
             default_values:{name:'Default Values'},
+            defgroups:{name:'Definitions Groups'},
+            title_mask:{name:'Title Masks'},
+            
+            owner_ref:{name:'Record Owner/Creator'},
             pointer_targets:{name:'Pointer Targets'},
             target_types:{name:'Target Types'},
             target_parent:{name:'Invalid Parents'},
             empty_fields:{name:'Empty Fields'},
-            //date_values:{name:'Date Values'},
-            term_values:{name:'Term Values'},
             //expected_terms
             single_value:{name:'Single Value Fields'},
             required_fields:{name:'Required Fields'},
             nonstandard_fields:{name:'Non-Standard Fields'},
-            invalid_chars:{name:'Invalid Characters'},
-            title_mask:{name:'Title Masks'},
+            
             relationship_cache:{name:'Relationship Cache'},
             dateindex:{name:'Date Index'},
-            defgroups:{name:'Definitions Groups'},
-            geo_values:{name:'Geo Values'}
+            multi_swf_values:{name:'Multiple Workflow Stages'},
+            
+            term_values:{name:'Term Values'},
+            //date_values:{name:'Date Values'},
+            geo_values:{name:'Geo Values'},
+            fld_spacing:{name:'Spaces in Values'},
+            invalid_chars:{name:'Invalid Characters'}
     },
         
     
@@ -675,7 +680,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var cont = this._$('#actions');
         
         for (const action in this._verification_actions){
-           $('<li><label><input type="checkbox" class="verify-actions" value="'+action+'">'
+           $('<li><label><input type="checkbox" checked class="verify-actions" value="'+action+'">'
                 +this._verification_actions[action].name+'</label></li>').appendTo(cont);
         } 
         
@@ -745,11 +750,30 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
                 var action = $(event.target).attr('data-fix');
                 
+                var request = {checks: action, fix:1, reload:1};
+                
+                var marker = $(event.target).attr('data-selected');
+                var sel_ids = [];
+                
+                if(marker){
+                    var sels = this._$('input[name="'+marker+'"]:checked');
+
+                    sels.each((i,item)=>{
+                        sel_ids.push(item.value);
+                    });
+                    if(sel_ids.length==0){
+                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Select one record at least'));
+                        return;
+                    }else{
+                        request['recids'] = sel_ids.join(',');
+                    }
+                }
+                
                 var cont_steps = this._$('.progressbar_div > .loading > ol');
                 cont_steps.empty();
                 $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
                 
-                this._sendRequest({checks: action, fix:1, reload:1});
+                this._sendRequest(request);
             }});
             
             //

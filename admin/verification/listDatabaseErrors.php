@@ -2789,7 +2789,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
                 $ids1[] = $rec_id;
             }
         }
-    }
+    }//while
     if($res) $res->close();
 
     $has_invalid_spacing = false;
@@ -2957,13 +2957,13 @@ if($active_all || in_array('multi_swf_values', $active)) {
                 if(count($dtl_IDs) > 1){
                     $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
                 }else{
-                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]})");
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]}");
                 }
 
                 $rty_Label = mysql__select_value($mysqli, "SELECT rty_Name FROM defRecTypes WHERE rty_ID = $rectype_ID");
                 $swf_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = {$final_stage[1]}");
 
-                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $$rty_Label, 'stage' => $swf_Label ] ];
+                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $rty_Label, 'stage' => $swf_Label ] ];
             }
         }
     }
@@ -2978,7 +2978,6 @@ if($active_all || in_array('multi_swf_values', $active)) {
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= htmlspecialchars(implode(',', array_keys($completedRecords))) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <a target=_new href="#selected_link" onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
         <table role="presentation">
