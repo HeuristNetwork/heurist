@@ -355,7 +355,7 @@ class DbsImport {
         if($this->cloning_template){ // all definitions
 
             // 3.1 Handle terms
-            $term_ids = [...$this->sourceTerms->treeData('enum', 3), ...$this->sourceTerms->treeData('relation', 3)];
+            $term_ids = array_merge($this->sourceTerms->treeData('enum', 3), $this->sourceTerms->treeData('relation', 3)); // merge both types of terms to be imported into one array
             $has_terms = !empty($term_ids);
             foreach($term_ids as $term_id){
                 $this->_getTopMostVocabulary($term_id, 'enum');
