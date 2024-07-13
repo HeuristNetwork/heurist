@@ -45,7 +45,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             target_types:{name:'Target Types'},
             target_parent:{name:'Invalid Parents'},
             empty_fields:{name:'Empty Fields'},
-            //expected_terms
             single_value:{name:'Single Value Fields'},
             required_fields:{name:'Required Fields'},
             nonstandard_fields:{name:'Non-Standard Fields'},
@@ -54,9 +53,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             dateindex:{name:'Date Index'},
             multi_swf_values:{name:'Multiple Workflow Stages'},
             
-            term_values:{name:'Term Values'},
-            //date_values:{name:'Date Values'},
+            date_values:{name:'Date Values'},
             geo_values:{name:'Geo Values'},
+            term_values:{name:'Term Values'},
+            expected_terms:{name:'Expected Terms'},
             fld_spacing:{name:'Spaces in Values'},
             invalid_chars:{name:'Invalid Characters'}
     },

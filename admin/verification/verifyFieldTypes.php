@@ -64,6 +64,12 @@ function initGlobalArr($mysqli, $type=null){
     }
 }
 
+/**
+* Finds invalid field types ('enum','relationtype','relmarker','resource')
+* 
+* @param mixed $mysqli
+* @param mixed $rectype_id
+*/
 function getInvalidFieldTypes($mysqli, $rectype_id){
 
     global $TL, $RTN;
@@ -144,7 +150,7 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 }
 
 //
-// Finds and clear wrong default values
+// Finds and clear wrong default values for resource and enum fields
 //
 function getInvalidDefaultValues($mysqli, $rectype_id=null){
 

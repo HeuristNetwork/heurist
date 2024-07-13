@@ -1212,8 +1212,9 @@ if($active_all || in_array('date_values', $active)) {
 
     $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added, rst_DisplayName
         from recDetails, defDetailTypes, defRecStructure, Records a
-        where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
-    and (dty_Type = "date") and (dtl_Value is not null)');
+        where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) 
+        and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
+        and (dty_Type = "date") and (dtl_Value is not null)');
 
     $was_suggested = array();
     $was_corrected = array();

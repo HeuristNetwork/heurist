@@ -64,91 +64,144 @@ class DbVerify {
      */
     private $mysqli = null;
     private $system = null;
+    
+    private $out = null; //output stream
+    private $keep_autocommit = null;
 
     public function __construct($system) {
        $this->system = $system;
        $this->mysqli = $system->get_mysqli();
     }    
+    
+    //
+    //
+    //
+    private function _outStreamInit(){
+        $this->out = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+    }
+    
+    //
+    //
+    //
+    private function _outStreamRes(){
+        rewind($this->out);
+        $res = stream_get_contents($this->out);
+        fclose($this->out);
+        $this->out = null;
+        return $res;
+    }
+    
+    //
+    //
+    //
+    private function _terminatedByUser(){
 
+        $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
+        if($this->keep_autocommit!=null){
+            $mysqli->rollback();                
+            if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        }
+        if($this->out){
+            fclose($this->out);
+        }
+        $this->keep_autocommit = null;
+        $this->out = null;            
+    }
     
     //
     //
     //
     private function _printList($title, $sub_title, $resList, $marker){
+
+        if(!$sub_title) $sub_title = '';
         
-          $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-          $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-          
-          if(!$sub_title) $sub_title = '';
+        if($title!=null){
 
             $resMsg = <<<HEADER
-            <div>
-                <h3>$title</h3>
-                $sub_title
-                <span>
-                    <a target=_new href="url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="$marker">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="7">
-                        <label><input type="checkbox" data-mark-all="$marker">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
+                <div>
+                    <h3>$title</h3>
+                    $sub_title
+                    <span>
+                        <a target=_new href="#" data-show-all="$marker">(show results as search)</a>
+                        <a target=_new href="#selected_link" data-show-selected="$marker">(show selected as search)</a>
+                    </span>
+                </div>
+                <table role="presentation">
+                    <tr>
+                        <td colspan="7">
+                            <label><input type="checkbox" data-mark-all="$marker">Mark all</label>
+                        </td>
+                    </tr>
+                HEADER;
 
-            $ids = array();
+            fwrite($this->out, $resMsg);
+        }
+        
+        if($resList!=null){
+
+            $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
+            $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
+
+            //$ids = array();
             $rec_id = null;
             $idx = 0;
-            
+
             while ($row = is_array($resList)?@$resList[$idx]:$resList->fetch_assoc()){
-            //foreach ($resList as $row) {
+                //foreach ($resList as $row) {
+                $resMsg = '';
                 $idx++;
                 if($rec_id==null || $rec_id!=$row['rec_ID']) {
-                    
+
                     $rec_id = $row['rec_ID'];
-                    
-                    array_push($ids, $rec_id);
-                    
-                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
+
+                    //array_push($ids, $rec_id);
+                    $url_icon = @$row['rec_RecTypeID']?HEURIST_RTY_ICON.$row['rec_RecTypeID']:'';
                     $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$rec_id;
-                    $rec_title = strip_tags($row['rec_Title']);
+                    $rec_title = @$row['rec_Title']?strip_tags($row['rec_Title']):'';
                     if(@$row['wkt']){
                         $dtl_value = $row['wkt'];
                     }else{
-                        $dtl_value = strip_tags($row['dtl_Value']);    
+                        $dtl_value = strip_tags($row['dtl_Value'],'<span>');    
                     }
-                    
-                    
+
+
                     $resMsg = $resMsg . <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="$marker" value={$rec_id}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                {$rec_id} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td class="truncate" style="max-width:400px">$rec_title</td>
-                    EOT;
+                        <tr>
+                            <td><input type=checkbox name="$marker" value={$rec_id}></td>
+                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                            <td style="white-space: nowrap;"><a target=_new href="$url_rec">
+                                    {$rec_id} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
+                                </a></td>
+                            <td class="truncate" style="max-width:400px">$rec_title</td>
+                        EOT;
                 }else{
                     $resMsg .= '<tr><td colspan="4"></td>';
                 }
                 $resMsg = $resMsg . <<<EOT
-                        <td>{$row['dty_ID']}</td>
-                        <td width="150px" style="max-width:150px" class="truncate">{$row['dty_Name']}</td>
-                        <td style="max-width:400px" class="truncate">{$dtl_value}</td></tr>
-                        EOT;
-            }//foreach
-            $resMsg .= '</table>';
+                            <td>{$row['dty_ID']}</td>
+                            <td width="150px" style="max-width:150px" class="truncate">{$row['dty_Name']}</td>
+                            <td style="max-width:400px" class="truncate">{$dtl_value}</td></tr>
+                            EOT;
 
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids);
-            $resMsg = str_replace('href="url_all"','href="'.$url_all.'"',$resMsg);
+                fwrite($this->out, $resMsg);
+
+            }//foreach
             
+            
+            if($title!=null){
+                fwrite($this->out, '</table>');
+            }
+
+            //$url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids);
+            //$resMsg = str_replace('href="url_all"','href="'.$url_all.'"',$resMsg);
+
             if(!is_array($resList)){
                 $resList->close();
             }
-            
-            return $resMsg;
+        
+        }
+
+        //return $resMsg;
     }    
 
     /**
@@ -342,7 +395,7 @@ class DbVerify {
         
         if(count($trmDuplicates)>0){                                                 
             $resStatus = false;
-
+            
             $resMsg .= '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
             .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
             foreach ($trmDuplicates as $parent_ID=>$dupes) {
@@ -487,7 +540,7 @@ class DbVerify {
         
         
     /**
-    * Check 
+    * Check Db definitions - wrong default valuss
     * 
     * @param array $params 
     */
@@ -575,7 +628,6 @@ class DbVerify {
         $ids = array();
         while ($row = $res->fetch_assoc()) {
             array_push($bibs, $row);
-            //$ids[$row['rec_ID']] = 1;
         }
         $res->close();
         
@@ -589,14 +641,19 @@ class DbVerify {
         else
         {
             $resStatus = false;
+            
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
+            
             $fixMsg = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="pointer_targets">Delete ALL faulty pointers</button></div>';
-            $resMsg .= $this->_printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
-
+            $this->_printList('Records record pointers to non-existent records', $fixMsg, $bibs, 'recCB0');
+            
+            $resMsg = $this->_outStreamRes();
         }
+        
         
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
-
     
     /**
     * Check 
@@ -609,19 +666,22 @@ class DbVerify {
         $resMsg = '';
         $mysqli = $this->mysqli;
         
-        $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name, rec_RecTypeID
-            from defDetailTypes
-            left join recDetails on dty_ID = dtl_DetailTypeID
-            left join Records on rec_ID = dtl_Value and rec_FlagTemporary!=1
-            left join defRecTypes on rty_ID = rec_RecTypeID
-            where dty_Type = "resource"
-            and dty_PtrTargetRectypeIDs > 0
-        and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
+        $res = $mysqli->query('SELECT dtl_RecID AS rec_ID, dty_ID, dty_Name, ' //dty_PtrTargetRectypeIDs, 
+            .' rec_ID as target_ID, rec_Title, rty_Name ' //, rec_RecTypeID
+            .' FROM defDetailTypes'
+            .' left join recDetails on dty_ID = dtl_DetailTypeID'
+            .' left join Records on rec_ID = dtl_Value and rec_FlagTemporary!=1'
+            .' left join defRecTypes on rty_ID = rec_RecTypeID'
+            .' where dty_Type = "resource"'
+            .' and dty_PtrTargetRectypeIDs > 0'
+        .' and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0) ORDER BY dtl_RecID');
 
         $bibs = array();
         while ($row = $res->fetch_assoc()){
-            $bibs[$row['dtl_RecID']] = $row;
-            //$row['dtl_Value'] = "{$row['rec_ID']} ({$row['rty_Name']}) - $rec_title"
+            $rec_title = (substr(strip_tags($row['rec_Title']), 0, 50));
+            $row['dtl_Value'] = "points to {$row['target_ID']} ({$row['rty_Name']}) - $rec_title";
+            unset($row['rec_Title']);
+            $bibs[] = $row;
         }
         $res->close();
         
@@ -631,50 +691,13 @@ class DbVerify {
         else
         {
             $resStatus = false;
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
             
-            $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', array_keys($bibs));
+            $fixMsg = null;
+            $this->_printList('Records with record pointers to the wrong record type', $fixMsg, $bibs, 'recCB2');
             
-            $resMsg .= <<<HEADER
-            <div>
-                <h3>Records with record pointers to the wrong record type</h3>
-                <br>
-                <span>
-                    <a target=_new href="$url_all">(show results as search)</a>
-                    <a target=_new href="#selected_link" data-show-selected="recCB2">(show selected as search)</a>
-                </span>
-            </div>
-            <table role="presentation">
-                <tr>
-                    <td colspan="6">
-                        <label><input type="checkbox" data-mark-all="recCB2">Mark all</label>
-                    </td>
-                </tr>
-            HEADER;
-
-                $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
-                $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
-                
-                foreach ($bibs as $row) {
-
-                    $url_icon = HEURIST_RTY_ICON.$row['rec_RecTypeID'];
-                    $url_rec =  HEURIST_BASE_URL.'?fmt=edit&db='.$this->system->dbname().'&recID='.$row['dtl_RecID'];
-                    $rec_title = (substr(strip_tags($row['rec_Title']), 0, 50));
-                    
-                    $resMsg .= <<<EOT
-                    <tr>
-                        <td><input type=checkbox name="recCB2" value={$row['dtl_RecID']}></td>
-                        <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
-                        <td style="white-space: nowrap;"><a target=_new href="$url_rec">
-                                {$row['dtl_RecID']} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
-                            </a></td>
-                        <td>{$row['dty_Name']}</td>
-                        <td>points to</td>
-                        <td>{$row['rec_ID']} ({$row['rty_Name']}) - $rec_title</td>
-                    </tr>
-                    EOT;
-                    
-                }//foreach
-                $resMsg .= "</table>\n";
+            $resMsg = $this->_outStreamRes();
         }
         
         return array('status'=>$resStatus,'message'=>$resMsg);        
@@ -1007,11 +1030,15 @@ HEADER;
         if($total_count_rows>0)
         {
             $resStatus = false;
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
             
             $fixMsg = '<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
-            $resMsg .= $this->_printList('Records with empty fields', $fixMsg, $res, 'recCB5');
-
-        }   
+            $this->_printList('Records with empty fields', $fixMsg, $res, 'recCB5');
+            
+            $resMsg = $this->_outStreamRes();
+        }  
+         
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
 
@@ -1071,9 +1098,16 @@ HEADER;
         if($total_count_rows>0)
         {
             $resStatus = false;
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
+            
             $fixMsg  = '<div style="padding:20px 0px">To fix the inconsistencies, please click here: <button data-fix="term_values">Delete ALL faulty term values</button></button></div>';
-            $resMsg .= $this->_printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
-        }   
+            $this->_printList('Records with non-existent term values', $fixMsg, $res, 'recCB6');
+            
+            $resMsg = $this->_outStreamRes();
+        }  
+        
+        
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }
     
@@ -1104,13 +1138,18 @@ HEADER;
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
         if($total_count_rows<1){
-            $resMsg .= '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
+            $resMsg = '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
         }else
         {
             $resStatus = false;
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
             
-            $resMsg .= $this->_printList('Single value fields with multiple values', null, $res, 'recCB7');
-        }   
+            $this->_printList('Single value fields with multiple values', null, $res, 'recCB7');
+            
+            $resMsg = $this->_outStreamRes();
+        }  
+        
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
     
@@ -1144,12 +1183,18 @@ HEADER;
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
         if($total_count_rows<1){
-            $resMsg .= '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
+            $resMsg = '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
         }else
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with missing or empty required values', null, $res, 'recCB8');
-        }   
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
+            
+            $this->_printList('Records with missing or empty required values', null, $res, 'recCB8');
+            
+            $resMsg = $this->_outStreamRes();
+        }  
+        
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }   
     
@@ -1193,12 +1238,19 @@ HEADER;
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
         if($total_count_rows<1){
-            $resMsg .= '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';
+            $resMsg = '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';
         }else
         {
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
-        }   
+            $this->_outStreamInit();
+            fwrite($this->out, $resMsg);
+            
+            $this->_printList('Records with extraneous fields (not defined in the list of fields for the record type)', null, $res, 'recCB9');
+            
+            $resMsg = $this->_outStreamRes();
+        }  
+        
+        
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
     
@@ -1229,7 +1281,7 @@ HEADER;
         
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
         
-        $keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
         
         while(true){
         
@@ -1305,9 +1357,7 @@ HEADER;
                 $percentage = intval($offset*100/$total_count);
                 if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
                     //terminated by user
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
-                    $mysqli->rollback();                
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    $this->_terminatedByUser();
                     return false;
                 }
             }
@@ -1329,7 +1379,7 @@ HEADER;
                     .$resMsg.'</table>';
         }
         
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
 
         return array('status'=>$resStatus,'message'=>$resMsg);        
     }    
@@ -1676,7 +1726,7 @@ HEADER;
         $geojson_adapter = null;
         $wkt_adapter = null;
         $update_stmt = null;
-        $keep_autocommit = null;
+        $this->keep_autocommit = null;
         if($need_correct_long){
             if(method_exists('geoPHP','getAdapter')){
                 $wkt_adapter = geoPHP::getAdapter('wkt');
@@ -1686,7 +1736,7 @@ HEADER;
                 $geojson_adapter = new GeoJSON();
             }
             $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
-            $keep_autocommit = mysql__begin_transaction($mysqli);    
+            $this->keep_autocommit = mysql__begin_transaction($mysqli);    
         }
         $isOk = true;
 
@@ -1791,27 +1841,31 @@ HEADER;
         if($isOk){
             $mysqli->commit();  
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        $this->_outStreamInit();
+        fwrite($this->out, $resMsg);
             
         // Invalid wkt values
         if(count($bibs3) == 0){
-            $resMsg .=  '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>';
+            fwrite($this->out, '<h3 class="res-valid">OK: No invalid geospatial values</h3><br>');
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
-        }
+            $this->_printList('Records with invalid geospatial values', null, $bibs3, 'recCB10');
+        }  
+        
 
         // Missing wkt or general invalid value
         if(count($bibs1) == 0){
-            $resMsg .=  '<h3 class="res-valid">OK: No missing geospatial values</h3><br>';
+            fwrite($this->out, '<h3 class="res-valid">OK: No missing geospatial values</h3><br>');
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
+            $this->_printList('Records with missing geospatial values', null, $bibs1, 'recCB11');
         }
 
         // Value that is out of bounds, i.e. -90 > lat || lat > 90 || -180 > long || long > 180
         if(count($bibs2) == 0){
-            $resMsg .= '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>';
+            fwrite($this->out, '<h3 class="res-valid">OK: All geospatial data is within bounds</h3>');
         }else{
             $resStatus = false;
             $fixMsg = null;
@@ -1820,9 +1874,10 @@ HEADER;
                         .' geo values with wrong longitudes. To fix longitudes (less than -180 or greater than 180 deg) click here:'
                         .' <button data-fix="geo_values">Fix longitudes</button></div>';
             }
-            $resMsg .= $this->_printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
-
+            $this->_printList('Records with geospatial data that is out of bounds', $fixMsg, $bibs2, 'recCB12');
         }            
+            
+        $resMsg = $this->_outStreamRes();
     
         return array('status'=>$resStatus, 'message'=>$resMsg);        
     } 
@@ -1857,7 +1912,7 @@ HEADER;
         
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
 
-        $keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
   
         while(true){
         
@@ -1878,7 +1933,7 @@ HEADER;
                     $new_val = $org_val;
                     $rec_id = intval($row['rec_ID']);
 
-                    if(empty($org_val) || empty(super_trim($org_val)) || preg_match('/\s/', $org_val) === false){ // empty value, or no spaces
+                    if(($org_val=='') || (super_trim($org_val)=='') || preg_match('/\s/', $org_val) === false){ // empty value, or no spaces
                         continue;
                     }
                     
@@ -1937,44 +1992,44 @@ HEADER;
                 $percentage = intval($offset*100/$total_count);
                 if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
                     //terminated by user
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
-                    $mysqli->rollback();                
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    $this->_terminatedByUser();
                     return false;
                 }
             }
         }//while limit by 10000
 
         $mysqli->commit();                
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
   
+        $this->_outStreamInit();
         
-  
         // Value has double, leading, and/or trailing spaces; [0] => Double, [1] => Leading/Trailing
         if(count($ids1) == 0){
-            $resMsg .= '<h3 class="res-valid">OK: No double, leading, or trailing spaces found in field values</h3><br>';
+            fwrite($this->out, '<h3 class="res-valid">OK: No double, leading, or trailing spaces found in field values</h3><br>');
         }else{
             $resStatus = false;
 
             if(count($bibs1[0]) > 0){
-                $resMsg .= '<h3>'. count($bibs1[0]) .' double spaces in text fields have been converted to single spaces.</h3><br>';
-                $resMsg .= '<span>Double spaces are almost always a typo and in any case they are ignored by html rendering.</span><br>';
+                fwrite($this->out, '<h3>'. count($bibs1[0]) 
+                    .' double spaces in text fields have been converted to single spaces.</h3><br>'
+                    .'<span>Double spaces are almost always a typo and in any case they are ignored by html rendering.</span><br>');
             }
             if(count($bibs1[1]) > 0){
-                $resMsg .= '<h3>'. count($bibs1[1]) .' leading or trailing spaces have been removed.</h3><br>';
-                $resMsg .= '<span>Leading and trailing spaces should never exist in data.</span><br>';
+                fwrite($this->out, '<h3>'. count($bibs1[1]) 
+                    .' leading or trailing spaces have been removed.</h3><br>'
+                    .'<span>Leading and trailing spaces should never exist in data.</span><br>');
             }
           
             $url_icon_extlink = HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif';
             $url_all = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&w=all&q=ids:'.implode(',', $ids1);
             
-            $resMsg .= '<a target=_new href="'.$url_all.'">Search for updated values '
-                       .'<img alt src="'.$url_icon_extlink.'" style="vertical-align:middle"></a>';
+            fwrite($this->out, '<a target=_new href="'.$url_all.'">Search for updated values '
+                       .'<img alt src="'.$url_icon_extlink.'" style="vertical-align:middle"></a>');
         }
 
         // Value that has multi-spaces, except double spacing
         if(count($bibs2) == 0){
-            $resMsg .= '<h3 class="res-valid">OK: No multiple spaces found in field values</h3>';
+            fwrite($this->out, '<h3 class="res-valid">OK: No multiple spaces found in field values</h3>');
         }else{
             $resStatus = false;
 
@@ -1989,12 +2044,14 @@ HEADER;
             <button data-fix="fld_spacing" data-selected="recCB14">Fix selected records</button></div>
             FIX;
             
-            $resMsg .= $this->_printList('Multiple consecutive spaces detected', $fixMsg, $bibs2, 'recCB14');
+            $this->_printList('Multiple consecutive spaces detected', $fixMsg, $bibs2, 'recCB14');
         }  
   
         if(count($fixed2) > 0){
-            $resMsg .= '<br><h3>'. count($fixed2) .' multi-spaced values changed to single space</h3><br>';
+            fwrite($this->out, '<br><h3>'. count($fixed2) .' multi-spaced values changed to single space</h3><br>');
         }
+
+        $resMsg = $this->_outStreamRes();
         
         return array('status'=>$resStatus, 'message'=>$resMsg);        
     }
@@ -2022,7 +2079,7 @@ HEADER;
                 .' WHERE dtl_DetailTypeID = '. DT_WORKFLOW_STAGE 
                 .' GROUP BY dtl_RecID HAVING COUNT(dtl_RecID) > 1');
 
-            if($recsWithManySWF && !empty($recsWithManySWF)){
+            if(is_array($recsWithManySWF) && count($recsWithManySWF)>0){
 
                 foreach($recsWithManySWF as $rec_ID => $rec){
 
@@ -2082,16 +2139,414 @@ HEADER;
         }
 
         if(count($completedRecords)==0){
-            $resMsg .= '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
+            $resMsg = '<h3 class="res-valid">OK: All records have single values for their workflow stage</h3>';
         }else{
             $resStatus = false;
-            $resMsg .= $this->_printList('Records were found to have multiple workflow stages', 
+            $this->_outStreamInit();
+            $this->_printList('Records were found to have multiple workflow stages', 
                 '<div style="padding:20px 0px">There workflow stage has been set to the newest available value, that is not the importing stage (unless it is the only value found).</div>',
                 $completedRecords, 'recCB15');
+            $resMsg = $this->_outStreamRes();
         }
     
         return array('status'=>$resStatus, 'message'=>$resMsg);        
     }
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_expected_terms($params=null){
+
+        $this->_outStreamInit();
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+  
+        $fix_same_name_terms = (@$params['fix'] == 1);
+        $fix_count = 0;
+
+        $cnt = 0;
+        $suggest_cnt = 0;
+        $err_count = 0;
+        $is_first = true;
+
+        $offset = 0;
+        $is_finished = false;
+        
+        $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes '
+            .'WHERE dtl_DetailTypeID = dty_ID AND (dty_Type = "enum" or dty_Type = "relmarker")');
+
+        $dbterms = VerifyValue::getTerms();
+  
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+  
+        while(true){
+        
+            $is_finished = true;
+
+            $res = $mysqli->query('SELECT dtl_ID,rec_ID,rec_RecTypeID,rec_Title,dty_ID,dty_Name,dtl_Value,dty_JsonTermIDTree ' //',trm_Label '
+                    .' FROM defDetailTypes,recDetails,Records'  // left join defTerms on dtl_Value=trm_ID
+                    .' WHERE (dty_Type = "enum" or dty_Type = "relmarker") AND dty_ID = dtl_DetailTypeID AND rec_ID=dtl_RecID '
+                    .' AND rec_FlagTemporary!=1 '
+                .' ORDER by dtl_DetailTypeID limit 10000 offset '.$offset);  //  and dtl_RecID=62734
+        
+//, rec_Title, rec_RecTypeID,
+            
+            if($res){
+                while ($row = $res->fetch_assoc()) {
+                    
+                    $is_finished = false;
+                    
+                    //$fixed_multi = false;
+                    $term_id = $row['dtl_Value'];
+                    $rec_id = intval($row['rec_ID']);
+
+                    //verify value
+                    if(trim($term_id) == ''
+                       ||  VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $term_id, $row['dty_ID'] )) 
+                    {
+                        continue;   //valid term
+                    }
+
+                    
+                    if($is_first){
+                        $is_first = false;
+                        $this->_printList('Records with terms not in the list of terms specified for the field', null, null, 'recCB16');
+                    }
+                    
+                    //ok - term does not belong to required vocabullary
+                    //check that this vocabulary already has term with the same label
+                    $term_label = $dbterms->getTermLabel($term_id);
+                    if($term_label){
+                        $row['dtl_Value'] = $term_id.'&nbsp;'.$term_label;
+                        
+                        $suggested_term_id = VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $term_label);
+                        if($suggested_term_id>0){
+                            
+                            if($fix_same_name_terms){
+      
+                                $update_query = 'UPDATE recDetails SET dtl_Value='.intval($suggested_term_id)
+                                                .' WHERE dtl_ID='.intval($row['dtl_ID']);
+                                $update_res = $mysqli->query($update_query);
+                                if(!$update_res)
+                                {
+                                    $resStatus = false;
+                                    $resMsg = '<div class="error" style="color:red">Cannot replace terms in record details. Query :'
+                                            .$update_query.'  SQL error: '.$mysqli->error.'</div>';
+                                    $mysqli->rollback();
+                                    fclose($this->out);
+                                    $this->out = null;
+                                    break 2;
+                                }
+                                
+                                $row['dtl_Value'] .= ' <span style="color:green">changed to '.$suggested_term_id.'</span>';
+                                $fix_count++;
+                                
+                            }else{
+                                $row['dtl_Value'] .= ' <span style="color:green">suggestion: '.$suggested_term_id.'</span>';
+                                $suggest_cnt++;
+                            }
+                        }
+                    }else{
+                        $row['dtl_Value'] = $term_id.'&nbsp; <span style="color:red">not found</span>';
+                        $err_count++;
+                    }
+                    
+                    $this->_printList(null, null, array($row), 'recCB16'); //out one row
+
+                    $cnt++;  
+                    
+                }//while
+                $res->close();
+            }
+            if($is_finished){
+                break;
+            }
+            
+            $offset = $offset + 10000;
+            
+            if(@$params['progress_report_step']>=0){
+                $percentage = intval($offset*100/$total_count);
+                if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
+                    //terminated by user
+                    $this->_terminatedByUser();
+                    return false;
+                }
+            }
+        }//while limit by 10000
+
+        if($resStatus){
+            $mysqli->commit();                
+        }
+        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        
+        if($resStatus){
+        
+
+            if ($cnt == 0) {
+                fwrite($this->out, '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>');
+            }else{
+                fwrite($this->out, '</table>');
+                
+                if($err_count>0){
+                    $resStatus = false;
+                    fwrite($this->out, '<h3 class="error">'.$err_count.' terms not found</h3>');
+                }
+                
+                if($fix_count>0){
+                    fwrite($this->out, '<h3>'.$fix_count.' terms referenced in incorrect vocabulary changed to terms in the vocabulary specified for the field</h3>');
+                    
+                }else if($suggest_cnt>0){
+                    $resStatus = false;
+                    
+                    fwrite($this->out, <<<FIXMSG
+<h3>Terms referenced in incorrect vocabulary (n = $suggest_cnt)</h3>
+<span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field, 
+<br>however the same term label exists in the vocabulary specified for the field.
+<br><button data-fix="expected_terms">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
+FIXMSG
+                    );                    
+                    
+                }
+            }
+            
+            $resMsg = $this->_outStreamRes();      
+        }
+        
+        
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    }
+    
+    
+    /**
+    * Check 
+    * 
+    * @param array $params 
+    */
+    public function check_date_values($params=null){
+
+        $this->_outStreamInit();
+        
+        $resStatus = true;
+        $resMsg = '';
+        
+        $mysqli = $this->mysqli;
+  
+        $fix_as_suggested = (@$params['fix'] == 1);
+        $records_to_fix = array();
+        if(@$params['recids']!=null){
+            $records_to_fix = explode(',', $params['recids']);
+        }
+        
+        $fix_count = 0;
+
+        $cnt = 0;
+        $bibs_suggested = array();
+        $bibs_manualfix = array();
+        
+        $is_first = true;
+
+        $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
+        $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
+        
+        $offset = 0;
+        $is_finished = false;
+        
+        $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes '
+            .'WHERE dtl_DetailTypeID = dty_ID AND dty_Type = "date"');
+
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+  
+        while(true){
+        
+            $is_finished = true;
+
+            $res = $mysqli->query('SELECT dtl_ID,rec_ID,rec_RecTypeID,rec_Title,rec_Added,'
+                    .' dty_ID, dty_Name, dtl_Value '
+                    .' FROM defDetailTypes,recDetails,Records'
+                    .' WHERE dty_Type = "date" AND dty_ID = dtl_DetailTypeID AND rec_ID=dtl_RecID '
+                    .' AND rec_FlagTemporary!=1 '
+                .' ORDER by dtl_DetailTypeID limit 10000 offset '.$offset);
+            
+            if($res){
+                while ($row = $res->fetch_assoc()) {
+                    
+                    $is_finished = false;
+                    
+                    $autofix = false;
+                    $date_val = trim($row['dtl_Value']);
+                    $rec_id = intval($row['rec_ID']);
+                    $row['is_ambig'] = true;
+                    $row['new_value'] = null;
+
+                    //verify value
+                    if($date_val == '')
+                    {
+                        $row['new_value'] = '';
+                        $autofix = true;
+                    }else 
+                    //check if dtl_Value is old plain string temporal object or new json object
+                    if(strpos($date_val,"|")!==false || strpos($date_val,'estMinDate')!==false){
+                        continue;
+                    }else
+                    //ignore decade dates
+                    if(  (strlen($date_val)==3 || strlen($date_val)==5) 
+                        && preg_match( $decade_regex, $date_val )){
+                            
+                        //this is decades    
+                        $row['is_ambig'] = 'we suggest using a date range';
+
+                    }else if(preg_match( $year_range_regex, $date_val)){
+                        
+                        list($y1, $y2) = explode('-',$date_val);
+                        if($y1>31 && $y2>12){
+                            //this is year range
+                            $row['is_ambig'] = 'we suggest using a date range';
+                        }
+                    }
+                    
+                    if($row['new_value']==null && $row['is_ambig']===true){
+                        
+                        //parse and validate value order 2 (mm/dd), don't add day if it is not defined
+                        $row['new_value'] = Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
+                        if($row['new_value']==$date_val){ //nothing to correct - result is the same
+
+                            if(strlen($date_val)>=8 && strpos($date_val,'-')==false){ // try automatic convert to ISO format
+                                
+                                try{
+                                    $t2 = new DateTime($date_val);
+
+                                    $format = 'Y-m-d';
+                                    if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
+                                        if($t2->format('s')>0){
+                                            $format .= ' H:i:s';
+                                        }else{
+                                            $format .= ' H:i';
+                                        }
+                                    }
+                                    $row['new_value'] = $t2->format($format);
+                                    $row['dtl_Value'] = $row['new_value']; // for final ambiguous check
+                                }catch(Exception  $e){
+                                    //skip
+                                }
+                            }
+                            continue;
+                        }
+                        if($row['new_value']!=null && $row['new_value']!=''){
+                            $row['is_ambig'] = Temporal::correctDMYorder($date_val, true);
+                            $autofix = ($row['is_ambig']===false);
+                        }
+                    }
+                    
+                    //correct wrong dates and remove empty values
+                    if($autofix || ($fix_as_suggested && in_array($rec_id, $records_to_fix)) ){
+
+                        if($row['new_value']!=null && $row['new_value']!=''){
+                            $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.intval($row['dtl_ID']));
+                            
+                            $row['dtl_Value'] .= ' <span style="color:green">changed to '.$row['new_value'].'</span>';
+                        }else{
+                            $mysqli->query('delete from recDetails where dtl_ID='.intval($row['dtl_ID']));
+                            
+                            $row['dtl_Value'] = '<span style="color:green">empty value removed</span>';
+                        }
+                        
+                        if($is_first){
+                            $is_first = false;
+                            $this->_printList('Auto-corrected dates', 'The following dates have been corrected as shown', null, 'recCB17');
+                        }
+                        $this->_printList(null, null, array($row), 'recCB17'); //out one row
+                        $fix_count++;
+                    }else {
+                    
+                        if($row['new_value']==null || $row['new_value']==''){
+                            //manual fix
+                            if($row['is_ambig']!==true){
+                                $row['dtl_Value'] .= ' <span style="color:red">'.$row['is_ambig'].'</span>';
+                            }
+                            $bibs_manualfix[] = $row;
+                            
+                        } else { //if ($row['is_ambig']===true)
+                            //suggestion 
+                            $row['dtl_Value'] .= ' <span style="color:green">suggestion to '.$row['new_value'].'</span>';
+                            $bibs_suggested[] = $row;
+                        }
+                    
+                        $cnt++;
+                    
+                    }  
+                    
+                }//while
+                $res->close();
+            }
+            if($is_finished){
+                break;
+            }
+            
+            $offset = $offset + 10000;
+            
+            if(@$params['progress_report_step']>=0){
+                $percentage = intval($offset*100/$total_count);
+                if(DbUtils::setSessionVal($params['progress_report_step'].','.$percentage)){
+                    //terminated by user
+                    $this->_terminatedByUser();
+                    return false;
+                }
+            }
+        }//while limit by 10000
+
+        $mysqli->commit();                
+        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        if($cnt==0){
+            fwrite($this->out, '<h3 class="res-valid">OK: All records have recognisable Date values</h3>');
+        }
+        
+        if($fix_count>0){
+            fwrite($this->out, '</table>');
+        }
+        if($cnt>0){
+            $resStatus = false;
+
+            if(count($bibs_suggested)>0){
+                $fixMsg = '<div>To fix faulty date values as suggested, mark desired records and please click here: <button data-fix="date_values" data-selected="recCB18">Fix dates</button></div>';
+                $this->_printList('Suggestions for date field corrections', $fixMsg, $bibs_suggested, 'recCB18');
+            }
+            if(count($bibs_manualfix)>0){
+                
+                $this->_printList('Invalid dates that needs to be fixed manually by a user', null, $bibs_manualfix, 'recCB19');
+            }
+        }
+                    
+        $resMsg = $this->_outStreamRes();      
+        
+/*
+                if(strlen($fixdate_url) > 2000){ // roughly a upper limit for the date fix url
+
+                <div style="color: red;margin: 10px 0;">
+                    Note: You cannot correct more than a few hundred dates at a time due to URL length limitations.<br>
+                    If you have more dates to correct we recommend exporting as a CSV, reformatting in a spreadsheet and reimporting as replacements.
+                </div>
+
+                <div>To fix faulty date values as suggested, mark desired records and please click here:
+                    <button
+                        onclick="correctDates();">
+                        Correct
+                    </button>
+
+                    <div style="display: inline-block;margin-left: 20px;"> Dates are in 
+                        <label><input type="radio" name="date_format" value="1" checked> dd/mm/yyyy (normal format)</label>
+                        <label><input type="radio" name="date_format" value="2"> mm/dd/yyyy (US format)</label>
+                    </div>
+                </div>
+*/        
+        
+        return array('status'=>$resStatus, 'message'=>$resMsg);        
+    }    
              
 }
 
