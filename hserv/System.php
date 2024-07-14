@@ -1026,8 +1026,8 @@ class System {
                 fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
             }
 
-            $mysql_error = $this->mysqli && $this->mysqli->errno==2006;
-            if($mysql_error){
+            $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
+            if($mysql_gone_away_error){
                 $message =  $message
                             .' There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
             }else{
@@ -1037,7 +1037,7 @@ class System {
 
             error_log($Title.'  '.$sMsg);
 
-            if(!$mysql_error){
+            if(!$mysql_gone_away_error){
                 $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
             }
         }
