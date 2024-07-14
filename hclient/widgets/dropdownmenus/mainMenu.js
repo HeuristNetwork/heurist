@@ -2279,22 +2279,29 @@ $.widget( "heurist.mainMenu", {
         if(!window.hWin.HAPI4.is_publish_mode){
 
                 if(window.hWin.HAPI4.sysinfo['db_total_records']>0){      
-                    var init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
-                    var qdomain;
-                    var rules = null;
-                    if(init_search){
-                        qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
-                        rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
+                    
+                    var request = {};
+
+                    if(window.hWin.HAPI4.postparams && window.hWin.HAPI4.postparams['q']){
+                        request = window.hWin.HAPI4.postparams;
                     }else{
-                        init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
-                    }
-                    if(!qdomain) qdomain = 'a';
-
-
-                    if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                        var request = {q: init_search, w: qdomain, f: 'map', source:'init' };
-
+                        var init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
+                        var qdomain;
+                        var rules = null;
+                        if(init_search){
+                            qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
+                            rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
+                        }else{
+                            init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
+                        }
+                        if(!qdomain) qdomain = 'a';
+                        request = {q: init_search, w: qdomain}
                         if(rules) request['rules'] = rules;
+                    }
+                    
+                    if(!window.hWin.HEURIST4.util.isempty(request['q'])){
+                        request['f'] = 'map';
+                        request['source'] = 'init';
 
                         setTimeout(function(){
                             window.hWin.HAPI4.RecordSearch.doSearch(window.hWin.document, request);//initial search
@@ -2303,6 +2310,8 @@ $.widget( "heurist.mainMenu", {
                         //trigger search finish to init some widgets
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
                     }
+                    
+                    window.hWin.HAPI4.postparams = null;
 
                 }
                 this._dashboardVisibility( true ); //after login

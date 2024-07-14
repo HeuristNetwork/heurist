@@ -643,6 +643,39 @@ window.hWin.HEURIST4.util = {
         $.ajax(options);
     },
 
+    
+    //
+    //
+    //
+    windowOpenInPost: function(actionUrl, windowName, windowFeatures, params) 
+    {
+        var mapForm = document.createElement("form");
+        var milliseconds = new Date().getTime();
+        windowName = windowName+milliseconds;
+        mapForm.target = windowName;
+        mapForm.method = "POST";
+        mapForm.action = actionUrl;
+        
+        for (const key in params){
+        //if (keyParams && valueParams && (keyParams.length == valueParams.length)){
+            //for (var i = 0; i < keyParams.length; i++){
+            var mapInput = document.createElement("input");
+                mapInput.type = "hidden";
+                mapInput.name = key;
+                mapInput.value = params[key];
+                mapForm.appendChild(mapInput);
+
+        }
+        document.body.appendChild(mapForm);
+
+        map = window.open('', windowName, windowFeatures);
+        if (map) {
+            mapForm.submit();
+        } else {
+            alert('You must allow popups for this map to work.');
+        }
+    },    
+    
     getScrollBarWidth: function() {
         var $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body'),
             widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();

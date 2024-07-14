@@ -352,6 +352,15 @@ if($isLocalHost){
             }
         });   
 
+<?php        
+/*
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $req_params = filter_input_array(INPUT_POST);
+    print 'window.hWin.HAPI4.postparams='.json_encode($req_params).';';
+    print 'console.log(window.hWin.HAPI4.postparams)';
+}     
+*/
+?>     
 
         //
         // cfg_widgets and cfg_layouts are defined in layout_default.js
@@ -438,7 +447,8 @@ if($isLocalHost){
                 //version is old 
                 return;
             }
-
+            
+            
             var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
             if(editRecID>0){
                 //edit record
@@ -505,8 +515,8 @@ if($isLocalHost){
 
 
         //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
-        
-        
+
+
         //if database is empty show welcome screen
         //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
         //    showTipOfTheDay(false);
@@ -527,10 +537,6 @@ if($isLocalHost){
                 }
             }
         }
-
-
-
-
 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 
