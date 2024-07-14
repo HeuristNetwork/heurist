@@ -168,7 +168,7 @@ class DbVerify {
                     $resMsg = $resMsg . <<<EOT
                         <tr>
                             <td><input type=checkbox name="$marker" value={$rec_id}></td>
-                            <td><img alt class="rft" style="background-image:url($url_icon)" src="$url_icon_placeholder"></td>
+                            <td><img alt class="rft" style="background-size:contain;background-image:url($url_icon)" src="$url_icon_placeholder"></td>
                             <td style="white-space: nowrap;"><a target=_new href="$url_rec">
                                     {$rec_id} <img alt src="$url_icon_extlink" style="vertical-align:middle" title="Click to edit record">
                                 </a></td>
@@ -1127,13 +1127,15 @@ HEADER;
         $total_count_rows = 0;
 
         //find repetative single value fields
-        $res = $mysqli->query('select rec_ID, rec_RecTypeID, dtl_DetailTypeID as dty_ID, rst_DisplayName as dty_Name, rec_Title, count(*)
-            from recDetails, Records, defRecStructure
-            where rec_ID = dtl_RecID  and rec_FlagTemporary!=1 
-            and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
-            and rst_MaxValues=1
-            GROUP BY dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
-            HAVING COUNT(*) > 1 ORDER BY rec_ID');
+        
+        //unfortunately this query does not work well for mySQL v5.7 (huma-num)
+        $res = $mysqli->query('SELECT rec_ID, rec_RecTypeID, dtl_DetailTypeID as dty_ID, rst_DisplayName as dty_Name, rec_Title, count(*) as cnt
+            FROM defRecStructure, Records, recDetails
+            WHERE rst_MaxValues=1 
+            AND rst_RecTypeID=rec_RecTypeID AND rec_FlagTemporary!=1 
+            AND rec_ID = dtl_RecID AND rst_DetailTypeID=dtl_DetailTypeID
+            GROUP BY rec_ID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
+            HAVING cnt > 1 ORDER BY rec_ID');
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 

@@ -802,12 +802,38 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 });
                 
                 if(ids.length>0){
+                    ids = ids.join(',');
                     window.open( window.hWin.HAPI4.baseURL_pro+'?db='
                                 +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
                 }
                 
                 return false;
             }});
+
+            //
+            // Show All link
+            //
+            this._on(this._$('a[data-show-all]'),{click:(event)=>{
+                
+                var name = $(event.target).attr('data-show-all');
+                var sels = this._$('input[name="'+name+'"]');
+                var ids = [];
+
+                sels.each((i,item)=>{
+                    ids.push(item.value);
+                });
+                
+                if(ids.length>0){
+                    ids = ids.join(',');
+                    //window.hWin.HEURIST4.util.windowOpenInPost(window.hWin.HAPI4.baseURL, '_blank', null,
+                    //    {db:window.hWin.HAPI4.database,w:'all',q:'ids:'+ids});
+                    window.open( window.hWin.HAPI4.baseURL_pro+'?db='
+                                +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
+                }
+                
+                return false;
+            }});
+
             
     }            
 
