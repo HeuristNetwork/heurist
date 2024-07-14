@@ -161,14 +161,23 @@ print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
 $long_reports = array();
 $long_reports_count = 0;
 
+$mysql_gone_away_error = false;
+$last_processed_database = null;
+
 foreach ($databases as $idx=>$db_name){
 
     $report='';
     
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
-        echo @$res[1]."\n";
-        continue;
+        $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
+        if($mysql_gone_away_error){
+            $last_processed_database = $db_name;
+            break;
+        }else{
+            echo @$res[1]."\n";
+            continue;
+        }
     }
     
     $system->set_mysqli($mysqli);
@@ -334,6 +343,12 @@ foreach ($databases as $idx=>$db_name){
 
 
 echo $eol.$tabs0.'finished'.$eol;
+
+if($mysql_gone_away_error){
+    $text = ' dailyCronJobs failed. MySQL server has gone away';
+    sendEmail(HEURIST_MAIL_TO_ADMIN, HEURIST_SERVER_NAME.$text,
+                $text.' It stopped on '.$last_processed_database);
+}
 
 if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
 
