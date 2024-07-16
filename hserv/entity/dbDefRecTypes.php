@@ -505,6 +505,9 @@ class DbDefRecTypes extends DbEntityBase
                 $ret = array();
                 foreach($this->data['fields'] as $idx => $record){
 
+                    // Remove leading and trailing spaces
+                    $record = array_map([USanitize::class, 'cleanupSpaces'], $record);
+
                     $ret[$idx] = array();
                     if(empty(@$record['rty_Name'])){ // check that a name has been provided
                         $ret[$idx][] = 'A record type name is required';
@@ -521,7 +524,7 @@ class DbDefRecTypes extends DbEntityBase
                     if(count($ret[$idx]) != 0){ // has error
 
                         unset($this->data['fields'][$idx]);
-                        $ret[$idx] = implode(' ', $ret[$idx]);
+                        $ret[$idx] = "<strong>Row #" . ($idx + 1) . "</strong>: " . implode(' ', $ret[$idx]);
                     }else{
 
                         $ret[$idx] = '';

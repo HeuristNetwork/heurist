@@ -1857,7 +1857,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
                     that._loadData(false);
 
-                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+                    let msg = context.result;;
+                    if(Array.isArray(context.result) || context.result.refresh_terms){
+
+                        msg = '<strong>Definitions imported</strong>, report:<br><br>';
+                        msg += context.result.join('<br>');    
+                    }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Record types imported',
                         {default_palette_class:that.options.default_palette_class});

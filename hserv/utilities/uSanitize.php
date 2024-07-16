@@ -319,6 +319,30 @@ class USanitize {
         $safe_message = preg_replace($regex, ' ', $message);
         error_log($safe_message);
     }
+
+    /**
+     * Removes leading, trailing and double (spaces and tabs only) spacing
+     * 
+     * @param mixed $value
+     * @return string
+     */
+    public static function cleanupSpaces($value){
+
+        if(is_string($value)){
+            $value = mb_ereg_replace('[ \t]{2,}', ' ', $value); // strip double spaces and tabs
+            return function_exists('super_trim') ? super_trim($value) : trim($value);
+        }
+
+        if(is_array($value)){ // need to traverse through the array
+            foreach($value as $idx => $val){
+                $value[$idx] = self::cleanupSpaces($val);
+            }
+        }
+
+        // else do nothing to avoid errors/faulty data
+
+        return $value;
+    }
         
 }
 ?>

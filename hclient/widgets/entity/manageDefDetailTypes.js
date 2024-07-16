@@ -2319,7 +2319,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     that._loadData(false);
 
-                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+                    let msg = context.result;;
+                    if(Array.isArray(context.result) || context.result.refresh_terms){
+
+                        msg = '<strong>Definitions imported</strong>, report:<br><br>';
+                        if(context.result.refresh_terms){
+                            delete context.result.refresh_terms;
+                        }
+    
+                        msg += context.result.join('<br>');
+                    }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Base fields imported',
                         {default_palette_class:that.options.default_palette_class});

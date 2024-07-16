@@ -422,8 +422,7 @@ class DbDefTerms extends DbEntityBase
                 $s2 = null;
 
                 // Strip trailing + double spacing
-                $this->records[$idx]['trm_Label'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['trm_Label']);
-                $this->records[$idx]['trm_Label'] = super_trim($this->records[$idx]['trm_Label']);
+                $this->records[$idx]['trm_Label'] = USanitize::cleanupSpaces($this->records[$idx]['trm_Label']);
 
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
 

@@ -424,6 +424,9 @@ class DbDefDetailTypes extends DbEntityBase
 
                 foreach($this->data['fields'] as $idx => $record){
 
+                    // Remove leading and trailing spaces
+                    $record = array_map([USanitize::class, 'cleanupSpaces'], $record);
+
                     $ret[$idx] = array();
                     if(empty(@$record['dty_Name'])){ // check that a name has been provided
                         $ret[$idx][] = 'A name is required';
@@ -459,8 +462,11 @@ class DbDefDetailTypes extends DbEntityBase
                                 $record['dty_Type'] = 'date';
                                 break;
 
+                            case 'number':
                             case 'numeric':
                             case 'float':
+                            case 'integer':
+                            case 'int':
                                 $this->data['fields'][$idx]['dty_Type'] = 'float';
                                 $record['dty_Type'] = 'float';
                                 break;
@@ -524,7 +530,7 @@ class DbDefDetailTypes extends DbEntityBase
                                         $record['dty_JsonTermIDTree'] = $new_id;
                                         $new_vocabs[$idx] = $new_id;
                                     }else{
-                                        $ret[$idx][] = 'Unable to create vocabulary for field \n Unable to retrieve existing vocabulary with matching name';
+                                        $ret[$idx][] = 'Unable to create vocabulary for field with matching name';
                                     }
                                 }
                             }else{
@@ -558,7 +564,7 @@ class DbDefDetailTypes extends DbEntityBase
                     if(count($ret[$idx]) != 0){ // has error
 
                         unset($this->data['fields'][$idx]);
-                        $ret[$idx] = implode(', ', $ret[$idx]);
+                        $ret[$idx] = "<strong>Row #" . ($idx + 1) . "</strong>: " . implode(', ', $ret[$idx]);
                     }else{
                         $ret[$idx] = '';
 
@@ -600,7 +606,7 @@ class DbDefDetailTypes extends DbEntityBase
 
                         $ret[$idx] = 'Created ID#'.$this->records[$i]['dty_ID'];
                         if(array_key_exists($idx, $new_vocabs)){
-                            $ret[$idx] .= '\n New vocabulary created ID#' . $new_vocabs[$idx];
+                            $ret[$idx] .= '<br> New vocabulary created ID#' . $new_vocabs[$idx];
                             $ret['refresh_terms'] = true;
                         }
                         $i++;

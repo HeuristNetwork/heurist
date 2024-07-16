@@ -573,7 +573,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             array_push($multivals, $k);
                         }
                         
-                        $field = trim($field);
+                        $field = USanitize::cleanupSpaces($field);
                         
                         //get field size before import to temp table                        
                         if($limit==0 && @$field_sizes[$k]!=='memo'){
