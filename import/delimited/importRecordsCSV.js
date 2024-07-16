@@ -1695,10 +1695,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '<td style="width:300px;">'
                 + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Heurist IDs for records being added/updated &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
-                + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
+                + '<select id="sa_dt_'+i+'" style="width:230px; font-size: 1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
-                + (isIndex||isIDfield?'class="indexes"':'')+'></select></span>';
+                + (isIndex||isIDfield?'class="indexes"':'')+'></select>';
             
+            // define new field button
+            s += (isIndex||isIDfield ? '' : `<button id="btn_dt_${i}" style="margin-left:5px;">Add field</button>`) + '</span>';
             
             s = s + '</td>';
 
@@ -1816,6 +1818,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         //init selectors
         _initFieldMapppingSelectors();
+        //init 'create field' buttons
+        _initCreateFieldButtons();
         //load data
         _getValuesFromImportTable();            
         //
@@ -2391,6 +2395,117 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('.skip_step').hide();
         }
         
+    }
+
+    //
+    // Allow users to add/define new fields to record structure
+    //
+    function _initCreateFieldButtons(){
+
+        let $btns = $('button[id^="btn_dt_"]');
+        if($btns.length == 0){
+            return;
+        }
+
+        $btns.button({
+            icon: 'ui-icon-plus'
+        });
+
+        $btns.on('click', (event) => {
+
+            let $btn = $(event.target);
+            if($btn.is('span')){
+                $btn.closest('button');
+            }
+
+            let fld_id = $btn.attr('id');
+            fld_id = fld_id.replace('btn', 'sa');
+
+            let $sel = $(`select[id^="${fld_id}"]`);
+            if($sel.length == 0){
+                return;
+            }
+
+            let rty_ID = imp_session['sequence'][currentSeqIndex]['rectype'];
+
+            let options = {
+                select_mode: 'manager',
+                edit_mode: 'editonly',
+                rec_ID: -1,
+                title: `Define new field for ${$Db.rty(rty_ID,'rty_Name')}`,
+                newFieldForRtyID: rty_ID,
+                selectOnSave: true,
+                onselect: (event, res) => {
+
+                    if(!res || (!res.selection && !res.updatedRstField)){
+                        return;
+                    }
+
+                    let recset = $Db.rst(rty_ID);
+                    recset.sort({'rst_DisplayOrder': -1});
+                    let last_rec = recset.getFirstRecord();
+
+                    let order = parseInt(last_rec.rst_DisplayOrder) + 1
+
+                    let dty_ID = res.selection ? res.selection[0] : res.updatedRstField;
+                    let dty = $Db.dty(dty_ID);
+                    let record = {
+                        rst_ID: dty_ID,
+                        rst_RecTypeID: rty_ID,
+                        rst_DisplayOrder: String(order).padStart(3, '0'),
+                        rst_DetailTypeID: dty_ID,
+                        rst_DisplayName: dty['dty_Name'],
+                        rst_DisplayHelpText: dty['dty_HelpText'],
+                        rst_DisplayExtendedDescription: dty['dty_ExtendedDescription']
+                    };
+                    if(res.rst_fields){
+                        record = $.extend(record, res.rst_fields);
+                    }else{
+                        record['rst_MaxValues'] = 1;
+                        record['rst_RequirementType'] = 'optional';
+                        record['rst_DisplayWidth'] = '0';
+                    }
+
+                    let request = {
+                        'a': 'save',
+                        'entity': 'defRecStructure',
+                        'request_id': window.hWin.HEURIST4.util.random(),
+                        'fields': record,
+                        'isfull': false
+                    };
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+                        if(response.status != window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            return;
+                        }
+
+                        // update cached record
+                        let rst_ID = response.data[0];
+                        if(rst_ID>0){
+
+                            record['rst_ID'] = String(rst_ID);
+                            $Db.rst(rty_ID).addRecord(rst_ID, record);
+
+                            // Set field selection to new field
+                            if(!imp_session['sequence'][currentSeqIndex]['mapping_flds']){
+                                imp_session['sequence'][currentSeqIndex]['mapping_flds'] = {};
+                            }
+                            let fld_index = fld_id.replace('sa_dt_', '');
+                            imp_session['sequence'][currentSeqIndex]['mapping_flds'][fld_index] = rst_ID;
+
+                            let $checked_boxes = $("input[id^='cbsa_dt_']:checked"); // save checked boxes
+                            _initFieldMapppingSelectors(); // recreate selects
+
+                            $checked_boxes.prop('checked', true).change(); // re-check boxes, they get reset by the above recreate
+                        }
+                    });
+                }
+            };
+
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', options);
+        });
     }
     
     //
