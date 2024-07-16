@@ -711,6 +711,23 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
     }
     $thumb_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&thumb=".$fileid;
 
+    $mode_3d_viewer = detect3D_byExt(@$params['var'][0]['ulf_MimeExt']);
+    
+    if($mode_3d_viewer!=null && $mode_3d_viewer!=''){
+
+        $playerURL = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$system->dbname()
+                    .'&file='.$fileid;
+
+        $result = '<a href="'.$playerURL.'" target="_blank"><img src="'.$thumb_url.'" '.$style.'/></a>';
+
+        /* IN IFRAME
+        if(($size==null || $size=='') && $style==''){
+            $size = ' height="640" width="800" ';
+        }
+        $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0" '
+            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+        */
+    }else
     if ( $is_video ) {
 
         if(($size==null || $size=='') && $style==''){
