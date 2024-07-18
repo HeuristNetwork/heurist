@@ -122,7 +122,13 @@ function hImportRecords(_max_upload_size) {
             _hideProgress(0);
             pbar_div.hide();
             if(textStatus!='abort'){
-                window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
+
+                let msg = textStatus+' '+errorThrown;
+                if(textStatus == 'error'){
+                    msg = 'An unknown error occurred while attempting to upload your CSV file.<br>This may be due to an unstable or slow internet connection.';
+                }
+
+                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
             }
         },
         done: function (e, response) {
