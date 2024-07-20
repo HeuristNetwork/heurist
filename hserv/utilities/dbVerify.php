@@ -97,9 +97,9 @@ class DbVerify {
     private function _terminatedByUser(){
 
         $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
-        if($this->keep_autocommit!=null){
-            $mysqli->rollback();                
-            if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit!=null && $this->mysqli){
+            $this->mysqli->rollback();                
+            if($this->keep_autocommit===true) $this->mysqli->autocommit(TRUE);
         }
         if($this->out){
             fclose($this->out);
@@ -1033,7 +1033,9 @@ HEADER;
             $this->_outStreamInit();
             fwrite($this->out, $resMsg);
             
-            $fixMsg = '<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
+            $fixMsg = 
+            '<div>NULL values are not useful in Heurist, as Heurist handles NULLs by storing no value. It is therefore perfectly safe to delete them</div>'
+            .'<div style="padding:20px 0px">To REMOVE empty fields, please click here: <button data-fix="empty_fields">Remove all null values</button></div>';
             $this->_printList('Records with empty fields', $fixMsg, $res, 'recCB5');
             
             $resMsg = $this->_outStreamRes();
@@ -1534,9 +1536,10 @@ HEADER;
         
         if(is_array($params) && @$params['fix']==1){
 
-            $rep = recreateRecDetailsDateIndex($this->system, true, false, 0); //see utils_db
+            $rep = recreateRecDetailsDateIndex($this->system, true, false, 0, @$params['progress_report_step']); //see utils_db
             
             if(is_bool($rep) && $rep==false){
+                
                 $response = $this->system->getError();    
                 $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 $resStatus = false;

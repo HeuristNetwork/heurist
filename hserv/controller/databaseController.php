@@ -411,7 +411,10 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                             $res2 = $dbVerify->$method($req_params);
                             
                             if(is_bool($res2) && $res2==false){
-                                $res = false;
+                                //terminated by user
+                                if(count($res)==0){
+                                    $res = false;
+                                }
                                 break;
                             }else{
                                 $counter++;
@@ -419,7 +422,9 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                                 if(DbUtils::setSessionVal($counter)){
                                     //terminated by user
                                     $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');                
-                                    $res = false;
+                                    if(count($res)==0){
+                                        $res = false;
+                                    }
                                     break;
                                 }
                             }
@@ -447,7 +452,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
         if(is_bool($res) && $res==false){
                 $response = $system->getError();
         }else{
-                $response = array("status"=>HEURIST_OK, "data"=> $res);
+                $response = array('status'=>HEURIST_OK, 'data'=> $res, 'message'=>$system->getErrorMsg());
         }
    }
 }

@@ -1074,7 +1074,7 @@
     // $need_populate - adds entries to recDetailsDateIndex
     // $json_for_record_details - update recDetails - change Plain string temporals to JSON 
     //
-    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0){
+    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0, $progress_report_step=-1){
         
         $mysqli = $system->get_mysqli();
         
@@ -1085,6 +1085,7 @@
         
         $err_prefix = '';//'Update date index: ';
         $cnt = 0;
+        $cnt_all = 0;
         $cnt_to_json = 0;
         $cnt_err = 0;
         $report = array();
@@ -1325,7 +1326,20 @@
                         //}
                     } 
                  
-                    
+                    $cnt_all++;
+                 
+                    if($progress_report_step>=0 && $cnt_all%1000==0 ){
+                        $percentage = intval($cnt_all*100/$cnt_dates);
+                        if(DbUtils::setSessionVal($progress_report_step.','.$percentage)){
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
+                            if($cnt_dates<150000){
+                                $mysqli->rollback();
+                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                            }
+                            return false;
+                        }
+                    }
                 }//while
                 $res->close();
                 

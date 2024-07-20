@@ -42,23 +42,25 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
             owner_ref:{name:'Record Owner/Creator'},
             pointer_targets:{name:'Pointer Targets'},
-            target_types:{name:'Target Types'},
             target_parent:{name:'Invalid Parents'},
             empty_fields:{name:'Empty Fields'},
-            single_value:{name:'Single Value Fields'},
-            required_fields:{name:'Required Fields'},
             nonstandard_fields:{name:'Non-Standard Fields'},
             
-            relationship_cache:{name:'Relationship Cache'},
             dateindex:{name:'Date Index'},
             multi_swf_values:{name:'Multiple Workflow Stages'},
             
-            date_values:{name:'Date Values'},
             geo_values:{name:'Geo Values'},
             term_values:{name:'Term Values'},
             expected_terms:{name:'Expected Terms'},
-            fld_spacing:{name:'Spaces in Values'},
-            invalid_chars:{name:'Invalid Characters'}
+            
+            target_types:{name:'Target Types', slow:1},
+            required_fields:{name:'Required Fields', slow:1},
+            single_value:{name:'Single Value Fields', slow:1},
+            relationship_cache:{name:'Relationship Cache', slow:1},
+            date_values:{name:'Date Values', slow:1},
+            fld_spacing:{name:'Spaces in Values', slow:1},
+            invalid_chars:{name:'Invalid Characters', slow:1}
+            
     },
         
     
@@ -321,8 +323,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     that._session_id = 0;
                     that._hideProgress();
                     //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    //    console.error(response);                   
+                    //console.error(response);                   
                     //}
+                    /*if(response.data && response.data.length>0){
+                        response.status = window.hWin.ResponseStatus.OK;
+                        that._afterActionEvenHandler(response.data);
+                    }*/
+                    //window.hWin.HEURIST4.msg.showMsgErr(response);
                 });
                 
                 
@@ -369,7 +376,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
                 if (response.status == window.hWin.ResponseStatus.OK) {
                     
-                    that._afterActionEvenHandler(response.data);
+                    that._afterActionEvenHandler(response.data, response.message);
                     
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -464,7 +471,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     //  after save event handler
     //
-    _afterActionEvenHandler: function( response ){
+    _afterActionEvenHandler: function( response, terminatation_message ){
         
         this._$('.ent_wrapper').hide();
         var div_res = this._$("#div_result").show();
@@ -530,6 +537,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }else if(this.options.actionName=='verify'){
             
             this._initVerificationResponse(response);
+            
+            if(terminatation_message){
+                window.hWin.HEURIST4.msg.showMsgErr(terminatation_message)
+            }
             
         }else{
             
@@ -677,23 +688,30 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _initVerification: function(){
         
-        var cont = this._$('#actions');
+        var cont1 = this._$('#actions');
+        var cont2 = this._$('#actions_slow');
         
         for (const action in this._verification_actions){
-           $('<li><label><input type="checkbox" checked class="verify-actions" value="'+action+'">'
+           let is_slow = (this._verification_actions[action].slow==1); 
+           let cont = (is_slow)?cont2:cont1;
+           $('<li><label><input type="checkbox" '+(is_slow?'data-slow="1"':'checked')+' class="verify-actions" value="'+action+'">'
                 +this._verification_actions[action].name+'</label></li>').appendTo(cont);
         } 
-        
+
         //
         // Mark all checkbox
         //
         this._on(this._$('input[data-mark-actions]'),{click:(event)=>{
             var is_checked = $(event.target).is(':checked');
-            this._$('input.verify-actions').prop('checked',is_checked);
+            this._$('input.verify-actions[data-slow!=1]').prop('checked',is_checked);
         }});
 
                 
         this._$("#div_result").css('overflow-y','auto');
+        
+        if(window.hWin.HAPI4.sysinfo.db_total_records>100000){
+            $('#notice_for_large_database').show();
+        }
     },
     
     //
@@ -701,7 +719,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _initVerificationResponse: function(response){
         
-            if(this._session_id==0) return;
+            //if(this._session_id==0) return;
+            this._session_id = 0;
     
             var div_res = this._$("#div_result");
             var is_reload = false;
