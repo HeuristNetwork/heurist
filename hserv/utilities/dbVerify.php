@@ -2105,7 +2105,7 @@ HEADER;
 
                     $stages = mysql__select_assoc2($mysqli, 
                         "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID="
-                        .DT_WORKFLOW_STAGE." ORDER BY dtl_ID", 'intval');
+                        .DT_WORKFLOW_STAGE." ORDER BY dtl_ID");
 
                     $final_stage = [];
                     $found_import = [];

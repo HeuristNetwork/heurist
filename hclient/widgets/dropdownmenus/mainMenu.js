@@ -692,7 +692,9 @@ $.widget( "heurist.mainMenu", {
                     var href = item.attr('href');
                     if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
                         item.attr('href','#')
-                        item.attr('data-link', href);
+                        if(href.length>1 && href[0]!='#'){
+                            item.attr('data-link', href);
+                        }
                     }
                 }
                 //localization   (without id - divider)

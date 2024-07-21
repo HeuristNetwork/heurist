@@ -78,8 +78,10 @@
 </li>
 
 <li style="padding-left:5px;">
-    <a href="#" id="menu-help-acknowledgements"
-        onclick="{ var contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
+    <a href="#menu-help-acknowledgements" id="menu-help-acknowledgements"
+        onclick="{ 
+                   window.hWin.HEURIST4.util.stopEvent(event);
+                   var contentURL = window.hWin.HAPI4.baseURL+'context_help/acknowledgementsHeurist.html';
                    window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
                    return false; }">
         Acknowledgements</a>
@@ -87,8 +89,9 @@
  
 
 <li style="padding-left:5px;">
-    <a href="#" id="menu-help-about"
-        onclick="{ var contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
+    <a href="#menu-help-about" id="menu-help-about"
+        onclick="{ window.hWin.HEURIST4.util.stopEvent(event);
+                   var contentURL = window.hWin.HAPI4.baseURL+'context_help/aboutHeurist.html';
                    window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', 
                    {isPopupDlg:true, width:500, height:390,
                    open: function( event, ui ) {
