@@ -2015,23 +2015,26 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         var mapped_fields = [];
         var needs_mapping = {};
-        var $selects = $("select[id^='sa_dt_']").filter(function(idx){ 
+        let do_partial_check = false;
+        var $selects = $("select[id^='sa_dt_']").filter(function(){
+
             if($(this).val() != ''){
                 mapped_fields.push($(this).val());
                 return false;
             }
-            needs_mapping[idx] = $(this);
+
+            let field_idx = $(this).attr('data-field');
+            needs_mapping[field_idx] = $(this);
+
+            do_partial_check = true;
             return true; 
         }); // retrieve selects w/ value
 
-        if($selects.length == 0 || needs_mapping.length == 0){
+        if($selects.length == 0 || !do_partial_check){
             return;
         }
 
         var rec_results = {};
-        var file_results = {};
-        var rec_column_parts = [];
-        var rcol_name = '';
 
         $selects.find('option').each(function(i, option){
 
@@ -2049,7 +2052,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     return;
                 }
 
-                rec_column_parts = option.text.split(' [');
+                let rec_column_parts = option.text.split(' [');
                 rcol_name = '';
 
                 if(rec_column_parts.length > 2){
@@ -2066,7 +2069,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var fcol_name = file_fields[idx];
 
-                if(fcol_name.length >= 4 || fcol_name.length == rcol_name.length){
+                if(fcol_name.length >= 3 || fcol_name.length == rcol_name.length){
                     // perform partial matching, based on the Sørensen–Dice Coefficient
 
                     var rcol_bigrams = [];
@@ -2307,7 +2310,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     // Compare fieldnames with column names within CSV data
                     var options = $item.find('option');
-                    var fcol_name = imp_session['columns'][idx];
+                    var fcol_name = imp_session['columns'][field_idx];
 
                     $.each(options, function(i, option){
 
@@ -3637,6 +3640,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 +' After import, you can find and correct these values using Verify > Verify integrity<br><br>'
                                 + 'Click "Show" button  for a list of rows with missing values');                            
                             }
+
+                            // auto check 'ignore errors', these errors can be picked up and fixed by verify integrity or manually
+                            $('#sa_ignore_errors').prop('checked', true).change();
                         }else{
                             $('#btnShowWarnings').hide();
                         }
@@ -3794,7 +3800,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                           +'<table class="tbresults"><tr><td>Total rows in import table:</td><td>'+ imp_result['total']
                           +'</td></tr><tr><td>Processed:</td><td>'+ imp_result['processed']
                           +'</td></tr><tr><td'+(imp_result['skipped']>0?' style="color:red"':'')
-                            +'>Skipped:</td><td>'+ imp_result['skipped']
+                            +'>Not processed (data errors):</td><td>'+ imp_result['skipped']
                           +'</td></tr><tr><td>Records added:</td><td>'+ imp_result['inserted']
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated'];
                           
@@ -4191,135 +4197,93 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
         else if(mode=='error' || mode=='warning'){    //----------------------------------------------------------------------------------- 
 
-                var is_missed = false;
-                var tabs = res[mode];
-                var k = 0;
+            var is_missed = false;
+            var tabs = res[mode];
+            var k = 0;
+            
+            var dt_to_col = {};
+
+            if(mode == 'warning'){
+                s = '<span style="color:red;">You MUST either change the field to a more lenient field, such as text, or check the \'Ignore validation. Add data "as is"\' box,<br>'
+                  + 'otherwise the rows containing these data will not be processed.</span>';
+            }
+
+            if(tabs.length>1){
+
+                s = s + '<div id="tabs_records"><ul>';
                 
-                var dt_to_col = {};
-
-                if(tabs.length>1){
-
-                    s = s + '<div id="tabs_records"><ul>';
+                for (;k<tabs.length;k++){
                     
-                    for (;k<tabs.length;k++){
-                        
-                        var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
-                                        ?(tabs[k]['values_error'].length+' '):'';
-                    
-                        checked_field = tabs[k]['field_checked'];
-                        if(checked_field && $.isArray(checked_field)){
-                            checked_field = checked_field[0];
-                        }
-                    
-                        var colname = imp_session['columns'][checked_field.substr(6)]; //field_
-                            s = s + '<li><a href="#rec__'+k+'" style="color:red">'
-                                        +colname+'<br><span style="font-size:0.7em">'
-                                        +cnt+tabs[k]['short_message']+'</span></a></li>';
-                        
-                    }
-                    s = s + '</ul>';
-                }
+                    var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
+                                    ?(tabs[k]['values_error'].length+' '):'';
                 
-                   
-                   
-                for (k=0;k<tabs.length;k++){
-                    var rec_tab = tabs[k];
-                    s = s + '<div id="rec__'+k+'">'
-
-                    var cnt = rec_tab['count_error'];
-                    var records = rec_tab['recs_error'];
-
-                    if(cnt>records.length){
-                        s = s + "<div class='error'><b>Only the first "+records.length+" of "+cnt+" rows are shown</b></div>";
-                    }
-
-                    var ismultivalue = false;
-                    var checked_field  = rec_tab['field_checked'];
+                    checked_field = tabs[k]['field_checked'];
                     if(checked_field && $.isArray(checked_field)){
                         checked_field = checked_field[0];
                     }
-                    if(checked_field){
-                        ismultivalue = imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
-                    }
-                    /*
-                    if(checked_field && checked_field.length>0){
-                        for (var m=0;m<checked_field.length;m++){    
-                            ismultivalue = imp_session['multivals'][checked_field[m].substr(6)];//highlight errors individually
-                            if(ismultivalue) break;
-                        }
-                    }*/
-                    
-                    s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br><br></div>";
-                    
-                    var is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
-
-                    //all this code only for small asterics
-                    var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
-
-    /*
-        //find distinct terms values
-        $is_enum = false;
-        if(!$is_missed){
-            $err_col = 0;
-            $m = 1;
-            foreach($mapped_fields as $field_name=>$dt_id) {
-                if($field_name==$checked_field && @$detDefs[$dt_id]){
-                    $err_col = $m;
-
-                    $dttype = $detDefs[$dt_id]['commonFields'][$idx_dt_type];
-                    $is_enum = ($dttype=='enum' || $dttype=='relationtype');
-                    break;
-                }
-                $m++;
-            }
-
-            if($is_enum){
-                $distinct_value = array();
-                if($records && is_array($records)) {
-                    foreach ($records as $row) {
-                        $value = $row[$err_col];
-                        if(!in_array($value, $distinct_value)){
-                            array_push($distinct_value, $value);
-                        }
-                    }
-                }
-
-                if(count($distinct_value)>0){
-                    //print distinct term values
-                    print '<div style="display:none;padding-bottom:10px;" id="distinct_terms_'.$k.'"><br>';
-                    foreach ($distinct_value as $value) {
-                        print '<div style="margin-left:30px;">'.$value.' </div>';
-                    }
-                    print '</div>';
-                    print '<div><a href="#" onclick="{top.HEURIST.util.popupTinyElement(window, document.getElementById(\'distinct_terms_'.
-                    $k.'\'),{\'no-close\':false, \'no-titlebar\':false });}">Get list of unrecognised terms</a>'.
-                    ' (can be imported into terms tree)<br>&nbsp;</div>';
-                }
-            }
-
-        }//end find distinct terms values
-    */
-    
-    
-                    var colname = imp_session['columns'][checked_field.substr(6)];
-                    var dt_id = res['mapped_fields'][checked_field]; //from validation
                 
-                        
-                    if(dt_id>0 && $Db.dty(dt_id, 'dty_Type')=='enum'){ //button to add terms
+                    var colname = imp_session['columns'][checked_field.substr(6)]; //field_
+                        s = s + '<li><a href="#rec__'+k+'" style="color:red">'
+                                    +colname+'<br><span style="font-size:0.7em">'
+                                    +cnt+tabs[k]['short_message']+'</span></a></li>';
                     
-                        var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
-                                        ?tabs[k]['values_error'].length:0;
-                        if(cnt>0){                 
-                            s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
-                            +'Adds '+cnt+' new terms to this field</button>';
-                              //'"'+$Db.dty(dt_id, 'dty_Name')+'"</button>';
-                            
-                            s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
-                                  +'Adds new terms to all fields</button>';
-                             
-                            s += '<br><br>';     
-                        }
+                }
+                s = s + '</ul>';
+            }
+   
+            for (k=0;k<tabs.length;k++){
+                var rec_tab = tabs[k];
+                s = s + '<div id="rec__'+k+'">'
+
+                var cnt = rec_tab['count_error'];
+                var records = rec_tab['recs_error'];
+
+                if(cnt>records.length){
+                    s = s + "<div class='error'><b>Only the first "+records.length+" of "+cnt+" rows are shown</b></div>";
+                }
+
+                var ismultivalue = false;
+                var checked_field  = rec_tab['field_checked'];
+                if(checked_field && $.isArray(checked_field)){
+                    checked_field = checked_field[0];
+                }
+                if(checked_field){
+                    ismultivalue = imp_session['multivals'][checked_field.substr(6)];//highlight errors individually
+                }
+                /*
+                if(checked_field && checked_field.length>0){
+                    for (var m=0;m<checked_field.length;m++){    
+                        ismultivalue = imp_session['multivals'][checked_field[m].substr(6)];//highlight errors individually
+                        if(ismultivalue) break;
                     }
+                }*/
+                
+                s = s + "<div><span class='error'>Values in red are invalid: </span> "+rec_tab['err_message']+"<br><br></div>";
+                
+                var is_missed = (rec_tab['err_message'].indexOf('a value must be supplied')>0);
+
+                //all this code only for small asterics
+                var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
+
+                var colname = imp_session['columns'][checked_field.substr(6)];
+                var dt_id = res['mapped_fields'][checked_field]; //from validation
+            
+                    
+                if(dt_id>0 && $Db.dty(dt_id, 'dty_Type')=='enum'){ //button to add terms
+                
+                    var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
+                                    ?tabs[k]['values_error'].length:0;
+                    if(cnt>0){                 
+                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
+                        +'Adds '+cnt+' new terms to this field</button>';
+                            //'"'+$Db.dty(dt_id, 'dty_Name')+'"</button>';
+                        
+                        s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
+                                +'Adds new terms to all fields</button>';
+                            
+                        s += '<br><br>';     
+                    }
+                }
     
     
                 s = s + '<table class="tbmain" width="100%"><thead><tr>' 
@@ -4398,7 +4362,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '</table></div>';
                 
             }//tabs
-            
 
             if(tabs.length>1){
                 s = s + '</div>';

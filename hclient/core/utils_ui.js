@@ -2430,7 +2430,16 @@ window.hWin.HEURIST4.ui = {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
-                            
+
+                            if(configMode.entity == 'SysImportFiles'){
+                                for(const idx in groups){
+                                    if(!Object.hasOwn(groups, idx)){
+                                        continue;
+                                    }
+                                    groups[idx]['title'] = groups[idx]['title'].replaceAll(/  +/g, '&nbsp;&nbsp;');
+                                }
+                            }
+
                             if(!window.hWin.HEURIST4.util.isArray(topOptions)){
                                 if(topOptions==true){
                                     topOptions = [{key:'',title:window.hWin.HR('select...')}];
