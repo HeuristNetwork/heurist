@@ -1586,7 +1586,7 @@ class System {
                 unset($_SESSION[$this->dbname_full]['need_refresh']);
             }
             
-            $fname = HEURIST_FILESTORE_DIR.$userID;
+            $fname = HEURIST_FILESTORE_DIR.basename($userID);
             if(file_exists($fname)){  //user info was updated by someone else
                 unlink($fname);
                 //marker for usr_info.verify_credentials to be sure that client side is also up to date 

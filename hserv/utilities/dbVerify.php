@@ -2451,7 +2451,9 @@ FIXMSG
                     if($autofix || ($fix_as_suggested && in_array($rec_id, $records_to_fix)) ){
 
                         if($row['new_value']!=null && $row['new_value']!=''){
-                            $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.intval($row['dtl_ID']));
+                            
+                            $query = 'update recDetails set dtl_Value=? where dtl_ID='.intval($row['dtl_ID']);
+                            mysql__exec_param_query($mysqli, $query, array('s',$row['new_value']), false );
                             
                             $row['dtl_Value'] .= ' <span style="color:green">changed to '.$row['new_value'].'</span>';
                         }else{

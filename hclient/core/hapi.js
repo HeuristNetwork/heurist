@@ -133,16 +133,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             window.hWin.HR = that.setLocale('ENG');
         }
 
-        if (!$.isFunction(that.fancybox)) {
+        if (!window.hWin.HEURIST4.util.isFunction(that.fancybox)) {
             that.fancybox = $.fn.fancybox; //to call from iframes
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
-        if (typeof hLayout !== 'undefined' && $.isFunction(hLayout)
+        if (typeof hLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hLayout)
             && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
             that.LayoutMgr = new hLayout();
         }
-        if (typeof hRecordSearch !== 'undefined' && $.isFunction(hRecordSearch)) {
+        if (typeof hRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hRecordSearch)) {
             that.RecordSearch = new hRecordSearch();
         }
 
@@ -289,7 +289,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                 }
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
@@ -298,7 +298,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     if ($.isPlainObject(response)) {
                         response.request_code = request_code;
                     }
@@ -322,7 +322,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
 
-                if ($.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
                 }
             }
@@ -379,7 +379,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
-        if ($.isFunction(callback)) {
+        if (window.hWin.HEURIST4.util.isFunction(callback)) {
             callback(response);
         }
     }
@@ -849,7 +849,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             user_log: function (activity, suplementary) {
 
-                if (typeof gtag !== 'undefined' && $.isFunction(gtag)) { //google log function
+                if (typeof gtag !== 'undefined' && window.hWin.HEURIST4.util.isFunction(gtag)) { //google log function
                     /*                    
                     Category
                     Action
@@ -1072,11 +1072,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         }      
                         
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                        if ($.isFunction(callback)) callback.call(that, true);
+                        if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, true);
 
                     } else {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
-                        if ($.isFunction(callback)) callback.call(that, false);
+                        if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
                     }
 
                 });
@@ -1252,7 +1252,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             checkPresenceOfRectype: function (rty_IDs, databaseID, message, callback, force_refresh) {
 
                 if (!rty_IDs) {
-                    if ($.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     return false;
                 } else if (!$.isArray(rty_IDs)) {
                     rty_IDs = [rty_IDs];
@@ -1278,7 +1278,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 //all record types are in this database
                 if (missed.length == 0) {
-                    if ($.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     return true;
                 }
 
@@ -1310,7 +1310,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         if ($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                         if (response.status == window.hWin.ResponseStatus.OK) {
-                                            if ($.isFunction(callback)) callback.call();
+                                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                                         } else {
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
@@ -1364,7 +1364,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(response);
                     }
                 });
@@ -1666,7 +1666,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     delete request['verify_credentials'];
                 }
 
-                if (!$.isFunction(callback)) {
+                if (!window.hWin.HEURIST4.util.isFunction(callback)) {
                     // it happens only of calback function is not set
                     // remove all this stuff since callback function is always defined
 
@@ -1840,7 +1840,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if(entityName=='records'){
                         entity_configs[entityName] = window.hWin.entityRecordCfg;                        
                     }
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(entity_configs[entityName]);
                     }
                     return entity_configs[entityName];
@@ -2032,7 +2032,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         if (response && response['uptodate']) { //relevance db definitions
                             
                             //console.log('definitions are up to date');
-                            if ($.isFunction(callback)) callback(this, true);
+                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
                         }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
@@ -2044,7 +2044,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
-                            if ($.isFunction(callback)) callback(this, true);
+                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
 
                         } else {
                             console.log('ERROR: ',response);                            
@@ -2081,7 +2081,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
                                 }
 
-                                if ($.isFunction(callback)) {
+                                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                                     callback(entity_data[response.data.entityName]);
                                 }
                             } else {
@@ -2092,7 +2092,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     );
                 } else {
                     //take from cache
-                    if ($.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(entity_data[entityName]);
                     } else {
                         //if user sure that data is already on client side
