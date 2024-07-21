@@ -1591,11 +1591,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function get_post_param($id) {
-        return @$_POST[$id];
+        return filter_input(INPUT_POST, $id); //@$_POST[$id];
     }
 
     protected function get_query_param($id) {
-        return @$_GET[$id];
+        return filter_input(INPUT_GET, $id); //@$_GET[$id];
     }
 
     protected function get_server_var($id) {
