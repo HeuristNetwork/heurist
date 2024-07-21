@@ -494,8 +494,10 @@ class DbUtils {
 
                 if($res2 !== 0) {
                     
-                    $msg = "mysqldump for ".htmlspecialchars($database_name_full)
-                                ." failed with a return code of {$res2}";
+                    $msg = 'mysqldump for '.htmlspecialchars($database_name_full)
+                            .' failed with a return status: '.($res2!=null?intval($res2):'unknown')
+                            .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
+
                     if($verbose) echo '<br>'.$msg;
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);

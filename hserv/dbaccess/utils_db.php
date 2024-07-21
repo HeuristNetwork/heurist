@@ -880,10 +880,11 @@
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1'; 
                 
-                exec($cmd, $arr_out, $res2);
+                $shell_res = exec($cmd, $arr_out, $res2);
 
-                if ($res2 != 0 ) {
-                    $error = 'Error: '.print_r($res2, true);
+                if ($res2 != 0) { // $shell_res is either empty or contains $arr_out as a string
+                    $error = 'Error. Shell returns status: '.($res2!=null?intval($res2):'unknown')
+                        .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
                 }else{
                     $res = true;
                 }
