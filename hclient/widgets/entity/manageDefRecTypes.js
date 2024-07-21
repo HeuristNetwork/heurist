@@ -369,6 +369,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
                     
                     this.recordList.resultList('resetGroups');
+                    this.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                        + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                        + 'Loading record types from template database</div>');
+                    this.recordList.resultList('option', 'empty_remark', '');
                     
                     var sMsg = window.hWin.HR('manageDefRectypes_longrequest');
                     sMsg = sMsg.replaceAll( '[url]', this.options.import_structure.database_url); 
@@ -1861,7 +1865,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
                     that._loadData(false);
 
-                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+                    let msg = context.result;;
+                    if(Array.isArray(context.result) || context.result.refresh_terms){
+
+                        msg = '<strong>Definitions imported</strong>, report:<br><br>';
+                        msg += context.result.join('<br>');    
+                    }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Record types imported',
                         {default_palette_class:that.options.default_palette_class});

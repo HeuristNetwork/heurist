@@ -29,9 +29,42 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
     
     _progressInterval:0,
+    _session_id:0,
     _select_file_dlg:null,
     Heurist_Reference_Index: 'Heurist_Reference_Index',
 
+    _verification_actions: {
+            dup_terms:{name:'Invalid/Duplicate Terms'},           
+            field_type:{name:'Field Types'},
+            default_values:{name:'Default Values'},
+            defgroups:{name:'Definitions Groups'},
+            title_mask:{name:'Title Masks'},
+            
+            owner_ref:{name:'Record Owner/Creator'},
+            pointer_targets:{name:'Pointer Targets'},
+            target_parent:{name:'Invalid Parents'},
+            empty_fields:{name:'Empty Fields'},
+            nonstandard_fields:{name:'Non-Standard Fields'},
+            
+            dateindex:{name:'Date Index'},
+            multi_swf_values:{name:'Multiple Workflow Stages'},
+            
+            geo_values:{name:'Geo Values'},
+            term_values:{name:'Term Values'},
+            expected_terms:{name:'Expected Terms'},
+            
+            target_types:{name:'Target Types', slow:1},
+            required_fields:{name:'Required Fields', slow:1},
+            single_value:{name:'Single Value Fields', slow:1},
+            relationship_cache:{name:'Relationship Cache', slow:1},
+            date_values:{name:'Date Values', slow:1},
+            fld_spacing:{name:'Spaces in Values', slow:1},
+            invalid_chars:{name:'Invalid Characters', slow:1}
+            
+    },
+        
+    
+    
     _init: function() {
 
         if(this.options.htmlContent=='' && this.options.actionName){
@@ -63,9 +96,26 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         else if(this.options.actionName=='clone')
         {
             this._checkNewDefinitions();
+            
+            if(window.hWin.HAPI4.sysinfo.db_total_records<50000){
+                this._$('.large-db').hide();
+            }else{
+                this._on(this._$('#nodata'), {click:()=>{
+                    if(this._$('#nodata').is(':checked')){
+                        this._$('.large-db').hide();
+                    }else{
+                        this._$('.large-db').show();
+                    }
+                }});
+            }
+            
         }else if(this.options.actionName=='restore')
         {
             this._on(this._$('#btnSelectZip'),{click:this._selectArchive});
+            
+        }else if(this.options.actionName=='verify')
+        {
+            this._initVerification();
         
         }else if(this.options.actionName=='register')
         {
@@ -88,7 +138,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         +'&db='+this.Heurist_Reference_Index)
                        
                 this._$('.ent_wrapper').hide();
-                var div_res = this._$("#div_result").show();
+                this._$("#div_result").show();
                         
             }else{
             
@@ -250,6 +300,44 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 } 
                 request['pwd'] = pwd;
            }
+           
+        }else if(this.options.actionName=='verify'){
+            
+            var actions=[];
+            var cont_steps = this._$('.progressbar_div > .loading > ol');
+            cont_steps.empty();
+            
+            this._$('.verify-actions:checked').each((i, item)=>{
+                var action = item.value
+                actions.push(action);
+                $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
+            });
+            
+            var btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
+            btn_stop.button();
+            this._on(btn_stop,{click:function(){
+                var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
+                var that = this;
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    that._session_id = 0;
+                    that._hideProgress();
+                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    //console.error(response);                   
+                    //}
+                    /*if(response.data && response.data.length>0){
+                        response.status = window.hWin.ResponseStatus.OK;
+                        that._afterActionEvenHandler(response.data);
+                    }*/
+                    //window.hWin.HEURIST4.msg.showMsgErr(response);
+                });
+                
+                
+            }});
+            
+            request = {checks: actions.length==Object.keys(this._verification_actions).length?'all':actions.join(',')};
+
+            
         }//end switch
 
         
@@ -261,17 +349,25 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('.archive').show();
            }
         }
-        
-        
+
+        this._sendRequest(request);        
+
+    },
+    
+    //
+    //
+    //    
+    _sendRequest: function(request)
+    {
         //unique session id    ------------------------
-        var session_id = Math.round((new Date()).getTime()/1000);
+        this._session_id = Math.round((new Date()).getTime()/1000);
         
         request['action'] = this.options.actionName;       
         request['db'] = window.hWin.HAPI4.database;
         request['locale'] = window.hWin.HAPI4.getLocale();
-        request['session'] = session_id;
+        request['session'] = this._session_id;
 
-        this._showProgress( session_id, false, (this.options.actionName=='register')?0:1000 );
+        this._showProgress( this._session_id, false, (this.options.actionName=='register')?0:1000 );
         var that = this;
         
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
@@ -280,17 +376,15 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
                 if (response.status == window.hWin.ResponseStatus.OK) {
                     
-                    that._afterActionEvenHandler(response.data);
+                    that._afterActionEvenHandler(response.data, response.message);
                     
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     that._$('.ent_wrapper').hide();
-                    that._$('#div_header').show();
+                    that._$('#div_header').show(); //show first page
                 }
               
         });
-
-        return;
     },
     
     // Action: Clone
@@ -377,7 +471,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     //  after save event handler
     //
-    _afterActionEvenHandler: function( response ){
+    _afterActionEvenHandler: function( response, terminatation_message ){
         
         this._$('.ent_wrapper').hide();
         var div_res = this._$("#div_result").show();
@@ -422,7 +516,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             this._$('.dbDescription').text(response.dbTitle);
             this._$('span.dbId').text(response.dbID);
             this._$('a.dbLink').attr('href',
-                window.hWin.HAPI4.baseURL_pro
+                window.hWin.HAPI4.sysinfo['referenceServerURL']
                     +'?fmt=edit&recID='+response.dbID
                     +'&db='+this.Heurist_Reference_Index);
             
@@ -439,6 +533,14 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     }
                }
             );
+            
+        }else if(this.options.actionName=='verify'){
+            
+            this._initVerificationResponse(response);
+            
+            if(terminatation_message){
+                window.hWin.HEURIST4.msg.showMsgErr(terminatation_message)
+            }
             
         }else{
             
@@ -483,9 +585,15 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var progress_div = this._$('.progressbar_div').show();
         
         var div_loading = progress_div.find('.loading').show();
-        div_loading.find('li').css('color','lightgray');
+        var all_li = div_loading.find('li');
+        if(all_li.length>0){
+            all_li.css('color','lightgray');
+            $(all_li[0]).css('color','black');
+            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  <span class="percentage">processing...</span></span>').appendTo( $(all_li[0]) );
+        }
+        
         var that = this;
-        var prevStep = 0;
+        var currStep = 0;
         
         if(t_interval>900){
 
@@ -501,14 +609,56 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         that._hideProgress();
                     }else if(response=='terminate' && is_autohide){
                         that._hideProgress();
-                    }else if(prevStep!=response){
-                        prevStep = response;
-                        if(window.hWin.HEURIST4.util.isNumber(prevStep)){
-                            var arr = div_loading.find('li').slice(0,prevStep);
-                            arr.css('color','black'); 
+                    }else if(response && currStep!=response){
+
+                        currStep = response;
+            
+                        let percentage = 0, newStep = 0;
+                        if(response.indexOf(',')>0){
+                            [newStep, percentage] = response.split(',');
                         }else{
-                            $('<li>'+prevStep+'</li>').appendTo(div_loading.find('ol'));
+                            newStep = response;    
                         }
+                        
+                        if(window.hWin.HEURIST4.util.isNumber(newStep)){
+                            //set finished step in solid black
+                            newStep = parseInt(newStep);
+                            var all_li = div_loading.find('li');
+                            if(newStep>0){
+                                var arr = all_li.slice(0,newStep);
+                                arr.css('color','black');
+                                arr.find('span.processing').remove(); //remove rotation icon
+                                //set current step (if exists) with loading icon
+                            }
+                            if(newStep<all_li.length){
+                                    if(percentage>0){
+                                        if(percentage>100) percentage = 100;
+                                        percentage = percentage+'%'; 
+                                    }else{
+                                        percentage = 'processing...'
+                                    }
+                                    var ele = $(all_li[newStep]).find('span.percentage');
+                                    if(ele.length==0){
+                                        percentage = '<span class="percentage">'+percentage+'</span>';
+                                        $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span> '
+                                            +percentage+'</span>')
+                                            .appendTo( $(all_li[newStep]) );
+                                        $(all_li[newStep]).css('color','black');
+                                    }else{
+                                        ele.text(percentage);
+                                    }
+                            }
+                        }else{
+                            let cont = div_loading.find('ol');
+                            var li_ele = cont.find('li:contains("'+newStep+'")');
+                            if(li_ele.length==0){
+                                $('<li>'+newStep+'</li>').appendTo(cont);    
+                            }else if(percentage>0){
+                                
+                            }
+                        }
+                            
+                        
                     }
                 },'text');
             
@@ -533,6 +683,178 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         
     },
     
+    //
+    //
+    //
+    _initVerification: function(){
+        
+        var cont1 = this._$('#actions');
+        var cont2 = this._$('#actions_slow');
+        
+        for (const action in this._verification_actions){
+           let is_slow = (this._verification_actions[action].slow==1); 
+           let cont = (is_slow)?cont2:cont1;
+           $('<li><label><input type="checkbox" '+(is_slow?'data-slow="1"':'checked')+' class="verify-actions" value="'+action+'">'
+                +this._verification_actions[action].name+'</label></li>').appendTo(cont);
+        } 
+
+        //
+        // Mark all checkbox
+        //
+        this._on(this._$('input[data-mark-actions]'),{click:(event)=>{
+            var is_checked = $(event.target).is(':checked');
+            this._$('input.verify-actions[data-slow!=1]').prop('checked',is_checked);
+        }});
+
+                
+        this._$("#div_result").css('overflow-y','auto');
+        
+        if(window.hWin.HAPI4.sysinfo.db_total_records>100000){
+            $('#notice_for_large_database').show();
+        }
+    },
+    
+    //
+    //
+    //
+    _initVerificationResponse: function(response){
+        
+            //if(this._session_id==0) return;
+            this._session_id = 0;
+    
+            var div_res = this._$("#div_result");
+            var is_reload = false;
+            
+            if(response['reload']){
+                is_reload = response['reload'];
+                delete response['reload'];
+            }
+            
+            if(is_reload){
+                
+                var action = Object.keys(response)[0];
+                var res = response[action];
+                
+                div_res.find('a[href="#'+action+'"]').parent()
+                    .css("background-color", res['status']?'#6AA84F':'#E60000');                
+                div_res.find('#'+action).empty().append($(res['message']));
+                
+                div_res.find('#linkbar').tabs('refresh');
+                
+            }else{            
+            
+                div_res.empty();
+                
+                var tabs = $('<div id="linkbar" style="margin:5px;"><ul id="links"></ul></div>').appendTo(div_res);
+                
+                var tab_header = div_res.find('#links');
+
+                for (const [action, res] of Object.entries(response)) {
+                    // add tab header
+                    $('<li style="background-color:'+(res['status']?'#6AA84F':'#E60000')+'"><a href="#'+action
+                        +'" style="white-space:nowrap;padding-right:10px;color:black;">'
+                        + this._verification_actions[action].name +'</a></li>')
+                        .appendTo(tab_header);
+                    // add content
+                    $('<div id="'+action+'" style="top:110px;padding:5px !important">'+res['message']+'</div>').appendTo(tabs);
+                }
+                tabs.tabs();
+            
+            }
+            
+            //
+            // FIX button
+            //
+            this._on(this._$('button[data-fix]').button(),{click:(event)=>{
+            
+                var action = $(event.target).attr('data-fix');
+                
+                var request = {checks: action, fix:1, reload:1};
+                
+                var marker = $(event.target).attr('data-selected');
+                var sel_ids = [];
+                
+                if(marker){
+                    var sels = this._$('input[name="'+marker+'"]:checked');
+
+                    sels.each((i,item)=>{
+                        sel_ids.push(item.value);
+                    });
+                    if(sel_ids.length==0){
+                        window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Select one record at least'));
+                        return;
+                    }else{
+                        request['recids'] = sel_ids.join(',');
+                    }
+                }
+                
+                var cont_steps = this._$('.progressbar_div > .loading > ol');
+                cont_steps.empty();
+                $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
+                
+                this._sendRequest(request);
+            }});
+            
+            //
+            // Mark all checkbox
+            //
+            this._on(this._$('input[data-mark-all]'),{click:(event)=>{
+                
+                var ele = $(event.target)
+                var name = ele.attr('data-mark-all');
+                var is_checked = ele.is(':checked');
+                
+                this._$('input[name="'+name+'"]').prop('checked',is_checked);
+            }});
+
+            //
+            // Show selected link
+            //
+            this._on(this._$('a[data-show-selected]'),{click:(event)=>{
+                
+                var name = $(event.target).attr('data-show-selected');
+                var sels = this._$('input[name="'+name+'"]:checked');
+                var ids = [];
+
+                sels.each((i,item)=>{
+                    ids.push(item.value);
+                });
+                
+                if(ids.length>0){
+                    ids = ids.join(',');
+                    window.open( window.hWin.HAPI4.baseURL_pro+'?db='
+                                +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
+                }
+                
+                return false;
+            }});
+
+            //
+            // Show All link
+            //
+            this._on(this._$('a[data-show-all]'),{click:(event)=>{
+                
+                var name = $(event.target).attr('data-show-all');
+                var sels = this._$('input[name="'+name+'"]');
+                var ids = [];
+
+                sels.each((i,item)=>{
+                    ids.push(item.value);
+                });
+                
+                if(ids.length>0){
+                    ids = ids.join(',');
+                    //window.hWin.HEURIST4.util.windowOpenInPost(window.hWin.HAPI4.baseURL, '_blank', null,
+                    //    {db:window.hWin.HAPI4.database,w:'all',q:'ids:'+ids});
+                    window.open( window.hWin.HAPI4.baseURL_pro+'?db='
+                                +window.hWin.HAPI4.database+'&w=all&q=ids:'+ids, '_blank' );
+                }
+                
+                return false;
+            }});
+
+            
+    }            
+
 
 });
-

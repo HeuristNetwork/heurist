@@ -5,7 +5,12 @@
         (beware of making many copies of databases containing many large files, as all uploaded files are copied).
         The target database is unregistered with the Heurist central index even if the source database is registered.    
         
-        
+        <p class="large-db">
+        If the database is large (eg. many records or many uploaded files) the clone will take a long time and your browser may become impatient and show a timeout. The clone should complete as it is a server-side operation. 
+        </p>
+        <p class="large-db">
+        Please give it a little time (15 minutes to an hour after the timeout) to complete the operation, then check the cloned database. If it shows the same number of records as the original the operation has been successful
+        </p>        
         <p>
             <label>No data (copy structure definitions only):&nbsp;<input type="checkbox" id="nodata" value="1"></label>
         </p>

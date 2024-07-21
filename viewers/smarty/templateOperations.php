@@ -33,12 +33,18 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
     $dir = HEURIST_SMARTY_TEMPLATES_DIR;
 
+    if(@$_SERVER['REQUEST_METHOD']=='POST'){
+        $req_params = filter_input_array(INPUT_POST);
+    }else{
+        $req_params = filter_input_array(INPUT_GET);    
+    }
+    
     if($mode){ //operations with template files
 
         //get name of template file
-        $template_file = (array_key_exists('template',$_REQUEST)?  USanitize::sanitizeFileName(basename(urldecode($_REQUEST['template'])),false) :null);
+        $template_file = (array_key_exists('template',$req_params)?  USanitize::sanitizeFileName(basename(urldecode($req_params['template'])),false) :null);
         //get template body from request (for execution from editor)
-        $template_body = (array_key_exists('template_body',$_REQUEST)?$_REQUEST['template_body']:null);
+        $template_body = (array_key_exists('template_body',$req_params)?$req_params['template_body']:null);
         
         $repAction = new ReportActions($system, $dir);
 
@@ -81,11 +87,11 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                 case 'import':
                 
                     $for_cms = null;
-                    if(@$_REQUEST['import_template']['cms_tmp_name']){ 
+                    if(@$req_params['import_template']['cms_tmp_name']){ 
                         //for CMS
-                        $for_cms = basename($_REQUEST['import_template']['cms_tmp_name']);
+                        $for_cms = basename($req_params['import_template']['cms_tmp_name']);
                         $params['size'] = 999;
-                        $params['name'] = @$_REQUEST['import_template']['name'];
+                        $params['name'] = @$req_params['import_template']['name'];
                     }else{
                         //for impport uloaded gpl
                         $params = @$_FILES['import_template'];

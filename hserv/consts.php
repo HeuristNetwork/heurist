@@ -176,6 +176,12 @@ define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_IN
 define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
 define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
 
+define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN', 
+    'It is also possible that drive space has been exhausted. '
+            .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
+            .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
+            .'<br><br>We apologise for any inconvenience');
+
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 

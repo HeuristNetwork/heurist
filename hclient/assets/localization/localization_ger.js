@@ -475,7 +475,7 @@ regional['GER'] = {
 //---------------------- END OF TRANSLATION 2021-10-19
 
     // EMAIL FORM WIDGET --------------------
-    'Email Us': 'E-Mail an uns'',
+    'Email Us': 'E-Mail an uns',
     'Your name': 'Dein Name',
     'Email Address': 'E-Mail-Adresse',
     'Email Message': 'Bericht',

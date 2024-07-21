@@ -636,23 +636,25 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         //that.loadanimation(true);
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
                 
                     if(_isTranslation){
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.close( { result:response.data } );
                     }else{
                         var recIDs = response.data;
                         //refresh local defintions
                         window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
                                 function(){
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                                     window.close( { result:recIDs } );            
                                 }
                         );
                     }
                     
                 }else{
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             });

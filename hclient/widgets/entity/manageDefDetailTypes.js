@@ -319,7 +319,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this.use_remote && this.options.import_structure){
 
             this.recordList.resultList('resetGroups');
-
+            this.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                + 'Loading detail fields from template database</div>');
+            this.recordList.resultList('option', 'empty_remark', '');
             
             //@todo - obtain definitions in new format
             //get definitions (in old format) from REMOTE database
@@ -2316,7 +2319,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     that._loadData(false);
 
-                    let msg = $.isArray(context.result) ? context.result.join('<br>') : context.result;
+                    let msg = context.result;;
+                    if(Array.isArray(context.result) || context.result.refresh_terms){
+
+                        msg = '<strong>Definitions imported</strong>, report:<br><br>';
+                        if(context.result.refresh_terms){
+                            delete context.result.refresh_terms;
+                        }
+    
+                        msg += context.result.join('<br>');
+                    }
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Base fields imported',
                         {default_palette_class:that.options.default_palette_class});

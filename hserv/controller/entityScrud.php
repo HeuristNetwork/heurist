@@ -49,13 +49,18 @@ if (@$argv) {
     require_once dirname(__FILE__).'/../System.php';
     require_once 'entityScrudSrv.php';
     
-    $dbname = @$_REQUEST['db'];
+    $dbname = filter_input(INPUT_POST,'db');//@$_REQUEST['db'];
+    if(!$dbname){
+        $dbname = filter_input(INPUT_GET,'db');
+    }
 
+    $system_init_failed = false;
+    
     $system = new System();
     
     $dbdef_cache = null;
     
-    $db_check_result = mysql__check_dbname( $dbname );
+    $db_check_result = mysql__check_dbname( $dbname ); //validate db name
     
     if($db_check_result===true 
         && isset($defaultRootFileUploadURL)
@@ -63,56 +68,88 @@ if (@$argv) {
     {
             $path = $system->getFileStoreRootFolder().basename($dbname).'/entity/';
             if(is_dir($path) && file_exists($path)){
-                $dbdef_cache = $path.'db.json';    
+                $dbdef_cache = $path.'dbdef_cache.json';    
             }
     }
     
     //
     // for structure request (to refresh db defs on client side)
     // entity parameters may be a name of structure table or
-    // all - get all definitions (from cache db.json if it exists)
-    // force_all - get all definitions and update db.json
-    // relevance - compare filetime with timestamp, if filetime is later - returns definitions
-    
+    // all - get all definitions (from cache dbdef_cache.json if it exists)
+    // force_all - get all definitions and update dbdef_cache.json
+    // relevance - compare filetime with timestamp, 
+    //                      if filetime is later - returns definitions
+    //                      otherwise file time
     if( @$_REQUEST['a']=='structure'
         && (@$_REQUEST['entity']=='all' || @$_REQUEST['entity']=='relevance')
         && $dbdef_cache!=null && file_exists($dbdef_cache)
         ){
             if($db_check_result===true){
+
+                $dbdef_cache_is_uptodate = true;
                 
                 if($_REQUEST['entity']=='relevance'){
                     $_REQUEST['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
+                    
                     if($file_time - intval($_REQUEST['timestamp']) < 5){
                         //defintions are up to date on client side
                         header('Content-type: application/json;charset=UTF-8');
                         print json_encode( array('uptodate'=>$file_time));
                         exit;
+                        //otherwise download dbdef cache
                     } 
-                }
-                    
-            
-                if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
-                {
-                    $host_params = USystem::getHostParams();
-                    // 
-                    if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
-                        $url = $defaultRootFileUploadURL;
+                }else{
+                    //check file time and last update time of definitions
+                    if($system->init($dbname)){
+                        $dbdef_mod = getDefinitionsModTime($system->get_mysqli()); //see utils_db
+                        
+                        if($dbdef_mod!=null){
+                            $db_time  = $dbdef_mod->getTimestamp();
+                            $file_time = filemtime($dbdef_cache);
+                            
+//error_log('DEBUG '.($db_time>$file_time).'  '.$dbdef_mod->format('Y-m-d h:i').' > '.date ('Y-m-d h:i UTC',$file_time).'  '.date_default_timezone_get());                            
+                            
+                            if($db_time>$file_time){ //db def cache is outdated
+                                  $_REQUEST['entity'] = 'force_all';                    
+                                  $dbdef_cache_is_uptodate = false;
+                            }    
+                        }
+                            
                     }else{
-                        //replace server name to avoid CORS issues
-                        $parts = explode('/',$defaultRootFileUploadURL);
-                        $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                        $system_init_failed = true;
                     }
                     
-                    //rawurlencode - required for security reports only
-                    $url = $url.rawurlencode($dbname).'/entity/db.json';
-                    header('Location: '.$url);
                     
-                }else{
-                    downloadFile('application/json', $dbdef_cache);
                 }
+                    
+                if($dbdef_cache_is_uptodate){    
+                    //download db def cache or direct access
+                    if(isset($allowWebAccessEntityFiles) && $allowWebAccessEntityFiles)
+                    {
+                        $host_params = USystem::getHostParams();
+                        // 
+                        if(strpos($defaultRootFileUploadURL, $host_params['server_url'])===0){
+                            $url = $defaultRootFileUploadURL;
+                        }else{
+                            //replace server name to avoid CORS issues
+                            $parts = explode('/',$defaultRootFileUploadURL);
+                            $url = $host_params['server_url'] . '/' . implode('/',array_slice($parts,3));
+                        }
+                        
+                        //rawurlencode - required for security reports only
+                        $url = $url.rawurlencode($dbname).'/entity/dbdef_cache.json';
+                        header('Location: '.$url);
+                        
+                    }else{
+                        downloadFile('application/json', $dbdef_cache);
+                    }
+                    exit;
+                }
+            }else{
+                exit;//wrong db name    
             }
-            exit;
+            
     }
     
     $response = array();
@@ -122,20 +159,24 @@ if (@$argv) {
     
     $need_config = false;
     
-    //USanitize::sanitizeRequest($_REQUEST);  it brokes json strings
-    USanitize::stripScriptTagInRequest($_REQUEST);
-    
-    if($system->init($dbname)){
+    if( (!$system_init_failed)  //system can be inited beforehand for getDefinitionsModTime 
+        && ($system->is_inited() || $system->init($dbname)))
+    {
 
+        //USanitize::sanitizeRequest($_REQUEST);  it brokes json strings
+        USanitize::stripScriptTagInRequest($_REQUEST); //remove <script>
+    
         $res = array();        
         $entities = array();
         
         if(@$_REQUEST['a']=='structure'){ 
             // see HAPI4.refreshEntityData
-            if(@$_REQUEST['entity']=='force_all' && $dbdef_cache!=null){
-                //remove cache
-                fileDelete($dbdef_cache);
+            if(@$_REQUEST['entity']=='force_all'){  //recreate cache
                 $_REQUEST['entity'] = 'all';
+                //remove cache
+                if($dbdef_cache!=null){
+                    $system->cleanDefCache(); //fileDelete($dbdef_cache);
+                }
             }else if(@$_REQUEST['entity']=='relevance'){
                 $_REQUEST['entity'] = 'all';    
             }
@@ -143,7 +184,7 @@ if (@$argv) {
             
             //update dbdef cache
             if(@$_REQUEST['entity']=='all' && $res!==false && $dbdef_cache!=null){
-                $res['timestamp'] = time();
+                $res['timestamp'] = time(); //update time for db def cache
                 file_put_contents($dbdef_cache, json_encode($res));
             }
             

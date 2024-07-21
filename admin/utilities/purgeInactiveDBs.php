@@ -146,16 +146,22 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
 $system = new System();
+
+if(!$is_shell){
+    $sysadmin_pwd = System::getAdminPwd();
+    if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
+        include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        //$response = $system->getError();
+        //print $response['message'];
+        exit;
+    }
+}
+
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
 
-if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-    //$response = $system->getError();
-    //print $response['message'];
-    exit;
-}
+
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
 if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'
@@ -302,17 +308,8 @@ foreach ($databases as $idx=>$db_name){
     $archive_db = ($vals['cnt']<11 && $diff>=6) || ($vals['cnt']<51 && $diff>=12) || ($vals['cnt']<101 && $diff>=24);
 
     if($archive_db){ // check for structure updates
-
-        $rst_mod = mysql__select_value($mysqli, 'SELECT MAX(rst_Modified) FROM defRecStructure');
-        $rty_mod = mysql__select_value($mysqli, 'SELECT MAX(rty_Modified) FROM defRecTypes');
-        $dty_mod = mysql__select_value($mysqli, 'SELECT MAX(dty_Modified) FROM defDetailTypes');
-        $trm_mod = mysql__select_value($mysqli, 'SELECT MAX(trm_Modified) FROM defTerms');
-
-        $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
-        $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
-        $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
-
-        $datetime3 = date_create($last_mod);
+    
+        $datetime3 = getDefinitionsModTime($mysqli); //see utils_db
 
         if(!$datetime3){
             echo $tabs0.$db_name.' cannot detect last structure modification date'.$eol;
@@ -393,7 +390,7 @@ if($need_email){
             $email_list[] = $db_name.'  '.$usr_owner.'  '
                 .$vals['cnt'].' records. Last update: '.$datetime2->format('Y-m-d').' ('.$diff.' months ago)';
                 
-            $report =  $diff.' months, n='.$vals['cnt'].' EMAIL';
+            $report =  $diff.' months, n='.$vals['cnt'].' INACTIVE';
         }else{
             //echo ' '.$vals['cnt'].' records '.$diff.' months. OK'."\n";
             //no report for db without action echo $eol;
@@ -478,6 +475,8 @@ if($need_email){
                 
                 if(hasTable($mysqli,$sif_table)){
                     $file_name = USanitize::sanitizeFileName($sif_list[$sif_id]);
+                    
+                    $file_name = preg_replace('/[()]/g','',$file_name);
                     
 //echo $file_name."\n";                    
 //echo strlen($file_name)."\n";                        

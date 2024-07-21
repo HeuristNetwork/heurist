@@ -44,29 +44,35 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
-$db = @$_REQUEST['db'];
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $req_params = filter_input_array(INPUT_POST);
+}else{
+    $req_params = filter_input_array(INPUT_GET);    
+}
+
+$db = @$req_params['db'];
 
 $error = System::dbname_check($db);
 
 if(!$error){
     
     $system = new System(); //without connection
-    $fileid = filter_var(@$_REQUEST['thumb'], FILTER_SANITIZE_STRING);
+    $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
     if($fileid!=null){ 
         
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
             
-            $force_recreate = (@$_REQUEST['refresh']==1);
+            $force_recreate = (@$req_params['refresh']==1);
 
             if($system->initPathConstants($db)){
 
-                $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
+                $thumbfile = HEURIST_THUMB_DIR.basename('ulf_'.$fileid.'.png');
                 
                 if(!$force_recreate && file_exists($thumbfile)){
                     
                     if(defined('HEURIST_THUMB_URL')){
                         //rawurlencode - required for security reports only
-                        $turl = HEURIST_THUMB_URL.'ulf_'.rawurlencode($fileid).'.png';
+                        $turl = HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png');
                         header('Location: '.$turl);    
                     }else{
                         downloadFile('image/png', $thumbfile);    
@@ -81,10 +87,10 @@ if(!$error){
             }
         }
     }
-    else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
+    else if(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
 
-        $fileid = @$_REQUEST['file']? $_REQUEST['file'] :intval(@$_REQUEST['ulf_ID']);
-        $size = @$_REQUEST['size'];
+        $fileid = @$req_params['file']? $req_params['file'] :intval(@$req_params['ulf_ID']);
+        $size = @$req_params['size'];
         
         if(is_numeric($fileid)){
             //Obfuscated id is allowed only
@@ -122,7 +128,7 @@ if(!$error){
             
             $params = null;
             
-            if( @$_REQUEST['mode']=='page')     //return full page with embed player
+            if( @$req_params['mode']=='page')     //return full page with embed player
             {
                 $mode_3d_viewer = detect3D_byExt($fileExt);
                 
@@ -132,7 +138,7 @@ if(!$error){
                     header('Location: '.$url);
                     
                 }else{
-                    $url = HEURIST_BASE_URL.'?mode=tag&db='.htmlspecialchars($db).'&file='.$fileid.'&size='.$size;
+                    $url = HEURIST_BASE_URL.'?mode=tag&db='.basename($db).'&file='.$fileid.'&size='.$size;
                 
                     ?>
                     <!DOCTYPE HTML>
@@ -151,10 +157,10 @@ if(!$error){
                 }
                     
             }else    
-            if( @$_REQUEST['mode']=='tag'){
+            if( @$req_params['mode']=='tag'){
 
                 //request may have special parameters for audio/video players
-                if(@$_REQUEST['fancybox']){
+                if(@$req_params['fancybox']){
                     $params = array('fancybox'=>1); //returns player in wrapper
                 }else{
                     $params = null;
@@ -168,19 +174,19 @@ if(!$error){
                 $filepath = resolveFilePath( $filepath );
                 $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
                 
-                if( @$_REQUEST['mode']=='metaonly'){ //get width and height for image file
+                if( @$req_params['mode']=='metaonly'){ //get width and height for image file
 
                     fileGetMetadata($fileinfo);
 
-                }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
+                }else if(@$req_params['metadata']){//download zip file: registered file and file with links to html and xml
                 
-                    downloadFileWithMetadata($system, $fileinfo, $_REQUEST['metadata']);
+                    downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
                 
                 }else
                 if(file_exists($filepath) && !is_dir($filepath)){
                     
                     //fix issue if original name does not have ext
-                    if(@$_REQUEST['embedplayer']!=1){
+                    if(@$req_params['embedplayer']!=1){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
                         if($ext==null || $ext==''){
@@ -194,7 +200,7 @@ if(!$error){
                         }    
                     }
                     
-                    $is_download = (@$_REQUEST['download']==1); 
+                    $is_download = (@$req_params['download']==1); 
 
                     if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
                                         && strpos($fileinfo['fullPath'],'file_uploads/')===0){
@@ -202,7 +208,7 @@ if(!$error){
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
 
-                        if(@$_REQUEST['fullres'] === '0'){ // get web cached version
+                        if(@$req_params['fullres'] === '0'){ // get web cached version
 
                             $cache_url = getWebImageCache($system, $fileinfo);
                             if($cache_url){
@@ -223,11 +229,11 @@ if(!$error){
                         
                     }else {
                         //see recordFile.php
-                        downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
+                        downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
                     }
                 }
                 else if($external_url){
-                    if(@$_REQUEST['mode']=='url'){
+                    if(@$req_params['mode']=='url'){
            
                         //if it does not start with http - this is relative path             
                         if(strpos($originalFileName,'_tiled')===0 ||

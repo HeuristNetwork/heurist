@@ -88,12 +88,16 @@ class DbUtils {
         self::$initialized = true;
     }
 
+    // 
+    // init progress session
+    //
     public static function setSessionId($id){
         self::$session_id = $id;
         self::$progress_step = 0;
     }
 
     //
+    // update progress session value
     // returns true if session has been terminated
     //
     public static function setSessionVal($session_val){
@@ -490,8 +494,10 @@ class DbUtils {
 
                 if($res2 !== 0) {
                     
-                    $msg = "mysqldump for ".htmlspecialchars($database_name_full)
-                                ." failed with a return code of {$res2}";
+                    $msg = 'mysqldump for '.htmlspecialchars($database_name_full)
+                            .' failed with a return status: '.($res2!=null?intval($res2):'unknown')
+                            .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
+
                     if($verbose) echo '<br>'.$msg;
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
@@ -1392,9 +1398,9 @@ class DbUtils {
 
                     //cleanup target database to avoid issues with addition of constraints
 
-                    //1. cleanup missed trm_InverseTermId
-                    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
-                        set t1.trm_InverseTermId=null
+                    //1. cleanup missed trm_InverseTermID
+                    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermID=t2.trm_ID
+                        set t1.trm_InverseTermID=null
                     where t1.trm_ID>0 and t2.trm_ID is NULL');
                     
                     //3. remove missed rl_SourceID and rl_TargetID

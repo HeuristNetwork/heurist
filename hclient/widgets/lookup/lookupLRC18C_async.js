@@ -369,7 +369,7 @@ _rendererResultList: function (recordset, record) {
         var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveTerms
         var oTerms = {
             terms: {
-                colNames: ['trm_Label', 'trm_InverseTermId', 'trm_Description', 'trm_Domain', 'trm_ParentTermID', 'trm_Status', 'trm_Code', 'trm_SemanticReferenceURL'],
+                colNames: ['trm_Label', 'trm_InverseTermID', 'trm_Description', 'trm_Domain', 'trm_ParentTermID', 'trm_Status', 'trm_Code', 'trm_SemanticReferenceURL'],
                 defs: {},
             }
         };

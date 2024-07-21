@@ -260,7 +260,7 @@ function do_print_table($desc, $tname, $where=null)
                 }
                 $vals[] = $val;   
             }   
-            print "('".implode("','",$vals)."'),"; 
+            print "('".implode("','",$vals)."'),";
 
             if ($_REQUEST['pretty']) {
                 print"<br>";

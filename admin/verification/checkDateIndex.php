@@ -1,4 +1,6 @@
 <?php
+//@TODO remove as soon as listDatabaseErrors will be replaced
+
 $is_included = (defined('PDIR'));
 $cache_missed = false;
 $is_upgrade = (@$_REQUEST['upgrade']==1);

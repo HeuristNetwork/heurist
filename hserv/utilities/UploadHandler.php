@@ -1521,11 +1521,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 }
             } else {
                 // Non-multipart uploads (PUT method support)
+                /*
+                Artem Osmakov  2024-06-23 HEURIST DOES NOT USE THIS MODE
                 file_put_contents(
                     $file_path,
                     fopen($this->options['input_stream'], 'r'),
                     $append_file ? FILE_APPEND : 0
                 );
+                */
             }
             
             //file does not exist
@@ -1588,15 +1591,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function get_post_param($id) {
-        return @$_POST[$id];
+        return filter_input(INPUT_POST, $id); //@$_POST[$id];
     }
 
     protected function get_query_param($id) {
-        return @$_GET[$id];
+        return filter_input(INPUT_GET, $id); //@$_GET[$id];
     }
 
     protected function get_server_var($id) {
-        return @$_SERVER[$id];
+        return filter_input(INPUT_SERVER, $id); //@$_SERVER[$id];
     }
 
     protected function handle_form_data($file, $index) {

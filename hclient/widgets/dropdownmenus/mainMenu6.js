@@ -302,7 +302,8 @@ $.widget( "heurist.mainMenu6", {
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     if(data && (data.ispreview || data.increment || data.search_realm)) return;
 
-                    let move_to_explore = !data.no_menu_switch ? false : true;
+                    // Check whether to block auto switch to explore menu
+                    let move_to_explore = !data.no_menu_switch;
                     if(Object.hasOwn(data, 'no_menu_switch')){
                         delete data.no_menu_switch;
                         delete window.hWin.HEURIST4.current_query_request.no_menu_switch;

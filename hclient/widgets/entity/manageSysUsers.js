@@ -384,7 +384,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
         + '</div>'
         + fld2('ugr_ID','flex:0 2 4em;')
-        + `<a class="truncate" style="flex:0 1 ${name_width}em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">`
+        + `<a class="truncate" style="flex:0 1 ${name_width}em" href="mailto:${fld('ugr_eMail')}" title="${fld('ugr_eMail')}">`
             + fld('ugr_Name')
         + '</a>'
         + '<div class="truncate" style="flex:0 3 10em;">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>';

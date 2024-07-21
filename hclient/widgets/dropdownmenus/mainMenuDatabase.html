@@ -105,13 +105,13 @@
 
 <li><a  id="menu-database-delete"
         data-container="admin"
-        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-trash">
+        data-user-admin-status="1" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-trash">
         Delete</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
 <li><a  id="menu-database-clear"
         data-container="admin"
-        data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion" data-logaction="db_Clear" data-icon="ui-icon-erase">
+        data-user-admin-status="1"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion" data-logaction="db_Clear" data-icon="ui-icon-erase">
         Clear</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
 
@@ -122,4 +122,13 @@
         data-user-admin-status="1"  data-user-experience-level="1"  data-icon="ui-icon-undo">
         Rollback</a> <!-- Holding value, substituted from localisation file using id -->
 </li>
+
+
+<li><a  id="menu-database-verify"
+        data-container="admin" data-logaction="verify_st"
+        data-user-admin-status="1"  data-user-experience-level="1 data-icon="ui-icon-check"
+        data-size="medium" data-header="Verify &gt; Errors in database structure" data-icon="ui-icon-check">
+        Verify integrity NEW</a>
+</li>
+
 </ul>

@@ -100,10 +100,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
         if($parent_id==null || $parent_id==''){
             $allowed_terms = 'all';
         }else{
-            if(self::$terms == null){
-               self::$terms = dbs_GetTerms(self::$system); 
-               self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
-            }  
+            self::getTerms();
             $allowed_terms = self::$dbs_terms->treeData($parent_id, 3);
         }
         
@@ -152,17 +149,21 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     return $allowed_terms;
 }
 
+public static function getTerms(){
+    if(self::$terms == null){
+        self::initialize();
+        self::$terms = dbs_GetTerms(self::$system); 
+        self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
+    }  
+    return self::$dbs_terms;
+}
+
 //
 // return term id with given label in given vocabulary 
 //
 public static function hasVocabGivenLabel($vocab_id, $label){
-
-        if(self::$terms == null){
-               self::$terms = dbs_GetTerms(self::$system); 
-               self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
-        }  
-        
-        return self::$dbs_terms->getTermByLabel($vocab_id, $label);
+    self::getTerms();
+    return self::$dbs_terms->getTermByLabel($vocab_id, $label);
 }
 
 
@@ -200,10 +201,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $withHierarchy = true;//(strpos($label,'.')>0); 
     
         self::initialize();
-        if(self::$terms==null){
-            self::$terms = dbs_GetTerms(self::$system);   
-            self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
-        }
+        self::getTerms();
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_labels = array();
@@ -277,10 +275,7 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
     if($dtyID==null || !@self::$dtyIDDefs_codes[$dtyID]){
     
         self::initialize();
-        if(self::$terms==null){
-            self::$terms = dbs_GetTerms(self::$system);   
-            self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
-        }
+        self::getTerms();
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_codes = array();

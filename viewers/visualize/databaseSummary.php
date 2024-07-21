@@ -24,15 +24,21 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
-        
-A:visited {
-    color: #6A7C99;
-    text-decoration: none;
-}
-A:link {
-    color: #6A7C99;
-    text-decoration: none;
-}        
+
+            A:visited {
+                color: #6A7C99;
+                text-decoration: none;
+            }
+            A:link {
+                color: #6A7C99;
+                text-decoration: none;
+            }
+            .external-link{
+                background-image: url('<?=HEURIST_BASE_URL?>hclient/assets/external_link_16x16.gif');
+                background-repeat: no-repeat;
+                padding-left: 12px;
+                padding-top: 1px;
+            }
 
             #rectypes {
                 height: 100%;
@@ -49,10 +55,6 @@ A:link {
                 vertical-align: top;
                 margin: 0px;
                 padding: 2px 1px;
-            }
-
-            .show {
-                /*display: none;*/
             }
 
             .empty-row {

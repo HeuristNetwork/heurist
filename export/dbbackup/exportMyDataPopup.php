@@ -541,44 +541,66 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            }
            
            
-           //remove db.json (database def cache) from entity
-           fileDelete(FOLDER_BACKUP.'/entity/db.json');
+           //remove dbdef_cache.json (database definitions cache) from entity folder
+           fileDelete(FOLDER_BACKUP.'/entity/db.json'); //old name
+           fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
             
 
            if(@$_REQUEST['include_hml']=='1'){
-            
-                //load hml output into string file and save it
-                if(@$_REQUEST['allrecs']!="1"){
-                    $userid = $system->get_user_id();
-                    $q = "owner:$userid"; //user:$userid OR
-                    $_REQUEST['depth'] = '5';
-                }else{
-                    $q = "sortby:-m";
-                    $_REQUEST['depth'] = '0';
-                    $_REQUEST['linkmode'] = 'none';
-                }
+
+               echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
+
+               /*
+               $hml_url = HEURIST_BASE_URL.'export/xml/flathml.php?w=all&a=1&rev=no&filename=1&db='.HEURIST_DBNAME;
+               
+               //load hml output into string file and save it
+               if(@$_REQUEST['allrecs']!="1"){
+                   $userid = $system->get_user_id();
+                   $q = "owner:$userid"; //user:$userid OR
+                   //$_REQUEST['depth'] = '5';
+                   $hml_url = $hml_url.'&depth=5';
+               }else{
+                   $q = "sortby:-m";
+                   //$_REQUEST['depth'] = '0';
+                   //$_REQUEST['linkmode'] = 'none';
+                   $hml_url = $hml_url.'&depth=0&linkmode=none';
+               }
+               $hml_url = $hml_url.'&q='.$q;
+               $outres = loadRemoteURLContentWithRange($hml_url, null, true);
+               */
+                          
+               //load hml output into string file and save it
+               if(@$_REQUEST['allrecs']!="1"){
+                   $userid = $system->get_user_id();
+                   $q = "owner:$userid"; //user:$userid OR
+                   $_REQUEST['depth'] = '5';
+               }else{
+                   $q = "sortby:-m";
+                   $_REQUEST['depth'] = '0';
+                   $_REQUEST['linkmode'] = 'none';
+               }
 
 
-                $_REQUEST['w'] = 'all';
-                $_REQUEST['a'] = '1';
-                $_REQUEST['q'] = $q;
-                $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-                $_REQUEST['filename'] = '1'; //FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
-                
-                echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
+               $_REQUEST['w'] = 'all';
+               $_REQUEST['a'] = '1';
+               $_REQUEST['q'] = $q;
+               $_REQUEST['rev'] = 'no'; //do not include reverse pointers
+               $_REQUEST['filename'] = '1'; //FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
 
-                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-                if (is_file($to_include)) {
-                    include_once $to_include;
-                }
+               $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+               if (is_file($to_include)) {
+                   include_once $to_include;
+               }
 
-                if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip){
-                    $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
-                }
-            
+//error_log('loadRemoteURLContentWithRange <<');        
+               
+               if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip){
+                   $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
+               }
+
            }//export HML
 
-            if(@$_REQUEST['include_tsv']=='1'){
+           if(@$_REQUEST['include_tsv']=='1'){
 
                 require_once dirname(__FILE__).'/../../hserv/records/export/recordsExportCSV.php';
 

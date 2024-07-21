@@ -23,12 +23,20 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 
-
 $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
 $system = new System();
+
+if(defined('ADMIN_PWD_REQUIRED') && ADMIN_PWD_REQUIRED==1){
+    $sysadmin_pwd = System::getAdminPwd();
+
+    if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
+        include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+}
 
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database

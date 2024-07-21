@@ -4104,6 +4104,472 @@ console.log('remove ', input_id);
         return ptrset;
     },
     
+    //
+    //
+    //
+    _createDateInput: function($input, $inputdiv){
+      
+        $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
+        
+        var that = this;
+
+        function __onDateChange(){
+
+            var value = $input.val();
+            
+            that.newvalues[$input.attr('id')] = value; 
+            
+            if(that.options.dtID>0){
+                
+                var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                if(isTemporalValue) {
+                    window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+
+                    var temporal = new Temporal(value);
+                    var content = '<p>'+temporal.toReadableExt('<br>')+'</p>';
+                    
+                    var $tooltip = $input.tooltip({
+                        items: "input.ui-widget-content",
+                        position: { // Post it to the right of $input
+                            my: "left+20 center",
+                            at: "right center",
+                            collision: "none"
+                        },
+                        show: { // Add slight delay to show
+                            delay: 500,
+                            duration: 0
+                        },
+                        content: function(){ // Provide text
+                            return content;
+                        },
+                        open: function(event, ui){ // Add custom CSS + class
+                            ui.tooltip.css({
+                                "width": "200px",
+                                "background": "rgb(209, 231, 231)",
+                                "font-size": "1.1em"
+                            })//.addClass('ui-heurist-populate');
+                        }
+                    });
+                    if(!that.tooltips) that.tooltips = {};
+                    that.tooltips[$input.attr('id')] = $tooltip; 
+                    
+                    $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
+                }else{
+                    $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                    that._removeTooltip($input.attr('id'));
+                }
+            }
+            
+            that.onChange();
+        }
+
+        function translateDate(date, from_calendar, to_calendar){
+
+            if(!$.isFunction($('body').calendarsPicker)){
+                return date;
+            }
+
+            if(typeof date == 'string'){
+                var date_parts = date.split('-');
+                date = {};
+                date['year'] = date_parts[0];
+
+                if(date_parts.length >= 2){
+                    date['month'] = date_parts[1];
+                }
+                if(date_parts.length == 3){
+                    date['day'] = date_parts[2];
+                }
+            }
+
+            var new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
+            if(!new_cal){
+                return date;
+            }
+
+            var julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
+            return to_calendar.fromJD(julian_date);
+        }
+
+        var defDate = $input.val();
+        var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
+                        .val(defDate).insertAfter( $input );
+
+        if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
+
+            var calendar = $.calendars.instance('gregorian');
+            var g_calendar = $.calendars.instance('gregorian');
+            var temporal = null;
+
+            try {
+                temporal = Temporal.parse($input.val());
+            } catch(e) {
+                temporal = null;
+            }
+            var cal_name = temporal ? temporal.getField('CLD') : null;
+            var tDate = temporal ? temporal.getTDate("DAT") : null;
+
+            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate && cal_name && cal_name.toLowerCase() !== 'gregorian'){
+
+                // change calendar to current type
+                calendar = $.calendars.instance(cal_name);                
+
+                if(tDate && tDate.getYear()){
+                    var hasMonth = tDate.getMonth();
+                    var hasDay = tDate.getDay();
+
+                    var month = hasMonth ? tDate.getMonth() : 1;
+                    var day = hasDay ? tDate.getDay() : 1;
+
+                    defDate = translateDate({'year': tDate.getYear(), 'month': month, 'day': day}, g_calendar, calendar);
+                }
+            }else if(tDate){
+                // remove padding zeroes from year
+                var year = Number(tDate.getYear());
+                defDate = tDate.toString('yyyy-MM-dd');
+                defDate = defDate.replace(tDate.getYear(), year);
+            }
+
+            $tinpt.val(defDate);
+
+            let minDate = '';
+            let maxDate = '';
+            let current_era = 0;
+            let value_era = current_era; // to reset current era
+
+            function setMinMaxDatesJPN(calendar, era, resetDefDate = false){
+
+                let limits = calendar.getEraLimits(era);
+
+                let new_options = {
+                    minDate: calendar.newDate(...limits[0]),
+                    maxDate: limits[1].length > 0 ? calendar.newDate(...limits[1]) : ''
+                };
+
+                let defDate = null;
+                if(resetDefDate === true){
+                    defDate = '';
+                }else if(resetDefDate !== false){
+                    defDate = resetDefDate;
+                }
+                if(resetDefDate !== null) { new_options['defaultDate'] = defDate; }
+
+                current_era = era;
+
+                $tinpt.calendarsPicker('option', new_options);
+            }
+
+            let $japanese_era = $('<select>', {class: 'calendars-eras'});
+            let eras = $.calendars.instance('japanese').getEras();
+            for(let i = 0; i < eras.length; i ++){
+                window.hWin.HEURIST4.ui.addoption($japanese_era[0], i, eras[i]);
+            }
+
+            fixCalendarPickerCMDs();
+
+            $tinpt.calendarsPicker({
+                calendar: calendar,
+                defaultDate: defDate,
+                //selectDefaultDate: false,
+                showOnFocus: false,
+                dateFormat: 'yyyy-mm-dd',
+                pickerClass: 'calendars-jumps',
+                minDate: minDate,
+                maxDate: maxDate,
+                onShow: function($calendar, calendar_locale, config){
+                    config.div.css('z-index', 9999999);
+
+                    if(calendar_locale.local.name.toLowerCase() === 'japanese'){ // Add eras dropdown to calendar
+
+                        let $year_dropdown = $($calendar.find('.calendars-month-year')[1]);
+                        let $era_sel = $japanese_era.clone().insertAfter($year_dropdown);
+
+                        function updateYearTitle(){ // update year's rollover
+
+                            let era_name = $era_sel.find(`option[value="${$era_sel.val()}"]`).text();
+                            if(window.hWin.HEURIST4.util.isempty(era_name)){
+                                $year_dropdown.attr('title', 'Change the year');
+                                return;
+                            }
+                            era_name = era_name.split(' (')[0];
+
+                            let cur_year = $year_dropdown.find('option[selected="selected"]').text();
+                            if(window.hWin.HEURIST4.util.isempty(cur_year)){
+                                $year_dropdown.attr('title', 'Change the year');
+                                return;
+                            }
+                            cur_year = cur_year.split(' (');
+                            cur_year[1] = cur_year[1].slice(0, -1);
+
+                            $year_dropdown.attr('title', `Change the year\n${era_name} ${cur_year[0]}\nGregorian year: ${cur_year[1]}`);
+                        }
+
+                        $year_dropdown.find('option').each((idx, option) => {
+                            let year = $(option).text();
+                            $(option).text(`${idx+1} (${year})`);
+                        });
+
+                        current_era = current_era >= 0 ? current_era : 0;
+
+                        $era_sel.val(current_era).attr('title', `Change the era\nCurrent era: ${eras[current_era]}`);
+                        updateYearTitle();
+
+                        that._on($year_dropdown, {
+                            change: updateYearTitle
+                        });
+                        that._on($era_sel, {
+                            change: () => {
+                                // Update min + max dates
+                                setMinMaxDatesJPN(calendar_locale, $era_sel.val(), true);
+                            }
+                        });
+                    }
+                },
+                onSelect: function(date){
+
+                    let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                    let value = $tinpt.val();
+                    const org_value = value;
+                    if(cur_cal.name.toLowerCase() === 'japanese'){
+                        value_era = cur_cal.getEraFromJapaneseStr(value);
+                        value = cur_cal.japaneseToGregorianStr(value);
+                    }
+                    let val_parts = value != '' ? value.split('-') : '';
+                    let new_temporal = new Temporal();
+
+                    if(val_parts.length == 4 && val_parts[0] == ''){ // for BC years
+                        val_parts.shift();
+                        val_parts[0] = '-'+val_parts[0];
+                    }
+
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(val_parts) && val_parts.length == 3 && cur_cal.local.name.toLowerCase() != 'gregorian'){
+
+                        let g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
+                        g_value = g_calendar.formatDate('yyyy-mm-dd', g_value);
+
+                        if(g_value != ''){
+                            try {
+
+                                var new_tdate = TDate.parse(g_value);
+
+                                new_temporal.setType('s');
+                                new_temporal.setTDate('DAT', new_tdate);
+                                new_temporal.addObjForString('CLD', cur_cal.local.name);
+                                new_temporal.addObjForString('CL2', org_value);
+
+                                value = new_temporal.toString();
+                            } catch(e) {}
+                        }
+                    }
+
+                    $input.val(value);
+                    window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
+                    __onDateChange();
+                },
+                onClose: function(){
+                    let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                    if(cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
+
+                        let date = true;
+                        try{
+                            date = new Temporal(that.newvalues[$input.attr('id')]).getTDate('DAT').toString('y-M-d');
+                        }catch(error){}
+                        setMinMaxDatesJPN(cur_cal, value_era, date);
+                    }
+                },
+                renderer: $.extend({}, $.calendars.picker.defaultRenderer,
+                        {picker: $.calendars.picker.defaultRenderer.picker.
+                            replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
+                            replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
+                showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
+            );
+
+            if(cal_name && cal_name.toLowerCase() === 'japanese'){
+                value_era = calendar.getEraFromGregorian(...$tinpt.val().split('-'));
+                setMinMaxDatesJPN(calendar, value_era);
+            }
+
+            this._on($input, {
+                'blur': function(event){ //update to changed value
+                    $tinpt.val($input.val());
+                }
+            });
+        }else{ // we use jquery datepicker for general use
+
+                /*var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
+                        .val($input.val()).insertAfter( $input );*/
+
+                var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
+                    .attr('data-picker',$input.attr('id'))
+                    .addClass('smallicon ui-icon ui-icon-calendar')
+                    .insertAfter( $tinpt );
+                    
+                
+                var $datepicker = $tinpt.datepicker({
+                    /*showOn: "button",
+                    buttonImage: "ui-icon-calendar",
+                    buttonImageOnly: true,*/
+                    showButtonPanel: true,
+                    changeMonth: true,
+                    changeYear: true,
+                    dateFormat: 'yy-mm-dd',
+                    beforeShow: function(){
+                        
+                        if(that.is_disabled) return false;
+                        var cv = $input.val();
+                        
+                        var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
+                        if(cv=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
+                            //$datepicker.datepicker( "setDate", prev_dp_value );    
+                            $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
+                        }else if(cv!='' && cv.indexOf('-')<0){
+                            $datepicker.datepicker( "option", "defaultDate", cv+'-01-01'); 
+                        }else if(cv!='') {
+                            $tinpt.val($input.val());
+                            //$datepicker.datepicker( "option", "setDate", cv); 
+                        }
+                    },
+                    onClose: function(dateText, inst){
+                        
+                        if($tinpt.val()!=''){
+                            $input.val($tinpt.val());
+                            window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
+                            __onDateChange();
+                        }else{
+                            $tinpt.val($input.val());
+                        }
+                    }
+                });
+                
+                this._on( $input, {
+                    keyup: function(event){
+                        if(!isNaN(String.fromCharCode(event.which))){
+                            var cv = $input.val();
+                            if(cv!='' && cv.indexOf('-')<0){
+                                $datepicker.datepicker( "setDate", cv+'-01-01');   
+                                $input.val(cv);
+                            }
+                        }
+                    },
+                    keypress: function (e) {
+                        var code = e.charCode || e.keyCode;
+                        var charValue = String.fromCharCode(code);
+                        var valid = false;
+
+                        if(charValue=='-'){
+                            valid = true;
+                        }else{
+                            valid = /^[0-9]+$/.test(charValue);
+                        }
+
+                        if(!valid){
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                        }
+
+                    },
+                    dblclick: function(){
+                        $btn_datepicker.click();
+                    }
+                });
+
+                //.button({icons:{primary: 'ui-icon-calendar'},text:false});
+               
+                
+                this._on( $btn_datepicker, { click: function(){
+                    
+                        if(that.is_disabled) return;
+                        
+                        $datepicker.datepicker( 'show' ); 
+                        $("#ui-datepicker-div").css("z-index", "999999 !important"); 
+                        //$(".ui-datepicker").css("z-index", "999999 !important");   
+                }} );
+        } 
+
+        if(this.options.is_faceted_search){
+            
+                $input.css({'max-width':'13ex','min-width':'13ex'});
+            
+        }else if(this.options.dtID>0){ //this is details of records
+
+            // temporal widget button
+            let $btn_temporal = $( '<span>', {
+                title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)', 
+                class: 'smallicon', 
+                style: 'margin-left: 1em;width: 55px !important;font-size: 0.8em;cursor: pointer;'
+            })
+            .text('range')
+            .appendTo( $inputdiv );
+
+            $('<span>', {class: 'ui-icon ui-icon-date-range', style: 'margin-left: 5px;'}).appendTo($btn_temporal); // date range icon
+
+            this._on( $btn_temporal, { click: function(){
+                
+                if(that.is_disabled) return;
+
+                var url = window.hWin.HAPI4.baseURL 
+                    + 'hclient/widgets/editing/editTemporalObject.html?'
+                    + encodeURIComponent(that.newvalues[$input.attr('id')]
+                                ?that.newvalues[$input.attr('id')]:$input.val());
+                
+                window.hWin.HEURIST4.msg.showDialog(url, {height:570, width:750,
+                    title: 'Temporal Object',
+                    class:'ui-heurist-populate-fade',
+                    //is_h6style: true,
+                    default_palette_class: 'ui-heurist-populate',
+                    callback: function(str){
+                        if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
+                            $input.val(str);    
+                            $input.change();
+                        }
+
+                        if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+
+                            var new_temporal = null;
+                            var new_cal = null;
+                            var new_date = null;
+                            try {
+                                new_temporal = Temporal.parse(str);
+                                new_cal = new_temporal.getField('CLD');
+                                new_cal = $.calendars.instance(new_cal);
+                                new_date = new_temporal.getTDate("DAT");
+                            } catch(e) {
+                                new_cal = null;
+                                new_date = null;
+                            }
+
+                            // Update calendar for calendarPicker
+                            if(new_cal && new_date && typeof $tinpt !== 'undefined'){
+
+                                if(new_date.getYear()){
+                                    var hasMonth = new_date.getMonth();
+                                    var hasDay = new_date.getDay();
+
+                                    var month = hasMonth ? new_date.getMonth() : 1;
+                                    var day = hasDay ? new_date.getDay() : 1;
+
+                                    new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
+                                    new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
+                                }
+
+                                var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                                if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
+                                    $tinpt.calendarsPicker('option', 'calendar', new_cal);
+                                }
+
+                                if(typeof new_date == 'string'){
+                                    $tinpt.val(new_date);
+                                }
+                            }
+                        }
+                    }
+                } );
+            }} );
+
+        }//temporal allowed
+        
+        $input.change(__onDateChange);
+    },
 
     //
     //

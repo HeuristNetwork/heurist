@@ -2431,8 +2431,17 @@ window.hWin.HEURIST4.ui = {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
-                            
-                            if(!Array.isArray(topOptions)){
+
+                            if(configMode.entity == 'SysImportFiles'){
+                                for(const idx in groups){
+                                    if(!Object.hasOwn(groups, idx)){
+                                        continue;
+                                    }
+                                    groups[idx]['title'] = groups[idx]['title'].replaceAll(/  +/g, '&nbsp;&nbsp;');
+                                }
+                            }
+
+                            if(!!Array.isArray(topOptions)){
                                 if(topOptions==true){
                                     topOptions = [{key:'',title:window.hWin.HR('select...')}];
                                 }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
@@ -2882,11 +2891,13 @@ window.hWin.HEURIST4.ui = {
     //
     preventNonAlphaNumeric: function(evt) {
         var theEvent = evt || window.event;
-        var key = theEvent.keyCode || theEvent.which;
+        var keyCode = theEvent.keyCode || theEvent.which;
         //if(key==37 || key==39) return;  // % '
-        if(key > 31){
-            key = String.fromCharCode( key );
-            if(!/^[a-zA-Z0-9_]+$/.test(key)){
+        if(keyCode > 31){
+            let key = String.fromCharCode( keyCode );
+            let is_percent = keyCode === 53 && theEvent.key === '%';
+            let is_underscore = keyCode === 189 && theEvent.key === '_';
+            if(is_percent || (!is_underscore && !/^[a-zA-Z0-9_]+$/.test(key))){
                 window.hWin.HEURIST4.util.stopEvent(theEvent);
             }
         }

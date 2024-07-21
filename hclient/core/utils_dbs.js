@@ -206,7 +206,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-     * Returns empty string if term is not found. trm_InverseTermId if inverse term is found or termID if it is not  
+     * Returns empty string if term is not found. trm_InverseTermID if inverse term is found or termID if it is not  
      * (used in record edit for relmarker fields)
      * 
      * @function getInverseTermById
@@ -218,7 +218,7 @@ window.hWin.HEURIST4.dbs = {
     getInverseTermById: function(termID){
         var term = $Db.trm(termID);
         if(term){
-            var invTermID = term['trm_InverseTermId'];
+            var invTermID = term['trm_InverseTermID'];
             if(invTermID>0) return invTermID;
             return termID;
         }
@@ -1133,20 +1133,51 @@ window.hWin.HEURIST4.dbs = {
         
     },
 
-    getLinkedRecordTypes_cache: function(rty_ID, need_separate){
+    /**
+     * @function getLinkedRecordTypes_cache
+     * Get list of record types linked and related, to or from, the provided record type
+     * @param {int} rty_ID record type ID
+     * @param {boolean} need_separate separate linkedto and relatedto 
+     * @param {string} direction {to,from,both} which direction to get, to the record type, from the record type, or both
+     * @returns {array|object} complete array or separated into groups of linked rty IDs
+     */
+    getLinkedRecordTypes_cache: function(rty_ID, need_separate, direction = 'to'){
 
-        let combined = {'linkedto': [], 'relatedto': []};
+        let combined = {};
+        if(direction != 'from'){
+            combined['linkedto'] = [];
+            combined['relatedto'] = [];
+        }
+        if(direction != 'to'){
+            combined['linkedfrom'] = [];
+            combined['relatedfrom'] = [];
+        }
+
         let rectypes = [];
 
         let links = $Db.rst_links();
 
-        if(Object.keys(links.direct).length > 0 && links.direct[rty_ID]){
-            combined['linkedto'] = links.direct[rty_ID].all;
-            rectypes.push(...links.direct[rty_ID].all);
+        if(direction != 'from'){ // get 'to' record types
+
+            if(Object.keys(links.direct).length > 0 && links.direct[rty_ID]){
+                combined['linkedto'] = links.direct[rty_ID].all;
+                rectypes.push(...links.direct[rty_ID].all);
+            }
+            if(Object.keys(links.rel_direct).length > 0 && links.rel_direct[rty_ID]){
+                combined['relatedto'] = links.rel_direct[rty_ID].all;
+                rectypes.push(...links.rel_direct[rty_ID].all);
+            }
         }
-        if(Object.keys(links.rel_direct).length > 0 && links.rel_direct[rty_ID]){
-            combined['relatedto'] = links.rel_direct[rty_ID].all;
-            rectypes.push(...links.rel_direct[rty_ID].all);
+        if(direction != 'to'){ // get 'from' record types
+
+            if(Object.keys(links.reverse).length > 0 && links.reverse[rty_ID]){
+                combined['linkedfrom'] = links.reverse[rty_ID].all;
+                rectypes.push(...links.reverse[rty_ID].all);
+            }
+            if(Object.keys(links.rel_reverse).length > 0 && links.rel_reverse[rty_ID]){
+                combined['relatedfrom'] = links.rel_reverse[rty_ID].all;
+                rectypes.push(...links.rel_reverse[rty_ID].all);
+            }
         }
 
         rectypes = [...new Set(rectypes)]; // remove dups from array version

@@ -132,13 +132,13 @@ class DbDefTerms extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,'
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermID,trm_Description,'
             .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermId,'
+            $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermID,'
             .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status,trm_Domain,trm_SemanticReferenceURL'
             .',trm_OriginatingDBID,trm_IDInOriginatingDB, "" as trm_Parents'; //trm_Modified
@@ -422,8 +422,7 @@ class DbDefTerms extends DbEntityBase
                 $s2 = null;
 
                 // Strip trailing + double spacing
-                $this->records[$idx]['trm_Label'] = preg_replace("/\s\s+/", ' ', $this->records[$idx]['trm_Label']);
-                $this->records[$idx]['trm_Label'] = super_trim($this->records[$idx]['trm_Label']);
+                $this->records[$idx]['trm_Label'] = USanitize::cleanupSpaces($this->records[$idx]['trm_Label']);
 
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
 
@@ -508,7 +507,7 @@ class DbDefTerms extends DbEntityBase
             $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s'); //reset
             if(@$this->records[$idx]['trm_Domain']!='relation') $this->records[$idx]['trm_Domain'] = 'enum';
             if(!@$this->records[$idx]['trm_Status']) $this->records[$idx]['trm_Status'] = 'open';
-            if(!(@$this->records[$idx]['trm_InverseTermId']>0)) $this->records[$idx]['trm_InverseTermId'] = null;
+            if(!(@$this->records[$idx]['trm_InverseTermID']>0)) $this->records[$idx]['trm_InverseTermID'] = null;
             if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) $this->records[$idx]['trm_OrderInBranch'] = null;
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
@@ -539,7 +538,7 @@ class DbDefTerms extends DbEntityBase
                 if(!$record['is_new']){
 
                     $this->records[$idx]['old_inverse_id'] = mysql__select_value($mysqli, 
-                        'select trm_InverseTermId from defTerms where trm_ID='.$record['trm_ID']);
+                        'select trm_InverseTermID from defTerms where trm_ID='.$record['trm_ID']);
 
                 }
             }
@@ -580,7 +579,7 @@ class DbDefTerms extends DbEntityBase
                         $this->renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
                     
-                    $inverse_termid = @$record['trm_InverseTermId'];
+                    $inverse_termid = @$record['trm_InverseTermID'];
                     $inverse_termid_old = @$record['old_inverse_id'];
                     $is_symmetrical = (@$record['trm_InverseSymmetrical']!=0);
                                         
@@ -588,12 +587,12 @@ class DbDefTerms extends DbEntityBase
                         $trmID = $record['trm_ID'];
                         if($inverse_termid>0){
                             //set mutual inversion for inverse term
-                            $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
+                            $query = "update defTerms set trm_InverseTermID=$trmID where trm_ID=$inverse_termid";
                             $res = $mysqli->query($query);
                         }
                         if ($inverse_termid_old>0){
                             //clear mutual inversion for previous inversion
-                            $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old and trm_InverseTermId=$trmID";
+                            $query = "update defTerms set trm_InverseTermID=null where trm_ID=$inverse_termid_old and trm_InverseTermID=$trmID";
                             $res = $mysqli->query($query);
                         }
                     }

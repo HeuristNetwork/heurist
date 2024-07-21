@@ -464,9 +464,9 @@ $.widget( "heurist.recordAction", {
                 var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._hideProgress();
-                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        console.error(response);                   
-                    }
+                    //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    //    console.error(response);                   
+                    //}
                 });
             }});
         

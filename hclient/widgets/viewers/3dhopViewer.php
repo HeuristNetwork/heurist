@@ -32,17 +32,23 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 @todo id - record with 3object media
 
 */
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $req_params = filter_input_array(INPUT_POST);
+}else{
+    $req_params = filter_input_array(INPUT_GET);    
+}    
+
 $is_not_inited = true;
-$db = filter_var(@$_REQUEST['db'], FILTER_SANITIZE_STRING);
+$db = @$req_params['db'];
 
 // init main system class
 $system = new System();
 
 if($system->init($db, true, false)){
 
-    if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID is obfuscation id here
+    if(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
 
-        $fileid = filter_var(@$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'], FILTER_SANITIZE_STRING);
+        $fileid = @$req_params['file']? $req_params['file'] :@$req_params['ulf_ID'];
             
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
@@ -62,7 +68,7 @@ if($system->init($db, true, false)){
             $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');      
         }
         
-    }else{ // if(@$_REQUEST['id']){
+    }else{ // if(@$req_params['id']){
         $system->addError(HEURIST_INVALID_REQUEST, 'Parameter "file" is not defined');
     }
 }

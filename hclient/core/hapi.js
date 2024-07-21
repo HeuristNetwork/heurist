@@ -133,16 +133,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             window.hWin.HR = that.setLocale('ENG');
         }
 
-        if (!window.hWin.HUL.isFunction(that.fancybox)) {
+        if (!window.hWin.HEURIST4.util.isFunction(that.fancybox)) {
             that.fancybox = $.fn.fancybox; //to call from iframes
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
-        if (typeof hLayout !== 'undefined' && window.hWin.HUL.isFunction(hLayout)
+        if (typeof hLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hLayout)
             && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
             that.LayoutMgr = new hLayout();
         }
-        if (typeof hRecordSearch !== 'undefined' && window.hWin.HUL.isFunction(hRecordSearch)) {
+        if (typeof hRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hRecordSearch)) {
             that.RecordSearch = new hRecordSearch();
         }
 
@@ -289,7 +289,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                 }
 
-                if (window.hWin.HUL.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
@@ -298,7 +298,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                if (window.hWin.HUL.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     if ($.isPlainObject(response)) {
                         response.request_code = request_code;
                     }
@@ -322,7 +322,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
 
-                if (window.hWin.HUL.isFunction(callback)) {
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
                 }
             }
@@ -379,7 +379,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
-        if (window.hWin.HUL.isFunction(callback)) {
+        if (window.hWin.HEURIST4.util.isFunction(callback)) {
             callback(response);
         }
     }
@@ -849,7 +849,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             user_log: function (activity, suplementary) {
 
-                if (typeof gtag !== 'undefined' && window.hWin.HUL.isFunction(gtag)) { //google log function
+                if (typeof gtag !== 'undefined' && window.hWin.HEURIST4.util.isFunction(gtag)) { //google log function
                     /*                    
                     Category
                     Action
@@ -1072,11 +1072,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         }      
                         
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                        if (window.hWin.HUL.isFunction(callback)) callback.call(that, true);
+                        if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, true);
 
                     } else {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
-                        if (window.hWin.HUL.isFunction(callback)) callback.call(that, false);
+                        if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, false);
                     }
 
                 });
@@ -1252,7 +1252,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             checkPresenceOfRectype: function (rty_IDs, databaseID, message, callback, force_refresh) {
 
                 if (!rty_IDs) {
-                    if (window.hWin.HUL.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     return false;
                 } else if (!Array.isArray(rty_IDs)) {
                     rty_IDs = [rty_IDs];
@@ -1278,7 +1278,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 //all record types are in this database
                 if (missed.length == 0) {
-                    if (window.hWin.HUL.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     return true;
                 }
 
@@ -1310,7 +1310,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         if ($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                         if (response.status == window.hWin.ResponseStatus.OK) {
-                                            if (window.hWin.HUL.isFunction(callback)) callback.call();
+                                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                                         } else {
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
@@ -1364,7 +1364,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
-                    if (window.hWin.HUL.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(response);
                     }
                 });
@@ -1666,7 +1666,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     delete request['verify_credentials'];
                 }
 
-                if (!window.hWin.HUL.isFunction(callback)) {
+                if (!window.hWin.HEURIST4.util.isFunction(callback)) {
                     // it happens only of calback function is not set
                     // remove all this stuff since callback function is always defined
 
@@ -1840,7 +1840,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     if(entityName=='records'){
                         entity_configs[entityName] = window.hWin.entityRecordCfg;                        
                     }
-                    if (window.hWin.HUL.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(entity_configs[entityName]);
                     }
                     return entity_configs[entityName];
@@ -1993,7 +1993,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             // Check that definitions are up to date on client side
             //            
-            // It erases db definitions cache on server side (db.json) on every structure change - 
+            // It erases db definitions cache on server side (dbdef_cache.json) on every structure change - 
             // it means that every new heurist window obtains fresh set of definitions.
             // For existing instances (ie in different browser window) it verifies the  relevance of definitions every 20 seconds.
             // see initialLoadDatabaseDefintions 
@@ -2029,10 +2029,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 _callserver('entityScrud', params,
                     function (response) {
                         
-                        if (response && response['uptodate']) {
+                        if (response && response['uptodate']) { //relevance db definitions
                             
                             //console.log('definitions are up to date');
-                            if ($.isFunction(callback)) callback(this, true);
+                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
                         }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
@@ -2044,7 +2044,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
-                            if (window.hWin.HUL.isFunction(callback)) callback(this, true);
+                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
 
                         } else {
                             console.log('ERROR: ',response);                            
@@ -2081,7 +2081,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
                                 }
 
-                                if (window.hWin.HUL.isFunction(callback)) {
+                                if (window.hWin.HEURIST4.util.isFunction(callback)) {
                                     callback(entity_data[response.data.entityName]);
                                 }
                             } else {
@@ -2092,7 +2092,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     );
                 } else {
                     //take from cache
-                    if (window.hWin.HUL.isFunction(callback)) {
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
                         callback(entity_data[entityName]);
                     } else {
                         //if user sure that data is already on client side
@@ -2115,8 +2115,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 if(entityName=='timestamp'){ 
                     
-                    entity_timestamp = Number(data[entityName]); 
-
+                    entity_timestamp = Number(data[entityName]); //db structure cache file last update time
+                    //console.log('entity_timestamp: ', entity_timestamp)
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;

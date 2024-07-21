@@ -26,7 +26,10 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
 
 $system = new System();
-if($system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+
+$sysadmin_pwd = System::getAdminPwd();
+
+if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
     include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
 }

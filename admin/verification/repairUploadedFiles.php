@@ -33,7 +33,13 @@ $rv = array();
 // init main system class
 $system = new System();
 
-if(!$system->init(@$_REQUEST['db'])){
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $req_params = filter_input_array(INPUT_POST);
+}else{
+    $req_params = filter_input_array(INPUT_GET);    
+}
+
+if(!$system->init(@$req_params['db'])){
     $response = $system->getError();
     print json_encode($response);
     return;
@@ -52,8 +58,8 @@ $mysqli = $system->get_mysqli();
 
 
 $data = null;
-if(@$_REQUEST['data']){
-    $data = json_decode(urldecode(@$_REQUEST['data']), true);
+if(@$req_params['data']){
+    $data = json_decode(urldecode(@$req_params['data']), true);
 }else{
     $response = $system->addError(HEURIST_INVALID_REQUEST,
                  'Data not defined! Wrong request.');

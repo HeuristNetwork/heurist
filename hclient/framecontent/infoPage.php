@@ -120,10 +120,16 @@ if(!isset($message)){
             function onHapiInit() {
                 let $login_ele = $(document).find('.login-link');
                 if($login_ele.length > 0 && window.hWin && window.hWin.HEURIST4){
+                    let reload_target = $login_ele.attr('reload');
                     $login_ele.on('click', () => {
                         if(window.hWin && window.hWin.HEURIST4){
                             window.hWin.HEURIST4.ui.checkAndLogin(true, () => {
-                                location.reload();
+                                if(reload_target=='home'){
+                                    document.location = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+                                }else{
+                                    location.reload();    
+                                }
+                                
                             });
                         }
                     });

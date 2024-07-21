@@ -819,14 +819,14 @@ $.widget( "heurist.resultList", {
         
         if(this.options.is_h6style && this.options.show_search_form){
 
-                this.div_search_form = $('<div>').search({
-                        is_h6style: this.options.is_h6style,
-                        btn_visible_newrecord: false,
-                        search_button_label: window.hWin.HR('Filter'),
-                        btn_entity_filter: false})
-                    .css({  //display:'block','max-height':'55px','height':'55px',
-                            padding:'15px 10px 0px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
-                    .appendTo(this.div_header);
+            this.div_search_form = $('<div>').search({
+                    is_h6style: this.options.is_h6style,
+                    btn_visible_newrecord: false,
+                    search_button_label: window.hWin.HR('Filter'),
+                    btn_entity_filter: false})
+                .css({  //display:'block','max-height':'55px','height':'55px',
+                        padding:'15px 10px 25px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
+                .appendTo(this.div_header);
         
         }
         
@@ -1385,7 +1385,7 @@ $.widget( "heurist.resultList", {
                 .insertAfter( this.div_toolbar );
             }
             
-            this.div_content[0].innerHTML = message?message:'';//.empty();  //clear
+            this.div_content[0].innerHTML = window.hWin.HEURIST4.util.isempty(message)?'':message;//.empty();  //clear
         }
 
         if(new_title!=null){
@@ -1683,8 +1683,8 @@ $.widget( "heurist.resultList", {
         var bkm_ID = fld('bkm_ID');
         var recTitle = fld('rec_Title'); 
         var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HEURIST4.util.stripTags(recTitle))+' id:'+recID;
-        var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong');
-        var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
+        var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong, em');
+        var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong, em');
         var recIcon = fld('rec_Icon');
         if(!recIcon) recIcon = rectypeID;
         recIcon = window.hWin.HAPI4.iconBaseURL + recIcon + this._icon_timer_suffix;

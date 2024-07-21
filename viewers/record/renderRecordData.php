@@ -202,8 +202,9 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
             var rec_Files = [];
             var rec_Files_IIIF_and_3D = [];
             var rec_Files_IIIF_and_3D_linked = [];
-            var baseURL = '<?php echo HEURIST_BASE_URL;?>';                
-            var database = '<?php echo HEURIST_DBNAME;?>';                
+            var baseURL = '<?php echo HEURIST_BASE_URL;?>';
+            var database = '<?php echo HEURIST_DBNAME;?>';
+            var hint_popup = null, $map_frame = null;
         
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -877,6 +878,23 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 }
             }
 
+
+            function recviewer_showMap(event, rec_id){
+
+                hint_popup.showAt(event);
+
+                if(!$map_frame || $map_frame.length == 0){ // create iframe
+                    $map_frame = $('<iframe>', {id: 'recviewer_map_frame'}).appendTo($('#recviewer_map_popup'));
+                }else{// reset source
+                    $map_frame.attr('src', null);
+                }
+
+                //let t = `&t=${new Date().getTime()}`;
+                const URL = `${baseURL}viewers/map/map.php?q=ids%3A${rec_id}&db=${database}&notimeline=1&nocluster=1&basemap=OpenStreetMap&controls=none&published=true&popup=none`;
+
+                $map_frame.attr('src', URL);
+            }
+
             $(document).ready(function() {
                 showHidePrivateInfo(null);
              
@@ -892,6 +910,8 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
                 onWindowResize();
                 $(document).on('resize', onWindowResize);
+
+                hint_popup = new HintDiv('mapPopup', 300, 300, '<div id="recviewer_map_popup" style="width:100%;height:100%;"></div>');
 
             });
             
@@ -1857,8 +1877,8 @@ function print_public_details($bib) {
 
                     $geoimage = 
                     "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
-                    ."hclient/assets/geo.gif' onmouseout='{if(mapViewer){mapViewer.hide();}}' "
-                    ."onmouseover='{if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
+                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(mapViewer){mapViewer.hide();}}' "
+                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
 
                     $bd['val'] = $geoimage.$bd['val'];
 
@@ -1906,7 +1926,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.htmlspecialchars($bd['val']).'</div></div>';
+            .' '.($bd['val']).'</div></div>';  // htmlentities  
             break;
         }
     }
@@ -2196,7 +2216,7 @@ function print_public_details($bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . htmlspecialchars($bd['val']) . '</span>'; // add value
+                .'>' . ($bd['val']) . '</span>'; // add value
         $prevLbl = $bd['name'];
     }
 

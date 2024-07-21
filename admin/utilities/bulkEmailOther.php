@@ -30,6 +30,8 @@ header('Content-type: application/json;charset=UTF-8');
 
 $system = new System();
 
+$sysadmin_pwd = System::getAdminPwd('sysadmin_pwd');
+
 $data = null;
 $response = array();
 $rtn = false;
@@ -331,9 +333,9 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 
-} else if(isset($_REQUEST['sysadmin_pwd'])) { // Verify Admin Password
+} else if(isset($sysadmin_pwd)) { // Verify Admin Password
 
-	if(!$system->verifyActionPassword($_REQUEST['sysadmin_pwd'], $passwordForServerFunctions)){
+	if(!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
 		$data = true;
 	} else {
 		$data = false;

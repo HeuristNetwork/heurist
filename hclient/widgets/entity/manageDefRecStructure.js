@@ -509,9 +509,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                             that.previewEditor.manageRecords('setDisabledEditForm', true)
                             that._onActionListener(event, {action:'edit'}); //default action of selection            
                         }
-                        
                     }
                 }
+
+                that._treeview.closest('.treeview_with_header').scrollLeft(0);
             },
             beforeExpand: function(event, data) {
                 if(available_outer_groups.includes(data.node.data.type) && data.node.isExpanded()){
@@ -1691,6 +1692,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             if(requirement_sel.hSelect('instance') != undefined){
                 window.hWin.HEURIST4.ui.initHSelect(requirement_sel.get(0), false);
             }
+            var vis_sel = this._editing.getFieldByName('rst_NonOwnerVisibility').find('select');
+            if(vis_sel.hSelect('instance') != undefined){
+                window.hWin.HEURIST4.ui.initHSelect(vis_sel.get(0), false);
+            }
 
         }
             
@@ -1857,8 +1862,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +' <span class="ui-icon ui-icon-circle-info"></span></span>')
                 .attr('title', baseFieldDetails)
                 .appendTo(bottom_div);
-                
-                
+
             let edit_ele= this._editing.getFieldByName('rst_DisplayWidth');
             if(edit_ele){
                 edit_ele.editing_input('option','change', function(){
@@ -2013,10 +2017,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.editForm.find('.header').css('width', '160px');
 
         // Custom widths for width and height field headings
-        if($height_header.length){
+        if($height_header && $height_header.length > 0){
             $height_header.css({width: '50px', 'min-width': '50px'});
         }
-        if($width_header.length){
+        if($width_header && $width_header.length > 0){
             $width_header.css({width: '35px', 'min-width': '35px'});
         }
     },

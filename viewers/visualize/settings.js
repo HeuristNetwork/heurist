@@ -343,36 +343,15 @@ function handleSettingsInUI() {
     var fontSize = getSetting(setting_fontsize, 12);    
     if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
     else if(fontSize>25) fontSize = 25;
-   
+
     $('#fontSize').val(fontSize).on('change',
     function(){
         var newval = $(event.target).val();
         putSetting(setting_fontsize, newval);
         var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));
         if(isLabelVisible) visualizeData();    
-    });    
+    });
 
-    /* hidden in current version
-    $("#textColor")
-        //.addClass('ui-icon ui-icon-loading-status-circle')
-        .css({'display':'inline-block','cursor':'pointer','font-size':'1em','font-weight':'bold',
-            'color':getSetting(setting_textcolor)})
-        .colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
-                putSetting(setting_textcolor, color);
-                
-                $(".namelabel").attr("fill", color);
-                //visualizeData();
-                
-                $(el).css('color', color);
-                $(el).colpickHide();
-            }});
-    */
-
-    
     if(settings.isDatabaseStructure){
         initRecTypeSelector();    
         $('#setDivExport').hide();
@@ -382,53 +361,6 @@ function handleSettingsInUI() {
     }
     
     tBar.show();
- /*   OLD JJ CODE
-    // LINE SETTINGS
-    if(settings.showLineSettings) {
-        handleLineType();
-        handleLineLength();
-        handleLineWidth();
-        handleLineColor();
-        handleMarkerColor();
-    }else{
-        $("#lineSettings").remove();
-    }
-    $("#lineSettings").hide();
-    
-    // ENTITY SETTINGS
-    if(settings.showEntitySettings) {
-        //handleEntityRadius();
-        //handleEntityColor();
-    }else{
-        $("#entitySettings").remove();
-    }
-    
-    // LABEL SETTINGS
-    if(settings.showTextSettings) {
-        handleLabels();
-        handleTextSize();
-        handleTextLength();
-        handleTextColor();
-    }else{
-        $("#textSettings").remove();
-    }
-    
-    // TRANSFORM SETTINGS
-    if(settings.showTransformSettings) {
-        handleFormula();
-        handleFisheye();
-    }else{
-        $("#transformSettings").remove();
-    }
-    
-    // GRAVITY SETTINGS
-    if(settings.showGravitySettings) {
-        handleGravity();
-        handleAttraction();
-    }else{
-        $("#gravitySettings").remove();
-    }
-*/
 }
 
 function initRecTypeSelector(){
@@ -598,23 +530,16 @@ function setFormulaMode(formula) {
 //
 //
 function refreshLinesWidth(){
-    
-        /*d3.selectAll("path").style("stroke-width", function(d) { 
-            return getLineWidth(d.targetcount);
-         });
-        d3.selectAll("polyline.link").style("stroke-width", function(d) { 
-            return getLineWidth(d.targetcount);
-         });*/
 
-        d3.selectAll(".bottom-lines").style("stroke-width", //thickness);
-             function(d) { return getLineWidth(d.targetcount); });
-    
-        d3.selectAll("marker").attr("markerWidth", function(d) {    
-                        return getMarkerWidth(d?d.targetcount:0);             
-                    })
-                    .attr("markerHeight", function(d) {
-                       return getMarkerWidth(d?d.targetcount:0);
-                    });
+    d3.selectAll(".bottom-lines").style("stroke-width", //thickness);
+            function(d) { return getLineWidth(d.targetcount); });
+
+    d3.selectAll("marker").attr("markerWidth", function(d) {    
+                    return getMarkerWidth(d?d.targetcount:0);             
+                })
+                .attr("markerHeight", function(d) {
+                    return getMarkerWidth(d?d.targetcount:0);
+                });
     
 }
 
@@ -623,7 +548,6 @@ function refreshLinesWidth(){
 // straight or curverd links type
 //
 function setLinkMode(formula) {
-    //var formula = $(event.target).val();
     putSetting(setting_linetype, formula);
     visualizeData();
     _syncUI();

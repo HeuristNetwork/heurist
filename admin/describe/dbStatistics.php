@@ -19,6 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+define('ADMIN_PWD_REQUIRED', 1); 
 define('MANAGER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
     
@@ -28,13 +29,6 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 $is_csv = (@$_REQUEST['csv']==1);
 
 $starts_with = filter_var(@$_REQUEST['start'], FILTER_SANITIZE_STRING);
-
-if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    $response = $system->getError();
-    print $response['message'];
-    exit;
-}
-
 
 $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 

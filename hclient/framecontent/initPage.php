@@ -61,20 +61,25 @@ if(defined('IS_INDEX_PAGE')){
     //check for missed tables
     $missed = hasAllTables($system->get_mysqli());
     
-    if(count($missed)>0){
-        $message = 'Database <b>'.HEURIST_DBNAME
-        .'</b> is missing the following tables:<br><br><i>'
-        .implode(', ',$missed)
-        .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
-        .'It is also possible that drive space has been exhausted. '
-        .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
-        .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
-        .'<br>We apologise for any inconvenience</p>';        
-
-        //to add to error log            
-        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
-                .' is missing the following tables: '.implode(', ',$missed));
+    if(is_array($missed)){
+        if(count($missed)>0){
+            $message = 'Database <b>'.HEURIST_DBNAME
+            .'</b> is missing the following tables:<br><br><i>'
+            .implode(', ',$missed)
+            .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
+            .CRITICAL_DB_ERROR_CONTACT_SYSADMIN.'</p>';
+            
+            //to add to error log            
+            $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
+                    .' is missing the following tables: '.implode(', ',$missed));
+            
+            include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+            exit;
+        }
+    }else{
+        $message = 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
         
+        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
         
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;
@@ -82,6 +87,8 @@ if(defined('IS_INDEX_PAGE')){
 }
 
 if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
+    
+    $user_pwd = System::getAdminPwd();
     
     $mysqli = $system->get_mysqli();
     $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;
@@ -115,8 +122,8 @@ if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pw
         $attempt_login = intval($role_count) === 0;
     }
     
-    if($attempt_login && !empty($username) && !empty($_REQUEST['pwd'])){
-        $system->doLogin($username, $_REQUEST['pwd'], 'public');
+    if($attempt_login && !empty($username) && $user_pwd!=null){
+        $system->doLogin($username, $user_pwd, 'public');
     }
 }
 
@@ -167,6 +174,12 @@ if(defined('IS_INDEX_PAGE')){
     
     $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
     
+    if($subsubVer==null){
+        $message = $system->getErrorMsg();
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+    
     if (version_compare(HEURIST_MIN_DBVERSION,
     $system->get_system('sys_dbVersion').'.'
     .$system->get_system('sys_dbSubVersion').'.'
@@ -186,7 +199,8 @@ if(defined('IS_INDEX_PAGE')){
 <!doctype html>
 <html  class="no-js" lang="en" dir="ltr">
 */
-if(true || defined('IS_INDEX_PAGE')){
+if(defined('IS_INDEX_PAGE')){
+//header("Content-Security-Policy: frame-ancestors 'self'");    
 ?>
 <!DOCTYPE html>
 <?php    
@@ -203,7 +217,10 @@ if(true || defined('IS_INDEX_PAGE')){
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!--
+<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self'; frame-src 'self' https://test-idp.federation.renater.fr;" />
+
 <meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
 -->
 <!--
@@ -213,40 +230,7 @@ if(true || defined('IS_INDEX_PAGE')){
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
 <?php 
-// Do not use google analytics unless requested in heuristConfigIni.php
-$allowGoogleAnalytics = false; //this is deprecated version of google analytics that will be disabled in June 2024
-if($allowGoogleAnalytics && !$isLocalHost) {
-    $host = strtolower($_SERVER["SERVER_NAME"]);
-    
-    if (strpos('heuristref.net', $host===0) 
-        || strpos('heuristref', $host)===0) {// Operating on Heurist reference server
-        ?>     
-        <!-- Heurist Reference Server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-131444459-1'); 
-        </script>
-        <?php  
-    } else {
-        ?>
-        <!-- Other Heurist server, Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132203312-1"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'UA-132203312-1'); 
-        </script>
-        <?php  
-
-    }
-}
-
 $isUpgrade = true;
-
 ?>
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>

@@ -259,58 +259,62 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                             
                             window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
                             
-                            mapping.mapping( 'drawZoomTo' );
+                            mapping.mapping( 'drawZoomTo', (event) => {
 
-                            function filterNode(node) {
-                                if (node instanceof Text) {
-                                    return true;
+                                function filterNode(node) {
+                                    if (node instanceof Text) {
+                                        return true;
+                                    }
+                                    return [
+                                        "div",
+                                        "span",
+                                        "p",
+                                        "i",
+                                        "img",
+                                        "svg",
+                                        "g",
+                                        "path"
+                                        /*
+                                        "strong",
+                                        "main",
+                                        "aside",
+                                        "article",
+                                        "pre",
+                                        "code",
+                                        "time",
+                                        "address",
+                                        "header",
+                                        "footer"
+                                        */
+                                    ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
                                 }
-                                return [
-                                    "div",
-                                    "span",
-                                    "p",
-                                    "i",
-                                    "img",
-                                    "svg",
-                                    "g",
-                                    "path"
-                                    /*
-                                    "strong",
-                                    "main",
-                                    "aside",
-                                    "article",
-                                    "pre",
-                                    "code",
-                                    "time",
-                                    "address",
-                                    "header",
-                                    "footer"
-                                    */
-                                ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
-}
-                            setTimeout(function(){  
-                            try{
-                                domtoimage
-                                .toPng(document.getElementById('map_digitizer'),{
-                                    filter: filterNode
-                                })
-                                .then(function (dataUrl) {
-                                    window.hWin.HEURIST4.msg.sendCoverallToBack();   
-                                    window.close({type:typeCode, wkt:res, imgData:dataUrl});        
-                                });                                
-                            }catch(e){
-                                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                window.close({type:typeCode, wkt:res});        
-                            }
-                            
-                            }, 2000);    
+
+                                try{
+                                    domtoimage
+                                    .toPng(document.getElementById('map_digitizer'),{
+                                        filter: filterNode
+                                    })
+                                    .then(function (dataUrl) {
+                                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                        window.close({type:typeCode, wkt:res, imgData:dataUrl});
+                                    })
+                                    .catch(function(error){
+                                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                        window.close({type:typeCode, wkt:res});
+                                    });
+                                }catch(e){
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                    window.close({type:typeCode, wkt:res});
+                                }
+
+                            } );
+
                         }else{
-                            window.close({type:typeCode, wkt:res});        
+                            window.close({type:typeCode, wkt:res});
                         }
-                        
-                        
+
                         return;
-                        
+
                     }
                     else if(is_geofilter){
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);

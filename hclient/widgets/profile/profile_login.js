@@ -70,11 +70,22 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             
         var sp_entity = sel.val();
         
+        var surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
+        
+//console.log(surl); 
+        var isFrameAllowed = false;
+        if(!isFrameAllowed){
+            surl = surl + '&noframe=1';
+            window.hWin.location = surl;
+            return;
+        }
+
+
         //loads saml dialog into iframe
         window.hWin.HEURIST4.msg.showDialog(
-        window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
+        surl,
         {
-            title: 'BnF Authentification',
+            title: 'External Authentification',
             width: 980,
             height: 420,
             //noClose: true,
@@ -189,28 +200,34 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
                 var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                 if(sp_keys.length>0){
+
+                    var sel = $dlg.find('#saml_sp');
                     
                     //hide standard login
                     if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
-                        $dlg.find('#login_saml > label:first').html('Select: ');
-                        $dlg.find('#login_saml').css({'margin-left':'14%'});
+                        //$dlg.find('#login_saml > label:first').html('Select: ');
+                        //$dlg.find('#login_saml').css({'margin-left':'14%'});
                         
                         $dlg.find('#login_guest').hide();
+                        $dlg.find('.login_heurist').hide();
                         show_guest_login = false;
                     }else{
-                        iWidth = 700;    
-                        $dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
+                        //$dlg.find('#login_standard').css({'width':'370px','display':'inline-block'});
+                        //window.hWin.HEURIST4.ui.addoption(sel[0],0,'Heurist');
                     }
+                    iWidth = 600;    
                     
-                    var sel = $dlg.find('#saml_sp');
                     for(let id of sp_keys){
                         window.hWin.HEURIST4.ui.addoption(sel[0],id,window.hWin.HAPI4.sysinfo.saml_service_provides[id]);
                     }
                     
-                    $dlg.find('#login_saml').css({'display':'inline-block'});
-                    $dlg.find('#btn_saml_auth').button().on('click', __onSamlLogin );
+                    sel.on({change:function(event){$(event.target).val()==0?$dlg.find('.login_heurist').show():$dlg.find('.login_heurist').hide();}})
                     
+                    $dlg.find('#login_saml').show(); //css({'display':'inline-block'});
+                    //$dlg.find('#btn_saml_auth').button().click( __onSamlLogin );
                 }
+            }else{
+                $dlg.find('#login_saml').hide();
             }
             
             if(show_guest_login){
@@ -264,6 +281,11 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             function __doLogin(){
 
+                
+                if($dlg.find('#saml_sp').val()!=0){
+                        __onSamlLogin();
+                        return;
+                }else
                 if(saml_login_only){
                         var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                         if(sp_keys.length>0){

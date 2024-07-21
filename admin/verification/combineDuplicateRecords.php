@@ -566,7 +566,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
                             if(!empty($missing_in_master)){
                                 print '<script>'
-                                        . '$(".not_in_master").on("change", (e) => {let name = $(e.target).attr("name"); $(`input[type="checkbox"][name="${name}"]`).prop("checked", false); $(e.target).prop("checked", true);})'
+                                        . '$(".not_in_master").on("change", (e) => {'
+                                            . 'let name = $(e.target).attr("name"); let new_state = $(e.target).prop("checked"); '
+                                            . 'let $inputs = $(`input[type="checkbox"][name="${name}"]`); if($inputs.length > 1) { $inputs.prop("checked", false); $(e.target).prop("checked", new_state); } })'
                                     . '</script>';
                             }
                         }

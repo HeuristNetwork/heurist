@@ -91,14 +91,18 @@ require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
+$sysadmin_pwd = System::getAdminPwd();
+
 //retrieve list of databases
 $system = new System();
-if( !$system->init(null, false, false) ){
-    exit("Cannot establish connection to sql server\n");
-}
-if(!$is_shell && $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+
+if(!$is_shell && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
         include_once ERROR_REDIR;
         exit;
+}
+
+if( !$system->init(null, false, false) ){
+    exit("Cannot establish connection to sql server\n");
 }
 
 if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');

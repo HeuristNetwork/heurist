@@ -656,7 +656,7 @@ regional['FRE'] = {
     Error_Title: 'Erreur',
     Error_Empty_Message: 'Aucun message d\'erreur n\'a été prévu. Merci de contacter l\'équipe de développement de Heurist.',
     Error_Report_Code: 'Signaler ce code à l\'équipe de développement de Heurist.',
-    Error_Report_Team: 'Si cette erreur survient régulièrement, merci de contacter votre administrateur système ou de nous contacter par mail (support[at]HeuristNetwork[dot]org) en décrivant les circonstances dans lesquelles est apparue l\'erreur afin qu\'une solution puisse être trouvée.',
+    Error_Report_Team: 'Si cette erreur survient régulièrement, merci de contacter votre administrateur système (#sysadmin_email#) ou de nous contacter par mail (support[at]HeuristNetwork[dot]org) en décrivant les circonstances dans lesquelles est apparue l\'erreur afin qu\'une solution puisse être trouvée.',
     Error_Wrong_Request: 'La valeur, le nombre et/ou les paramètres de la requête ne sont pas valides.',
     Error_System_Config: 'Ceci peut venir d\'une interruption du réseau ou d\'un système mal configuré. Si le problème persite, signalez le à votre administrateur système.',
     Error_Json_Parse: 'Il n\'est pas possible de lire la réponse du serveur.',

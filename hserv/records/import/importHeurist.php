@@ -1105,6 +1105,12 @@ EOD;
                        if(@$value['ulf_ExternalFileReference'] && 
                             (strpos($value['ulf_ExternalFileReference'],'http://')===0
                             || strpos($value['ulf_ExternalFileReference'],'https://')===0)){ //remote URL
+                            
+                            //detect mimetype
+                            $ext = recognizeMimeTypeFromURL($mysqli, $value['ulf_ExternalFileReference']);
+                            if(@$ext['extension']){
+                                $value['ulf_MimeExt'] = $ext['extension'];
+                            }
                            
                             if(@$value['ulf_ID']>0) $value['ulf_ID']=0;
                            

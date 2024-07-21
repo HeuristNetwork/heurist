@@ -42,7 +42,7 @@
                     }
                 },
                 {
-                    "dtID": "trm_InverseTermId",
+                    "dtID": "trm_InverseTermID",
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName":"Inverse term:",

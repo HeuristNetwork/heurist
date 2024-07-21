@@ -101,6 +101,16 @@ $dbPort = null;  //'3306'
 $dbAdminUsername = '';
 $dbAdminPassword = '';
 
+//Determines how to execute sql script file  -  0: use db_script function (based on 3d party BigDump (default), 2 - call mysql via shell
+$dbScriptMode = 0;
+//Determines how to  dump database  -  0: use 3d party PDO Mysqldump (default), 1:use internal routine (disabled), 2 - call mysqldump via shell 
+$dbDumpMode = 0;
+ 
+// path to mysql executables
+$dbMySQLpath = null;
+$dbMySQLDump = null;
+
+
 // dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
 // from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
 // The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
@@ -123,8 +133,6 @@ $passwordForDatabaseCreation =''; // normally blank = any logged in user can cre
 $passwordForDatabaseDeletion =''; // if blank = no one can delete db except db owner (to delete from server management)
 $passwordForReservedChanges  =''; // if blank = no-one can modify reserved fields, otherwise password challenge
 $passwordForServerFunctions  =''; // if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
-
-$allowGoogleAnalytics = false;
 
 $defaultRootFileUploadPath ='';
 $defaultRootFileUploadURL = '';

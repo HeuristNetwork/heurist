@@ -28,17 +28,37 @@
     <div id="fld_login" style="padding-top: 40px;">    
 
         <h2 id="span-database" style="margin-top: 0px;">Database</h2>
-        <fieldset id="login_standard" style="padding-top: 0px;"><legend style="display:none"></legend>
         
-        <div>
+        <!--
+        <div id="login_saml" style="vertical-align: top;padding-top: 13px;display: none; margin-left: -13px;">
+            <span><b>Authentication method</b></span>
+            <select id="saml_sp" class="text ui-widget-content ui-corner-all" style="margin-left: 10px; width:142px;background:rgb(232, 240, 254) !important"></select>
+            <button id="btn_saml_auth" style="width: 85px;margin-left: 10px">Authenticate</button>
+            <span class="heurist-helper2" style="display:block;padding:5px 0px 0px 15px;">generally requires specific institutional authorisation and/or VPN</span>
+        </div>
+        -->
+        
+        <fieldset id="login_standard" style="padding-top: 0px;"><legend style="display:none"></legend>
+
+        
+        <div id="login_saml">
+            <div class="header"><label for="username">Authentication method</label></div>
+            <select id="saml_sp" class="text ui-widget-content ui-corner-all" style="width:190px;background:rgb(232, 240, 254) !important">
+                <option value="0">Heurist</option>
+            </select>
+            <div class="heurist-helper1" style="display: inline-block;width: 160px;margin-left: 10px;">
+                Authentication methods other than Heurist can only be used if added to the user's profile
+            </div>
+        </div>
+        <div class="login_heurist">
             <div class="header"><label for="username">Username</label></div>
             <input type="text" name="username" id="username" class="text ui-widget-content ui-corner-all" autocomplete="on" />
         </div>
-        <div>
+        <div class="login_heurist">
             <div class="header"><label for="password">Password</label></div>
             <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
         </div>
-        <div>
+        <div class="login_heurist">
             <div class="header"><label for="session_type" style="font-size:0.9em">Remember me (for 1 month)</label></div>
             <input type="checkbox" name="session_type" id="session_type" value="remember" class="ui-widget-content ui-corner-all" checked="checked"/>
             <div class="heurist-helper1" style="display: inline-block;width: 160px;margin-left: 10px;">strongly recommended if you are the only user of this computer</div>
@@ -55,14 +75,7 @@
         -->
         </fieldset>
     
-        <div id="login_saml" style="vertical-align: top;padding-top: 13px;display: none; margin-left: -13px;">
-            <span><b>OR:</b></span>
-            <select id="saml_sp" class="text ui-widget-content ui-corner-all" style="margin-left: 10px; width:142px;background:rgb(232, 240, 254) !important"></select>
-            <button id="btn_saml_auth" style="width: 85px;margin-left: 10px">Authenticate</button>
-            <span class="heurist-helper2" style="display:block;padding:5px 0px 0px 15px;">generally requires specific institutional authorisation and/or VPN</span>
-        </div>
-    
-        <div id="login_forgot" style="width: 370px;display: inline-block;padding: 5px;">
+        <div id="login_forgot"  class="login_heurist" style="width: 370px;display: inline-block;padding: 5px;">
             <br><span>Forgotten your password?</span>&nbsp;<a href="#" id="link_restore">Click here to reset it</a>
         </div>
         

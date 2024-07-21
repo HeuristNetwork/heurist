@@ -52,7 +52,10 @@ $active_all = true; //all part are active
 $active = array('relationship_cache', 'defgroups', 'dateindex'); //if $active_all=false, active are included in this list
 
 if(@$_REQUEST['data']){
-    $lists = json_decode($_REQUEST['data'], true);
+    
+    $lists = filter_input(@$_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'data');
+    
+    $lists = json_decode($lists);
     
     $lists2 = $lists;
     
@@ -60,10 +63,13 @@ if(@$_REQUEST['data']){
     $lists = getInvalidFieldTypes($mysqli, intval(@$_REQUEST['rt'])); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
         if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
-        && count($lists["rt_contraints"])==0  && count($lists["rt_defvalues"])==0){
+        && count($lists["rt_contraints"])==0){
             $lists = array();
         }
     }
+    
+    $lists3 = getInvalidDefaultValues($mysqli, intval(@$_REQUEST['rt']));
+    $rtysWithInvalidDefaultValues = @$lists3["rt_defvalues"];
     
     $lists2 = getTermsWithIssues($mysqli);
 }
@@ -78,13 +84,13 @@ if(count($recids)>0){
 
 //see getInvalidFieldTypes in verifyFieldTypes.php
 $dtysWithInvalidTerms = @$lists["terms"];
-$dtysWithInvalidNonSelectableTerms = prepareIds(filter_var(@$lists["terms_nonselectable"], FILTER_SANITIZE_STRING));
-$dtysWithInvalidRectypeConstraint = prepareIds(filter_var(@$lists["rt_contraints"], FILTER_SANITIZE_STRING));
+$dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
+$dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
 $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
 
-$trmWithWrongParents = prepareIds(filter_var(@$lists2["trm_missed_parents"], FILTER_SANITIZE_STRING));
-$trmWithWrongInverse = prepareIds(filter_var(@$lists2["trm_missed_inverse"], FILTER_SANITIZE_STRING));
+$trmWithWrongParents = prepareIds(@$lists2["trm_missed_parents"]);
+$trmWithWrongInverse = prepareIds(@$lists2["trm_missed_inverse"]);
 $trmDuplicates = @$lists2["trm_dupes"];
 
 ?>
@@ -170,7 +176,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditFieldType(dty_ID){
                 
-                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 return;
 
                 var sURL = "<?=HEURIST_BASE_URL?>admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
@@ -195,7 +201,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             function onEditRtStructure(rty_ID){
 
-                window.hWin.HEUIRIST4.msg.showMsg_ScriptFail();
+                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 return;
                 
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
@@ -360,7 +366,7 @@ if($active_all || in_array('owner_ref', $active)) {
                 }
 
                 $query = 'UPDATE Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID '
-                .' SET rec_AddedByUGrpID=2 WHERE ugr_ID is null';
+                .' SET rec_OwnerUGrpID=2 WHERE ugr_ID is null';
                 $res = $mysqli->query( $query );
                 if(! $res )
                 {
@@ -387,7 +393,7 @@ if($active_all || in_array('owner_ref', $active)) {
             }
 
             if($wrongUser_Add==0 && $wrongUser_Owner==0){
-                print '<div><h3 class="res-valid">OK: All record have valid Owner and Added by User references</h3></div>';
+                print '<div><h3 class="res-valid">OK: All records have valid Owner and Added by User references</h3></div>';
                 echo '<script>$(".owner_ref").css("background-color", "#6AA84F");</script>';
                 if($wasassigned1>0){
                     print "<div>$wasassigned1 records 'Added by' value were set to user # 2 Database Manager</div>";
@@ -455,7 +461,7 @@ if($active_all || in_array('dup_terms', $active)) {
                 }
 
                 if(is_array($trmWithWrongInverse) && count($trmWithWrongInverse)>0){
-                    $query = 'UPDATE defTerms set trm_InverseTermId=NULL '
+                    $query = 'UPDATE defTerms set trm_InverseTermID=NULL '
                     .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
                     $res = $mysqli->query( $query );
                     if(! $res )
@@ -597,9 +603,10 @@ if($active_all || in_array('field_type', $active)) {
 
             The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br><br>
             To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br>&nbsp;<br>
-            You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
             <hr>
             <?php 
+// You can also look at the individual field definitions by clicking on the name in the list below<br>&nbsp;<br>
+
             foreach ($dtysWithInvalidTerms as $row) {
                 ?>
                 <div class="msgline"><b><a href="#invalid_terms1" onclick='{ onEditFieldType(<?= intval($row['dty_ID']) ?>); return false}'>
@@ -891,16 +898,20 @@ if($active_all || in_array('target_parent', $active)) {
 
             //---------------------------------------                
             //find parents with pointer field rst_CreateChildIfRecPtr=1) without reverse pointer in child record               
-            $query1 = 'SELECT parentrec.rec_ID, parentrec.rec_RecTypeID, parentrec.rec_Title as p_title, '  //'parent.dtl_DetailTypeID, rst_DisplayName, '
-            .'parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_RecID as f247 '
-            .'FROM Records parentrec, defRecStructure, recDetails parent '
-            .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
-            .'LEFT JOIN Records childrec ON parent.dtl_Value=childrec.rec_ID '
-            .'WHERE '
-            .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 AND parentrec.rec_FlagTemporary!=1 '
-            .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
-            .'AND child.dtl_RecID is NULL ORDER BY parentrec.rec_ID'; 
-
+            $dt_parent_entity_field_id = DT_PARENT_ENTITY; 
+            $query1 = 
+            <<<QUERY
+            SELECT parentrec.rec_ID, parentrec.rec_RecTypeID, parentrec.rec_Title as p_title, 
+            parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_Value as f247, child.dtl_ID
+            FROM Records parentrec, defRecStructure, recDetails parent, Records childrec
+            LEFT JOIN recDetails child ON child.dtl_DetailTypeID=$dt_parent_entity_field_id AND child.dtl_RecID=childrec.rec_ID
+            WHERE 
+            rst_CreateChildIfRecPtr=1 AND rst_RecTypeID=parentrec.rec_RecTypeID AND parentrec.rec_FlagTemporary!=1 
+            AND parentrec.rec_ID=parent.dtl_RecID AND rst_DetailTypeID=parent.dtl_DetailTypeID 
+            AND parent.dtl_Value=childrec.rec_ID 
+            AND (child.dtl_Value!=parent.dtl_RecID OR child.dtl_Value IS NULL)
+            ORDER BY parentrec.rec_ID
+            QUERY;
 
             $res = $mysqli->query( $query1 );
 
@@ -927,17 +938,18 @@ if($active_all || in_array('target_parent', $active)) {
             //print '<br>'.count($bibs1);
 
             //find children without reverse pointer in parent record               
-            $query2 = 'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
-            .'parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr, '
-            .'childrec.rec_FlagTemporary '
-            .' FROM recDetails child '
-            .'LEFT JOIN Records parentrec ON child.dtl_Value=parentrec.rec_ID '
-            .'LEFT JOIN Records childrec ON childrec.rec_ID=child.dtl_RecID  '
-            .'LEFT JOIN recDetails parent ON parent.dtl_RecID=parentrec.rec_ID AND parent.dtl_Value=childrec.rec_ID '
-            .'LEFT JOIN defDetailTypes ON parent.dtl_DetailTypeID=dty_ID AND dty_Type="resource" ' //'AND dty_PtrTargetRectypeIDs=childrec.rec_RecTypeID '
-            .'LEFT JOIN defRecStructure ON rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=dty_ID AND rst_CreateChildIfRecPtr=1 '
-            .'WHERE child.dtl_DetailTypeID='.DT_PARENT_ENTITY .' AND parent.dtl_DetailTypeID!='.DT_PARENT_ENTITY
-            .' AND dty_Type="resource" AND (rst_CreateChildIfRecPtr IS NULL OR rst_CreateChildIfRecPtr!=1) ORDER BY child.dtl_RecID';
+        $query2 = 
+"SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value,
+parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr,
+childrec.rec_FlagTemporary 
+FROM recDetails child 
+LEFT JOIN  Records childrec ON childrec.rec_ID=child.dtl_RecID 
+LEFT JOIN Records parentrec ON child.dtl_Value=parentrec.rec_ID 
+LEFT JOIN recDetails parent ON parent.dtl_RecID=parentrec.rec_ID AND parent.dtl_Value=childrec.rec_ID 
+LEFT JOIN defDetailTypes ON parent.dtl_DetailTypeID=dty_ID AND dty_Type='resource' AND parent.dtl_DetailTypeID!=$dt_parent_entity_field_id
+LEFT JOIN defRecStructure ON rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=dty_ID AND rst_CreateChildIfRecPtr=1
+WHERE child.dtl_DetailTypeID=$dt_parent_entity_field_id  AND childrec.rec_FlagTemporary!=1 and parent.dtl_Value IS NULL
+ORDER BY child.dtl_RecID";
 
             $res = $mysqli->query( $query2 );
             
@@ -1111,12 +1123,11 @@ if($active_all || in_array('empty_fields', $active)) {
 
         $total_count_rows = 0;
 
-        //find all fields with faulty dates
+        //find all fields with empty values
         $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_RecTypeID, a.rec_Title, dty_Name, dty_Type
             from recDetails, defDetailTypes, Records a
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
         and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
-
 
         $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
 
@@ -1202,8 +1213,9 @@ if($active_all || in_array('date_values', $active)) {
 
     $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added, rst_DisplayName
         from recDetails, defDetailTypes, defRecStructure, Records a
-        where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
-    and (dty_Type = "date") and (dtl_Value is not null)');
+        where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (rst_DetailTypeID = dty_ID) 
+        and (rst_RecTypeID = a.rec_RecTypeID) and (a.rec_FlagTemporary!=1)
+        and (dty_Type = "date") and (dtl_Value is not null)');
 
     $was_suggested = array();
     $was_corrected = array();
@@ -2248,6 +2260,7 @@ if($active_all || in_array('defgroups', $active)) {
 
             $orphaned_entities = false;
             
+            // record types =========================
             $cnt = intval(mysql__select_value($mysqli, 'select count(rty_ID) from defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID WHERE rtg_ID is null'));
             if($cnt>0){
                 
@@ -2778,7 +2791,7 @@ if($active_all || in_array('fld_spacing', $active)){ // Check spacing in freetex
                 $ids1[] = $rec_id;
             }
         }
-    }
+    }//while
     if($res) $res->close();
 
     $has_invalid_spacing = false;
@@ -2946,13 +2959,13 @@ if($active_all || in_array('multi_swf_values', $active)) {
                 if(count($dtl_IDs) > 1){
                     $mysqli->query("DELETE FROM recDetails WHERE dtl_ID IN (". implode(',', $dtl_IDs) .")");
                 }else{
-                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]})");
+                    $mysqli->query("DELETE FROM recDetails WHERE dtl_ID = {$dtl_IDs[0]}");
                 }
 
                 $rty_Label = mysql__select_value($mysqli, "SELECT rty_Name FROM defRecTypes WHERE rty_ID = $rectype_ID");
                 $swf_Label = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = {$final_stage[1]}");
 
-                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $$rty_Label, 'stage' => $swf_Label ] ];
+                $completedRecords[] = [ $rec_ID => [ 'title' => $rec_Title, 'type' => $rectype_ID, 'type_name' => $rty_Label, 'stage' => $swf_Label ] ];
             }
         }
     }
@@ -2967,7 +2980,6 @@ if($active_all || in_array('multi_swf_values', $active)) {
             <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= htmlspecialchars(implode(',', array_keys($completedRecords))) ?>'>
                 (show results as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
             <a target=_new href="#selected_link" onClick="return open_selected_by_name('multi_swf_values');">(show selected as search) <img alt src='<?php echo HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif'?>'></a>
-            <button onclick="removeMultiSpacing()">Fix selected records</button>
         </span>
 
         <table role="presentation">

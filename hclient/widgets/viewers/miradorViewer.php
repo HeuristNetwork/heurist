@@ -53,7 +53,7 @@ if q only defined all images linked to record(s) will be included
 $dbname = @$_REQUEST['db'];
 $rec_ID = intval(@$_REQUEST['recID']);
 $canvasUri = null;
-
+$baseUrl = null;
 //if database and record id are defined we take manifest url from database
 if(!preg_match('[\W]', $dbname) && $rec_ID>0){
     

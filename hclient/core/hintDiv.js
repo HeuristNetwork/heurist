@@ -119,11 +119,11 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		var posx = 0;
 		var posy = 0;
 		if (!e) var e = window.event;
-		if (e.pageX || e.pageY) 	{
-				posx = e.pageX;
-				posy = e.pageY;
+		if (e.pageX || e.pageY){
+			posx = e.pageX;
+			posy = e.pageY;
 		}
-		else if (e.clientX || e.clientY) 	{
+		else if (e.clientX || e.clientY){
 			posx = e.clientX + document.body.scrollLeft
 				+ document.documentElement.scrollLeft;
 			posy = e.clientY + document.body.scrollTop
@@ -160,26 +160,26 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _showAt(event)
 	{
-			var xy = _getMousePos(event);
-			_showAtXY(xy);
+		var xy = _getMousePos(event);
+		_showAtXY(xy);
 	}
 
 	function _showAtXY(xy){
 
-			_init();
-			//xy = [posx = event.target.x,posy = event.target.y];
+		_init();
+		//xy = [posx = event.target.x,posy = event.target.y];
 
-			//var _map_popup = $("#mapPopup");
-			//_map_popup.html(xy[0]+",  "+xy[1]+"<br>");
+		//var _map_popup = $("#mapPopup");
+		//_map_popup.html(xy[0]+",  "+xy[1]+"<br>");
 
-			var border_top = $(window).scrollTop();
-			var border_right = $(window).width();
-			var border_height = $(window).height();
-			var offset =0;
+		var border_top = $(window).scrollTop();
+		var border_right = $(window).width();
+		var border_height = $(window).height();
+		var offset =0;
 
-			_showPopupDivAt(xy, border_top ,border_right ,border_height, offset );
+		_showPopupDivAt(xy, border_top ,border_right ,border_height, offset );
 
-			return popup_div;
+		return popup_div;
 	}
 
 	//
@@ -212,15 +212,15 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		},
 		showInfoAt: function(xy, divid, divcontent){
 
-					if(!divid){
-						divid = id+"-content";
-					}
+			if(!divid){
+				divid = id+"-content";
+			}
 
-					var my_tooltip = $("#"+divid);
-					my_tooltip.html(divcontent);
+			var my_tooltip = $("#"+divid);
+			my_tooltip.html(divcontent);
 
-                    _setSize([my_tooltip.width(), my_tooltip.height()+25]);
-					_showAtXY(xy);
+			_setSize([my_tooltip.width(), my_tooltip.height()+25]);
+			_showAtXY(xy);
 		},
 		setSize: function(wh){
 			_setSize(wh);

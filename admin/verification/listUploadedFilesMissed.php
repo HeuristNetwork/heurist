@@ -35,6 +35,8 @@ if($is_included){
     
     require_once dirname(__FILE__).'/../../hserv/System.php';
     
+    $sysadmin_pwd = System::getAdminPwd();
+    
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
@@ -43,7 +45,7 @@ if($is_included){
     }
     
     if( @$_REQUEST['all']==1 ){
-        if($system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions)){
+        if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
         ?>
         
         <form action="listUploadedFilesMissed.php" method="POST">

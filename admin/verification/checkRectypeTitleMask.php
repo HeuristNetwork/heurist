@@ -1,6 +1,8 @@
 <?php
 
     /**
+    * @TODO remove as soon as listDatabaseErrors will be replaced
+    * 
     * checkRectypeTitleMask.php: Verifies the validity of the record type title masks and lists their contents
     *
     * @package     Heurist academic knowledge management system

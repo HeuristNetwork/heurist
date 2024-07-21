@@ -1139,7 +1139,7 @@ $.widget( "heurist.search_faceted", {
                                 showclear_button: false,
                                 showedit_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
-                                suppress_repeat: true, // currently disabled - (fld_type == 'freetext' && field['multisel']) ? 'force_repeat' : true
+                                suppress_repeat: (fld_type == 'freetext' && field['multisel']) ? 'force_repeat' : true,
                                 is_faceted_search: true,
                                 onrecreate: () => {
 
@@ -1164,7 +1164,21 @@ $.widget( "heurist.search_faceted", {
                                         return "<br><br>";
                                     }); // add space between inputs
 
-                                    that._handleNewInput($new_fld.find('input'));
+                                    let $new_input = $new_fld.find('input.ui-widget-content'); // new text input
+
+                                    that._handleNewInput($new_input);
+
+                                    // Add extra customisation
+                                    let w = that.element.width();
+                                    if(!(w>0) || w<200) w = 200;
+
+                                    $new_input.removeClass('ui-widget-content').addClass('ui-selectmenu-button')
+                                            .css({
+                                                'background':'none',
+                                                'width':'auto',
+                                                'max-width': `${w-90}px`,
+                                                'min-width':'100px'
+                                            });
                                 }
                         };
                         
@@ -1468,8 +1482,9 @@ $.widget( "heurist.search_faceted", {
         var _inputs = this._input_fields;
         var that = this;
         var isbranch_empty = true;
-        
-            
+
+        let predicates_to_add = [];
+
         //$(q).each(function(idx, predicate){ 
         // [{"f:1":$X680},....]
         
@@ -1482,13 +1497,13 @@ $.widget( "heurist.search_faceted", {
             $.each(predicate, function(key,val)
             {
                 if( Array.isArray(val) ) { //|| $.isPlainObject(val) ){
-                     var is_empty = that._fillQueryWithValues(val, facet_index_do_not_touch);
-                     isbranch_empty = isbranch_empty && is_empty;
-                     
-                     if(is_empty){
+                    var is_empty = that._fillQueryWithValues(val, facet_index_do_not_touch);
+                    isbranch_empty = isbranch_empty && is_empty;
+
+                    if(is_empty){
                         //remove entire branch if none of variables are defined
                         delete predicate[key];  
-                     }
+                    }
                 }else{
                     if(typeof val === 'string' && val.indexOf('$X')===0){ //replace $xn with facet value
                         
@@ -1496,13 +1511,13 @@ $.widget( "heurist.search_faceted", {
                         var facets = that.options.params.facets;
                         var facet_index, len = facets.length;
                         for (facet_index=0;facet_index<len;facet_index++){
-                            if(facets[facet_index]["var"] == val.substr(2)){ //find facet by variable
+                            if(facets[facet_index]["var"] == val.substring(2)){ //find facet by variable
 
                                 if(facets[facet_index]['isfacet']==that._FT_INPUT){  //this is direct input
                                     var sel = $(_inputs[val]).editing_input('getValues');
                                     if(sel && sel.length>0){
 
-                                        let multi_preds = [];
+                                        let next_idx = false;
                                         for (let k = 0; k < sel.length; k++) {
 
                                             let val = sel[k];
@@ -1511,15 +1526,24 @@ $.widget( "heurist.search_faceted", {
 
                                             if(val.length>2 && val[0]=='"' && val[val.length-1]=='"'){
                                                 val = val.substring(1,val.length-1);
-                                            }else if(!window.hWin.HEURIST4.util.isempty(val) && (val.indexOf(' ')>0 || sel.length > 0)){
-                                                search_all_words = false; //true;  Artem: 2023-06-28 it does not work properly
+                                            }else if(!window.hWin.HEURIST4.util.isempty(val) && (val.indexOf(' ')>0 || sel.length > 1)){
+                                                search_all_words = true;
                                             }
                                             
                                             facets[facet_index].selectedvalue = {value:val}; // TODO - Handle multivalue, store in selectedvalue.value as comma list
     
                                             //search for words, ANDed by default check for OR and handle as needed
                                             let values = val.split(' ');
-                                            if(search_all_words && values.length>1){
+                                            if(search_all_words && (values.length > 1 || sel.length > 1)){
+
+                                                if(values.length == 1){ // multi-input value
+
+                                                    pred.push({[key]: val});
+
+                                                    next_idx = true;
+
+                                                    continue;
+                                                }
                                                 
                                                 let predicates = [];
                                                 for (var i=0; i<values.length; i++){
@@ -1559,21 +1583,19 @@ $.widget( "heurist.search_faceted", {
                                                         predicates.push(pred_parts);
                                                     }
                                                 }
+
                                                 if(predicates.length > 0){
-                                                    for(var i = 0; i < predicates.length; i++){
-                                                        pred.push(predicates[i]);
-                                                    }
+                                                    pred.push(...predicates);
                                                 }
                                             }
 
                                             if(pred.length > 0){
-                                                multi_preds.push({"all": pred});
+                                                predicates_to_add.push({"all": pred});
+                                                next_idx = true;
                                             }
                                         }
 
-                                        if(multi_preds.length > 0){
-
-                                            q.push({"any": multi_preds});
+                                        if(next_idx){
 
                                             isbranch_empty = false;
                                             delete predicate[key];
@@ -1642,7 +1664,7 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     isbranch_empty = false;
                                 }else{
-                                    delete predicate[key];  
+                                    delete predicate[key];
                                 }
                                 
                                 break;
@@ -1656,21 +1678,19 @@ $.widget( "heurist.search_faceted", {
             idx++;    
         }//while
 
-        /*$(q).each(function(idx, predicate){
-            if(Object.keys(predicate).length==0){
-                 q.splice(idx, 1)
-            }
-        });*/
+        if(predicates_to_add.length > 0){
+            q.push(...predicates_to_add);
+        }
+
         var  idx = 0
         while (idx<q.length){
             if(Object.keys(q[idx]).length==0){
-                 q.splice(idx, 1)
+                q.splice(idx, 1);
             }else{
                 idx++;
             }
         }
-        
-            
+
         return isbranch_empty;
     }
     
@@ -1736,7 +1756,7 @@ $.widget( "heurist.search_faceted", {
                         (isform_empty && this.options.params.ui_temporal_filter_initial)
                             ?this.options.params.ui_temporal_filter_initial: ''
                         );
-                        
+
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
         var sort_clause;
         if(this.options.params.sort_order){
@@ -1776,7 +1796,7 @@ $.widget( "heurist.search_faceted", {
         }
 
         this._expanded_count_cancel = this._expanded_count_order.length > 0;
-        
+
         //perform search
         window.hWin.HAPI4.RecordSearch.doSearch( this, request );
         
@@ -1985,7 +2005,7 @@ $.widget( "heurist.search_faceted", {
                             vocabulary_id = null;
                             field['groupby'] = null;
                     }
-                } 
+                }
                 
                 if(field['type']=='freetext'){
                     if(!field['groupby']){
@@ -2742,7 +2762,7 @@ $.widget( "heurist.search_faceted", {
                             $("<span>").html(s + s_counts).appendTo($facet_values); 
 
                             if(sl_count == '1'){
-                                this._addFacetToExpandedCount(f_index, $facet_values, $input_div, $(s_counts));
+                                this._addFacetToExpandedCount(facet_index, $facet_values, $input_div, $(s_counts));
                             }
                             
                         }else if(field.srange && field.srange == 'text'){ // replace slider with two inputs
@@ -4196,6 +4216,10 @@ $.widget( "heurist.search_faceted", {
     
     _addFacetToExpandedCount: function(facet_index, facet_value, $container, $facet){
 
+        if(!this.options.params.rules){
+            return;
+        }
+
         if(!Object.hasOwn(this._expanded_count_facets, facet_index)){
 
             this._expanded_count_facets[facet_index] = {
@@ -4223,7 +4247,7 @@ $.widget( "heurist.search_faceted", {
 
         const that = this;
 
-        if(this._expanded_count_order.length == 0){
+        if(!this.options.params.rules || this._expanded_count_order.length == 0){
             return;
         }
 

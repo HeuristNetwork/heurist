@@ -355,7 +355,7 @@ class DbsImport {
         if($this->cloning_template){ // all definitions
 
             // 3.1 Handle terms
-            $term_ids = [...$this->sourceTerms->treeData('enum', 3), ...$this->sourceTerms->treeData('relation', 3)];
+            $term_ids = array_merge($this->sourceTerms->treeData('enum', 3), $this->sourceTerms->treeData('relation', 3)); // merge both types of terms to be imported into one array
             $has_terms = !empty($term_ids);
             foreach($term_ids as $term_id){
                 $this->_getTopMostVocabulary($term_id, 'enum');
@@ -493,6 +493,9 @@ class DbsImport {
         return true;   
     }
     
+    //
+    //
+    //
     private function error_exit2($msg){
 
         $this->system->addError(HEURIST_ERROR, $msg);
@@ -538,6 +541,7 @@ class DbsImport {
 
         if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
             $mysqli->commit(); 
+            $this->system->cleanDefCache();
             return true;
         }
         
@@ -1448,7 +1452,15 @@ $mysqli->commit();
         if(is_array($terms_ids))
         foreach ($terms_ids as $term_id){
             $topmost = $this->sourceTerms->getTopMostTermParent($term_id, $domain);
+            
             if($topmost && !in_array($topmost, $this->imp_terms[$domain])){
+                
+                //because of HEURIST_UNITED_TERMS=true  enum domain can have relation vocabularies 
+                //ignore them for enum to avoid import duplications
+                if($domain=='enum' && $this->sourceTerms->getTermField($topmost,'trm_Domain')=='relation'){
+                    continue;
+                }
+                
                 array_push($this->imp_terms[$domain], $topmost);
             }
         }
@@ -1699,8 +1711,7 @@ $mysqli->commit();
             
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
-            
-
+           
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
                 if($parent_id>0){ //this is not vocabulary

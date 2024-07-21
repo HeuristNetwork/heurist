@@ -464,9 +464,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     
                                 }
 
-                                if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                    $this->records[$idx]['ulf_OrigFileName'] = '_iiif';   
-                                }
+                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';   
+                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -485,9 +485,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;      
                                 
-                                if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                    $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
-                                }
+                                //if(!@$this->records[$idx]['ulf_OrigFileName']){
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
+                                //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
                                 $this->records[$idx]['ulf_MimeExt'] = 'json';
@@ -1209,10 +1209,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 while($local_file = $local_dups->fetch_row()){
 
-                    $fname = (@$local_file[0]!=null)?$mysqli->real_escape_string($local_file[0]):'';
+                    $fname = (@$local_file[0]!=null)?$local_file[0]:'';
                     
-                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName="'.$fname.'"';
-                    $dup_local_files = $mysqli->query($dup_query);
+                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName=?';
+
+                    $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
             
                     $dups_files = array(); //ulf_ID => path, size, md, array(dup_ulf_ids)
                     
@@ -2096,6 +2097,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
        $this->setData($fileinfo);
+       $this->setRecords(null); //reset
        $ulf_ID = $this->save();
        if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
        

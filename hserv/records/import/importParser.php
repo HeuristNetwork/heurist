@@ -573,7 +573,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             array_push($multivals, $k);
                         }
                         
-                        $field = trim($field);
+                        $field = USanitize::cleanupSpaces($field);
                         
                         //get field size before import to temp table                        
                         if($limit==0 && @$field_sizes[$k]!=='memo'){
@@ -1110,7 +1110,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
     //add record to import_log
     $session = array("reccount"=>$reccount,
         "import_table"=>$import_table,
-        "import_name"=>((substr($preproc['original_filename'],-4)=='.tmp'?'csv':$preproc['original_filename']).' '.date('Y-m-d H:i:s')),
+        "import_name"=>((substr($preproc['original_filename'],-4)=='.tmp'?'csv':$preproc['original_filename']).'  '.date('d M Y').'  '.date('H:i')),
         "columns"=>$preproc['fields'],   //names of columns in file header
         //"memos"=>$preproc['memos'],
         "multivals"=>$preproc['multivals'],  //columns that have multivalue separator

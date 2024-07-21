@@ -29,17 +29,23 @@
     $response = array();
     $is_remote = false;
     $remoteURL = null;
+
+    if(@$_SERVER['REQUEST_METHOD']=='POST'){
+        $req_params = filter_input_array(INPUT_POST);
+    }else{
+        $req_params = filter_input_array(INPUT_GET);    
+    }    
     
     //get list of registered database and master index db on the same server
-    if(@$_REQUEST['remote']){
+    if(@$req_params['remote']){
         
-       $remoteURL = $_REQUEST['remote'];
+       $remoteURL = $req_params['remote'];
        preg_match("/db=([^&]*).*$/", $remoteURL, $match);
         
        if(strpos($remoteURL, HEURIST_SERVER_URL)===0){ //same domain
 
-            unset($_REQUEST['remote']);
-            $_REQUEST['db'] = $match[1];
+            unset($req_params['remote']);
+            $req_params['db'] = $match[1];
        }else{
                 if(@$match[1]==null || $match[1]==''){
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
@@ -54,11 +60,11 @@
                     $remoteURL = $splittedURL[0]
                     .'hserv/controller/sys_structure.php?db='.$match[1];
 
-                    if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
-                    if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
-                    if (@$_REQUEST['terms']) $remoteURL = $remoteURL.'&terms='.$_REQUEST['terms'];
-                    if (@$_REQUEST['translations']) $remoteURL = $remoteURL.'&translations='.$_REQUEST['translations'];
-                    if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
+                    if (@$req_params['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$req_params['rectypes'];
+                    if (@$req_params['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$req_params['detailtypes'];
+                    if (@$req_params['terms']) $remoteURL = $remoteURL.'&terms='.$req_params['terms'];
+                    if (@$req_params['translations']) $remoteURL = $remoteURL.'&translations='.$req_params['translations'];
+                    if (@$req_params['mode']) $remoteURL = $remoteURL.'&mode='.$req_params['mode'];
 
                     $data = loadRemoteURLContent($remoteURL); //load defitions from remote database
                 
@@ -87,7 +93,7 @@
 
     $mode = 0;
     $system = new System();
-    if( ! $system->init(@$_REQUEST['db']) ){
+    if( ! $system->init(@$req_params['db']) ){
 
         //get error and response
         $response = $system->getError();
@@ -102,7 +108,7 @@
         
     }else{
         
-        if(@$_REQUEST["import"]){ //this is import
+        if(@$req_params["import"]){ //this is import
             if(!$system->is_admin()){
                 $system->error_exit('To perform this action you must be logged in as '
                         .'Administrator of group \'Database Managers\'',
@@ -110,7 +116,7 @@
             }
             
             //combination of db and record type id eg. 1126-13            
-            $code = @$_REQUEST['code']; //this is not concept code - these are source database and rectype id in it
+            $code = @$req_params['code']; //this is not concept code - these are source database and rectype id in it
             //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
          
             $isOK = false;  
@@ -118,11 +124,11 @@ ini_set('max_execution_time', 0);
             $importDef = new DbsImport( $system );
 
             $options = [
-                'defType' => @$_REQUEST["import"],
-                'databaseID' => @$_REQUEST["databaseID"],
-                'definitionID' => @$_REQUEST["definitionID"],
-                'is_rename_target' => @$_REQUEST["is_rename_target"] == 1,
-                'conceptCode'=> @$_REQUEST['conceptCode']
+                'defType' => @$req_params["import"],
+                'databaseID' => @$req_params["databaseID"],
+                'definitionID' => @$req_params["definitionID"],
+                'is_rename_target' => @$req_params["is_rename_target"] == 1,
+                'conceptCode'=> @$req_params['conceptCode']
             ];
 
             if($importDef->doPrepare( $options )){
@@ -142,7 +148,7 @@ ini_set('max_execution_time', 0);
             if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
                 
                 $sText = 'Target database '.HEURIST_DBNAME;
-                $sText .= ("\n".'Source database '.intval(@$_REQUEST["databaseID"]));
+                $sText .= ("\n".'Source database '.intval(@$req_params["databaseID"]));
                 $sText .= ("\n".count($response['report']['broken_terms']).' terms were not imported.');
                 foreach($response['report']['broken_terms'] as $idx => $term){
                     $sText .= ("\n".print_r($term, true));
@@ -157,7 +163,7 @@ ini_set('max_execution_time', 0);
             if(@$response['report'] && $response['report']['rectypes']){
 
                 $sText = 'Target database '.HEURIST_DBNAME;
-                $sText .= ("<br>".'Source database '.intval(@$_REQUEST["databaseID"]));
+                $sText .= ("<br>".'Source database '.intval(@$req_params["databaseID"]));
                 $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
                         .$response['report']['rectypes'].'</table>');
                         
@@ -170,28 +176,28 @@ ini_set('max_execution_time', 0);
             //$currentUser = $system->getCurrentUser();
             $data = array();
 
-            if (@$_REQUEST['translations']){
-                $data['translations'] = dbs_GetTranslations($system, $_REQUEST['translations']);
+            if (@$req_params['translations']){
+                $data['translations'] = dbs_GetTranslations($system, $req_params['translations']);
             }
 
-            if (@$_REQUEST['terms']) {
+            if (@$req_params['terms']) {
                 $data["terms"] = dbs_GetTerms($system);
             }
 
-            if (@$_REQUEST['detailtypes']) {
-                $ids = $_REQUEST['detailtypes']=='all'?null
-                            :filter_var($_REQUEST['detailtypes'], FILTER_SANITIZE_STRING);
-                $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
+            if (@$req_params['detailtypes']) {
+                $ids = $req_params['detailtypes']=='all'?null
+                            :filter_var($req_params['detailtypes'], FILTER_SANITIZE_STRING);
+                $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$req_params['mode']) );
             }
 
             
-            if (@$_REQUEST['rectypes']) {
-                $ids = $_REQUEST['rectypes']=='all'?null
-                            :filter_var($_REQUEST['rectypes'], FILTER_SANITIZE_STRING);
-                $mode = intval(@$_REQUEST['mode']);
+            if (@$req_params['rectypes']) {
+                $ids = $req_params['rectypes']=='all'?null
+                            :filter_var($req_params['rectypes'], FILTER_SANITIZE_STRING);
+                $mode = intval(@$req_params['mode']);
 
                 if($mode>2){
-                    $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes'], @$_REQUEST['parentcode']);
+                    $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$req_params['fieldtypes'], @$req_params['parentcode']);
                 }else{
                     $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
                 }
@@ -207,7 +213,7 @@ ini_set('max_execution_time', 0);
                     $response = $data["rectypes"];
                 }
     /* verify this piece after merging 25-Jul-18
-                if($mode==4 && @$_REQUEST['lazyload']){
+                if($mode==4 && @$req_params['lazyload']){
                     if(count($data["rectypes"])==1){
                         $response = $data["rectypes"][0]['children'];
                     }else{

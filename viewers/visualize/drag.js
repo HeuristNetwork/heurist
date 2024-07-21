@@ -146,12 +146,12 @@ function addNodes() {
           })    
          .on("click", function(d) {
              
-              closeRectypeSelector();
-              // Check if it's not a click after dragging
-              if(!d3.event.defaultPrevented) {
+            closeRectypeSelector();
+            // Check if it's not a click after dragging
+            if(!d3.event.defaultPrevented) {
                 // Load record details
                 showNodeInformation(d);//Added by ISH
-              }
+            }
          })
          .call(drag);
 
@@ -184,10 +184,10 @@ function showNodeInformation(d){
     window.hWin.HEURIST4.msg.bringCoverallToFront(iframeDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
         'Loading<br><br>'+ window.hWin.HEURIST4.util.stripTags(truncateText(d.name, 40)));
 
-
     var srcURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID=' + d.id + '&db=' + window.hWin.HAPI4.database;//URL for source of information iframe
     infoBox.attr("src", srcURL)
            .attr("recid", d.id)
+           .attr("data-recid", d.id)
            .on('load', () => {
                 window.hWin.HEURIST4.msg.sendCoverallToBack(true);
            });//supply document to iframe
@@ -203,8 +203,17 @@ function showNodeInformation(d){
 /*Hides record details shown by showNodeInformation
   Added by "ISH"
 */
-function hideNodeInformation(){
-    d3.select("#iframeDiv").style("display", "none");//close the box when clicked 
+function handleNodeAction(action = 'close'){
+
+    if(action == 'close'){
+        d3.select('#iframeDiv').style('display', 'none');//close the box when clicked 
+        return;
+    }
+
+    let rec_ID = d3.select('#iframeInfo').attr('data-recid');
+    let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
+
+    action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
 }
 
 /**

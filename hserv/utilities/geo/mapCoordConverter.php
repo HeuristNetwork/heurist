@@ -473,8 +473,6 @@ class GpointConverter
      * is they run east-west) that define where the "cone" intersects the earth.
      * Simply put they should bracket the area being projected. 
      *
-     * google is your friend to find out more
-     *
      * @param integer $falseEasting
      * @param integer $falseNorthing
      * @param float $longOfOrigin

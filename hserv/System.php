@@ -1007,6 +1007,14 @@ class System {
                     .' '.@$this->current_User['ugr_FullName']
                     .' <'.@$this->current_User['ugr_eMail'].'>';
 
+            //clear sensetive info
+            $sensetive = array('pwd','','chpwd','create_pwd','usrPassword','password');
+            array_walk($sensetive,function($key){
+                if(array_key_exists($key,$_REQUEST)){
+                    unset($_REQUEST[$key]);
+                }   
+            });
+                    
             $sMsg = "\nMessage: ".preg_replace("/[\r\n]/", ' ', $message)."\n"
                     .($sysmsg?'System message: '.$sysmsg."\n":'')
                     .'Script: '.@$_SERVER['REQUEST_URI']."\n"
@@ -1018,10 +1026,20 @@ class System {
                 fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
             }
 
-            $message = 'Heurist was unable to process this request. '.$message;
-            $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
+            $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
+            if($mysql_gone_away_error){
+                $message =  $message
+                            .' There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+            }else{
+                $message = 'Heurist was unable to process this request. ' . $message;
+                $sysmsg = 'Although errors are emailed to the Heurist team (for servers maintained directly by the project), there are several thousand Heurist databases, so we are unable to review all automated reports. If this is the first time you have seen this error, please try again in a few minutes in case it is a temporary network outage. Please contact us if this error persists and is causing you a problem, as this will help us identify important issues. We apologise for any inconvenience';
+            }
 
-            error_log($Title.'  '.$sMsg);     
+            error_log($Title.'  '.$sMsg);
+
+            if(!$mysql_gone_away_error){
+                $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
+            }
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
@@ -1568,7 +1586,7 @@ class System {
                 unset($_SESSION[$this->dbname_full]['need_refresh']);
             }
             
-            $fname = HEURIST_FILESTORE_DIR.$userID;
+            $fname = HEURIST_FILESTORE_DIR.basename($userID);
             if(file_exists($fname)){  //user info was updated by someone else
                 unlink($fname);
                 //marker for usr_info.verify_credentials to be sure that client side is also up to date 
@@ -1881,8 +1899,10 @@ class System {
             
             $mysqli = $this->mysqli;
             $this->system_settings = getSysValues($mysqli);
+            
             if(!$this->system_settings){
-                $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
+                //HEURIST_SYSTEM_FATAL
+                $this->addError(HEURIST_DB_ERROR, 'Unable to read sysIdentification', $mysqli->error);
                 return null;
             }
             
@@ -2084,7 +2104,20 @@ class System {
         
         return $version_last_check; 
     }
-
+    
+    //
+    //
+    //
+    public static function getAdminPwd($name='pwd'){
+        if(@$_REQUEST[$name]){
+            $sysadmin_pwd  = $_REQUEST[$name];
+            unset($_REQUEST[$name]);   
+        }else{
+            $sysadmin_pwd = null;
+        }
+        return $sysadmin_pwd;
+    }
+    
     //
     // returns true if password is wrong
     //
@@ -2309,7 +2342,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     * Remove database definition cache file
     */
     public function cleanDefCache(){
-            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json');
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json'); //old name
+            fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/dbdef_cache.json');
     }
     
     /**

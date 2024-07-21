@@ -1248,10 +1248,9 @@ function recordUpdateOwnerAccess($system, $params){
         $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
         $access = @$params['NonOwnerVisibility'];
 
-        if(!is_array($owner_grps) || count($owner_grps)==0 || $access==null){             
+        if((!is_array($owner_grps) || count($owner_grps)==0 || $access==null) && !$system->is_admin()){
             return $system->addError(HEURIST_INVALID_REQUEST, 'Neither owner nor visibility parameters defined');
         }
-
 
         $mysqli = $system->get_mysqli();  
 
@@ -1337,14 +1336,34 @@ function recordUpdateOwnerAccess($system, $params){
         $tot_count = $cnt_allowed_recids; 
 
         $rec_mod = date('Y-m-d H:i:s');
-        $main_owner = $owner_grps[0];
-        array_shift( $owner_grps );  //other owners
+        $main_owner = null;
+        if(!empty($owner_grps)){
+            $main_owner = $owner_grps[0];
+            array_shift( $owner_grps );  //other owners
+        }
         $access_grps = @$params['NonOwnerVisibilityGroups'];
         $success = true;
         $updated_count = 0;
 
         //update by chunks
         $k = 0;
+
+        // Setup base query
+        $fields = ['rec_Modified=?'];
+        $data = [$rec_mod];
+        $types = 's';
+        if(!empty($main_owner)){
+            $fields[] = 'rec_OwnerUGrpID=?';
+            $data[] = $main_owner;
+            $types .= 'i';
+        }
+        if(!empty($access)){
+            $fields[] = 'rec_NonOwnerVisibility=?';
+            $data[] = $access;
+            $types .= 's';
+        }
+        $base_query = 'UPDATE Records set ' . implode(', ', $fields);
+
         while ($k < $cnt_allowed_recids) {
 
             if($progress_session_id && $cnt_allowed_recids>5000){
@@ -1360,12 +1379,11 @@ function recordUpdateOwnerAccess($system, $params){
 
             $chunk = array_slice($allowed_recids, $k, 5000);
 
-            $query = 'UPDATE Records set rec_Modified=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=? '
-            .' where rec_ID in ('.implode(',', $chunk).')';
+            $query = $base_query . ' where rec_ID in ('.implode(',', $chunk).')';
 
             $stmt = $mysqli->prepare($query);
 
-            $stmt->bind_param('sis', $rec_mod, $main_owner, $access);
+            $stmt->bind_param($types, ...$data);
 
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
@@ -3226,14 +3244,23 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
     $recIDs = prepareIds($recIDs);
 
     if(is_array($recIDs) && count($recIDs)>0){
-
-        $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).')';
-        $mysqli->query($query);
-
+        
         $access_grps = prepareIds($access_grps);
         $owner_grps = prepareIds($owner_grps, true);
-        if( (is_array($access_grps) && count($access_grps)>0) 
-            || (is_array($owner_grps) && count($owner_grps)>0)){
+
+        $has_access_values = is_array($access_grps) && count($access_grps)>0;
+        $has_owner_values = is_array($owner_grps) && count($owner_grps)>0;
+
+        if($has_access_values){
+            $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).') AND rcp_Level = "view"';
+            $mysqli->query($query);
+        }
+        if($has_owner_values){
+            $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).') AND rcp_Level = "edit"';
+            $mysqli->query($query);
+        }
+
+        if($has_access_values || $has_owner_values){
             //add group record permissions
             $values = array();
             foreach($recIDs as $recID){
@@ -3505,7 +3532,7 @@ function checkUserPermissions($system, $action){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
-    }else if(  ($permissions = 'y_no_add')
+    }else if(  ($permissions == 'y_no_add')
             || ($action == 'add' && strpos($permissions, 'add') !== false) 
             || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
             

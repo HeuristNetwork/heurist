@@ -285,6 +285,26 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
 <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
+<!-- Calendar picker -->
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
+
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
+<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+<script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
+
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
 
@@ -327,6 +347,15 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
             }
         });   
 
+<?php        
+/*
+if(@$_SERVER['REQUEST_METHOD']=='POST'){
+    $req_params = filter_input_array(INPUT_POST);
+    print 'window.hWin.HAPI4.postparams='.json_encode($req_params).';';
+    print 'console.log(window.hWin.HAPI4.postparams)';
+}     
+*/
+?>     
 
         //
         // cfg_widgets and cfg_layouts are defined in layout_default.js
@@ -413,7 +442,8 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
                 //version is old 
                 return;
             }
-
+            
+            
             var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
             if(editRecID>0){
                 //edit record
@@ -480,8 +510,8 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 
         //perform search in the case that parameter "q" is defined - see mainMenu.js function _performInitialSearch
-        
-        
+
+
         //if database is empty show welcome screen
         //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
         //    showTipOfTheDay(false);
@@ -502,10 +532,6 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
                 }
             }
         }
-
-
-
-
 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
 

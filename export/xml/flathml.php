@@ -132,20 +132,9 @@ if(@$_REQUEST['multifile']){ // output manifest + files ??
 }                                                 
 
 $output_file = null;
+$output_file_fd = null;
+
 $hunifile = null; //name of file-per-record for HuNI mode
-
-//write the output into single file
-// output to file is allowed in the only case - archiving database
-if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME)){ 
-    $output_file_name = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
-
-    $output_file = fopen ($output_file_name, "w");    
-    if(!$output_file){
-        die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
-    }
-    $_REQUEST['mode'] = 1;
-}
-
 
 if(!defined('PDIR')){
     $system = new System();
@@ -153,6 +142,20 @@ if(!defined('PDIR')){
         die("Cannot connect to database");
     }
 }
+
+//write the output into single file
+// output to file is allowed in the only case - archiving database
+if(@$_REQUEST['filename']==1 && file_exists(HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME)){ 
+    $output_file = tempnam(HEURIST_SCRATCHSPACE_DIR, "xml");
+    
+    $output_file_fd = fopen($output_file, 'w');    
+    //$output_file = fopen ($output_file_name, "w");    
+    //if(!$output_file){
+    //    die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
+    //}
+    $_REQUEST['mode'] = 1;
+}
+
 
 if(!defined('HEURIST_HML_DIR')){
     /*$path = $system->get_system('sys_hmlOutputDirectory'); //@todo check
@@ -175,6 +178,7 @@ if(!$intofile){
         header('Content-type: text/xml; charset=utf-8');
 
         if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
+            //name of file in header - for download
             if($rectype_templates){
                 $filename = 'Template_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';
             }else{
@@ -207,15 +211,15 @@ $dbID = $system->get_system('sys_dbRegisteredID');
 //----------------------------------------------------------------------------//
 
 function output($str){
-    global $intofile, $hunifile, $output_file;
+    global $intofile, $hunifile, $output_file, $output_file_fd;
 
     if($intofile){
         if($hunifile){
             fwrite($hunifile, $str);
         }
     }else{
-        if($output_file){
-            fwrite($output_file, $str);
+        if($output_file_fd){
+            fwrite($output_file_fd, $str);
         }else{
             echo $str;   
         }
@@ -658,7 +662,7 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
     $nlrIDs = array();
     $query = 'SELECT f.dtl_Value as srcRecID, rel.rec_ID as relID, ' . // from detail
     'IF( f.dtl_Value IN (' . join(',', prepareIds($qrec_ids)) . '),1,0) as srcIsFrom, ' .
-    't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermId as invRelType ' .
+    't.dtl_Value as trgRecID, trm.trm_ID as relType, trm.trm_InverseTermID as invRelType ' .
     ', src.rec_NonOwnerVisibility , trg.rec_NonOwnerVisibility ' . 'FROM recDetails f ' .
     'LEFT JOIN Records rel ON rel.rec_ID = f.dtl_RecID and f.dtl_DetailTypeID = ' . intval($relSrcDT) . ' ' .
     'LEFT JOIN recDetails t ON t.dtl_RecID = rel.rec_ID and t.dtl_DetailTypeID = ' . intval($relTrgDT) . ' ' .
@@ -2138,8 +2142,10 @@ else{ // single output stream
     }
     closeTag('hml');
 
-    if($output_file){
-        fclose ($output_file);
+    if($output_file_fd){
+        fclose ($output_file_fd);
+        $output_file_name = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME."/".HEURIST_DBNAME.".xml";
+        rename($output_file, $output_file_name);
     }
 
 }

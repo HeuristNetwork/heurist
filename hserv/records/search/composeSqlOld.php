@@ -2619,7 +2619,7 @@ class RelatedFromParentPredicate extends Predicate {
        
                 if($this->need_recursion){         
                     //there is relationship term - need to find inverse value
-                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = ".intval($relation_type_ID));
+                    $res = $mysqli->query("select trm_InverseTermID from defTerms where trm_ID = ".intval($relation_type_ID));
                     if($res){
                         $inverseTermId = $res->fetch_row();
                         $inverseTermId = @$inverseTermId[0];
@@ -2706,7 +2706,7 @@ class RelatedToParentPredicate extends Predicate {
                 
                 if($this->need_recursion){         
                     //there is relationship term - need to find inverse value
-                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = ".intval($relation_type_ID));
+                    $res = $mysqli->query("select trm_InverseTermID from defTerms where trm_ID = ".intval($relation_type_ID));
                     if($res){
                         $inverseTermId = $res->fetch_row();
                         $inverseTermId = @$inverseTermId[0];
@@ -2793,7 +2793,7 @@ class RelatedPredicate extends Predicate {
                 
                 //there is relationship term - need to find inverse value
                 if($relation_type_ID>0){
-                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = $relation_type_ID");
+                    $res = $mysqli->query("select trm_InverseTermID from defTerms where trm_ID = $relation_type_ID");
                     if($res){
                         $inverseTermId = $res->fetch_row();
                         $inverseTermId = @$inverseTermId[0];

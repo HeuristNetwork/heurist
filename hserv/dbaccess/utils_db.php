@@ -37,6 +37,7 @@
     *  stripAccents
     *  prepareIds
     *  checkMaxLength - check max length for TEXT field
+    *  getDefinitionsModTime - returns timestamp of last update of db denitions
     * 
     *  updateDatabaseToLatest - make changes in database structure according to the latest version
     *  recreateRecLinks
@@ -879,10 +880,11 @@
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
                 ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1'; 
                 
-                exec($cmd, $arr_out, $res2);
+                $shell_res = exec($cmd, $arr_out, $res2);
 
-                if ($res2 != 0 ) {
-                    $error = 'Error: '.print_r($res2, true);
+                if ($res2 != 0) { // $shell_res is either empty or contains $arr_out as a string
+                    $error = 'Error. Shell returns status: '.($res2!=null?intval($res2):'unknown')
+                        .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
                 }else{
                     $res = true;
                 }
@@ -1073,7 +1075,7 @@
     // $need_populate - adds entries to recDetailsDateIndex
     // $json_for_record_details - update recDetails - change Plain string temporals to JSON 
     //
-    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0){
+    function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0, $progress_report_step=-1){
         
         $mysqli = $system->get_mysqli();
         
@@ -1084,6 +1086,7 @@
         
         $err_prefix = '';//'Update date index: ';
         $cnt = 0;
+        $cnt_all = 0;
         $cnt_to_json = 0;
         $cnt_err = 0;
         $report = array();
@@ -1324,7 +1327,20 @@
                         //}
                     } 
                  
-                    
+                    $cnt_all++;
+                 
+                    if($progress_report_step>=0 && $cnt_all%1000==0 ){
+                        $percentage = intval($cnt_all*100/$cnt_dates);
+                        if(DbUtils::setSessionVal($progress_report_step.','.$percentage)){
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
+                            if($cnt_dates<150000){
+                                $mysqli->rollback();
+                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                            }
+                            return false;
+                        }
+                    }
                 }//while
                 $res->close();
                 
@@ -1611,6 +1627,24 @@
         }
         
     }
+    
+    //
+    // returns timestamp of last update of db denitions
+    //
+    function getDefinitionsModTime($mysqli)
+    {                                                 
+        //CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, '+00:00')
+        $rst_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rst_Modified), @@session.time_zone, "+00:00") FROM defRecStructure');
+        $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
+        $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
+        $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
+
+        $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
+        $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
+        $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
+
+        return date_create($last_mod);
+    }
 
 
     
@@ -1692,7 +1726,8 @@
     }    
     
     //
-    //  returns value of session file
+    // returns value of session file
+    // if $value is not set, it returns current value
     //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
         
@@ -1706,25 +1741,24 @@
         
         $session_file = HEURIST_SCRATCH_DIR.'session'.$session_id;
         $is_exist = file_exists($session_file);
-        
-        if($value=='REMOVE'){
+
+        if($value==='REMOVE'){
             if($is_exist) fileDelete($session_file);
             $res = 'terminate';
         }else{
             //get    
             if($is_exist) $res = file_get_contents($session_file);
             
-            if($value!=null && $res!='terminate'){
+            if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);
                 $res = $value;
             }
         }
-   
         return $res;
     }    
 
     // 
-    // For Sybversion update see DBUpgrade_1.2.0_to_1.3.0.php
+    // For Subversion update see DBUpgrade_1.2.0_to_1.3.0.php
     //
     // This method updates from 1.3.14 to 1.3.xxxx
     //
@@ -1795,6 +1829,7 @@
     * 
     * @param mixed $mysqli
     * @param mixed $db_name
+    * @return either array of missed tables or SQL error
     */
     function hasAllTables($mysqli, $db_name=null){
 
@@ -1806,29 +1841,37 @@
 
         $list = mysql__select_list2($mysqli, "SHOW TABLES $query", 'strtolower');
         
-/*not used        
-defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
-recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
-woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
-*/
-
-//auto recreated
-//'reclinks'
-
-//recreated via upgrade
-//'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
-
-        $check_list = array(
-'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
-'defrecstructure','defrectypegroups','defrectypes','defterms','deftermslinks',
-'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
-'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
-'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
-'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
-
-        $missed = array_diff($check_list, $list);
         
-        return $missed;
+        if($mysqli->error){
+            
+            return $mysqli->error;
+            
+        }else{
+            
+    /*not used        
+    defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
+    recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
+    woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
+    */
+
+    //auto recreated
+    //'reclinks'
+
+    //recreated via upgrade
+    //'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+
+            $check_list = array(
+    'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
+    'defrecstructure','defrectypegroups','defrectypes','defterms','deftermslinks',
+    'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
+    'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
+    'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
+    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
+
+            $missed = array_diff($check_list, $list);
+            
+            return $missed;
+        }
     }
     
     

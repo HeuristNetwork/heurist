@@ -414,7 +414,7 @@ $query = "CREATE TABLE defTermsLinks (
         $system->get_system(null, true); //reset system values - to update version
         
         //validate default values for record type structures
-        $list = getInvalidFieldTypes($mysqli, null);
+        $list = getInvalidDefaultValues($mysqli);
         
         if($list && is_array(@$list['rt_defvalues']) && count($list['rt_defvalues'])>0){
             $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
