@@ -1599,7 +1599,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function get_server_var($id) {
-        return @$_SERVER[$id];
+        return filter_input(INPUT_SERVER, $id); //@$_SERVER[$id];
     }
 
     protected function handle_form_data($file, $index) {
