@@ -92,7 +92,8 @@ if (@$argv) {
                     $_REQUEST['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
                     
-                    if($file_time - intval($_REQUEST['timestamp']) < 5){
+                    if($file_time - intval($_REQUEST['timestamp']) < 10){
+                        //compare file time with time of db defs on client side
                         //defintions are up to date on client side
                         header('Content-type: application/json;charset=UTF-8');
                         print json_encode( array('uptodate'=>$file_time));
@@ -184,7 +185,8 @@ if (@$argv) {
             
             //update dbdef cache
             if(@$_REQUEST['entity']=='all' && $res!==false && $dbdef_cache!=null){
-                $res['timestamp'] = time(); //update time for db def cache
+                $res['timestamp'] = time();  //update time on client side
+                //update db defintion cache file
                 file_put_contents($dbdef_cache, json_encode($res));
             }
             

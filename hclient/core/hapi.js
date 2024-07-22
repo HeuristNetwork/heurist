@@ -63,6 +63,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _guestUser = { ugr_ID: 0, ugr_FullName: 'Guest' },
         _listeners = [],
         _is_callserver_in_progress = false,
+        _last_check_dbcache_relevance = 0,
 
         _use_debug = true;
                 
@@ -244,6 +245,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
+        
+        if(window.hWin.HAPI4 && action!='entityScrud' && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //3 seconds
+            _last_check_dbcache_relevance = new Date().getTime();
+            window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
+                _callserver(action, request, callback, timeout);
+            });
+        }
+        
 
         if (!request.db) {
             request.db = _database;
@@ -1828,6 +1837,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         var entity_configs = {};
         var entity_data = {};
         var entity_timestamp = 0;
+        var _msgOnRefreshEntityData = 0;
 
         var that = {
 
@@ -2001,6 +2011,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             relevanceEntityData: function (callback) {
                 if(entity_timestamp>0){
                     window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
+                }else if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                    callback(this, true);
                 }
             },
             
@@ -2011,7 +2023,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 var params = { a: 'structure', 'details': 'full'};
                 params['entity'] = entityName;
-                params['timestamp'] = entity_timestamp;
+                params['timestamp'] = entity_timestamp; //db defitions time on client side
 
                 /*
                 if($.isPlainObject(opts) && opts['recID']>0){ 
@@ -2025,9 +2037,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 var s_time = new Date().getTime() / 1000;
                 //'multi':1,  
 //[domain]/h6-alpha/hserv/controller/entityScrud.php?db=[database]&a=structure&entity=all                
+
+                if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
+                _msgOnRefreshEntityData = setTimeout(function(){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false);
+                }, 1000);
+
                  
                 _callserver('entityScrud', params,
                     function (response) {
+
+                        if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
+                        _msgOnRefreshEntityData = 0;
+                        window.hWin.HEURIST4.msg.closeMsgFlash();
                         
                         if (response && response['uptodate']) { //relevance db definitions
                             

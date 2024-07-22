@@ -2345,6 +2345,29 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/db.json'); //old name
             fileDelete($this->getFileStoreRootFolder().$this->dbname().'/entity/dbdef_cache.json');
     }
+
+    /**
+    * Validates that db defintions cache is up to date with client side version
+    * 
+    * @param mixed $timestamp - client side last update timestamp
+    * @return {false|true} - returns false if client side cache is older
+    public function checkDefCache($timestamp){
+        $res = true;
+        if($timestamp>0){
+            $dbdef_cache = $this->getFileStoreRootFolder().$this->dbname().'/entity/dbdef_cache.json';
+            if(file_exists($dbdef_cache)){
+                $file_time = filemtime($dbdef_cache);
+                if($file_time - $timestamp > 10){
+                    $res = false;            
+                }
+            }else{
+                //cache file does not exist - need to be updated
+                $res = false;            
+            }
+        }
+        return $res;
+    }
+    */
     
     /**
      * Retrieve saved settings for current database from settings/
