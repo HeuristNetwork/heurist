@@ -1270,7 +1270,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 // It returns selection function that opens record selection popup dialog
 //
 function browseRecords(_editing_input, $input){
-    
+
     var that = _editing_input;
     
     var $inputdiv = $input.parent(); //div.input-div
@@ -1314,7 +1314,6 @@ function browseRecords(_editing_input, $input){
                     parententity: (isparententity)?that.options.recID:0,
                     
                     onselect: function(event, data){
-                        
                              if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
 
                                 var f_id = $('#'+__current_input_id).parents('fieldset').attr('id');
@@ -1339,6 +1338,11 @@ function browseRecords(_editing_input, $input){
                                        $input = inputs[inputs.length-1];
                                        $inputdiv = $input.parent(); 
                                     }
+                                }else{
+                                     let inpt = that.element.find('#'+__current_input_id);
+                                     if(inpt.length>0){
+                                        $input = inpt;   
+                                     }
                                 }
                                 
                                  
@@ -1358,7 +1362,7 @@ function browseRecords(_editing_input, $input){
                                 
                                 that.newvalues[$input.attr('id')] = targetID;
                                 $input.attr('data-value', targetID); //that's more reliable
-                                
+
                                 //save last 25 selected records
                                 var now_selected = data.selection.getIds(25);
                                 window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
@@ -1374,6 +1378,8 @@ function browseRecords(_editing_input, $input){
                                 
                                 that.onChange();
                                 ele.css({margin:'4px', 'border':'2px red solid !important'});
+                                
+                                var $inputdiv = $input.parent();
                                 $inputdiv.css('border','4px green solid !important');
                                 $input.css('border','1px blue solid');
 
@@ -1418,7 +1424,6 @@ function browseRecords(_editing_input, $input){
                 var et = that.options.editing.getFieldByName('rec_Title');
                 
                 var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
-                
                 if(et && et.editing_input('instance') && et.editing_input('getValues')[0] == '' && isparententity){
 
                     var is_empty = true;
@@ -1680,11 +1685,12 @@ function browseRecords(_editing_input, $input){
 
                         that._off($(that.selObj),'change');
                         
+                        var ref_id = $(that.selObj).attr('ref-id');
+                        
                         if(targetID=='select'){
+                            __current_input_id = ref_id;
                            __show_select_dialog(); 
                         }else{
-
-                            var ref_id = $(that.selObj).attr('ref-id');
                             
                             var $input = $('#'+ref_id);
                             var $inputdiv = $('#'+ref_id).parent();
@@ -1695,7 +1701,6 @@ function browseRecords(_editing_input, $input){
                             var rec_RecType = opt.attr('data-rty');
                             that.newvalues[$input.attr('id')] = targetID;
                             $input.attr('data-value', targetID); //that's more reliable
-                            
                             $input.empty();
                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($input, 
                                 {rec_ID: targetID, 
