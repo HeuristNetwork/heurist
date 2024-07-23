@@ -6537,7 +6537,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                         cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
                     }
 
-                    history_head = `<div id="${field.id}-${fld_idx}-0" style="padding-bottom: 5px;">`
+                    history_head = `<div id="${field.id}-${fld_idx}" style="padding-bottom: 5px;">`
                                     + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>`
                                  + `</div>`;
 
@@ -6556,14 +6556,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         let date_stamp = cur_history['arc_TimeOfChange'];
                         date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('H:m d  MMMM y');
 
-                        history_log += `<div id="${field.id}-${fld_idx}-${idx}" style="${row_css}">`
+                        let is_revert = cur_history.arc_Action == 'revert';
+                        let chkbx_attr = !is_revert ? 
+                                            'disabled="disabled" class="ui-state-disabled"' : `name="revert-change" value="${field.id}-${fld_idx}-${idx}"`;
+                        let chkbx_style = `cursor: pointer;${!is_revert ? 'visibility: hidden;' : ''}`
+
+                        history_log += `<div id="${field.id}-${fld_idx}-${idx}" style="${row_css}" ${is_revert ? 'class="record_history_value"' : ''}>`
                                         + '<span>'
-                                            + (cur_history.arc_Action != 'revert' ? '' : 
-                                                `<input type="checkbox" name="revert-change" value="${field.id}-${fld_idx}-${idx}" style="cursor: pointer;"> `)
+                                            + `<input type="checkbox" ${chkbx_attr} style="${chkbx_style}"> `
                                         + '</span>'
                                         + `<span>${cur_history.arc_Action}</span> `
                                         + `<span style="${smaller_text_css}">${cur_history.arc_ChangedByUGrpID}</span> <span style="${smaller_text_css}">@</span>`
-                                        + `<span style="${smaller_text_css}">${date_stamp}</span> <span style="${smaller_text_css}"> >> </span>`
+                                        + `<span class="record_history_datestamp" style="${smaller_text_css}">${date_stamp}</span> <span style="${smaller_text_css}">&nbsp;>> </span>`
                                         + `<span class="truncate" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
                                     + `</div>`;
                     }
@@ -6585,7 +6589,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
 
-                content = `Check values to be restored, then click <button id="btn-history-revert">Revert changes</button> <button id="btn-history-cancel">Cancel</button>`
+                content = `Check values to be restored, then click <button id="btn-history-revert" style="margin: 0px 10px">Revert changes</button> or <button id="btn-history-cancel" style="margin: 0px 10px">Cancel</button>`
+                        + '<br><label for="record_history_setby_group">Bulk check by modification date <input type="checkbox" id="record_history_setby_group" /></label>'
                         + users
                         + content;
                 $acc_ele.children('div').html(content);
@@ -6598,6 +6603,58 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._on($acc_ele.find('#btn-history-cancel').button(), {
                     click: function(){
                         $acc_ele.find('input[type="checkbox"][name="revert-change"]').prop('checked', false);
+                    }
+                });
+                that._on($acc_ele.find('#record_history_setby_group'), {
+                    click: function(){
+                        $acc_ele.find(`input[name="revert-change"]`).prop('checked', false); // reset checks
+                    }
+                });
+                // Check checkbox on clicking row
+                that._on($acc_ele.find('div.record_history_value'), {
+                    click: function(event){
+
+                        let $ele = $(event.target);
+                        let org_target_checkbox = $ele.is('input[type="checkbox"]');
+                        if(!$ele.hasClass('record_history_value') && !org_target_checkbox){
+                            $ele = $ele.closest('.record_history_value');
+                        }
+
+                        $ele = org_target_checkbox || $ele.is('input[type="checkbox"]') ? $ele : $ele.find('input[type="checkbox"]');
+                        if($ele.length == 0){
+                            return;
+                        }
+
+                        let val = $ele.val().split('-'); // get base of value
+                        let date = that._record_history[val[0]][val[1]][val[2]]['arc_TimeOfChange'];
+
+                        val.pop();
+
+                        let new_status = $ele.is(':checked');
+                        new_status = org_target_checkbox ? new_status : !new_status; // invert status if the checkbox was not clicked
+
+                        if($acc_ele.find('#record_history_setby_group').is(':checked')){
+
+                            date = TDate.parse(date).toString('H:m d  MMMM y');
+                            let $dates = $acc_ele.find(`.record_history_datestamp:contains("${date}")`);
+
+                            $dates.each((idx, date) => {
+                                let $parent = $(date).closest('.record_history_value');
+                                if($parent.length == 0){
+                                    return;
+                                }
+
+                                $parent.parent().find('input[type="checkbox"]').prop('checked', false);
+
+                                $ele = $ele.add($parent.find('input[type="checkbox"]'));
+                            });
+                        }
+
+                        val = `${val.join('-')}-`;
+
+                        $acc_ele.find(`input[value^="${val}"]`).prop('checked', false); // remove all selections for this field
+
+                        $ele.prop('checked', new_status); // now, set clicked row's check status
                     }
                 });
 
@@ -6642,39 +6699,65 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     _revertRecordHistory: function(){
 
         const that = this;
+        const rectype = this._getField('rec_RecTypeID');
 
-        if(that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked').length <= 0){
+        let $checked_options = that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked');
+
+        if($checked_options.length <= 0){
             return;
         }
 
+        let changes = {};
+        let changes_txt = '';
+        let header_css = "display: inline-block; margin: 5px;";
+        let row_css = "cursor: default; display: grid; grid-template-columns: 250px 20px 250px; align-items: center; margin-bottom: 5px;";
+
+        $checked_options.each((idx, ele) => {
+
+            let value = $(ele).val();
+            if(value.indexOf('-') === -1){
+                return;
+            }
+            let [dty_ID, fld_idx, arc_idx] = value.split('-');
+            if(window.hWin.HEURIST4.util.isempty(dty_ID) || window.hWin.HEURIST4.util.isempty(fld_idx) || window.hWin.HEURIST4.util.isempty(arc_idx)){
+                return;
+            }
+
+            let archive_row = that._record_history[dty_ID][fld_idx][arc_idx];
+            let existing_val = that._record_history[dty_ID][fld_idx][0]['arc_Value'];
+
+            if(!Object.hasOwn(changes, dty_ID)){
+                changes[dty_ID] = {};
+
+                if(changes_txt !== ''){ // add line break
+                    changes_txt += '<hr style="margin-top: 10px;">';
+                }
+
+                let fld_name = $Db.rst(rectype, dty_ID, 'rst_DisplayName');
+                changes_txt += `<strong style="${header_css}">${fld_name}</strong>`;
+            }
+
+            // prep values for display
+            let escaped_val = window.hWin.HEURIST4.util.htmlEscape(existing_val);
+            let old_val = window.hWin.HEURIST4.util.htmlEscape(archive_row['arc_Value']);
+
+            changes_txt += `<div style="${row_css}">`
+                + `<span class="truncate" title="${existing_val}">${escaped_val}</span>`
+                + `<span>&nbsp;>> </span>`
+                + `<span class="truncate" title="${archive_row['arc_Value']}">${old_val}</span>`
+            + `</div>`;
+
+            changes[dty_ID][fld_idx] = archive_row['arc_ID'];
+        });
+
         let $dlg;
-        let msg = 'This will revert the changes that have been selected';
+        let msg = `Continuing will make the following changes:<br><br>${changes_txt}`;
 
         let btns = {};
-        btns[window.HR('OK')] = function(){
+        btns[window.HR('Proceed')] = function(){
 
             // Revert changes
             $dlg.dialog('close');
-
-            let $checked_options = that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked');
-
-            let changes = {};
-            $checked_options.each((idx, ele) => {
-
-                let value = $(ele).val();
-                if(value.indexOf('-') === -1){
-                    return;
-                }
-                let [dty_ID, fld_idx, arc_idx] = value.split('-');
-                if(window.hWin.HEURIST4.util.isempty(dty_ID) || window.hWin.HEURIST4.util.isempty(fld_idx) || window.hWin.HEURIST4.util.isempty(arc_idx)){
-                    return;
-                }
-
-                if(!Object.hasOwn(changes, dty_ID)){
-                    changes[dty_ID] = {};
-                }
-                changes[dty_ID][fld_idx] = that._record_history[dty_ID][fld_idx][arc_idx]['arc_ID'];
-            });
 
             let request = {
                 entity: 'sysArchive',
@@ -6716,7 +6799,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-            {title: 'Revert record changes', yes: window.HR('OK'), no: window.HR('Cancel')}, {default_palette_class: 'ui-heurist-populate'}
+            {title: 'Revert record changes', yes: window.HR('Proceed'), no: window.HR('Cancel')}, {default_palette_class: 'ui-heurist-populate', maxHeight: 800}
         );
     },
 
