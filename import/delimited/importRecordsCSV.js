@@ -2920,6 +2920,44 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     +(response.data.values.length<1000?'':' First 1000 rows')
                                     +'</h2>').appendTo(container);
 
+                            $('<span style="display: inline-block; padding-left: 10px; font-size: 1.1em;">'
+                                + 'Should show cleanly rendered data in a table with column names in first row.<br>If not, try changing choice of separator characters and encoding.'
+                            +'</span>').appendTo(container);
+
+                            let no_values = response.data.values.length == 0;
+                            let give_column_warning = false;
+
+                            if(!no_values && response.data.fields.length == 1){
+
+                                $('#csv_delimiter option').each((idx, option) => {
+                                    if($('#csv_delimiter').val() == option.value){
+                                        return;
+                                    }
+                                    let sep = option.value;
+                                    if(sep == 'tab'){
+                                        sep = "\t";
+                                    }
+
+                                    if(response.data.fields[0].indexOf(sep) > 0){
+                                        give_column_warning = true;
+                                        return false;
+                                    }
+                                });
+                            }
+
+                            if(no_values){
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: 'No values were detected.<br>'
+                                            +'Please select a different field separator or setting line separator to "auto detect", if not already set so, and hit Analyse data again.',
+                                    error_title: 'No values to import'
+                                });
+                            }else if(give_column_warning){
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: 'Only one column was detected.<br>'
+                                            +'Please select a different field separator or setting line separator to "auto detect", if not already set so, and hit Analyse data again.',
+                                    error_title: 'No fields found'
+                                });
+                            }
                             tbl  = $('<table>').addClass('tbpreview').appendTo(container);
                             
                             var _parseddata = response.data.values;
@@ -4367,7 +4405,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '</div>';
             }
             
-            dlg_options['title'] = 'Records with '+mode+'s';
+            dlg_options['title'] = `Records with ${mode == 'error' ? 'warning' : 'error'}s`; // 
             
         }
         else if(res['count_'+mode+'_rows']>0)
