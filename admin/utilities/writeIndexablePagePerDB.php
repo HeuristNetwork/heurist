@@ -168,6 +168,11 @@ $index_page = '<!DOCTYPE html>'
 
         . '<div style="margin: 10px 5px 15px;">'
             . 'Databases and websites on this server (<a href="'.$base_url.'" target=_blank>'.$base_url.'</a>)'
+            . '<p><b>**************************************************'
+            . '<br>This page is primarily for web indexing.'
+            . '<br>Many of these websites are just undeveloped stubs.'
+            . '<br><u>You will not be able to log into a database unless you have a password for it.'
+            . '</u><br>**************************************************</b></p>'
         . '</div>'
 
         . '<div style="margin-left: 10px;">'
