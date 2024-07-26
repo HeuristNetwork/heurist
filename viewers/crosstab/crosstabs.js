@@ -1034,7 +1034,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($entireDiv);
                 
                 $resetRowBody = '<div class="row">'+
-                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Reset Intervals:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Bucket count:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
                     '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier'+name+'" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
                     '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier'+name+'" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
                     '<div class="col-12 mb-2"><button class="btn btn-success w-100" id="numericApply"><i class="ui-icon ui-icon-circle-check"></i>Apply</button></div>' +
@@ -1055,7 +1055,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }
                     else{
-                        var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
+                        var errorMessage = "When entering the range of intervals to apply to a dataset, "
+                        + `the from and to values must be between the range ${fields3[name].values[0]} to ${fields3[name].values[1]}.`
                         + " The from value must also not exceed the to value and vice versa.";
 
                         createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
@@ -2859,7 +2860,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             hasValues = true;
 
             $row = $('<tr>').appendTo($table);
-            $row.append('<td class="crosstab-header" style="text-align:left;">'+rows[i].name+'</td>');
+            $row.append(`<td class="crosstab-header" data-order="${i}" style="text-align:left;">${rows[i].name}</td>`);
 
             if(noColumns){
                 if(rows[i].output[0]!=0 || !supressZero){
@@ -3002,12 +3003,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(type=="enum" || type=="resource" || type=="relationtype"){
             return (window.hWin.HEURIST4.util.findArrayIndex(val,values)>=0); // values.indexOf(val)
         }else{
-            if(val == fields3[name].values[1]){
-                return (val>=values[0] && val<=values[1]);    
-            }else{
-                val = parseFloat(val);
-                return (val>=values[0] && val<values[1]); 
-            }     
+            val = parseFloat(val);
+            return val == fields3[name].values[1] ? 
+                    val>=values[0] && val<=values[1] : val>=values[0] && val<values[1];
         }
     }
 
