@@ -845,7 +845,7 @@ function onAuthentication(response){
         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
                         [window.hWin.HAPI4.currentUser]);
 
-        if(login_dialog) login_dialog.dialog( "close" );
+        if(login_dialog && login_dialog.dialog('instance') !== undefined) login_dialog.dialog( "close" );
     }
 }
 
