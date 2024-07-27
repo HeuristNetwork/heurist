@@ -154,7 +154,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         this._on( this.searchForm, {
             "searchsysgroupsonresult": this.updateRecordList,
-            "searchsysgroupsonadd": function() { this.addEditRecord(-1); }
+            "searchsysgroupsonadd": function() { 
+                this.addEditRecord(-1); 
+            }
         });
 
         this._on( this.recordList, {

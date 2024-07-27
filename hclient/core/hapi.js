@@ -246,11 +246,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         _is_callserver_in_progress = true;
         
-        if(window.hWin.HAPI4 && action!='entityScrud' && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //3 seconds
+        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
+            && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //3 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
                 _callserver(action, request, callback, timeout);
             });
+            return;
         }
         
 
