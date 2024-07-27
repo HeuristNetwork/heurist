@@ -341,6 +341,10 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             var val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
             return '<div class="truncate" '+sstyle+' title="'+tip_text+'">'+val+'</div>';
         }
+        
+        var cur_mode = this.recordList.resultList('getCurrentViewMode');
+        var is_list = (cur_mode=='list');
+        var is_icon = (cur_mode=='icons');
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
 
@@ -351,20 +355,25 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         let desc = fld('ugr_Description');
 
         let name_width = navigator.userAgent.toLowerCase().includes('firefox') ? 10 : 11;
-        let recTitle = fld2('ugr_ID','flex:0 1 4em', '')
-        +fld2('ugr_Name',`flex:0 2 ${name_width}em;padding-left:5px;`, name);
+        let recTitle = fld2('ugr_ID',is_list?'flex:0 1 4em':'', '')
+            +fld2('ugr_Name',is_list
+                        ?`flex:0 2 ${name_width}em;padding-left:5px;`
+                        :('position:absolute;top:16px;'+(is_icon?'left:60px;right:42px;':''))
+                        , name);
 
         let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
 
         let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
 
-        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        let html_thumb = '<div class="recTypeThumb" style="'
+            +(cur_mode.indexOf('thumbs')>=0?'top:38px;':'')+'background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
         
-        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')+'" style="display:flex;">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')
+            +'" style="'+(is_list?'display:flex;':'')+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons" style="flex: 0 0 30px;">'
+        + '<div class="recordIcons" '+(is_list?'style="flex: 0 0 30px;"':'')+'>'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
@@ -374,38 +383,44 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         if(!is_user_roles){
 
             let show_role = this.searchForm.find('#input_search_type').val()!='any';
-            html = html + `<div title="Role" style="flex:0 0 80px;text-align:center;">${show_role?fld('ugl_Role'):''}</div>`;
+            html = html + '<div title="Role" style="'+(is_list?'flex:0 0 80px;':'')+'text-align:center;">'
+                    +(show_role?fld('ugl_Role'):'')+'</div>';
         }
 
+        var flexs = (is_list?'margin: 0px 15px;flex:0 0 25px;':'position:absolute;right:4px;');
+        
         let btn_edit = '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
-        +   'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+        +   'style="height:16px;top:4px;'+flexs+'">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
         + '</div>';
         let btn_delete = '<div title="Click to delete group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" '
-        +   'style="height:16px;margin: 0px 18px;flex:0 0 25px;">'
+        +   'style="height:16px;'+flexs+(is_list?'':'top:22px;')+'">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
         + '</div>';
 
         let locked_edit = '<div title="Status: not admin - locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" '
-            +   'style="height:16px;margin: 0px 15px;flex:0 0 25px;">'
+            +   'style="height:4px;top:4px;'+flexs+'">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
             + '</div>';
 
         if(!is_user_roles){
             html += window.hWin.HAPI4.has_access(recID) ? btn_edit : locked_edit;
             html += window.hWin.HAPI4.has_access(recID) && recID != 1 ? btn_delete : 
-                        '<div style="height:16px;flex:0 0 60px;"></div>';
+                        '<div style="height:16px;'+(is_list?'flex:0 0 55px;':'')+'"></div>';
         }
 
         if(this.options.select_mode=='select_roles'){
 
             html = html
-            +'<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px 0px 10px;">' + fld('ugr_Members') + '</div>'
-            +'<div class="adminSelector" style="flex:0 0 50px;padding-top:2px;"><input type="checkbox" id="adm'+recID
-            +'" '+(this._select_roles[recID]=='admin'?'checked':'')
+            +'<div class="truncate" style="'+(is_list?'flex:0 1 50px;':'')
+                        +'text-align:center;margin: 0px 15px 0px 10px;">' + fld('ugr_Members') + '</div>'
+            +'<div class="adminSelector" style="'+(is_list?'flex:0 0 50px;':'')
+                    +'padding-top:2px;"><input type="checkbox" id="adm'+recID
+                    +'" '+(this._select_roles[recID]=='admin'?'checked':'')
             +'/></div>' 
-            +'<div class="memberSelector" style="flex:0 0 30px;padding-top:2px;"><input type="checkbox" id="mem'+recID
-            +'" '+(this._select_roles[recID]=='member'?'checked':'')
+            +'<div class="memberSelector" style="'+(is_list?'flex:0 0 30px;':'')
+                    +'padding-top:2px;"><input type="checkbox" id="mem'+recID
+                    +'" '+(this._select_roles[recID]=='member'?'checked':'')
             +'/><label for="mem'+recID+'">Member</label></div>';
 
             html = html + '</div>';
@@ -416,22 +431,23 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             if(this.options.ugl_UserID>0){ //select_role
 
                 html = html
-                +'<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px;">' + fld('ugr_Members') + '</div>'
-                +'<div class="adminSelector" style="flex:0 0 50px;padding-top:2px;"><input type="checkbox" id="adm'+recID
+                +'<div class="truncate" style="'+(is_list?'flex:0 1 50px;':'')+'text-align:center;margin: 0px 15px;">' + fld('ugr_Members') + '</div>'
+                +'<div class="adminSelector" style="'+(is_list?'flex:0 0 50px;':'')+'padding-top:2px;"><input type="checkbox" id="adm'+recID
                 +'" '+(fld('ugl_Role')=='admin'?'checked':'')
                 +'/></div>' 
-                +'<div class="memberSelector" style="flex:0 0 30px;padding-top:2px;"><input type="checkbox" id="mem'+recID
+                +'<div class="memberSelector" style="'+(is_list?'flex:0 0 30px;':'')+'padding-top:2px;"><input type="checkbox" id="mem'+recID
                 +'" '+(fld('ugl_Role')=='member'?'checked':'')
                 +'/></div>';
 
             }else{
 
                 html = html 
-                + '<div class="truncate" style="flex:0 1 50px;text-align:center;margin: 0px 15px 0px 10px;">'
-                    + fld('ugr_Members')
+                + '<div class="truncate" style="'+(is_list?'flex:0 0 50px;':'position:absolute;top:50px;right:22px;')
+                        +'text-align:center;margin: 0px 15px 0px 10px;">'
+                        + fld('ugr_Members')
                 + '</div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
                 + '<div class="edit-members ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" '
-                +   'style="height:16px;margin: 0px 35px;">'
+                +   'style="height:16px;'+(is_list?'margin: 0px 35px;':'position:absolute;top:50px;right:5px;')+ '">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
             }
@@ -448,8 +464,10 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         html = html 
-            + fld2('ugr_Description','flex:0 5 50em;padding-left:10px;', desc)
-        + '</div>';
+            + fld2('ugr_Description',(is_list
+                    ?'flex:0 0 50em;padding-left:10px;'
+                    :('position:absolute;bottom:5px;'+(is_icon?'left:60px;right:42px;':'width:100%;'))), desc)
+            + '</div>';
 
         return html;
 

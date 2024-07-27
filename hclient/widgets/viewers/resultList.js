@@ -1312,7 +1312,7 @@ $.widget( "heurist.resultList", {
                 this.div_content_header.html( header_html ).show(); //css('display','table');
             }
         } 
-        if(this.options.view_mode=='tabs' || old_mode=='tabs'){
+        if(this.options.view_mode=='tabs' || old_mode=='tabs' || window.hWin.HEURIST4.util.isFunction(this.options.renderer)){
             //this._renderTabHeader(); //add <ul> with list of records to div_content
             this._renderPage(this.current_page);
         }
@@ -4636,6 +4636,10 @@ $.widget( "heurist.resultList", {
         }
 
         this._renderPage(0);
-    }
+    },
+    
+    getCurrentViewMode: function(){
+        return this._current_view_mode;
+    },
     
 });
