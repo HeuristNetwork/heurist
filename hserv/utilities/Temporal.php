@@ -1274,20 +1274,20 @@ class Temporal {
 
     //
     // $dt - string
-    // $mode - 0  simple
-    //         1  compact
-    //         2  extended
+    // $mode - 0  simple  (native first)
+    //         1  compact (gregorian first) 
+    //         2  extended  (list of all fields - pipe (|) separated)
 
     //
-    public static function toHumanReadable($dt, $print_invalid_str = false, $mode=0, $sep='|'){
+    public static function toHumanReadable($dt, $print_invalid_str=false, $mode=0, $sep='|', $calendar="both"){
 
         if($dt){
             $dt2 = new Temporal($dt);
             if($dt2 && $dt2->isValid()) {
                 if($mode>0){
-                    return $dt2->toReadableExt($sep, ($mode==1));
+                    return $dt2->toReadableExt($sep, ($mode==1), $calendar);
                 }else{
-                    return $dt2->toReadable();       
+                    return $dt2->toReadable($calendar);       
                 }            
             }else{
                 $dt = $print_invalid_str && is_string($dt) && !empty($dt) ? '('. $dt .')' : '';
@@ -1377,12 +1377,18 @@ class Temporal {
     //
     // Outputs human readable representation of temporal object
     //    
-    public function toReadable(){
+    public function toReadable($out_calendar='both'){
         if($this->tDate){
 
             $date = $this->tDate;
 
             $calendar = @$date['calendar'];
+
+            $native = null;
+            $is_greg_or_julian = (!$calendar || strtolower($calendar)=='gregorian'); // || strtolower($calendar)=='julian'
+            if(@$date['native'] && !$is_greg_or_julian){
+                $native = @$date['native'];
+            }            
 
             if(@$date['timestamp']){
 
@@ -1392,12 +1398,20 @@ class Temporal {
                     $res = $res.Temporal::_deviationSuffix( $date['timestamp'] );
                 }
 
+                $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $res = 'circa '.$res;
+                    $prefix = 'circa ';
                 }else if(@$date['timestamp']['before']){
-                    $res = 'before '.$res;
+                    $prefix = 'before ';
                 }else if(@$date['timestamp']['after']){
-                    $res = 'after '.$res;
+                    $prefix = 'after ';
+                }
+                
+                if($prefix){
+                    $res = $prefix.$res;
+                    if($native){
+                        $native = $prefix.$native;
+                    }
                 }
 
             }else{
@@ -1426,13 +1440,15 @@ class Temporal {
             }
 
             //add native decription as prefix
-            $is_greg_or_julian = (!$calendar || 
-                strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
-
-            if($calendar && @$date['native'] && !$is_greg_or_julian){
-                $res = $date['native'].'  '.$calendar.' (Gregorian '.$res.')';
-            }            
-
+            if($native){
+                if($out_calendar=='native'){
+                    $res = $native; //native only    
+                }else if($out_calendar!='gregorian'){
+                    //both gregorian and native
+                    $res = $native.'  '.$calendar.' (Gregorian '.$res.')';
+                }
+            }
+            
             return $res;
 
         }else{
@@ -1444,7 +1460,7 @@ class Temporal {
     //
     // Outputs human readable representation of temporal object
     //    
-    public function toReadableExt($separator, $is_compact=false){
+    public function toReadableExt($separator, $is_compact=false, $out_calendar=null){
 
         if($this->tDate){
 
@@ -1455,6 +1471,12 @@ class Temporal {
             $is_simple = false;
 
             $res['Type'] = '';
+            
+            $native = null;
+            $is_greg_or_julian = (!$calendar || strtolower($calendar)=='gregorian'); // || strtolower($calendar)=='julian'
+            if(@$date['native'] && !$is_greg_or_julian){
+                $native = @$date['native'];
+            }            
 
             if(@$date['timestamp']){
 
@@ -1466,15 +1488,23 @@ class Temporal {
                 if($timestamp){
                     $timestamp = $timestamp.Temporal::_deviationSuffix( $date['timestamp'] );
                 }
+                
+                $res['Date']  = $timestamp;
 
+                $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $res['Date'] = 'circa '.$timestamp;
+                    $prefix = 'circa ';
                 }else if(@$date['timestamp']['before']){
-                    $res['Date'] = 'before '.$timestamp;
+                    $prefix = 'before ';
                 }else if(@$date['timestamp']['after']){
-                    $res['Date'] = 'after '.$timestamp;
-                }else {
-                    $res['Date']  = $timestamp;    
+                    $prefix = 'after ';
+                }
+                
+                if($prefix){
+                    $res['Date'] = $prefix.$res['Date'];
+                    if($native){
+                        $native = $prefix.$native;
+                    }
                 }
 
             }else if(@$date['start'] && $date['type']=='r'){  //simple range
@@ -1552,15 +1582,8 @@ class Temporal {
             }
 
             //add native decription as prefix
-            $is_greg_or_julian = (!$calendar || 
-                strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
-
-            if(!$is_greg_or_julian){
-                //add native decription as suffux
-                $res['Calendar'] = $date['calendar'].' '.($date['native']?$date['native']:'');  
-            } 
-
-
+            //$is_greg_or_julian = (!$calendar || 
+            //    strtolower($calendar)=='gregorian'); // || strtolower($calendar)=='julian'
 
             if(@$date['comment']) $res['Comment'] = $date['comment'];
             if(@$date['determination']) $res['Determination'] = $this->dictDetermination[intval($date['determination'])];
@@ -1573,6 +1596,9 @@ class Temporal {
 
                 if($res['Type']!='Simple' && $res['Type']!='Simple Range'){
                     $res2 = $res['Type'].' ';    
+                    if($native && $out_calendar=='native'){
+                        $native = $res['Type'].' '.$native;    
+                    }
                 }
 
                 if($res['Date']){
@@ -1590,14 +1616,25 @@ class Temporal {
                 $supinfo = array();
                 if($res['Determination']) $supinfo[] = $res['Determination'];
                 if($date['calibrated']) $supinfo[] = 'Calibarated';
-                if(!$is_greg_or_julian) {
-                    $supinfo[] = $res['Calendar'];
+                
+                //add native decription as prefix
+                if($native){
+                    if($out_calendar=='native'){
+                        $res2 = $native; //native only    
+                    }else if($out_calendar!='gregorian'){
+                        //both gregorian and native
+                        $supinfo[] =  $calendar.' '.$native;
+                    }
                 }
+                    
                 if(count($supinfo)>0){
                     $res2 = $res2 . ' (' . implode(', ', $supinfo) . ')';
                 }
 
             }else{
+                if($native!=null){
+                    $res['Calendar'] = $date['calendar'].' '.$native; //($date['native']?$date['native']:'');  
+                } 
                 foreach($res as $key=>$val){
                     $res2 = $res2.$key.': '.$val.$separator;
                 }

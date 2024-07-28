@@ -1337,8 +1337,13 @@ function ShowReps( is_snippet_editor ) {
             {
                 if(window.hWin.HEURIST4.util.isempty(dtype) || _nodep.key === 'recURL'){
                     res = res + ' dt="url"';
-                }else if(dtype === 'ge  o'){
+                }else if(dtype === 'geo'){
                     res = res + '_originalvalue dt="'+dtype+'"';
+                }else if(dtype === 'date'){
+                    res = res + '_originalvalue dt="date" mode="0" calendar="native"';
+                    
+                    remark = remark+' mode: 0-simple,1-full,2-all fields; calendar: native,gregorian,both';
+                    
                 }else if(dtype === 'file'){
                     res = res + '_originalvalue dt="'+dtype+'"';
                     res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';

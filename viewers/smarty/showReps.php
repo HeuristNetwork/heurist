@@ -1424,6 +1424,23 @@ function smarty_function_wrap($params, &$smarty)
             }
             return $res;
         }
+        else if($dt=='date'){
+            
+            if($mode==null) $mode = 1;
+            
+            $calendar = null;
+            if(array_key_exists('calendar',$params)){
+                $calendar = $params['calendar'];
+            }
+            if(is_array($params['var']) && array_key_exists(0,$params['var'])){
+                $params['var'] = $params['var'][0];
+            }
+            
+            $content = Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
+            
+            if($label!="") $label = $label.": ";
+            return $label.$content.'<br>';
+        }
         else{
             //if this is CMS content
             // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
@@ -1435,7 +1452,6 @@ function smarty_function_wrap($params, &$smarty)
                 $content = cms_content_prepare($params['var']);
             }
                                                                         
-            
             if($label!="") $label = $label.": ";
             return $label.$content.'<br>';
         }
