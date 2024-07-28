@@ -6909,7 +6909,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 that._checkStructureFromSource(NEXT_ATTEMPT);
                 return;
             }
-
+                    
             let missing_field = false;
 
             for(let dty_ID in that._source_def.typedefs[source_rty_id].dtFields){
@@ -6917,7 +6917,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 let concept_code = that._source_def.typedefs[source_rty_id].dtFields[dty_ID][dty_cc_idx];
                 let local_code = $Db.getLocalID('dty', concept_code);
 
-                if(local_code == 0 || !Object.hasOwn(current_fields, local_code)){ console.log(that._source_def.typedefs[source_rty_id].dtFields[dty_ID]);
+                if(local_code == 0 || !Object.hasOwn(current_fields, local_code)){ //DEBUG console.log(that._source_def.typedefs[source_rty_id].dtFields[dty_ID]);
                     missing_field = true;
                     break;
                 }

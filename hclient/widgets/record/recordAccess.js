@@ -120,7 +120,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 
                 //define group selector for access
                 var ele = that.element.find('#sel_AccessGroups');
-                if(!ele.editing_input('instance')){
+                if(ele.length==0 || !ele.editing_input('instance')){
                     ele.empty();
                     that._createGroupSelectorElement('sel_AccessGroups', that.options.currentAccessGroups);    
                 }
