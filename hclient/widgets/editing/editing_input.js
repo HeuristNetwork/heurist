@@ -6007,8 +6007,6 @@ $.widget( "heurist.editing_input", {
 
         if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
-            var calendar = $.calendars.instance('gregorian');
-            var g_calendar = $.calendars.instance('gregorian');
             var temporal = null;
 
             try {
@@ -6019,10 +6017,17 @@ $.widget( "heurist.editing_input", {
             var cal_name = temporal ? temporal.getField('CLD') : null;
             var tDate = temporal ? temporal.getTDate("DAT") : null;
 
-            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate && cal_name && cal_name.toLowerCase() !== 'gregorian'){
+            if(cal_name){
+                cal_name = cal_name.toLowerCase();
+            }else{
+                cal_name = 'gregorian';
+            }
 
-                // change calendar to current type
-                calendar = $.calendars.instance(cal_name);                
+            // change calendar to current type
+            var calendar = $.calendars.instance(cal_name);
+            var g_calendar = $.calendars.instance('gregorian');
+
+            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate){
 
                 if(tDate && tDate.getYear()){
                     var hasMonth = tDate.getMonth();
@@ -6178,7 +6183,7 @@ $.widget( "heurist.editing_input", {
                 },
                 onClose: function(){
                     let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
-                    if(cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
+                    if(cur_cal && cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
 
                         let date = true;
                         try{
@@ -6194,7 +6199,7 @@ $.widget( "heurist.editing_input", {
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
             );
 
-            if(cal_name && cal_name.toLowerCase() === 'japanese'){
+            if(cal_name === 'japanese'){
                 value_era = calendar.getEraFromGregorian(...$tinpt.val().split('-'));
                 setMinMaxDatesJPN(calendar, value_era);
             }

@@ -53,7 +53,6 @@ function calendarPopup(buttonElt) {
 	{
 		if (date) {
 			document.getElementById("simpleDate").value = date;
-            
 			if(window.hWin && window.hWin.HAPI4) window.hWin.HAPI4.save_pref("record-edit-date", date);
 			calendarViewer.close();
 		}
@@ -247,7 +246,10 @@ var TemporalPopup = (function () {
 
 	            if(!_change_tab_only){
 		            // grab all the data from the current tab using the
-		            _updateTemporalFromUI(that.curTemporal, false);
+                    try{
+		                _updateTemporalFromUI(that.curTemporal, false);
+                    }catch(e) {
+                    }
 		            that.curTemporal.setType(newType);
 	            }else{
 					_change_tab_only = false;
@@ -282,14 +284,15 @@ var TemporalPopup = (function () {
 			that.curTemporal.setType("f");	
 		}
 
+        //
+        _initJqCalendar(that.curTemporal);
+        
 		// select the tab for the initial temporal's type and change the label to show the user this is where things started
         _updateUIFromTemporal(that.curTemporal, true);
         var active_idx = _type2TabIndexMap[ that.curTemporal.getType() ? that.curTemporal.getType():'s' ];
         $('#display-div').tabs('option','active',active_idx);
         
 		//dRangeDraw();
-
-        _initJqCalendar(that.curTemporal);
 
         $(".withCalendarsPicker").change(_updateGeorgianDate);
         _updateGeorgianDate();
@@ -337,12 +340,16 @@ var TemporalPopup = (function () {
 		let early_date = $early.val();
 		let late_date = $latest.val();
 
-		let is_greg = $('#selectCLD').val() == 'gregorian';
+		let from_calendar_type = $('#selectCLD').val();
 
 		// Get values as gregorian, then send across
-		if(!is_greg){
-			early_date = convert($early, false);
-			late_date = convert($latest, false);
+		if(from_calendar_type.toLowerCase() != 'gregorian'){
+            
+            early_date = convertCLD($early.val(), from_calendar_type);
+            late_date = convertCLD($latest.val(), from_calendar_type);
+            
+			//early_date = convert($early, false);
+			//late_date = convert($latest, false);
 		}
         
         var tDate1 = TDate.parse(early_date);
@@ -375,17 +382,30 @@ var TemporalPopup = (function () {
 	}
 
     function _updateGeorgianDate(){
+        
         var type = that.curTemporal.getType();
         if(calendar && calendar.name.toLowerCase()!='gregorian' && type && type!='c'){
 
             var value = '';
+            var from_calendar_type = calendar.name.toLowerCase();
+            
             if (type === "s") {
-                value = convert($("#simpleDate"), true);
+                //value = convert($("#simpleDate"), true);
+                value = convertCLD($("#simpleDate").val(), from_calendar_type);
             }else if (type === "f") {
-                value = convert($("#fTPQ"), true) + " " + convert($("#fTAQ"), true);
+                //value = convert($("#fTPQ"), true) + " " + convert($("#fTAQ"), true);
+
+                value = convertCLD($("#fTPQ").val(), from_calendar_type)
+                        +' '
+                        +convertCLD($("#fTAQ").val(), from_calendar_type);
+
             }else  if (type === "p") {
-                value = convert($("#TPQ"), true) + " " + convert($("#TAQ"), true);
+                //value = convert($("#TPQ"), true) + " " + convert($("#TAQ"), true);
                 //PDB  PDE
+                
+                value = convertCLD($("#TPQ").val(), from_calendar_type)
+                        +' '
+                        +convertCLD($("#TAQ").val(), from_calendar_type);
             }
 
             $("#dateGregorian").text(value?"gregorian: "+value:'');
@@ -401,12 +421,18 @@ var TemporalPopup = (function () {
 		if (!type) {
 			return;
 		}
+
+        //"|VER=1|TYP=s|DAT=2024-07-01|CLD=Islamic|CL2=1445-12-24"
+        let calendar_type = temporal.getStringForCode("CLD");
+            
 		if (type === "s") {
+            
 			var tDate = temporal.getTDate("DAT");
 			// if DAT then separate Date, Time and TimeZone
 			if (tDate) {
                 if(changedates){
-				    $("#simpleDate").val(tDate.toString("yy-MM-dd"));
+                    let dateValue = tDate.toString("yy-MM-dd");
+                    convertAndAssign($("#simpleDate"), dateValue, calendar_type);
                 }
 				$("#simpleTime").val(tDate.toString("HH:mm:ss"));
 				$("#tzone").val(tDate.toString("z"));
@@ -460,7 +486,15 @@ var TemporalPopup = (function () {
 						break;
 					default :
                         if(!elem.hasClass('withCalendarsPicker') ||  changedates){
-						        elem.val(val);
+                            
+                                var tDate = temporal.getTDate(code);
+                                // if DAT then separate Date, Time and TimeZone
+                                if (tDate) {
+                                    let dateValue = tDate.toString("yy-MM-dd");
+                                    convertAndAssign(elem, dateValue, calendar_type);
+                                }else{
+                                    elem.val(val);    
+                                }
                         }
 				}
 			}
@@ -468,9 +502,14 @@ var TemporalPopup = (function () {
 
 	};
 
+    //
+    //
+    //
 	function _updateTemporalFromUI (temporal, togregorian) {
 		var type = temporal.getType();
-
+        
+        togregorian = true;
+        
         //store oirginal value
         if(togregorian){
             if(calendar && calendar.name.toLowerCase()!='gregorian'){
@@ -492,12 +531,15 @@ var TemporalPopup = (function () {
                 temporal.addObjForString("CL2", value);
 
             }else{
-                  temporal.removeObjForCode("CL2");
+                temporal.removeObjForCode("CL2");
             }
         }
 
+        var from_calendar_type = (calendar && calendar.name)?calendar.name.toLowerCase():'';
+        
+        let is_japanese_cal = (from_calendar_type === 'japanese');
+        
 		var fields = Temporal.getFieldsForType(type);
-		let is_japanese_cal = (calendar && calendar.name.toLowerCase() === 'japanese');
 		for(var i =0; i< fields.length; i++) {
 			var code = fields[i];
 			var elem = $( "#" + type + code);
@@ -527,7 +569,8 @@ var TemporalPopup = (function () {
 							}
                             //convert to gregorian
                             if(togregorian && elem.hasClass('withCalendarsPicker')){
-                                val = convert(elem, true);
+                                //val = convert(elem, true);
+                                val = convertCLD(elem.val(), from_calendar_type);
                             }
 							temporal.addObjForString(code, val);  // FIXME  this should validate input from the user.
 						}else if (elem.length != 0) {
@@ -553,7 +596,10 @@ var TemporalPopup = (function () {
                 }else{
                     temporal.removeObjForCode("CL2");
                 }*/
-                dt = convert(elem, true);
+                
+                //dt = convert(elem, true);
+                dt = convertCLD(elem.val(), from_calendar_type);
+                
 			}else if(is_japanese_cal || dt.indexOf('年') !== -1){
 				dt = $.calendars.instance('japanese').japaneseToGregorianStr(dt); // translate japanese
 			}
@@ -563,7 +609,8 @@ var TemporalPopup = (function () {
 				strDate = dt;
 			}
 			if (strDate) {
-                temporal.addObjForString("DAT", strDate);   
+                temporal.addObjForString("DAT", strDate);
+                   
                 if($("#CIR1").prop('checked')){
                     temporal.addObjForString("CIR",'1');    
                 }else if($("#CIR2").prop('checked')){
@@ -588,13 +635,14 @@ var TemporalPopup = (function () {
 				throw 'Earliest estimate needs to be before latest estimate';
 			}
 		}
-		if(togregorian && type === "f" && // change to date range format and add simple range flag
-			!window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TPQ')) && !window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TAQ'))){
+		if(togregorian && type === "f" // change to date range format and add simple range flag
+			&& !window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TPQ')) 
+            && !window.hWin.HEURIST4.util.isempty(temporal.getStringForCode('TAQ'))){
 
         	temporal.setType("p");
         }
 
-        if(calendar && calendar.name!='gregorian'){
+        if(from_calendar_type!='' && from_calendar_type!='gregorian'){
             temporal.addObjForString("CLD", calendar.name);
         }else{
             temporal.removeObjForCode("CLD");
@@ -704,6 +752,8 @@ var TemporalPopup = (function () {
 
             let new_calendar = $(this).val();
             if(!new_calendar) return;
+            
+            var old_calendar = calendar.name.toLowerCase();            
 
             calendar = $.calendars.instance(new_calendar);
             if(!calendar) return;
@@ -716,20 +766,26 @@ var TemporalPopup = (function () {
             let changed_options = {
 				calendar: calendar
             };
-
+            
             //assign new calendar for all pickers
             $('.withCalendarsPicker').each(function() {
 
                 changed_options['defaultDate'] = '';
-                try{
-					changed_options['defaultDate'] = convert($(this), false);
-                }catch(e){}
+                if($(this).val()!=''){
+                    try{
+                        //convert to new 
+                        //changed_options['defaultDate'] = convert($(this), false);
+                        changed_options['defaultDate'] = convertCLD($(this).val(), old_calendar, new_calendar);
+                        $(this).val(changed_options['defaultDate']);
+                    }catch(e){
+                    }
+                }
 
 				if(is_japanese_cal){
 
 					let era = 0;
 					if(!window.hWin.HEURIST4.util.isempty(changed_options['defaultDate'])){
-						let date = changed_options['defaultDate'];
+                        let date = calendar.japaneseToGregorian(changed_options['defaultDate']); // translate to gregorian
 						era = calendar.getEraFromGregorian(date.year(), date.month(), date.day());
 					}
 					let limits = calendar.getEraLimits(era);
@@ -740,8 +796,9 @@ var TemporalPopup = (function () {
 				}
 
                 $(this).calendarsPicker('option', changed_options);
-
             });
+            
+            _updateGeorgianDate();
         }); //end change calendar
 
         $('#selectCLD').val(calendar_type);
@@ -757,13 +814,137 @@ var TemporalPopup = (function () {
 		}
 	}
 
+    //
+    // Convert date from Gregorian to Native and assign to input
+    //
+    var convertAndAssign = function($input, dateValue, calendar_type){
+                    
+            if(calendar_type.toLowerCase()!='gregorian'){
+                let newvalue = convertCLD(dateValue, 'gregorian', calendar_type);
+                if(newvalue!=''){
+                    dateValue = newvalue;
+                }
+            }
+            $input.val(dateValue);    
+    }
+    
+    //
+    //
+    //
+    var convertCLD = function(value, fromcal, tocal) {
+        
+        let newval = '';
+        
+        if(value!='' && value!=null && fromcal!=''){
+            let tDate;
+            let dformat = 'yyyy';
+            let hasMonth = true;
+            
+            fromcal = fromcal.toLowerCase();
+            tocal = tocal?tocal.toLowerCase():'gregorian';
+            let fromCalendar = $.calendars.instance(fromcal);
+            let cal_value = null;
+            
+            
+            if(fromcal == 'japanese'){
+                if(tocal == 'japanese'){
+                    return value;    
+                }
+                //japanese->gregorian->native
+                //try{
+                //    tDate = TDate.parse(value);
+                //}catch($e){
+                try{
+                    cal_value = fromCalendar.japaneseToGregorian(value); // translate first to gregorian
+                    value = `${cal_value.year()}-${cal_value.month()}-${cal_value.day()}`;
+                    cal_value = null;
+                    //dformat = 'yyyy-mm-dd';
+                }catch($e3){
+                }
+                //}
+                fromcal = 'gregorian';
+                fromCalendar = $.calendars.instance(fromcal);
+            }
+            try{
+                tDate = TDate.parse(value);    
+            }catch($e){
+                try{
+                    dformat = 'yyyy-mm-dd';
+                    cal_value = fromCalendar.parseDate(dformat, value);
+                }catch($e2){
+                    alert('Can not parse given date value '+value);
+                }
+            }
+            
+            if (cal_value==null && tDate && tDate.getYear()) {
+                hasMonth = tDate.getMonth()>0;
+                let hasDay  = tDate.getDay()>0;
+
+                let month = hasMonth? tDate.getMonth(): 1;
+                let day = hasDay? tDate.getDay(): 1;
+
+                dformat = dformat + (hasMonth?'-mm':'');
+                dformat = dformat + (hasDay?'-dd':'');
+
+                cal_value = fromCalendar.newDate(tDate.getYear(),month, day);
+            }
+            
+            if(cal_value){
+                
+                function __noNeedConvert(from, to){
+                    let cc = ['taiwan','julian','gregorian'];
+                    return (from==to) ||
+                    (!hasMonth && (cc.indexOf(from)>=0 && cc.indexOf(to)>=0));
+                }
+
+                if(__noNeedConvert(fromcal, tocal)){
+                    //newval = cal_value;
+                    //newval._calendar.local.name = toCalendar.local.name;
+                    //newval._calendar.name  = toCalendar.local.name;
+                    //
+                    newval = cal_value._calendar.formatDate(dformat, cal_value);
+                }else{
+                    
+                    try{
+
+                        if(fromcal=='gregorian' && tocal=='japanese'){
+                            newval = $.calendars.instance('japanese').gregorianToJapaneseStr(cal_value);
+                        }else{
+                            
+                            let toCalendar = $.calendars.instance(tocal=='japanese'?'gregorian':tocal);
+                            let jd = cal_value._calendar.toJD(Number(cal_value.year()), Number(cal_value.month()), Number(cal_value.day()));
+                            cal_value = toCalendar.fromJD(jd);  
+                            if(tocal=='japanese'){
+                                //native->gregorian->japanese
+                                newval = $.calendars.instance('japanese').gregorianToJapaneseStr(cal_value);
+                            }else{
+                                newval = toCalendar.formatDate(dformat, cal_value);    
+                            }
+                        }
+                        
+                    }catch(err){
+                        alert(err);
+                    }
+                }
+            }
+        }
+
+        return newval;        
+    }
+    
+    
     // mode 0 - to gregorian (no assign), 1 - to
+/*    
     var convert = function($inpt, togregorian) {
 
 		//current value
 		let fromcal = $inpt.calendarsPicker('option', 'calendar');
 		let tDate = null;
 		let value = $inpt.val();
+        
+        if(value=='') return ''; 
+        
+        
 		let toJapaneseStr = false;
 		let cur_calendar = $('#selectCLD').val();
 
@@ -802,9 +983,7 @@ var TemporalPopup = (function () {
 		}
 
 		function noNeedConvert(from, to){
-
 			let cc = ['taiwan','julian','gregorian'];
-
 			return (from.name.toLowerCase()==to.name.toLowerCase()) ||
 			(!hasMonth && (cc.indexOf(from.name.toLowerCase())>=0 && cc.indexOf(to.name.toLowerCase())>=0));
 		}
@@ -851,6 +1030,7 @@ var TemporalPopup = (function () {
 
 		return newval;
     };
+*/    
 	//public members
 	var that = {
 			originalInputString : "",
