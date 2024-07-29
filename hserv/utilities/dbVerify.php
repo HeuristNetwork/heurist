@@ -132,6 +132,13 @@ class DbVerify {
                             <label><input type="checkbox" data-mark-all="$marker">Mark all</label>
                         </td>
                     </tr>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><strong>Record title</strong></td>
+                        <td><strong>ID</strong></td>
+                        <td><strong>Field name</strong></td>
+                        <td><strong>Field value</strong></td>
+                    </tr>
                 HEADER;
 
             fwrite($this->out, $resMsg);
@@ -884,6 +891,12 @@ ORDER BY child.dtl_RecID";
                         <label><input type="checkbox" data-mark-all="recCB">Mark all</label>
                     </td>
                 </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td><strong>Parent record title</strong></td>
+                    <td colspan="2"></td>
+                    <td><strong>Child record title</strong></td>
+                </tr>
 HEADER;
 
                 $url_icon_placeholder = HEURIST_BASE_URL.'hclient/assets/16x16.gif';
@@ -944,6 +957,12 @@ HEADER;
                     <td colspan="6">
                         <label><input type="checkbox" data-mark-all="recCB4">Mark all</label>
                     </td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td><strong>Child record title</strong></td>
+                    <td colspan="2"></td>
+                    <td><strong>Parent record title</strong></td>
                 </tr>
             HEADER;
             /*
