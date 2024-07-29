@@ -2,7 +2,7 @@
 /**
 * verifyValue.php - library of functions to verify values - pointers and terms to conform to
 * the constraints in detail and record type definitions
-* Used in listDatabaseErrors.php, importCSV_lib.php
+* Used in dbVerify.php, importCSV_lib.php
 * @todo saveRecordDetail and importRectype
 *
 * @package     Heurist academic knowledge management system

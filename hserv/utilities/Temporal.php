@@ -23,7 +23,7 @@
 * 
 * for import:     importParser.php  prepareDateField   @todo validate real dates only
 *                 syncZotero.php
-* for validation: listDatabaseErrors.php               @todo validate real dates only     
+* for validation: dbVerify.php
 *                 composeSql.php
 * 
 *  - converts temporal string to human readable

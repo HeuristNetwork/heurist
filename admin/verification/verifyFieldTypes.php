@@ -18,7 +18,7 @@
 * Verify rst_DefaultValue, dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs dty_PtrTargetRectypeIDs
 * for terms and rectype existance
 * 
-* see listDatabaseErrors.php
+* see dbVerify.php
 * 
 *
 * @author      Tom Murtagh

@@ -712,6 +712,26 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         if(window.hWin.HAPI4.sysinfo.db_total_records>100000){
             $('#notice_for_large_database').show();
         }
+        
+        //very slow reports in popup
+        this._$('div.slow-checks-in-popup > button').button();
+        this._on(this._$('div.slow-checks-in-popup > button'),{click:(event)=>{
+            
+                let type = $(event.target).attr('data-type');
+                if(type != 'files' && type != 'urls') { return; }
+            
+                let body = $(window.hWin.document).find('body');
+
+                let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
+                                    window.innerHeight : body.innerHeight();
+
+                let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
+
+                window.hWin.HEURIST4.msg.showDialog(
+                    `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=${type}&db=${window.hWin.HAPI4.database}`
+                    , opts);                
+        }});
+        
     },
     
     //
