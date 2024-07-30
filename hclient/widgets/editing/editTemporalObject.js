@@ -247,7 +247,7 @@ var TemporalPopup = (function () {
 	            if(!_change_tab_only){
 		            // grab all the data from the current tab using the
                     try{
-		                _updateTemporalFromUI(that.curTemporal, false);
+		                _updateTemporalFromUI(that.curTemporal);
                     }catch(e) {
                     }
 		            that.curTemporal.setType(newType);
@@ -505,40 +505,38 @@ var TemporalPopup = (function () {
     //
     //
     //
-	function _updateTemporalFromUI (temporal, togregorian) {
+	function _updateTemporalFromUI (temporal) {
 		var type = temporal.getType();
         
-        togregorian = true;
+        var togregorian = true;
         
-        //store oirginal value
-        if(togregorian){
-            if(calendar && calendar.name.toLowerCase()!='gregorian'){
-
-                var isj = (calendar.name.toLowerCase()=='julian');
-
-                var value = '';
-                if (type === "s") {
-                    value = formatGregJulian($("#simpleDate").val(), isj);
-                }else if (type === "f") {
-                    value = formatGregJulian($("#fTPQ").val(), isj) + " to " + formatGregJulian($("#fTAQ").val(), isj);
-                }else  if (type === "p") {
-                    if($("#TPQ").val()!='' && $("#TAQ").val()!=''){
-                        value = formatGregJulian($("#TPQ").val(), isj) + " to " + formatGregJulian($("#TAQ").val(), isj);
-                    }else if($("#PDB").val()!='' && $("#PDE").val()!=''){
-                        value = formatGregJulian($("#PDB").val(), isj) + " to " + formatGregJulian($("#PDE").val(), isj);
-                    }
-                }
-                temporal.addObjForString("CL2", value);
-
-            }else{
-                temporal.removeObjForCode("CL2");
-            }
-        }
-
+        //store values in native calendar
         var from_calendar_type = (calendar && calendar.name)?calendar.name.toLowerCase():'';
-        
         let is_japanese_cal = (from_calendar_type === 'japanese');
         
+        if(from_calendar_type!='' && from_calendar_type!='gregorian'){
+
+            var isj = (from_calendar_type=='julian');
+
+            var value = '';
+            if (type === "s") {
+                value = formatGregJulian($("#simpleDate").val(), isj);
+            }else if (type === "f") {
+                value = formatGregJulian($("#fTPQ").val(), isj) + " to " + formatGregJulian($("#fTAQ").val(), isj);
+            }else  if (type === "p") {
+                if($("#TPQ").val()!='' && $("#TAQ").val()!=''){
+                    value = formatGregJulian($("#TPQ").val(), isj) + " to " + formatGregJulian($("#TAQ").val(), isj);
+                }else if($("#PDB").val()!='' && $("#PDE").val()!=''){
+                    value = formatGregJulian($("#PDB").val(), isj) + " to " + formatGregJulian($("#PDE").val(), isj);
+                }
+            }
+            temporal.addObjForString("CL2", value);
+            temporal.addObjForString("CLD", calendar.name);
+        }else{
+            temporal.removeObjForCode("CL2");
+            temporal.removeObjForCode("CLD");
+        }
+    
 		var fields = Temporal.getFieldsForType(type);
 		for(var i =0; i< fields.length; i++) {
 			var code = fields[i];
@@ -568,7 +566,7 @@ var TemporalPopup = (function () {
 								val = "P" + val + "Y";
 							}
                             //convert to gregorian
-                            if(togregorian && elem.hasClass('withCalendarsPicker')){
+                            if(elem.hasClass('withCalendarsPicker')){
                                 //val = convert(elem, true);
                                 val = convertCLD(elem.val(), from_calendar_type);
                             }
@@ -642,11 +640,6 @@ var TemporalPopup = (function () {
         	temporal.setType("p");
         }
 
-        if(from_calendar_type!='' && from_calendar_type!='gregorian'){
-            temporal.addObjForString("CLD", calendar.name);
-        }else{
-            temporal.removeObjForCode("CLD");
-        }
 	};
 
     var calendar = null;
@@ -1040,7 +1033,7 @@ var TemporalPopup = (function () {
 			//getTabView : function () {return _tabView; },
 			close : function () {
 				try{
-					_updateTemporalFromUI(that.curTemporal, true);
+					_updateTemporalFromUI(that.curTemporal);
 				}catch(e) {	// save string in COM field and keep an empty simple date temporal
 					alert(e);
 					return;

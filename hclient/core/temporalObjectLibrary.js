@@ -2072,6 +2072,7 @@ function isTemporal(str) {
 function formatGregJulian(val, isneed){
 
         if(isneed && val){
+            //convert gregorian and julian dates as  -500-05-15 => 15 May 500 BCE
 
             var tDate = TDate.parse(val);
             var isbce = (tDate.getYear()<0);
