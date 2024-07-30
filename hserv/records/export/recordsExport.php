@@ -46,6 +46,8 @@ class RecordsExport {
     private static $defTerms = null;
     private static $datetime_field_types = null;
     private static $mapdoc_defaults = null;
+
+    private static $relmarker_fields = [];
     
 //
 //
@@ -378,39 +380,12 @@ IIIF;
 
         $t2 = new DateTime();
         $dt = $t2->format('Y-m-d');
-/*
-        $gephi_header = 
-'<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"'
-    .' xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">'
-    ."<meta lastmodifieddate=\"{$dt}\">"
-        .'<creator>HeuristNetwork.org</creator>'
-        .'<description>Visualisation export</description>'
-    .'</meta>'
-    .'<graph mode="static" defaultedgetype="directed">'
-        .'<attributes class="node">'
-            .'<attribute id="0" title="name" type="string"/>'
-            .'<attribute id="1" title="image" type="string"/>'
-            .'<attribute id="2" title="rectype" type="string"/>'
-            .'<attribute id="3" title="count" type="float"/>'
-        .'</attributes>'
-        .'<attributes class="edge">'
-            .'<attribute id="0" title="relation-id" type="float"/>'
-            .'<attribute id="1" title="relation-name" type="string"/>'
-            .'<attribute id="2" title="relation-image" type="string"/>'
-            .'<attribute id="3" title="relation-count" type="float"/>'
-        .'</attributes>'
-        .'<nodes>';
-*/
+
         //although anyURI is defined it is not recognized by gephi v0.92
 
         $heurist_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
 
-        $rec_fields = '<attribute id="0" title="name" type="string"/>
-                <attribute id="1" title="image" type="string"/>
-                <attribute id="2" title="rectype" type="string"/>
-                <attribute id="3" title="count" type="float"/>
-                <attribute id="4" title="url" type="string"/>';
-
+        $rec_fields = '';
         if(!empty(@$params['columns'])){
             
             $id_idx = 5;
@@ -426,6 +401,35 @@ IIIF;
             }
         }
 
+        // Relationship record values
+        $rel_RecTypeID = self::$system->defineConstant('RT_RELATION') ? RT_RELATION : null;
+        $rel_Source = self::$system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : null;
+        $rel_Target = self::$system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : null;
+        $rel_Type = self::$system->defineConstant('DT_RELATION_TYPE') ? DT_RELATION_TYPE : null;
+        $rel_Start = self::$system->defineConstant('DT_START_DATE') ? DT_START_DATE : null;
+        $rel_End = self::$system->defineConstant('DT_END_DATE') ? DT_END_DATE : null;
+
+        $rel_fields = '';
+        if($rel_RecTypeID && $rel_Source && $rel_Target && $rel_Type && $rel_Start && $rel_End){
+
+            $query = "SELECT rst_DisplayName, rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID = ? AND rst_DetailTypeID NOT IN (?,?,?,?,?)";
+            $query_params = ['iiiiii', $rel_RecTypeID, $rel_Source, $rel_Target, $rel_Type, $rel_Start, $rel_End];
+            $res = mysql__select_param_query(self::$mysqli, $query, $query_params);
+
+            $id_idx = 6;
+
+            if($res){
+
+                while($row = $res->fetch_row()){
+
+                    $rel_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$row[0]}\" type=\"string\"/>";
+                    self::$relmarker_fields[] = $row[1];
+
+                    $id_idx ++;
+                }
+            }
+        }
+
         $gephi_header = <<<XML
             <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
                 xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
@@ -435,13 +439,19 @@ IIIF;
                 </meta>
                 <graph mode="static" defaultedgetype="directed">
                     <attributes class="node">
-                        {$rec_fields}
+                        <attribute id="0" title="name" type="string"/>
+                        <attribute id="1" title="image" type="string"/>
+                        <attribute id="2" title="rectype" type="string"/>
+                        <attribute id="3" title="count" type="float"/>
+                        <attribute id="4" title="url" type="string"/>{$rec_fields}
                     </attributes>
                     <attributes class="edge">
                         <attribute id="0" title="relation-id" type="float"/>
                         <attribute id="1" title="relation-name" type="string"/>
                         <attribute id="2" title="relation-image" type="string"/>
                         <attribute id="3" title="relation-count" type="float"/>
+                        <attribute id="4" title="relation-start" type="string"/>
+                        <attribute id="5" title="relation-end" type="string"/>{$rel_fields}
                     </attributes>
                     <nodes>
         XML;
@@ -834,12 +844,7 @@ IIIF;
             $image  = htmlspecialchars(HEURIST_RTY_ICON.$rty_ID);
             $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.HEURIST_DBNAME);
 
-            $rec_values = "<attvalue for=\"0\" value=\"{$name}\"/>
-            <attvalue for=\"1\" value=\"{$image}\"/>
-            <attvalue for=\"2\" value=\"{$rty_ID}\"/>
-            <attvalue for=\"3\" value=\"0\"/>
-            <attvalue for=\"4\" value=\"{$recURL}\"/>";
-
+            $rec_values = '';
             if(is_array($retrieve_detail_fields)){
 
                 $att_id = 4;
@@ -849,33 +854,15 @@ IIIF;
                     $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ? 
                                 $record['details'][$dty_ID] : null;
 
-                    if(empty($values)) { continue; }
-
-                    $dty_Type = mysql__select_value(self::$mysqli, "SELECT dty_Type FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
-
-                    foreach($values as $dtl_ID => $value){
-
-                        if($dty_Type == 'file'){ // get external URL / Heurist URL
-
-                            $f_id = $value['file']['ulf_ObfuscatedFileID'];
-                            $external_url = $value['file']['ulf_ExternalFileReference'];
-
-                            $value = empty($external_url) ? HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file={$f_id}" : $external_url;
-
-                        }else if($dty_Type == 'enum'){ // get term label
-                            $value = mysql__select_value(self::$mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = $value");
-                        }
-
-                        if(strpos($value, '"') !== false){ // add slashes, to avoid double quote issues
-                            $values[$dtl_ID] = addslashes($value);
-                        }
-
-                        $values[$dtl_ID] = $value;
+                    if(empty($values)){
+                        continue;
                     }
 
-                    $values = is_array($values) ? implode('|', $values) : $values;
+                    self::_processFieldData($dty_ID, $values);
 
-                    if(empty($values)) { continue; }
+                    if(empty($values)){
+                        continue;
+                    }
 
                     $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
                 }
@@ -884,7 +871,11 @@ IIIF;
             $gephi_node = <<<XML
 <node id="{$recID}" label="{$name}">                               
     <attvalues>
-        {$rec_values}
+        <attvalue for="0" value="{$name}"/>
+        <attvalue for="1" value="{$image}"/>
+        <attvalue for="2" value="{$rty_ID}"/>
+        <attvalue for="3" value="0"/>
+        <attvalue for="4" value="{$recURL}"/>{$rec_values}
     </attvalues>
 </node>
 XML;
@@ -1285,6 +1276,9 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
             $relationName = "Floating relationship";
             $relationID = 0;
 
+            $startDate = empty($link->dtl_StartDate) ? '' : $link->dtl_StartDate;
+            $endDate = empty($link->dtl_EndDate) ? '' : $link->dtl_EndDate;
+
             if(in_array($source, $records) && in_array($target, $records)){
 
                 if($dtID > 0) {
@@ -1295,15 +1289,42 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
                     $relationID = $trmID;
                 }
 
+                $rel_values = '';
+                $att_id = 5;
+                if(!empty(self::$relmarker_fields) && !empty($link->relationID) && intval($link->relationID) > 0){
+
+                    $record = recordSearchByID(self::$system, intval($link->relationID), self::$relmarker_fields, 'rec_ID');
+
+                    foreach(self::$relmarker_fields as $dty_ID){
+                        
+                        $att_id ++;
+
+                        if(!array_key_exists($dty_ID, $record['details']) || empty($record['details'][$dty_ID])){
+                            continue;
+                        }
+
+                        $values = $record['details'][$dty_ID];
+                        self::_processFieldData($dty_ID, $values);
+
+                        if(empty($values)){
+                            continue;
+                        }
+
+                        $rel_values .= "\n\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+                    }
+                }
+
                 $relationName  = htmlspecialchars($relationName);                               
                 $links_cnt++; 
 
                 $edges = $edges.<<<XML
 <edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">                               
     <attvalues>
-    <attvalue for="0" value="{$relationID}"/>
-    <attvalue for="1" value="{$relationName}"/>
-    <attvalue for="3" value="1"/>
+        <attvalue for="0" value="{$relationID}"/>
+        <attvalue for="1" value="{$relationName}"/>
+        <attvalue for="3" value="1"/>
+        <attvalue for="4" value="{$startDate}"/>
+        <attvalue for="5" value="{$endDate}"/>{$rel_values}
     </attvalues>
 </edge>
 XML;
@@ -2526,6 +2547,50 @@ private static function gen_uuid() {
     );
 }
 
+private static function _processFieldData($dty_ID, &$values){
+
+    $dty_Type = mysql__select_value(self::$mysqli, "SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ?", ['i', $dty_ID]);
+
+    foreach($values as $dtl_ID => $value){
+
+        switch ($dty_Type) {
+            case 'file': // get external URL / Heurist URL
+
+                $f_id = $value['file']['ulf_ObfuscatedFileID'];
+                $external_url = $value['file']['ulf_ExternalFileReference'];
+
+                $value = empty($external_url) ? HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file={$f_id}" : $external_url;
+                break;
+
+            case 'enum': // get term label
+
+                if(is_numeric($value)){
+                    $value = intval($value);
+                    $value = mysql__select_value(self::$mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $value]);
+                }
+
+                break;
+
+            case 'resource': // get record title
+
+                if(is_numeric($value)){
+                    $value = intval($value);
+                    $value = mysql__select_value(self::$mysqli, "SELECT rec_Title FROM Records WHERE rec_ID = ?", ['i', $value]);
+                }else if(is_array($value)){
+                    $value = $value["title"];
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        $values[$dtl_ID] = htmlspecialchars($value);
+    }
+
+    $values = implode('|', $values);
+}
 
 } //end class
 ?>

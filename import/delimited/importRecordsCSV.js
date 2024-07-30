@@ -1701,13 +1701,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '<td style="width:300px;">'
                 + (isIDfield && !mode_display_separate?'<span style="padding:4px 0px">&lt; Heurist IDs for records being added/updated &gt;</span>':'')
                 + '&nbsp;<span style="display:none;">'
-                + '<select id="sa_dt_'+i+'" style="width:230px; font-size: 1em;" data-field="'+i+'" '
+                + '<select id="sa_dt_'+i+'" style="width:230px;max-width:230px;font-size:1em;" data-field="'+i+'" '
                 //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select>';
             
             // define new field button
-            s += (isIndex||isIDfield ? '' : `<button id="btn_dt_${i}" style="margin-left:5px;">Add field</button>`) + '</span>';
-            
+            s += (isIndex||isIDfield ? '' : 
+                    `<button id="btn_dt_${i}" style="margin-left:5px;padding:2px;" title="Add a new field to the record type">Add field</button>`) + '</span>';
+
             s = s + '</td>';
 
             // cell for value
@@ -2418,6 +2419,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $btns.button({
             icon: 'ui-icon-plus'
+        });
+
+        $btn.find('span.ui-button-icon').css({
+            'font-size': '10px',
+            width: '10px',
+            height: '10px'
         });
 
         $btns.on('click', (event) => {
@@ -4320,6 +4327,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 +'Adds new terms to all fields</button>';
                             
                         s += '<br><br>';     
+                    }
+
+                    if(cnt >= 1000 || cnt == imp_session['reccount']){
+
+                        s += '<span style="color:red;">'
+                            + 'Heurist has determined that there is a very large amount of terms to be imported that do not exist.<br>'
+                            + 'We recommend reviewing this field\'s mapping and changing it to a field type that is less restrictive (e.g. freetext or blocktext).<br>'
+                        + '</span>';
+
+                        s += '<br><br>';
                     }
                 }
     
