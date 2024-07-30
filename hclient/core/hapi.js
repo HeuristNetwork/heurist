@@ -247,7 +247,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _is_callserver_in_progress = true;
         
         if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
-            && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //3 seconds
+            && (new Date().getTime())-_last_check_dbcache_relevance> 7000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
                 _callserver(action, request, callback, timeout);
@@ -1776,11 +1776,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
 
 
-            // find min and max values for
+            // find min and max values, or count of distinct values, or matching counts
+            // for
             // rt - record type
             // dt - detailtyep
-            , minmax: function (request, callback) {
-                if (request) request.a = 'minmax';
+            , get_aggregations: function (request, callback) {
+                //if (request) request.a = 'minmax';
                 _callserver('record_search', request, callback);
             }
 

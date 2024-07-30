@@ -305,6 +305,7 @@ regional['POR'] = {
         'menu-selected-value-delete': 'Eliminar valor de campo',
         'menu-selected-value-delete-hint': 'Elimine o valor do campo encontrado nos registos filtrados',
         'menu-selected-add-link': 'Relacionar: Link',
+        'menu-selected-add-link-match': 'Foreign Key match',
         'menu-selected-add-link-hint': 'Adicione um novo link ou crie uma nova relação entre registos',
         'menu-selected-rectype-change': 'Alterar tipos de registo',
         'menu-selected-rectype-change-hint': 'Altere os tipos de registo para os registos filtrados',

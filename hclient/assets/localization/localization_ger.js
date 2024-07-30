@@ -306,6 +306,7 @@ regional['GER'] = {
         'menu-selected-value-delete': 'Den Datenwert aus dem Datenfeld löschen',
         'menu-selected-value-delete-hint': 'Den vorhandenen Datenwert eines Datenfeldes in allen ausgewählten Datensätzen löschen.',
         'menu-selected-add-link': 'Link hinzufügen',
+        'menu-selected-add-link-match': 'Foreign Key match',
         'menu-selected-add-link-hint': 'Einen Link für die ausgewählten Datensätze hinzufügen',
         'menu-selected-rectype-change': 'Datentyp ändern',
         'menu-selected-rectype-change-hint': 'Die Datentypen für alle ausgewählten Datensätze ändern (z.B. Place -> Building)',

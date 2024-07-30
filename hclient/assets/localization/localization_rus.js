@@ -445,6 +445,7 @@ regional['RUS'] = {
         'menu-selected-value-delete': 'Удалить поле',
         'menu-selected-value-delete-hint': 'Удалить поле в отобранных записях',
         'menu-selected-add-link': 'Связь или отношение',
+        'menu-selected-add-link-match': 'Связь по поиску совпадений',
         'menu-selected-add-link-hint': 'Добавить связь или создать новое отношение между записями',
         'menu-selected-rectype-change': 'Изменить тип данных',
         'menu-selected-rectype-change-hint': 'Изменить тип данных для отобранных записей',

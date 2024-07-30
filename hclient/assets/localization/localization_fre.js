@@ -499,6 +499,7 @@ regional['FRE'] = {
     'menu-selected-value-delete': 'Supprimer une valeur',
     'menu-selected-value-delete-hint': 'Supprimer une valeur dans les enresgitrements trouvés',
     'menu-selected-add-link': 'Relier : lien',
+    'menu-selected-add-link-match': 'Lien par correspondance',
     'menu-selected-add-link-hint': 'Ajouter un nouveau lien ou créer une nouvelle relation entre des enregistrements',
     'menu-selected-rectype-change': 'Changer le type d\'enregistrement',
     'menu-selected-rectype-change-hint': 'Changer le type d\'enregistrement pour les enregistrements trouvés',

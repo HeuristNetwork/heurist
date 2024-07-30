@@ -125,6 +125,14 @@
 
         $response = recordSearchMinMax($system, $req_params);
 
+    }else if(@$req_params['a'] == 'count_distinct_values'){
+
+        $response = recordSearchDistinctValue($system, $req_params);
+        
+    }else if(@$req_params['a'] == 'count_matches'){
+
+        $response = recordSearchMatchedValues($system, $req_params); 
+        
     }else if(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
     
         $params = array();

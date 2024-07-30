@@ -2829,5 +2829,130 @@ public methods
 
         return $this->result_data;
     }
+    
+    
+    /**
+     * Creates links (resource field) or Adds relationship records between records 
+     * based on certain fields values matching
+     * 
+     * $data parameters
+     *          dty_ID - resource field id or  trm_ID - relationtype ID
+     *          rty_src or recids_src, dty_src, rty_trg, dty_trg - matching conditions
+     *          repalce - 1 replace existing, otherwise add new link
+     * 
+     * @return false|array - false on error | array with keys count (number of new records) and record_ids (comma list of new record ids)
+     */
+    public function createRecordLinksByMatching(){
+
+        // Can only be used by an administrator
+        if(!$this->system->is_admin()){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only database administrators can add multiple links');
+            return false;
+        }
+
+        $system = $this->system;
+        $mysqli = $system->get_mysqli();
+
+        $data = $this->data;
+        
+        //dty_ID - resource field id or  trm_ID - relationtype ID
+        //recIDs or rty_src, dty_src, rty_trg, dty_trg - matching conditions
+        
+        //1. Validate dty_ID or trm_ID from parameters
+        $dty_ID = intval(@$data['dty_ID']);
+        $trm_ID = intval(@$data['trm_ID']);
+        
+        
+        //check that this is resouce filed
+        if($dty_ID>0){
+            if('resource' != mysql__select_value($mysqli, 'SELECT dty_Type FROM defDetailTypes WHERE dty_ID='.$dty_ID)){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not type "resource"');
+                return false;
+            }
+        }else if($trm_ID>0){
+            //check that trm_ID is valid
+            
+        }
+
+        
+        
+        $to_replace = (@$data['replace']==1); //replace existing link
+        
+        //2. Find matching pairs - [source rec_ID, target rec_ID]
+        $data['pairs'] = 1;
+        $pairs = recordSearchMatchedValues($system, $data);
+        
+        if(@$pairs['status']==HEURIST_OK){
+            $pairs = $pairs['data'];
+        }else{
+            return false;
+        }
+        
+        //3. Add pointer or create relationship record
+        
+        if($trm_ID>0){
+            $system->defineConstant('RT_RELATION');
+            $system->defineConstant('DT_PRIMARY_RESOURCE');
+            $system->defineConstant('DT_TARGET_RESOURCE');
+        }
+
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        $this->result_data = array('added'=>0,'exist'=>0,'records_updated'=>0);
+        
+        $res = true;
+        
+        $execution_counter = 0;
+        $tot_count = count($pairs);               
+        
+        $prev_rec_ID = 0;
+        
+        foreach($pairs as $row){
+            
+            $source_id = $row[0];
+            $target_id = $row[1];
+            
+            if($trm_ID>0){
+                $res = 1;
+            }else{
+                $res = addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace);
+            }
+            if($res<0){
+                $mysqli->rollback();
+                $res = false;
+                break;
+            }else if($res==0){
+                $res = true;
+                $this->result_data['exist']++;
+            }else{
+                $this->result_data['added']++;
+                if($prev_rec_ID!=$source_id){        
+                    $prev_rec_ID=$source_id;
+                    $this->result_data['records_updated']++;
+                }
+            }
+            
+            
+            if($this->session_id!=null){
+                //check for termination and set new value
+                $execution_counter++;
+                $session_val = $execution_counter.','.$tot_count;
+                $current_val = mysql__update_progress($mysqli, $this->session_id, false, $session_val);
+                if($current_val=='terminate'){ //session was terminated from client side
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Action has been terminated by user');                
+                    return false;
+                    break;
+                }
+            }
+        }
+        
+        if($res){
+            $mysqli->commit();
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        
+        return $res?$this->result_data:false;
+    }
+    
 }
 ?>

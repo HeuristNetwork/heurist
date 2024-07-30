@@ -49,6 +49,116 @@ require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
+
+/**
+* Find distinct detail values for for given detail type and record type
+*
+* @param mixed $system
+* @param mixed $params - array  rt - record type, dt - detail type
+*/
+function recordSearchDistinctValue($system, $params){
+
+    if(intval(@$params['rt'])>0 && intval(@$params['dt'])>0){
+        $mysqli = $system->get_mysqli();
+
+        $query = 'SELECT COUNT(DISTINCT dtl_Value) FROM Records, recDetails'
+            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rt'])
+            .' AND dtl_DetailTypeID='.intval($params['dt']); //." AND dtl_Value is not null AND dtl_Value!=''";
+
+        $res = mysql__select_value($mysqli, $query);
+        if ($res==null){
+            $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on unique values count. Query '.$query, $mysqli->error);
+        }else{
+            $response = array('status'=>HEURIST_OK, 'data'=> $res);
+        }
+
+    }else{
+        $response = $system->addError(HEURIST_INVALID_REQUEST, 'Count query parameters are invalid');
+    }
+
+    return $response;
+}
+
+//
+// Returns count of matching records by given detail field
+//         pairs of matching records
+//
+function recordSearchMatchedValues($system, $params){
+    
+    if(intval(@$params['dty_src'])>0 &&  //intval(@$params['rty_src'])>0 && 
+        intval(@$params['rty_trg'])>0 && intval(@$params['dty_trg'])>0){
+        $mysqli = $system->get_mysqli();
+        
+        
+        $need_ids = (@$params['pairs']==1);
+        
+        $rec_IDs = prepareIds($params['rec_IDs']);
+        
+        $total_cnt = count($rec_IDs);
+        $offset = 0;
+        
+        if($total_cnt>0){
+
+        //'distinct d1.dtl_RecID, d2.dtl_RecID '  
+        //d1.dtl_Value, d2.dtl_Value, 
+            if($need_ids){
+                $result = array();
+            }else{
+                $result = 0;
+            }
+        
+            while ($offset<$total_cnt){
+        
+                $rec_IDs_chunk = array_slice($rec_IDs, $offset, 500);
+        
+                if($need_ids){
+                    $query = 'select distinct d1.dtl_RecID, d2.dtl_RecID ';
+                }else{
+                    $query = 'select count(distinct d1.dtl_RecID, d2.dtl_RecID) ';
+                }
+                $query = $query
+                .' from recDetails d1, recDetails d2, Records r2'   //Records r1, 
+                .' where d1.dtl_RecID IN ('.implode(',',$rec_IDs_chunk).')'      //=r1.rec_ID and r1.rec_RecTypeID='.intval($params['rty_src'])
+                    .' and d1.dtl_DetailTypeID='.intval($params['dty_src'])
+                .' and d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='.intval($params['rty_trg'])
+                    .' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
+                .' and d1.dtl_RecID!=d2.dtl_RecID and d1.dtl_Value=d2.dtl_Value';
+
+                if($need_ids){
+                    $query .= ' ORDER BY d1.dtl_RecID';
+                    $res = mysql__select_all($mysqli, $query);
+                }else{
+                    $res = mysql__select_value($mysqli, $query);
+                }
+                if ($res==null){
+                    $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. Query '.$query, $mysqli->error);
+                    break;    
+                }else{
+                    if($need_ids){
+                        $result = array_merge($result, $res);    
+                    }else{
+                        $result = $result + $res;    
+                    }
+                }
+            
+                $offset = $offset+500;
+            }//wile 
+            
+            if ($res!=null){
+                $response = array('status'=>HEURIST_OK, 'data'=> $result);
+            }
+        
+        }else{
+           $response = $system->addError(HEURIST_INVALID_REQUEST, 'Source records are not defined as matching query parameter'); 
+        }
+    }else{
+        $response = $system->addError(HEURIST_INVALID_REQUEST, 'Matching query parameters are invalid');
+    }
+
+    return $response;
+}
+
+
 /**
 * Find minimal and maximal values for given detail type and record type
 *
@@ -63,7 +173,7 @@ function recordSearchMinMax($system, $params){
         //$currentUser = $system->getCurrentUser();
 
         $query = 'SELECT MIN(CAST(dtl_Value as decimal)) as MIN, MAX(CAST(dtl_Value as decimal)) AS MAX FROM Records, recDetails';
-        $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_RecTypeID='
+        $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='
         .intval($params['rt']).' AND dtl_DetailTypeID='.intval($params['dt'])." AND dtl_Value is not null AND dtl_Value!=''";
 
         $currUserID = $system->get_user_id();
@@ -170,6 +280,7 @@ function recordSearchFacets($system, $params){
 
     if(@$params['q'] && @$params['field']){
         
+        //{type:'freetext',step:0,field:1,facet_type:3,
         $currentUser = $system->getCurrentUser();
         $dt_type     = @$params['type'];
         $step_level  = intval(@$params['step']);

@@ -1728,6 +1728,58 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
 
 }
 
+//
+// add/update pointer detail field TO child record 
+// return -1 - error, 0 - nothing done, 1 - insert
+//
+function addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace){
+
+    $res = 0; 
+
+    $mysqli = $system->get_mysqli();
+    
+        $dtl_ID = -1;
+        $source_id = intval($source_id);
+        $target_id = intval($target_id);
+        $dty_ID = intval($dty_ID);
+
+        if(!($source_id>0 && $target_id && $dty_ID>0)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation');
+            return -1;
+        }
+
+        //check that link already exists
+        $target_IDs = mysql__select_assoc2($mysqli, 'SELECT rl_DetailID, rl_TargetID FROM recLinks WHERE rl_SourceID='.$source_id
+                //.' AND rl_TargetID='.$target_id
+                .' AND rl_DetailTypeID='.$dty_ID);
+        if(count($target_IDs)>0){
+            if(in_array($target_id, $target_IDs)){
+                return 0; //such link already exists    
+            }
+            if($to_replace){
+                //remove existing one
+                $dtl_IDs = array_keys($target_IDs);
+                if(count($dtl_IDs)==1){
+                    $mysqli->query('DELETE FROM recDetails WHERE dtl_ID ='.intval($dtl_IDs[0]));                    
+                }else{
+                    $dtl_IDs = prepareIds($dtl_IDs);
+                    $mysqli->query('DELETE FROM recDetails WHERE dtl_ID IN ('.implode(',',$dtl_IDs).')');
+                }
+            }
+        }
+
+        $mysqli->query('INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) '.
+            "VALUES ($source_id, $dty_ID, $target_id)");                    
+
+        $res = 1;
+        if(!($mysqli->insert_id>0)){
+            $system->addError(HEURIST_DB_ERROR, 'Can not add resource field', $mysqli->error);
+            $res=-1;  
+        } 
+
+    return $res;
+}
+
 
 // verify ACCESS RIGHTS -------------
 //

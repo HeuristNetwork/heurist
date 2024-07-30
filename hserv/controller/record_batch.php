@@ -68,6 +68,11 @@
             
             $res = $dbRecDetails->addRevercePointerForChild();
             
+        }else if(@$_REQUEST['a'] == 'add_links_by_matching'){
+            
+            $res = $dbRecDetails->createRecordLinksByMatching();
+            
+            
         }else if(@$_REQUEST['a'] == 'rectype_change'){
 
             $res = $dbRecDetails->changeRecordTypeInBatch();

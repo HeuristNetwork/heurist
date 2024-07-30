@@ -511,6 +511,11 @@ $.widget( "heurist.resultListMenu", {
             if(this.isResultSetEmpty()) return;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink');
             
+        }else if(action == "menu-selected-add-link-match"){
+
+            if(this.isResultSetEmpty()) return;
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLinkMatch');
+            
         }else if(action == "menu-selected-extract-pdf"){
 
             this.detailBatchEditPopup('extract_pdf');
