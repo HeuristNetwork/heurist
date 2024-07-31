@@ -58,6 +58,25 @@ if(!$isSystemInited){
 }
 
 if(defined('IS_INDEX_PAGE')){
+    
+    //verify database version against minimal required
+    $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
+    
+    if($subsubVer==null){
+        $message = $system->getErrorMsg();
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+    
+    if (version_compare(HEURIST_MIN_DBVERSION,
+    $system->get_system('sys_dbVersion').'.'
+    .$system->get_system('sys_dbSubVersion').'.'
+    .$subsubVer)>0){
+
+        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
+        exit;
+    }
+    
     //check for missed tables
     $missed = hasAllTables($system->get_mysqli());
     
@@ -167,27 +186,6 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     }
 
     if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
-}
-
-//verify database version against minimal required
-if(defined('IS_INDEX_PAGE')){
-    
-    $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
-    
-    if($subsubVer==null){
-        $message = $system->getErrorMsg();
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-        exit;
-    }
-    
-    if (version_compare(HEURIST_MIN_DBVERSION,
-    $system->get_system('sys_dbVersion').'.'
-    .$system->get_system('sys_dbSubVersion').'.'
-    .$subsubVer)>0){
-
-        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
-        exit;
-    }
 }
 
 //$system->defineConstants(); //init constants for record and field types
