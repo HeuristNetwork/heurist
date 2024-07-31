@@ -33,7 +33,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
-        this.options.width = 800;
+        this.options.width = 960;
 
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = false;
