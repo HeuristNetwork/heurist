@@ -101,7 +101,7 @@ if($is_json){
                 <ul class="db-list">
                     <?php
                     foreach ($list as $name) {
-                        print("<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>");
+                        print "<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>";
                     }
 
                     ?>

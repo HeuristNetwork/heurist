@@ -218,7 +218,7 @@ class GpointConverter
      * 
      */
     public function printUTM() {
-        print( "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone);
+        print "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone;
     }
     
     /**
@@ -252,7 +252,7 @@ class GpointConverter
      * 
      */
     public function printLambert() {
-        print( "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting);
+        print  "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting;
     }
     
     /**

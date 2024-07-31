@@ -173,6 +173,6 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
 if (is_file($parentIni)){
-    include_once($parentIni);
+    include_once $parentIni;
 }
 ?>
