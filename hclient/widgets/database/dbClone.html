@@ -25,7 +25,9 @@
         </p>
         
         <p>     
-            This database contains new definitions: <span id="new_defs_warning"></span> which are local to the database.<br>
+            This database contains new definitions: <span id="new_defs_warning"></span> which are local to the database.
+        </p>
+        <p>
             Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
             This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
         </p>         
@@ -35,7 +37,7 @@
             <input type="password" maxlength="64" size="25" id="pwd" name="pwd">
         </div>
         <div class="heurist-helper2">
-            The password set by your system administrator to allow clone not registered database with new defintions
+            This is an override set by the system administrator for their use only
         </div>
     </div>
     
@@ -54,6 +56,8 @@
     
     <div class="heurist-helper1">                
         Do not use punctuation except underscore. Names are case sensitive.
+        <p>IF THE DATABASE FAILS TO CLONE:</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;please run Admin &gt; Test integrity which can fix problems which block cloning. </p>
     </div>
 </div>
 
