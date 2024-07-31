@@ -75,7 +75,7 @@ class DbDefRecStructure extends DbEntityBase
         $needCheck = false;
         $is_structure = false;
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -233,7 +233,7 @@ class DbDefRecStructure extends DbEntityBase
             if($isInsert){
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
-                if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+                if(!@$this->records[$idx]['rst_Status']) {$this->records[$idx]['rst_Status'] = 'open';}
                 
                 if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
                     $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
@@ -241,11 +241,11 @@ class DbDefRecStructure extends DbEntityBase
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
-                if(@$this->records[$idx]['rst_Status']=='') $this->records[$idx]['rst_Status'] = 'open';
+                if(@$this->records[$idx]['rst_Status']=='') {$this->records[$idx]['rst_Status'] = 'open';}
             }
 
             if(@$this->records[$idx]['rst_MaxValues']==null ||
-                !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) $this->records[$idx]['rst_MaxValues'] = 1;
+                !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
             
             $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s');//reset

@@ -130,7 +130,7 @@
             
         $params = array();
         $res = array();
-        if($need_config!==false) $need_config = array();
+        if($need_config!==false) {$need_config = array();}
         
         foreach($entities as $idx=>$entity_name){
             
@@ -168,15 +168,15 @@
     //
     function entityResolveName($entity_name)
     {
-            if($entity_name=='rtg') $entity_name = 'defRecTypeGroups';
-            else if($entity_name=='dtg') $entity_name = 'defDetailTypeGroups';
-            else if($entity_name=='rty') $entity_name = 'defRecTypes';
-            else if($entity_name=='dty') $entity_name = 'defDetailTypes';
-            else if($entity_name=='trm' || $entity_name=='term') $entity_name = 'defTerms';
-            else if($entity_name=='vcg') $entity_name = 'defVocabularyGroups';
-            else if($entity_name=='rst') $entity_name = 'defRecStructure';
-            else if($entity_name=='rem') $entity_name = 'dbUsrReminders';
-            else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';
+            if($entity_name=='rtg') {$entity_name = 'defRecTypeGroups';}
+            else if($entity_name=='dtg') {$entity_name = 'defDetailTypeGroups';}
+            else if($entity_name=='rty') {$entity_name = 'defRecTypes';}
+            else if($entity_name=='dty') {$entity_name = 'defDetailTypes';}
+            else if($entity_name=='trm' || $entity_name=='term') {$entity_name = 'defTerms';}
+            else if($entity_name=='vcg') {$entity_name = 'defVocabularyGroups';}
+            else if($entity_name=='rst') {$entity_name = 'defRecStructure';}
+            else if($entity_name=='rem') {$entity_name = 'dbUsrReminders';}
+            else if($entity_name=='swf') {$entity_name = 'sysWorkflowRules';}
             
             if(!preg_match('/^[A-Za-z]+$/', $entity_name)){ //validatate entity name
                 return null;

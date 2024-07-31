@@ -233,7 +233,7 @@
                                                                                                               
             if(@$dbs_rtStructs['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
                 $details =  @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!$details) $details = array();//rectype without fields - exceptional case
+                if(!$details) {$details = array();}//rectype without fields - exceptional case
                 
                 $children_links = array();
                 $new_pointer_fields = array();
@@ -439,7 +439,7 @@
                             $pref = ($detailType=="resource")?"lt":"rt";
 
                             $pointerRecTypeId = @$dtValue[$rst_fi['rst_PtrFilteredIDs']];
-                            if($pointerRecTypeId==null) $pointerRecTypeId = '';
+                            if($pointerRecTypeId==null) {$pointerRecTypeId = '';}
                             $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
                             $rectype_ids = explode(",", $pointerRecTypeId);
 
@@ -468,7 +468,7 @@
                                 if(is_array($rectype_ids) && count($rectype_ids)>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     $res['constraint'] = count($rectype_ids);
-                                    if($mode!=5) $res['children'] = array();
+                                    if($mode!=5) {$res['children'] = array();}
                                 }
                                 if($mode==5){
                                     $res['rt_ids'] = $pointerRecTypeId;
@@ -505,7 +505,7 @@
 
         if(is_array($res)){
 
-            if(!@$res['code']) $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
+            if(!@$res['code']) {$res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;}  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
             $res['key'] = "f:".$dtID;
             if($mode==4 || $mode==5){
                     

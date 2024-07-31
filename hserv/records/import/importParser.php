@@ -104,10 +104,11 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     if($upload_file_name==null){
         $s = 'File parameter is not defined<br><br>'
         .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    }else if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
+    }else if (! file_exists($upload_file_name)) {
+        $s = ' does not exist.<br><br>'
         .'Please clear your browser cache and try again. '
         .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    else if (! is_readable($upload_file_name)) $s = ' is not readable';
+    }else if (! is_readable($upload_file_name)) {$s = ' is not readable';}
         
     if($s){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);
@@ -230,8 +231,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         if(!$encoded_filename){
             $encoded_filename = '';
             $s = ' not defined';
-        }else if (! file_exists($encoded_filename)) $s = ' does not exist';
-        else if (! is_readable($encoded_filename)) $s = ' is not readable';
+        }else if (! file_exists($encoded_filename)) {$s = ' does not exist';}
+        else if (! is_readable($encoded_filename)) {$s = ' is not readable';}
         if($s){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename. $s);
             return false;
@@ -263,8 +264,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     $datefields = @$params["datefield"];
     $memofields = @$params["memofield"];
     
-    if(!$keyfields) $keyfields = array();
-    if(!$datefields) $datefields = array();
+    if(!$keyfields) {$keyfields = array();}
+    if(!$datefields) {$datefields = array();}
     if(!$memofields) { $memofields = array();}
     
     $csv_dateformat = @$params["csv_dateformat"];
@@ -347,10 +348,10 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 if($line_no==0){
                     $fields = array_keys($properties);
                     //always add geometry, timestamp, timespan_begin, timespan_end
-                    if(!@$fields['geometry']) $fields[] = 'geometry';
-                    if(!@$fields['timestamp']) $fields[] = 'timestamp';
-                    if(!@$fields['timespan_begin']) $fields[] = 'timespan_begin';
-                    if(!@$fields['timespan_end']) $fields[] = 'timespan_end';
+                    if(!@$fields['geometry']) {$fields[] = 'geometry';}
+                    if(!@$fields['timestamp']) {$fields[] = 'timestamp';}
+                    if(!@$fields['timespan_begin']) {$fields[] = 'timespan_begin';}
+                    if(!@$fields['timespan_end']) {$fields[] = 'timespan_end';}
                     
                     $header = $fields;
                     $len = count($fields);
@@ -367,7 +368,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
                     $field = @$properties[$field_name];
 
-                    if($field==null) $field='';
+                    if($field==null) {$field='';}
 
                     //Identify repeating value fields and flag - will not be used as key fields
                     if($field_name=='geometry'){
@@ -661,7 +662,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     $empty75 = array();
     $lines75 = $line_no*0.75;
     foreach ($empty75_fields as $k=>$cnt){
-        if($cnt>=$lines75) $empty75[$k] = $cnt;
+        if($cnt>=$lines75) {$empty75[$k] = $cnt;}
     }
     /*$empty_fields = array_keys($empty_fields);
     $int_fields = array_keys($int_fields);
@@ -862,7 +863,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
                 }
             }
             //exclude from array of fields with integer values
-            if(@$int_fields[$k]) $int_fields[$k]=null;
+            if(@$int_fields[$k]) {$int_fields[$k]=null;}
 
         }else if(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
 
@@ -874,7 +875,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
                 }
             }
             //exclude from array of fields with integer values
-            if(@$int_fields[$k]) $int_fields[$k]=null;
+            if(@$int_fields[$k]) {$int_fields[$k]=null;}
         }
     }
 }
@@ -954,8 +955,8 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
     $filename = $prepared_filename;
     
     $s = null;
-    if (! file_exists($filename)) $s = ' does not exist';
-    else if (! is_readable($filename)) $s = ' is not readable';
+    if (! file_exists($filename)) {$s = ' does not exist';}
+    else if (! is_readable($filename)) {$s = ' is not readable';}
         
     if($s){
         self::$system->addError(HEURIST_UNKNOWN_ERROR, 'Source file '.$filename. $s);
@@ -1039,7 +1040,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
         return false;
     }
 
-    //always " if($csv_enclosure=="'") $csv_enclosure = "\\".$csv_enclosure;
+    //always " if($csv_enclosure=="'") {$csv_enclosure = "\\".$csv_enclosure;}
     
     $filename = $mysqli->real_escape_string($filename);
     /* real_escape_string does it
@@ -1145,11 +1146,11 @@ public static function simpleCsvParser($params){
     $csv_enclosure = @$params['csv_enclosure'];
     $csv_linebreak = @$params['csv_linebreak'];
 
-    if(!$csv_delimiter) $csv_delimiter = ',';
-    else if($csv_delimiter=='tab') $csv_delimiter="\t";
-    else if($csv_delimiter=='space') $csv_delimiter=" ";
+    if(!$csv_delimiter) {$csv_delimiter = ',';}
+    else if($csv_delimiter=='tab') {$csv_delimiter="\t";}
+    else if($csv_delimiter=='space') {$csv_delimiter=" ";}
     
-    if(!$csv_linebreak) $csv_linebreak = "auto";
+    if(!$csv_linebreak) {$csv_linebreak = "auto";}
 
     $csv_enclosure = ($csv_enclosure==1)?"'":'"';
 

@@ -458,7 +458,7 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
             $rtyID = $mysqli->insert_id;
 
             $dbID = $system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)){ $dbID = 0;}
             
             $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.intval($dbID)
                 .', rty_NameInOriginatingDB=rty_Name'
@@ -526,7 +526,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
             if (array_key_exists($colName, $rtyColumnNames)) {
                 //array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."$colName = ?";
 
                 //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
@@ -534,7 +534,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
                     //array_push($parameters, "");//empty title mask - store only canonical!
                     $val = TitleMask::execute($val, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
                 }else if($colName == "rty_Status"){
-                    if($val==null || $val=='') $val = 'open';
+                    if($val==null || $val=='') {$val = 'open';}
                 }
 
                 $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
@@ -814,11 +814,11 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
                     //array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
                     if($isInsert){
-                        if($query!="") $query = $query.",";
+                        if($query!="") {$query = $query.",";}
                         $fieldNames = $fieldNames.", $colName";
                         $query = $query."?";
                     }else{
-                        if($query!="") $query = $query.",";
+                        if($query!="") {$query = $query.",";}
                         $query = $query."$colName = ?";
                     }
 
@@ -920,7 +920,7 @@ function createRectypeGroups($columnNames, $rt) {
             $query = "";
             foreach ($columnNames as $colName) {
                 $val = array_shift($colValues);
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."?";
                 $parameters = addParam($parameters, $rtgColumnNames[$colName], $val);
 
@@ -992,7 +992,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
             if (array_key_exists($colName, $rtgColumnNames)) {
                 //array_push($ret['error'], array('wrongname'=>"$colName is not a valid column name for defRecTypeGroups val= $val was not used"));
 
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."$colName = ?";
 
                 $parameters = addParam($parameters, $rtgColumnNames[$colName], $val);
@@ -1102,7 +1102,7 @@ function createDettypeGroups($columnNames, $rt)
             $query = "";
             foreach ($columnNames as $colName) {
                 $val = array_shift($colValues);
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."?";
                 $parameters = addParam($parameters, $dtgColumnNames[$colName], $val);
 
@@ -1175,7 +1175,7 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
             if (array_key_exists($colName, $dtgColumnNames)) {
                 //array_push($ret['error'], array('wrongname'=>"$colName is not a valid column name for defDetailTypeGroups val= $val was not used"));
 
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."$colName = ?";
 
                 $parameters = addParam($parameters, $dtgColumnNames[$colName], $val);
@@ -1300,7 +1300,7 @@ function createDetailTypes($commonNames, $dt) {
             $dtyID = $mysqli->insert_id;
             
             $dbID = $system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)) {$dbID = 0;}
             
             $query= 'UPDATE defDetailTypes SET dty_OriginatingDBID='.$dbID
                                 .', dty_NameInOriginatingDB=dty_Name'
@@ -1389,7 +1389,7 @@ function updateDetailType($commonNames,$dtyID,$dt) {
             if (array_key_exists($colName, $dtyColumnNames)) {
                 //array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
 
-                if($query!="") $query = $query.",";
+                if($query!="") {$query = $query.",";}
                 $query = $query."$colName = ?";
 
                 $parameters = addParam($parameters, $dtyColumnNames[$colName], $val);
@@ -1516,17 +1516,17 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                 }
 
                 if($colName=="trm_ParentTermID"){
-                    if(!($val>0)) $val = null;  //set null value, otherwise we get mysql error
+                    if(!($val>0)) {$val = null;}  //set null value, otherwise we get mysql error
                     $ch_parent_id = $val;
                 }else if($colName=="trm_Code"){
                     $ch_code = $val;
                 }else if($colName=="trm_Label"){
                     $ch_label = $val;
                 }else if($colName=="trm_InverseTermID"){
-                    if(!($val>0)) $val = null;
+                    if(!($val>0)) {$val = null;}
                     $inverse_termid = $val;   //set null value, otherwise we get mysql error
                 }else if($colName=="trm_Status"){
-                    if($val=="") $val="open";
+                    if($val=="") {$val="open";}
                 }else if($colName=="trm_NameInOriginatingDB"){
                     $val = $val?substr($val,0,63):'';
                 }
@@ -1608,7 +1608,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     $trmID = $ext_db->insert_id;  // new id
                     
                     $dbID = $system->get_system('sys_dbRegisteredID');
-                    if(!($dbID>0)) $dbID = 0;
+                    if(!($dbID>0)) {$dbID = 0;}
                     
                     $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
                                 .', trm_NameInOriginatingDB=trm_Label'
@@ -1711,7 +1711,7 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
 function getTermsChilds($ret, $trmID, $terms=null) {
     global $mysqli;
 
-    if(!$terms) $terms = array($trmID);//to prevent recursion
+    if(!$terms) {$terms = array($trmID);}//to prevent recursion
 
     $query = "select trm_ID from defTerms where trm_ParentTermID = ".intval($trmID);
     $res = $mysqli->query($query);

@@ -88,7 +88,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			$base_url = $url_match[1];
 		$base_url_root = preg_replace('!([^:/])/.*!', '$1', $base_url);
 		$base_url_base = preg_replace('!([^:/]/.*/)[^/]*$!', '$1', $base_url);
-		if (substr($base_url_base, -1, 1) != '/') $base_url_base = $base_url_base . '/';
+		if (substr($base_url_base, -1, 1) != '/') {$base_url_base = $base_url_base . '/';}
 
 		// clean up the page a little
 		$src = preg_replace('/<!-.*?->/s', '', $src);
@@ -292,7 +292,7 @@ if (@$urls) {
     
 	$ignore = array();
 	foreach ($urls as $url => $title){
-		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
+		if (@$bkmk_urls[$url]) {$ignore[$url] = 1;}
 	}
 }
 

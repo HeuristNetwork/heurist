@@ -258,7 +258,7 @@ if($response!=null){
         foreach($allowed_exts_2 as $ext){
             if(in_array(strtolower($ext), $allowed_exts_all)){
                 $idx = array_search(strtolower($ext), $allowed_exts_all);
-                if($idx>=0) $allowed_exts[] = $allowed_exts_all[$idx];
+                if($idx>=0) {$allowed_exts[] = $allowed_exts_all[$idx];}
             }    
         }
         */

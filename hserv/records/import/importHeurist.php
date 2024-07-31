@@ -261,7 +261,7 @@ private static function hmlToJson($filename){
 				   }else if($xml_det->geo){
 					   
 					   $geotype = @$GEO_TYPES[ ''.$xml_det->geo->type ];
-					   if(!$geotype) $geotype = ''.$xml_det->geo->type;
+					   if(!$geotype) {$geotype = ''.$xml_det->geo->type;}
 					   
 					   $detail = array('geo'=>array(
 						'type'=>$geotype,
@@ -292,7 +292,7 @@ private static function hmlToJson($filename){
 				   }
 				   
 				   //field idx can be local id or concept code
-				   if(!@$record['details'][$field_idx]) $record['details'][$field_idx] = array();
+				   if(!@$record['details'][$field_idx]) {$record['details'][$field_idx] = array();}
 				   $record['details'][$field_idx][] = $detail; 
 				}
 			}
@@ -849,7 +849,7 @@ EOD;
                 if($recTypeID>0){
                     $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['key'];
                     $key_value = $record_src['details'][$keyDty_ID];
-                    if(is_array($key_value)) $key_value = array_shift($key_value);
+                    if(is_array($key_value)) {$key_value = array_shift($key_value);}
                     
                     //search in target 
                     $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['details'][$keyDty_ID];
@@ -1112,7 +1112,7 @@ EOD;
                                 $value['ulf_MimeExt'] = $ext['extension'];
                             }
                            
-                            if(@$value['ulf_ID']>0) $value['ulf_ID']=0;
+                            if(@$value['ulf_ID']>0) {$value['ulf_ID']=0;}
                            
                             $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$value);
                             

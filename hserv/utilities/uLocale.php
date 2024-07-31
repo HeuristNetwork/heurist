@@ -175,7 +175,7 @@
         //detect if it is usual record or term
         if(is_array($input) && (@$input['term'] || (is_array(@$input[0]) && @$input[0]['term']))){
             
-            if($field==null) $field = 'label';
+            if($field==null) {$field = 'label';}
             
             $trm = @$input[0]?$input[0]:$input;
             

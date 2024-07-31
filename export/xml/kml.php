@@ -199,7 +199,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                             
                             if($row[7] || $row[8]){
                                 
-                                if(!$row[7]) $row[7] = $row[8];
+                                if(!$row[7]) {$row[7] = $row[8];}
                                 
                                 //create timespan from two temporal objects
                                 $dt = Temporal::mergeTemporals($row[7], $row[8]);

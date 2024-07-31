@@ -408,7 +408,7 @@ class DbsTerms
             foreach($lvl as $trmId=>$children){
                 if($trmId==$parent_id){
                     
-                    if(!is_array(@$lvl[$trmId])) $lvl[$trmId] = array();
+                    if(!is_array(@$lvl[$trmId])) {$lvl[$trmId] = array();}
                     $lvl[$trmId][$new_term_id] = array();
                     
                     break;
@@ -420,7 +420,7 @@ class DbsTerms
 
         }else{
             //vocabulary
-            if(!is_array($lvl)) $lvl = array();
+            if(!is_array($lvl)) {$lvl = array();}
             $lvl[$new_term_id] = array();
         }
     }    

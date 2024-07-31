@@ -300,8 +300,8 @@
         $order = array();
         $fields = array('file_id', 'file_name', 'file_dir', 'file_url', 'file_size');
         $idx = 1;
-        if(!is_array($dirs)) $dirs = array($dirs);
-        if($exts!=null && !is_array($exts)) $exts = array($exts);
+        if(!is_array($dirs)) {$dirs = array($dirs);}
+        if($exts!=null && !is_array($exts)) {$exts = array($exts);}
 
         foreach ($dirs as $dir) {
             
@@ -540,7 +540,7 @@
         $systemFolders = @$params['systemFolders'];
         $isFancy = (@$params['format']=='fancy');
         if(is_array($params)) {$params['systemFolders'] = null;} //use on first level only
-        if($regex==null) $regex = '';
+        if($regex==null) {$regex = '';}
         
         $fancytree = array();
         
@@ -1302,9 +1302,9 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     $handle = @fopen($filename, 'r');
     if (!$handle) {
         $s = null;
-        if (! file_exists($filename)) $s = ' does not exist';
-        else if (! is_readable($filename)) $s = ' is not readable';
-            else $s = ' could not be read';
+        if (! file_exists($filename)) {$s = ' does not exist';}
+        else if (! is_readable($filename)) {$s = ' is not readable';}
+            else {$s = ' could not be read';}
             
         if($s){
             return array('error'=>('File '.$filename. $s));
@@ -1404,7 +1404,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
                 $max = $cnt;
             }
         }
-        if($csv_delimiter=="\t") $csv_delimiter = "tab";
+        if($csv_delimiter=="\t") {$csv_delimiter = "tab";}
     }
     
     if($eol=="\r\n"){

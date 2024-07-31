@@ -745,7 +745,7 @@ function dbs_GetRectypeConstraint($system) {
     */
     function getTermOffspringList($mysqli, $termID, $parentlist = null) {
         
-        if($parentlist==null) $parentlist = array($termID);
+        if($parentlist==null) {$parentlist = array($termID);}
         $offspring = array();
         if ($termID) {
             $emailsent = false;
@@ -788,7 +788,7 @@ function dbs_GetRectypeConstraint($system) {
     //
     function getTermTopMostParent($mysqli, $termId, $terms=null){
         
-        if(!$terms) $terms = array($termId);//to prevent recursion
+        if(!$terms) {$terms = array($termId);}//to prevent recursion
 
         $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
 
@@ -845,7 +845,7 @@ function dbs_GetRectypeConstraint($system) {
         {
             $query = $query .' IN ('.implode(',',$parent_ids).')';
         }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
+            if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
             $query = $query . ' = '.$parent_ids;    
         }
 
@@ -870,7 +870,7 @@ function dbs_GetRectypeConstraint($system) {
         {
             $query = $query .' IN ('.implode(',',$parent_ids).')';
         }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
+            if(is_array($parent_ids)) {$parent_ids = @$parent_ids[0];}
             $query = $query . ' = '.$parent_ids;    
         }
         
@@ -919,7 +919,7 @@ function dbs_GetRectypeConstraint($system) {
                     array_push($parents, $parent_id);
                     
                     $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);
-                    if($parent_label) $parent_label = $parent_label.'.';
+                    if($parent_label) {$parent_label = $parent_label.'.';}
                 }
             }    
         }

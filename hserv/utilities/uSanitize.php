@@ -274,7 +274,7 @@ class USanitize {
             // avoids ".", ".." or ".hiddenFiles"
             $filename = ltrim($filename, '.-');
             // optional beautification
-            if ($beautify) $filename = USanitize::fileNameBeautify($filename);
+            if ($beautify) {$filename = USanitize::fileNameBeautify($filename);}
             // maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
             $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');

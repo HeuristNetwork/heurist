@@ -427,7 +427,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 $val = $value;
             }
             
-            if(!isset($val)) $val = '';
+            if(!isset($val)) {$val = '';}
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
@@ -441,7 +441,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
                     $term_code  = self::$defTerms->getTermCode($val['value']);
-                    if($term_code) $val['termCode'] = $term_code;    
+                    if($term_code) {$val['termCode'] = $term_code;}
                 }
 
                 //take name for rt structure    
@@ -462,7 +462,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
     
     if($detail_mode==0){ //for leaflet - header and description only
-        if($ext_description) $res['properties']['description'] = $ext_description;
+        if($ext_description) {$res['properties']['description'] = $ext_description;}
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
     }else if($detail_mode==1){
@@ -594,14 +594,14 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
             }else{
                 $path = array('type'=>'LineString', 'coordinates'=>array());
                 
-                if(count($point0)>0) $path['coordinates'][] = $point0[0]['coordinates'];
+                if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
                 if(count($points)>0)
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }                
                 
-                if(count($point1)>0) $path['coordinates'][] = $point1[0]['coordinates'];
+                if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
             
             }
             

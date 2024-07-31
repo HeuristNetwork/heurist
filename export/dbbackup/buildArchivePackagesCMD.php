@@ -202,7 +202,7 @@ foreach ($arg_database as $idx=>$db_name){
     }
 
     if(!$arg_skip_files){
-        if($folders_to_copy==null) $folders_to_copy = array();
+        if($folders_to_copy==null) {$folders_to_copy = array();}
         $folders_to_copy[] = $database_folder.'file_uploads/';//HEURIST_FILES_DIR;
         $folders_to_copy[] = $database_folder.'filethumbs/';//HEURIST_THUMB_DIR;
 

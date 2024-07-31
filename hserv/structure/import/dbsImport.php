@@ -170,7 +170,7 @@ class DbsImport {
         }
         if(@$data['definitionID']){  //id or concept code in source database
             $local_ids = $data['definitionID'];
-            if(!is_array($local_ids)) $local_ids = array($local_ids);
+            if(!is_array($local_ids)) {$local_ids = array($local_ids);}
         }
         
         if(!@$data['databaseURL']){
@@ -804,7 +804,7 @@ if($this->rename_target_entities){
         if(@$def_dts[$src_ID]['commonFields']){
             renameDetailtype($trg_ID, $def_dts[$src_ID]['commonFields'], $def_dts['fieldNamesToIndex']);
 
-            if(!in_array($trg_ID, $this->detailtypes_updated)) $this->detailtypes_updated[] = $trg_ID;
+            if(!in_array($trg_ID, $this->detailtypes_updated)) {$this->detailtypes_updated[] = $trg_ID;}
         }
 
         if(!array_key_exists($trg_ID, $this->def_translations['detailtypes'])){
@@ -1029,7 +1029,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             
         //1. convert smarty report from concept to local codes
         $cfn_code = $repAction->convertTemplate($cfn_code, 1);
-        if(@$cfn_code['template']) $cfn_code = $cfn_code['template'];
+        if(@$cfn_code['template']) {$cfn_code = $cfn_code['template'];}
         
 //           $cfn_values[$idx_cfn_code] = convertCalcField( $cfn_values[$idx_cfn_code] );
         
@@ -1080,7 +1080,7 @@ foreach($cfn_tobeimported as $cfn_ID => $rty_IDs){ //$rty_IDs $rty_ID=>$dty_ID
             $cfn_entity->setData($cfn_values);
             //$cfn_entity->setRecords(null);//reset
             $new_cfn_ID = $cfn_entity->save();//register remote url - it returns ulf_ID
-            if(is_array($new_cfn_ID)) $new_cfn_ID = $new_cfn_ID[0];
+            if(is_array($new_cfn_ID)) {$new_cfn_ID = $new_cfn_ID[0];}
             
         }
         
@@ -1744,7 +1744,7 @@ $mysqli->commit();
                     renameTerm($new_term_id, $term_import, $terms['fieldNamesToIndex']);
                 }
                 
-                if(!in_array($new_term_id, $this->terms_updated)) $this->terms_updated[] = $new_term_id;
+                if(!in_array($new_term_id, $this->terms_updated)) {$this->terms_updated[] = $new_term_id;}
                 $new_term_id = -$new_term_id;
             }else{
                 //if not found add new term
@@ -2053,7 +2053,7 @@ $mysqli->commit();
 
         if($sterms==null || $sterms=="") return $sterms;
 
-        if($domain=="relationtype") $domain = "relation";
+        if($domain=="relationtype") {$domain = "relation";}
 
         // Import terms
 

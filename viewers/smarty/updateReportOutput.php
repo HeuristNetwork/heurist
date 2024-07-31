@@ -245,7 +245,7 @@ function doReport($system, $update_mode, $format, $row){
 
 	$success = executeSmartyTemplate($system, $params);//in showReps
     
-    if(!$success) $res = 0;
+    if(!$success) {$res = 0;}
 
     if($update_mode==4){
         echo htmlspecialchars($outputfile.'  '.($res==0?'error':($res==1?'created':'updated')))."\n";

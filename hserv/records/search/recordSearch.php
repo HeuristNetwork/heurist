@@ -695,7 +695,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
     $count = 0;
     $add_day = new DateInterval('P1D');// Keep the class limits inclusive
     $is_years_only = ($format=='years_only');
-    if($is_years_only) $format='year';
+    if($is_years_only) {$format='year';}
 
     // Validate Input
     if($rec_ids == null){
@@ -1073,7 +1073,7 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
 
     if($depth>=$max_depth) return;
 
-    if($new_level_ids==null) $new_level_ids = $ids;
+    if($new_level_ids==null) {$new_level_ids = $ids;}
 
     if(!($direction==1||$direction==-1)){
         $direction = 0;
@@ -1897,7 +1897,7 @@ function recordSearch($system, $params, $relation_query=null)
 
     $is_count_only = ('count'==$params['detail']);
     $is_count_by_rty = ('count_by_rty'==$params['detail']);
-    if($is_count_by_rty) $is_count_only = true;
+    if($is_count_by_rty) {$is_count_only = true;}
     $is_ids_only = ('ids'==$params['detail']);
     
     if($params['detail']=='timemap'){ //($istimemap_request){
@@ -1933,10 +1933,10 @@ function recordSearch($system, $params, $relation_query=null)
             $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE);//9,10,11,28';
         }
         //add symbology fields
-        if(defined('DT_SYMBOLOGY_POINTMARKER')) $fieldtypes_ids[] = DT_SYMBOLOGY_POINTMARKER;
-        if(defined('DT_SYMBOLOGY_COLOR')) $fieldtypes_ids[] = DT_SYMBOLOGY_COLOR;
-        if(defined('DT_BG_COLOR')) $fieldtypes_ids[] = DT_BG_COLOR;
-        if(defined('DT_OPACITY')) $fieldtypes_ids[] = DT_OPACITY;
+        if(defined('DT_SYMBOLOGY_POINTMARKER')) {$fieldtypes_ids[] = DT_SYMBOLOGY_POINTMARKER;}
+        if(defined('DT_SYMBOLOGY_COLOR')) {$fieldtypes_ids[] = DT_SYMBOLOGY_COLOR;}
+        if(defined('DT_BG_COLOR')) {$fieldtypes_ids[] = DT_BG_COLOR;}
+        if(defined('DT_OPACITY')) {$fieldtypes_ids[] = DT_OPACITY;}
 
         $fieldtypes_ids = prepareIds($fieldtypes_ids);
         
@@ -2122,8 +2122,8 @@ function recordSearch($system, $params, $relation_query=null)
 
         //find result for main query
         unset($params['rules']);
-        if(@$params['limit']) unset($params['limit']);
-        if(@$params['offset']) unset($params['offset']);
+        if(@$params['limit']) {unset($params['limit']);}
+        if(@$params['offset']) {unset($params['offset']);}
 
         $params['needall'] = 1; //return all records, otherwise dependent records could not be found
 
@@ -2356,9 +2356,9 @@ function recordSearch($system, $params, $relation_query=null)
     
         unset($params['queryset']);
         unset($params['all']);
-        if(@$params['limit']) unset($params['limit']);
-        if(@$params['offset']) unset($params['offset']);
-        if(@$params['sortby']) unset($params['sortby']);
+        if(@$params['limit']) {unset($params['limit']);}
+        if(@$params['offset']) {unset($params['offset']);}
+        if(@$params['sortby']) {unset($params['sortby']);}
         
         $params['detail'] = 'ids';
         $params['needall'] = 1;
@@ -2471,7 +2471,7 @@ function recordSearch($system, $params, $relation_query=null)
         if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->has_access() ){ //not logged in
             $search_detail_limit = PHP_INT_MAX;
             $aquery['limit'] = '';
-            if($is_count_only) $aquery['sort'] = '';
+            if($is_count_only) {$aquery['sort'] = '';}
             $aquery['offset'] = '';
         }else{
             $search_detail_limit = $system->user_GetPreference('search_detail_limit');//limit for map/timemap output
@@ -2919,7 +2919,7 @@ function recordSearch($system, $params, $relation_query=null)
                                         if($istimemap_counter<$search_detail_limit){
                                             $tm_records[$recID] = $record;        
                                             array_push($order, $recID);
-                                            if($rec_RecTypeID_index>=0) $rectypes[$record[$rec_RecTypeID_index]] = 1; 
+                                            if($rec_RecTypeID_index>=0) {$rectypes[$record[$rec_RecTypeID_index]] = 1; }
                                             //$records[$recID] = null; //unset
                                             //unset($records[$recID]);
                                         }else{
@@ -3360,7 +3360,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
     if($rec_type!=null && $rec_type>0){
        
         $usr_groups = $system->get_user_group_ids();
-        if(!is_array($usr_groups)) $usr_groups = array();
+        if(!is_array($usr_groups)) {$usr_groups = array();}
         array_push($usr_groups, 0);//everyone
         
         if($system->has_access() && in_array($rec_owner, $usr_groups)){
@@ -3399,7 +3399,7 @@ function recordSearchDetails($system, &$record, $detail_types) {
                 continue;
             }
 
-            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+            if (! @$details[$rd["dtl_DetailTypeID"]]) {$details[$rd["dtl_DetailTypeID"]] = array();}
 
             $detailValue = null;
 
@@ -3530,7 +3530,7 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
             
             $allowed_terms = null; //$terms->treeData($constraints[1], 'set');
             $constr_rty_ids = explode(',', $constraints[2]);
-            if(count($constr_rty_ids)==0) $constr_rty_ids = false;
+            if(count($constr_rty_ids)==0) {$constr_rty_ids = false;}
         
             //find among related record that satisfy contraints
             foreach ($related_recs['data']['direct'] as $relation){
@@ -3539,7 +3539,7 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
                     
                     $rty_ID = $related_recs['data']['headers'][$relation->targetID][1];//rectype id
                     if(!$constr_rty_ids || in_array($rty_ID, $constr_rty_ids) ){
-                        if(!@$record["details"][$constraints[0]]) $record["details"][$constraints[0]] = array();
+                        if(!@$record["details"][$constraints[0]]) {$record["details"][$constraints[0]] = array();}
                         $record["details"][$constraints[0]][] = array('id'=>$relation->targetID, 
                                     'type'=>$rty_ID, 
                                     'title'=>$related_recs['data']['headers'][$relation->targetID][0],
@@ -3553,7 +3553,7 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
                     
                     $rty_ID = $related_recs['data']['headers'][$relation->sourceID][1];//rectype id
                     if(!$constr_rty_ids || in_array($rty_ID, $constr_rty_ids) ){
-                        if(!@$record["details"][$constraints[0]]) $record["details"][$constraints[0]] = array();
+                        if(!@$record["details"][$constraints[0]]) {$record["details"][$constraints[0]] = array();}
                         $record["details"][$constraints[0]][] = array('id'=>$relation->sourceID, 
                                     'type'=>$rty_ID, 
                                     'title'=>$related_recs['data']['headers'][$relation->sourceID][0],

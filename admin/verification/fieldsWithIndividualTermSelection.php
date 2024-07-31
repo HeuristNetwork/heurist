@@ -173,7 +173,7 @@ $is_csv = (@$_REQUEST['html']!=1);
     
     function getTermTopMostParent22($db_name, $mysqli, $termId, $terms=null){
         
-        if(!$terms) $terms = array($termId);//to prevent recursion
+        if(!$terms) {$terms = array($termId);}//to prevent recursion
 
         $query = "select trm_ParentTermID from $db_name.defTerms where trm_ID = ".$termId;
 

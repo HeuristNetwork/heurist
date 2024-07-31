@@ -92,7 +92,7 @@ class DbDefDetailTypes extends DbEntityBase
 
         $needCheck = false;
         
-        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -362,7 +362,7 @@ class DbDefDetailTypes extends DbEntityBase
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)) {$dbID = 0;}
 
             $mysqli = $this->system->get_mysqli();
             

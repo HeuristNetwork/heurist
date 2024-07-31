@@ -14,7 +14,7 @@
 * Runs from shell only
 * 
 * in heuristConfigIni.php define $serverName
-* if (!@$serverName && php_sapi_name() == 'cli') $serverName = 'heuristref.net';
+* if (!@$serverName && php_sapi_name() == 'cli') {$serverName = 'heuristref.net';}
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org

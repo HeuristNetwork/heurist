@@ -86,7 +86,7 @@ $mysqli = $system->get_mysqli();
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
-        if ($res1) $res1->close();
+        if ($res1) {$res1->close();}
         continue;
     }
     else {

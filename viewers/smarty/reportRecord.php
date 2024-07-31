@@ -168,7 +168,7 @@ class ReportRecord {
         
         if($rec){
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);//for current user only
-            if(is_array($rec['rec_Tags'])) $rec['rec_Tags'] = implode(',',$rec['rec_Tags']);
+            if(is_array($rec['rec_Tags'])) {$rec['rec_Tags'] = implode(',',$rec['rec_Tags']);}
             
             $rec['rec_IsVisible'] = $this->recordIsVisible($rec);//for current user only
         }
@@ -448,7 +448,7 @@ class ReportRecord {
     private function _add_term_val($res, $val){
 
         if($val){
-            if(strlen($res)>0) $res = $res.", ";
+            if(strlen($res)>0) {$res = $res.", ";}
             $res = $res.$val;
         }
         return $res;
@@ -566,7 +566,7 @@ class ReportRecord {
                             $res = "";
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
-                                if(strlen($res)>0) $res = $res.", ";
+                                if(strlen($res)>0) {$res = $res.", ";}
                                 $res = $res.Temporal::toHumanReadable($value, true, 0, '|', 'native');
                                 array_push($origvalues, $value);
                             }
@@ -628,7 +628,7 @@ class ReportRecord {
                                     $geojson_adapter = new GeoJSON();
                                     $json = $geojson_adapter->write($geom, true);
                                 }
-                                if(!$json) $json = array();
+                                if(!$json) {$json = array();}
                                 $dtname2 = $dtname."_geojson";
                                 $arres = array_merge($arres, array($dtname2=>$json));
                                 
@@ -679,7 +679,7 @@ class ReportRecord {
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
                                 //$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-                                if(strlen($res)>0) $res = $res.", ";
+                                if(strlen($res)>0) {$res = $res.", ";}
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
                             }

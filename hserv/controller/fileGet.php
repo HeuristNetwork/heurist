@@ -74,10 +74,15 @@ if($filename){ //download from scratch (for csv import)
             $handle = @fopen($file_read, "r");
             if (!$handle) {
                 $s = null;
-                if (! file_exists($file_read)) $s = ' does not exist.<br><br>'
+                if (! file_exists($file_read)){
+                     $s = ' does not exist.<br><br>'
                     .'Please clear your browser cache and try again. if problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-                else if (! is_readable($file_read)) $s = ' is not readable';
-                else $s = ' could not be read';
+                }else if (! is_readable($file_read)) {
+                    $s = ' is not readable';   
+                }
+                else {
+                    $s = ' could not be read';   
+                }
                 
                 if($s){
                     print 'Temporary file (uploaded csv data) '.htmlspecialchars($file_read). $s;                
@@ -125,7 +130,7 @@ if($filename){ //download from scratch (for csv import)
         $content_type = 'image/png';
 
         $rec_id = @$_REQUEST['icon'];
-        if($rec_id==null) $rec_id = @$_REQUEST['id'];
+        if($rec_id==null) {$rec_id = @$_REQUEST['id'];}
         
         //icon, thumb, full
         $viewmode = rawurlencode(@$_REQUEST['version']);
@@ -168,8 +173,8 @@ if($filename){ //download from scratch (for csv import)
         // 1 - returns image with invitation "add image"
         // otherwise it returns empty image placeholder (100x100 or 16x16 for icons)
         $default_mode = @$_REQUEST['def'];
-        if($default_mode=='check') $default_mode = 3;
-        else if($default_mode==null) $default_mode = 2;
+        if($default_mode=='check') {$default_mode = 3;}
+        else if($default_mode==null) {$default_mode = 2;}
 
                    
         if(file_exists($filename) && !is_dir($filename)){

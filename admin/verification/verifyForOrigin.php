@@ -25,7 +25,7 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-    if(!@$_REQUEST['db']) $_REQUEST['db'] = 'Heurist_Bibliographic';
+    if(!@$_REQUEST['db']) {$_REQUEST['db'] = 'Heurist_Bibliographic';}
 
     $sysadmin_pwd = System::getAdminPwd();
 
@@ -76,7 +76,7 @@
     $filter = @$_REQUEST['filter_exact'];
     if(!$filter){
         $filter = @$_REQUEST['filter'];
-        if(!$filter) $filter = 'hdb_johns';
+        if(!$filter) {$filter = 'hdb_johns';}
     
 
         //1. find all database
@@ -127,7 +127,7 @@
             $where = 'rty_RecTypeGroupID in ('.implode(',',$ids['rty_RecTypeGroupID']).')';
         }
         if(is_array(@$ids['rty_ID']) && count($ids['rty_ID'])>0){
-            if($where) $where = $where.' OR ';
+            if($where) {$where = $where.' OR ';}
             $where = 'rty_ID in ('.implode(',',$ids['rty_ID']).')';
         }
         if($where==null){
@@ -166,7 +166,7 @@
              $rty_Code = $rty_Codes[$row['rst_RecTypeID']];
              $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
             
-             if(!@$fields[$rty_Code]) $fields[$rty_Code] = array();
+             if(!@$fields[$rty_Code]) {$fields[$rty_Code] = array();}
             
               /*if($row['rst_RecTypeID']==17){
                 print $rty_Code.' '.$dty_Code.'  '.$row['rst_DisplayName'].'<br>';

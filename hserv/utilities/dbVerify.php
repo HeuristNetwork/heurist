@@ -99,7 +99,7 @@ class DbVerify {
         $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
         if($this->keep_autocommit!=null && $this->mysqli){
             $this->mysqli->rollback();
-            if($this->keep_autocommit===true) $this->mysqli->autocommit(TRUE);
+            if($this->keep_autocommit===true) {$this->mysqli->autocommit(TRUE);}
         }
         if($this->out){
             fclose($this->out);
@@ -113,7 +113,7 @@ class DbVerify {
     //
     private function _printList($title, $sub_title, $resList, $marker){
 
-        if(!$sub_title) $sub_title = '';
+        if(!$sub_title) {$sub_title = '';}
         
         if($title!=null){
 
@@ -1402,7 +1402,7 @@ HEADER;
                     .$resMsg.'</table>';
         }
         
-        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return array('status'=>$resStatus,'message'=>$resMsg);
     }    
@@ -1482,7 +1482,7 @@ HEADER;
             
             if($is_table_exist){
 
-                if(!defined('RT_RELATION')) $this->system->defineConstant('RT_RELATION');
+                if(!defined('RT_RELATION')) {$this->system->defineConstant('RT_RELATION');}
 
                 //count of relations 
                 $query = 'SELECT count(rec_ID) FROM Records '
@@ -1860,12 +1860,12 @@ HEADER;
                 continue;
             }
         } //while
-        if($res) $res->close();
+        if($res) {$res->close();}
         
         if($isOk){
             $mysqli->commit();
         }
-        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         $this->_outStreamInit();
         fwrite($this->out, $resMsg);
@@ -2023,7 +2023,7 @@ HEADER;
         }//while limit by 10000
 
         $mysqli->commit();
-        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
   
         $this->_outStreamInit();
         
@@ -2306,7 +2306,7 @@ HEADER;
         if($resStatus){
             $mysqli->commit();
         }
-        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         if($resStatus){
         
@@ -2526,7 +2526,7 @@ FIXMSG
         }//while limit by 10000
 
         $mysqli->commit();
-        if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         if($cnt==0){
             fwrite($this->out, '<h3 class="res-valid">OK: All records have recognisable Date values</h3>');

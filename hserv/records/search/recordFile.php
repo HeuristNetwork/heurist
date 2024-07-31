@@ -176,7 +176,7 @@ function fileGetByOriginalFileName($system, $orig_name){
 //
 function fileRenameToOriginal($system, $orig_name, $new_name=null){
 
-    if($new_name==null) $new_name = $orig_name;
+    if($new_name==null) {$new_name = $orig_name;}
     $file_fullpath = HEURIST_FILESTORE_DIR.'file_uploads/'.$new_name;
     
     if(!file_exists($file_fullpath)){
@@ -619,7 +619,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
                 $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
         }
     }
-    if(!$downloadFileName) $downloadFileName = 'Dataset_'.$rec_ID;
+    if(!$downloadFileName) {$downloadFileName = 'Dataset_'.$rec_ID;}
     
     
     $finfo = pathinfo($originalFileName);
@@ -698,7 +698,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
                     strpos(@$params['var'][0]['ulf_PreferredSource'],'iiif')===0);
     }
     
-    if($style==null) $style='';
+    if($style==null) {$style='';}
 
     if($external_url && strpos($external_url,'http://')!==0){ //download non secure external resource via heurist
         $filepath = $external_url;  //external 

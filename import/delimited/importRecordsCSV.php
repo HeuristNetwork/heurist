@@ -41,7 +41,7 @@ if($max_size<100*1024*1024){
 */
 
 $format = @$_REQUEST['format'];
-if(!$format) $format='csv';
+if(!$format){ $format='csv';}
 ?>
         <script type="text/javascript" src="importRecordsCSV.js"></script>
 

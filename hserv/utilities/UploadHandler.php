@@ -84,12 +84,12 @@ class UploadHandler
         }
         
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']);//defined in form
-        if(!($replace_edited_file>0 && $replace_edited_file<4)) $replace_edited_file = false;
+        if(!($replace_edited_file>0 && $replace_edited_file<4)) {$replace_edited_file = false;}
         $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
 
         if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
 
-            if($options==null) $options=array();
+            if($options==null) {$options=array();}
 
             //get upload subfolder from parameters - this is subfolder of database upload folder
             $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form 

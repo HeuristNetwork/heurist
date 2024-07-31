@@ -153,7 +153,7 @@ function executeSmartyTemplate($system, $params){
     if($outputmode!='js' && $outputmode!='html'){
         $is_headless = true;            
     }
-    if($outputmode=='text') $outputmode = 'txt';
+    if($outputmode=='text'){ $outputmode = 'txt';}
            
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
@@ -271,7 +271,7 @@ function executeSmartyTemplate($system, $params){
         }
     }else{
         $content = $template_body;
-        if($publishmode!=4) $publishmode = 0;
+        if($publishmode!=4) {$publishmode = 0;}
         $outputmode = 'html';
     }
     
@@ -395,7 +395,7 @@ function executeSmartyTemplate($system, $params){
         
         $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl';//snyk SSRF
         $template_folder = $smarty->getTemplateDir();
-        if(is_array($template_folder)) $template_folder = $template_folder[0];
+        if(is_array($template_folder)) {$template_folder = $template_folder[0];}
         $file = fopen ($template_folder.$template_file, "w");
         fwrite($file, $template_body);
         fclose ($file);
@@ -1339,7 +1339,7 @@ function smarty_function_wrap($params, &$smarty)
 
             $sres = "";
 
-            if(!is_array($values) || !array_key_exists(0,$values)) $values = array($values);
+            if(!is_array($values) || !array_key_exists(0,$values)) {$values = array($values);}
 
             foreach ($values as $idx => $fileinfo){
 
@@ -1413,7 +1413,7 @@ function smarty_function_wrap($params, &$smarty)
 
                     if(array_key_exists('mode',$params) && $params['mode']=="link"){
                         $point = $geom->centroid();
-                        if($label=="") $label = "on map";
+                        if($label=="") {$label = "on map";}
                         $res = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
@@ -1426,7 +1426,7 @@ function smarty_function_wrap($params, &$smarty)
         }
         else if($dt=='date'){
             
-            if($mode==null) $mode = 1;
+            if($mode==null) {$mode = 1;}
             
             $calendar = null;
             if(array_key_exists('calendar',$params)){
@@ -1438,7 +1438,7 @@ function smarty_function_wrap($params, &$smarty)
             
             $content = Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
             
-            if($label!="") $label = $label.": ";
+            if($label!="") {$label = $label.": ";}
             return $label.$content.'<br>';
         }
         else{
@@ -1452,7 +1452,7 @@ function smarty_function_wrap($params, &$smarty)
                 $content = cms_content_prepare($params['var']);
             }
                                                                         
-            if($label!="") $label = $label.": ";
+            if($label!="") {$label = $label.": ";}
             return $label.$content.'<br>';
         }
     }else{

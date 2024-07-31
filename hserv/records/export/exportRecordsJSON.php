@@ -101,7 +101,7 @@ protected function _outputPrepareFields($params){
                 if(strpos($col_name,'.')>0){
                     list($rt_id, $col_name) = explode('.',$col_name);
                     
-                    if(!@$this->datatable_row_placeholder[$rt_id]) $this->datatable_row_placeholder[$rt_id] = array();
+                    if(!@$this->datatable_row_placeholder[$rt_id]) {$this->datatable_row_placeholder[$rt_id] = array();}
                     $this->datatable_row_placeholder[$rt_id][$col_name] = '';
                 }else{
                     $rt_id = 0;
@@ -518,7 +518,7 @@ private function _getJsonFeature($record, $extended_mode){
         
         $res['rec_RecTypeName'] = self::$defRecTypes['names'][$rty_ID];
         $idx_ccode2 = self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$idx_ccode2];
-        if($idx_ccode2) $res['rec_RecTypeConceptID'] = $idx_ccode2;
+        if($idx_ccode2) {$res['rec_RecTypeConceptID'] = $idx_ccode2;}
         
     }
 
@@ -536,9 +536,9 @@ private function _getJsonFeature($record, $extended_mode){
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
                     $term_code  = self::$defTerms->getTermCode($value);
-                    if($term_code) $val['termCode'] = $term_code; 
+                    if($term_code) {$val['termCode'] = $term_code; }
                     $term_code  = self::$defTerms->getTermConceptID($value);
-                    if($term_code) $val['termConceptID'] = $term_code;    
+                    if($term_code) {$val['termConceptID'] = $term_code;}
                 }
 
                 if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){

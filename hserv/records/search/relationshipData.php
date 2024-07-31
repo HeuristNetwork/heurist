@@ -131,8 +131,8 @@ function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id
                 ." WHERE A.trm_Label is not null and B.trm_Label is not null");
     }
     $inverse = @$inverses[$relTermID];
-    if (!$inverse) $inverse = array_search($relTermID, $inverses);//do an inverse search and return key.
-    if (!$inverse) $inverse = $relTermID; //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
+    if (!$inverse) {$inverse = array_search($relTermID, $inverses);}//do an inverse search and return key.
+    if (!$inverse) {$inverse = $relTermID;} //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
     return $inverse;
 }
 ?>

@@ -439,7 +439,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     $mysqli = $db;
 
-    if(!$params) $params = array();//$_REQUEST;
+    if(!$params){ $params = array();}//$_REQUEST;
     
     if(is_array(@$params['q'])){
         $query_json = $params['q'];
@@ -456,7 +456,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $currUserID = $currentUser['ugr_ID'];
         array_push($wg_ids, $currUserID);
         
-        if(!@$params['w']) $params['w'] = 'all';
+        if(!@$params['w']) {$params['w'] = 'all';}
         
     }else{
         $currUserID = 0;
@@ -974,7 +974,7 @@ class HLimb {
                         }else{
                             array_push($wheres, "(".$res["where"].")");
                             //$where = $where."(".$res["where"].")";
-                            //if($ind<$cnt) $where = $where.$cnj;
+                            //if($ind<$cnt) {$where = $where.$cnj;}
                         }
                     }else if($limb->error_message){
                         $this->error_message = $limb->error_message;
@@ -1111,7 +1111,7 @@ class HPredicate {
                         }
                         if(@$this->allowed_term_fields[$val1]){
                             $this->field_term = $val1;    
-                            if($val2) $this->field_lang = $val2;
+                            if($val2) {$this->field_lang = $val2;}
                         }else if(@$this->allowed_term_fields[$val2]){
                             $this->field_term = $val2;    
                             $this->field_lang = $val1;
@@ -1207,7 +1207,7 @@ class HPredicate {
                     // related to particular records
                     foreach($value as $idx=>$val){
                         if($idx==='ids' || (is_array($val) && @$val['ids']) ){
-                            if(is_array($val) && @$val['ids']) $val = $val['ids'];
+                            if(is_array($val) && @$val['ids']) {$val = $val['ids'];}
                             $this->value = $val;
                             $value = array();//reset
                             break;
@@ -1567,7 +1567,7 @@ class HPredicate {
           
         if($sHeaderField){    
             
-            if($this->pred_type=='f') $this->pred_type = $this->field_id;
+            if($this->pred_type=='f') {$this->pred_type = $this->field_id;}
             
             if($is_empty){
                 $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField='')";
@@ -1955,7 +1955,7 @@ class HPredicate {
                     
                 }else{
                     $val = $this->getFieldValue();
-                    if($val) $pred = 'tag_Text '.$val;
+                    if($val) {$pred = 'tag_Text '.$val;}
                 }
                 
                 if($pred){
@@ -2735,7 +2735,7 @@ class HPredicate {
             }else{
                  $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
                         .$mysqli->real_escape_string($username).'" limit 1');
-                 if($username!=null) $userids[] = $username;
+                 if($username!=null) {$userids[] = $username;}
             }
         }
         return implode(',',$userids);
@@ -3014,8 +3014,8 @@ class HPredicate {
                 || $this->pred_type=='after'  || $this->pred_type=='before'
                 || $this->field_id=='added' || $this->field_id=='modified'){
         
-                if($this->pred_type=='before') $this->lessthan = '<=';
-                if($this->pred_type=='after')  $this->greaterthan = '>';
+                if($this->pred_type=='before') {$this->lessthan = '<=';}
+                if($this->pred_type=='after') {$this->greaterthan = '>';}
                     
                 $this->field_type = 'date';
                 $cs_ids = null;    

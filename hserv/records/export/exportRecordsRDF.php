@@ -70,8 +70,8 @@ protected function _outputPrepare($data, $params)
         
         
         $ext_info = @$params['extinfo'];
-        if($ext_info==null) $ext_info = '0';
-        else if($ext_info==='1') $ext_info = '1111';
+        if($ext_info==null) {$ext_info = '0';}
+        else if($ext_info==='1') {$ext_info = '1111';}
         if(strlen($ext_info)<4){
             $ext_info = str_pad($ext_info,4,'0');
         }
@@ -152,7 +152,7 @@ private function _prepareURI($surl, $original_dbid=null){
         }else if(strpos($surl,'http://')===0 || strpos($surl,'https://')===0){
             $parts = explode('/',$surl);
             $type = array_pop($parts);
-            if($type=='') $type = array_pop($parts);
+            if($type=='') {$type = array_pop($parts);}
             $uri = implode('/',$parts).'/';
         }else{
             //dty-2-1
@@ -187,7 +187,7 @@ private function _prepareURI($surl, $original_dbid=null){
                     
                     $parts = explode('/',$uri);
                     $dbid = array_pop($parts);
-                    if($dbid=='') $dbid = array_pop($parts);
+                    if($dbid=='') {$dbid = array_pop($parts);}
                     if(intval($dbid)>0){
                         $ns .= $dbid;                       
                     }
@@ -466,7 +466,7 @@ private function _setResourceProps($record, &$resource){
             $resource->add($field_URI, $value);
   
 /*            
-            if(!isset($val)) $val = '';
+            if(!isset($val)) {$val = '';}
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
@@ -480,7 +480,7 @@ private function _setResourceProps($record, &$resource){
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
                     $term_code  = self::$defTerms->getTermCode($val['value']);
-                    if($term_code) $val['termCode'] = $term_code;    
+                    if($term_code) {$val['termCode'] = $term_code; }
                 }
 
                 //take name for rt structure    

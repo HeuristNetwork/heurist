@@ -172,7 +172,7 @@ public static function output($data, $params){
     }
     
     $find_timefields = prepareIds(@$params['timefields']);
-    if(count($find_timefields)==0) $find_timefields = null;
+    if(count($find_timefields)==0) {$find_timefields = null;}
     
     $find_geo_by_pointer_rty = false;
     $geojson_ids = array();//simplify array('all'=>array());
@@ -587,7 +587,7 @@ IIIF;
                 if(strpos($col_name,'.')>0){
                     list($rt_id, $col_name) = explode('.',$col_name);
                     
-                    if(!@$row_placeholder[$rt_id]) $row_placeholder[$rt_id] = array();
+                    if(!@$row_placeholder[$rt_id]) {$row_placeholder[$rt_id] = array();}
                     $row_placeholder[$rt_id][$col_name] = '';
                 }else{
                     $rt_id = 0;
@@ -1065,7 +1065,7 @@ XML;
             $originalFileName = null;
             if(@$params['metadata']){
                 list($db_meta,$rec_ID) = explode('-',$params['metadata']);
-                if(!$db_meta && $rec_ID) $db_meta = self::$system->dbname();
+                if(!$db_meta && $rec_ID) {$db_meta = self::$system->dbname();}
                 
                 $record = array("rec_ID"=>$rec_ID);
                 if($db_meta!=self::$system->dbname()){
@@ -1086,7 +1086,7 @@ XML;
                         $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                     }
                 }
-                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                if(!$originalFileName) {$originalFileName = 'Dataset_'.$record['rec_ID'];}
                 
             }else{
                 $originalFileName = $params['filename'];
@@ -1559,7 +1559,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 $val = $value;
             }
             
-            if(!isset($val)) $val = '';
+            if(!isset($val)) {$val = '';}
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
@@ -1573,7 +1573,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
                     $term_code  = self::$defTerms->getTermCode($val['value']);
-                    if($term_code) $val['termCode'] = $term_code;    
+                    if($term_code) {$val['termCode'] = $term_code;}
                 }
 
                 //take name for rt structure    
@@ -1594,7 +1594,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 
     
     if($detail_mode==0){ //for leaflet - header and description only
-        if($ext_description) $res['properties']['description'] = $ext_description;
+        if($ext_description) {$res['properties']['description'] = $ext_description;}
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
     }else if($detail_mode==1){
@@ -1725,14 +1725,14 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
             }else{
                 $path = array('type'=>'LineString', 'coordinates'=>array());
                 
-                if(count($point0)>0) $path['coordinates'][] = $point0[0]['coordinates'];
+                if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
                 if(count($points)>0)
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }                
                 
-                if(count($point1)>0) $path['coordinates'][] = $point1[0]['coordinates'];
+                if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
             
             }
             
@@ -2057,7 +2057,7 @@ private static function _getJsonFeature($record, $mode){
         
         $res['rec_RecTypeName'] = self::$defRecTypes['names'][$rty_ID];
         $idx_ccode2 = self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$idx_ccode2];
-        if($idx_ccode2) $res['rec_RecTypeConceptID'] = $idx_ccode2;
+        if($idx_ccode2) {$res['rec_RecTypeConceptID'] = $idx_ccode2;}
         
     }
 
@@ -2075,9 +2075,9 @@ private static function _getJsonFeature($record, $mode){
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
                     $term_code  = self::$defTerms->getTermCode($value);
-                    if($term_code) $val['termCode'] = $term_code; 
+                    if($term_code) {$val['termCode'] = $term_code; }
                     $term_code  = self::$defTerms->getTermConceptID($value);
-                    if($term_code) $val['termConceptID'] = $term_code;    
+                    if($term_code) {$val['termConceptID'] = $term_code;    }
                 }
 
                 if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
@@ -2302,20 +2302,20 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
                     
                     $context = @$iiif_manifest['@context'];
                     $service_id = $iiif_manifest['@id'];
-                    if(@$iiif_manifest['width']>0) $width = $iiif_manifest['width'];
-                    if(@$iiif_manifest['height']>0) $height = $iiif_manifest['height'];
+                    if(@$iiif_manifest['width']>0) {$width = $iiif_manifest['width'];}
+                    if(@$iiif_manifest['height']>0) {$height = $iiif_manifest['height'];}
                     
                     $profile = @$iiif_manifest['profile'];
                     
                     $mimeType = null;
                     if(is_array($profile)){
                         $mimeType = @$profile[1]['formats'][0];
-                        if($mimeType) $mimeType = 'image/'.$mimeType;
+                        if($mimeType) {$mimeType = 'image/'.$mimeType;}
                         $profile = @$profile[0];
                     }else if($profile==null){
                         $profile = 'level1';
                     }
-                    if(!$mimeType) $mimeType= 'image/jpeg';
+                    if(!$mimeType) {$mimeType= 'image/jpeg';}
                     
                     if(strpos($profile, 'library.stanford.edu/iiif/image-api/1.1')>0){
                         $quality = 'native';

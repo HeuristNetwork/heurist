@@ -47,8 +47,8 @@ use PHPMailer\PHPMailer\Exception;
         $replyTo = null;//$email_from;
         $replyToName = null;//$email_from_name;
 
-        if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
-        if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
+        if(!$email_from) {$email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);}
+        if(!$email_from_name) {$email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';}
         
         if($is_html){
             USanitize::purifyHTML($email_text);

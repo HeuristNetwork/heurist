@@ -375,9 +375,9 @@ if(@$_REQUEST['recID'] || @$_REQUEST['recid']){
     
 }else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     
-    if(@$_REQUEST['rty']) $entity = 'rty';
-    else if(@$_REQUEST['dty']) $entity = 'dty';
-    else if(@$_REQUEST['trm']) $entity = 'trm';
+    if(@$_REQUEST['rty']) {$entity = 'rty';}
+    else if(@$_REQUEST['dty']) {$entity = 'dty';}
+    else if(@$_REQUEST['trm']) {$entity = 'trm';}
     
     $recid = filter_var($_REQUEST[$entity], FILTER_SANITIZE_STRING);
     $format = 'xml';

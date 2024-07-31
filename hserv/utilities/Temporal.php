@@ -188,8 +188,8 @@ class Temporal {
                     $res[5] = $date['profile'];
                 }else{
                     //fuzzy range
-                    if(@$date['start']['profile']>0) $res[5] = $date['start']['profile'];
-                    if(@$date['end']['profile']>0) $res[6] = $date['end']['profile'];
+                    if(@$date['start']['profile']>0) {$res[5] = $date['start']['profile'];}
+                    if(@$date['end']['profile']>0) {$res[6] = $date['end']['profile'];}
                 }
             }
 
@@ -429,7 +429,7 @@ class Temporal {
 
                 if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
                     $cld = $tDate["CL2"]." ".$tDate["CLD"];
-                    if(strpos($cld,'null')!==false) $tDate["CLD"] = substr($cld,4);//some dates were saved in wrong format - fix it
+                    if(strpos($cld,'null')!==false) {$tDate["CLD"] = substr($cld,4);}//some dates were saved in wrong format - fix it
                 }        
 
 
@@ -494,22 +494,22 @@ class Temporal {
                             $timespan['end']['earliest'] = $tDate['PDE'];
                         }
 
-                        if(@$tDate['SPF']) $timespan['start']['profile'] = $tDate['SPF'];
-                        if(@$tDate['EPF']) $timespan['end']['profile'] = $tDate['EPF'];
-                        if(@$tDate['PRF']) $timespan['profile'] = $tDate['PRF'];
+                        if(@$tDate['SPF']) {$timespan['start']['profile'] = $tDate['SPF'];}
+                        if(@$tDate['EPF']) {$timespan['end']['profile'] = $tDate['EPF'];}
+                        if(@$tDate['PRF']) {$timespan['profile'] = $tDate['PRF'];}
 
                         break;
                 }//end case
 
 
-                if(@$tDate['DET']) $timespan['determination'] = $tDate['DET'];
-                if(@$tDate['CLD'] && $tDate['CLD']!='Gregorian') $timespan['calendar'] = $tDate['CLD'];
-                if(@$tDate['COM'] && $tDate['COM']!='') $timespan['comment'] = $tDate['COM'];
+                if(@$tDate['DET']) {$timespan['determination'] = $tDate['DET'];}
+                if(@$tDate['CLD'] && $tDate['CLD']!='Gregorian') {$timespan['calendar'] = $tDate['CLD'];}
+                if(@$tDate['COM'] && $tDate['COM']!='') {$timespan['comment'] = $tDate['COM'];}
                 //labaratory code for C14
-                if(@$tDate['COD']) $timespan['labcode'] = $tDate['COD'];
-                if(@$tDate['CAL']) $timespan['calibrated'] = 1;
+                if(@$tDate['COD']) {$timespan['labcode'] = $tDate['COD'];}
+                if(@$tDate['CAL']) {$timespan['calibrated'] = 1;}
                 //human readable in native calendar
-                if(@$tDate['CL2']) $timespan['native'] = $tDate['CL2'];
+                if(@$tDate['CL2']) {$timespan['native'] = $tDate['CL2'];}
 
             }  else {
                 $timespan = Temporal::_getIntervalForMonth($value);
@@ -811,8 +811,8 @@ class Temporal {
                 .' '.substr($value,8,2).':'.substr($value,10,2).':'.substr($value,12,2);
             }else if(intval($value)>9999){ //20090410 
                 $nval = substr($value,0,4);
-                if(strlen($value)>4) $nval = $nval.'-'.substr($value,4,2);
-                if(strlen($value)>6) $nval = $nval.'-'.substr($value,6,2);
+                if(strlen($value)>4) {$nval = $nval.'-'.substr($value,4,2);}
+                if(strlen($value)>6) {$nval = $nval.'-'.substr($value,6,2);}
                 $value = $nval;
             }else{
                 $value = preg_replace('/\s+/', '', $value);//remove spaces
@@ -922,7 +922,7 @@ class Temporal {
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
 
                     if($need_day && count($date) == 1){ // only year, add -01-01 for ISO format
-                        if($need_day===true) $need_day = '-01-01';
+                        if($need_day===true) {$need_day = '-01-01';}
                         $res = $res . $need_day;
                     }
                 }
@@ -1131,7 +1131,7 @@ class Temporal {
             // or rare case: year is last  as 10-11-1970
             if( $y>31 || ($is_dots_slash && (!is_numeric($m) || $m<32)) ){
 
-                if($y>22 && $y<100) $y = '19'.$y; 
+                if($y>22 && $y<100) {$y = '19'.$y; }
 
                 if(strlen($m)>2 || $d>12){ // month is word
                     //$value = $y.'-'.$m.'-'.$d;
@@ -1545,7 +1545,7 @@ class Temporal {
                     }
 
                     $res[$is_simple?'Earliest estimate':'Terminus Post Quem'] = $from;
-                    if(!$is_simple) $res['Probable Begin'] = $dt;
+                    if(!$is_simple) {$res['Probable Begin'] = $dt;}
                     if(@$date['start']['profile']){
                         $res['Start Profile'] = $this->dictProfile[intval($date['start']['profile'])];
                     }
@@ -1585,11 +1585,11 @@ class Temporal {
             //$is_greg_or_julian = (!$calendar || 
             //    strtolower($calendar)=='gregorian');// || strtolower($calendar)=='julian'
 
-            if(@$date['comment']) $res['Comment'] = $date['comment'];
-            if(@$date['determination']) $res['Determination'] = $this->dictDetermination[intval($date['determination'])];
+            if(@$date['comment']) {$res['Comment'] = $date['comment'];}
+            if(@$date['determination']) {$res['Determination'] = $this->dictDetermination[intval($date['determination'])];}
             //labaratory code for C14
-            if(@$date['labcode']) $res['Labaratory Code'] = $date['labcode'];
-            if(@$date['calibrated']) $res['Calibarated'] = 'yes';
+            if(@$date['labcode']) {$res['Labaratory Code'] = $date['labcode'];}
+            if(@$date['calibrated']) {$res['Calibarated'] = 'yes';}
 
             $res2 = '';
             if($is_compact){
@@ -1614,8 +1614,8 @@ class Temporal {
                 }
 
                 $supinfo = array();
-                if($res['Determination']) $supinfo[] = $res['Determination'];
-                if($date['calibrated']) $supinfo[] = 'Calibarated';
+                if($res['Determination']) {$supinfo[] = $res['Determination'];}
+                if($date['calibrated']) {$supinfo[] = 'Calibarated';}
                 
                 //add native decription as prefix
                 if($native){
@@ -1690,7 +1690,7 @@ class Temporal {
                         $res['TAQ'] = Temporal::decimalToYMD($date['estMaxDate']);
 
                         $res['RNG'] = $date['timestamp']['deviation'];
-                        if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];
+                        if(@$date['timestamp']['profile']) {$res['PRF'] = $date['timestamp']['profile'];}
 
                     }else{
                         $res['TYP'] = 's';
@@ -1721,30 +1721,30 @@ class Temporal {
                     $res['TPQ'] = $date['start']['in'];
                 }else{
                     $res['TPQ'] = $date['start']['earliest'];
-                    if(@$date['start']['latest']) $res['PDB'] = $date['start']['latest'];
+                    if(@$date['start']['latest']) {$res['PDB'] = $date['start']['latest'];}
                 }
 
                 if(@$date['end'] && @$date['end']['in']){
                     $res['TAQ'] = $date['end']['in'];
                 }else{
-                    if(@$date['end']['earliest']) $res['PDE'] = $date['end']['earliest'];
+                    if(@$date['end']['earliest']) {$res['PDE'] = $date['end']['earliest'];}
                     $res['TAQ'] = $date['end']['latest'];
                 }
 
-                if(@$date['start']['profile']) $res['SPF'] = $date['start']['profile'];
-                if(@$date['end']['profile']) $res['EPF'] = $date['end']['profile'];
-                if(@$date['profile']) $res['PRF'] = $date['profile'];
+                if(@$date['start']['profile']) {$res['SPF'] = $date['start']['profile'];}
+                if(@$date['end']['profile']) {$res['EPF'] = $date['end']['profile'];}
+                if(@$date['profile']) {$res['PRF'] = $date['profile'];}
             }
 
 
-            if(@$date['determination']) $res['DET'] = $date['determination'];
-            if(@$date['calendar']) $res['CLD'] = $date['calendar'];
-            if(@$date['comment']) $res['COM'] = $date['comment'];
+            if(@$date['determination']) {$res['DET'] = $date['determination'];}
+            if(@$date['calendar']) {$res['CLD'] = $date['calendar'];}
+            if(@$date['comment']) {$res['COM'] = $date['comment'];}
             //labaratory code for C14
-            if(@$date['labcode']) $res['COD'] = $date['labcode'];
-            if(@$date['calibrated']) $res['CAL'] = '1';
+            if(@$date['labcode']) {$res['COD'] = $date['labcode'];}
+            if(@$date['calibrated']) {$res['CAL'] = '1';}
             //human readable in native calendar
-            if(@$date['native']) $res['CL2'] = $date['native'];
+            if(@$date['native']) {$res['CL2'] = $date['native'];}
 
             $res2 = '|VER=1';
             foreach($res as $key=>$val){

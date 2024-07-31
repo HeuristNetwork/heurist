@@ -194,7 +194,7 @@ if(!$error){
                             if(@$finfo['extension']){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];
                             }else if($fileExt){
-                                if($fileExt=='jpe') $fileExt = 'jpg';
+                                if($fileExt=='jpe'){ $fileExt = 'jpg';}
                                 $originalFileName = $originalFileName.'.'.$fileExt;   
                             }
                         }    

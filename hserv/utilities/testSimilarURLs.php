@@ -60,7 +60,7 @@ function similar_urls($mysqli, $url) {
 	if (count($new_matches) >= 10) return $new_matches;
 
 	$matches = array();
-	foreach ($new_matches as $match) $matches[$match] = $match;
+	foreach ($new_matches as $match) {$matches[$match] = $match;}
 
 	$qpos = strpos($noproto_url, '?');
 	if ($qpos) {

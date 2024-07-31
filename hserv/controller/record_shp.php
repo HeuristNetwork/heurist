@@ -136,7 +136,7 @@ use Shapefile\ShapefileReader;
                 if(is_array($record['details'][DT_NAME])){
                     $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                 }
-                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                if(!$originalFileName) {$originalFileName = 'Dataset_'.$record['rec_ID'];}
                 
                 $file_zip = $originalFileName.'.zip';
                 $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");

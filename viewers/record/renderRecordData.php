@@ -81,7 +81,7 @@ $defTerms = new DbsTerms($system, $defTerms);
 
 
 $ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();//all groups current user is a member
-if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
+if(!is_array($ACCESSABLE_OWNER_IDS)) {$ACCESSABLE_OWNER_IDS = array();}
 array_push($ACCESSABLE_OWNER_IDS, 0);//everyone
 
 $ACCESS_CONDITION = 'rec_OwnerUGrpID '.
@@ -1498,7 +1498,7 @@ function print_private_details($bib) {
                                 if ($i > 0) print '&nbsp; ';
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
-                                if (preg_match('/\\s/', $grp_kwd)) $grp_kwd = '"'.$grp_kwd.'"';
+                                if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
                                 print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/magglass_12x11.gif"></a>';
                             }
                             ?>
@@ -1536,7 +1536,7 @@ function print_personal_details($bkmk) {
                     if ($i > 0) print '&nbsp; ';
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
-                    if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
+                    if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
                     print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/magglass_12x11.gif"></a>';
                 }
                 if (count($tags)) {
@@ -2748,7 +2748,7 @@ function orderComments($cmts) {
             array_push($orderedCmtIds,$id);
         }else {	//note this algrithm assumes comments are ordered by date and that a child comment always has a more recent date
             // handle deleted or children of deleted
-            if ($cmts[$cmt["owner"]]["deleted"]) $cmt["deleted"] = true;
+            if ($cmts[$cmt["owner"]]["deleted"]) {$cmt["deleted"] = true;}
             if ($cmt["deleted"]) {continue;}
             $ownerIndex = array_search($cmt["owner"],$orderedCmtIds);
             $insertIndex = count($orderedCmtIds);//set insertion to end of array as default
@@ -2779,7 +2779,7 @@ function orderComments($cmts) {
     foreach ( $orderedCmtIds as $id) {
         array_push($ret, array( 'id' => $id, 'level' => $cmts[$id]['level']));
     }
-    if (count($orderErrCmts)) $orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);
+    if (count($orderErrCmts)) {$orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);}
     return $ret;
 }
 

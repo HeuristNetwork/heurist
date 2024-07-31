@@ -50,7 +50,7 @@ if(@$_REQUEST['recTypeIDs']){
     $rty_ids = prepareIds(filter_var($_REQUEST['recTypeIDs']));
     $mysqli = $system->get_mysqli();
     //$rty_ids = array_map(array($mysqli,'real_escape_string'), $rty_ids);
-    if(count($rty_ids)>0) $rty_ids_list = implode(',', $rty_ids);
+    if(count($rty_ids)>0) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
 if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on client side

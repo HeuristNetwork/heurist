@@ -61,8 +61,8 @@ if(@$_REQUEST['u']){
 //      (that's double precaution - it is already checked in bookmarkletPopup)    
 
     //  fix url to be complete with protocol and remove any trailing slash
-    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'https://' . $url;       
-    if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
+    if (! preg_match('!^[a-z]+:!i', $url)) {$url = 'https://' . $url;}
+    if (substr($url, -1) == '/') {$url = substr($url, 0, strlen($url)-1);}
 
     $mysqli = $system->get_mysqli();
     

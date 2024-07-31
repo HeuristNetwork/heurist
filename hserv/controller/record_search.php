@@ -77,9 +77,9 @@
     }    
     
     //these are internal parameters, they cannot be sent from client side
-    if( @$req_params['sql'] )unset( $req_params['sql'] );
-    if( @$req_params['parentquery'] ) unset ($req_params['parentquery'] );
-    //if( @$req_params['needall'] ) unset ($req_params['needall'] );
+    if( @$req_params['sql'] ) {unset( $req_params['sql'] );}
+    if( @$req_params['parentquery'] ) {unset ($req_params['parentquery'] );}
+    //if( @$req_params['needall'] ) {unset ($req_params['needall'] );}
 
     //get list of registered database and master index db on the same server
     if(@$req_params['remote'] == 'master' &&
@@ -87,7 +87,7 @@
        
        unset($req_params['remote']);
        $req_params['db'] = HEURIST_INDEX_DATABASE;
-       if(!@$req_params['q']) $req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';
+       if(!@$req_params['q']) {$req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';}
     }
     
 
@@ -210,7 +210,7 @@
         
         if(@$req_params['remote'] == 'master'){
             
-                if(!@$req_params['q']) $req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';//all registred db
+                if(!@$req_params['q']) {$req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';}//all registred db
                 //change hsapi to hserv when master index will be v6.5
                 $reg_url = HEURIST_INDEX_BASE_URL
                 .'hserv/controller/record_search.php?db='.HEURIST_INDEX_DATABASE.'&q='.$req_params['q'];

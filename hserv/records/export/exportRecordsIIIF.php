@@ -285,20 +285,20 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                     
                     $context = @$iiif_manifest['@context'];
                     $service_id = $iiif_manifest['@id'];
-                    if(@$iiif_manifest['width']>0) $width = $iiif_manifest['width'];
-                    if(@$iiif_manifest['height']>0) $height = $iiif_manifest['height'];
+                    if(@$iiif_manifest['width']>0) {$width = $iiif_manifest['width'];}
+                    if(@$iiif_manifest['height']>0) {$height = $iiif_manifest['height'];}
                     
                     $profile = @$iiif_manifest['profile'];
                     
                     $mimeType = null;
                     if(is_array($profile)){
                         $mimeType = @$profile[1]['formats'][0];
-                        if($mimeType) $mimeType = 'image/'.$mimeType;
+                        if($mimeType) {$mimeType = 'image/'.$mimeType;}
                         $profile = @$profile[0];
                     }else if($profile==null){
                         $profile = 'level1';
                     }
-                    if(!$mimeType) $mimeType= 'image/jpeg';
+                    if(!$mimeType) {$mimeType= 'image/jpeg';}
                     
                     if(strpos($profile, 'library.stanford.edu/iiif/image-api/1.1')>0){
                         $quality = 'native';

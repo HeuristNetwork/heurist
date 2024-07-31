@@ -713,7 +713,7 @@ abstract class DbEntityBase
             
             //ulf_MimeExt is the only nonnumeric resource
             if(@$field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
-                if(intval($value)<1) $this->data['fields'][$fieldname] = null;
+                if(intval($value)<1) {$this->data['fields'][$fieldname] = null;}
             }
         }
         
@@ -977,7 +977,7 @@ abstract class DbEntityBase
                 $rec_id = 1;    
                 $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';
             }else{
-                if($db_name==null) $db_name = HEURIST_DBNAME;
+                if($db_name==null) {$db_name = HEURIST_DBNAME;}
                 
                 $path = HEURIST_FILESTORE_ROOT.$db_name.'/entity/'.$entity_name.'/';
                 //$path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';

@@ -513,7 +513,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
             
             if(@$_REQUEST['includeresources']=='1'){ //uploaded images
-                if($folders_to_copy==null) $folders_to_copy = array();
+                if($folders_to_copy==null) {$folders_to_copy = array();}
                 $folders_to_copy[] = HEURIST_FILES_DIR;
                 $folders_to_copy[] = HEURIST_THUMB_DIR;
                 
@@ -522,7 +522,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $copy_files_in_root = false;
             }
             if(@$_REQUEST['include_tilestacks']=='1' && defined('HEURIST_TILESTACKS_DIR')){
-                if($folders_to_copy==null) $folders_to_copy = array();
+                if($folders_to_copy==null) {$folders_to_copy = array();}
                 $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
             }
             if($folders_to_copy==null){

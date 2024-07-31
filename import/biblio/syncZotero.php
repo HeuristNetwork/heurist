@@ -532,7 +532,7 @@ if($step=="1"){  //first step - info about current status
 				
                     #print " <br> Undefined Record type".$itemtype."  ".$itemtitle."<br>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
-                    if(!@$arr_ignored_by_type[$itemtype]) $arr_ignored_by_type[$itemtype] = 0;
+                    if(!@$arr_ignored_by_type[$itemtype]) {$arr_ignored_by_type[$itemtype] = 0;}
                     $arr_ignored_by_type[$itemtype]++;
                     $cnt_ignored++;
                     continue;
@@ -757,7 +757,7 @@ if($step=="1"){  //first step - info about current status
                         if(count($unresolved_records)>0){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
-                        if(!@$cnt_report[$recordType]) $cnt_report[$recordType] = array('added'=>array(), 'updated'=>array());
+                        if(!@$cnt_report[$recordType]) {$cnt_report[$recordType] = array('added'=>array(), 'updated'=>array());}
 
                         if($recId==$new_recid){
                             $cnt_updated[]=$new_recid;

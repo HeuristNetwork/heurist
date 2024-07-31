@@ -63,7 +63,7 @@ class DbDefCalcFunctions extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('cfn_Name');
         if($pred!=null) array_push($where, $pred);
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';//default
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
                
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property

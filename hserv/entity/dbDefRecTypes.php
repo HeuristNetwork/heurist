@@ -66,7 +66,7 @@ class DbDefRecTypes extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
         if($pred!=null) array_push($where, $pred);
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -414,7 +414,7 @@ class DbDefRecTypes extends DbEntityBase
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)) {$dbID = 0;}
             
             $mysqli = $this->system->get_mysqli();
             
@@ -676,7 +676,7 @@ WHERE
 
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
-                if(@$conds[1]) $conds[1] = ' AND '.$conds[1];
+                if(@$conds[1]) {$conds[1] = ' AND '.$conds[1];}
             }else{
                 $conds = array('', ' AND (not r0.rec_FlagTemporary)');
             }
@@ -688,14 +688,14 @@ WHERE
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
 
             $res2 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
-            if($res2==null) $res2 = array();
+            if($res2==null) {$res2 = array();}
             
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
 
             $res3 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
-            if($res3==null) $res3 = array();
+            if($res3==null) {$res3 = array();}
             
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
                 'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);

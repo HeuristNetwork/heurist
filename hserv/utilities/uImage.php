@@ -498,7 +498,7 @@ class UImage {
             
                 if (extension_loaded('imagick')) {
                     $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height, $force_type);
-                    if($res!==true) $errorMsg = 'Cannot resize image. '.$res;
+                    if($res!==true) {$errorMsg = 'Cannot resize image. '.$res;}
                 }else{
                     $img = UImage::safeLoadImage($filename, $mimeExt);
                     if($img){
@@ -771,7 +771,7 @@ class UImage {
             $n = $imgw*$imgh;
 
             $histo = array();
-            for ($i=0; $i<256; $i++) $histo[]=0;
+            for ($i=0; $i<256; $i++) {$histo[]=0;}
 
             for ($i=0; $i<$imgw; $i++)
             {

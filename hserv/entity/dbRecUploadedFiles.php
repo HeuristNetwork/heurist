@@ -192,9 +192,9 @@ class DbRecUploadedFiles extends DbEntityBase
                             $mimeType=null;
                             $external_url=null;
                             $idx = array_search('fxm_MimeType', $fields);
-                            if($idx!==false) $mimeType = $row[$idx];
+                            if($idx!==false) {$mimeType = $row[$idx];}
                             $idx = array_search('ulf_ExternalFileReference', $fields);
-                            if($idx!==false) $external_url = $row[$idx];
+                            if($idx!==false) {$external_url = $row[$idx];}
                             array_push($row, fileGetPlayerTag($this->system, $fileid, $mimeType, null, $external_url));//add ulf_PlayerTag  
                         }else{
                             array_push($row, '');
@@ -521,9 +521,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $this->records[$idx]['ulf_Added'] = date('Y-m-d H:i:s');
             }else{
                 //do not change these params on update
-                if(@$this->records[$idx]['ulf_FilePath']=='') unset($this->records[$idx]['ulf_FilePath']);
+                if(@$this->records[$idx]['ulf_FilePath']=='') {unset($this->records[$idx]['ulf_FilePath']);}
             }
-            if(@$this->records[$idx]['ulf_FileName']=='') unset($this->records[$idx]['ulf_FileName']);
+            if(@$this->records[$idx]['ulf_FileName']=='') {unset($this->records[$idx]['ulf_FileName']);}
             
             if(@$record['ulf_ExternalFileReference']==null || @$record['ulf_ExternalFileReference']==''){
                 $this->records[$idx]['ulf_ExternalFileReference'] = null;
@@ -884,7 +884,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else{
 
                         $k = strpos($url,'uploaded_files/');
-                        if($k===false) $k = strpos($url,'file_uploads/');
+                        if($k===false) {$k = strpos($url,'file_uploads/');}
 
                         if($k===0 || $k===1){
                             //relative path in database folder
@@ -2053,7 +2053,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             
             //temp file will be removed in save method
             $ulf_ID = $this->registerFile($tmp_file, null, false, false, $fields);
-            if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
+            if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
             
             return $ulf_ID;
         }else{
@@ -2099,7 +2099,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $this->setData($fileinfo);
        $this->setRecords(null);//reset
        $ulf_ID = $this->save();
-       if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
+       if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
        
        if( $ulf_ID>0 && $dtl_ID>0 ){ //register in recDetails
                

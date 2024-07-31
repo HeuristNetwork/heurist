@@ -251,7 +251,7 @@ class DbSysBugreport extends DbEntityBase
             if($record){
                 $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
                 $email_to = recordGetField($record, DT_EMAIL);
-                if($email_to) $email_to = explode(';', $email_to);
+                if($email_to) {$email_to = explode(';', $email_to);}
             }
             $email_from_name = 'Website contact';
         }else{

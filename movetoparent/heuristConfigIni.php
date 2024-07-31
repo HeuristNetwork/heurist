@@ -35,44 +35,44 @@
 // **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent) 
 //      as this will have no effect (it is the copy in ..../HEURIST/ which is used)
 
-if (!@$serverName) $serverName = null; // override default taken from request header SERVER_NAME
-if (!@$mailDomain) $mailDomain = null; // You may need to set mail domain if it does not use server domain
-if (!@$dbHost) $dbHost= "";// Optional, blank = localhost for single tier, or set IP of MySQL server
+if (!@$serverName) {$serverName = null;} // override default taken from request header SERVER_NAME
+if (!@$mailDomain) {$mailDomain = null;} // You may need to set mail domain if it does not use server domain
+if (!@$dbHost) {$dbHost= "";}// Optional, blank = localhost for single tier, or set IP of MySQL server
 
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. We recommend "heurist". Password cannot be null.
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 // Values can be assigned to environment variable or defined here
-if (!@$dbAdminUsername) $dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";// required
-if (!@$dbAdminPassword) $dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";// required
+if (!@$dbAdminUsername) {$dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";}// required
+if (!@$dbAdminPassword) {$dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";}// required
 
 // [FOLDERS]
 
 // REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
-if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";
+if (!@$defaultRootFileUploadURL) {$defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";}
 // REQUIRED: defines internal location of Heurist filestore
-if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
+if (!@$defaultRootFileUploadPath) {$defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";}
 
 // [EMAIL]
 
-if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org";
+if (!@$sysAdminEmail) {$sysAdminEmail = "info@HeuristNetwork.org";}
 // REQUIRED, please set to email of the system administrator or mailing group
-if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org";
+if (!@$infoEmail) {$infoEmail = "info@HeuristNetwork.org";}
 // recommended, please set to the email of whoever provides user assistance
-if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org";
+if (!@$bugEmail) {$bugEmail = "info@HeuristNetwork.org";}
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
 // [ADMINSTRATOR ACCESS PASSWORDS]
 // A simple challenge password > 14 characters for creation of new databases. 
 // If left blank - normal condition - any logged in user can create a new database
-if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation="";// normally blank = any logged in user can create
+if (!@$passwordForDatabaseCreation) {$passwordForDatabaseCreation="";}// normally blank = any logged in user can create
 
 // Note: We strongly recommend setting a password at least for the server functions
 // Password(s) to allow system adminstrator certain extra rights. Must be > 14 characters or they are treated as blank
-if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, no-one can run server functions, otherwise challenge for password
-if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion="";// db owner can always delete. Can delete up to 10 at a time with password challenge.
-if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, no-one can modify reserved fields, otherwise challenge for password
+if (!@$passwordForServerFunctions) {$passwordForServerFunctions="";}// if blank, no-one can run server functions, otherwise challenge for password
+if (!@$passwordForDatabaseDeletion) {$passwordForDatabaseDeletion="";}// db owner can always delete. Can delete up to 10 at a time with password challenge.
+if (!@$passwordForReservedChanges) {$passwordForReservedChanges="";}// if blank, no-one can modify reserved fields, otherwise challenge for password
 
 
 // [THUMBNAILING SERVICE] 
@@ -81,11 +81,11 @@ if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, n
 // appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
 // if the URL is passworded. The thumbnailing service is called automatically when web pages are bookmarked.
 // Beware of exceeding free thumbnailign limits if your database is used for a lot of web page bookmarking
-if (!@$websiteThumbnailService) $websiteThumbnailService = "https://api.thumbnail.ws/api/ab73cfc7f4cdf591e05c916e74448eb37567feb81d44/thumbnail/get?url=[URL]&width=320";
-if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
-if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
-if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
-if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
+if (!@$websiteThumbnailService) {$websiteThumbnailService = "https://api.thumbnail.ws/api/ab73cfc7f4cdf591e05c916e74448eb37567feb81d44/thumbnail/get?url=[URL]&width=320";}
+if (!@$websiteThumbnailUsername) {$websiteThumbnailUsername = "";}
+if (!@$websiteThumbnailPassword) {$websiteThumbnailPassword = "";}
+if (!@$websiteThumbnailXsize) {$websiteThumbnailXsize = 500;} // required
+if (!@$websiteThumbnailYsize) {$websiteThumbnailYsize = 300;} // required
 
 
 // [ACCESS AND PERFORMANCE]
@@ -104,8 +104,8 @@ $allowWebAccessUploadedFiles = true;
 $allowWebAccessEntityFiles = true;
 
 //Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within uFile.php
-if (!@$httpProxy) $httpProxy = '';// blank = assumes direct internet access from server
-if (!@$httpProxyAuth) $httpProxyAuth = '';// authorization for proxy server "username:password"
+if (!@$httpProxy) {$httpProxy = '';}// blank = assumes direct internet access from server
+if (!@$httpProxyAuth) {$httpProxyAuth = '';}// authorization for proxy server "username:password"
 $httpProxyAlwaysActive = false;           // if true - always use proxy for CURL, otherwise proxy will mostly be used for non-heurist resources
 
 // API keys and accessTokens
@@ -157,8 +157,8 @@ $dbMySQLDump = '/usr/bin/mysqldump';
 // [ELASTIC SEARCH]
 
 //  set to IP address and port of Elastic search server, if used
-if (!@$indexServerAddress) $indexServerAddress = "";
-if (!@$indexServerPort) $indexServerPort = "9200";
+if (!@$indexServerAddress) {$indexServerAddress = "";}
+if (!@$indexServerPort) {$indexServerPort = "9200";}
 
 
 // [SECURITY LOCKDOWNS]
@@ -170,7 +170,7 @@ $allowCMSCreation = 1;
 // In other words it forbids any request which is suspected as malicious
 // To workaround set this value to "1" to encode json requests for record edit
 //
-if (!@$needEncodeRecordDetails) $needEncodeRecordDetails = 0; 
+if (!@$needEncodeRecordDetails) {$needEncodeRecordDetails = 0; }
 
 
 // [LEGACY FIXES]

@@ -44,7 +44,7 @@ class Simplify {
             }
         }
 
-        if ($prevPoint !== $point) $newPoints[] = $point;
+        if ($prevPoint !== $point) {$newPoints[] = $point;}
 
         return $newPoints;
     }
@@ -95,7 +95,7 @@ class Simplify {
 
         //var_dump($markers, $points, $i);
         for ($i = 0; $i < $len; $i++) {
-            if ($markers[$i]) $newPoints[] = $points[$i];
+            if ($markers[$i]) {$newPoints[] = $points[$i];}
         }
 
         return $newPoints;

@@ -32,7 +32,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 $post_max_size = USystem::getConfigBytes('post_max_size');
 $file_max_size = USystem::getConfigBytes('upload_max_filesize');
 $max_size = min($file_max_size,$post_max_size);
-if(!($max_size>0)) $max_size = 0;
+if(!($max_size>0)) {$max_size = 0;}
 
 ?>
 <!DOCTYPE>
@@ -116,7 +116,7 @@ if(!($max_size>0)) $max_size = 0;
                     $mediaFolders = 'uploaded_files';
                 }
                 $mediaExts = $system->get_system('sys_MediaExtensions');//from preferences
-                if(!$mediaExts) $mediaExts = '';
+                if(!$mediaExts) {$mediaExts = '';}
                 
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories

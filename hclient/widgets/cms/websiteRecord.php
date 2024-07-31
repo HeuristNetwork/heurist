@@ -279,7 +279,7 @@ if(defined('DT_LANGUAGES')){
             
             if($lang_code){
                 $lang_code = strtoupper($lang_code);
-                if($website_language_def=='') $website_language_def = $lang_code;
+                if($website_language_def=='') {$website_language_def = $lang_code;}
                 $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
                 array_push($website_languages_res, $lang_code);
             } 
@@ -290,7 +290,7 @@ if(defined('DT_LANGUAGES')){
 }
 
 $current_language = @$_REQUEST['lang'];
-if(!$current_language) $current_language = $website_language_def; 
+if(!$current_language) {$current_language = $website_language_def;}
 
 if(!empty($website_languages_links)){
     $curr_lang_text = 'data-lang="'.$website_language_def.'"';
@@ -429,7 +429,7 @@ if(!$isWebPage){  //not standalone web page
 
     $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE):null; 
     $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET):null; 
-    if($record_view_target=='recordview') $record_view_target='main-recordview';
+    if($record_view_target=='recordview') {$record_view_target='main-recordview';}
     
     //backward capability 
     if($custom_website_php_template==null && strpos($record_view_smarty_template, 'cmsTemplate')===0){

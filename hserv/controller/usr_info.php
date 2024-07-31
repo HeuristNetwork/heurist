@@ -622,7 +622,7 @@
             } else if ($action=="reset_password") {
 
                 $password = array_key_exists('new_password', $req_params) ? $req_params['new_password'] : null;
-                if(array_key_exists('new_password', $req_params)) unset($req_params['new_password']);// remove from REQUEST
+                if(array_key_exists('new_password', $req_params)) {unset($req_params['new_password']);}// remove from REQUEST
 
                 if($req_params['pin'] && $req_params['username'] && $password){ // update password w/ pin
                     $system->user_LogActivity('ResetPassword', "Updating password for {$req_params['username']}");

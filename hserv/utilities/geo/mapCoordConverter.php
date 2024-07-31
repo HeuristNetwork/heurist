@@ -182,7 +182,7 @@ class GpointConverter
     {
         $this->utmNorthing = $northing;
         $this->utmEasting = $easting;
-        if($zone!=null && $zone!='') $this->utmZone = $zone;
+        if($zone!=null && $zone!='') {$this->utmZone = $zone;}
     }
     
     public function setUTMZone($zone){
@@ -314,7 +314,7 @@ class GpointConverter
 
         if (!$LongOrigin) { // Do a standard UTM conversion - so findout what zone the point is in
             $ZoneNumber = (integer)(($LongTemp + 180)/6) + 1;
-            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) $ZoneNumber = 32;
+            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) {$ZoneNumber = 32;}
             // Special zones for Svalbard
             if( $this->lat >= 72.0 && $this->lat < 84.0 )  {
                 if($LongTemp >= 0.0  && $LongTemp <  9.0) {
@@ -355,7 +355,7 @@ class GpointConverter
         $this->utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
                      + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
         
-        if($this->lat < 0) $this->utmNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
+        if($this->lat < 0) {$this->utmNorthing += 10000000.0;} //10000000 meter offset for southern hemisphere
     }
 
     /**
@@ -365,27 +365,27 @@ class GpointConverter
      */
     public function UTMLetterDesignator()
     {    
-        if((84 >= $this->lat) && ($this->lat >= 72)) $LetterDesignator = 'X';
-        else if((72 > $this->lat) && ($this->lat >= 64)) $LetterDesignator = 'W';
-        else if((64 > $this->lat) && ($this->lat >= 56)) $LetterDesignator = 'V';
-        else if((56 > $this->lat) && ($this->lat >= 48)) $LetterDesignator = 'U';
-        else if((48 > $this->lat) && ($this->lat >= 40)) $LetterDesignator = 'T';
-        else if((40 > $this->lat) && ($this->lat >= 32)) $LetterDesignator = 'S';
-        else if((32 > $this->lat) && ($this->lat >= 24)) $LetterDesignator = 'R';
-        else if((24 > $this->lat) && ($this->lat >= 16)) $LetterDesignator = 'Q';
-        else if((16 > $this->lat) && ($this->lat >= 8)) $LetterDesignator = 'P';
-        else if(( 8 > $this->lat) && ($this->lat >= 0)) $LetterDesignator = 'N';
-        else if(( 0 > $this->lat) && ($this->lat >= -8)) $LetterDesignator = 'M';
-        else if((-8 > $this->lat) && ($this->lat >= -16)) $LetterDesignator = 'L';
-        else if((-16 > $this->lat) && ($this->lat >= -24)) $LetterDesignator = 'K';
-        else if((-24 > $this->lat) && ($this->lat >= -32)) $LetterDesignator = 'J';
-        else if((-32 > $this->lat) && ($this->lat >= -40)) $LetterDesignator = 'H';
-        else if((-40 > $this->lat) && ($this->lat >= -48)) $LetterDesignator = 'G';
-        else if((-48 > $this->lat) && ($this->lat >= -56)) $LetterDesignator = 'F';
-        else if((-56 > $this->lat) && ($this->lat >= -64)) $LetterDesignator = 'E';
-        else if((-64 > $this->lat) && ($this->lat >= -72)) $LetterDesignator = 'D';
-        else if((-72 > $this->lat) && ($this->lat >= -80)) $LetterDesignator = 'C';
-        else $LetterDesignator = 'Z';//This is here as an error flag to show that the Latitude is outside the UTM limits
+        if((84 >= $this->lat) && ($this->lat >= 72)) {$LetterDesignator = 'X';}
+        else if((72 > $this->lat) && ($this->lat >= 64)) {$LetterDesignator = 'W';}
+        else if((64 > $this->lat) && ($this->lat >= 56)) {$LetterDesignator = 'V';}
+        else if((56 > $this->lat) && ($this->lat >= 48)) {$LetterDesignator = 'U';}
+        else if((48 > $this->lat) && ($this->lat >= 40)) {$LetterDesignator = 'T';}
+        else if((40 > $this->lat) && ($this->lat >= 32)) {$LetterDesignator = 'S';}
+        else if((32 > $this->lat) && ($this->lat >= 24)) {$LetterDesignator = 'R';}
+        else if((24 > $this->lat) && ($this->lat >= 16)) {$LetterDesignator = 'Q';}
+        else if((16 > $this->lat) && ($this->lat >= 8)) {$LetterDesignator = 'P';}
+        else if(( 8 > $this->lat) && ($this->lat >= 0)) {$LetterDesignator = 'N';}
+        else if(( 0 > $this->lat) && ($this->lat >= -8)) {$LetterDesignator = 'M';}
+        else if((-8 > $this->lat) && ($this->lat >= -16)) {$LetterDesignator = 'L';}
+        else if((-16 > $this->lat) && ($this->lat >= -24)) {$LetterDesignator = 'K';}
+        else if((-24 > $this->lat) && ($this->lat >= -32)) {$LetterDesignator = 'J';}
+        else if((-32 > $this->lat) && ($this->lat >= -40)) {$LetterDesignator = 'H';}
+        else if((-40 > $this->lat) && ($this->lat >= -48)) {$LetterDesignator = 'G';}
+        else if((-48 > $this->lat) && ($this->lat >= -56)) {$LetterDesignator = 'F';}
+        else if((-56 > $this->lat) && ($this->lat >= -64)) {$LetterDesignator = 'E';}
+        else if((-64 > $this->lat) && ($this->lat >= -72)) {$LetterDesignator = 'D';}
+        else if((-72 > $this->lat) && ($this->lat >= -80)) {$LetterDesignator = 'C';}
+        else {$LetterDesignator = 'Z';}//This is here as an error flag to show that the Latitude is outside the UTM limits
 
         return($LetterDesignator);
     }

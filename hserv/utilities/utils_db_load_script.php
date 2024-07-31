@@ -285,8 +285,8 @@ if (!$error && isset($param_start))
     // Get the file size (can't do it fast on gzipped files, no idea how)
 
     else if ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
-    { if (!$gzipmode) $filesize = ftell($file);
-        else $filesize = gztell($file); // Always zero, ignore
+    { if (!$gzipmode) {$filesize = ftell($file);}
+        else {$filesize = gztell($file);} // Always zero, ignore
     }
     else
     { 
@@ -620,19 +620,19 @@ $script_name = urlencode($_SERVER["PHP_SELF"]);
     }
     else
     { if ($delaypersession!=0)
-        echo ("<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n");
+        echo "<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n";
       if (!$ajax)
-        echo ("<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$script_name."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n");
+        echo "<script language=\"JavaScript\" type=\"text/javascript\">window.setTimeout('location.href=\"".$script_name."?start=$linenumber&fn=".urlencode($curfilename)."&foffset=$foffset&totalqueries=$totalqueries&delimiter=".urlencode($delimiter)."\";',500+$delaypersession);</script>\n";
 
-      echo ("<noscript>\n");
-      echo ("<p class=\"centr\"><a href=\"".$script_name."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n");
-      echo ("</noscript>\n");
+      echo "<noscript>\n";
+      echo "<p class=\"centr\"><a href=\"".$script_name."?start=$linenumber&amp;fn=".urlencode($curfilename)."&amp;foffset=$foffset&amp;totalqueries=$totalqueries&amp;delimiter=".urlencode($delimiter)."\">Continue from the line $linenumber</a> (Enable JavaScript to do it automatically)</p>\n";
+      echo "</noscript>\n";
 
-      echo ("<p class=\"centr\">Press <b><a href=\"".$script_name."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n");
+      echo "<p class=\"centr\">Press <b><a href=\"".$script_name."\">STOP</a></b> to abort the import <b>OR WAIT!</b></p>\n";
     }
   }
   else
-    echo ("<p class=\"error\">Stopped on error</p>\n");
+    {echo "<p class=\"error\">Stopped on error</p>\n";}
 
 skin_close();
 
@@ -641,10 +641,10 @@ skin_close();
 }
 
 
-if ($error && TESTMODE)
-  echo ("<p class=\"centr\"><a href=\"".$script_name."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n");
-
-if ($mysqli) $mysqli->close();
+if ($error && TESTMODE){
+  echo "<p class=\"centr\"><a href=\"".$script_name."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n";
+}
+if ($mysqli) {$mysqli->close();}
 if ($file && !$gzipmode) fclose($file);
 else if ($file && $gzipmode) gzclose($file);
 

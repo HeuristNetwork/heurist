@@ -106,7 +106,7 @@ private static function findRecordIds($imp_session, $params){
     $import_table = $imp_session['import_table'];
     $multivalue_field_name = @$params['multifield'];//name of multivalue field - among mapped fields ONLY ONE can be multivalued
 
-    if( $multivalue_field_name!=null && $multivalue_field_name>=0 ) $multivalue_field_name = 'field_'.$multivalue_field_name;
+    if( $multivalue_field_name!=null && $multivalue_field_name>=0 ) {$multivalue_field_name = 'field_'.$multivalue_field_name;}
 
     $cnt_update_rows = 0;
     $cnt_insert_rows = 0;
@@ -181,8 +181,8 @@ private static function findRecordIds($imp_session, $params){
     $tot_count = $imp_session['reccount'];
     $cnt = 0;
     $step = ceil($tot_count/100);
-    if($step>100) $step = 100;
-    else if($step<10) $step=10;
+    if($step>100) {$step = 100;}
+    else if($step<10) {$step=10;}
     
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
 
@@ -451,9 +451,9 @@ private static function findRecordIds($imp_session, $params){
                 }
             
             
-            if($is_update) $cnt_update_rows++;
-            if($is_insert) $cnt_insert_rows++;
-            if(!$is_update && !$is_insert && $ignore_rectype == 1) $imp_session['validation']['count_ignore_rows']++;
+            if($is_update) {$cnt_update_rows++;}
+            if($is_insert) {$cnt_insert_rows++;}
+            if(!$is_update && !$is_insert && $ignore_rectype == 1) {$imp_session['validation']['count_ignore_rows']++;}
 
         }//while import table
 
@@ -578,7 +578,7 @@ public static function assignRecordIds($params){
         $query = "SHOW COLUMNS FROM `$import_table` LIKE '$id_field'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
-        if($res) $res->close();
+        if($res) {$res->close();}
         if(!$row_cnt){ //good name
         
             $altquery = "alter table ".$import_table." add column ".$id_field." varchar(1000) ";
@@ -1091,7 +1091,7 @@ public static function validateImport($params) {
             if(is_array($mapping_prev_session)){
                 $field_name = array_search($recordType.".".$ft_id, $mapping_prev_session, true);//from previous session    
                 
-                if($field_name && !is_array($field_name)) $field_name = array($field_name);
+                if($field_name && !is_array($field_name)) {$field_name = array($field_name);}
             }
         }
         
@@ -2196,7 +2196,7 @@ private static function findOriginalRecord($recordId){
                 }else{
                     $value = $row[2];
                 }
-                if(!@$details["t:".$field_type]) $details["t:".$field_type] = array();
+                if(!@$details["t:".$field_type]) {$details["t:".$field_type] = array();}
                 $details["t:".$field_type]["bd:".$bd_id] = $value;
             }
         }
@@ -2231,8 +2231,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['RecTypeID'] = $recordType;
     $record['AddedByImport'] = 1;
     $record['no_validation'] = $ignore_errors?'ignore_all':true; //if true - don't check resouces and enums
-    if(@$details['URL']) $record['URL'] = @$details['URL'];
-    if(@$details['ScratchPad']) $record['ScratchPad'] = @$details['ScratchPad'];
+    if(@$details['URL']) {$record['URL'] = @$details['URL'];}
+    if(@$details['ScratchPad']) {$record['ScratchPad'] = @$details['ScratchPad'];}
     $record['details'] = $details;
 
     $updating_record = $recordId != 0 && // Check that a record is actually being updated, for the final count
@@ -2631,15 +2631,15 @@ public static function performImport($params, $mode_output){
         $tot_count = $imp_session['reccount'];
         $first_time = true;
         $step = ceil($tot_count/100);
-        if($step>100) $step = 100;
-        else if($step<10) $step=10;
+        if($step>100) {$step = 100;}
+        else if($step<10) {$step=10;}
         
         mysql__update_progress( null, $progress_session_id, true, '0,'.$tot_count );
         
         $csv_mvsep = @$params['csv_mvsep']?$params['csv_mvsep']:$imp_session['csv_mvsep'];
         $csv_enclosure = @$params['csv_enclosure']?$params['csv_enclosure']:$imp_session['csv_enclosure'];
-        if(!$csv_mvsep) $csv_mvsep = '|';
-        if(!$csv_enclosure) $csv_enclosure = '"';
+        if(!$csv_mvsep) {$csv_mvsep = '|';}
+        if(!$csv_enclosure) {$csv_enclosure = '"';}
                                    
         $previos_recordId = null;
         $recid_in_idfield = null; //value in id field in import table before import session
@@ -2718,7 +2718,7 @@ public static function performImport($params, $mode_output){
                                                         $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output,
                                                         $ignore_errors, $record_count);
                             
-                            if($prev_recid_in_idfield!=null) $pairs[$prev_recid_in_idfield] = $new_id;//new_A                            
+                            if($prev_recid_in_idfield!=null) {$pairs[$prev_recid_in_idfield] = $new_id;}//new_A                            
                             
                             }
                         }
@@ -2931,7 +2931,7 @@ public static function performImport($params, $mode_output){
                                 }else{
                                     
                                     $k = strpos($r_value,'uploaded_files/');
-                                    if($k===false) $k = strpos($r_value,'file_uploads/');
+                                    if($k===false) {$k = strpos($r_value,'file_uploads/');}
                                     
                                     if($k===0 || $k===1){
                                     //relative path in database folder
@@ -3156,7 +3156,7 @@ public static function performImport($params, $mode_output){
                         $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                     $details, $id_field, $ismulti_id?$recid_in_idfield:null, $mode_output,
                                                     $ignore_errors, $record_count);
-                        if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
+                        if($recid_in_idfield!=null) {$pairs[$recid_in_idfield] = $new_id;}//new_A
 
                         $details = array();
                     }
@@ -3202,7 +3202,7 @@ public static function performImport($params, $mode_output){
                 $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                     $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output,
                                                     $ignore_errors, $record_count);
-                if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
+                if($recid_in_idfield!=null) {$pairs[$recid_in_idfield] = $new_id;}//new_A
             
             }
         }
@@ -3270,7 +3270,7 @@ public static function performImport($params, $mode_output){
         if($use_sequence){
             $imp_session['sequence'][$currentSeqIndex]['counts'] = $new_counts;         
         }else{
-            if(!@$imp_session['counts']) $imp_session['counts'] = array();
+            if(!@$imp_session['counts']) {$imp_session['counts'] = array();}
             $imp_session['counts'][$recordType] = $new_counts;
         }
         

@@ -370,7 +370,7 @@ exit;
             //
             if(count($recipients)>0){
                 
-                if(!@$report[$record['rem_Freq']]) $report[$record['rem_Freq']] = 0;
+                if(!@$report[$record['rem_Freq']]) {$report[$record['rem_Freq']] = 0;}
                 $report[$record['rem_Freq']] = $report[$record['rem_Freq']] + count($recipients);
 
             //sender params - reminder owner

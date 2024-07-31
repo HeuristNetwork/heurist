@@ -183,7 +183,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     }});
                     
                     $('#ugr_eMail').on({'blur':function(){
-                        if($('#ugr_Name').val()=='') $('#ugr_Name').val(this.value)
+                        if($('#ugr_Name').val()=='') {
+                                $('#ugr_Name').val(this.value);
+                        }
                     }});
                     
                     $('#showConditions').on({click: function(){ 

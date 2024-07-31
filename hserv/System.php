@@ -515,7 +515,7 @@ class System {
             $dir_Filestore = "HEURIST_FILESTORE/";
 
             $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
-            if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+            if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) {$documentRoot = $documentRoot.'/';}
             
             
             return  $documentRoot . $install_path . $dir_Filestore;
@@ -754,7 +754,7 @@ class System {
     private function getInstallPath(){
 
         $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
-        if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
+        if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) {$documentRoot = $documentRoot.'/';}
 
         $topDirs = "admin|api|applications|common|context_help|export|hapi|hclient|hserv|import|records|redirects|search|viewers|help|ext|external";// Upddate in 3 places if changed
         $installDir = preg_replace("/\/(" . $topDirs . ")\/.* /", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
@@ -769,7 +769,7 @@ class System {
         }
 
         $install_path = @$_SERVER['DOCUMENT_ROOT'].$installDir;
-        if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1);//remove last slash
+        if( substr($install_path, -1, 1) == '/' ) {$install_path = substr($install_path,0,-1);}//remove last slash
 
         if(is_link($install_path)){
             $install_path = readlink($install_path);//real installation path eg. html/HEURIST/h3-ij/
@@ -779,7 +779,7 @@ class System {
 
         if($install_path!=""){ //this is simlink
             //remove code folder - to get real HEURIST installation
-            if( substr($install_path, -1, 1) == '/' ) $install_path = substr($install_path,0,-1);//remove last slash
+            if( substr($install_path, -1, 1) == '/' ) {$install_path = substr($install_path,0,-1);}//remove last slash
             if(strrpos($install_path,"/")>0){
                 $install_path = substr($install_path,0,strrpos($install_path,"/")+1);//remove last folder
 
@@ -793,7 +793,7 @@ class System {
 
             $install_dir = $installDir; 
             if($install_dir){
-                if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1);//remove last slash
+                if( substr($install_dir, -1, 1) == '/' ) {$install_dir = substr($install_dir,0,-1);}//remove last slash
                 if($install_dir!=""){
                     if(strrpos($install_dir,"/")>0){
                         $install_dir = substr($install_dir,0,strrpos($install_dir,"/")+1);//remove last folder
@@ -805,7 +805,7 @@ class System {
             }
             $install_path = $install_dir;
         }
-        if( $install_path && substr($install_path, 0, 1) == '/' ) $install_path = substr($install_path,1);//remove first slash
+        if( $install_path && substr($install_path, 0, 1) == '/' ) {$install_path = substr($install_path,1);}//remove first slash
 
         return $install_path;
     }
@@ -1472,7 +1472,7 @@ class System {
         }
         
         $cookie_session_id = @$_COOKIE['heurist-sessionid'];
-        if(!$cookie_session_id) $cookie_session_id = @$_REQUEST['captchaid'];
+        if(!$cookie_session_id) {$cookie_session_id = @$_REQUEST['captchaid'];}
         
         //if(session_id() == '' || !isset($_SESSION)) {
         if (session_status() != PHP_SESSION_ACTIVE) {
@@ -1590,7 +1590,7 @@ class System {
             if(file_exists($fname)){  //user info was updated by someone else
                 unlink($fname);
                 //marker for usr_info.verify_credentials to be sure that client side is also up to date 
-                if($user!==true) $_SESSION[$this->dbname_full]['need_refresh'] = 1;
+                if($user!==true) {$_SESSION[$this->dbname_full]['need_refresh'] = 1;}
                 $reload_user_from_db = true;
             }
             
@@ -1822,10 +1822,10 @@ class System {
         unset($_SESSION[$this->dbname_full]['ugr_ID']);
         unset($_SESSION[$this->dbname_full]['ugr_Name']);
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
-        if(@$_SESSION[$this->dbname_full]['ugr_Groups']) unset($_SESSION[$this->dbname_full]['ugr_Groups']);
-        if(@$_SESSION[$this->dbname_full]['ugr_Permissions']) unset($_SESSION[$this->dbname_full]['ugr_Permissions']);
-        //if(@$_SESSION[$this->dbname_full]['ugr_Enabled']) unset($_SESSION[$this->dbname_full]['ugr_Enabled']);
-        if(@$_SESSION[$this->dbname_full]['ugr_GuestUser']!=null) unset($_SESSION[$this->dbname_full]['ugr_GuestUser']);
+        if(@$_SESSION[$this->dbname_full]['ugr_Groups']) {unset($_SESSION[$this->dbname_full]['ugr_Groups']);}
+        if(@$_SESSION[$this->dbname_full]['ugr_Permissions']) {unset($_SESSION[$this->dbname_full]['ugr_Permissions']);}
+        //if(@$_SESSION[$this->dbname_full]['ugr_Enabled']) {unset($_SESSION[$this->dbname_full]['ugr_Enabled']);}
+        if(@$_SESSION[$this->dbname_full]['ugr_GuestUser']!=null) {unset($_SESSION[$this->dbname_full]['ugr_GuestUser']);}
         
         // clear
         // even if user is logged to different databases he has the only session per browser
@@ -2232,7 +2232,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                     $logs_to_be_emailed[] = $archiveFolder.$arc_logfile;
                     
                     $y2 = $yesterday->format('Y-m-d');
-                    if($y1==null) $y1 = $y2;
+                    if($y1==null) {$y1 = $y2;}
                 }                
             }
 

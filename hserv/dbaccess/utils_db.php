@@ -680,7 +680,7 @@
             }
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
-            if($fieldname == 'ulf_ObfuscatedFileID') $dtype = 's';//exception
+            if($fieldname == 'ulf_ObfuscatedFileID') {$dtype = 's';}//exception
             //else if($fieldname == 'dtl_Value') $dtype = 'b';//exception
             
             $params[0] = $params[0].$dtype;
@@ -811,7 +811,7 @@
         if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
         {
             $refs = array();
-            foreach ($arr as $key => $value) $refs[$key] = &$arr[$key];
+            foreach ($arr as $key => $value) {$refs[$key] = &$arr[$key];}
             return $refs;
         }
         return $arr;
@@ -1308,7 +1308,7 @@
                     //keep log
                     if(!$is_date_simple || $error){
 //file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );
-                        if(!$is_date_simple) $cnt_to_json++;
+                        if(!$is_date_simple) {$cnt_to_json++;}
                         if($error){
                             $error = '<span style="color:red">'.$error.'</span>';
                             $cnt_err++;
@@ -1359,7 +1359,7 @@
                         $mysqli->rollback();
                     }
                 }
-                if( $cnt_dates<150000 && $keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if( $cnt_dates<150000 && $keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
             }
         }
@@ -1747,7 +1747,7 @@
             $res = 'terminate';
         }else{
             //get    
-            if($is_exist) $res = file_get_contents($session_file);
+            if($is_exist) {$res = file_get_contents($session_file);}
             
             if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);

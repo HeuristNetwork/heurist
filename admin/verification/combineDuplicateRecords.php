@@ -343,10 +343,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                             }
                                                                                      
                                         }
-                                        if(! @$temp) $temp=$rd_temp;
+                                        if(! @$temp) {$temp=$rd_temp;}
                                         elseif(!is_array($temp)){
                                             $temp = array($temp,$rd_temp);
-                                        }else array_push($temp,$rd_temp);
+                                        }else {array_push($temp,$rd_temp);}
                                     }
                                     $detail = detail_str($rd_type, $temp);
                                     unset($temp);
@@ -621,7 +621,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
                     'select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']);
         }
         
-        if($detail_val==null) $detail_val = '';
+        if($detail_val==null) {$detail_val = '';}
 
         $def_checked = $is_master || $is_type_repeatable ? "checked=checked" : "";
 
@@ -741,7 +741,7 @@ function do_fix_dupe()
         $prepared_values = array();
         if(is_array($value)){
             foreach($value as $idx => $val){
-                if(intval($val)>0) $prepared_values[] = intval($val);
+                if(intval($val)>0) {$prepared_values[] = intval($val);}
             }
         }else if(intval($value)>0){
             $prepared_values[] = intval($value);
@@ -797,7 +797,7 @@ function do_fix_dupe()
     }
     //diff the arrays  don't delet yet as the user might be adding an existing value
     $master_delete_dt_ids = array();
-    if($master_rep_detail_ids) $master_delete_dt_ids = array_diff($master_rep_detail_ids,$master_keep_ids);//ART HERE   $master_keep_ids
+    if($master_rep_detail_ids){ $master_delete_dt_ids = array_diff($master_rep_detail_ids,$master_keep_ids);}//ART HERE   $master_keep_ids
     //FIXME add code to remove any none repeatable extra details
     //for each update
     if ($update_dt_ids){
@@ -903,7 +903,7 @@ function do_fix_dupe()
         }
         
         $master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);
-        if (!$master_pers_record['bkm_ZoteroID']) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];
+        if (!$master_pers_record['bkm_ZoteroID']{) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];}
 
         $master_pers_record['bkm_ID'] = $master_bkm_ID;
         mysql__insertupdate($mysqli, 'usrBookmarks', 'bkm_', $master_pers_record);

@@ -163,7 +163,7 @@ exit;
 
         if($row['rps_FilePath']!=null){
             $dir = $row['rps_FilePath'];
-            if(substr($dir,-1)!="/") $dir = $dir."/";
+            if(substr($dir,-1)!="/") {$dir = $dir."/";}
         }else{
             $dir = HEURIST_FILESTORE_DIR."generated-reports/";
         }
@@ -241,7 +241,7 @@ exit;
                 if (array_key_exists($colName, $sys_usrReportSchedule_ColumnNames))
                 {
 
-                    if($query!="") $query = $query.",";
+                    if($query!="") {$query = $query.",";}
 
                     if($isInsert){
                             $query = $query."?";

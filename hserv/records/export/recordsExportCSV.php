@@ -754,13 +754,13 @@ public static function output($data, $params){
             }else{
                 $value = @$record[$dt_id];//from record header
             }
-            if($value===null) $value = ''; 
+            if($value===null) {$value = ''; }
 
 
             if(is_array($enum_label) && count($enum_label)>0){
-                if(!$term_ids_only) $record_row[] = implode($csv_mvsep,$enum_label);
-                if($include_term_ids) $record_row[] = $value;
-                if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);
+                if(!$term_ids_only) {$record_row[] = implode($csv_mvsep,$enum_label);}
+                if($include_term_ids) {$record_row[] = $value;}
+                if($include_term_codes) {$record_row[] = implode($csv_mvsep,$enum_code);}
             }else {
                 $record_row[] = $value;
 
@@ -1055,7 +1055,7 @@ public static function output_header($data, $params)
                     }    
                     
                     //add terms pickup list
-                    if(!@$terms_pickup[$rt]) $terms_pickup[$rt] = array();
+                    if(!@$terms_pickup[$rt]) {$terms_pickup[$rt] = array();}
                     $terms_pickup[$rt][$dt_id] = array('name'=>$field_name, 'domain'=>$field_type,
                                              'term_ids'=>self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree],
                                              'nonsel'=>self::$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree]);
@@ -1251,7 +1251,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
         
         $content_len = strlen($out);
-        if(!($content_len>0)) $content_len = 0;
+        if(!($content_len>0)) {$content_len = 0;}
 
         if($save_to_file){
             if($content_len > 0){ // save csv/error log to file

@@ -129,7 +129,7 @@ function recordAddDefaultValues($system, $record=null){
         $ownerid = is_array($userDefaultOwnerGroupID)?$userDefaultOwnerGroupID:array($userDefaultOwnerGroupID);
     }
     if(!is_array($ownerid) || !($ownerid[0]>=0)){
-        if(!$sysvals) $sysvals = $system->get_system();
+        if(!$sysvals) {$sysvals = $system->get_system();}
         $ownerid = @$sysvals['sys_NewRecOwnerGrpID'];//from database properties
     }
     if(!(is_array($ownerid) && count($ownerid) > 0) || !($ownerid[0]>=0)){
@@ -657,7 +657,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $keep_autocommit = mysql__begin_transaction($mysqli);
         }
 
-        if(!$modeImport) $mysqli->query('set @suppress_update_trigger=1');
+        if(!$modeImport) {$mysqli->query('set @suppress_update_trigger=1');}
 
         $query = 'UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,rec_FlagTemporary=? ';
         
@@ -749,7 +749,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
             $dtyID = $values['dtl_DetailTypeID'];
             $dtl_Value = @$values['dtl_Value'];
-            if($dtl_Value) $dtl_Value = super_trim($dtl_Value);//including &nbsp; and &xef; (BOM)
+            if($dtl_Value) {$dtl_Value = super_trim($dtl_Value);}//including &nbsp; and &xef; (BOM)
             $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
             $dtl_Geo = @$values['dtl_Geo'];
             $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
@@ -1623,12 +1623,12 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
         if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
             $mysqli->query('UPDATE recDetails '.
                 'SET dtl_Value='.$parent_id.' WHERE dtl_ID='.intval($dtl_ID));
-            if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
+            if($mysqli->error) {$res = -1; }//($mysqli->affected_rows>0);
         }else{
             $mysqli->query('INSERT INTO recDetails '.
                 "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
                 "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");
-            if(!($mysqli->insert_id>0)) $res=-1;
+            if(!($mysqli->insert_id>0)) {$res=-1;}
         }
     }
 
@@ -1689,7 +1689,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             $pointers = mysql__select_assoc2($mysqli, $query);
             if(is_array($pointers) && count($pointers)>0)
                 foreach($pointers as $dt_ID=>$ptr){
-                    if($ptr) $ptr = explode(',',$ptr);
+                    if($ptr) {$ptr = explode(',',$ptr);}
                     if(count($ptr)>0 && in_array($child_rectype, $ptr)){
                         $detailTypeId = $dt_ID;
                         break;                        
@@ -1721,7 +1721,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             "VALUES ($parent_id, ".$detailTypeId.", $child_id, $addedByImport )");
 
         $res = 1;
-        if(!($mysqli->insert_id>0)) $res=-1;
+        if(!($mysqli->insert_id>0)) {$res=-1;}
     }
 
     return $res;
@@ -1827,7 +1827,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
         $current_owner_groups = mysql__select_list2($mysqli, $query);
 
     }
-    if(!$current_owner_groups) $current_owner_groups = array();
+    if(!$current_owner_groups) {$current_owner_groups = array();}
     array_unshift($current_owner_groups, $record["rec_OwnerUGrpID"]);//add to begin of array
 
     if(count($current_owner_groups)==1 && !($current_owner_groups[0]>=0)){  
@@ -2118,7 +2118,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                     'SELECT dtl_Value FROM recDetails '
                     .' WHERE dtl_RecID='.$recID.' AND dtl_DetailTypeID='.$dty_ID);
                 
-                if($new_value!=null) $new_value = trim($new_value);
+                if($new_value!=null) {$new_value = trim($new_value);}
                 
                 if($current_value==$new_value){
                     $unchanged_count++;
@@ -2239,7 +2239,7 @@ function executeSmarty($system, $params, $mode=null, $heuristRec=null){
 
   /*
   $template_folder = $smarty->getTemplateDir();
-  if(is_array($template_folder)) $template_folder = $template_folder[0];
+  if(is_array($template_folder)) {$template_folder = $template_folder[0];}
   
   //$user = $system->getCurrentUser();'_'.$user['ugr_Name']
   $template_file = $template_folder.'calc_fld_'.uniqid().'.tpl';
@@ -2248,7 +2248,7 @@ function executeSmarty($system, $params, $mode=null, $heuristRec=null){
   fclose ($file);
   */
   
-  if($heuristRec==null) $heuristRec = new ReportRecord();
+  if($heuristRec==null) {$heuristRec = new ReportRecord();}
 
   $smarty->assignByRef('heurist', $heuristRec);
 
@@ -2318,7 +2318,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 
     $new_title = TitleMask::fill($recID, $mask);
 
-    if($new_title==null && $recTitleDefault!=null) $new_title = $recTitleDefault;
+    if($new_title==null && $recTitleDefault!=null) {$new_title = $recTitleDefault;}
 
 
     if ($new_title) {
@@ -2699,7 +2699,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                 case "float":
                     $isValid = preg_match("/^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+)?)\\s*$/", $dtl_Value);
                     //preg_match('/^0(?:[.]0*)?$/', $dtl_Value)
-                    if(!$isValid ) $err_msg = 'Not valid float value '.htmlspecialchars($dtl_Value);
+                    if(!$isValid ) {$err_msg = 'Not valid float value '.htmlspecialchars($dtl_Value);}
                     break;
                 case "enum":
                 case "relationtype":
@@ -2831,7 +2831,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     $dtl_Value = null;
                     $isValid = ($dtl_UploadedFileID>0);
 
-                    if($validation_mode==0 && !$isValid) $isValid = 'ignore';
+                    if($validation_mode==0 && !$isValid) {$isValid = 'ignore';}
 
                     break;
 

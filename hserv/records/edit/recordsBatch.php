@@ -639,7 +639,7 @@ class RecordsBatch
             if($res===false){
                 break;   
             }else{
-                if(!@$this->result_data['processed']) $this->result_data['processed'] = 0;
+                if(!@$this->result_data['processed']) {$this->result_data['processed'] = 0;}
                 $this->result_data['processed'] = $this->result_data['processed'] 
                     +(@$res['processed']>0?$res['processed']:0);
             }
@@ -851,7 +851,7 @@ class RecordsBatch
             //update the details
             while (true) {
                 
-                if($get_next_row) $row = $res->fetch_row();
+                if($get_next_row) {$row = $res->fetch_row();}
                 $get_next_row = true;
                 
                 if(!$row || ($recID>0 && $row[1]!=$recID) ){ 
@@ -978,7 +978,7 @@ class RecordsBatch
             
         }//while records
         
-        if($res) $res->close();
+        if($res) {$res->close();}
         
         //update record title
         foreach ($processedRecIDs as $recID){
@@ -1774,7 +1774,7 @@ public methods
 
         $system = $this->system;
         
-        if($ugrID<1) $ugrID = $system->get_user_id();
+        if($ugrID<1) {$ugrID = $system->get_user_id();}
         
         if (!$system->has_access($ugrID)) {
             $system->addError(HEURIST_REQUEST_DENIED);

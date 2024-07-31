@@ -60,11 +60,11 @@
                     $remoteURL = $splittedURL[0]
                     .'hserv/controller/sys_structure.php?db='.$match[1];
 
-                    if (@$req_params['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$req_params['rectypes'];
-                    if (@$req_params['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$req_params['detailtypes'];
-                    if (@$req_params['terms']) $remoteURL = $remoteURL.'&terms='.$req_params['terms'];
-                    if (@$req_params['translations']) $remoteURL = $remoteURL.'&translations='.$req_params['translations'];
-                    if (@$req_params['mode']) $remoteURL = $remoteURL.'&mode='.$req_params['mode'];
+                    if (@$req_params['rectypes']) {$remoteURL = $remoteURL.'&rectypes='.$req_params['rectypes'];}
+                    if (@$req_params['detailtypes']) {$remoteURL = $remoteURL.'&detailtypes='.$req_params['detailtypes'];}
+                    if (@$req_params['terms']) {$remoteURL = $remoteURL.'&terms='.$req_params['terms'];}
+                    if (@$req_params['translations']) {$remoteURL = $remoteURL.'&translations='.$req_params['translations'];}
+                    if (@$req_params['mode']) {$remoteURL = $remoteURL.'&mode='.$req_params['mode'];}
 
                     $data = loadRemoteURLContent($remoteURL);//load defitions from remote database
                 

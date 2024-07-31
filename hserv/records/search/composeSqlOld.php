@@ -126,7 +126,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     $mysqli = $db;
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
-    if (! $params) $params = array();//$_REQUEST;
+    if (! $params) {$params = array();}//$_REQUEST;
     if(!defined('stype') && @$params['stype'])  define('stype', @$params['stype']);
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
@@ -207,7 +207,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     if ($search_domain != EVERYTHING) {
 
-        if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
+        if ($where_clause) {$where_clause = '(' . $where_clause . ') and ';}
 
         if ($search_domain == BOOKMARK) {
             $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not TOPBIBLIO.rec_FlagTemporary) ';
@@ -342,7 +342,7 @@ function get_offset($params){
 */
 function parse_query($search_domain, $text, $sort_order, $parentquery, $currUserID) {
 
-    if($sort_order==null) $sort_order = '';
+    if($sort_order==null) {$sort_order = '';}
 
     // remove any  lone dashes outside matched quotes.
     $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
@@ -588,7 +588,7 @@ class Query {
             }
             sort($or_clauses);// alphabetise
             $where_clause = join(' or ', $or_clauses);
-            if(count($or_clauses)>1) $where_clause = '(' . $where_clause . ')';
+            if(count($or_clauses)>1) {$where_clause = '(' . $where_clause . ')';}
             array_push($and_clauses, $where_clause);
         }
         sort($and_clauses);
@@ -604,7 +604,7 @@ class Query {
             if($new_sql!=null){
 
                 if (! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
-                    if ($sort_clause) $sort_clause .= ', ';
+                    if ($sort_clause) {$sort_clause .= ', ';}
 
                     $sort_clause .= $new_sql;
                     if ($new_tables) array_push($this->sort_tables, $new_tables);
@@ -614,7 +614,7 @@ class Query {
                 
             }
         }
-        if ($sort_clause) $sort_clause = ' ORDER BY ' . $sort_clause;
+        if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
         $this->sort_clause = $sort_clause;
 
         //FROM
@@ -642,7 +642,7 @@ class OrLimb {
         $this->parent = &$parent;
         $this->absoluteStrQuery = $parent->absoluteStrQuery;
         $this->and_limbs = array();
-        if (substr_count($text, '"') % 2 != 0) $text .= '"';// unmatched quote
+        if (substr_count($text, '"') % 2 != 0) {$text .= '"';}// unmatched quote
 
         //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
         
@@ -820,9 +820,9 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
-                    else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
-                        else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
+                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
+                    else if (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
                 }
                 
                 $fieldtype_id = null;
@@ -836,9 +836,9 @@ class AndLimb {
                     $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
                     $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
                     
-                    if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
-                    else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
-                        else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
+                    if (($colon_pos = strpos($value, '='))===0) {$this->exact = true;}
+                    else if (($colon_pos = strpos($value, '<'))===0) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($value, '>'))===0) {$this->greaterthan = true;}
                             if($colon_pos===0){
                         $value = substr($value,1);
                     }
@@ -851,15 +851,15 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
-                    else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
-                        else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
-                            //else if (($colon_pos = strpos($raw_pred_val, '@'))) $this->fulltext = true;
+                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
+                    else if (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
+                            //else if (($colon_pos = strpos($raw_pred_val, '@'))) {$this->fulltext = true;}
                 }
                 if ($colon_pos === FALSE){
                     $value = $this->cleanQuotedValue($raw_pred_val);
                     
-                    if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if (($colon_pos = strpos($value, '@'))===0) {$this->fulltext = true;}
                     if($colon_pos===0){
                         $value = substr($value,1);
                     }                    
@@ -874,10 +874,10 @@ class AndLimb {
                     $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
                     $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
                           
-                    if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
-                    else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
-                        else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
-                            else if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if (($colon_pos = strpos($value, '='))===0) {$this->exact = true;}
+                    else if (($colon_pos = strpos($value, '<'))===0) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($value, '>'))===0) {$this->greaterthan = true;}
+                            else if (($colon_pos = strpos($value, '@'))===0) {$this->fulltext = true;}
                     if($colon_pos===0){
                         $value = substr($value,1);
                     }
@@ -990,7 +990,7 @@ class SortPhrase {
         $text = substr($this->value, $colon_pos+1);
 
         $colon_pos = strpos($text, ':');
-        if ($colon_pos === FALSE) $subtext = $text;
+        if ($colon_pos === FALSE) {$subtext = $text;}
         else $subtext = substr($text, 0, $colon_pos);
 
         // if sortby: is followed by a -, we sort DESCENDING; if it's a + or nothing, it's ASCENDING
@@ -2165,7 +2165,7 @@ class TagPredicate extends Predicate {
                 $any_wg_values = true;
             }
         }
-        if (! $any_wg_values) $this->wg_value = array();
+        if (! $any_wg_values) {$this->wg_value = array();}
         $this->query = NULL;
     }
 
@@ -2189,7 +2189,7 @@ class TagPredicate extends Predicate {
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
-                    if (! $first_value) $query .= 'or ';
+                    if (! $first_value) {$query .= 'or ';}
                     if (is_numeric($value)) {
                         $query .= 'rtl_TagID='.intval($value).' ';
                     } else {
@@ -2204,7 +2204,7 @@ class TagPredicate extends Predicate {
                 $query='('.$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
                 . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value);++$i) {
-                    if ($i > 0) $query .= 'or ';
+                    if ($i > 0) {$query .= 'or ';}
 
                     $value = $this->value[$i];
                     $wg_value = $this->wg_value[$i];
@@ -2227,7 +2227,7 @@ class TagPredicate extends Predicate {
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
-                    if (! $first_value) $query .= 'or ';
+                    if (! $first_value) {$query .= 'or ';}
                     if (is_numeric($value)) {
                         $query .= "kwd.tag_ID=$value ";
                     } else {
@@ -2241,7 +2241,7 @@ class TagPredicate extends Predicate {
                 $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value);++$i) {
-                    if ($i > 0) $query .= 'or ';
+                    if ($i > 0) {$query .= 'or ';}
 
                     $value = $this->value[$i];
                     $wg_value = $this->wg_value[$i];

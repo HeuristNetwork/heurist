@@ -157,14 +157,14 @@ public static function findDupes( $params ){
     if(self::$distance>20) self::$distance = 20; //percentage
     
     $startgroup = @$params['startgroup'];
-    if(!($startgroup>0)) $startgroup = 0;
-    if($startgroup>5) $startgroup = 5;
+    if(!($startgroup>0)){ $startgroup = 0;}
+    if($startgroup>5) {$startgroup = 5;}
     
     $sort_field = @$params['sort_field'];
     
     
     $fields = @$params['fields'];
-    if(!$fields) $fields = 'rec_Title';//by default
+    if(!$fields) {$fields = 'rec_Title';}//by default
     
     if(!is_array($fields)){
         $fields = explode(',', $fields);
@@ -293,7 +293,7 @@ public static function findDupes( $params ){
             //remove "as dXXX" otherwise CONCAT doesn't work
             foreach($exact_fields as $idx=>$fld){
                 $k = strpos($fld,' as ');
-                if($k>0) $exact_fields[$idx] = substr($exact_fields[$idx],0,$k);
+                if($k>0) {$exact_fields[$idx] = substr($exact_fields[$idx],0,$k);}
             }
             
             $exact_fields = ', '.(count($exact_fields)>1?'CONCAT('.implode('|',$exact_fields).')':$exact_fields[0]);
@@ -368,8 +368,8 @@ public static function findDupes( $params ){
     else if(self::$limit_cnt>3000) self::$limit_cnt = 3000;
     
     $limit_pc = @$params['limit_cnt'];
-    if(!($limit_pc>0)) $limit_pc = 30;
-    else if($limit_pc>50) $limit_pc = 50;
+    if(!($limit_pc>0)) {$limit_pc = 30;}
+    else if($limit_pc>50) {$limit_pc = 50;}
     
     
     self::$progress_session_id = @$params['session'];

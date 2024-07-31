@@ -39,7 +39,7 @@ if($error){
 }else{
     
     $sp = @$_REQUEST['sp'];
-    if(!$sp) $sp = 'default-sp';
+    if(!$sp) {$sp = 'default-sp';}
     
     if(!$sp){
         $system->addError(HEURIST_INVALID_REQUEST, 'Database '.$dbname.' does not support SAML authorisation');

@@ -505,10 +505,10 @@ class DbDefTerms extends DbEntityBase
             }
 
             $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s');//reset
-            if(@$this->records[$idx]['trm_Domain']!='relation') $this->records[$idx]['trm_Domain'] = 'enum';
-            if(!@$this->records[$idx]['trm_Status']) $this->records[$idx]['trm_Status'] = 'open';
-            if(!(@$this->records[$idx]['trm_InverseTermID']>0)) $this->records[$idx]['trm_InverseTermID'] = null;
-            if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) $this->records[$idx]['trm_OrderInBranch'] = null;
+            if(@$this->records[$idx]['trm_Domain']!='relation') {$this->records[$idx]['trm_Domain'] = 'enum';}
+            if(!@$this->records[$idx]['trm_Status']) {$this->records[$idx]['trm_Status'] = 'open';}
+            if(!(@$this->records[$idx]['trm_InverseTermID']>0)) {$this->records[$idx]['trm_InverseTermID'] = null;}
+            if(!(@$this->records[$idx]['trm_OrderInBranch']>0)) {$this->records[$idx]['trm_OrderInBranch'] = null;}
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
         }
@@ -550,7 +550,7 @@ class DbDefTerms extends DbEntityBase
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)) {$dbID = 0;}
             
             foreach($this->records as $record){
                 $trm_ID = @$record['trm_ID'];
@@ -672,12 +672,12 @@ class DbDefTerms extends DbEntityBase
                         
                         $old_vocab = @$this->data['old_VocabID'];
                         $old_parent = @$this->data['old_ParentTermID'];
-                        if(!($old_parent>0) && $old_vocab>0) $old_parent = $old_vocab;
+                        if(!($old_parent>0) && $old_vocab>0) {$old_parent = $old_vocab;}
 
                         if($new_parent>0){
                             //get labels and codes for vocabulary
                             $labels = $this->getLabelsAndCodes($new_vocab);
-                            if(!is_array($labels) || count($labels)==0) $labels = null;
+                            if(!is_array($labels) || count($labels)==0) {$labels = null;}
                         }
                         if($new_vocab>0 && $new_vocab!=$old_vocab){
                             $all_children = $this->getChildren($new_vocab);
@@ -849,8 +849,8 @@ class DbDefTerms extends DbEntityBase
                 
                     //4. update term $retain_id
                     $values = array('trm_ID'=>$retain_id);
-                    if(@$this->data['trm_Code']) $values['trm_Code'] = $this->data['trm_Code'];
-                    if(@$this->data['trm_Description']) $values['trm_Description'] = $this->data['trm_Description'];
+                    if(@$this->data['trm_Code']) {$values['trm_Code'] = $this->data['trm_Code'];}
+                    if(@$this->data['trm_Description']) {$values['trm_Description'] = $this->data['trm_Description'];}
                     
                     if(count($values)>1){
                     

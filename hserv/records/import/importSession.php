@@ -143,7 +143,7 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
      
      $matching = array();
      
-     if(!($imp_ID>0)) $imp_ID = 0;
+     if(!($imp_ID>0)) {$imp_ID = 0;}
      
      $sessions = mysql__select_assoc2(self::$mysqli, 'select sif_ID, sif_ProcessingInfo from sysImportFiles where sif_ID!='.$imp_ID);
      
@@ -207,8 +207,8 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         $order_field = $id_field;
     }
     
-    if(!($offset>0)) $offset = 0;
-    if(!is_int($limit)) $limit = 100;
+    if(!($offset>0)) {$offset = 0;}
+    if(!is_int($limit)) {$limit = 100;}
 
     if($mapping!=null && !is_array($mapping)){
         $mapping = json_decode($mapping, true);

@@ -390,7 +390,7 @@ $system = new System();
 if( $system->init(@$_REQUEST['db']) ){
 
     $wg_ids = $system->get_user_group_ids();
-    if($wg_ids==null) $wg_ids = array();
+    if($wg_ids==null) {$wg_ids = array();}
     array_push($wg_ids, 0);
     $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
     . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';

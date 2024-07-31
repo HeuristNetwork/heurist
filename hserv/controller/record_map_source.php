@@ -219,9 +219,9 @@
                 if($input_format == 'kml'){
                     $parser_parms['kmldata'] = true; 
                     $mapping[DT_GEO_OBJECT] = 'geometry';
-                    if(!@$mapping[DT_START_DATE]) $mapping[DT_START_DATE] = 'timespan_begin';//'timespan';
-                    if(!@$mapping[DT_END_DATE]) $mapping[DT_END_DATE] = 'timespan_end';//'timespan';
-                    if(!@$mapping[DT_DATE]) $mapping[DT_DATE] = 'timestamp';//'when';
+                    if(!@$mapping[DT_START_DATE]) {$mapping[DT_START_DATE] = 'timespan_begin';}//'timespan';
+                    if(!@$mapping[DT_END_DATE]) {$mapping[DT_END_DATE] = 'timespan_end';}//'timespan';
+                    if(!@$mapping[DT_DATE]) {$mapping[DT_DATE] = 'timestamp';}//'when';
                     
                 }else{
                     $parser_parms['csvdata'] = true; 
@@ -313,7 +313,7 @@
                 if(is_array($record['details'][DT_NAME])){
                     $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                 }
-                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                if(!$originalFileName) {$originalFileName = 'Dataset_'.$record['rec_ID'];}
                 
                 
                 if(@$params['format']=='rawfile'){

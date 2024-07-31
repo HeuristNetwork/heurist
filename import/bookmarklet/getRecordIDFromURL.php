@@ -48,7 +48,7 @@ ob_start();
 $url = $_REQUEST["url"];
 $mysqli = $system->get_mysqli();
 
-if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
+if (substr($url, -1) == "/") {$url = substr($url, 0, strlen($url)-1);}
 
 $url = $mysqli->real_escape_string($url);
 

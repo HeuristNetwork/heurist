@@ -204,7 +204,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                 $title = htmlspecialchars($row["title"]);
                             
                                 if($grp_name!=$row['grp']){
-                                    if($grp_name!=null) $first_grp = '';
+                                    if($grp_name!=null) {$first_grp = '';}
                                     $grp_name = $row['grp'];
                                     ?>
                             <tr class="row">

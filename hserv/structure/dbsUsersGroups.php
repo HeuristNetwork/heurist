@@ -236,7 +236,7 @@
         $now = strtotime('now');
         $an_hour = 60 * 60;
 
-        if($pin == 1) $pin = '';// requesting new pin or a re-send
+        if($pin == 1) {$pin = '';}// requesting new pin or a re-send
 
         if(session_status() == PHP_SESSION_ACTIVE){  // all information is stored within the current session
 
@@ -522,7 +522,7 @@
         $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") ORDER BY ugr_Name';
         $result = mysql__select_assoc2($mysqli, $query);
         
-        if($result==null) $result = array();
+        if($result==null) {$result = array();}
         
         return $result;
     }
@@ -1193,7 +1193,7 @@
         $possible = '023456789bcdfghjkmnpqrstvwxyz';
         while (strlen($passwd) < $length) {
             $char = substr($possible, random_int(0, strlen($possible)-1), 1);
-            if (!strstr($passwd, $char)) $passwd .= $char;
+            if (!strstr($passwd, $char)) {$passwd .= $char;}
         }
         return $passwd;
     }
@@ -1256,7 +1256,7 @@
             foreach($new_prefs as $service_id=>$service){
             if(in_array($service['usr_ID'], $wg_ids)){
                 $usr_ID = intval($service['usr_ID']);
-                if(!@$prepared[$usr_ID]) $prepared[$usr_ID] = array();
+                if(!@$prepared[$usr_ID]) {$prepared[$usr_ID] = array();}
                         
                 $prepared[$usr_ID][$service_id] = $service;
             }
