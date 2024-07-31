@@ -18,7 +18,7 @@ require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
-require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 //require_once dirname(__FILE__).'/../../records/woot/woot.php';
 
 /*
@@ -64,7 +64,7 @@ class ReportRecord {
        $this->dtTerms = dbs_GetTerms($system);
        $this->dbsTerms = new DbsTerms($system, $this->dtTerms);
        */
-       $this->loaded_recs = array(); //cache
+       $this->loaded_recs = array();//cache
 
         $this->translations = array(
             'trm' => array()
@@ -76,10 +76,10 @@ class ReportRecord {
     //
     public function constant($name, $smarty_obj=null) {
         if(defined($name)){
-            return constant($name);  
+            return constant($name);
         }else{
             if(strpos($name,'RT_')===0 || strpos($name,'DT_')===0){
-                if($this->system->defineConstant($name)) return constant($name);  
+                if($this->system->defineConstant($name)) return constant($name);
             }
             
             return null;  
@@ -164,16 +164,16 @@ class ReportRecord {
             return $this->loaded_recs[$rec_ID];
         }
 
-        $rec = recordSearchByID($this->system, $rec_ID); //from recordSearch.php
+        $rec = recordSearchByID($this->system, $rec_ID);//from recordSearch.php
         
         if($rec){
-            $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID); //for current user only
+            $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);//for current user only
             if(is_array($rec['rec_Tags'])) $rec['rec_Tags'] = implode(',',$rec['rec_Tags']);
             
-            $rec['rec_IsVisible'] = $this->recordIsVisible($rec); //for current user only
+            $rec['rec_IsVisible'] = $this->recordIsVisible($rec);//for current user only
         }
         
-        $res1 = $this->getRecordForSmarty($rec); 
+        $res1 = $this->getRecordForSmarty($rec);
         
         return $res1;
     }
@@ -201,15 +201,15 @@ class ReportRecord {
                         $wg_ids = array_keys($currentUser['ugr_Groups']);
                         array_push($wg_ids, $currentUser['ugr_ID']);
                 }else{
-                        $wg_ids = $this->system->get_user_group_ids();    
+                        $wg_ids = $this->system->get_user_group_ids();
                 }
-                array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
+                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup    
                 
                 if(is_array($wg_ids) && count($wg_ids)>0){
                     if(!in_array($rec['rec_OwnerUGrpID'],$wg_ids)){
                         
                         $query = 'select rcp_UGrpID from usrRecPermissions where rcp_RecID='.$rec['rec_ID'];
-                        $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);     
+                        $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);
                         if(count($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids)==0)){
                             $res = false;
                         }
@@ -274,7 +274,7 @@ class ReportRecord {
                             if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                                 
                                 
-                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']); //related record
+                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']);//related record
                                                             
                                 
                                 //add specific variables from relationship record (rty_ID=1)
@@ -319,7 +319,7 @@ class ReportRecord {
                 $rec_ID = $rec;
             }
             
-            $where = ' WHERE ';  
+            $where = ' WHERE ';
             
             if($rty_ID!=null){
                 if(is_int($rty_ID) && $rty_ID>0) 
@@ -347,7 +347,7 @@ class ReportRecord {
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
                     .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
 
-               $to_records = mysql__select_list2($mysqli, $from_query);     
+               $to_records = mysql__select_list2($mysqli, $from_query);
             }
 
             if($direction==null || $direction=='linkedfrom'){
@@ -356,7 +356,7 @@ class ReportRecord {
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
                     
-                $from_records = mysql__select_list2($mysqli, $to_query);     
+                $from_records = mysql__select_list2($mysqli, $to_query);
             }
             
             $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
@@ -374,7 +374,7 @@ class ReportRecord {
         }
         else
         {
-            $recordID = $rec['rec_ID'];    
+            $recordID = $rec['rec_ID'];
             
             if(@$this->loaded_recs[$recordID]){
                 return $this->loaded_recs[$recordID];
@@ -407,7 +407,7 @@ class ReportRecord {
                         
                     }else if ($key=='rec_ID'){ //load tags and woottext once per record
 
-                        $record['recWootText'] = $this->getWootText($value); //htmlspecialchars(, ENT_QUOTES, 'UTF-8'); //@todo load dynamically 
+                        $record['recWootText'] = $this->getWootText($value);//htmlspecialchars(, ENT_QUOTES, 'UTF-8');//@todo load dynamically 
                         
                     }else if ($key == 'rec_ScratchPad'){
                         
@@ -420,7 +420,7 @@ class ReportRecord {
 
                     $details = array();
                     foreach ($value as $dtKey => $dtValue){
-                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang); //$record['recID']);
+                        $dt = $this->getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recordID, $lang);//$record['recID']);
                         if($dt){
                             $record = array_merge($record, $dt);
                         }
@@ -431,7 +431,7 @@ class ReportRecord {
             
             if(count($this->loaded_recs)>2500){
                 unset($this->loaded_recs);
-                $this->loaded_recs = array(); //reset to avoid memory overflow
+                $this->loaded_recs = array();//reset to avoid memory overflow
             }
             
             $this->loaded_recs[$recordID] = $record; 
@@ -533,8 +533,8 @@ class ReportRecord {
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
                                     
                                     $res_label_full = $this->_add_term_val($res_label_full, $term_full);
-                                    $res_label = $this->_add_term_val($res_label, $term_label); //$term[ $fi['trm_Label'] ]);
-                                    $res_desc = $this->_add_term_val($res_desc, $term_desc); //$term[ $fi['trm_Description'] ]);
+                                    $res_label = $this->_add_term_val($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
+                                    $res_desc = $this->_add_term_val($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
                                     //original value
@@ -582,14 +582,14 @@ class ReportRecord {
 
                             //if image - special case
 
-                            $res = array(); //list of urls
+                            $res = array();//list of urls
                             $origvalues = array();
 
                             foreach ($dtValue as $key => $value){
                                 
                                 $external_url = @$value['file']['ulf_ExternalFileReference'];
                                 if($external_url && strpos($external_url,'http://')!==0){
-                                    array_push($res, $external_url);  //external 
+                                    array_push($res, $external_url);//external 
 
                                 }else 
                                 if(@$value['file']['ulf_ObfuscatedFileID']){
@@ -625,8 +625,8 @@ class ReportRecord {
                                 
                                 $geom = geoPHP::load($value['geo']['wkt'], 'wkt');
                                 if(!$geom->isEmpty()){
-                                    $geojson_adapter = new GeoJSON();                                     
-                                    $json = $geojson_adapter->write($geom, true); 
+                                    $geojson_adapter = new GeoJSON();
+                                    $json = $geojson_adapter->write($geom, true);
                                 }
                                 if(!$json) $json = array();
                                 $dtname2 = $dtname."_geojson";
@@ -893,7 +893,7 @@ class ReportRecord {
 
         
         if($entity == 'trm'){
-            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description'; // grab label by default
+            $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description';// grab label by default
         }else{
             $field = $entity.'_Name';
         }
@@ -916,7 +916,7 @@ class ReportRecord {
             if(count($ids) == 1){
                 $id_clause = ' ='.intval($ids[0]);
             }else{
-                $id_clause = ' IN (' .implode(',', $ids). ')';    
+                $id_clause = ' IN (' .implode(',', $ids). ')';
             }
         }
 
@@ -1010,7 +1010,7 @@ class ReportRecord {
 
             case 'name':
             case 'filename';
-                $field = 'ulf_OrigFileName'; // ulf_FileName
+                $field = 'ulf_OrigFileName';// ulf_FileName
                 break;
 
             default:

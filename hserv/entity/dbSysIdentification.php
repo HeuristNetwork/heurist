@@ -85,7 +85,7 @@ class DbSysIdentification extends DbEntityBase
         // load record
         $row = $res->fetch_row();
         if($row){
-            $row[] = $row[2].'.'.$row[3].'.'.$row[4]; //sys_dbVersion
+            $row[] = $row[2].'.'.$row[3].'.'.$row[4];//sys_dbVersion
             $records[$row[0]] = $row;
             $order =  $row[0];
         }
@@ -98,7 +98,7 @@ class DbSysIdentification extends DbEntityBase
                 'fields'=>$fields,
                 'records'=>$records,
                 'order'=>$order,
-                'entityName'=>'sysIdentification');        
+                'entityName'=>'sysIdentification');
         return $response;
     }
 

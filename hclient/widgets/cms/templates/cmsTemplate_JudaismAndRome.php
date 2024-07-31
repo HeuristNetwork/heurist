@@ -24,7 +24,7 @@
                 </div>
                 <div id="main-content" 
                     data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?> 
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
  *  
@@ -70,7 +70,7 @@
 <html lang="en">
 
 <head>
-    <title><?php print htmlspecialchars(strip_tags($website_title_translated)); ?></title>
+    <title><?php print htmlspecialchars(strip_tags($website_title_translated));?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords; ?>">
     <meta name="description" content="<?php echo $meta_description; ?>">
@@ -172,7 +172,7 @@ default content consists of
                     . '<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
                     . 'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
                 }else if($system->get_user_id() == 0 && $show_login_button){
-                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
                 }
             }
             
@@ -220,12 +220,12 @@ default content consists of
                         . 'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
                 }
                 if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+                    print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
                 }
                 ?>
                 <div id="main-pagetitle" class="ui-heurist-bg-light"></div>
             </div>
-            <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container" style="top:152px;<?php echo $is_page_footer_fixed ? 'bottom:' . $page_footer_height . 'px;' : ''; ?>padding: 5px;">
+            <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container" style="top:152px;<?php echo $is_page_footer_fixed ? 'bottom:' . $page_footer_height . 'px;' : '';?>padding: 5px;">
                 <div id="sidebar">
                     <h3>Simple Search</h3>
                     <input></input>
@@ -239,7 +239,7 @@ default content consists of
                     <a href="5935">Sarcophagii</a>
                     <a href="5936">Texts</a>
                 </div>
-                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : ''; ?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo !$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : ''; ?>">
+                <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : '';?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo !$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : '';?>">
                 </div>
                 <?php
                 if (!$is_page_footer_fixed) print $page_footer;

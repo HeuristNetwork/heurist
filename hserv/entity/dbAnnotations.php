@@ -73,7 +73,7 @@ class DbAnnotations extends DbEntityBase
             if($this->data['uri']){
                 $this->data['uri'] = substr($_SERVER['QUERY_STRING'],4);
             }
-            $uri = $this->data['uri']; //.(@$this->data['file']?'&file='.$this->data['file']:'');
+            $uri = $this->data['uri'];//.(@$this->data['file']?'&file='.$this->data['file']:'');
             $items = $this->findItems_by_Canvas($uri);
             if(is_array($items) && count($items)>0){
                 
@@ -82,7 +82,7 @@ class DbAnnotations extends DbEntityBase
                 }
                 
             }else{
-                $sjson['items'] = array(); 
+                $sjson['items'] = array();
             }
         }
         else if($this->data['recID']=='edit'){
@@ -91,13 +91,13 @@ class DbAnnotations extends DbEntityBase
            
             $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
            
-            header('Location: '.$redirect);  
+            header('Location: '.$redirect);
             exit;
             
         }else{
             $item = $this->findItem_by_UUID($this->data['recID']);
             if($item!=null){
-                $sjson['items'] = array(json_decode($item, true));     
+                $sjson['items'] = array(json_decode($item, true));
             }
         }
             
@@ -270,7 +270,7 @@ class DbAnnotations extends DbEntityBase
                         }else{
                             $value = $row[2];
                         }
-                        //if(!@$details[$field_type]) $details[$field_type] = array(); //
+                        //if(!@$details[$field_type]) $details[$field_type] = array();//
                         $details[$field_type][] = $value; //"t:"
                     }
                 }            
@@ -284,7 +284,7 @@ class DbAnnotations extends DbEntityBase
         
             if(@$anno_dec['body']['type']=='TextualBody'){
                 $this->_assignField($details, 'DT_NAME', substr(strip_tags($anno_dec['body']['value']),0,50));
-                $this->_assignField($details, 'DT_SHORT_SUMMARY', $anno_dec['body']['value']); 
+                $this->_assignField($details, 'DT_SHORT_SUMMARY', $anno_dec['body']['value']);
             }
 
             //thumbnail
@@ -310,7 +310,7 @@ class DbAnnotations extends DbEntityBase
                                 if(@$anno['manifestUrl']){ //sourceRecordId
                                     //find image service uri by canvas in manifest
                                     $iiif_manifest_url = filter_var($anno['manifestUrl'], FILTER_SANITIZE_URL);
-                                    $iiif_manifest = loadRemoteURLContent($iiif_manifest_url); //retrieve iiif manifest into manifest
+                                    $iiif_manifest = loadRemoteURLContent($iiif_manifest_url);//retrieve iiif manifest into manifest
                                     $iiif_manifest = json_decode($iiif_manifest, true);
                                     if($iiif_manifest!==false && is_array($iiif_manifest)){
 
@@ -369,7 +369,7 @@ class DbAnnotations extends DbEntityBase
                                 // {scheme}://{server}{/prefix}/{identifier}/{region}/{size}/{rotation}/{quality}.{format}
                                 $url = $url.'/'.$region.'/!200,200/0/default.jpg';
 
-                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.basename($anno['uuid'].'.jpg'); //basename for snyk
+                                $tmp_file = HEURIST_SCRATCH_DIR.'/'.basename($anno['uuid'].'.jpg');//basename for snyk
                                 //tempnam(HEURIST_SCRATCH_DIR,'iiif_thumb');
                                 //tempnam()
                                 $res = saveURLasFile($url, $tmp_file);
@@ -377,14 +377,14 @@ class DbAnnotations extends DbEntityBase
                                 if($res>0){
                                     $entity = new DbRecUploadedFiles($this->system);
 
-                                    $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
+                                    $dtl_UploadedFileID = $entity->registerFile($tmp_file, null);//it returns ulf_ID
 
                                     if($dtl_UploadedFileID===false){
                                         $err_msg = $this->system->getError();
                                         $err_msg = $err_msg['message'];
-                                        $this->system->clearError();  
+                                        $this->system->clearError();
                                     }else{
-                                        $this->_assignField($details, 'DT_THUMBNAIL', $dtl_UploadedFileID[0]); 
+                                        $this->_assignField($details, 'DT_THUMBNAIL', $dtl_UploadedFileID[0]);
                                     }
                                 }
                                 
@@ -398,18 +398,18 @@ class DbAnnotations extends DbEntityBase
                 $details[DT_URL][] = $anno['canvas'];
             }else {
                 if($this->is_addition && @$anno_dec['target']['source']){ //page is not changed on edit
-                    $this->_assignField($details, 'DT_URL', $anno_dec['target']['source']); 
+                    $this->_assignField($details, 'DT_URL', $anno_dec['target']['source']);
                 }
             }
         
         }
         
-        $this->_assignField($details, $this->dty_Annotation_Info, $anno['data']); 
-        $this->_assignField($details, 'DT_ORIGINAL_RECORD_ID', $anno['uuid']); 
+        $this->_assignField($details, $this->dty_Annotation_Info, $anno['data']);
+        $this->_assignField($details, 'DT_ORIGINAL_RECORD_ID', $anno['uuid']);
         
         if($anno['sourceRecordId']>0){
             //link referenced image record with annotation record
-            $this->_assignField($details, 'DT_MEDIA_RESOURCE', $anno['sourceRecordId']); 
+            $this->_assignField($details, 'DT_MEDIA_RESOURCE', $anno['sourceRecordId']);
         }
         
         //record header

@@ -83,16 +83,16 @@ class UploadHandler
             return;
         }
         
-        $replace_edited_file = intval(@$_REQUEST['replace_edited_file']); //defined in form
+        $replace_edited_file = intval(@$_REQUEST['replace_edited_file']);//defined in form
         if(!($replace_edited_file>0 && $replace_edited_file<4)) $replace_edited_file = false;
-        $unique_filename = (@$_REQUEST['unique_filename']!=='0'); //defined in form
+        $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
 
         if($options==null || @$options['upload_dir']==null){  //from UploadHandlerInit.php
 
             if($options==null) $options=array();
 
             //get upload subfolder from parameters - this is subfolder of database upload folder
-            $upload_dir = @$_REQUEST['upload_subfolder']; //defined in form 
+            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form 
             if(!$upload_dir){
                 $upload_dir = 'insitu/';
             }
@@ -101,7 +101,7 @@ class UploadHandler
                     //NOT ALLOWED
                     // by default into subfolder files next to script
                     $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
-                    $upload_url = $this->get_full_url().'/files/';  //default - next to script
+                    $upload_url = $this->get_full_url().'/files/';//default - next to script
             */
 
             //sanitize
@@ -279,7 +279,7 @@ class UploadHandler
             $siz = 100*1024*1024;
             ini_set( 'post_max_size', '12000000' );
             ini_set( 'upload_max_filesize', '10000000' );
-$siz = USystem::getConfigBytes('upload_max_filesize');            
+$siz = USystem::getConfigBytes('upload_max_filesize');
         }
 */        
         if ($initialize) {
@@ -355,7 +355,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $file_name = htmlspecialchars(basename($file_name));
                 $file_name = str_replace('&amp;','&',$file_name);
                 
-                return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name); //realpath
+                return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name);//realpath
             }
             $version_path = $version.'/';
         }
@@ -418,7 +418,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if(@$this->options['upload_subfolder']){
             $file->deleteUrl .= ('&db='.$this->options['database'].'&upload_subfolder='.rawurlencode($this->options['upload_subfolder']));
         }else{
-            $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);    
+            $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);
         }
         
         if (!empty($file->subfolder)) {
@@ -684,7 +684,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if($this->options['unique_filename']){ //Artem Osmakov assign uniqie name to uploaded file 
         
             while(is_dir($this->get_upload_path($name, $subfolder))) {
-                $name = $this->upcount_name($name); //unique name for subfolder
+                $name = $this->upcount_name($name);//unique name for subfolder
             }
             // Keep an existing filename if this is part of a chunked upload:
             $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
@@ -693,7 +693,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $this->get_upload_path($name, $subfolder))) {
                     break;
                 }
-                $name = $this->upcount_name($name); //get name with counter
+                $name = $this->upcount_name($name);//get name with counter
             }
         
         }
@@ -1126,23 +1126,23 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $background = new \ImagickPixel('none');
         switch ($orientation) {
             case \imagick::ORIENTATION_TOPRIGHT: // 2
-                $image->flopImage(); // horizontal flop around y-axis
+                $image->flopImage();// horizontal flop around y-axis
                 break;
             case \imagick::ORIENTATION_BOTTOMRIGHT: // 3
                 $image->rotateImage($background, 180);
                 break;
             case \imagick::ORIENTATION_BOTTOMLEFT: // 4
-                $image->flipImage(); // vertical flip around x-axis
+                $image->flipImage();// vertical flip around x-axis
                 break;
             case \imagick::ORIENTATION_LEFTTOP: // 5
-                $image->flopImage(); // horizontal flop around y-axis
+                $image->flopImage();// horizontal flop around y-axis
                 $image->rotateImage($background, 270);
                 break;
             case \imagick::ORIENTATION_RIGHTTOP: // 6
                 $image->rotateImage($background, 90);
                 break;
             case \imagick::ORIENTATION_RIGHTBOTTOM: // 7
-                $image->flipImage(); // vertical flip around x-axis
+                $image->flipImage();// vertical flip around x-axis
                 $image->rotateImage($background, 270);
                 break;
             case \imagick::ORIENTATION_LEFTBOTTOM: // 8
@@ -1151,7 +1151,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             default:
                 return false;
         }
-        $image->setImageOrientation(\imagick::ORIENTATION_TOPLEFT); // 1
+        $image->setImageOrientation(\imagick::ORIENTATION_TOPLEFT);// 1
         return true;
     }
                        
@@ -1421,7 +1421,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             }else{
                 $rep = array();
                 foreach ($failed_versions as $ver=>$msg){
-                    $rep[] = $ver.' '.($msg!==false?(': '.$msg):'');        
+                    $rep[] = $ver.' '.($msg!==false?(': '.$msg):'');
                 }
                 $file->error = $this->get_error_message('image_resize')  //get text
                         .' <br>'.implode('<br>', $rep);
@@ -1591,15 +1591,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function get_post_param($id) {
-        return filter_input(INPUT_POST, $id); //@$_POST[$id];
+        return filter_input(INPUT_POST, $id);//@$_POST[$id];
     }
 
     protected function get_query_param($id) {
-        return filter_input(INPUT_GET, $id); //@$_GET[$id];
+        return filter_input(INPUT_GET, $id);//@$_GET[$id];
     }
 
     protected function get_server_var($id) {
-        return filter_input(INPUT_SERVER, $id); //@$_SERVER[$id];
+        return filter_input(INPUT_SERVER, $id);//@$_SERVER[$id];
     }
 
     protected function handle_form_data($file, $index) {
@@ -1611,14 +1611,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     }
 
     protected function get_singular_param_name() {
-        return substr($this->options['param_name'], 0, -1);  //files -> file
+        return substr($this->options['param_name'], 0, -1);//files -> file
     }
     
     //
     // Unfortunately Snyk security report doesn't see this code
     //
     private function secure_file_name($filename){
-        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = htmlspecialchars(basename($filename));//stripslashes()
         $filename = str_replace('&amp;','&',$filename);
         return $filename;
     }
@@ -1626,7 +1626,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function get_file_name_param() {
         $name = $this->get_singular_param_name();
         $filename = $this->get_query_param($name);
-        $filename = htmlspecialchars(basename($filename)); //stripslashes()
+        $filename = htmlspecialchars(basename($filename));//stripslashes()
         $filename = str_replace('&amp;','&',$filename);
         //$filename = $this->secure_file_name($filename);
         return $filename;
@@ -1644,7 +1644,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         $params2 = array();
         foreach ($params as $key => $value) {
-            $filename = htmlspecialchars(basename($value)); //stripslashes()
+            $filename = htmlspecialchars(basename($value));//stripslashes()
             $filename = str_replace('&amp;','&',$filename);
             if($filename){
                 $params2[$key] = $filename; //secure_file_name($value);
@@ -1684,8 +1684,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $this->header('HTTP/1.1 403 Forbidden');
                 return;
         }
-        $file_name = $this->get_file_name_param(); 
-        $subfolder = $this->get_subfolder_param(); 
+        $file_name = $this->get_file_name_param();
+        $subfolder = $this->get_subfolder_param();
         
         if (!$this->is_valid_file_object($file_name, $subfolder)) {
             $this->header('HTTP/1.1 404 Not Found');
@@ -1819,7 +1819,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $files = array();
         
         if($this->options['newfilename']){ //Artem Osmakov: rename file on server
-            $file_name = $this->options['newfilename'];            
+            $file_name = $this->options['newfilename'];
         }
         
         if ($upload) {

@@ -24,8 +24,8 @@ require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-require_once dirname(__FILE__).'/../records/edit/recordModify.php'; //for recordDelete
-require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php'; //send email methods
+require_once dirname(__FILE__).'/../records/edit/recordModify.php';//for recordDelete
+require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
 
 class DbSysUsers extends DbEntityBase
 {
@@ -114,7 +114,7 @@ class DbSysUsers extends DbEntityBase
             
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Organisation,ugr_Enabled';
             if($needRole) {
-                $this->data['details'] .= ',ugl_Role';   
+                $this->data['details'] .= ',ugl_Role';
             }else{
                 $needCount = true;  //need count only for all groups
             } 
@@ -125,7 +125,7 @@ class DbSysUsers extends DbEntityBase
             .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,usr_ExternalAuthentication';
             
             if($needRole){
-                $this->data['details'] .= ',ugl_Role';  
+                $this->data['details'] .= ',ugl_Role';
             }else{
                 $needCount = true;  //need count only for all groups
             } 
@@ -238,7 +238,7 @@ class DbSysUsers extends DbEntityBase
         
         if($ret){
             
-            $fieldvalues = $this->data['fields']; //current record
+            $fieldvalues = $this->data['fields'];//current record
             
             $email_address = @$fieldvalues['ugr_eMail'];
             
@@ -269,7 +269,7 @@ class DbSysUsers extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
             $this->records[$idx]['ugr_Type'] = 'user';
-            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s');//reset
             
             //add password by default
             if(@$this->records[$idx]['ugr_Password']==''){
@@ -293,7 +293,7 @@ class DbSysUsers extends DbEntityBase
                 $allowed_status = array('n', 'y', 'y_no_add', 'y_no_delete', 'y_no_add_delete');
                 $is_valid = in_array($this->records[$idx]['ugr_Enabled'], $allowed_status);
 
-                $this->records[$idx]['ugr_Enabled'] = ($is_valid ? $this->records[$idx]['ugr_Enabled'] : 'n'); // y_no_add_delete
+                $this->records[$idx]['ugr_Enabled'] = ($is_valid ? $this->records[$idx]['ugr_Enabled'] : 'n');// y_no_add_delete
             }
 
             //validate duplication
@@ -361,7 +361,7 @@ class DbSysUsers extends DbEntityBase
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
                         
                         //$fname = HEURIST_FILESTORE_DIR.$ugr_ID;   //save special semaphore file to trigger user refresh for other users
-                        //fileSave('X',$fname);  //add to group ???
+                        //fileSave('X',$fname);//add to group ???
                     }
                     
                     //send approvement or registration email
@@ -404,7 +404,7 @@ class DbSysUsers extends DbEntityBase
         
             $query = 'SELECT g2.ugl_GroupID, count(g2.ugl_ID) AS adm FROM sysUsrGrpLinks AS g2 LEFT JOIN sysUsrGrpLinks AS g1 '
                         .'ON g1.ugl_GroupID=g2.ugl_GroupID AND g2.ugl_Role="admin" '                        //is it the only admin
-                        .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" GROUP BY g1.ugl_GroupID  HAVING adm=1';  //is this user admin
+                        .'WHERE g1.ugl_UserID='.$usrID.' AND g1.ugl_Role="admin" GROUP BY g1.ugl_GroupID  HAVING adm=1';//is this user admin
                         
             //can't remove last admin
             $res = mysql__select_row($mysqli, $query);
@@ -483,9 +483,9 @@ class DbSysUsers extends DbEntityBase
     private function transferOwner($disable_foreign_checks = false){
 
         /* General Variables */
-        $mysqli = $this->system->get_mysqli();  // MySQL connection
+        $mysqli = $this->system->get_mysqli();// MySQL connection
         $return = true; // Control variable
-        $recID = $this->data['ugr_ID'];     // Selected User ID
+        $recID = $this->data['ugr_ID'];// Selected User ID
 
         $current_userid = $this->system->get_user_id();
         if($current_userid != 2){
@@ -577,7 +577,7 @@ class DbSysUsers extends DbEntityBase
             $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids');
             $return = false;
         }
-        $query = substr($query, 0, -2); /* Remove last characters, space and comma */
+        $query = substr($query, 0, -2);/* Remove last characters, space and comma */
         $mysqli->query($query);
         if ($mysqli->affected_rows <= 0){
             $this->system->addError(HEURIST_DB_ERROR, 'Cannot assign new owner\'s administrator privilege for each group');
@@ -650,7 +650,7 @@ class DbSysUsers extends DbEntityBase
             return false;
         }
         
-        $exit_if_exists = (@$this->data['exit_if_exists']!=0); //proceed even user already exists
+        $exit_if_exists = (@$this->data['exit_if_exists']!=0);//proceed even user already exists
         
         $mysqli = $this->system->get_mysqli();
         
@@ -658,7 +658,7 @@ class DbSysUsers extends DbEntityBase
         $query = 'SELECT distinct src.ugr_ID, dest.ugr_ID from '
             .$sytem_source->dbname_full().'.sysUGrps as src, sysUGrps as dest'
             .' where src.ugr_ID in ('.implode(',',$userIDs)
-            .') and ((src.ugr_eMail = dest.ugr_eMail) OR (src.ugr_Name=dest.ugr_Name))';       
+            .') and ((src.ugr_eMail = dest.ugr_eMail) OR (src.ugr_Name=dest.ugr_Name))';
         
         $userIDs_already_exists = mysql__select_assoc2($mysqli, $query);
         
@@ -689,7 +689,7 @@ class DbSysUsers extends DbEntityBase
                 return false;
             }
 
-            $overwrite_status = 'y_no_delete'; //y_no_add_delete
+            $overwrite_status = 'y_no_delete';//y_no_add_delete
         }
 
         //1. import users from another database
@@ -704,7 +704,7 @@ class DbSysUsers extends DbEntityBase
                     "FROM ".$sytem_source->dbname_full().".sysUGrps where ugr_ID=";
 
                     
-        $newUserIDs = array();                    
+        $newUserIDs = array();
                     
         $ret = true;            
         foreach($userIDs as $userID){
@@ -720,19 +720,19 @@ class DbSysUsers extends DbEntityBase
                 }
 
                 //copy user image 
-                $user_image = parent::getEntityImagePath($userID, null, $this->data['sourceDB']); //in source db
+                $user_image = parent::getEntityImagePath($userID, null, $this->data['sourceDB']);//in source db
                 if(file_exists($user_image)){
                     
                     $extension = pathinfo($user_image, PATHINFO_EXTENSION);
                     
-                    $user_image_new = parent::getEntityImagePath($userID_new,null,null,$extension); //in this database
+                    $user_image_new = parent::getEntityImagePath($userID_new,null,null,$extension);//in this database
                     
                     fileCopy($user_image, $user_image_new);
                     
-                    $user_thumb = parent::getEntityImagePath($userID, 'thumb', $this->data['sourceDB']); //in source db
-                    $user_thumb_new = parent::getEntityImagePath($userID_new, 'thumb'); //in this db
+                    $user_thumb = parent::getEntityImagePath($userID, 'thumb', $this->data['sourceDB']);//in source db
+                    $user_thumb_new = parent::getEntityImagePath($userID_new, 'thumb');//in this db
                     if(file_exists($user_thumb)){
-                        fileCopy($user_thumb, $user_thumb_new);    
+                        fileCopy($user_thumb, $user_thumb_new);
                     }                        
                 }
                 

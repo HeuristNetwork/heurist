@@ -42,7 +42,7 @@
     require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
     require_once dirname(__FILE__).'/../utilities/uArchive.php';
-    //require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for ShapeFile
+    //require_once dirname(__FILE__).'/../../vendor/autoload.php';//for ShapeFile
     
 // Register autoloader
 require_once '../../vendor/gasparesganga/php-shapefile/src/Shapefile/ShapefileAutoloader.php';
@@ -62,10 +62,10 @@ use Shapefile\ShapefileReader;
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
-        $system->error_exit_api(null, null, $is_api); //exit from script
+        $system->error_exit_api(null, null, $is_api);//exit from script
     }
     if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter value is missing or invalid', null, $is_api); //exit from script
+        $system->error_exit_api('recID parameter value is missing or invalid', null, $is_api);//exit from script
     }
     
     $need_simplify = (true || @$params['simplify']=='yes' || @$params['simplify']==1);
@@ -99,7 +99,7 @@ use Shapefile\ShapefileReader;
     if( count($fields) == 0 ){
         $system->error_exit_api('Database '.$params['db']
                     .' does not have field definitions for shp, zip or simple resource file'
-                    , HEURIST_SYSTEM_CONFIG, $is_api); //exit from script
+                    , HEURIST_SYSTEM_CONFIG, $is_api);//exit from script
     }
     $isZipArchive = false;
     
@@ -161,13 +161,13 @@ use Shapefile\ShapefileReader;
                     if(@$params['metadata']){//save hml into scratch folder
                         
                         $zip->addFromString($originalFileName.'.txt', 
-                                       recordLinksFileContent($system, $record));    
+                                       recordLinksFileContent($system, $record));
                     }
                     $zip->close();
                     //donwload
                     $contentDispositionField = 'Content-Disposition: attachment; '
-                        . sprintf('filename="%s"; ', rawurlencode($file_zip))
-                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+                        . sprintf('filename="%s";', rawurlencode($file_zip))
+                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
                     
                     header('Content-Type: application/zip');
                     header($contentDispositionField);
@@ -199,8 +199,8 @@ use Shapefile\ShapefileReader;
                     }
                     
                     //$json = array();
-                    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
-                    $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
+                    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
+                    $fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file 
                     fwrite($fd, '[');
                     $rec_cnt = 0;
                     
@@ -263,19 +263,19 @@ use Shapefile\ShapefileReader;
                     $is_compressed = true;
                         
                     if($is_compressed){                    
-                        $output = gzencode(file_get_contents($tmp_destination), 6); 
+                        $output = gzencode(file_get_contents($tmp_destination), 6);
                         header('Content-Encoding: gzip');
                     }else{
                         $output = file_get_contents($tmp_destination);
                     }
                     fclose($fd);
                     
-                    header( 'Content-Type: application/json');    
+                    header( 'Content-Type: application/json');
                     //header('Content-Length: ' . strlen($output));
                     unlink($tmp_destination);
                     
                     echo $output; 
-                    unset($output);   
+                    unset($output);
                     
 
                 } catch (ShapeFileException $e) {
@@ -291,7 +291,7 @@ use Shapefile\ShapefileReader;
 'Cannot process shp file. Please ask the owner of the layer data source record (id:'
 .$params['recID']
 .') to check that the file exists, is readable and has not been corrupted.',
-            HEURIST_NOT_FOUND, $is_api); 
+            HEURIST_NOT_FOUND, $is_api);
     }
     
     $system->dbclose();
@@ -312,7 +312,7 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
 .'to support the plotting of maps worldwide. This shapefile is not in this format '
 .'and will not therefore display on maps. '
-.'Please use a GIS or other converter to convert to WGS84', HEURIST_ACTION_BLOCKED, $is_api);  
+.'Please use a GIS or other converter to convert to WGS84', HEURIST_ACTION_BLOCKED, $is_api);
         }       
                  
         if( $check_number_or_all===true || $cnt < $check_number_or_all ){
@@ -334,13 +334,13 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
 function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
     
     if(@$fileinfo['file']){
-        $fileinfo = $fileinfo['file']; //
+        $fileinfo = $fileinfo['file'];//
     }
             
-    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
     $external_url = $fileinfo['ulf_ExternalFileReference'];
     $originalFileName = $fileinfo['ulf_OrigFileName'];
-    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+    $mimeType = $fileinfo['fxm_MimeType'];//fxm_MimeType
 
     $filepath = resolveFilePath($filepath);
 
@@ -348,7 +348,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
         
     }else if($external_url){
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
-        saveURLasFile($external_url, $filepath); //save remote shp to temp in scratch folder
+        saveURLasFile($external_url, $filepath);//save remote shp to temp in scratch folder
     }    
     
     if(file_exists($filepath)){

@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 if (!defined('PDIR')){
-    define('PDIR','../');  
+    define('PDIR','../');
     require_once dirname(__FILE__).'/../hserv/System.php';
 } 
 
@@ -74,7 +74,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
 <?php 
 //https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css
-//include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; 
+//include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';
 ?>
 
 <script type="text/javascript">
@@ -158,7 +158,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 
                     var ele = $('#ugr_CaptchaCode')
                     ele.parent().css({
-                        display: 'inline-block', float: 'left', 'min-width': 90, width: 90});            
+                        display: 'inline-block', float: 'left', 'min-width': 90, width: 90});
 
                     $('#btnRegisterDo').button().on({click: _validateRegistration});
                     $('#btnRegisterCancel').button().on({click: _showStep});
@@ -194,8 +194,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         return false;
                     }});
                     
-                    $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).change(); _showStep(2); }});
-                    $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).change(); _showStep(2); }});
+                    $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).change(); _showStep(2);}});
+                    $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).change(); _showStep(2);}});
 
                     refreshCaptcha();
                     _showStep(2);
@@ -236,7 +236,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             var ele = $('#ugr_CaptchaCode')
             ele.load(baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
-            $dd.empty(); //find("#img").remove();
+            $dd.empty();//find("#img").remove();
             $('<img id="img" src="hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
     }
@@ -281,7 +281,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             var login = regform.find("#ugr_Name");
             if(!window.hWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
-                    +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
+                    +'a-z, 0-9, _, @ and begin with a letter';// "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = window.hWin.HEURIST4.msg.checkLength2( login, "User name", 3, 60 );
                 if(ss!=''){
@@ -324,7 +324,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             ele.value = user_name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,'');
             
             _showStep(3);
-            $("#dbname").focus();        
+            $("#dbname").focus();
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(err_text);
         }
@@ -380,9 +380,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     }else{
                         //either wrong captcha or invalid registration values
                         if(response.status == window.hWin.ResponseStatus.INVALID_REQUEST){
-                            _showRegistration(); //back to registration
+                            _showRegistration();//back to registration
                         }else{
-                            _showStep(3); //back to db form
+                            _showStep(3);//back to db form
                         }
                         
                         window.hWin.HEURIST4.msg.showMsgErr(response.message, false);
@@ -414,7 +414,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         if(Object.keys(all_databases).length>0 && show_list){
                             _showDatabaseList();
                         }else{
-                            _initControls();    
+                            _initControls();
                         }
                         
                     }else{
@@ -471,20 +471,20 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             window.hWin.HR = window.hWin.HAPI4.setLocale('ENG');
         }
         
-        $('.button-registration').button().on({click:_showRegistration}); //goto step2
+        $('.button-registration').button().on({click:_showRegistration});//goto step2
         
-        $('#btnCreateDatabase').button().on({click: _doCreateDatabase}); //on step 3
-        $('#btnGetStarted').button().on({click: _showGetStarted });  //goto step6 - getting started
+        $('#btnCreateDatabase').button().on({click: _doCreateDatabase});//on step 3
+        $('#btnGetStarted').button().on({click: _showGetStarted });//goto step6 - getting started
         
         if(Object.keys(all_databases).length>0){
             
             //init controls on existing-user div
             
             $('#btnNewDatabase').button().show();
-            $('#showDatabaseList').on({click: _showDatabaseList});  //goto step8
+            $('#showDatabaseList').on({click: _showDatabaseList});//goto step8
             
             $(document).on({click: function(event){
-               if($(event.target).parents('.list_div').length==0) { $('.list_div').hide(); };
+               if($(event.target).parents('.list_div').length==0) { $('.list_div').hide();};
             }});
             
             $('.list_div').on({click:function(e){
@@ -508,7 +508,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                 var sval = inpt.val().toLowerCase();
 
                 if(sval.length>1){
-                    list_div.empty(); 
+                    list_div.empty();
                     var is_added = false;
                     var len = Object.keys(all_databases).length;
                     for (var idx=0;idx<len;idx++){
@@ -522,22 +522,22 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         //.css({'max-width':(maxw+'px')});
                         .css({'max-width':inpt.width()+60});
                         if(is_added){
-                            list_div.show();    
+                            list_div.show();
                         }else{
                             list_div.hide();
                         }
                 }else{
-                    list_div.hide();    
+                    list_div.hide();
                 }                
                     
                     
-                }}); 
+                }});
             
             $('#btnOpenDatabase').button().on({click:function(){
                 
                     var sval = $('#search_database').val().trim();
                     if(sval==''){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Define database name'); 
+                        window.hWin.HEURIST4.msg.showMsgFlash('Define database name');
                     }else{
                         var len = Object.keys(all_databases).length;
                         for (var idx=0;idx<len;idx++){
@@ -546,7 +546,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                                 return;  
                             }
                         }
-                        window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found'); 
+                        window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found');
                     }
                 
             }});
@@ -554,7 +554,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         
         }else{
             //no one database found - hide existing user div - force create new database
-            $('.existing-user').hide();    
+            $('.existing-user').hide();
         }
          
         _showStep(1);
@@ -590,7 +590,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                 }else{
                     list_div.find('li').show();
                 }                    
-            }}); 
+            }});
 
         
             list_div.empty();
@@ -616,20 +616,20 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
         _showStep(8);
-        _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false'; ?> );
+        _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false';?> );
 
         <?php if(isset($_REQUEST['error']) && count($_REQUEST['error']) >= 1){ 
 
             $_REQUEST['error']['message'] = '<br>' . $_REQUEST['error']['message'];
             ?>
 
-            window.hWin.HEURIST4.msg.showMsgErr(<?php echo json_encode($_REQUEST['error']); ?>);
+            window.hWin.HEURIST4.msg.showMsgErr(<?php echo json_encode($_REQUEST['error']);?>);
 
         <?php 
         }else if(isset($message) && !empty($message)){ 
         ?>
             
-            window.hWin.HEURIST4.msg.showMsgErr('<?php echo str_replace("'",'&#39;',$message); ?>');
+            window.hWin.HEURIST4.msg.showMsgErr('<?php echo str_replace("'",'&#39;',$message);?>');
             
         <?php } ?>
     });
@@ -663,7 +663,7 @@ a{
     height: 90px;
 }
 .bg_intro{
-    background-color: rgba(218, 208, 228, 0.15); /*#DAD0E4*/
+    background-color: rgba(218, 208, 228, 0.15);/*#DAD0E4*/
     background-image: url("<?php echo PDIR;?>hclient/assets/v6/h6logo_bg_200.png");
     background-repeat: no-repeat !important;
     background-position-x:right;       

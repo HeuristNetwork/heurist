@@ -75,7 +75,7 @@ if($rec==null){
 
 $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
     ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
-    $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
+    $system->is_member($rec['rec_OwnerUGrpID']) );//owner
 
 if(!$hasAccess){
         $_REQUEST['error'] = 'You are not a member of the workgroup that owns the Heurist record #'

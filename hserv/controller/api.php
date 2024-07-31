@@ -20,7 +20,7 @@ if(@$_REQUEST['method']){
         if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
             $method = 'DELETE';
         } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT' || $_SERVER['HTTP_X_HTTP_METHOD'] == 'PATCH') {
-            $method = 'PUT';   //replace
+            $method = 'PUT';//replace
         } else {
             exitWithError('Unexpected Header', 400);
         }
@@ -86,7 +86,7 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
     if(@$entities[$_REQUEST['ent']] != null ){
         $requestUri = array(0, 'api', $_REQUEST['db'], $_REQUEST['ent'], @$_REQUEST['id']);
     }else{
-        exitWithError('API Not Found', 400);    
+        exitWithError('API Not Found', 400);
     }
     
 }else if(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
@@ -94,11 +94,11 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $_REQUEST['db'], $requestUri[2], @$requestUri[3]);
     }else{
-        exitWithError('API Not Found', 400);    
+        exitWithError('API Not Found', 400);
     }
     
 }else if(@$requestUri[2]!=null){
-    $_REQUEST['db'] = $requestUri[2];    
+    $_REQUEST['db'] = $requestUri[2];
 }
 
 
@@ -153,7 +153,7 @@ if (@$requestUri[3]=='iiif') {
     $system = new System();
     if( ! $system->init($_REQUEST['db']) ){
         //get error and response
-        $system->error_exit_api(); //exit from script
+        $system->error_exit_api();//exit from script
     }
     
     if($requestUri[3]==='login'){
@@ -183,7 +183,7 @@ else
     $_REQUEST['restapi'] = 1; //set http response code
 
     if(@$requestUri[4]!=null){
-      $_REQUEST['recID'] = $requestUri[4];  
+      $_REQUEST['recID'] = $requestUri[4];
     } 
 
     if($_REQUEST['entity']=='Records'){
@@ -198,14 +198,14 @@ else
 }
 exit;
 //header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
-//echo json_encode($data); 
+//echo json_encode($data);
 
 function exitWithError($message, $code){
     
     header("Access-Control-Allow-Origin: *");
-    header('Content-type: application/json;charset=UTF-8'); //'text/javascript');
+    header('Content-type: application/json;charset=UTF-8');//'text/javascript');
     
-    http_response_code($code);    
+    http_response_code($code);
     print json_encode(array("status"=>'invalid', "message"=>$message));
     exit;
 }

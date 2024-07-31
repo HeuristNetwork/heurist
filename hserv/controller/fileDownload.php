@@ -47,7 +47,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
 }else{
-    $req_params = filter_input_array(INPUT_GET);    
+    $req_params = filter_input_array(INPUT_GET);
 }
 
 $db = @$req_params['db'];
@@ -56,7 +56,7 @@ $error = System::dbname_check($db);
 
 if(!$error){
     
-    $system = new System(); //without connection
+    $system = new System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
     if($fileid!=null){ 
         
@@ -73,9 +73,9 @@ if(!$error){
                     if(defined('HEURIST_THUMB_URL')){
                         //rawurlencode - required for security reports only
                         $turl = HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png');
-                        header('Location: '.$turl);    
+                        header('Location: '.$turl);
                     }else{
-                        downloadFile('image/png', $thumbfile);    
+                        downloadFile('image/png', $thumbfile);
                     }
                     
                 }else{
@@ -112,15 +112,15 @@ if(!$error){
         $listpaths = fileGetFullInfo($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
 
-            $fileinfo = $listpaths[0]; //
-            $filepath = USanitize::sanitizePath($fileinfo['fullPath']);  //concat(ulf_FilePath,ulf_FileName as fullPath
-            $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-            $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-            $sourceType = $fileinfo['ulf_PreferredSource']; //not used
+            $fileinfo = $listpaths[0];//
+            $filepath = USanitize::sanitizePath($fileinfo['fullPath']);//concat(ulf_FilePath,ulf_FileName as fullPath
+            $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
+            $mimeType = $fileinfo['fxm_MimeType'];//fxm_MimeType
+            $sourceType = $fileinfo['ulf_PreferredSource'];//not used
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
             $fileExt = $fileinfo['ulf_MimeExt'];
-            $fileParams = $fileinfo['ulf_Parameters']; // external repository service id
+            $fileParams = $fileinfo['ulf_Parameters'];// external repository service id
             if($fileParams!=null && !empty($fileParams)){
                 $fileParams = json_decode($fileParams, true);
             }
@@ -149,7 +149,7 @@ if(!$error){
                         </head>
                         <body>
                            <?php 
-                             print file_get_contents($url);   //execute this script to get html tag for player
+                             print file_get_contents($url);//execute this script to get html tag for player
                            ?>
                         </body>
                     </html>
@@ -161,7 +161,7 @@ if(!$error){
 
                 //request may have special parameters for audio/video players
                 if(@$req_params['fancybox']){
-                    $params = array('fancybox'=>1); //returns player in wrapper
+                    $params = array('fancybox'=>1);//returns player in wrapper
                 }else{
                     $params = null;
                 }
@@ -172,7 +172,7 @@ if(!$error){
             {
 
                 $filepath = resolveFilePath( $filepath );
-                $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
+                $filepath = isPathInHeuristUploadFolder($filepath);//snyk SSRF
                 
                 if( @$req_params['mode']=='metaonly'){ //get width and height for image file
 
@@ -190,9 +190,9 @@ if(!$error){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
                         if($ext==null || $ext==''){
-                            $finfo = pathinfo($filepath);  //take from path
+                            $finfo = pathinfo($filepath);//take from path
                             if(@$finfo['extension']){
-                                $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
+                                $originalFileName = $originalFileName.'.'.@$finfo['extension'];
                             }else if($fileExt){
                                 if($fileExt=='jpe') $fileExt = 'jpg';
                                 $originalFileName = $originalFileName.'.'.$fileExt;   
@@ -200,7 +200,7 @@ if(!$error){
                         }    
                     }
                     
-                    $is_download = (@$req_params['download']==1); 
+                    $is_download = (@$req_params['download']==1);
 
                     if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
                                         && strpos($fileinfo['fullPath'],'file_uploads/')===0){
@@ -286,7 +286,7 @@ if(!$error){
                         //}
                         
                         
-                        header('Location: '.$external_url);  //redirect to URL (external)    
+                        header('Location: '.$external_url);//redirect to URL (external)    
                     }
                     
                     

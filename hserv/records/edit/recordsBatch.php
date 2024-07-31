@@ -119,16 +119,16 @@ class RecordsBatch
     private function _initPutifier(){
         if($this->purifier==null){
             $not_purify = array();
-            /*if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
-            if($this->system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS); }
-            if($this->system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY); }
-            if($this->system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
-            if($this->system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
-            if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }*/
-            if($this->system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES); }
+            /*if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT);}
+            if($this->system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS);}
+            if($this->system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY);}
+            if($this->system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML);}
+            if($this->system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING);}
+            if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL);}*/
+            if($this->system->defineConstant('DT_CMS_EXTFILES')){ array_push($not_purify, DT_CMS_EXTFILES);}
             
             $this->not_purify = $not_purify;
-            //$this->purifier = USanitize::getHTMLPurifier();  DISABLED
+            //$this->purifier = USanitize::getHTMLPurifier(); DISABLED
         }
     }
 
@@ -149,7 +149,7 @@ class RecordsBatch
     private function _validateDetailType(){
         
         $rtyID = @$this->data['rtyID'];
-        $dtyID = $this->data['dtyID'];    //detail to be affected
+        $dtyID = $this->data['dtyID'];//detail to be affected
         
         if ($rtyID && !((is_array($rtyID) || (ctype_digit($rtyID) && $rtyID>0))) ){
             $this->system->addError(HEURIST_ERROR, "Wrong parameter record type id $rtyID");
@@ -228,7 +228,7 @@ class RecordsBatch
                 if($rtyID>0){ //filter for record type
                     $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
                                         .implode(",",$recIDs).")");
-                    $recIDs = prepareIds($recIDs); //redundant for snyk
+                    $recIDs = prepareIds($recIDs);//redundant for snyk
                     $passedRecIDCnt = is_array($recIDs)?count($recIDs):0;
                 }
                 if($passedRecIDCnt>0){
@@ -239,7 +239,7 @@ class RecordsBatch
                         $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
                             .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
                             .join(",",$this->system->get_user_group_ids()).")");
-                        $this->recIDs = prepareIds($this->recIDs); //redundant for snyk
+                        $this->recIDs = prepareIds($this->recIDs);//redundant for snyk
                     }
 
                     $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
@@ -297,7 +297,7 @@ class RecordsBatch
         
         $allow_multi_parent = ($this->data['allow_multi_parent']==true);
        
-        $mysqli = $this->system->get_mysqli(); 
+        $mysqli = $this->system->get_mysqli();
         
         //1. find resource (child) records for given record type and detail
         $query = 'SELECT dtl_RecID as parent_id, d.dtl_Value as child_id, child.rec_OwnerUGrpID, child.rec_RecTypeID, child.rec_Title '
@@ -359,9 +359,9 @@ class RecordsBatch
         if (count($toProcess)>0){
         //3. add reverse pointer field in child record to parent record 
         $processedParents = array();
-        $childInserted = array();   
-        $childUpdated = array();    
-        $childAlready = array();    
+        $childInserted = array();
+        $childUpdated = array();
+        $childAlready = array();
         $titlesFailed = array();
         $childMiltiplied = array();
         
@@ -385,17 +385,17 @@ class RecordsBatch
                 
                 if($res==2){ 
                     if($allow_multi_parent){
-                        //if(!in_array($child_id, $childInserted)) array_push($childInserted, $child_id);    
-                        if(!in_array($child_id, $childMiltiplied)) array_push($childMiltiplied, $child_id);    
+                        //if(!in_array($child_id, $childInserted)) array_push($childInserted, $child_id);
+                        if(!in_array($child_id, $childMiltiplied)) array_push($childMiltiplied, $child_id);
                     }else{
-                        array_push($childUpdated, $child_id);    
+                        array_push($childUpdated, $child_id);
                     }
                     
                 }else{
-                    array_push($childInserted, $child_id);    
+                    array_push($childInserted, $child_id);
                 }
                 if(!in_array($parent_id, $processedParents)){
-                    array_push($processedParents, $parent_id);    
+                    array_push($processedParents, $parent_id);
                 }
                 
                 //update record title for child record
@@ -494,7 +494,7 @@ class RecordsBatch
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                      'rec_Modified'  => $now);
                      
-        $baseTag = "~add field $dtyName $now"; //name of tag assigned to modified records
+        $baseTag = "~add field $dtyName $now";//name of tag assigned to modified records
         
         if(@$this->data['geo']!=null){
             
@@ -505,7 +505,7 @@ class RecordsBatch
             }
             $dtl['dtl_Value'] = $geoType;
             $dtl['dtl_Geo'] = $geoValue;
-            //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
+            //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");
         }else if($basetype=='date'){
             
             $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
@@ -522,10 +522,10 @@ class RecordsBatch
                 $s = trim($this->data['val']);
                 $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                                                       
-                //$s = $this->purifier->purify( $this->data['val']);                                
+                //$s = $this->purifier->purify( $this->data['val']);
                 //$dtl['dtl_Value'] = htmlspecialchars_decode( $this->data['val'] );
             }else{
-                $dtl['dtl_Value'] = $this->data['val'];    
+                $dtl['dtl_Value'] = $this->data['val'];
             }
             
         }
@@ -534,13 +534,13 @@ class RecordsBatch
             $dtl['dtl_UploadedFileID'] = $this->data['ulfID'];
         }
         
-        $undefinedFieldsRecIDs = array(); //limit not defined
-        $processedRecIDs = array();       //success  
-        $limitedRecIDs = array();        //over limit - skip
+        $undefinedFieldsRecIDs = array();//limit not defined
+        $processedRecIDs = array();//success  
+        $limitedRecIDs = array();//over limit - skip
         $sqlErrors = array();
         
         foreach ($this->recIDs as $recID) {
-            $recID = intval($recID); //redundant for snyk
+            $recID = intval($recID);//redundant for snyk
             //check field limit for this record
             $query = "select rec_RecTypeID, tmp.cnt from Records ".
             "left join (select dtl_RecID as recID, count(dtl_ID) as cnt ".
@@ -550,7 +550,7 @@ class RecordsBatch
 
             $res = $mysqli->query($query);
             if(!$res){
-                array_push($undefinedFieldsRecIDs, $recID); //cannot retrieve limit 
+                array_push($undefinedFieldsRecIDs, $recID);//cannot retrieve limit 
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
             }
@@ -563,7 +563,7 @@ class RecordsBatch
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }else if (intval($rtyLimits[$rectype_ID])>0 && $row[1]>0 && ($rtyLimits[$rectype_ID] - $row[1]) < 1){
-                array_push($limitedRecIDs, $recID);  //over limit - skip
+                array_push($limitedRecIDs, $recID);//over limit - skip
                 continue;
             }
 
@@ -700,7 +700,7 @@ class RecordsBatch
         if(@$this->data['dt_extended_description']>0){
             $this->dt_extended_description = $this->data['dt_extended_description'];
         }else if(!($this->dt_extended_description>0)){
-            $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');    
+            $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
             $this->dt_extended_description = DT_EXTENDED_DESCRIPTION;
         }
         
@@ -742,7 +742,7 @@ class RecordsBatch
             $replace_all_occurences = true;   //search value not defined replace all
 
             //??? why we need it if $dtyID is defined
-            $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"'); // OR dty_Type = "geo"
+            $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"');// OR dty_Type = "geo"
             $types = prepareIds($types);//redundant for snyk
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
             
@@ -786,8 +786,8 @@ class RecordsBatch
             $replace_all_occurences = false;
         }
 
-        $undefinedFieldsRecIDs = array(); //value not found
-        $processedRecIDs = array();       //success  
+        $undefinedFieldsRecIDs = array();//value not found
+        $processedRecIDs = array();//success  
         $sqlErrors = array();
         
         $now = date('Y-m-d H:i:s');
@@ -885,7 +885,7 @@ class RecordsBatch
                     if(!$row){ //end of loop
                     
                         if($recID==0){
-                            array_push($undefinedFieldsRecIDs, $keep_recID);    
+                            array_push($undefinedFieldsRecIDs, $keep_recID);
                         }
                         break;
                     }
@@ -905,7 +905,7 @@ class RecordsBatch
                         $dtl['dtl_RecID']  = $recID;
                         $dtl['dtl_DetailTypeID']  = $dtyID;
                         $dtl['dtl_Value'] = $val;
-                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                     }
                     $recDetailWasUpdated = true;
                     
@@ -932,7 +932,7 @@ class RecordsBatch
                             $s = trim($newVal);
                             $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                             
-                            //$s = $this->purifier->purify( $newVal );                                
+                            //$s = $this->purifier->purify( $newVal );
                             //$dtl['dtl_Value'] = htmlspecialchars_decode( $dtl['dtl_Value'] );
                     }else if($basetype=='geo'){
                         
@@ -949,7 +949,7 @@ class RecordsBatch
                     
                     if(!@$this->data['debug']){
                         
-                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                 
                         if (!is_numeric($ret)) {
                             $sqlErrors[$recID] = $ret;
@@ -963,7 +963,7 @@ class RecordsBatch
                 
                 if($replace_all_occurences || $is_multiline)
                 {
-                    if($is_multiline) array_push($valuesToBeDeleted, intval($dtlID));  //= array_keys($valuesToBeReplaced);
+                    if($is_multiline) array_push($valuesToBeDeleted, intval($dtlID));//= array_keys($valuesToBeReplaced);
                     
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){
@@ -1008,7 +1008,7 @@ class RecordsBatch
 
         $dtyID = $this->data['dtyID'];
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
-        $isDeleteAll = (!array_key_exists("sVal",$this->data) || $this->data['sVal']=='');  //without conditions
+        $isDeleteAll = (!array_key_exists("sVal",$this->data) || $this->data['sVal']=='');//without conditions
         if($isDeleteAll){
             $unconditionally = true;    
         }
@@ -1061,9 +1061,9 @@ class RecordsBatch
         "rst_DetailTypeID = $dtyID and rst_RecTypeID in (".implode(",",$this->rtyIDs).") and rst_RequirementType='required'");
         
 
-        $undefinedFieldsRecIDs = array(); //value not found
-        $processedRecIDs = array();       //success  
-        $limitedRecIDs = array(); //it is not possible to delete requried fields
+        $undefinedFieldsRecIDs = array();//value not found
+        $processedRecIDs = array();//success  
+        $limitedRecIDs = array();//it is not possible to delete requried fields
         $sqlErrors = array();
         
         $now = date('Y-m-d H:i:s');
@@ -1091,7 +1091,7 @@ class RecordsBatch
                                 ?('='.$this->rtyIDs[0])
                                 :('in ('.implode(',', $this->rtyIDs).')'))
                         .' AND d.dtl_DetailTypeID='.$dtyID;
-                $mysqli->query($query);        
+                $mysqli->query($query);
              
                 if($mysqli->error!=null || $mysqli->error!=''){
                     $this->result_data['processed'] = 0;
@@ -1107,7 +1107,7 @@ class RecordsBatch
             $query = 'SELECT rec_ID FROM Records WHERE rec_RecTypeID '
                     .((count($this->rtyIDs)==1)
                             ?('='.$this->rtyIDs[0])
-                            :('in ('.implode(',', $this->rtyIDs).')'));            
+                            :('in ('.implode(',', $this->rtyIDs).')'));
                             
             $this->recIDs = mysql__select_list2($mysqli, $query);
             if($mysqli->error!=null || $mysqli->error!=''){
@@ -1179,7 +1179,7 @@ class RecordsBatch
                         $dtl['dtl_ID'] = $dtlID;  
                         $dtl['dtl_Value'] = $newVal;        
                                             
-                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                 
                         if (!is_numeric($ret)) {
                             $sqlErrors[$recID] = $ret;
@@ -1246,7 +1246,7 @@ class RecordsBatch
     */
     public function changeRecordTypeInBatch(){
 
-        $this->data['dtyID'] = '1'; //dumb value to pass validation
+        $this->data['dtyID'] = '1';//dumb value to pass validation
         
         if(!$this->_validateParamsAndCounts()){
             return false;
@@ -1327,11 +1327,11 @@ class RecordsBatch
         
         $processedRecIDs = array();//success  
         $sqlErrors = array();
-        $skippedRecIDs = array(); //values already defined
+        $skippedRecIDs = array();//values already defined
         
-        $skippedNoPDF   = array();  //no assosiated records
-        $skippedEmpty   = array();  //empty
-        $skippedParseEx = array();  //parse exception
+        $skippedNoPDF   = array();//no assosiated records
+        $skippedEmpty   = array();//empty
+        $skippedParseEx = array();//parse exception
         
         
                      
@@ -1390,7 +1390,7 @@ class RecordsBatch
 
                                             if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
 
-                                                $pagetext = iconv("UTF-8","UTF-8//IGNORE", $pagetext); // to remove
+                                                $pagetext = iconv("UTF-8","UTF-8//IGNORE", $pagetext);// to remove
 
                                                 //$pagetext = Encoding::fixUTF8($pagetext);
                                                 if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
@@ -1512,10 +1512,10 @@ class RecordsBatch
         
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
-        $this->_assignTagsAndReport('undefined', $skippedNoPDF, null);  //no pdf assigned
-        $this->_assignTagsAndReport('limited',   $skippedRecIDs, null);  //value already defined
-        $this->_assignTagsAndReport('parseexception', $skippedParseEx, null);  
-        $this->_assignTagsAndReport('parseempty', $skippedEmpty, null);  
+        $this->_assignTagsAndReport('undefined', $skippedNoPDF, null);//no pdf assigned
+        $this->_assignTagsAndReport('limited',   $skippedRecIDs, null);//value already defined
+        $this->_assignTagsAndReport('parseexception', $skippedParseEx, null);
+        $this->_assignTagsAndReport('parseempty', $skippedEmpty, null);
         $this->_assignTagsAndReport('errors',  $sqlErrors, null);//$baseTag);
         
         return $this->result_data;        
@@ -1564,7 +1564,7 @@ class RecordsBatch
         .' AND dtl_RecID in ('.implode(',',$this->recIDs).')';
         
         if($this->data['url_substring']){
-            $query = $query.' AND ulf_ExternalFileReference LIKE "%'.$mysqli->real_escape_string($this->data['url_substring']).'%"';    
+            $query = $query.' AND ulf_ExternalFileReference LIKE "%'.$mysqli->real_escape_string($this->data['url_substring']).'%"';
         }
         
         $query = $query.' ORDER BY ulf_ID';
@@ -1600,10 +1600,10 @@ class RecordsBatch
                     //5. If download - register new file
                     $file_entity->setRecords(null);
                     //$ulf_ID_new = false;
-                    $ulf_ID_new = $file_entity->downloadAndRegisterdURL($surl, null, (@$this->data['match_only']==1)?1:2); //it returns ulf_ID  
+                    $ulf_ID_new = $file_entity->downloadAndRegisterdURL($surl, null, (@$this->data['match_only']==1)?1:2);//it returns ulf_ID  
                     if(!$ulf_ID_new){
                         //can't download
-                        $downloadError[] = $row[3]; //rec_ID
+                        $downloadError[] = $row[3];//rec_ID
                     }
                     
                 }
@@ -1681,8 +1681,8 @@ class RecordsBatch
         if ($res){
             
             while ($row = $res->fetch_row()){        
-                $obfuscation_id = preg_replace('/[^a-z0-9]/', "", $row[0]);  //for snyk
-                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$obfuscation_id.'.png'; //'ulf_ObfuscatedFileID'
+                $obfuscation_id = preg_replace('/[^a-z0-9]/', "", $row[0]);//for snyk
+                $thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$obfuscation_id.'.png';//'ulf_ObfuscatedFileID'
                 if(file_exists($thumbnail_file)){
                     unlink($thumbnail_file);
                     $cnt++;
@@ -1802,8 +1802,8 @@ public methods
 
             $mysqli = $system->get_mysqli();
 
-            $record_ids = prepareIds($record_ids); //for snyk
-            $tag_ids    = prepareIds($tag_ids); //for snyk 
+            $record_ids = prepareIds($record_ids);//for snyk
+            $tag_ids    = prepareIds($tag_ids);//for snyk 
             
             //assign links
             $insert_query = 'insert ignore into usrRecTagLinks (rtl_RecID, rtl_TagID) '
@@ -2011,15 +2011,15 @@ public methods
             return false;
         }
 
-        $rec_count = count($record_ids); // this is to avoid multiple swf emails when creating records
+        $rec_count = count($record_ids);// this is to avoid multiple swf emails when creating records
 
-        $new_records = array(); // final array of newly created records
+        $new_records = array();// final array of newly created records
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         foreach($record_ids as $rec_id){
             
-            $rec_id = intval($rec_id); //snyk does not see intval in mysql__select_list2
+            $rec_id = intval($rec_id);//snyk does not see intval in mysql__select_list2
 
             // 1. Get values -----
             $details_to_transfer = array();
@@ -2072,7 +2072,7 @@ public methods
 
                 //$record['details'][DT_PARENT_ENTITY] = array($rec_id);
 
-                $result = recordSave($this->system, $record, false, false, 0, $rec_count); // $rec_count to avoid sending multiple swf emails
+                $result = recordSave($this->system, $record, false, false, 0, $rec_count);// $rec_count to avoid sending multiple swf emails
                 if($result['status'] != HEURIST_OK){
 
                     $mysqli->rollback();
@@ -2088,7 +2088,7 @@ public methods
 
                     //$record['details'][DT_PARENT_ENTITY] = array($rec_id);
 
-                    $result = recordSave($this->system, $record, false, false, 0, $rec_count); // $rec_count to avoid sending multiple swf emails
+                    $result = recordSave($this->system, $record, false, false, 0, $rec_count);// $rec_count to avoid sending multiple swf emails
                     if($result['status'] != HEURIST_OK){
 
                         $mysqli->rollback();
@@ -2109,7 +2109,7 @@ public methods
                     $dtl_IDs = $details_to_transfer[$idx];
                 }
                 
-                $dtl_IDs = prepareIds($dtl_IDs); //for snyk
+                $dtl_IDs = prepareIds($dtl_IDs);//for snyk
 
                 $upd_where = count($dtl_IDs) == 1 ? ("= " . $dtl_IDs[0]) : ("IN (" . implode(',', $dtl_IDs) . ")");
                 $upd_query = "UPDATE recDetails SET dtl_RecID = $rec_id WHERE dtl_ID $upd_where";
@@ -2156,13 +2156,13 @@ public methods
                 return false;
             }
 
-            array_push($new_records, ...$new_rec_ids); // add new rec ids to array
+            array_push($new_records, ...$new_rec_ids);// add new rec ids to array
         }
 
         $mysqli->commit();
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
-        $final_count = count($new_records); // get final count of new records
+        $final_count = count($new_records);// get final count of new records
 
         return array('count' => $final_count, 'record_ids' => implode(',', $new_records));
     }
@@ -2187,9 +2187,9 @@ public methods
         }
 
         $mysqli = $this->system->get_mysqli();
-        $date_mode = date('Y-m-d H:i:s'); // for tags, rec_modified and dtl_modified
+        $date_mode = date('Y-m-d H:i:s');// for tags, rec_modified and dtl_modified
 
-        $operation = intval($this->data['op']); // number corresponding to an operation below
+        $operation = intval($this->data['op']);// number corresponding to an operation below
         $doc = new DOMDocument; // for handling html text
 
         // Prepare exceptions list
@@ -2299,9 +2299,9 @@ public methods
 
                     $value = $temp_open.$values[1].$temp_close; // add temp tags, to avoid extra elements
 
-                    $doc->loadHTML($value, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
+                    $doc->loadHTML($value, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);// load html
 
-                    $xpath = new DOMXPath($doc); // retrieve text only
+                    $xpath = new DOMXPath($doc);// retrieve text only
                     $text_nodes = $xpath->query('//text()');
 
                     foreach($text_nodes as $node){
@@ -2312,7 +2312,7 @@ public methods
                         $node->data = $use_reg ? mb_ereg_replace_callback($regex, $callback, $text) : $text;
                     }
 
-                    $value = $doc->saveHTML(); // save new value
+                    $value = $doc->saveHTML();// save new value
 
                     // strip temp tags
                     $value = mb_substr($value, strlen($temp_open));
@@ -2342,7 +2342,7 @@ public methods
                     $regex = preg_quote($except);
                     $regex = "\b$regex\b";
                     if(mb_eregi($regex, $value)){ // check if exception appears in string
-                        $value = mb_eregi_replace($regex, $except, $value); // replace
+                        $value = mb_eregi_replace($regex, $except, $value);// replace
                     }
                 }
 
@@ -2366,7 +2366,7 @@ public methods
 
             array_push($completed_recs, $recID);
             if(!empty($sql_errors[$recID])){
-                $sql_errors[$recID] = implode(' ; ', $sql_errors[$recID]);
+                $sql_errors[$recID] = implode(' ;', $sql_errors[$recID]);
             }else{
                 unset($sql_errors[$recID]);
             }
@@ -2398,7 +2398,7 @@ public methods
         }
 
         $mysqli = $this->system->get_mysqli();
-        $date_mode = date('Y-m-d H:i:s'); // for tags, rec_modified and dtl_modified
+        $date_mode = date('Y-m-d H:i:s');// for tags, rec_modified and dtl_modified
         
         // Field details
         $dtyID = intval($this->data['dtyID']);
@@ -2478,7 +2478,7 @@ public methods
                 
                 if($replacement_dtl_id>0){
                     $query = 'DELETE FROM recDetails WHERE dtl_ID='.$replacement_dtl_id;
-                    $ret = $mysqli->query($query);        
+                    $ret = $mysqli->query($query);
                     if(!$ret){
                         $sql_errors[$recID][] = $mysqli->error;
                     }
@@ -2531,7 +2531,7 @@ public methods
 
             array_push($completed_recs, $recID);
             if(!empty($sql_errors[$recID])){
-                $sql_errors[$recID] = implode(' ; ', $sql_errors[$recID]);
+                $sql_errors[$recID] = implode(' ;', $sql_errors[$recID]);
             }else{
                 unset($sql_errors[$recID]);
             }
@@ -2643,7 +2643,7 @@ public methods
                 'propertyUri' => 'http://nakala.fr/terms#license'
             );
 
-            $api_key = $credentials[$service_id]['params']['writeApiKey']; //$this->system->get_system('sys_NakalaKey');
+            $api_key = $credentials[$service_id]['params']['writeApiKey'];//$this->system->get_system('sys_NakalaKey');
             $use_test_url = @$this->data['use_test_url'] == 1 || strpos($service_id,'nakala')===1 ? 1 : 0;
 
             while($row = $res->fetch_row()){
@@ -2752,14 +2752,14 @@ public methods
                               'use_test_url' => $use_test_url));
 
                     if($rtn){ // register URL ($rtn)
-                        //$file_entity->setRecords(null); // reset records
+                        //$file_entity->setRecords(null);// reset records
                         if($service_id){
-                            $fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');    
+                            $fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');
                         }else{
                             $fields = null;
                         }
                         
-                        $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields); // register nakala url
+                        $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields);// register nakala url
                         if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
                             $sqlErrors[$row[2]][] = 'File #' . $row[1] . ' &Rightarrow; ' . $mysqli->error;
                             $failed_ids[] = $row[2];
@@ -2804,7 +2804,7 @@ public methods
                     $ulf_to_delete[] = $org_ID;
                 }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
-                    $dtl_IDs = prepareIds($dtl_IDs); //for snyk
+                    $dtl_IDs = prepareIds($dtl_IDs);//for snyk
                     if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
                         // then delete the file reference + local file
                         $ulf_to_delete[] = $org_ID;
@@ -2876,7 +2876,7 @@ public methods
 
         
         
-        $to_replace = (@$data['replace']==1); //replace existing link
+        $to_replace = (@$data['replace']==1);//replace existing link
         
         //2. Find matching pairs - [source rec_ID, target rec_ID]
         $data['pairs'] = 1;
@@ -2903,7 +2903,7 @@ public methods
         $res = true;
         
         $execution_counter = 0;
-        $tot_count = count($pairs);               
+        $tot_count = count($pairs); 
         
         $prev_rec_ID = 0;
         
@@ -2939,7 +2939,7 @@ public methods
                 $session_val = $execution_counter.','.$tot_count;
                 $current_val = mysql__update_progress($mysqli, $this->session_id, false, $session_val);
                 if($current_val=='terminate'){ //session was terminated from client side
-                    $system->addError(HEURIST_ACTION_BLOCKED, 'Action has been terminated by user');                
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Action has been terminated by user');
                     return false;
                 }
             }

@@ -73,7 +73,7 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
@@ -130,7 +130,7 @@ $email_body = "This is a reminder that you can download an archive package of yo
 . "Please note: some very large databases could create files which are too large to download.<br>"
 . "In that case please ".CONTACT_SYSADMIN." so that we are aware of the problem and can arrange an alternative procedure.";
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $month_ago = strtotime('-1 month');

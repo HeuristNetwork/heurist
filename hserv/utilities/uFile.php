@@ -241,7 +241,7 @@
                 if ($object != '.' && $object != '..') {
                     if (filetype($dir.'/'.$object) == 'dir') {
 
-                        $rtn = folderDelete($dir.'/'.$object, true, $verbos); //delete files
+                        $rtn = folderDelete($dir.'/'.$object, true, $verbos);//delete files
                         
                         $msgs[] = "Deleting sub directory $object";
                         if($verbos && !empty($rtn)){ // merge messages
@@ -255,7 +255,7 @@
             }
             reset($objects);
             if($rmdir)
-                rmdir($dir); //delete folder itself
+                rmdir($dir);//delete folder itself
         }
 
         return $verbos ? $msgs : null;
@@ -410,7 +410,7 @@
                 $os        = strtoupper(substr(PHP_OS, 0, 3));
                 // If on a Unix Host (Linux, Mac OS)
                 if ($os !== 'WIN') {
-                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir); 
+                    $cmd = escapeshellcmd('/usr/bin/du -sb ' . $dir);
                     $io = popen($cmd, 'r');
                     if ($io !==false) {
                         $totalSize = intval(fgets($io, 80));
@@ -433,7 +433,7 @@
                 foreach ($files as $file) {
                     
                     if(!$file->isDir()){
-                        $totalSize += $file->getSize();    
+                        $totalSize += $file->getSize();
                     }
                 }
             }
@@ -460,7 +460,7 @@
                 $file = $dir.'/'.$node;
                 if(is_dir($file)){
                     if($recursion){
-                        return folderFirstFile($file, $ext, $recursion);    
+                        return folderFirstFile($file, $ext, $recursion);
                     }
                 }else{
                     if($ext!=null)
@@ -693,7 +693,7 @@
     {
         if($rawdata){
             try{
-                $fp = fopen($filename,'a'); //open for add
+                $fp = fopen($filename,'a');//open for add
                 if($fp===false){
                     // 'Cannot open file '.$filename 
                 }else{
@@ -846,7 +846,7 @@ function folderSubs($src, $exclude=null, $full_path=true) {
                             }
                             
                             if($full_path){
-                                $res[] = $src.$file.'/';    
+                                $res[] = $src.$file.'/';
                             }else{
                                 $res[] = $file;
                             }
@@ -867,7 +867,7 @@ function folderSubs($src, $exclude=null, $full_path=true) {
 //
 function isPathInHeuristUploadFolder($path, $check_existance=true){
   
-    chdir(HEURIST_FILESTORE_DIR);  // relatively db root  or HEURIST_FILES_DIR??        
+    chdir(HEURIST_FILESTORE_DIR);// relatively db root  or HEURIST_FILES_DIR??        
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $r_path = realpath($path);
     
@@ -912,11 +912,11 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
 function saveURLasFile($url, $filename)
 {   
     //Download file from remote server
-    $rawdata = loadRemoteURLContent($url, false); //use proxy 
+    $rawdata = loadRemoteURLContent($url, false);//use proxy 
     if(is_string($rawdata)){
-        return fileSave($rawdata, $filename); //returns file size
+        return fileSave($rawdata, $filename);//returns file size
     }else{
-        error_log('Can not access remote resource'); //.filter_var($url,FILTER_SANITIZE_URL));
+        error_log('Can not access remote resource');//.filter_var($url,FILTER_SANITIZE_URL));
         return 0;
     }
 }
@@ -941,7 +941,7 @@ function getTitleFromURL($url){
         preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
         if ($matches) {
             // Clean up title: remove EOL's and excessive whitespace.
-            $title = preg_replace('/\s+/', ' ', $matches[1]);   
+            $title = preg_replace('/\s+/', ' ', $matches[1]);
             $title = trim($title);
         }
     }
@@ -1031,17 +1031,17 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
                  //'Firefox (WindowsXP) - Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return the output as a string from curl_exec
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
     curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
     curl_setopt($ch, CURLOPT_NOBODY, 0);
-    curl_setopt($ch, CURLOPT_HEADER, 0);    //don't include header in output
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
-    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);    // don't verify peer cert
+    curl_setopt($ch, CURLOPT_HEADER, 0);//don't include header in output
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
+    //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);// don't verify peer cert
     if(strpos(strtolower($url), strtolower(HEURIST_MAIN_SERVER))===0){
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 1);
     }
-    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);    // no more than 5 redirections
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);// timeout after ten seconds
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);// no more than 5 redirections
 
     curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
     curl_setopt($ch, CURLOPT_FAILONERROR, true);
@@ -1127,7 +1127,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     curl_setopt($ch, CURLOPT_HEADER, 1);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);    // timeout after ten seconds
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);// timeout after ten seconds
     //Vulnerability curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -1152,7 +1152,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
         USanitize::errorLog('CURL ERROR: http code = '.$code.'  curl error='.$error);
     } else {
         //if(!$data){
-            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);    
+            $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
         //}
     }
     curl_close($ch);
@@ -1205,7 +1205,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
             //get extension from url - unreliable
             //$f_extension = getURLExtension($url)
 
-            $mimeType = loadRemoteURLContentType($url); 
+            $mimeType = loadRemoteURLContentType($url);
             
         }
         
@@ -1219,7 +1219,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
                 while($k<count($parts)){
                     if(strpos($parts[$k],'charset')!==false){
                         array_splice($parts, $k, 1);
-                        //unset($parts[$k]);     
+                        //unset($parts[$k]);
                     }else{
                         $k++;
                     }
@@ -1232,7 +1232,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
                 if($mimeType=='application/json' ||  $mimeType=='application/ld+json'){
                     $mimeType = 'application/json';
                     $extension = 'json';
-                    $force_add = "('json','application/json', '0','','JSON','')";    
+                    $force_add = "('json','application/json', '0','','JSON','')";
                 }
             
                 $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
@@ -1252,7 +1252,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
         }
         //if extension not found apply bin: application/octet-stream - generic mime type
         if($extension==null && $use_default_ext) {
-            $extension = 'bin';    
+            $extension = 'bin';
         }
         $res = array('extension'=>$extension, 'needrefresh'=>$needrefresh);
         
@@ -1313,7 +1313,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     
     //DETECT End of line
     if($csv_enclosure=='' || $csv_enclosure=='none'){
-        $csv_enclosure = 'ʰ'; //rare character
+        $csv_enclosure = 'ʰ';//rare character
     }
     
     $eol = null;
@@ -1328,7 +1328,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     if($csv_linebreak=='auto' || $csv_linebreak==null || $eol==null){
         ini_set('auto_detect_line_endings', 'true');
         
-        $line = fgets($handle, 1000000);      //read line and auto detect line break
+        $line = fgets($handle, 1000000);//read line and auto detect line break
         $position = ftell($handle);
         fseek($handle, $position - 5);
         $data = fread($handle, 10);
@@ -1346,7 +1346,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     //--------- DETECT FIELD SEPARATOR    
     //fgetcsv и str_getcsv depends on server locale
     // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
-    setlocale(LC_ALL, 'en_US.utf8');        
+    setlocale(LC_ALL, 'en_US.utf8');
     
     
     $delimiters = array("\t"=>0,','=>0,';'=>0,':'=>0,'|'=>0,'-'=>0);
@@ -1388,7 +1388,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
             if($line_no>10) break;
             $line_no++;
         }   
-        rewind($handle); 
+        rewind($handle);
     }//for delimiters
     fclose($handle);
     
@@ -1426,8 +1426,8 @@ function isXMLfile($filename){
     $res = false;
     $handle = @fopen($filename, 'r');
     if ($handle) {
-        $output = fread($handle, 10);   
-        $pp = strpos($output, '<?xml'); 
+        $output = fread($handle, 10);
+        $pp = strpos($output, '<?xml');
         $res = ($pp === 0 || $pp === 3);
         fclose($handle);
     }
@@ -1463,7 +1463,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
             if (strpos($line, $action)===0) {
                 
                 $datetime1 = date_create(trim(substr($line, strlen($action))));
-                $interval = date_diff($datetime1, $datetime2);                    
+                $interval = date_diff($datetime1, $datetime2);
                 
                 $allowed = ($interval->format('%y')>0 ||
                 $interval->format('%m')>0 || $interval->format('%d')>0 || 
@@ -1493,7 +1493,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
     }else if ($range_minutes>0) {
         $fp = fopen($progress_flag, 'w');
         fwrite($fp, $action.' '. date_create('now')->format('Y-m-d H:i:s'));
-        fclose($fp);            
+        fclose($fp);
     }
     return true;
 }
@@ -1545,16 +1545,16 @@ function uploadFileToNakala($system, $params) {
 
     $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key)); // USERs API KEY
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key));// USERs API KEY
 
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);    //return the output as a string from curl_exec
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
     curl_setopt($ch, CURLOPT_NOBODY, 0);
-    curl_setopt($ch, CURLOPT_HEADER, 0);            //don't include header in output
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);    // follow server header redirects
+    curl_setopt($ch, CURLOPT_HEADER, 0);//don't include header in output
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
 
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);          // timeout after sixty seconds
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);         // no more than 5 redirections
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);// timeout after sixty seconds
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);// no more than 5 redirections
 
     curl_setopt($ch, CURLOPT_USERAGENT, $useragent);
 
@@ -1706,7 +1706,7 @@ function uploadFileToNakala($system, $params) {
         $metadata['metas'][] = $data;    
     }
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json')); // Reset headers to specify the return type
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json'));// Reset headers to specify the return type
     curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}");
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($metadata));
 

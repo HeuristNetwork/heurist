@@ -24,7 +24,7 @@
  * @package     Heurist academic knowledge management system
  */
 
-define('PDIR', '../../');  //need for proper path to js and css
+define('PDIR', '../../');//need for proper path to js and css
 require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 ?>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
@@ -65,7 +65,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
     }
         //Used to open the crosstabs section to the full width on the initial load.
         // window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-        //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
+        //     ['east', (top ? top.innerWidth : window.innerWidth)]);
         if(window.hWin.HAPI4 && window.hWin.HAPI4.LayoutMgr){
             window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
                 ['east', (top ?  '55%' : window.innerWidth)]);

@@ -25,14 +25,14 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
   
-define('ADMIN_PWD_REQUIRED', 1); 
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED', 1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 ?>  
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
           
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>Record and base field types with missing xxx_OriginatingDBID or xxx_IDinOriginatingDB fields</p>
@@ -82,7 +82,7 @@ $mysqli = $system->get_mysqli();
             ."(rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL)";
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;  
@@ -98,7 +98,7 @@ $mysqli = $system->get_mysqli();
             //'(NOT (dty_IDInOriginatingDB>0)) ';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -118,7 +118,7 @@ $mysqli = $system->get_mysqli();
             .$db_name.'`.defTerms WHERE  trm_OriginatingDBID>0 AND (NOT (trm_IDInOriginatingDB>0)) ';
             
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -128,9 +128,9 @@ $mysqli = $system->get_mysqli();
         }
         
         if($is_found){
-            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';    
+            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';
             
-            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';            
+            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';
             
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';

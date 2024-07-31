@@ -57,7 +57,7 @@ function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
     if(!$as->isAuthenticated()){
         
         if($require_auth){
-            $as->requireAuth();    //after saml login - it returns to this page again
+            $as->requireAuth();//after saml login - it returns to this page again
             exit;
         }else{
             $errMessage = 'Not externally authenticated';
@@ -104,7 +104,7 @@ function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
             $spe = $mysqli->real_escape_string($sp);
 $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not null '
 .' and  (usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="" OR usr_ExternalAuthentication->\'$."'.$spe.'".uid\'="'.$mysqli->real_escape_string($attr['uid'][0]).'")'
-.' and  (usr_ExternalAuthentication->\'$."'.$spe.'".mail\'="n" OR ugr_eMail="'.$mysqli->real_escape_string($attr['mail'][0]).'")';            
+.' and  (usr_ExternalAuthentication->\'$."'.$spe.'".mail\'="n" OR ugr_eMail="'.$mysqli->real_escape_string($attr['mail'][0]).'")';
 
             $user_id = mysql__select_value($system->get_mysqli(), $query);
             */
@@ -115,8 +115,8 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
                 
                 if($system->get_system('sys_AllowRegistration')){
                     //register new user 
-                    $givenName = @$attr['urn:oid:2.5.4.42'][0]?$attr['urn:oid:2.5.4.42'][0]:@$attr['givenName'][0]; 
-                    $surName = @$attr['urn:oid:2.5.4.4'][0]?$attr['urn:oid:2.5.4.4'][0]:@$attr['sn'][0]; 
+                    $givenName = @$attr['urn:oid:2.5.4.42'][0]?$attr['urn:oid:2.5.4.42'][0]:@$attr['givenName'][0];
+                    $surName = @$attr['urn:oid:2.5.4.4'][0]?$attr['urn:oid:2.5.4.4'][0]:@$attr['sn'][0];
                     
                     list($givenName2, $surName2) = explode(' ',
                         @$attr['displayName'][0]?$attr['displayName'][0]

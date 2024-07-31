@@ -25,7 +25,7 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 if(!array_key_exists('rectype_ids', $_REQUEST)){
-    require_once dirname(__FILE__).'/../../hserv/controller/record_output.php'; // attempt to export actual records
+    require_once dirname(__FILE__).'/../../hserv/controller/record_output.php';// attempt to export actual records
     exit;
 }
 
@@ -37,7 +37,7 @@ if(!defined('PDIR')){
 }
 
 // Record type names
-$rst = dbs_GetRectypeStructures($system, null, 0); //0 - only names and groupnames
+$rst = dbs_GetRectypeStructures($system, null, 0);//0 - only names and groupnames
 $rty_names = $rst['names'];
 
 if(@$_REQUEST['rectype_ids']=='y' || @$_REQUEST['rectype_ids']=='all'){ //all
@@ -132,7 +132,7 @@ $import_help = "{"
 //$fd = fopen('php://output', 'w');
 
 $json = "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[";
-//fwrite($fd, "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":["); // starting string
+//fwrite($fd, "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[");// starting string
 
 // RECORD STRUCTURES
 $file_field = '{"file": {"ulf_ExternalFileReference": "FILE_OR_URL", "fxm_MimeType": "TEXT", "ulf_Description": "MEMO_TEXT", "ulf_OrigFileName": "TEXT"}}';
@@ -142,7 +142,7 @@ $sep = '';
 $rectypes = '';
 foreach ($rectype_ids as $rty_id) {
 
-    $rectype_structure = recordTemplateByRecTypeID($system, $rty_id); // recordSearch.php
+    $rectype_structure = recordTemplateByRecTypeID($system, $rty_id);// recordSearch.php
     $rec_templates = '';
 
     if(!array_key_exists('error', $rectype_structure)){
@@ -186,13 +186,13 @@ foreach ($rectype_ids as $rty_id) {
     }
 
     $json .= $rec_templates;
-    //fwrite($fd, $rec_templates); // add template to file
+    //fwrite($fd, $rec_templates);// add template to file
 
     $sep = ',';
 }
 
 $json .= "\n \t],";
-//fwrite($fd, "\n \t],"); // end of record templates
+//fwrite($fd, "\n \t],");// end of record templates
 
 // Add database details
 $db_details = "\n \t\"database\":{"

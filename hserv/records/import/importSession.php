@@ -111,7 +111,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         //save session with new ID
         $imp_session['primary_rectype'] = $rty_ID;
         $imp_session['sequence'] = $sequence;
-        $res = self::save($imp_session);    
+        $res = self::save($imp_session);
         if(!is_array($res)){
             self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session #'.$imp_ID, $res);
             return false;
@@ -121,7 +121,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
      }else{
         //get dependent record types
         try{
-            return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');  //?? 6    
+            return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');//?? 6    
         }catch(Exception $e){
             $sMsg = $e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage();
             self::$system->addError(HEURIST_ERROR, 'Cannot generate structure tree for record type '.$rty_ID.' session #'.$imp_ID, $sMsg);
@@ -223,10 +223,10 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         
         foreach($field_idx as $idx){
             if('field_'.$idx!=$id_field)
-                array_push($sel_fields, 'field_'.$idx);        
+                array_push($sel_fields, 'field_'.$idx);
         }
         if($mode=='insert' && count($sel_fields)>1){
-            $order_field = $sel_fields[1];    
+            $order_field = $sel_fields[1];
         }
         
         $sel_fields = 'DISTINCT '.implode(',',$sel_fields);

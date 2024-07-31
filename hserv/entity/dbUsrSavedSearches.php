@@ -24,7 +24,7 @@ require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php'; //send email methods
+require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
 
 
 class DbUsrSavedSearches extends DbEntityBase
@@ -178,7 +178,7 @@ class DbUsrSavedSearches extends DbEntityBase
         
         //add specific field values
         foreach($this->records as $idx=>$record){
-            $this->records[$idx]['svs_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['svs_Modified'] = date('Y-m-d H:i:s');//reset
             
             $tbl = $this->config['tableName'];
             

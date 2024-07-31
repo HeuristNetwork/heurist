@@ -72,7 +72,7 @@ $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["
 if($is_own_domain){
     //'dicobiosport'
     //detect databasename 
-    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12); //remove .huma-num.fr
+    $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);//remove .huma-num.fr
     if(count($requestUri)==0 || $requestUri[0]!=$database_name_from_domain){
         array_unshift($requestUri, $database_name_from_domain);
     }
@@ -92,7 +92,7 @@ http://127.0.0.1/heurist/MBH
 */
 if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha')){
 
-    header('Location: /'.rawurlencode($requestUri[0]).'/index.php');  
+    header('Location: /'.rawurlencode($requestUri[0]).'/index.php');
     exit;
 
 }else
@@ -101,14 +101,14 @@ if ((count($requestUri)==1)
     (count($requestUri)==2 && (!in_array($requestUri[1],$allowedActions) || $requestUri[1]=='startup'))
     )
 { //&& (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
-    $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]); //to avoid "Open redirect" security report
+    $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]);//to avoid "Open redirect" security report
     
     if($dbname=='startup'){
-        header('Location: /'.rawurlencode($requestUri[0]).'/startup/index.php');  
+        header('Location: /'.rawurlencode($requestUri[0]).'/startup/index.php');
         exit;
     }else
     if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
-        header('Location: /'.rawurlencode($dbname).'/web/');  
+        header('Location: /'.rawurlencode($dbname).'/web/');
         exit;
     }
 }
@@ -200,7 +200,7 @@ $requestUri:
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
         }else if($database=='heurist' || $database=='h6-alpha'){
-            header('Location: /'.rawurlencode($database).'/index.php');  
+            header('Location: /'.rawurlencode($database).'/index.php');
             exit;
         }
 
@@ -217,14 +217,14 @@ $requestUri:
             $params['website'] = 1;
                         
             if(intval(@$requestUri[3])>0){
-                $redirect .= '&id='.intval($requestUri[3]);    
+                $redirect .= '&id='.intval($requestUri[3]);
                 $params['id'] = intval($requestUri[3]);
             } 
             if(intval(@$requestUri[4])>0) { //it may be both website pageid and record id
-                $redirect .= '&pageid='.intval($requestUri[4]);    
+                $redirect .= '&pageid='.intval($requestUri[4]);
                 $params['pageid'] = intval($requestUri[4]);
             }
-            $_SERVER["REQUEST_URI"] = $host_params['install_dir']; //'/heurist/';
+            $_SERVER["REQUEST_URI"] = $host_params['install_dir'];//'/heurist/';
             
             define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
             
@@ -242,7 +242,7 @@ $requestUri:
                     $params['recID'] = intval($requestUri[3]);
                     
                     if($action=='view'){
-                        $rewrite_path = dirname(__FILE__).'/../viewers/record/viewRecord.php';    
+                        $rewrite_path = dirname(__FILE__).'/../viewers/record/viewRecord.php';
                     }else{
                         define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
                         $rewrite_path = dirname(__FILE__).'/../hclient/framecontent/recordEdit.php';
@@ -263,15 +263,15 @@ $requestUri:
                     
                     //if(ctype_digit($requestUri[3]) && $requestUri[3]>0){
                     if(count($ids)>0){
-                        $redirect .= ('ids:'.$requestUri[3]);    
+                        $redirect .= ('ids:'.$requestUri[3]);
                     }else{
-                        $redirect .= $requestUri[3];     
+                        $redirect .= $requestUri[3];
                     }
                     
                     if(@$requestUri[4]!=null && ctype_digit($requestUri[4]) && $requestUri[4]>=0){
-                        $redirect .= ('&depth='.intval($requestUri[4]));         
+                        $redirect .= ('&depth='.intval($requestUri[4]));
                     }else{
-                        $redirect .= '&depth=1';     
+                        $redirect .= '&depth=1';
                     }
                     
                 }else{
@@ -287,16 +287,16 @@ $requestUri:
                     $ids = prepareIds(@$requestUri[3]);
                     //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
                     if(count($ids)>0){
-                        $query = ('ids:'.$requestUri[3]);    
+                        $query = ('ids:'.$requestUri[3]);
                     }else{
-                        $query = urldecode($requestUri[3]);     
+                        $query = urldecode($requestUri[3]);
                     }
                     $params['w'] = 'a';
                     $params['q'] = $query;
                     
                     $redirect = $redirect.'&q='.$query;
                 }
-                //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);    
+                //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
                 //$rewrite_path = dirname(__FILE__).'/../index.php';
                 
             }else if($action=='tpl'){
@@ -313,9 +313,9 @@ $requestUri:
                         $ids = prepareIds(@$requestUri[4]);
                         //if(ctype_digit($requestUri[4]) && $requestUri[4]>0){
                         if(count($ids)>0){
-                            $query = ('ids:'.$requestUri[4]);    
+                            $query = ('ids:'.$requestUri[4]);
                         }else{
-                            $query = $requestUri[4];     
+                            $query = $requestUri[4];
                         }
                         $redirect .= $query;     
 
@@ -337,14 +337,14 @@ $requestUri:
     }
     
     if($error_msg){
-       $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg)); 
+       $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
     }else if($rewrite_path){
         $_REQUEST = $params;
         include_once $rewrite_path;
         exit;
     }
     
-    header('Location: '.$redirect);  
+    header('Location: '.$redirect);
     exit;
 
 }
@@ -352,16 +352,16 @@ else if(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h
     //Redirects to index page for viewers plugins
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    header('Location: /'.filter_var($requestUri[0]).'/'.$requestUri[1].'/'.$requestUri[2].'/index.php?'.$query_string);  
+    header('Location: /'.filter_var($requestUri[0]).'/'.$requestUri[1].'/'.$requestUri[2].'/index.php?'.$query_string);
     exit;
     
 }
 
 //alowed 
 if(@$_REQUEST['fmt']){
-    $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
+    $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
 }elseif(@$_REQUEST['format']){
-    $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);        
+    $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
 }else{
     $format = ($isMediaRequest)?'html':'hml';
 }
@@ -371,7 +371,7 @@ $recid = null;
 $database_id = 0;
 
 if(@$_REQUEST['recID'] || @$_REQUEST['recid']){
-    $recid = @$_REQUEST['recid']?$_REQUEST['recid']:$_REQUEST['recID'];        
+    $recid = @$_REQUEST['recid']?$_REQUEST['recid']:$_REQUEST['recID'];
     
 }else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
     
@@ -402,7 +402,7 @@ if($isMediaRequest){
         exit;
     }
 }else{
-    $recid = intval($recid);    
+    $recid = intval($recid);
     if(!($recid>0)){
         header('Location:'.$redirection_path.'hclient/framecontent/infoPage.php?error=Record ID is not defined');
         exit;
@@ -415,7 +415,7 @@ if ($database_id>0) {
     include_once dirname(__FILE__).'/../hserv/utilities/dbRegis.php';
     
     if(!isset($system)){
-        $system = new System(); //to keep error
+        $system = new System();//to keep error
     }
     
     $database_url = DbRegis::registrationGet(array('dbID'=>$database_id));
@@ -478,7 +478,7 @@ if($database_url!=null){ //redirect to resolver for another database
     
     $redirect = 'hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
     if(@$_REQUEST['field']>0){
-        $redirect = $redirect.'&field='.$_REQUEST['field'];    
+        $redirect = $redirect.'&field='.$_REQUEST['field'];
     }
     
 }else if($format=='edit'){  //redirect to record edit
@@ -511,7 +511,7 @@ if($database_url!=null){ //redirect to resolver for another database
     if(!isset($error_msg)){
         $error_msg = 'Can\'t resolve the given URI: '.$_SERVER['REQUEST_URI'];
     }
-    $redirect = 'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg); 
+    $redirect = 'hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg);
 }
 
 header('Location: '.$redirection_path.$redirect);

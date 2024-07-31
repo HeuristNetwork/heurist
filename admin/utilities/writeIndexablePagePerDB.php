@@ -77,7 +77,7 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -301,14 +301,14 @@ $template_page = '<!DOCTYPE html>'
 
 . '</html>';
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
-$today = date('Y-m-d'); //'d-M-Y'
+$today = date('Y-m-d');//'d-M-Y'
 $pages_made = 0;
 $list_is_array = is_array($arg_database);
 
-$index_databases = array(); // array of databases with websites (is inserted, with links, into index.html)
+$index_databases = array();// array of databases with websites (is inserted, with links, into index.html)
 
 foreach ($databases as $idx=>$db_name){
 
@@ -445,7 +445,7 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
 
-    $values[17] = implode('<br>', $vals); // produce concatenated string of record types
+    $values[17] = implode('<br>', $vals);// produce concatenated string of record types
 
     // Setup content
     $content = str_replace($value_to_replace, $values, $template_page);

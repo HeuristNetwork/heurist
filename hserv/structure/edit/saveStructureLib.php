@@ -31,8 +31,8 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
-require_once dirname(__FILE__).'/../../records/edit/recordModify.php';  //to delete temporary records
-require_once dirname(__FILE__).'/../conceptCode.php'; 
+require_once dirname(__FILE__).'/../../records/edit/recordModify.php';//to delete temporary records
+require_once dirname(__FILE__).'/../conceptCode.php';
 
 
 $rtyColumnNames = array(
@@ -288,7 +288,7 @@ function deleteRecType($rtyID) {
             recordDelete($system, $recIds);
 
             /* @todo old h3 code to delete
-            $res = $mysqli->query($query); 
+            $res = $mysqli->query($query);
             while ($row =  $res->fetch_row() ) {
             deleteRecord($row[0]);
             }*/
@@ -518,7 +518,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
 
     if (is_array($commonNames) && count($commonNames)>0) {
 
-        $parameters = array(""); //list of field date types
+        $parameters = array("");//list of field date types
         foreach ($commonNames as $colName) {
 
             $val = array_shift($rt[0]['common']);
@@ -531,7 +531,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
 
                 //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
                 if($colName == "rty_TitleMask"){
-                    //array_push($parameters, ""); //empty title mask - store only canonical!
+                    //array_push($parameters, "");//empty title mask - store only canonical!
                     $val = TitleMask::execute($val, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
                 }else if($colName == "rty_Status"){
                     if($val==null || $val=='') $val = 'open';
@@ -661,7 +661,7 @@ function _getInitRty($ri, $di, $dt, $dtid, $defvals){
 
     $arr_target[$ri['rst_OriginatingDBID']] = 2;
     $arr_target[$ri['rst_MaxValues']] = "1";
-    $arr_target[$ri['rst_MinValues']] = $defvals[1]; //0 -repeatable, 1-single
+    $arr_target[$ri['rst_MinValues']] = $defvals[1];//0 -repeatable, 1-single
 
     $arr_target[$ri['rst_DisplayDetailTypeGroupID']] = "1";
     $arr_target[$ri['rst_FilteredJsonTermIDTree']] = null;
@@ -730,7 +730,7 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
 
         foreach($fields as $dty_ID){
             $data['dtFields'][$dty_ID] = _getInitRty($ri, $di, $dt, $dty_ID, 
-                array((in_array($dty_ID, $reqs)?'required':'recommended'),1,100,$order));  //req,minval,width
+                array((in_array($dty_ID, $reqs)?'required':'recommended'),1,100,$order));//req,minval,width
             $order = $order+10;        
             if(count($seps)==2 && $need_sep){
                 $data['dtFields'][$seps[1]] = _getInitRty($ri, $di, $dt, $seps[1], array('optional',1,100,$order));
@@ -763,7 +763,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     global $system, $mysqli, $rstColumnNames;
 
-    $ret = array(); //result
+    $ret = array();//result
     $ret[$rtyID] = array();
 
     $res = mysql__select_value($mysqli, "select rty_ID from defRecTypes where rty_ID = $rtyID");
@@ -786,7 +786,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
         {
             //$ret['dtFields'][$dtyID] = array();
             $fieldNames = "";
-            $parameters = array(""); //list of field date types
+            $parameters = array("");//list of field date types
 
             $row = mysql__select_row_assoc($mysqli,
                 "select rst_ID, rst_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
@@ -853,7 +853,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
                     //array_push($ret[$rtyID], $ret);
                     return false;
                 } else {
-                    array_push($ret[$rtyID], $dtyID);  //numeric ok 
+                    array_push($ret[$rtyID], $dtyID);//numeric ok 
                 }
             }
         }//for each dt
@@ -916,7 +916,7 @@ function createRectypeGroups($columnNames, $rt) {
         foreach ( $rt as $newRT) {
 
             $colValues = $newRT['values'];
-            $parameters = array(""); //list of field date types
+            $parameters = array("");//list of field date types
             $query = "";
             foreach ($columnNames as $colName) {
                 $val = array_shift($colValues);
@@ -985,7 +985,7 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
     if ( is_array($columnNames) && count($columnNames)>0 ) {
 
         $vals = $rt;
-        $parameters = array(""); //list of field date types
+        $parameters = array("");//list of field date types
         foreach ($columnNames as $colName) {
             $val = array_shift($vals);
 
@@ -1098,7 +1098,7 @@ function createDettypeGroups($columnNames, $rt)
         foreach ( $rt as $newRT) {
 
             $colValues = $newRT['values'];
-            $parameters = array(""); //list of field date types
+            $parameters = array("");//list of field date types
             $query = "";
             foreach ($columnNames as $colName) {
                 $val = array_shift($colValues);
@@ -1168,7 +1168,7 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
     if (is_array($columnNames) && count($columnNames)>0) {
 
         $vals = $rt;
-        $parameters = array(""); //list of field date types
+        $parameters = array("");//list of field date types
         foreach ($columnNames as $colName) {
             $val = array_shift($vals);
 
@@ -1271,7 +1271,7 @@ function createDetailTypes($commonNames, $dt) {
 
         $colNames = join(",",$commonNames);
 
-        $parameters = array(""); //list of field date types
+        $parameters = array("");//list of field date types
         $query = "";
         $querycols = "";
         foreach ($commonNames as $colName) {
@@ -1380,11 +1380,11 @@ function updateDetailType($commonNames,$dtyID,$dt) {
     if (is_array($commonNames) && count($commonNames)>0) {
 
         $vals = $dt['common'];
-        $parameters = array(""); //list of field date types
+        $parameters = array("");//list of field date types
         foreach ($commonNames as $colName)
         {
 
-            $val = array_shift($vals); //take next value
+            $val = array_shift($vals);//take next value
 
             if (array_key_exists($colName, $dtyColumnNames)) {
                 //array_push($ret['error'], "$colName is not a valid column name for defDetailTypes val= $val was not used");
@@ -1694,7 +1694,7 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
     $res = updateTerms( $colNames, $retain_id, $dt, null );
     if(!($res>0)){
         if(!(count($system->getError())>0)){
-            $system->addError(HEURIST_ACTION_BLOCKED, $res);    
+            $system->addError(HEURIST_ACTION_BLOCKED, $res);
         }
         $ret = false;
     }else{
@@ -1711,7 +1711,7 @@ function mergeTerms($retain_id, $merge_id, $colNames, $dt){
 function getTermsChilds($ret, $trmID, $terms=null) {
     global $mysqli;
 
-    if(!$terms) $terms = array($trmID); //to prevent recursion
+    if(!$terms) $terms = array($trmID);//to prevent recursion
 
     $query = "select trm_ID from defTerms where trm_ParentTermID = ".intval($trmID);
     $res = $mysqli->query($query);
@@ -1759,7 +1759,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
             .implode(', ',$rt_Names)
             .') from the record-pointer field. However, this field already points to existing records of this type. '
             .'You must delete the target records first before you can delete '
-            .'the target record type from the record-pointer field.'; 
+            .'the target record type from the record-pointer field.';
 
             $ret['error_title'] = 'Warning: Record type in use';
             $recIDs = array();
@@ -1777,10 +1777,10 @@ function checkDtPtr($rty_IDs, $dty_ID){
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
-                $ret_message = $ret_message.' (limited to first 250)';    
+                $ret_message = $ret_message.' (limited to first 250)';
             }
 
-            $system->addError(HEURIST_ACTION_BLOCKED, $ret_message);   
+            $system->addError(HEURIST_ACTION_BLOCKED, $ret_message);
             $ret = false;
         }
     }
@@ -1858,7 +1858,7 @@ function checkTerms($termID){
                             }
 
                             if(!in_array($row[1], $rtyIDs)) {
-                                array_push($rtyIDs, $row[1]);   
+                                array_push($rtyIDs, $row[1]);
                             }
                         }
                         $ret_message = $ret_message.'<br><br>'
@@ -1867,7 +1867,7 @@ function checkTerms($termID){
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
-                            $ret_message = $ret_message.' (limited to first 250)';    
+                            $ret_message = $ret_message.' (limited to first 250)';
                         }
 
                         $ret_message = $ret_message.'<br><div style="padding:10px 30px;text-align:left">'
@@ -1878,7 +1878,7 @@ function checkTerms($termID){
                             $ret_message = $ret_message.'<li>'.$rty_Name.'</li>';
                         }
 
-                        $ret_message = $ret_message."</ul></div>";            
+                        $ret_message = $ret_message."</ul></div>";
 
                         $ret['warning'] = $ret_message;
                     }
@@ -1907,7 +1907,7 @@ function isTermInUse($trmID, $infield, $indetails){
     $children = array();
     //find all children
     $children = getTermsChilds($children, $trmID);
-    array_push($children, $trmID); //add itself
+    array_push($children, $trmID);//add itself
 
     if($infield){
         //find possible entries in defDetailTypes dty_JsonTermIDTree
@@ -1937,7 +1937,7 @@ function isTermInUse($trmID, $infield, $indetails){
                     $errMessage = $errMessage.'</ul>'
                     .'<br>Please note the field(s) listed below, then '
                     .'<a href="#" style="text-decoration:underline !important" onclick="{'
-                    .'var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); '           
+                    .'var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();'           
                     .'$dlg.dialog( \'close\' );'
                     .'window.hWin.HEURIST4.msg.showDialog(\''
                     .HEURIST_BASE_URL.'admin/structure/fields/manageDetailTypes.php?db='
@@ -1986,7 +1986,7 @@ function isTermInUse($trmID, $infield, $indetails){
                 ."<a href='#' onclick='window.open(\""
                 .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
                 if(count($links)<$recCount){
-                    $errMessage = $errMessage.' (limited to first 250)';    
+                    $errMessage = $errMessage.' (limited to first 250)';
                 }
 
                 $system->addError(HEURIST_ACTION_BLOCKED, $errMessage);
@@ -2089,7 +2089,7 @@ function updateRelConstraint($srcID, $trgID, $terms){
 
     $res = $mysqli->query($query);
 
-    $parameters = array("s",$terms[3]); //notes will be parameter
+    $parameters = array("s",$terms[3]);//notes will be parameter
     $query = "";
 
     $isInsert = ($res==null || $res->num_rows<1);

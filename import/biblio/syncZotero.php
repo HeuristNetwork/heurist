@@ -23,7 +23,7 @@
 ini_set('max_execution_time', '0');
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
@@ -103,7 +103,7 @@ if($fh_data==null || is_string($fh_data)){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <style type="text/css">
             .tbl-head > td {
@@ -127,7 +127,7 @@ if($fh_data==null || is_string($fh_data)){
                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
                     {onClose:function(){
                         location.reload();
-                    }}); 
+                    }});
                return false; 
             }
 
@@ -473,7 +473,7 @@ if($step=="1"){  //first step - info about current status
     $mysqli = $system->get_mysqli();
     
     //$tmp_destination = HEURIST_SCRATCH_DIR.'zotero.xml';
-    //$fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
+    //$fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file 
 
     print '<br>Starting Zotero Library Sync for '. intval($totalitems) .' records...<br>';
 
@@ -487,7 +487,7 @@ if($step=="1"){  //first step - info about current status
                 'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ));
         }
 
-//fwrite($fd, $items);        
+//fwrite($fd, $items);
         
         $zdata = simplexml_load_string($items);
 
@@ -540,7 +540,7 @@ if($step=="1"){  //first step - info about current status
                 else
                 {
                     if($is_echo){
-                        print htmlspecialchars($itemtype.": ".$itemtitle)."&nbsp;";    
+                        print htmlspecialchars($itemtype.": ".$itemtitle)."&nbsp;";
                     }
                 }
 
@@ -717,7 +717,7 @@ if($step=="1"){  //first step - info about current status
 
                             $pages = explode("-",$value);
                             $details["t:".$detail_id] = array("0"=>$pages[0]);
-                            $detail_id2 = ConceptCode::getDetailTypeLocalID("3-1027"); //MAGIC NUMBER
+                            $detail_id2 = ConceptCode::getDetailTypeLocalID("3-1027");//MAGIC NUMBER
                             if($detail_id2){
                                 $details["t:".$detail_id2] = array("0"=>(count($pages)>1)?$pages[1] :$pages[0]);
                             }
@@ -734,7 +734,7 @@ if($step=="1"){  //first step - info about current status
 
                     }else if(!($zkey == 'url' || $zkey=='key')){
                             if(!in_array($itemtype.'.'.$zkey, $arr_notmapped)){
-                                array_push($arr_notmapped, $itemtype.'.'.$zkey); 
+                                array_push($arr_notmapped, $itemtype.'.'.$zkey);
                                 $cnt_notmapped++;
                             }
                     }
@@ -779,7 +779,7 @@ if($step=="1"){  //first step - info about current status
     }// end of while loop
     print 'Synching Completed, Printing Report<br>';
 
-//fclose($fd);        
+//fclose($fd);
     print '<table><tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
     foreach ($cnt_report as $rty_ID=>$cnt){
         print '<tr><td>'.htmlspecialchars($rectypes['names'][$rty_ID])
@@ -926,7 +926,7 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
     $resource_rt_id = null;
     $resource_dt_id = null;
 
-    $extra_info = array(); // [0] => Zotero rectype id, [1] => Zotero rectype name, [2] => field id, [3] => field name
+    $extra_info = array();// [0] => Zotero rectype id, [1] => Zotero rectype name, [2] => field id, [3] => field name
     array_push($extra_info, $org_rt_id, $zType, $dt_code, $arr['value']);
     
     //pointer mapping
@@ -957,7 +957,7 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
             $mapping_dt[strval($arr['value'])] = $dt_id;
         }
         
-        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);        
+        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);
     }
 }
 
@@ -1014,7 +1014,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
             $label = '';
             $code = $arr;
 
-            if(is_array($arr)){ error_log(print_r($arr, TRUE)); }
+            if(is_array($arr)){ error_log(print_r($arr, TRUE));}
         }
 
         if($extra_info == null){
@@ -1080,8 +1080,8 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 
     $arrdt = explode(".",$dt_code);
     if(count($arrdt)>2){
-        $dt_code = array_shift($arrdt); // $arrdt[0];
-        $resource_rt_id = array_shift($arrdt); //$arrdt[1]; //resource record type
+        $dt_code = array_shift($arrdt);// $arrdt[0];
+        $resource_rt_id = array_shift($arrdt);//$arrdt[1];//resource record type
         $resource_dt_id = $arrdt[0];
     }else{
         return "Invalid resource mapping for id: ".$dt_code;
@@ -1090,7 +1090,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
     $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
     
     if($arr!=null){
-        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);    
+        printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);
     }else{
         printMappingReport_dt($dt_code, $rt_id, $dt_id, $extra_info);
     }
@@ -1222,7 +1222,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
                 $value = array();
                 foreach($recdata as $record_type_2=>$recdata_nextlevel){ //recordtype
 
-                    $value = createResourceRecord($mysqli, $record_type_2, $recdata_nextlevel, $missing_pointers_count); //return rec_id
+                    $value = createResourceRecord($mysqli, $record_type_2, $recdata_nextlevel, $missing_pointers_count);//return rec_id
                     break;
 
                 }
@@ -1231,7 +1231,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             $value = $recdata;
             if($dt_id==DT_DATE){
                 
-                $value = Temporal::dateToISO($value, 1); 
+                $value = Temporal::dateToISO($value, 1);
                 /*
                 try{
                     $t2 = new DateTime($value);
@@ -1392,7 +1392,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $record['ScratchPad'] = null;
         $record['details'] = $details;
         
-        $out = recordSave($system, $record, true, false, 0, $record_count);  //see recordModify.php
+        $out = recordSave($system, $record, true, false, 0, $record_count);//see recordModify.php
         
     if ( @$out['status'] != HEURIST_OK ) {
            print "<div style='color:red'> Error: ".htmlspecialchars($out["message"])."</div>";
@@ -1407,7 +1407,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
             if(!$rep_errors_only){
                 if (@$out['warning']) {
-                    print "<div style='color:red'>Warning: ".htmlspecialchars(implode("; ",$out["warning"]))."</div>";
+                    print "<div style='color:red'>Warning: ".htmlspecialchars(implode(";",$out["warning"]))."</div>";
                 }
             }
 

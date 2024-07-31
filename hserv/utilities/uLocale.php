@@ -86,7 +86,7 @@
         
         if ($lang) { 
 
-            initLangCodes();            
+            initLangCodes();
             
             $lang = strtoupper($lang);
             if(strlen($lang)==3){
@@ -141,7 +141,7 @@
                 }
                 
                 if($lang){
-                    $lang = getLangCode3($lang); //validate
+                    $lang = getLangCode3($lang);//validate
                 }
             }
 
@@ -149,10 +149,10 @@
                 
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
                 if($tag_to_remove == null){
-                    $val = substr($val_orig, $pos);        
+                    $val = substr($val_orig, $pos);
                 }else{
                     //remove first p or span
-                    $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));    
+                    $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));
                 }
                 
             }else{
@@ -160,7 +160,7 @@
             }
         } 
         
-        return array($lang, $val);    
+        return array($lang, $val);
     }    
     
     //
@@ -183,7 +183,7 @@
                 
                 //$heuristRec = @$smarty['tpl_vars']['heurist']['value'];
                 
-                $heuristRec = $smarty->getTemplateVars('heurist');       
+                $heuristRec = $smarty->getTemplateVars('heurist');
                 if($heuristRec){
                     return $heuristRec->getTranslation('trm', $trm['id'], $field, $lang);
                 }
@@ -234,7 +234,7 @@
             }
             
         }else if(is_string($input)) {
-            list($lang_, $res) = extractLangPrefix($input); //there is no localization
+            list($lang_, $res) = extractLangPrefix($input);//there is no localization
         }
         
         return $res;
@@ -289,13 +289,13 @@
         $curl_handle = curl_init();
 
         curl_setopt($curl_handle, CURLOPT_COOKIEFILE, '/dev/null');
-        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1); //return the output as a string from curl_exec
+        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
         curl_setopt($curl_handle, CURLOPT_NOBODY, 0);
-        curl_setopt($curl_handle, CURLOPT_HEADER, 0); //don't include header in output
-        curl_setopt($curl_handle, CURLOPT_FOLLOWLOCATION, 1); // follow server header redirects
+        curl_setopt($curl_handle, CURLOPT_HEADER, 0);//don't include header in output
+        curl_setopt($curl_handle, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
 
-        curl_setopt($curl_handle, CURLOPT_TIMEOUT, '30'); // timeout after thirty seconds
-        curl_setopt($curl_handle, CURLOPT_MAXREDIRS, 5); // no more than 5 redirections
+        curl_setopt($curl_handle, CURLOPT_TIMEOUT, '30');// timeout after thirty seconds
+        curl_setopt($curl_handle, CURLOPT_MAXREDIRS, 5);// no more than 5 redirections
 
         curl_setopt($curl_handle, CURLOPT_USERAGENT, $useragent);
         curl_setopt($curl_handle, CURLOPT_FAILONERROR, true);
@@ -410,7 +410,7 @@
 
         if($error){
 
-            $hmsg = ''; // Heurist's error message
+            $hmsg = '';// Heurist's error message
             $herror = HEURIST_UNKNOWN_ERROR;
             $code = intval(curl_getinfo($curl_handle, CURLINFO_HTTP_CODE));
 

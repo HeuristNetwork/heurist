@@ -40,8 +40,8 @@
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
     require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     
-    require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
-    require_once dirname(__FILE__).'/../records/import/importParser.php'; //parse CSV, KML and save into import table
+    require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
+    require_once dirname(__FILE__).'/../records/import/importParser.php';//parse CSV, KML and save into import table
     require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
     require_once dirname(__FILE__).'/../utilities/uArchive.php';
@@ -57,18 +57,18 @@
     $input_format = null;
 
     if(!(@$params['recID']>0)){
-        $system->error_exit_api('recID parameter value is missing or invalid'); //exit from script
+        $system->error_exit_api('recID parameter value is missing or invalid');//exit from script
     }
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
-        $system->error_exit_api(); //exit from script
+        $system->error_exit_api();//exit from script
     }
     $system->defineConstants();
     
     /*
     if(!(defined('DT_KML') && defined('DT_KML_FILE'))){
-        $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML/CSV snipppet and file'); //exit from script
+        $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML/CSV snipppet and file');//exit from script
     }*/
     
     $record = array("rec_ID"=>intval($params['recID']));
@@ -89,7 +89,7 @@
     
             if(@$record['details'][DT_KML]){
                 //snippet - format unknown
-                $file_content = array_shift($record['details'][DT_KML]);   
+                $file_content = array_shift($record['details'][DT_KML]);
                 if($tmp_destination){
                     file_put_contents($tmp_destination, $file_content);
                 }
@@ -106,9 +106,9 @@
                 $originalFileName = @$kml_file['ulf_OrigFileName'];
                 
                 if($url){
-                    $file_content = loadRemoteURLContent($url, true); //load remote KML into temp file   
+                    $file_content = loadRemoteURLContent($url, true);//load remote KML into temp file   
                     if($file_content===false){
-                      $system->error_exit_api('Cannot load remote file '.$url, HEURIST_ERROR);    
+                      $system->error_exit_api('Cannot load remote file '.$url, HEURIST_ERROR);
                     } 
                     
                     $ext = strtolower(substr($url,-4,4));
@@ -120,7 +120,7 @@
                 }else {
                     $filepath = resolveFilePath($kml_file['fullPath']);
                     
-                    $filepath = isPathInHeuristUploadFolder($filepath); //snyk SSRF
+                    $filepath = isPathInHeuristUploadFolder($filepath);//snyk SSRF
                     
                     if ($filepath!==false && file_exists($filepath)) {
                         
@@ -136,7 +136,7 @@
                             //check if scratch folder exists
                             $res = folderExistsVerbose(HEURIST_SCRATCH_DIR, true, 'scratch');
                             if($res!==true){
-                                $system->error_exit_api('Cannot extract kmz data to "scratch" folder. '.$res, HEURIST_ERROR);    
+                                $system->error_exit_api('Cannot extract kmz data to "scratch" folder. '.$res, HEURIST_ERROR);
                             }
                             
                             $files = UArchive::unzipFlat($filepath, HEURIST_SCRATCH_DIR);
@@ -153,7 +153,7 @@
                         $file_content = file_get_contents($filepath);
                     }else{
                         if($ext=='.kmz'){
-                            $input_format = 'kmz';    
+                            $input_format = 'kmz';
                         }
                         $tmp_destination = $filepath;
                     }
@@ -161,7 +161,7 @@
                 }
                 
                 if($input_format=='kml' || $ext=='.kmz' || $ext=='.kml'){
-                    $input_format = 'kml';                                                                                      
+                    $input_format = 'kml';
                     //$input_format = 'csv';
                 }else if($ext=='.tsv'){
                     $input_format = 'csv';
@@ -196,7 +196,7 @@
                 $fm_name = ConceptCode::getDetailTypeLocalID('2-934');
                 $fm_desc = ConceptCode::getDetailTypeLocalID('2-935');
                 $fm_X = ConceptCode::getDetailTypeLocalID('2-930');
-                $fm_Y = ConceptCode::getDetailTypeLocalID('2-931'); 
+                $fm_Y = ConceptCode::getDetailTypeLocalID('2-931');
                 $fm_t1 = ConceptCode::getDetailTypeLocalID('2-932');
                 $fm_t2 = ConceptCode::getDetailTypeLocalID('2-933');
                 
@@ -221,7 +221,7 @@
                     $mapping[DT_GEO_OBJECT] = 'geometry';
                     if(!@$mapping[DT_START_DATE]) $mapping[DT_START_DATE] = 'timespan_begin';//'timespan';
                     if(!@$mapping[DT_END_DATE]) $mapping[DT_END_DATE] = 'timespan_end';//'timespan';
-                    if(!@$mapping[DT_DATE]) $mapping[DT_DATE] = 'timestamp'; //'when'; 
+                    if(!@$mapping[DT_DATE]) $mapping[DT_DATE] = 'timestamp';//'when';
                     
                 }else{
                     $parser_parms['csvdata'] = true; 
@@ -238,7 +238,7 @@
                 if(count($mapping)>0){
                     
                     if(!@$mapping[DT_NAME]){
-                        $mapping[DT_NAME] = 'name';  
+                        $mapping[DT_NAME] = 'name';
                     } 
                     
                     //returns csv with header
@@ -258,13 +258,13 @@
                     try{
                         $geom = geoPHP::load($file_content, 'kml');
                     }catch(Exception $e){
-                        $system->error_exit_api('Cannot process kml: '.$e->getMessage(), HEURIST_ERROR);    
+                        $system->error_exit_api('Cannot process kml: '.$e->getMessage(), HEURIST_ERROR);
                     }
                     if($geom!==false && !$geom->isEmpty()){
                         
                         
-                            $geojson_adapter = new GeoJSON(); 
-                            $json = $geojson_adapter->write($geom, true); 
+                            $geojson_adapter = new GeoJSON();
+                            $json = $geojson_adapter->write($geom, true);
                             
                             if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
                                 
@@ -272,7 +272,7 @@
                                     
                                     if($json['type']=='LineString'){
 
-                                        simplifyCoordinates($json['coordinates']); //see mapSimplify.php
+                                        simplifyCoordinates($json['coordinates']);//see mapSimplify.php
 
                                     } else if($json['type']=='Polygon'){
                                         for($idx=0; $idx<count($json['coordinates']); $idx++){
@@ -330,13 +330,13 @@
                     if(@$params['metadata']){//save hml into scratch folder
                         
                         $zip->addFromString($originalFileName.'.txt', 
-                                       recordLinksFileContent($system, $record));    
+                                       recordLinksFileContent($system, $record));
                     }
                     $zip->close();
                     //donwload
                     $contentDispositionField = 'Content-Disposition: attachment; '
-                        . sprintf('filename="%s"; ', rawurlencode($file_zip))
-                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+                        . sprintf('filename="%s";', rawurlencode($file_zip))
+                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
                     
                     header('Content-Type: application/zip');
                     header($contentDispositionField);
@@ -354,8 +354,8 @@
                     } 
                     $originalFileName = $originalFileName.$input_format;
                     $contentDispositionField = 'Content-Disposition: attachment; '
-                            . sprintf('filename="%s"; ', rawurlencode($originalFileName))
-                            . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));            
+                            . sprintf('filename="%s";', rawurlencode($originalFileName))
+                            . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));
                         
                     header($contentDispositionField);
                     header('Content-Length: ' . strlen($file_content));

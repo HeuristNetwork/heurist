@@ -74,13 +74,13 @@ class ReportActions {
 
                     // gpl->tpl
                     $template_body = file_get_contents($this->dir.$filename);
-                    $res = $this->convertTemplate($template_body, 1); //to local codes
+                    $res = $this->convertTemplate($template_body, 1);//to local codes
                     
                     if(is_array($res) && @$res['details_not_found']){
                         //error except Harvard Bibliography (since many databases do not have biblio defs by default)
                         if($filename!='Harvard Bibliography.gpl'){
                             USanitize::errorLog('Cant convert gpl template '.$this->dir.$filename
-                                .'. Local details not found '.print_r($res['details_not_found'],true)); 
+                                .'. Local details not found '.print_r($res['details_not_found'],true));
                         }
                         
                     }else if(is_array($res) && @$res['template']) {
@@ -96,16 +96,16 @@ class ReportActions {
                             fileDelete($this->dir.$filename);
                             array_push($results, array( 'filename'=>$filename_tpl, 'name'=>$name));
                         }else{
-                            USanitize::errorLog('Cant save template '.$this->dir.$filename_tpl.' '.print_r($res,true)); 
+                            USanitize::errorLog('Cant save template '.$this->dir.$filename_tpl.' '.print_r($res,true));
                         }
                     }else{
-                        USanitize::errorLog('Unknow issue on gpl convertation '.$this->dir.$filename.'. '.print_r($res,true)); 
+                        USanitize::errorLog('Unknow issue on gpl convertation '.$this->dir.$filename.'. '.print_r($res,true));
                     }
                        
                     
                 }else if(file_exists($this->dir.$filename) && $ext=="tpl" && $isnot_temp)
                 {
-                    //$path_parts['filename'] )); - does not work for nonlatin names
+                    //$path_parts['filename'] ));- does not work for nonlatin names
                     $name = substr($filename, 0, -4);
                     array_push($results, array( 'filename'=>$filename, 'name'=>$name));
                 }
@@ -124,7 +124,7 @@ class ReportActions {
     public function getTemplate($filename){
 
         if($filename) {
-            $filename = $this->dir.basename($filename);   
+            $filename = $this->dir.basename($filename);
         }
         
         if($filename && file_exists($filename)){
@@ -215,7 +215,7 @@ class ReportActions {
 
         //1. get template content
         if($template==null || $template==''){
-            return array("error"=>"Template is empty");    
+            return array("error"=>"Template is empty");
         }
         
         //2. find all texts within {} - expressions
@@ -293,7 +293,7 @@ class ReportActions {
                         }
                         array_push($parts2, $part);
                     }
-                    $new_var = implode(".", $parts2);        
+                    $new_var = implode(".", $parts2);
                     
                     if($var!=$new_var){
                         $replacements[$var] = $new_var;  
@@ -314,7 +314,7 @@ class ReportActions {
         }
 
         if($mode==1){
-            return array("template"=>$template, "details_not_found"=>$not_found_details); 
+            return array("template"=>$template, "details_not_found"=>$not_found_details);
         }else{
             return $template;
         }
@@ -332,14 +332,14 @@ class ReportActions {
         $res = null;
         
         if(!$dbID){
-             $res = array("error"=>"Database must be registered to allow translation of local template to global template");    
+             $res = array("error"=>"Database must be registered to allow translation of local template to global template");
         }else {
 
             if($filename){
                 if(file_exists($this->dir.$filename)){
-                    $template = file_get_contents($this->dir.$filename);    
+                    $template = file_get_contents($this->dir.$filename);
                 }else{
-                    $res = array('error'=>"File $filename not found");    
+                    $res = array('error'=>"File $filename not found");
                 }
             }
             
@@ -347,7 +347,7 @@ class ReportActions {
                 if($template && strlen($template)>0){
                     $res = $this->convertTemplate($template, 0);
                 }else{
-                    $res = array('error'=>'Template is not defined or empty');    
+                    $res = array('error'=>'Template is not defined or empty');
                 }
             }
             
@@ -359,7 +359,7 @@ class ReportActions {
         }else{
             header('Content-type: html/text');
             if($filename){
-                header('Content-Disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
+                header('Content-Disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));
             }
             print $res; //"<hr><br><br><xmp>".$template."</xmp>";
         }
@@ -390,10 +390,10 @@ class ReportActions {
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
-                    $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);    
+                    $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);
                 }
             }else if (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
-                    $filename = USanitize::sanitizePath($params['tmp_name']);                
+                    $filename = USanitize::sanitizePath($params['tmp_name']);
             }
             
             if(file_exists($filename)){
@@ -449,7 +449,7 @@ class ReportActions {
         while ($subject) {
             $match_idx = -1;
             $match_offset = -1;
-            for ($i=0; $i < count($search); ++$i) {
+            for ($i=0; $i < count($search);++$i) {
                 if($search[$i]==null || $search[$i]=='') continue;
                 $offset = strpos($subject, $search[$i]);
                 if ($offset === FALSE) continue;

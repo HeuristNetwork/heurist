@@ -53,8 +53,8 @@ protected function _outputPrepareFields($params){
 //  
 protected function _outputHeader(){
     
-    $this->gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");    
-    $this->fd_links = fopen($this->gephi_links_dest, 'w');  //less than 1MB in memory otherwise as temp file 
+    $this->gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");
+    $this->fd_links = fopen($this->gephi_links_dest, 'w');//less than 1MB in memory otherwise as temp file 
     if (false === $this->fd_links) {
         $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
         return false;
@@ -137,7 +137,7 @@ XML;
 
     $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
-    fwrite($this->fd, $gephi_header);      
+    fwrite($this->fd, $gephi_header);
     
     $this->links_cnt = 0;
 }
@@ -239,7 +239,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
 
 
-    $edges = ''; 
+    $edges = '';
 
     if($links){
 
@@ -270,8 +270,8 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                     $relationID = $trmID;
                 }
 
-                $relationName  = htmlspecialchars($relationName);                               
-                $links_cnt++; 
+                $relationName  = htmlspecialchars($relationName); 
+                $links_cnt++;
 
                 $rel_values = '';
                 $att_id = 5;

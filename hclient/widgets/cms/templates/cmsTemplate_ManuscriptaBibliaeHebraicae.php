@@ -23,7 +23,7 @@
 </div>
 </div>
 <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?>
+    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
     data-viewonly="<?php print ($hasAccess)?0:1;?>">
 </div>
 *
@@ -98,7 +98,7 @@
 #wrapper-video {
     z-index:9999999;
     cursor:pointer;
-    background: linear-gradient(rgba(120, 120, 120, 1), rgba(0, 0, 0, 1), rgba(120, 120, 120, 1));    
+    background: linear-gradient(rgba(120, 120, 120, 1), rgba(0, 0, 0, 1), rgba(120, 120, 120, 1));
 }
 
 #wrapper-video > .slogan {
@@ -138,7 +138,7 @@ if($isWebPage){ //set in websiteRecord.php
         <div class="ent_wrapper heurist-website">
             <?php
     if($showWarnAboutPublic){
-        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
+        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
     }
 ?>
             <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px"
@@ -207,7 +207,7 @@ if($isWebPage){ //set in websiteRecord.php
         
         <div class="ent_content_full  ui-heurist-bg-light" id="main-content-container">
             <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>"
-                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?>
+                <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':'';?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
             

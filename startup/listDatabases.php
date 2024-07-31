@@ -30,7 +30,7 @@ if(!isset($system)){
 }
 
 if(!$system->is_inited()){
-    $system->init(@$_REQUEST['db'], false); //init wihout db
+    $system->init(@$_REQUEST['db'], false);//init wihout db
 }
 
 if( !$system->is_inited() ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
@@ -50,12 +50,12 @@ if($system->get_mysqli()!=null) { //server is connected
 
 if($is_json){
     
-    header( 'Content-Type: application/json');    
+    header( 'Content-Type: application/json');
     
     if(isset($error_msg) && $error_msg!=''){
         $response = $system->getError();
     }else{
-        $response = array("status"=>HEURIST_OK, "data"=> $list);    
+        $response = array("status"=>HEURIST_OK, "data"=> $list);
     }    
         
     print json_encode( $response );
@@ -71,7 +71,7 @@ if($is_json){
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../hclient/framecontent/initPageCss.php';?>
 
         <script type="text/javascript">
         </script>

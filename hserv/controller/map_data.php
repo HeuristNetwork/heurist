@@ -361,7 +361,7 @@ function getMapDocuments($system, $recId) {
 
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
-        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT); //InOriginatingDB
+        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT);//InOriginatingDB
 
         if($recId>0){
             $query = $query . ' and rec_ID='.intval($recId);

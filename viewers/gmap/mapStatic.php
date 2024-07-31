@@ -34,7 +34,7 @@
     require_once dirname(__FILE__).'/../../hserv/System.php';
     require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
     
-    require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+    require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapEncodePolyline.php";
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapSimplify.php";
@@ -68,7 +68,7 @@
         
         
         if(@$_REQUEST['id'] && !$_REQUEST['q']){
-            $_REQUEST['q'] = 'ids:'.$_REQUEST['id'];    
+            $_REQUEST['q'] = 'ids:'.$_REQUEST['id'];
         }
         $_REQUEST['w'] = 'e';
         $_REQUEST['detail'] = 'timemap';
@@ -122,10 +122,10 @@
                             $geom = geoPHP::load($as_wkt, 'wkt');
                             if(!$geom->isEmpty()){
                                
-                               $geojson_adapter = new GeoJSON(); 
-                               $json = $geojson_adapter->write($geom, true); 
+                               $geojson_adapter = new GeoJSON();
+                               $json = $geojson_adapter->write($geom, true);
                                
-                               ///$json = $geom->out('json'); 
+                               ///$json = $geom->out('json');
                                // $geom->numGeometries()
                                if(count($json['coordinates'])>0){
                                    if($json['type']=='Polygon'){
@@ -288,7 +288,7 @@
 
                     if(count($points2)>1000){
                     
-                        $points = array();    
+                        $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }
@@ -317,7 +317,7 @@
                     if(count($points_to_encode)>1){
                         
                         if($geoObject['type']=="polygon" || $geoObject['type']=="pl"){
-                            array_push($points_to_encode, $points_to_encode[0]); //add last as first
+                            array_push($points_to_encode, $points_to_encode[0]);//add last as first
                         }
 
                         $encodedPoints = dpEncode($points_to_encode);
@@ -328,7 +328,7 @@
                                 break; //total length of url is too long
                             }
                         }else{
-                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];        
+                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];
                             if(strlen($path_all)>1900){
                                 break; //total length of url is too long
                             }
@@ -344,7 +344,7 @@
 
                     if(count($points2)>100){
                     
-                        $points = array();    
+                        $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }

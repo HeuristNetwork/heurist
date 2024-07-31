@@ -31,7 +31,7 @@
 */
 
 define('LOGIN_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
@@ -70,7 +70,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
             $error = 'URL is not valid.';
             
         }else{
-            $src = loadRemoteURLContentWithRange($url, null, false, 120); //load external webpage to extract links
+            $src = loadRemoteURLContentWithRange($url, null, false, 120);//load external webpage to extract links
             if(!$src){
                 $error = 'URL could not be retrieved. Verify your proxy setting in configuration file.';
             }
@@ -127,7 +127,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$urls = array();
 		$notes = array();
 		$last_url = '';
-		for ($i=0; $i < count($matches[1]); ++$i) {
+		for ($i=0; $i < count($matches[1]);++$i) {
 			// ignore javascript links, mozilla 'about' links
 			if (preg_match('!^(javascript|about):!i', @$matches[2][$i])) {
 				continue;
@@ -371,12 +371,12 @@ if (@$urls) {
                         html = document.documentElement;
 
                     var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
-                                           html.clientHeight, html.scrollHeight, html.offsetHeight );                    
+                                           html.clientHeight, html.scrollHeight, html.offsetHeight );
                     var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth, 
-                                           html.clientWidth, html.scrollWidth, html.offsetWidth ); 
+                                           html.clientWidth, html.scrollWidth, html.offsetWidth );
                                                               
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
-                        doDialogResize(desiredWidth, desiredHeight);              
+                        doDialogResize(desiredWidth, desiredHeight);
                     }
 */                    
         }
@@ -564,7 +564,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
 	} else if (! $user_rec_id) {
 
-		$rec_ids = similar_urls($mysqli, $url); //see testSimilarURls
+		$rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
 		if ($rec_ids) return $rec_ids;
 /*
 		$par_url = preg_replace('/[?].*'.'/', '', $url);
@@ -598,7 +598,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $record['details']["t:".DT_EXTENDED_DESCRIPTION] = array("0"=>$notes);
 
     
-    $out = recordSave($system, $record);  //see recordModify.php    
+    $out = recordSave($system, $record);//see recordModify.php    
     
     if ( @$out['status'] != HEURIST_OK ) {
         //print "<div style='color:red'> Error: ".$out["message"]."</div>";
@@ -622,7 +622,7 @@ function print_link($url, $title) {
     
     $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
-    $title_esc = htmlspecialchars($title);    
+    $title_esc = htmlspecialchars($title);
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
 		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?> 
@@ -644,7 +644,7 @@ function print_link($url, $title) {
 	<div style="display:inline-block;width:30px;vertical-align: middle;">
 		<input style="margin: 0px;" type="checkbox" name="use_notes[<?php echo  $linkno ?>]" value="1" id="un<?php echo $linkno ?>" class="use_notes_checkbox" title="Use Notes">
       	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>" 
-            value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url])); ?>">
+            value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url]));?>">
 	  </div>
       <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;">
             <?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? $_REQUEST['notes'][$linkno] : wordwrap($notes[$url], 50, "\n", true)) ?>
@@ -684,8 +684,8 @@ function print_link($url, $title) {
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id); ?>" onchange="selectExistingLink(<?php echo  $linkno ?>);">
-			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
+			<input type="radio" name="rec_ID[<?php echo  $linkno ?>]" value="<?php echo intval($rec_id);?>" onchange="selectExistingLink(<?php echo  $linkno ?>);">
+			<?php echo htmlspecialchars($row[0]);//'rec_Title' ?>
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?php echo  htmlspecialchars($row[1]) ?>"><?php
 				if (strlen($row[1]) < 100) //'rec_URL'
@@ -708,7 +708,7 @@ function print_link($url, $title) {
 
 
 function common_substring($url, $base_url) {
-	for ($i=0; $i < strlen($url) && $i < strlen($base_url); ++$i) {
+	for ($i=0; $i < strlen($url) && $i < strlen($base_url);++$i) {
 		if ($url[$i] != $base_url[$i]) break;
 	}
 

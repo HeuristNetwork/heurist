@@ -24,7 +24,7 @@ $mode = $_REQUEST['mode'];
 if($mode!='serve'){ // OK to serve tempalte files without login
     define('LOGIN_REQUIRED',1);
 }
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
@@ -36,7 +36,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $req_params = filter_input_array(INPUT_POST);
     }else{
-        $req_params = filter_input_array(INPUT_GET);    
+        $req_params = filter_input_array(INPUT_GET);
     }
     
     if($mode){ //operations with template files
@@ -105,7 +105,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                     if($template_file){
                         $template_body = null;
                     }
-                    $repAction->smartyLocalIDsToConceptIDs($template_file, $template_body);    
+                    $repAction->smartyLocalIDsToConceptIDs($template_file, $template_body);
                     
                     
                     break;

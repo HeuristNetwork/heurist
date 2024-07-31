@@ -68,8 +68,8 @@ class DbDefDetailTypes extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array(); 
-        $from_table = array($this->config['tableName']);   
+        $where = array();
+        $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('dty_ID');
         if($pred!=null) array_push($where, $pred);
@@ -197,7 +197,7 @@ class DbDefDetailTypes extends DbEntityBase
             return false;
         }
 
-        $dtyID = $this->recordIDs[0]; 
+        $dtyID = $this->recordIDs[0];
 
         $query = 'select dtl_RecID from recDetails where dtl_DetailTypeID='.$dtyID;
         $rec_IDs = mysql__select_list2($this->system->get_mysqli(), $query);
@@ -287,7 +287,7 @@ class DbDefDetailTypes extends DbEntityBase
                         $children = getTermChildrenAll($mysqli, $curr_vocab_id, true);
                         $new_children = getTermChildrenAll($mysqli, $this->records[$idx]['dty_JsonTermIDTree'], true);
 
-                        $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children); });
+                        $children = array_filter($children, function($id) use ($new_children) { return !in_array($id, $new_children);});
 
                         if(count($children)>0){
                             if(count($children)>1){
@@ -347,7 +347,7 @@ class DbDefDetailTypes extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['dty_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['dty_Modified'] = date('Y-m-d H:i:s');//reset
 
         }
         
@@ -409,7 +409,7 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->data['fields'] = json_decode($this->data['fields'], true);
             }
 
-            $defTerms = new DbDefTerms($this->system); // to create new vocabs
+            $defTerms = new DbDefTerms($this->system);// to create new vocabs
             $new_vocabs = array();
 
             $vcg_query = 'SELECT vcg_ID FROM defVocabularyGroups WHERE vcg_Domain = "enum" ORDER BY vcg_Order';
@@ -499,7 +499,7 @@ class DbDefDetailTypes extends DbEntityBase
                         if($record['dty_Type'] == 'enum' || $record['dty_Type'] == 'relmarker'){
                             if(empty(@$record['dty_JsonTermIDTree'])){
 
-                                $vcb_query = 'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID = 0 AND trm_Label = "'. $record['dty_Name'] .'"'; // Check for existing vocab with field name
+                                $vcb_query = 'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID = 0 AND trm_Label = "'. $record['dty_Name'] .'"';// Check for existing vocab with field name
 
                                 $vcb_id = mysql__select_value($mysqli, $vcb_query);
 
@@ -587,7 +587,7 @@ class DbDefDetailTypes extends DbEntityBase
                 }
 
                 $idx_to_do = array_keys($this->data['fields']);
-                $this->data['fields'] = array_values($this->data['fields']); // re-write indexes
+                $this->data['fields'] = array_values($this->data['fields']);// re-write indexes
 
                 $result = true;
                 if(count($this->data['fields']) > 0){ // ensure there are still base fields to define
@@ -620,7 +620,7 @@ class DbDefDetailTypes extends DbEntityBase
         if($ret===false){
             $mysqli->rollback();
         }else{
-            $mysqli->commit();    
+            $mysqli->commit();
         }
 
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);

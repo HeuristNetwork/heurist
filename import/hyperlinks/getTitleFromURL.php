@@ -57,7 +57,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
 		preg_match('!<\s*title[^>]*>\s*([^<]+?)\s*</title>!is', $data, $matches);
 		if ($matches) {
-            $title = preg_replace('/\s+/', ' ', $matches[1]);   
+            $title = preg_replace('/\s+/', ' ', $matches[1]);
         }
 
 		if ($title) {

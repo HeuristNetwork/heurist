@@ -92,7 +92,7 @@ if(@$_REQUEST['u']){
         
         
         
-        $rec_rectype = @$_REQUEST['rec_rectype'];    
+        $rec_rectype = @$_REQUEST['rec_rectype'];
         if($rec_rectype!=null){
             $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
             $params['rec_rectype'] = $rec_rectype;
@@ -168,7 +168,7 @@ if(@$_REQUEST['u']){
 else{
     $params = array();
     
-    $rec_rectype = @$_REQUEST['rec_rectype'];    
+    $rec_rectype = @$_REQUEST['rec_rectype'];
     if($rec_rectype!=null){
         $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
         $params['rec_rectype'] = $rec_rectype;
@@ -254,7 +254,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 if(success){
                 
                     //FORCE LOGIN  
-                    if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true); }))
+                    if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true);}))
                     {
                         return;
                     }
@@ -291,7 +291,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         /*
                         $details = array();
                         new_record_params['title'] = __param('d');
-                        new_record_params['title'] = __param('f'); //favicon
+                        new_record_params['title'] = __param('f');//favicon
                         
                         if(count($details)>0)
                             new_record_params['details'] = $details;
@@ -352,19 +352,19 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                                             
                                             window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
                                                 {ok:'Close', title:'Record not found or hidden'}, 
-                                                    {close:function(){ window.close(); }});
+                                                    {close:function(){ window.close();}});
                                             
                                         }
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response, false, 
-                                            {close:function(){ if(isPopup){ window.close(); }}});
+                                            {close:function(){ if(isPopup){ window.close();}}});
                                     }
 
                                 });
                             
                             }else{
                                 
-                                $container.manageRecords('addEditRecord',-1); //call widget method
+                                $container.manageRecords('addEditRecord',-1);//call widget method
                             }                            
                             
                         }

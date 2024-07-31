@@ -62,7 +62,7 @@ if (@$argv) {
             array_push($ARGV, $argv[$i]);
         }
     }
-    if (@$ARGV['-db']) $arg_database = $ARGV['-db'];   
+    if (@$ARGV['-db']) $arg_database = $ARGV['-db'];
     if (@$ARGV['-nofiles']) $arg_skip_files = true;
     if (@$ARGV['-hml']) $arg_skip_hml = false;
     if (@$ARGV['-nodocs']) $arg_include_docs = false;
@@ -92,7 +92,7 @@ if( !$system->init(null, false,false) ){
 }
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 if($arg_database=='all'){
     $arg_database = $databases;
@@ -121,7 +121,7 @@ if (!folderCreate($backup_root, true)) {
 //flag that backup in progress
 $action = 'backupDBs';
 if(!isActionInProgress($action, 30)){
-    exit("It appears that backup operation has been started already. Please try this function later");        
+    exit("It appears that backup operation has been started already. Please try this function later");
 }
 /*
 //set semaphore file
@@ -133,7 +133,7 @@ if(file_exists($progress_flag)){
 }
 $fp = fopen($progress_flag,'w');
 fwrite($fp, '1');
-fclose($fp);            
+fclose($fp);
 */
 
 
@@ -156,20 +156,20 @@ if($with_triggers){
 
 
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 
 foreach ($arg_database as $idx=>$db_name){
 
-    echo "processing ".$db_name." "; //.'  in '.$folder
+    echo "processing ".$db_name." ";//.'  in '.$folder
 
 
     $folder = $backup_root.$db_name.'/';
-    $backup_zip = $backup_root.$db_name.'.zip'; 
+    $backup_zip = $backup_root.$db_name.'.zip';
 
     $database_folder = $upload_root.$db_name.'/';
 
     if(file_exists($folder)){
-        $res = folderDelete2($folder, true); //remove previous backup
+        $res = folderDelete2($folder, true);//remove previous backup
         if(!$res){
             if(file_exists($progress_flag)) unlink($progress_flag);
             exit("Cannot clear existing backup folder $folder \n");
@@ -202,19 +202,19 @@ foreach ($arg_database as $idx=>$db_name){
     }
 
     if(!$arg_skip_files){
-        if($folders_to_copy==null) $folders_to_copy = array();    
-        $folders_to_copy[] = $database_folder.'file_uploads/';   //HEURIST_FILES_DIR;
-        $folders_to_copy[] = $database_folder.'filethumbs/';  //HEURIST_THUMB_DIR;
+        if($folders_to_copy==null) $folders_to_copy = array();
+        $folders_to_copy[] = $database_folder.'file_uploads/';//HEURIST_FILES_DIR;
+        $folders_to_copy[] = $database_folder.'filethumbs/';//HEURIST_THUMB_DIR;
 
         $copy_files_in_root = true; //copy all files within database folder
     }else{
         $copy_files_in_root = false;
     }
 
-    //var_dump($folders_to_copy); 
+    //var_dump($folders_to_copy);
 
     if($folders_to_copy==null){
-        $folders_to_copy = array('no copy folders');   
+        $folders_to_copy = array('no copy folders');
     }
 
 
@@ -233,7 +233,7 @@ foreach ($arg_database as $idx=>$db_name){
         //load hml output into string file and save it
         if(@$_REQUEST['allrecs']!="1"){
         $userid = get_user_id();
-        $q = "owner:$userid"; //user:$userid OR
+        $q = "owner:$userid";//user:$userid OR
         $_REQUEST['depth'] = '5';
         }else{
         $q = "sortby:-m";
@@ -244,7 +244,7 @@ foreach ($arg_database as $idx=>$db_name){
         $_REQUEST['w'] = 'all';
         $_REQUEST['a'] = '1';
         $_REQUEST['q'] = $q;
-        $_REQUEST['rev'] = 'no'; //do not include reverse pointers
+        $_REQUEST['rev'] = 'no';//do not include reverse pointers
         $_REQUEST['filename'] = $folder."/".HEURIST_DBNAME.".xml";
 
         echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take some time for large databases)<br>");
@@ -264,12 +264,12 @@ foreach ($arg_database as $idx=>$db_name){
     echo_flush2("Exporting database definitions as readable text<br>");
 
     $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-    saveURLasFile($url, $folder."/Database_Structure.txt"); //save to $upload_root.'backup/'.HEURIST_DBNAME
+    saveURLasFile($url, $folder."/Database_Structure.txt");//save to $upload_root.'backup/'.HEURIST_DBNAME
 
     echo_flush2("Exporting database definitions as XML<br>");
 
     $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-    saveURLasFile($url, $folder."/Database_Structure.xml"); //save to $upload_root.'backup/'.HEURIST_DBNAME
+    saveURLasFile($url, $folder."/Database_Structure.xml");//save to $upload_root.'backup/'.HEURIST_DBNAME
     */
 
     // Do an SQL dump of the whole database
@@ -308,7 +308,7 @@ foreach ($arg_database as $idx=>$db_name){
         exit("Database: $db_name Failed to create zip file at $destination \n");
     }
 
-    echo "   ".$db_name." OK \n"; //.'  in '.$folder
+    echo "   ".$db_name." OK \n";//.'  in '.$folder
 }//for
 
 if(file_exists($progress_flag)) unlink($progress_flag);

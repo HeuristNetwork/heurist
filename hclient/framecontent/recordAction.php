@@ -123,7 +123,7 @@ if(!in_array($action_type, $allowed_actions)){
         font-size:1.1em;
     }
     
-.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%;}
 .calendars-month-header, .calendars-nav, .calendars-month th, 
 .calendars-month-header select, .calendars-ctrl, .calendars a{
     background-color:lightgray;

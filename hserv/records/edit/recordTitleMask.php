@@ -38,9 +38,9 @@
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 
-define('_ERR_REP_WARN', 0); // returns general message that titlemask is invalid - default
-define('_ERR_REP_MSG', 1);  // returns detailed error message
-define('_ERR_REP_SILENT', 2); // returns empty string
+define('_ERR_REP_WARN', 0);// returns general message that titlemask is invalid - default
+define('_ERR_REP_MSG', 1);// returns detailed error message
+define('_ERR_REP_SILENT', 2);// returns empty string
 
 define('_ERROR_MSG', 'Invalid title mask: please define the title mask in record structure editor');
 define('_ERROR_MSG2', 'Error in title mask. Please look for syntax errors or special characters. ' 
@@ -103,7 +103,7 @@ class TitleMask {
 */
  public static function check($mask, $rt, $checkempty) {
      
-    self::initialize(); 
+    self::initialize();
     // \[([^]]+)\]  - works in php     \[([^\]]+)\] - is js
 
     if (! preg_match_all('/\\[\\[|\\]\\]|\\[\\s*([^]]+)\\s*\\]/', $mask, $matches))
@@ -116,7 +116,7 @@ class TitleMask {
 
     $res = self::execute($mask, $rt, 1, null, _ERR_REP_MSG);
     if(is_array($res)){
-        return $res[0]; // mask is invalid - this is error message
+        return $res[0];// mask is invalid - this is error message
     }else{
         return "";
     }
@@ -165,7 +165,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
     }
 
     if($rec_id){
-        self::__get_record_value($rec_id, true); //keep recvalue in static
+        self::__get_record_value($rec_id, true);//keep recvalue in static
     }
 
     if (!$mask) {
@@ -212,7 +212,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 return $value;
             }else{
                 $replacements[$matches[1][$i]] = "";
-                $fields_err++; //return "";
+                $fields_err++;//return "";
             }
         }else if (null==$value || trim($value)==""){
             $replacements[$matches[1][$i]] = "";
@@ -252,7 +252,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
                 // retrieve conditional sections
                 preg_match("/{\d*\s?(?:\\\\[^\\\\]*\s?)*}/", $cond_str, $cond_mask);
 
-                $cond_mask[0] = trim($cond_mask[0], ' {}'); // remove curly brackets
+                $cond_mask[0] = trim($cond_mask[0], ' {}');// remove curly brackets
 
                 $cond_parts = mb_split("\\\\", $cond_mask[0]);
                 if(is_numeric(trim($cond_parts[0])) || empty($cond_parts[0])){
@@ -326,19 +326,19 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
         
-            $puncts = '-:;,.@#|+=&(){}'; // These are stripped from begining and end of title
-            $puncts2 = '-:;,@#|+=&'; // same less period
+            $puncts = '-:;,.@#|+=&(){}';// These are stripped from begining and end of title
+            $puncts2 = '-:;,@#|+=&';// same less period
 
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title); // remove leading and trailing punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title); // remove brackets containing only punctuation
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*\\)!s', '(\\1)', $title); // remove leading and trailing punctuation within brackets
-            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title); // remove brackets containing only punctuation
-            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title); // remove leading and trailing punctuation
-            $title = preg_replace('!,\\s*,+!s', ',', $title); // replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
-            $title = preg_replace('!\\s+,!s', ',', $title); // remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
+            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $title = preg_replace('!\\(['.$puncts.'/\\s]+\\)!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace('!\\(['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*\\)!s', '(\\1)', $title);// remove leading and trailing punctuation within brackets
+            $title = preg_replace('!\\(['.$puncts.'/\\s]*\\)|\\[['.$puncts.'/\\s]*\\]!s', '', $title);// remove brackets containing only punctuation
+            $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);// remove leading and trailing punctuation
+            $title = preg_replace('!,\\s*,+!s', ',', $title);// replace commas with nothing between them, e.g. "Hello, , World" => "Hello, World"
+            $title = preg_replace('!\\s+,!s', ',', $title);// remove leading spaces before comma, e.g. "Hello    , World" => "Hello, World"
 
         }
-        $title = trim(preg_replace('!  +!s', ' ', $title)); //remove double spaces
+        $title = trim(preg_replace('!  +!s', ' ', $title));//remove double spaces
 
         if($title==""){
 
@@ -467,7 +467,7 @@ private static function __get_rec_detail_types($rt) {
 
                 $row['dty_ConceptCode'] = $dt_cc;
 
-                $fld_name_idx = mb_eregi_replace("/\s{2,}/", " ", $row['rst_DisplayName']); // remove double spacing from field name used for indexing
+                $fld_name_idx = mb_eregi_replace("/\s{2,}/", " ", $row['rst_DisplayName']);// remove double spacing from field name used for indexing
 
                 //keep 3 indexes by id, name and concept code    
                 self::$rdr[$rt][$row['dty_ID']] = $row;
@@ -686,10 +686,10 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
     if($mode==0){
 
-        $local_dt_id = self::__get_dt_field($rt, $rdt_id, $mode, 'dty_ID'); //local dt id
+        $local_dt_id = self::__get_dt_field($rt, $rdt_id, $mode, 'dty_ID');//local dt id
         $dt_type = '';
         if($local_dt_id>0){
-            $dt_type = self::__get_dt_field($rt, $local_dt_id, $mode, 'dty_Type');    
+            $dt_type = self::__get_dt_field($rt, $local_dt_id, $mode, 'dty_Type');
         }
         if($dt_type=='relmarker'){
             //find related record id
@@ -729,7 +729,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     }else if($dt_type=="file"){
                         $value = self::__get_file_name(intval($detail['dtl_UploadedFileID']));
                     }else if($dt_type=='freetext' || $dt_type=='blocktext'){
-                        list(, $value) = extractLangPrefix($detail['dtl_Value']); // remove possible language prefix
+                        list(, $value) = extractLangPrefix($detail['dtl_Value']);// remove possible language prefix
                     }else{
                         $value = $detail['dtl_Value'];
                     }
@@ -762,7 +762,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
         }else if($mode==1){ //convert to
             return $rdt_id; //concept code
         } else {
-            return self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');  //original name (with capital chars)
+            return self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');//original name (with capital chars)
         }
     }
 }
@@ -827,10 +827,10 @@ private static function __get_rt_id( $rt_search ){
         if($where==''){
             if($rt_search>0){
                 $params = array('i',intval($rt_search));
-                $where = 'rty_ID=?';    
+                $where = 'rty_ID=?';
             }else{
                 $params = array('s', mb_strtolower($rt_search, 'UTF-8'));
-                $where = 'LOWER(rty_Name)=?';    
+                $where = 'LOWER(rty_Name)=?';
             }
         }
         $query = $query . $where;
@@ -902,7 +902,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     
     if($mode==1 || mb_strpos($field_name, '..')>0){ //convert to concept codes
         $fullstop = '..';
-        $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/'; //parsing
+        $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/';//parsing
     }
     if($mode==2){ //convert to human readable codes
         $fullstop_concat = '..';
@@ -915,7 +915,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             $field_name = self::__replaceInCaseOfImport($field_name);
         }
 
-        $rdt_id = self::__get_dt_field($rt, $field_name, $mode);  //get concept code
+        $rdt_id = self::__get_dt_field($rt, $field_name, $mode);//get concept code
         if(!$rdt_id){
             //ERROR
             $msg = "Field name '$field_name' not recognised";
@@ -1054,24 +1054,24 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         //it is required to distiguish rt for multiconstrained pointers
         $inner_rectype = 0;
         $inner_rectype_name = '';
-        $inner_rectype_cc = '';  //concept code
+        $inner_rectype_cc = '';//concept code
         $multi_constraint = false;
         
         if(count($matches)>3){ //this is resource field  [Places referenced..Media..Media item title]
             
             $ishift = 0;
-            $pos = mb_strpos($inner_field_name, '{'); //{Organization}..Name - name of target rectype is defined
+            $pos = mb_strpos($inner_field_name, '{');//{Organization}..Name - name of target rectype is defined
             $pos2 = mb_strpos($inner_field_name, '}');
             $is_parent_entity = !empty($inner_field_name) ? self::_is_parent_entity($inner_field_name) : false;
             if($pos===0 && $pos2==mb_strlen($inner_field_name)-1){
-                $inner_rectype_search = mb_substr($inner_field_name, 1, -1);     
+                $inner_rectype_search = mb_substr($inner_field_name, 1, -1);
                 
                 $ishift = 3;
                 $multi_constraint = true;
             }else{
                 
                 $inner_rectype = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');
-                $inner_rectype = explode(",", $inner_rectype); //mb_split
+                $inner_rectype = explode(",", $inner_rectype);//mb_split
                 if(count($inner_rectype)==1 && $inner_rectype[0]>0 || $is_parent_entity){
                     $inner_rectype = $inner_rectype[0];
                     $ishift = 2;
@@ -1083,7 +1083,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 
             }
             if($inner_rectype==0 && !$is_parent_entity){
-                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
+                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search );
                 if(!($inner_rectype>0)){
                     return array("error_title" => "Syntax error", 
                                  "message" => "Unable to interpret '$inner_rectype_search' as a record type<br><br>"
@@ -1102,7 +1102,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 $pointer_ids = prepareIds($pointer_ids);
                 $res = array();
                 foreach ($pointer_ids as $rec_id){
-                    $fld_value = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id); //recursion        
+                    $fld_value = self::__fill_field($f_name, $inner_rectype, $mode, $rec_id);//recursion        
                     array_push($res, $fld_value);
                 }
                 $res = implode(", ", $res);
@@ -1131,17 +1131,17 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             
             return $res;
             // TEMP
-            //list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-            //$inner_field_name = $matches[3]; 
+            //list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search );
+            //$inner_field_name = $matches[3];
         }else{
         
         
-            $pos = mb_strpos($inner_field_name, $fullstop); //{Organization}..Name
+            $pos = mb_strpos($inner_field_name, $fullstop);//{Organization}..Name
             $pos2 = mb_strpos($inner_field_name, '}');
             if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
-                $inner_rectype_search = mb_substr($inner_field_name, 1, $pos2-1);  //was $pos-mb_strlen($fullstop)
-                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
-                $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop)); 
+                $inner_rectype_search = mb_substr($inner_field_name, 1, $pos2-1);//was $pos-mb_strlen($fullstop)
+                list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search );
+                $inner_field_name = mb_substr($inner_field_name, $pos+mb_strlen($fullstop));
             }
         }
 
@@ -1157,7 +1157,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 $rec_value = self::__get_record_value($rec_id);
                 if($rec_value){
-                    $res_rt = $rec_value['rec_RecTypeID']; //resource rt
+                    $res_rt = $rec_value['rec_RecTypeID'];//resource rt
                     
                     if($inner_rectype>0 && $inner_rectype!=$res_rt) continue;
                     
@@ -1178,7 +1178,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             if($inner_rectype>0){
                 $inner_rec_type = array($inner_rectype);
             }else{
-                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
+                $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs');//$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
                 $inner_rec_type = explode(",", $inner_rec_type);
             }
             if(count($inner_rec_type)>0){ //constrained
@@ -1189,7 +1189,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if($inner_rectype>0){
                         if($inner_rectype!=$rtid) continue; //skip  
                     }else{
-                        list($rtid, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $rtid ); 
+                        list($rtid, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $rtid );
                     } 
                     
                     $inner_rdt = self::__fill_field($inner_field_name, $rtid, $mode);
@@ -1278,7 +1278,7 @@ if (! function_exists('array_str_replace')) {
         while ($subject) {
             $match_idx = -1;
             $match_offset = -1;
-            for ($i=0; $i < count($search); ++$i) {
+            for ($i=0; $i < count($search);++$i) {
                 if($search[$i]==null || $search[$i]=='') continue;
                 $offset = mb_strpos($subject, $search[$i]);
                 if ($offset === FALSE) continue;

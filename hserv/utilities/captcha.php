@@ -33,13 +33,13 @@ if (session_status() != PHP_SESSION_ACTIVE) {
     } else {   //session does not exist - create new one and save on cookies
         @session_start();
         //$session_id = session_id();
-        setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https, true ); //create new session - REM
+        setcookie('heurist-sessionid', session_id(), 0, '/', '', $is_https, true );//create new session - REM
     }
 }
 
 if(@$_REQUEST['img']){ //IMAGE CAPTCHA
-    $captchanumber = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz'; // Initializing PHP variable with string
-    $captcha_code = substr(str_shuffle($captchanumber), 0, 4); // Getting first 6 word after shuffle.
+    $captchanumber = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz';// Initializing PHP variable with string
+    $captcha_code = substr(str_shuffle($captchanumber), 0, 4);// Getting first 6 word after shuffle.
 
     $_SESSION["captcha_code"] = $captcha_code;
     $target_layer = imagecreatetruecolor(50,24);

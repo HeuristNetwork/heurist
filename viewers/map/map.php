@@ -22,7 +22,7 @@
 //&callback=initMap" async defer  for gmap
 //<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 //
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
 $system->defineConstants();
@@ -279,7 +279,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         //   basemap: name of initial basemap
         //   extent: fixed extent    
         layout_params = {};
-        layout_params['ui_main'] = __gp('ui_main'); //separate toolbar for map controls
+        layout_params['ui_main'] = __gp('ui_main');//separate toolbar for map controls
         layout_params['nomap'] = __gp('nomap');
         layout_params['notimeline'] = __gp('notimeline');
         layout_params['nocluster'] = __gp('nocluster');
@@ -287,20 +287,20 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['smooth_zoom'] = __gp('smooth_zoom');
         layout_params['zoom_delta'] = __gp('zoom_delta');
         layout_params['zoom_to_selected'] = __gp('zoom_to_selected');
-        layout_params['mapdocuments'] = __gp('mapdocuments'); //visible mapdocuments
-        layout_params['basemaps'] = __gp('basemaps'); //visible basemaps
-        layout_params['basemap'] = __gp('basemap');   //name of basemap
-        layout_params['basemap_filter'] = __gp('basemap_filter');  //name of basemap
-        layout_params['extent'] = __gp('extent'); //@todo
+        layout_params['mapdocuments'] = __gp('mapdocuments');//visible mapdocuments
+        layout_params['basemaps'] = __gp('basemaps');//visible basemaps
+        layout_params['basemap'] = __gp('basemap');//name of basemap
+        layout_params['basemap_filter'] = __gp('basemap_filter');//name of basemap
+        layout_params['extent'] = __gp('extent');//@todo
         
-        layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
-        layout_params['legend'] = __gp('legend'); //legend configuration: csv basemaps,mapdocs,search,off,width
-        layout_params['template'] = __gp('template'); //smarty template for popup info
+        layout_params['controls'] = __gp('controls');//comma separated list of visible controls
+        layout_params['legend'] = __gp('legend');//legend configuration: csv basemaps,mapdocs,search,off,width
+        layout_params['template'] = __gp('template');//smarty template for popup info
 
-        layout_params['popup_behaviour'] = __gp('popup_behaviour'); // fixed size, fixed width, scale to content
-        layout_params['popup_width'] = __gp('popup_width'); // = width, for scale = max-width
-        layout_params['popup_height'] = __gp('popup_height'); // = height, for scale = max-height
-        layout_params['popup_resizing'] = __gp('popup_resizing'); // whether to enable resizing, currently turned off
+        layout_params['popup_behaviour'] = __gp('popup_behaviour');// fixed size, fixed width, scale to content
+        layout_params['popup_width'] = __gp('popup_width');// = width, for scale = max-width
+        layout_params['popup_height'] = __gp('popup_height');// = height, for scale = max-height
+        layout_params['popup_resizing'] = __gp('popup_resizing');// whether to enable resizing, currently turned off
 
         layout_params['published'] = __gp('published');
         layout_params['popup'] = __gp('popup');
@@ -309,7 +309,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['maxzoom'] = __gp('maxzoom');
         layout_params['minzoom'] = __gp('minzoom');
         layout_params['pntzoom'] = __gp('pntzoom');
-        layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
+        layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style'));//default style
         layout_params['selection_style'] = window.hWin.HEURIST4.util.isJSON(__gp('selection_style'));
         
         mapping = $('#mapping').mapping({
@@ -340,7 +340,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
             var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
 
             if( with_mapdoc ){
-                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument ); //load map document
+                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument );//load map document
             }
         
             var request = window.hWin.HEURIST4.query.parseHeuristQuery(location.search );

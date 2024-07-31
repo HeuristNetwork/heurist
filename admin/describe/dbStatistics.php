@@ -19,9 +19,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('ADMIN_PWD_REQUIRED', 1); 
-define('MANAGER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED', 1);
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
     
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
@@ -32,7 +32,7 @@ $starts_with = filter_var(@$_REQUEST['start'], FILTER_SANITIZE_STRING);
 
 $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 
 $mysqli = $system->get_mysqli();
 $dbs = mysql__getdatabases4($mysqli, true, $starts_with);
@@ -82,11 +82,11 @@ function dirsize($dir)
             $path = $dir."/".$file;
             if (is_dir($path))
             {
-                $size += dirsize($path); // recursive in sub-folders
+                $size += dirsize($path);// recursive in sub-folders
             }
             elseif (is_file($path))
             {
-                $size += filesize($path); // add file
+                $size += filesize($path);// add file
             }
         }
     }
@@ -95,7 +95,7 @@ function dirsize($dir)
 }
 
 if($is_csv){                                                  
-    $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+    $fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file 
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
@@ -156,15 +156,15 @@ foreach ($dbs as $db){
 
             $record_row[] = implode(' ', $owner);
 
-            $record_row[4] = strtotime($record_row[4]); 
-            $record_row[5] = strtotime($record_row[5]); 
+            $record_row[4] = strtotime($record_row[4]);
+            $record_row[5] = strtotime($record_row[5]);
 
             $aitem_quote = function($n)
             {
                 return is_numeric($n) ?$n :('"'.str_replace('"','\"',htmlspecialchars($n, ENT_NOQUOTES)).'"');
-            };        
+            };
             
-            $record_row[] = $record_row[0]; //add dbname to the end
+            $record_row[] = $record_row[0];//add dbname to the end
             
             $record_row = array_map($aitem_quote, $record_row);
             $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
@@ -195,7 +195,7 @@ if($is_csv){
         
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-            print "Cannot create zip $destination";    
+            print "Cannot create zip $destination";
         }else{
             // return to the start of the stream
             rewind($fd);
@@ -215,7 +215,7 @@ if($is_csv){
             header('Content-Length: ' . filesize($destination));
             readfile($destination);
             // remove the zip archive
-            unlink($destination);    
+            unlink($destination);
         }else{
             print "Zip archive ".$destination." doesn't exist";
         }
@@ -239,7 +239,7 @@ if($is_csv){
         <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
@@ -252,7 +252,7 @@ if($is_csv){
     <body class="popup">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
-            <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
+            <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>";?>
             <?php if($is_delete_allowed) { /*&& $sysadmin*/?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
             
 
@@ -327,7 +327,7 @@ if($is_csv){
             if(val>0){
                 var epoch = new Date(0);
                 epoch.setSeconds(val);
-                return epoch.toISOString().replace('T', ' ').replace('.000Z','');                        
+                return epoch.toISOString().replace('T', ' ').replace('.000Z','');
                 redate;
             }else{
                 return '';
@@ -371,17 +371,17 @@ if($is_csv){
                             return '<input type=\"checkbox\" value=\"'+data
                                 +'\" onchange="{_onSelectDeleteDb(event);return false;}"/>';
                         }else{
-                            return '';    
+                            return '';
                         }
                     }}
                 <?php } ?>
             ];
 
             
-            _dataTable = $('.div_datatable').DataTable( _dataTableParams );        
+            _dataTable = $('.div_datatable').DataTable( _dataTableParams );
             $('.dataTables_filter').css({float:'left'});
             var ele = $('.dataTables_filter').find('input');
-            ele.val(''); //attr('type','text').
+            ele.val('');//attr('type','text').
             window.hWin.HEURIST4.ui.disableAutoFill( ele );
             setTimeout(function(){ele.val(' ')},1000);
             
@@ -428,16 +428,16 @@ if($is_csv){
                     getSelectedDatabases();
                     if(this.databases.length>25){
                         window.hWin.HEURIST4.msg.showMsgDlg("You selected "+this.databases.length+" databases to be deleted. Max 25 allowed at one time.",null,null,
-                        {position: { my: "left top", at: "left+150 top+150", of: window }});                        
+                        {position: { my: "left top", at: "left+150 top+150", of: window }});
                         return false;
                     }else if(this.databases.length == 0) {
                         window.hWin.HEURIST4.msg.showMsgFlash("Select at least one database to delete",null,null,
-                            {position: { my: "left top", at: "left+150 top+150", of: window }});                        
+                            {position: { my: "left top", at: "left+150 top+150", of: window }});
                         return false;
                     }
-                    $("#div-pw").show(); //show password input
+                    $("#div-pw").show();//show password input
                     var ele = $("#authorized");
-                    ele.find('div.reps').remove(); //clear
+                    ele.find('div.reps').remove();//clear
                     ele.find('div.ui-state-error').remove();
                     ele.hide();
                     
@@ -480,11 +480,11 @@ if($is_csv){
                                 var ele = $("#authorized");
                                 ele.css({'background-image': 'url(../../hclient/assets/loading-animation-white.gif)',
                                     'background-position': 'center', 'background-repeat': 'no-repeat'});
-                                ele.find('div.reps').remove(); //clear
+                                ele.find('div.reps').remove();//clear
                                 ele.find('div.ui-state-error').remove();
                                 ele.show();
                                 updateProgress(0);
-                                postDeleteRequest(0); //start deletion
+                                postDeleteRequest(0);//start deletion
                             }else{
                                 submit.disabled = false;
                                 response.sysmsg = 1;
@@ -559,7 +559,7 @@ if($is_csv){
                         window.hWin.HR = function(token){return token};
                     }
                    $('button').button();
-                });                
+                });
             </script>
             <?php } ?>
     </body>

@@ -70,7 +70,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
         }
 
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('fxm_Extension');
         if($pred!=null) array_push($where, $pred);

@@ -30,9 +30,9 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
     $_REQUEST['list'] = 1;
-    define('ERROR_REDIR','startup/index.php'); //redirects to startup page - list of all databases
+    define('ERROR_REDIR','startup/index.php');//redirects to startup page - list of all databases
 }else{
-    if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
+    if(!defined('PDIR')) define('PDIR','../../');//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
     
     $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
@@ -185,10 +185,10 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
-    if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
+    if($required !== ''){ $message = "To perform this action you need permission to $required records";}
 }
 
-//$system->defineConstants(); //init constants for record and field types
+//$system->defineConstants();//init constants for record and field types
 
 // BASE tag is convenient however it does not suit
 // reason: some jquery widgets uses href (tabcontrol for example)
@@ -198,7 +198,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-//header("Content-Security-Policy: frame-ancestors 'self'");    
+//header("Content-Security-Policy: frame-ancestors 'self'");
 ?>
 <!DOCTYPE html>
 <?php    
@@ -271,7 +271,7 @@ if($isLocalHost){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 
 <!-- CSS -->
-<?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
+<?php include_once dirname(__FILE__).'/initPageCss.php';?>
 
 <script type="text/javascript">
 
@@ -288,7 +288,7 @@ if($isLocalHost){
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
-        orgShow.apply( this, arguments ); //apply original show
+        orgShow.apply( this, arguments );//apply original show
         $(this).trigger( 'myOnShowEvent' );
         return this;
     }
@@ -345,7 +345,7 @@ if($isLocalHost){
 
             if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                    onAboutInit(); //init about dialog
+                    onAboutInit();//init about dialog
             }
 
             if(initialLoadDatabaseDefintions(null, onPageInit)){
@@ -372,10 +372,10 @@ if($isLocalHost){
                 var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
                 +'This is probably due to a network timeout. However, if the problem '
                 +'persists please report to Heurist developers as it could indicate '
-                +'corruption of the database.';                            
+                +'corruption of the database.'; 
                 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
-                var entities = (params)?params:'all'; //'rty,dty,rst,swf';
+                var entities = (params)?params:'all';//'rty,dty,rst,swf';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
@@ -391,7 +391,7 @@ if($isLocalHost){
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        if($.isFunction(callback)){ callback(false); }
+                        if($.isFunction(callback)){ callback(false);}
                     }
                     }
                 });

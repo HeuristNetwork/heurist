@@ -54,7 +54,7 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     $message =  str_replace('##Email##',$user_record['ugr_eMail'], $message);
     $message =  str_replace('##GivenNames##',$user_record['ugr_FirstName'],$message);
     $message =  str_replace('##FamilyName##',$user_record['ugr_LastName'],$message);
-    $message =  str_replace('##DBURL##',''.HEURIST_BASE_URL."?db=".$database_name.'',$message); //<pre>
+    $message =  str_replace('##DBURL##',''.HEURIST_BASE_URL."?db=".$database_name.'',$message);//<pre>
     $message =  str_replace('##Organisation##',$user_record['ugr_Organisation'],$message);
     $message =  str_replace('##Interests##',$user_record['ugr_Interests'],$message);
     

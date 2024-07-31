@@ -27,9 +27,9 @@
 
 ini_set('max_execution_time', '0');
 
-define('OWNER_REQUIRED',1);   
+define('OWNER_REQUIRED',1);
  
-define('PDIR','../../../');  //need for proper path to js and css    
+define('PDIR','../../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../../admin/setup/dbupgrade/DBUpgrade.php';
@@ -53,7 +53,7 @@ $mysqli = $system->get_mysqli();
         }
     }
       
-    $db_undef = array(); //it seems this is not heurist db
+    $db_undef = array();//it seems this is not heurist db
 
     $db = array();
     $cnt = 0;
@@ -74,7 +74,7 @@ $mysqli = $system->get_mysqli();
             if(!@$db[$ver]){
                 $db[$ver] = array($db_name);
             }else{
-                array_push($db[$ver], $db_name);    
+                array_push($db[$ver], $db_name);
             }
             
             $res = doUpgradeDatabase($system, $db_name, 1, 3, false);

@@ -22,7 +22,7 @@
 */
 
 
-require_once dirname(__FILE__).'/../../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
@@ -47,7 +47,7 @@ abstract class ExportRecords {
     
     private $tmp_destination; //temp file 
     protected $fd;  //file handler
-    protected $comma = ''; //separator for json 
+    protected $comma = '';//separator for json 
 
     //csv of header fields
     protected $retrieve_header_fields = null;
@@ -144,31 +144,31 @@ protected function _outputPrepare($data, $params){
     $data = $data['data'];
     
     if(@$data['memory_warning']){ //memory overflow in recordSearch
-        $this->records = array(); //@todo
+        $this->records = array();//@todo
     }else if(!(@$data['reccount']>0)){   //empty response
         $this->records = array();
     }else{
         $this->records = $data['records'];
     }
     
-    $records_out = array(); //ids already out - NOT USED
-    $this->rt_counts = array(); //counts of records by record type
+    $records_out = array();//ids already out - NOT USED
+    $this->rt_counts = array();//counts of records by record type
 
     //NOT USED    
     $records_original_count = is_array($this->records)?count($this->records):0; //mainset of ids (result of search without linked/related)
-    $error_log = array(); //NOT USED
+    $error_log = array();//NOT USED
     $error_log[] = 'Total rec count '.count($this->records);
     
-    $this->tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
-    //$this->fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
-    $this->fd = fopen($this->tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
+    $this->tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");
+    //$this->fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file 
+    $this->fd = fopen($this->tmp_destination, 'w');//less than 1MB in memory otherwise as temp file 
     if (false === $this->fd) {
         $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
         return false;
     }   
     
     if(intval(@$params['extended'])>0){
-        $this->extended_mode = intval($params['extended']); //prefs for geojson, json
+        $this->extended_mode = intval($params['extended']);//prefs for geojson, json
     }else{
         $this->extended_mode = 0;
     }
@@ -198,7 +198,7 @@ protected function _outputPrepare($data, $params){
     
     if($max_depth>0){
         if($params['format']=='gephi' && @$params['limit']>0){
-           $limit = $params['limit'];  
+           $limit = $params['limit'];
         }else{
            $limit = 0; 
         }
@@ -233,7 +233,7 @@ protected function _outputPrepareFields($params){
             foreach($params['columns'] as $col_name){
                 
                 if(is_numeric($col_name) && $col_name>0){
-                    array_push($this->retrieve_detail_fields, $col_name); 
+                    array_push($this->retrieve_detail_fields, $col_name);
                 }else if(strpos($col_name,'rec_')===0){
                     array_push($this->retrieve_header_fields, $col_name);
                 }
@@ -274,7 +274,7 @@ public function output($data, $params){
         return false;
     }
 
-    $this->_outputHeader();    
+    $this->_outputHeader();
 
     //MAIN LOOP  ----------------------------------------
     foreach($this->records as $record){
@@ -310,7 +310,7 @@ public function output($data, $params){
     $format = @$params['format'];
     if($format==null) $format = 'xml';
     if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
-        $mimeType = 'Content-Type: application/json';    
+        $mimeType = 'Content-Type: application/json';
     }else if(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
         $mimeType = 'Content-Type: text/html';
     }else {
@@ -322,7 +322,7 @@ public function output($data, $params){
     //
     if(@$params['zip']==1 || @$params['zip']===true){
         
-        $output = gzencode(file_get_contents($this->tmp_destination), 6); 
+        $output = gzencode(file_get_contents($this->tmp_destination), 6);
         fclose($this->fd);
         
         header('Content-Encoding: gzip');
@@ -330,7 +330,7 @@ public function output($data, $params){
 
         fileDelete($this->tmp_destination);
         echo $output; 
-        unset($output);   
+        unset($output);
         
         return true;
     }else{
@@ -347,7 +347,7 @@ public function output($data, $params){
             $originalFileName = null;
             if(@$params['metadata']){
                 list($db_meta,$rec_ID) = explode('-',$params['metadata']);
-                if(!$db_meta && $rec_ID) $db_meta = $this->system->dbname(); 
+                if(!$db_meta && $rec_ID) $db_meta = $this->system->dbname();
                 
                 $record = array("rec_ID"=>$rec_ID);
                 if($db_meta!=$this->system->dbname()){
@@ -392,14 +392,14 @@ public function output($data, $params){
             // SAVE hml into file DOES NOT WORK - need to rewrite flathml
             if(@$params['metadata']){//save hml into scratch folder
                     $zip->addFromString($originalFileName.'.txt', 
-                                    recordLinksFileContent($this->system, $record));    
+                                    recordLinksFileContent($this->system, $record));
 
             }
             $zip->close();
             //donwload
             $contentDispositionField = 'Content-Disposition: attachment; '
-                . sprintf('filename="%s"; ', rawurlencode($file_zip))
-                . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+                . sprintf('filename="%s";', rawurlencode($file_zip))
+                . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
             
             header('Content-Type: application/zip');
             header($contentDispositionField);
@@ -407,15 +407,15 @@ public function output($data, $params){
             self::readfile_by_chunks($file_zip_full);
                                      
             // remove the zip archive and temp files
-            //unlink($file_zip_full); 
+            //unlink($file_zip_full);
             //unlink($file_metadata_full);
-            fileDelete($this->tmp_destination);   
+            fileDelete($this->tmp_destination);
             return true;
         }else{
             //$content = file_get_contents($this->tmp_destination);
 
             if(@$params['restapi']){
-                //header("Access-Control-Allow-Origin: *");    
+                //header("Access-Control-Allow-Origin: *");
                 //header("Access-Control-Allow-Methods: POST, GET");
                 
                 // Allow from any origin
@@ -424,8 +424,8 @@ public function output($data, $params){
                     // you want to allow, and if so:
                     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
                     header('Access-Control-Allow-Credentials: true');
-                    header('Access-Control-Max-Age: 5');    // default value 5 sec
-                    //header('Access-Control-Max-Age: 86400');    // cache for 1 day
+                    header('Access-Control-Max-Age: 5');// default value 5 sec
+                    //header('Access-Control-Max-Age: 86400');// cache for 1 day
                 /*}else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         
                     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
@@ -440,14 +440,14 @@ public function output($data, $params){
                 }                
             }
             
-            header($mimeType);    
+            header($mimeType);
         
             if(@$params['file']==1 || @$params['file']===true){
                 
                 if($format=='iiif'){
                     $filename = 'manifest_'.$params['db'].'_'.date("YmdHis").'.json';
                 }else{
-                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.($format=='gephi'?'gexf':$format);    
+                    $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.($format=='gephi'?'gexf':$format);
                 }
                 
                 header('Content-Disposition: attachment; filename='.$filename);
@@ -485,8 +485,8 @@ protected function _getDatabaseInfo(){
         
     $query = 'select rty_ID,rty_Name,'
     ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
-    .' from defRecTypes where rty_ID in ('.implode(',',array_keys($this->rt_counts)).')';    
-    $rectypes = mysql__select_all($this->system->get_mysqli(),$query,1);    
+    .' from defRecTypes where rty_ID in ('.implode(',',array_keys($this->rt_counts)).')';
+    $rectypes = mysql__select_all($this->system->get_mysqli(),$query,1);
         
     foreach($this->rt_counts as $rtid => $cnt){
         //include record types that are in output - name, ccode and count

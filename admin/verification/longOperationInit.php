@@ -73,7 +73,7 @@ if(@$_REQUEST['type']=='urls'){
             setTimeout(function(){
                 var $dosframe = $('#verification_output');
                 $dosframe.on('load', function(){
-                    $dosframe.css({width:'97%',height:'97%'}).show(); 
+                    $dosframe.css({width:'97%',height:'97%'}).show();
                     $('#in_porgress').hide()
                 });
                 

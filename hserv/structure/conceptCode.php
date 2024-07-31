@@ -46,7 +46,7 @@ private static function initialize($system2=null)
 
     self::$initialized = true;
     
-    self::$database_id = self::$system->get_system('sys_dbRegisteredID'); 
+    self::$database_id = self::$system->get_system('sys_dbRegisteredID');
 }
 
 public static function setSystem($new_system){
@@ -145,7 +145,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
         //local or defined in this database
         
         if (count($ids) == 2) {
-            $res_id = $ids[1]; //this code is already local
+            $res_id = $ids[1];//this code is already local
         } else {
             $res_id = $ids[0];
         }
@@ -160,7 +160,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
                 . "OriginatingDBID=" . intval($ids[0]) . " and " 
                 . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
                 
-        $res_id = mysql__select_value(self::$system->get_mysqli(), $query);    
+        $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
     }
     
     if (!($res_id>0)) {

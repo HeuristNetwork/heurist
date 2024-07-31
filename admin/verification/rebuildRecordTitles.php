@@ -30,8 +30,8 @@
     */
 set_time_limit(0);
 
-define('MANGER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('MANGER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordTitleMask.php';
@@ -276,7 +276,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $masks = mysql__select_assoc2($mysqli, 'select rty_ID, rty_TitleMask from  defRecTypes');
 
     if($progress_session_id>0 && $rec_count>100){
-        mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);    
+        mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);
     }
     
     $titleDT = $system->defineConstant('DT_NAME')?DT_NAME :0;
@@ -291,7 +291,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
 
         $new_title = TitleMask::execute($mask, $rec['rec_RecTypeID'], 0, $rec_id, _ERR_REP_WARN);
         if(mb_strlen($new_title)>1023){
-            $new_title = mb_substr($new_title,0,1023);  
+            $new_title = mb_substr($new_title,0,1023);
         } 
         
         $processed_count++;
@@ -347,12 +347,12 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     
     //remove session file
     if($progress_session_id>0 && $rec_count>25 && ($processed_count % 25 == 0)){
-        mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+        mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
     }
     
     $q_updates = '';
     if(count($updates)>1000){
-        $q_updates = 'sortby:-m'; //'&limit='.count($updates);
+        $q_updates = 'sortby:-m';//'&limit='.count($updates);
     }else if(count($updates)>0){
         $q_updates = 'ids:'.implode(',',$updates);
     }

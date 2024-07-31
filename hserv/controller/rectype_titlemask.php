@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../System.php';        
+require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../records/edit/recordTitleMask.php';
 
 /*
@@ -82,14 +82,14 @@ if( $system->init(@$_REQUEST['db']) ){
             }else{
                 
                 $recID = @$_REQUEST['rec_id'];
-                $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, _ERR_REP_WARN); //convert to coded and fill values
+                $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, _ERR_REP_WARN);//convert to coded and fill values
                 $response =  $new_title;
                 
             }
     
     $system->dbclose();
     
-    $response = array("status"=>HEURIST_OK, 'data'=>$response, 'message'=>$invalid_mask );            
+    $response = array("status"=>HEURIST_OK, 'data'=>$response, 'message'=>$invalid_mask );
             
 }else{   
     $response = $system->getError();

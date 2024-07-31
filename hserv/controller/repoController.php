@@ -63,7 +63,7 @@ $credentials[$service_id]['params']['writeApiKey'] or user+pwd can be used for a
 
 on registration of URL, provide ulf_Parameters
 
-$fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');        
+$fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');
 $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields)
 
 It will be used later for authentication in fileDownload.php
@@ -105,7 +105,7 @@ if(!$system->init(@$_REQUEST['db'])){
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["a"];
         $res = false;        
-        $ugr_ID = $system->get_user_id(); //intval(@$_REQUEST["ugr_ID"]);
+        $ugr_ID = $system->get_user_id();//intval(@$_REQUEST["ugr_ID"]);
         
         if($action=='list'){   
             //get list of available repositories for given user (including for database and groups)
@@ -136,7 +136,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
             
         }else{
-            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");                
+            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;
         }
         

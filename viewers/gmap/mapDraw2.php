@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
@@ -55,7 +55,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     handleApiReady();
                 }else{                            
                     $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
-                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');                                           
+                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');
                 }
 
             } //onPageInit

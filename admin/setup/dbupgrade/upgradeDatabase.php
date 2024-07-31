@@ -21,7 +21,7 @@
     */
 
 if(!defined('PDIR')){
-    define('PDIR','../../../');  //need for proper path to js and css    
+    define('PDIR','../../../');//need for proper path to js and css    
     require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 }
     require_once dirname(__FILE__).'/../../../hserv/utilities/utils_db_load_script.php';
@@ -56,7 +56,7 @@ if(!defined('PDIR')){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php';?>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
@@ -121,18 +121,18 @@ if(!defined('PDIR')){
                             $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
                             
                             if($trg_maj==1 && $src_min==2){
-                                $filename = $filename.'.php';    
+                                $filename = $filename.'.php';
                             }else if ($src_min==3 && $trg_sub==14){
                                 $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
                             }else{
-                                $filename = $filename.'.sql';    
+                                $filename = $filename.'.sql';
                             }
                             
                             if( file_exists($dir.$filename) ){
                                 
                                 if($trg_maj==1 && $src_min==2){
                                     include_once $filename;
-                                    $rep = updateDatabseTo_v3($system);    //PHP
+                                    $rep = updateDatabseTo_v3($system);//PHP
                                 }else if($src_min==3 && $src_sub<$trg_sub){
                                     if($src_sub<13){
                                         include_once $filename;
@@ -150,7 +150,7 @@ if(!defined('PDIR')){
                                     }
                                     
                                 }else{
-                                    $rep = executeScript($dir.$filename);  //SQL
+                                    $rep = executeScript($dir.$filename);//SQL
                                 }
 
                                 if($rep){
@@ -162,9 +162,9 @@ if(!defined('PDIR')){
                                         }    
                                     }
                                     if($trg_min==3 && $trg_sub==14){ //to 1.3.14
-                                        print "<p>Upgraded to $trg_maj.$trg_min.$trg_sub</p>";    
+                                        print "<p>Upgraded to $trg_maj.$trg_min.$trg_sub</p>";
                                     }else{
-                                        print "<p>Upgraded to $src_maj.$src_min.0</p>";    
+                                        print "<p>Upgraded to $src_maj.$src_min.0</p>";
                                     }
                                     
                                 }else{

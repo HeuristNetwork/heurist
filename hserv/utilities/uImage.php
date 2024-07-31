@@ -116,7 +116,7 @@ class UImage {
             if(defined('WEBSITE_THUMBNAIL_SERVICE') && WEBSITE_THUMBNAIL_SERVICE!=''){
             
                 $remote_path =  str_replace("[URL]", $siteURL, WEBSITE_THUMBNAIL_SERVICE);
-                $filesize = saveURLasFile($remote_path, $heurist_path); //save url screenshot in tep file
+                $filesize = saveURLasFile($remote_path, $heurist_path);//save url screenshot in tep file
 
                 //check the dimension of returned thumbanil in case it is less than 50 - consider it as error
                 if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
@@ -142,13 +142,13 @@ class UImage {
                 
                 //full-page-screenshot details screenshot data
                 //screenshot-thumbnails details items[] data
-                $screenshot = @$googlePagespeedData['lighthouseResult']['audits']['final-screenshot']['details']['data'];  
+                $screenshot = @$googlePagespeedData['lighthouseResult']['audits']['final-screenshot']['details']['data'];
                 
                 //$screenshot = str_replace(array('_','-'),array('/','+'),$screenshot);
                 
                 $fp = fopen($heurist_path, "w+");
                 fwrite($fp, base64_decode($screenshot));
-                fclose($fp);            
+                fclose($fp);
                 
                 //display screenshot image
                 //echo "<img src=\"data:image/jpeg;base64,".$screenshot."\" /-->";
@@ -160,7 +160,7 @@ class UImage {
                 
                 $file = new \stdClass();
                 $file->original_name = 'snapshot.jpg';
-                $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
+                $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME);//name with ext
                 $file->fullpath = $heurist_path;
                 $file->size = $filesize; //fix_integer_overflow
                 $file->type = 'jpg';
@@ -186,7 +186,7 @@ class UImage {
 
         $img = null;
         
-        $data = loadRemoteURLContent($remote_url, false); //get_remote_image as raw data
+        $data = loadRemoteURLContent($remote_url, false);//get_remote_image as raw data
         if($data){
             
             if(isset($orientation)){
@@ -244,22 +244,22 @@ class UImage {
 
             if($img_icon===false) return;
             
-            $color_old = array(0,0,0);//???? 54,100,139);      
-            $color_new = (!$color_new)?array(255, 0, 0):$color_new;  //array(54,64,80);     
+            $color_old = array(0,0,0);//???? 54,100,139);
+            $color_new = (!$color_new)?array(255, 0, 0):$color_new;  //array(54,64,80);
             /* RGB of your inside color */
             $rgb = $color_new; //array(0,0,255);
             
             // Negative values, don't edit
             $rgb = array(($color_old[0]-$rgb[0]),($color_old[1]-$rgb[1]),($color_old[2]-$rgb[2]));
-            imagefilter($img_icon, IMG_FILTER_NEGATE); 
-            imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
-            imagefilter($img_icon, IMG_FILTER_NEGATE); 
+            imagefilter($img_icon, IMG_FILTER_NEGATE);
+            imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]);
+            imagefilter($img_icon, IMG_FILTER_NEGATE);
             //imagealphablending( $img_icon, false );
             //imagesavealpha( $img_icon, true );
 
             if($bg_circle_color!=null || $circle_color!=null){
                 
-                $img = imagecreatetruecolor(25, 25);      //truecolor image 25x25 pix
+                $img = imagecreatetruecolor(25, 25);//truecolor image 25x25 pix
                 imagealphablending( $img, false );
                 imagesavealpha( $img, true );
                 
@@ -270,13 +270,13 @@ class UImage {
                 $bg = imagecolorallocatealpha($img, 200, 200, 200, 127);
                 
                 //draw transparent rectangle
-                imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
+                imagefilledrectangle($img, 0, 0, 25, 25, $bg);//fill bg rectangle
                 
                 // draw filled circle
                 if($bg_circle_color!=null){
                     //$col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
                     $col_ellipse = imagecolorallocatealpha($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2], 80);
-                    imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
+                    imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);
                 }
                 // draw circle
                 if($circle_color!=null){
@@ -287,31 +287,31 @@ class UImage {
                 
                 $imageInfo = getimagesize($filename);
                 if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
-                    imagecopy($img, $img_icon, 1, 1, 0, 0, 24, 24); 
+                    imagecopy($img, $img_icon, 1, 1, 0, 0, 24, 24);
                 }else{
-                    imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); 
+                    imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16);
                 }
                 
                 // output
                 if($filename_new){
-                    imagepng($img, $filename_new);   //save to file     
+                    imagepng($img, $filename_new);//save to file     
                 }else{
-                    header("Content-type: image/png");        
-                    imagepng($img);        
+                    header("Content-type: image/png");
+                    imagepng($img);
                 }
                 imagedestroy($img);
                 //readfile($filename2);
             }else{
                 // output
                 if($filename_new){
-                    imagepng($img_icon, $filename_new);   //save to file     
+                    imagepng($img_icon, $filename_new);//save to file     
                 }else{
-                    header("Content-type: image/png");        
-                    imagepng($img_icon);        
+                    header("Content-type: image/png");
+                    imagepng($img_icon);
                 }
             }
         
-            imagedestroy($img_icon);    
+            imagedestroy($img_icon);
             
         }
     }
@@ -408,12 +408,12 @@ class UImage {
             case 'image/png':
             case 'png':
             
-                $imageInfo = getimagesize($filename); 
+                $imageInfo = getimagesize($filename);
                 if(is_array($imageInfo)){
                     if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
-                        $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65); 
+                        $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65);
                     }else{ //width x height
-                        $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);  
+                        $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);
                     } 
                     
                     $error_msg = USystem::isMemoryAllowed( $memoryNeeded );
@@ -456,7 +456,7 @@ class UImage {
                     
                 }
                 return false;
-            });//, E_WARNING);                
+            });//, E_WARNING);
             
             switch($mimeExt) {
                 case 'image/jpeg':
@@ -515,7 +515,7 @@ class UImage {
             if($errorMsg && $create_error_thumb)
             {
                 $img = UImage::createFromString($errorMsg);
-                imagepng($img, $scaled_file);                
+                imagepng($img, $scaled_file);
                 imagedestroy($img);
                 return $errorMsg;
             
@@ -536,7 +536,7 @@ class UImage {
     public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200, $orientation=0){
 
         if($orientation>0){
-            $img = UImage::gd_orient_image($img, $orientation);    
+            $img = UImage::gd_orient_image($img, $orientation);
         }
         
         $no_enlarge = false;
@@ -687,7 +687,7 @@ class UImage {
         
             if(!extension_loaded('imagick')){
                 
-                $cmd = 'convert -thumbnail x200 -flatten '; //-background white -alpha remove 
+                $cmd = 'convert -thumbnail x200 -flatten ';//-background white -alpha remove 
                 $cmd .= ' '.escapeshellarg($filename.'[0]');
                 $cmd .= ' '.escapeshellarg($thumbnail_file);
                 exec($cmd, $output, $error);
@@ -701,8 +701,8 @@ class UImage {
                 //Imagic
                 try {
                     
-                    $im =  new Imagick($filename.'[0]'); 
-                    $im->setImageFormat('png'); 
+                    $im =  new Imagick($filename.'[0]');
+                    $im->setImageFormat('png');
                     $im->thumbnailImage(200,200);
 
                     if(file_exists($thumbnail_file)){
@@ -731,13 +731,13 @@ class UImage {
         $image = UImage::getImageFromFile($filename);
         if($image){
             
-            $scaled = imagescale($image, 1, 1, IMG_BICUBIC);  //since v5.5
+            $scaled = imagescale($image, 1, 1, IMG_BICUBIC);//since v5.5
             $index = imagecolorat($scaled, 0, 0);
-            $rgb = imagecolorsforindex($scaled, $index); 
-            /* $red = round(round(($rgb['red'] / 0x33)) * 0x33); 
-            $green = round(round(($rgb['green'] / 0x33)) * 0x33); 
-            $blue = round(round(($rgb['blue'] / 0x33)) * 0x33); 
-            return sprintf('#%02X%02X%02X', $red, $green, $blue);     
+            $rgb = imagecolorsforindex($scaled, $index);
+            /* $red = round(round(($rgb['red'] / 0x33)) * 0x33);
+            $green = round(round(($rgb['green'] / 0x33)) * 0x33);
+            $blue = round(round(($rgb['blue'] / 0x33)) * 0x33);
+            return sprintf('#%02X%02X%02X', $red, $green, $blue);
             */
             return sprintf('#%02X%02X%02X', $rgb['red'], $rgb['green'], $rgb['blue']);
         }else{
@@ -826,7 +826,7 @@ class UImage {
             echo "</div>";
             */
         }else{
-            return '#FFFFFF';   
+            return '#FFFFFF';
         }
     }
 
@@ -849,7 +849,7 @@ class UImage {
                     $scaleHeight = $dims['height'] > $dims['width'] ? $max_width : 0;
                     $scaleWidth = $dims['width'] > $dims['height'] ? $max_height : 0;
 
-                    $image->scaleImage($scaleWidth, $scaleHeight); // scale image
+                    $image->scaleImage($scaleWidth, $scaleHeight);// scale image
                 }
 
                 // force jpeg output
@@ -984,7 +984,7 @@ class UImage {
             }
 
         }else{
-            $color_new = null; //array(255, 0, 0);    
+            $color_new = null; //array(255, 0, 0);
         }  
         return $color_new;
     }

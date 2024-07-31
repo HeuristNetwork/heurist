@@ -123,7 +123,7 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
     
-    $system->setResponseHeader(); //UTF-8?? apparently need to remove
+    $system->setResponseHeader();//UTF-8?? apparently need to remove
     print json_encode($response);
     exit;
 ?>

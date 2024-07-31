@@ -86,7 +86,7 @@ if (@$argv) {
 }
 
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
@@ -112,7 +112,7 @@ if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-
 //print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 $upload_root = $system->getFileStoreRootFolder();
 
@@ -125,7 +125,7 @@ if(!$arg_no_action){
 
     $action = 'cleanupFoldersDBs';
     if(false && !isActionInProgress($action, 1)){
-        exit("It appears that cleanup operation has been started already. Please try this function later\n");        
+        exit("It appears that cleanup operation has been started already. Please try this function later\n");
     }
 }
 
@@ -139,7 +139,7 @@ $databases = array('AmateurS1');
 
 //userInteraction.log
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $today = strtotime('now');
@@ -154,7 +154,7 @@ foreach ($databases as $idx=>$db_name){
 
     $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
 
-    $db_name = htmlspecialchars($db_name); 
+    $db_name = htmlspecialchars($db_name);
     
     if(file_exists($dir_root)){
 
@@ -220,7 +220,7 @@ foreach ($databases as $idx=>$db_name){
                         continue;
                     }
                     try{
-                        $new_log = new SplFileObject($log_tmp, 'w'); // to replace log, if lines removed
+                        $new_log = new SplFileObject($log_tmp, 'w');// to replace log, if lines removed
                         if(!$new_log->isWritable()){ // check if file is writable
                             throw new Exception("Temporary log file is not writable");
                         }
@@ -240,14 +240,14 @@ foreach ($databases as $idx=>$db_name){
                     // Check each line's date
                     while($org_log!=null && !$org_log->eof()){
 
-                        $line = $org_log->fgets(); // get line
+                        $line = $org_log->fgets();// get line
 
                         $chunks = explode(',', $line);
                         if(count($chunks) < 3){ // invalid line, skip it
                             continue;
                         }
 
-                        $date = strtotime('+1 week', strtotime($chunks[2])); // ge expiry date
+                        $date = strtotime('+1 week', strtotime($chunks[2]));// ge expiry date
 
                         if($date < $today){ // expired action
                             $remove_lines ++;
@@ -258,7 +258,7 @@ foreach ($databases as $idx=>$db_name){
                             break;
                         }
 
-                        $res_write = $new_log->fwrite($line); // write to temp file
+                        $res_write = $new_log->fwrite($line);// write to temp file
                         if(!$res_write){ // unable to write to temp file
                             $report .= "{$tabs}Failed to write to temporary log file{$eol}";
                             $remove_lines = 0;
@@ -275,7 +275,7 @@ foreach ($databases as $idx=>$db_name){
                         $report .= "{$tabs}Removed {$remove_lines} interactions from the log file{$eol}";
                     }
 
-                    fileDelete($log_tmp); // delete temp file
+                    fileDelete($log_tmp);// delete temp file
 
                 }else if ($object[1] != '.' && $object[1] != '..' && 
                     strpos($object[1],'ulf_')===false && strpos($object[1],'userNotifications')===false) {
@@ -352,7 +352,7 @@ foreach ($databases as $idx=>$db_name){
 
 }//databases
 
-    //echo "   ".$db_name." OK \n"; //.'  in '.$folder
+    //echo "   ".$db_name." OK \n";//.'  in '.$folder
 
 
 echo $tabs0.'---'.$eol;
@@ -388,8 +388,8 @@ function listFolderContent($dir){
     
     foreach ($content['records'] as $object) {
         if ($object[1] != '.' && $object[1] != '..') {
-            $list = $list.'<tr><td>'.$object[1].'</td><td align="right">'.$object[4].'</td></tr>'; //(intdiv($object[4], 1024))
-            $size += intval($object[4]); 
+            $list = $list.'<tr><td>'.$object[1].'</td><td align="right">'.$object[4].'</td></tr>';//(intdiv($object[4], 1024))
+            $size += intval($object[4]);
         }
     }
     

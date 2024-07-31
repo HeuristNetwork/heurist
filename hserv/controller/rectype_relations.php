@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';        
+    require_once dirname(__FILE__).'/../System.php';
 
     if(isset($_REQUEST['db'])) {
         $dbName = $_REQUEST['db'];
@@ -49,7 +49,7 @@
             print json_encode($result);
         }else {
             // Show construction error
-            echo $system->getError();   
+            echo $system->getError();
         }
     }else{
         echo "\"db\" parameter is required";
@@ -103,7 +103,7 @@
         $res = $system->get_mysqli()->query($query);
         while($row = $res->fetch_assoc()) { 
             $relation = new stdClass();
-            $relation->id = intval($row["id"]); //detail type id
+            $relation->id = intval($row["id"]);//detail type id
             $relation->name = $row["name"];
             $relation->count = 0;//intval($row["count"]);
             $relation->type = $row["reltype"];
@@ -128,7 +128,7 @@
         
         // Go through all ID's
         //echo "\nID's for relation #" . $relation->id . ": " . $relation->ids;
-        $ids = explode(",", $relation->ids); //target record types ids (constraints from field type definitions)
+        $ids = explode(",", $relation->ids);//target record types ids (constraints from field type definitions)
         foreach($ids as $id) {
             if($relation->type=='relmarker'){
                 
@@ -196,7 +196,7 @@
         // Go through all rectypes
         for($i = 0; $i < sizeof($rectypes); $i++) {
             // Find all constrined and relarion fields
-            $relations = getConstrainedResourceAndRelmarkerFields($system, $rectypes[$i]); 
+            $relations = getConstrainedResourceAndRelmarkerFields($system, $rectypes[$i]);
 
             // Find all targets for each relation
             foreach($relations as $relation) {
@@ -233,7 +233,7 @@ targetcount:0
                     $link->relation->count = $target->count;
 
                     //print_r($link);
-                    array_push($links, $link);      
+                    array_push($links, $link);
                 }
             }  
         }

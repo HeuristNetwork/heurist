@@ -27,7 +27,7 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../utilities/uSaml.php';
 
-$action = @$_REQUEST['a']; //$system->getError();
+$action = @$_REQUEST['a'];//$system->getError();
 
 $system = new System();
 $dbname = @$_REQUEST['db'];
@@ -74,12 +74,12 @@ if($error){
                     <title>Heurist external authentification</title>
                     <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
                     <script>
-                        window.hWin.HAPI4.currentUser = <?php echo json_encode($res['currentUser']); ?>;
-                        window.hWin.HAPI4.sysinfo = <?php echo json_encode($res['sysinfo']); ?>;
+                        window.hWin.HAPI4.currentUser = <?php echo json_encode($res['currentUser']);?>;
+                        window.hWin.HAPI4.sysinfo = <?php echo json_encode($res['sysinfo']);?>;
                     
                         window.onload = function(){
-console.log('Authentification completed ','<?php echo intval($user_id);?>');                                
-                            setTimeout(function(){window.close(<?php echo intval($user_id);?>); }, 1000);    
+console.log('Authentification completed ','<?php echo intval($user_id);?>');
+                            setTimeout(function(){window.close(<?php echo intval($user_id);?>);}, 1000);
                         }                 
                     </script>
                     </head>
@@ -109,7 +109,7 @@ if($msg==null){
     if($msg && @$msg['message']){
         $msg = $msg['message'];
     }else{
-        $msg = 'Indefenite error';     
+        $msg = 'Indefenite error';
     }
 }
 ?>
@@ -119,8 +119,8 @@ if($msg==null){
 <title>Heurist external authentification</title>
 <script>
     window.onload = function(){
-console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');                                
-        setTimeout(function(){window.close("<?php echo htmlspecialchars($msg);?>");}, 1000);    
+console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');
+        setTimeout(function(){window.close("<?php echo htmlspecialchars($msg);?>");}, 1000);
     }                 
 </script>
 </head>

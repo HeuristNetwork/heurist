@@ -26,7 +26,7 @@ class DbEntitySearch
 {
     private $system;  
     
-    private $data = array(); //assigned in validate params
+    private $data = array();//assigned in validate params
     
     //data types: ids, int, float, date, bool, enum
     //structure
@@ -155,7 +155,7 @@ class DbEntitySearch
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
                 }else if($is_ids=='ids'){
-                    $res = $this->_validateIds($fieldname, $data_type); //, 'user/group IDs');
+                    $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
                     
                 }else if($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);
@@ -225,9 +225,9 @@ class DbEntitySearch
             }
         
             if($data_type=='freetext' ||  $data_type=='url' || $data_type=='blocktext'){
-                $value = prepareStrIds($value);    
+                $value = prepareStrIds($value);
             }else{
-                $value = prepareIds($value);    
+                $value = prepareIds($value);
             }
             
             if(count($value)==0) return null;
@@ -312,7 +312,7 @@ class DbEntitySearch
                 if($between){
                     $res = $between.$values[0].' and '.$values[1];
                 }else{
-                    $res = " $eq ".($data_type == 'int'?intval($value):$value);  //no quotes
+                    $res = " $eq ".($data_type == 'int'?intval($value):$value);//no quotes
                 }
             }
             else if ($data_type == 'date') {    
@@ -452,7 +452,7 @@ class DbEntitySearch
                     }
                     //add calculated fields to header
                     if($calculatedFields!=null){
-                        $fields = $calculatedFields($fields); //adds names of calulated fields
+                        $fields = $calculatedFields($fields);//adds names of calulated fields
                     }
 
                     $records = array();
@@ -463,7 +463,7 @@ class DbEntitySearch
                     {
                         
                         if($calculatedFields!=null){
-                            $row = $calculatedFields($fields, $row); //adds values
+                            $row = $calculatedFields($fields, $row);//adds values
                         }
                         $records[$row[0]] = $row;   //record[primary key] = row from db table
                         $order[] = $row[0];
@@ -474,7 +474,7 @@ class DbEntitySearch
                     if(@$this->data['restapi']==1){
                        
                        //converts records to [fieldname=>value,... ]
-                       $response = array(); 
+                       $response = array();
                        foreach ($records as $record) {
                            $rec = array();
                            foreach ($fields as $idx=>$field){
@@ -505,7 +505,7 @@ class DbEntitySearch
                                         if(!is_array($records[$row[0]][$idx])){
                                             $records[$row[0]][$idx] = array($records[$row[0]][$idx]);
                                         }
-                                        array_push($records[$row[0]][$idx], $row[2].':'.$row[3]);    
+                                        array_push($records[$row[0]][$idx], $row[2].':'.$row[3]);
                                     }
                                 }
                                 $res->close();

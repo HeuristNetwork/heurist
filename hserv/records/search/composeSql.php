@@ -237,7 +237,7 @@ $dty_id_relation_type = 6;//$system->defineConstant('DT_RELATION_TYPE');
 function parse_query_to_json($query){
     
     $res = array();
-    $subres = array(); //parsed subqueries
+    $subres = array();//parsed subqueries
     
     if($query!=null && $query!=''){
 
@@ -262,7 +262,7 @@ function parse_query_to_json($query){
             $query = preg_replace_callback('/\(([^[\)]|(?R))*\)/', 
                 function($m) {
                     return ' [subquery] ';
-                }, $query);            
+                }, $query);
             
             
         }
@@ -377,7 +377,7 @@ function parse_query_to_json($query){
                         if(false && @$res[count($res)-1]['title']){
                             $res[count($res)-1]['title'] .= (' '.$word);
                         }else{
-                            array_push($res, array( 'title'=>$word ));        
+                            array_push($res, array( 'title'=>$word ));
                         }
                     }
                     continue;
@@ -396,7 +396,7 @@ function parse_query_to_json($query){
                     $word = array_shift($subres);
                 }
                 
-                array_push($res, array( $keyword=>$word ));    
+                array_push($res, array( $keyword=>$word ));
                 
                 $previous_key = $keyword;
                 
@@ -448,7 +448,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     }
     
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
-    $wg_ids = array(); //may be better use $system->get_user_group_ids() ???
+    $wg_ids = array();//may be better use $system->get_user_group_ids() ???
     if($currentUser && @$currentUser['ugr_ID']>0){
         if(@$currentUser['ugr_Groups']){
             $wg_ids = array_keys($currentUser['ugr_Groups']);
@@ -462,9 +462,9 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $currUserID = 0;
         $params['w'] = 'all';
     }
-    array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
+    array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
 
-    $publicOnly = (@$params['publiconly'] == 1); //@todo change to vt - visibility type parameter of query
+    $publicOnly = (@$params['publiconly'] == 1);//@todo change to vt - visibility type parameter of query
 
     // set is_admin
     $is_admin = true; //2023-11-28 TEMPORARY DISABLE field visibility check  $is_admin = $currUserID == 2;
@@ -496,7 +496,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     //for database owner we will search records of any workgroup and view access
     //@todo UNLESS parameter owner is not defined explicitely
     if($currUserID==2 && $search_domain != BOOKMARK){
-        $wg_ids = array();    
+        $wg_ids = array();
     }
     //$use_user_wss = (@$params['use_user_wss']===true);
     
@@ -580,7 +580,7 @@ class HQuery {
 
         global $publicOnly, $wg_ids, $is_admin; //, $mysqli, $use_user_wss;
 
-        $res = $this->top_limb->makeSQL(); //it creates where_clause and fill tables array
+        $res = $this->top_limb->makeSQL();//it creates where_clause and fill tables array
         
         if($this->top_limb->error_message){
              $this->error_message = $this->top_limb->error_message;
@@ -633,11 +633,11 @@ class HQuery {
                 $recVisibilityType = null;
             }
 
-            $where2 = '';    
+            $where2 = '';
             
             
             if($recVisibilityType && $recVisibilityType!="hidden"){
-                $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';  //'pending','public','viewable'
+                $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';//'pending','public','viewable'
             }else{
                 $where2_conj = '';
                 if($recVisibilityType){ //hidden
@@ -662,9 +662,9 @@ class HQuery {
                 if($this->currUserID>0 && is_array($wg_ids) && count($wg_ids)>0){
                     $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID ';
                     if(count($wg_ids)>1){
-                        $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                        $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';
                     }else{
-                        $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                        $where2 = $where2 .' = '.$wg_ids[0] . ' )';
                     }
                 }
             }
@@ -757,24 +757,24 @@ class HQuery {
                 case 'r': case 'rating':
                     if ($this->search_domain == BOOKMARK) {
                         if(!in_array('bkm_Rating', $sort_fields)) {
-                            $sort_fields[] = 'bkm_Rating';   
+                            $sort_fields[] = 'bkm_Rating';
                             $sort_expr[] = 'bkm_Rating'.$scending;   
                         }
                         break;
                     }
                 case 'p': case 'popularity':
                     if(!in_array('r0.rec_Popularity', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_Popularity';   
+                        $sort_fields[] = 'r0.rec_Popularity';
                         $sort_expr[] = 'r0.rec_Popularity'.$scending;   
                     }
                     if(!in_array('r0.rec_ID', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_ID';   
+                        $sort_fields[] = 'r0.rec_ID';
                         $sort_expr[] = 'r0.rec_ID'.$scending;   
                     }
                     break;
                 case 'u': case 'url':
                     if(!in_array('r0.rec_URL', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_URL';   
+                        $sort_fields[] = 'r0.rec_URL';
                         $sort_expr[] = 'r0.rec_URL'.$scending;   
                     }
                     break;
@@ -794,19 +794,19 @@ class HQuery {
                     break;
                 case 't': case 'title':
                     if(!in_array('r0.rec_Title', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_Title';   
+                        $sort_fields[] = 'r0.rec_Title';
                         $sort_expr[] = 'r0.rec_Title'.$scending;   
                     }
                     break;
                 case 'id': case 'ids':
                     if(!in_array('r0.rec_ID', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_ID';   
+                        $sort_fields[] = 'r0.rec_ID';
                         $sort_expr[] = 'r0.rec_ID'.$scending;   
                     }
                     break;
                 case 'rt': case 'type':
                     if(!in_array('r0.rec_RecTypeID', $sort_fields)) {
-                        $sort_fields[] = 'r0.rec_RecTypeID';   
+                        $sort_fields[] = 'r0.rec_RecTypeID';
                         $sort_expr[] = 'r0.rec_RecTypeID'.$scending;   
                     }
                     break;
@@ -820,8 +820,8 @@ class HQuery {
                         .' from recDetails sd1'
                         .' left join recDetails sd2 on sd1.dtl_Value=sd2.dtl_RecID and sd2.dtl_DetailTypeID=9'
                         .' left join recDetails sd3 on sd1.dtl_Value=sd3.dtl_RecID and sd3.dtl_DetailTypeID=10'
-                        .' where r0.rec_ID=sd1.dtl_RecID and sd1.dtl_DetailTypeID=293 limit 1) DESC';                    
-                        $sort_fields[] = 'hie';   
+                        .' where r0.rec_ID=sd1.dtl_RecID and sd1.dtl_DetailTypeID=293 limit 1) DESC';
+                        $sort_fields[] = 'hie';
                     }
                     
                     break;
@@ -838,10 +838,10 @@ class HQuery {
                                     .' ORDER BY trm_Label limit 1), ' // attempt sortby Order in Branch first
                                       . 'ifnull((select trm_Label from recDetails left join defTerms on trm_ID=dtl_Value where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
-                                        .' ORDER BY trm_Label limit 1), "~~")) '; // then by term label
+                                        .' ORDER BY trm_Label limit 1), "~~")) ';// then by term label
                             }else{
 
-                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getEstDate(dtl_Value,0)'; //for sort
+                                $fld = $field_type != 'date' ? 'dtl_Value' : 'getEstDate(dtl_Value,0)';//for sort
 
                                 $sortby = 'ifnull((select '.$fld.' from recDetails where dtl_RecID=r'
                                         .$this->level.'.rec_ID and dtl_DetailTypeID='.$dty_ID
@@ -849,9 +849,9 @@ class HQuery {
                             }
                             
                             if($field_type=='float'){
-                                $sortby = 'CAST('.$sortby.' AS DECIMAL) ';       
+                                $sortby = 'CAST('.$sortby.' AS DECIMAL) ';
                             }else if ($field_type=='integer'){
-                                $sortby = 'CAST('.$sortby.' AS SIGNED) ';       
+                                $sortby = 'CAST('.$sortby.' AS SIGNED) ';
                             }
 
                             $sort_expr[] = $sortby . $scending . ', r'.$this->level . '.rec_Title';
@@ -879,8 +879,8 @@ class HQuery {
 class HLimb {
 
     var $parent;           // query
-    var $limbs = array();  // limbs and predicates
-    var $conjunction = "all"; //and
+    var $limbs = array();// limbs and predicates
+    var $conjunction = "all";//and
 
     //results
     var $tables = array();
@@ -1030,7 +1030,7 @@ class HPredicate {
     
     var $relation_types = null; 
     var $relation_fields = null; // field in relationshio record: array(field_id=>value)
-    var $relation_prefix = ''; //prefix for recLinks
+    var $relation_prefix = '';//prefix for recLinks
     
     var $field_list = false; //list of id values used in predicate IN (val1, val2, val3... )
     
@@ -1100,14 +1100,14 @@ class HPredicate {
             if($this->pred_type=='f'){
                 $this->field_id = $key[1];
                 if($ll>2){ //get subfield for terms "f:5:desc" 
-                        $val1 = $key[2];    
+                        $val1 = $key[2];
                         if(@$this->allowed_term_fields[$val1]){
                             $this->field_term = $val1;    
                         }
                         /*
                         $val2 = null;
                         if($ll>3){
-                            $val2 = $key[3];    
+                            $val2 = $key[3];
                         }
                         if(@$this->allowed_term_fields[$val1]){
                             $this->field_term = $val1;    
@@ -1151,7 +1151,7 @@ class HPredicate {
                         {
                             $val = $val['r'];
                             if($val){
-                                $this->relation_types = prepareIds($val);    
+                                $this->relation_types = prepareIds($val);
                             }else{
                                 $this->relation_types = null; //not empty - any relationtype
                             }
@@ -1168,25 +1168,25 @@ class HPredicate {
                                $rel_field = $idx;
                                $rel_field = strpos($rel_field,'r:')===0
                                                     ?str_replace('r:','f:',$rel_field)
-                                                    :str_replace('relf:','f:',$rel_field);    
+                                                    :str_replace('relf:','f:',$rel_field);
                                $this->relation_fields[$rel_field] = $val;       
                         
                         }else if(is_array($val) && 
                                     (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],'relf:')===0)){  //that's for [{"r:10":10},{}]
                             //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
-                               $rel_field = array_keys($val)[0];  
+                               $rel_field = array_keys($val)[0];
                                if($rel_field=='r:'.$dty_id_relation_type){
                                    
                                    if($val[$rel_field]){
-                                        $this->relation_types = prepareIds($val[$rel_field]);        
+                                        $this->relation_types = prepareIds($val[$rel_field]);
                                    }
                                    
                                }else{
                                    $rel_field2 = strpos($rel_field,'r:')===0
                                                         ?str_replace('r:','f:',$rel_field)
-                                                        :str_replace('relf:','f:',$rel_field);    
+                                                        :str_replace('relf:','f:',$rel_field);
                                 
-                                   $this->relation_fields[$rel_field2] = $val[$rel_field];       
+                                   $this->relation_fields[$rel_field2] = $val[$rel_field];
                                }
                         }else{
                             $this->value[$idx] = $val;
@@ -1196,7 +1196,7 @@ class HPredicate {
                     
                     
                     if(is_array($this->relation_fields) && count($this->relation_fields)>0){
-                        $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);    
+                        $this->relation_fields = new HLimb($this->parent, 'all', $this->relation_fields);
                     }else{
                         $this->relation_fields = null;
                     }
@@ -1209,7 +1209,7 @@ class HPredicate {
                         if($idx==='ids' || (is_array($val) && @$val['ids']) ){
                             if(is_array($val) && @$val['ids']) $val = $val['ids'];
                             $this->value = $val;
-                            $value = array(); //reset
+                            $value = array();//reset
                             break;
                         }
                     }    
@@ -1263,7 +1263,7 @@ class HPredicate {
                 $tab = 'r'.$this->qlevel;
                              
                 $where_clause = $query->where_clause;
-                $where_clause = str_replace('TOPBIBLIO',$tab,$where_clause);  //need to replace for particular level
+                $where_clause = str_replace('TOPBIBLIO',$tab,$where_clause);//need to replace for particular level
                 $where_clause = str_replace('TOPBKMK','b',$where_clause);
                 
             
@@ -1283,7 +1283,7 @@ class HPredicate {
                     if(intval($this->value)==0){
                         return null;
                     }else{
-                        $res = "$eq ".intval($this->value);    
+                        $res = "$eq ".intval($this->value);
                     }
                     
                 }
@@ -1297,7 +1297,7 @@ class HPredicate {
                     if($local_rtyid>0){
                         $res = "$eq $local_rtyid";
                     }else{
-                        $res = "=0"; //localcode not found
+                        $res = "=0";//localcode not found
                     }
                 }
                 else
@@ -1427,13 +1427,13 @@ class HPredicate {
             .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND ';
         
         if($this->isEmptyValue()){
-            $res = ' NOT '.$res.$p.'dtl_Geo IS NOT NULL)'; //not defined
+            $res = ' NOT '.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
         }else if($this->value==''){  
-            $res = $res.$p.'dtl_Geo IS NOT NULL)'; //any not null value
+            $res = $res.$p.'dtl_Geo IS NOT NULL)';//any not null value
         }else {
             $res = $res
             .$p.'dtl_Geo is not null AND ST_Contains(ST_GeomFromText(\''.$this->value.'\'), '
-            .$p.'dtl_Geo) limit 1)';  //MBRContains
+            .$p.'dtl_Geo) limit 1)';//MBRContains
         }
         return array("where"=>$res);
     }
@@ -1448,9 +1448,9 @@ class HPredicate {
         $p = "rd".$this->qlevel.".";
         $p = "";
         
-        $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+        $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
         if(is_array($several_ids) && count($several_ids)>0){
-            $this->field_id = $several_ids[0];    
+            $this->field_id = $several_ids[0];
         }else{
             $several_ids = null;
         }
@@ -1463,7 +1463,7 @@ class HPredicate {
         }
         
         if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){
-            $this->field_type = 'link'; //integer without quotes
+            $this->field_type = 'link';//integer without quotes
         }else if($this->field_type=='file'){
             
         }else if(intval($this->field_id)>0){
@@ -1472,7 +1472,7 @@ class HPredicate {
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
             
             if($this->field_type=='relmarker'){
-                return $this->predicateRelatedDirect(false);    
+                return $this->predicateRelatedDirect(false);
             }
         }else{
             $this->field_type = 'freetext';
@@ -1504,7 +1504,7 @@ class HPredicate {
             }
         }
         
-        $is_empty = $this->isEmptyValue(); //search for empty or not defined value
+        $is_empty = $this->isEmptyValue();//search for empty or not defined value
         
         
         //@todo future - here we need to add code that will
@@ -1570,7 +1570,7 @@ class HPredicate {
             if($this->pred_type=='f') $this->pred_type = $this->field_id;
             
             if($is_empty){
-                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField='')";    
+                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField='')";
             }else{
                 $ignoreApostrophe = $ignoreApostrophe && (strpos($val,"'")===false);
                 
@@ -1585,9 +1585,9 @@ class HPredicate {
                     }
                 }else
                 if($ignoreApostrophe){
-                    $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";     
+                    $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";
                 }else{
-                    $res = "(r".$this->qlevel.".$sHeaderField ".$val.")";    
+                    $res = "(r".$this->qlevel.".$sHeaderField ".$val.")";
                 }
             }
             
@@ -1602,7 +1602,7 @@ class HPredicate {
         }else if($this->pred_type=='tag' || $this->field_id=='tag'){
             // it is better to use kwd keyword instead of f:tag
             
-            $res = "(r".$this->qlevel.".rec_ID IN ".$val.")"; 
+            $res = "(r".$this->qlevel.".rec_ID IN ".$val.")";
         
         }else if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){ //search for records where field occurs N times (repeatable values)
 
@@ -1619,13 +1619,13 @@ class HPredicate {
                 //OUTDATED - REMOVE
                 
             }else if($this->field_type=='file'){
-                $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
+                $field_name = $p."dtl_UploadedFileID ";//only for search non empty values
             }else{
                 
                 $field_name = $p."dtl_Value ";
                 $ignoreApostrophe = ((strpos($val, 'LIKE')==1) && (strpos($val,"'")===false));
                 if($ignoreApostrophe){
-                    $field_name = 'replace('.$field_name.", \"'\", \"\") ";                   
+                    $field_name = 'replace('.$field_name.", \"'\", \"\") "; 
                 }
             }
 
@@ -1653,7 +1653,7 @@ class HPredicate {
                     .$p.'dtl_DetailTypeID';
                  
                     if($this->negate){
-                        $val = $this->getFieldValue(); //this time it returns without negate
+                        $val = $this->getFieldValue();//this time it returns without negate
                         $res = ' NOT '.$res;
                     }
                 }
@@ -1671,11 +1671,11 @@ class HPredicate {
                                 ?' IN ('.implode(',',$list_ids).')'
                                 :'='.$list_ids[0]);
                     }else{
-                        $res = '(1=0)'; //nothing found    
+                        $res = '(1=0)';//nothing found    
                     }
                     
                 }else{
-                    $res = $res.' AND '.$field_name.$val.$field_condition.')';        
+                    $res = $res.' AND '.$field_name.$val.$field_condition.')';
                 }
             }else{
                 //field id not defined - at the moment used for search via registered file
@@ -1688,14 +1688,14 @@ class HPredicate {
                             ?' IN ('.implode(',',$list_ids).')'
                             :'='.$list_ids[0]);
                 }else{
-                    $res = '(1=0)'; //nothing found    
+                    $res = '(1=0)';//nothing found    
                 }
                 
             }
             
         }
 
-        return array("where"=>$res);  ///"from"=>"recDetails rd",
+        return array("where"=>$res);///"from"=>"recDetails rd",
 
     }
 
@@ -1725,8 +1725,8 @@ class HPredicate {
         
         $ignoreApostrophe = (strpos($val, 'LIKE')==1);
         if($ignoreApostrophe){
-            $field_name1 = 'replace('.$field_name1.", \"'\", \"\") ";                   
-            $field_name2 = 'replace('.$field_name2.", \"'\", \"\") ";                   
+            $field_name1 = 'replace('.$field_name1.", \"'\", \"\") "; 
+            $field_name2 = 'replace('.$field_name2.", \"'\", \"\") "; 
         }
 
         $field_condition = '';
@@ -1776,7 +1776,7 @@ class HPredicate {
                         ?' IN ('.implode(',',$list_ids).')'
                         :'='.$list_ids[0]);
             }else{
-                $res = '(1=0)'; //nothing found    
+                $res = '(1=0)';//nothing found    
             }
 
         }else{
@@ -1931,7 +1931,7 @@ class HPredicate {
                 }
                 
                 
-//SELECT rtl_RecID as cnt FROM usrrectaglinks where rtl_TagID in (1,3) group by rtl_RecID having count(*)=2);                
+//SELECT rtl_RecID as cnt FROM usrrectaglinks where rtl_TagID in (1,3) group by rtl_RecID having count(*)=2);
             }else{
                 $pred = null;
                 
@@ -1959,7 +1959,7 @@ class HPredicate {
                 }
                 
                 if($pred){
-                    $where = ' IN (SELECT rtl_RecID FROM usrRecTagLinks, usrTags where rtl_TagID=tag_ID and '.$pred.')';    
+                    $where = ' IN (SELECT rtl_RecID FROM usrRecTagLinks, usrTags where rtl_TagID=tag_ID and '.$pred.')';
                 }else{
                     $where = '=0';
                 }                
@@ -2073,7 +2073,7 @@ class HPredicate {
                 
                 $field_compare = "$rl.rl_RelationID IS NULL";
                 if($this->field_id){
-                    $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+                    $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
                     if(is_array($several_ids) && count($several_ids)>0){
                         
                         if(count($several_ids)>1){
@@ -2159,7 +2159,7 @@ class HPredicate {
             
             $field_compare = "$rl.rl_RelationID IS NULL";
             if($this->field_id){
-                $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+                $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
                 if(is_array($several_ids) && count($several_ids)>0){
                     
                     if(count($several_ids)>1){
@@ -2211,7 +2211,7 @@ class HPredicate {
                         //if(count($ids)>2000)
                         $val = ' IN ('.implode(',',$ids).')';
                     }else{
-                        $val = ' =0'; //not found
+                        $val = ' =0';//not found
                     }
                     
                     //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
@@ -2250,7 +2250,7 @@ class HPredicate {
                 $where_reverce_reltypes = "($rl.rl_RelationTypeID " .(count($inverse_reltype_ids)>1
                             ?' IN ('.implode(',',$inverse_reltype_ids).')'
                             :'='.$inverse_reltype_ids[0])
-                            .') AND '; 
+                            .') AND ';
                 
             }
             
@@ -2276,7 +2276,7 @@ class HPredicate {
             
             if($reltypes!=null && count($reltypes)>0){
                 if(count($reltypes)==1){
-                    $reltypes = '='.$reltypes[0];       
+                    $reltypes = '='.$reltypes[0];
                 }else{
                     $reltypes = 'IN ('.implode(',',$reltypes).')';
                 }
@@ -2299,7 +2299,7 @@ class HPredicate {
         $where = $where
         //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
          ." (($where_direct_reltypes r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val                   //direct
-            .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';       //reverse
+            .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';//reverse
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
@@ -2318,9 +2318,9 @@ class HPredicate {
             $reltypes = getTermChildrenAll($mysqli, $vocab_id);
             $rty_constraints = explode(',',$rty_constraints);
 
-            return array($reltypes, $rty_constraints);        
+            return array($reltypes, $rty_constraints);
         }else{
-            return array(null, null);        
+            return array(null, null);
         }
     }
     
@@ -2376,7 +2376,7 @@ class HPredicate {
                 
                 if($rty_constraints!=null && count($rty_constraints)>0){
                     if(count($rty_constraints)==1){
-                        $rty_constraints = '='.$rty_constraints[0];       
+                        $rty_constraints = '='.$rty_constraints[0];
                     }else{
                         $rty_constraints = 'IN ('.implode(',',$rty_constraints).')';
                     }
@@ -2388,7 +2388,7 @@ class HPredicate {
                 
                 if($reltypes!=null && count($reltypes)>0){
                     if(count($reltypes)==1){
-                        $reltypes = '='.$reltypes[0];       
+                        $reltypes = '='.$reltypes[0];
                     }else{
                         $reltypes = 'IN ('.implode(',',$reltypes).')';
                     }
@@ -2439,7 +2439,7 @@ class HPredicate {
 
             }else{
                 //related to/from list of record ids
-                $val = $this->getFieldValue();                
+                $val = $this->getFieldValue();
 
                 if($val=='' && !$this->field_list){
                     $val = "!=0";
@@ -2462,7 +2462,7 @@ class HPredicate {
                 $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
                             ?' IN ('.implode(',',$this->relation_types).')'
                             :'='.$this->relation_types[0])
-                            .')';    
+                            .')';
                 
             }else{
                 $where = $where . " AND $rl.rl_RelationID is not null";
@@ -2471,7 +2471,7 @@ class HPredicate {
             if($this->relation_fields!=null){
                 $this->relation_fields->setRelationPrefix($rl);
                 $w2 = $this->relation_fields->makeSQL();
-//$res = array("from"=>$this->tables, "where"=>$where);                
+//$res = array("from"=>$this->tables, "where"=>$where);
                 if($w2 && trim($w2['where'])!=''){
                     $where = $where . ' AND ' . $w2['where'];
                 }
@@ -2713,7 +2713,7 @@ class HPredicate {
     */
     private function isEmptyValue(){
                                             //$this->value=='' ||
-        return !is_array($this->value) && ( strtolower($this->value)=='null' || strtolower($this->value)=='-null'); // {"f:18":"NULL"}
+        return !is_array($this->value) && ( strtolower($this->value)=='null' || strtolower($this->value)=='-null');// {"f:18":"NULL"}
     }
 
     
@@ -2814,7 +2814,7 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if(is_string($this->value) && trim($this->value)=='') return "!=''";   //find any non empty value
+        if(is_string($this->value) && trim($this->value)=='') return "!=''";//find any non empty value
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? $this->lessthan : (($this->greaterthan) ? $this->greaterthan : '='));
         
@@ -2861,7 +2861,7 @@ class HPredicate {
                 if(count($all_terms)==1){
                     $res = ($this->negate?'<>':'=').$all_terms[0];
                 }else{
-                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$all_terms).')';    
+                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$all_terms).')';
                 }
                 
                     
@@ -2883,7 +2883,7 @@ class HPredicate {
                 
                 if($trm_Field == 'trm_ConceptId'){
                     $res = $res.' "'.$value
-                        .'" = CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB)';    
+                        .'" = CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB)';
                 }else{
                     //check language prefix in $value
                     list($lang, $value) = extractLangPrefix($value);
@@ -2903,18 +2903,18 @@ class HPredicate {
                         $query_tran = $query_tran.'trn_Translation';
                         
                         if($this->exact){
-                            $query_tran  =  $query_tran.' ="'.$value.'"'; 
+                            $query_tran  =  $query_tran.' ="'.$value.'"';
                         } else {
                             $query_tran  =  $query_tran.' LIKE "%'.$value.'%"';
                         }
                         
-                        $ids = mysql__select_list2($mysqli, $query_tran); 
+                        $ids = mysql__select_list2($mysqli, $query_tran);
                         
                     }
                     
                     $res = $res.$trm_Field;
                     if($this->exact){
-                        $res  =  $res.' ="'.$value.'"'; 
+                        $res  =  $res.' ="'.$value.'"';
                     } else {
                         $res  =  $res.' LIKE "%'.$value.'%"';
                     }
@@ -2926,7 +2926,7 @@ class HPredicate {
                 
                 //find trm_IDs
                 if($ids===null || $need_search_in_defTerms){
-                    $ids2 = mysql__select_list2($mysqli, $res); 
+                    $ids2 = mysql__select_list2($mysqli, $res);
                     $ids = ($ids==null)?$ids2:array_unique(array_merge($ids2, $ids));
                 }
                 if(count($ids)==0){
@@ -2934,7 +2934,7 @@ class HPredicate {
                 }else if(count($ids)==1){
                     $res = ($this->negate?'<>':'=').$ids[0];
                 }else{
-                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';    
+                    $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';
                 }
                 
                 
@@ -2971,7 +2971,7 @@ class HPredicate {
                 
             }else {
                 if($this->exact){
-                    $res  =  $res.'="'.$value.'"'; 
+                    $res  =  $res.'="'.$value.'"';
                 } else {
                     $res  =  $res.'LIKE "%'.$value.'%"';
                 }
@@ -2991,7 +2991,7 @@ class HPredicate {
                     $res = $between.$vals[0]." and ".$vals[1];
                 }
             }else if($this->field_type=="link"){
-                $res = " $eq ".intval($this->value);  //no quotes
+                $res = " $eq ".intval($this->value);//no quotes
             }else{
                 $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));//."'";
             }
@@ -3040,9 +3040,9 @@ class HPredicate {
             } else if($this->field_type=='date'){ //$this->isDateTime()){
                 //
                 if($isHeaderDate){
-                    $res = $this->makeDateClause_ForHeaderField();    
+                    $res = $this->makeDateClause_ForHeaderField();
                 }else{
-                    $res = $this->makeDateClause();    
+                    $res = $this->makeDateClause();
                 }
 
             } else {
@@ -3076,7 +3076,7 @@ class HPredicate {
                     if(strpos($this->value, '++')===0 || strpos($this->value, '--')===0){
                        
                         $op = (strpos($this->value, '+')===0)?' +':' -';
-                        $this->negate = ($op==' -'); 
+                        $this->negate = ($op==' -');
                         
                         //get all words
                         $pattern = "/(\w+)/u";
@@ -3117,7 +3117,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
                     if(!$this->exact){ //$eq=='=' && 
                         $eq = ($this->negate?'NOT ':'').'LIKE';
-                        $k = strpos($this->value,"%"); //if begin or end
+                        $k = strpos($this->value,"%");//if begin or end
                         if($k===false || ($k>0 && $k+1<strlen($this->value))){
                             $this->value = '%'.$this->value.'%';
                         }
@@ -3164,11 +3164,11 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             $fld = mysql__select_value($mysqli,
             'select group_concat(distinct column_name) as fld'
             .' from information_schema.STATISTICS '
-            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'Records' and index_type = 'FULLTEXT'");        
+            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'Records' and index_type = 'FULLTEXT'");
             
             if($fld==null){
-                $mysqli->query('ALTER TABLE Records ADD FULLTEXT INDEX `rec_Title_FullText` (`rec_Title`)'); // VISIBLE
-                $this->error_message = 'create_fulltext';  
+                $mysqli->query('ALTER TABLE Records ADD FULLTEXT INDEX `rec_Title_FullText` (`rec_Title`)');// VISIBLE
+                $this->error_message = 'create_fulltext';
                 return true;
             }
                     
@@ -3177,12 +3177,12 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             $fld = mysql__select_value($mysqli,
             'select group_concat(distinct column_name) as fld'
             .' from information_schema.STATISTICS '
-            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");        
+            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");
             
             if($fld==null){
 
-                $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)'); // VISIBLE
-                $this->error_message = 'create_fulltext';  
+                $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`)');// VISIBLE
+                $this->error_message = 'create_fulltext';
                 return true;
             }
             

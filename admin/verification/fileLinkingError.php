@@ -23,8 +23,8 @@
 */
 ini_set('max_execution_time', '0');
 
-define('OWNER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('OWNER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -72,7 +72,7 @@ $mysqli = $system->get_mysqli();
 
     $counter = 0;
             
-    $dbs = mysql__getdatabases4($mysqli, true);            
+    $dbs = mysql__getdatabases4($mysqli, true);
     foreach ($dbs as $db){
         
         //if($counter>50) break;
@@ -80,9 +80,9 @@ $mysqli = $system->get_mysqli();
         
         print "<h2>".htmlspecialchars($db)."</h2>";
 
-    $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
+    $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
             
-    $query1 = "SELECT * from `$db`.recUploadedFiles"; // get a list of all the files
+    $query1 = "SELECT * from `$db`.recUploadedFiles";// get a list of all the files
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
@@ -121,7 +121,7 @@ $mysqli = $system->get_mysqli();
                                             'isfound'=>0,
                                             'ulf_ExternalFileReference'=>@$res['ulf_ExternalFileReference']);
                 }else{
-                    $row = $res2->fetch_row();  
+                    $row = $res2->fetch_row();
                     $currentRecID = $row[0];
                 }
                 $res2->close();
@@ -146,12 +146,12 @@ $mysqli = $system->get_mysqli();
                     //HEURIST_FILESTORE_DIR
                     $_HEURIST_FILESTORE_DIR = HEURIST_FILESTORE_ROOT . $dbName . '/';
 
-                    chdir($_HEURIST_FILESTORE_DIR);  // relatively db root
+                    chdir($_HEURIST_FILESTORE_DIR);// relatively db root
 
                     $fpath = realpath($res['db_fullpath']);
 
                     if(!$fpath || !file_exists($fpath)){
-                        chdir($_HEURIST_FILESTORE_DIR.'file_uploads/');  // relatively db/file_uploads $_HEURIST_FILES_DIR
+                        chdir($_HEURIST_FILESTORE_DIR.'file_uploads/');// relatively db/file_uploads $_HEURIST_FILES_DIR
                         $fpath = realpath($res['db_fullpath']);
                     }
 
@@ -171,7 +171,7 @@ $mysqli = $system->get_mysqli();
                         $dirname = str_replace("\0", '', $dirname);
                         $dirname = str_replace('\\', '/', $dirname);
                         if(strpos($dirname, $_HEURIST_FILESTORE_DIR)===0){
-                            $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                            $relative_path = getRelativePath($_HEURIST_FILESTORE_DIR, $dirname);//db root folder
                         }else{
                             $relative_path = '';
                         }
@@ -242,7 +242,7 @@ $mysqli = $system->get_mysqli();
                     }
                     print '<hr>';
                 
-                    file_put_contents($log_filename, $log_data, FILE_APPEND);                
+                    file_put_contents($log_filename, $log_data, FILE_APPEND);
 
                 }
                 if(count($files_path_to_correct)>0){
@@ -263,7 +263,7 @@ $mysqli = $system->get_mysqli();
                     
                     <div class="msgline"><b><?php echo htmlspecialchars($row['ulf_ID']);?></b> 
                             <?php echo htmlspecialchars($row['res_fullpath']).' &nbsp;&nbsp;&nbsp;&nbsp; '
-                            .htmlspecialchars($row['ulf_FilePath']).' -&gt; '.htmlspecialchars($row['res_relative']); ?>
+                            .htmlspecialchars($row['ulf_FilePath']).' -&gt; '.htmlspecialchars($row['res_relative']);?>
                     </div>
                     <?php
                 }

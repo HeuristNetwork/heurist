@@ -54,7 +54,7 @@
         
         $system->defineConstant('DT_PARENT_ENTITY');
 
-        if($mode>=4) set_time_limit(0); //no limit
+        if($mode>=4) set_time_limit(0);//no limit
         
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
@@ -63,7 +63,7 @@
         }
 
         //loads plain array for rectypes
-        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);  //need all
+        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);//need all
         $dbs_lookups = dbs_GetDtLookups();
 
         $rtypes = $dbs_rtStructs['names'];
@@ -107,9 +107,9 @@
                             if(@$def['code']){
 
                                 if(@$det['code']){
-                                    $def['children'][$idx]['code'] = $def['code'].":".$det['code']; 
+                                    $def['children'][$idx]['code'] = $def['code'].":".$det['code'];
                                 }else{
-                                    $def['children'][$idx]['code'] = $def['code'];    
+                                    $def['children'][$idx]['code'] = $def['code'];
                                 }
                             }
                             if(is_array(@$det['children'])){
@@ -147,7 +147,7 @@
                         
                         $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
                         if($constraint && in_array($recTypeId, explode(',',$constraint)) && !in_array($rtKey, $parent_Rts) ){
-                            array_push($parent_Rts, $rtKey);    
+                            array_push($parent_Rts, $rtKey);
                             //break;
                         }
                         
@@ -220,7 +220,7 @@
                 //this rectype is not loaded yet - load it
                 $rt0 = dbs_GetRectypeStructures($system, $recTypeId, 1);
                 if($rt0){ //merge with $dbs_rtStructs 
-                    $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];    
+                    $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];
                     $dbs_rtStructs['names'][$recTypeId] = $rt0['names'][$recTypeId];
                 }else{
                     return null;
@@ -233,7 +233,7 @@
                                                                                                               
             if(@$dbs_rtStructs['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
                 $details =  @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!$details) $details = array(); //rectype without fields - exceptional case
+                if(!$details) $details = array();//rectype without fields - exceptional case
                 
                 $children_links = array();
                 $new_pointer_fields = array();
@@ -258,7 +258,7 @@
                         }
                         /*
                         if(is_array($res_dt) && count($res_dt)==1){
-                        $res["f".$dtID] = $res_dt[0];    
+                        $res["f".$dtID] = $res_dt[0];
                         }else{
                         //multi-constrained pointers or simple variable
                         $res["f".$dtID] = $res_dt;
@@ -366,7 +366,7 @@
 
         $res = null;
 
-        $rtNames = $dbs_rtStructs['names']; //???need
+        $rtNames = $dbs_rtStructs['names'];//???need
         $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
 
         $dtValue = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'][$dtID];
@@ -374,10 +374,10 @@
         $detailType = $dtValue[$rst_fi['dty_Type']];
         $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
         $dt_title   = $dtValue[$rst_fi['rst_DisplayName']];
-        $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
+        $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']];//help text
 
         $pref = "";
-        //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
+        //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']];//repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
         
         if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
@@ -515,7 +515,7 @@
                     $res['isreverse'] = 1;
                 }
                 if($stype!=''){
-                    $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";   
+                    $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";
                 }
                 
                 $res['title'] = $dt_title . $stype;

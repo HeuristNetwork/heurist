@@ -55,7 +55,7 @@ use PHPMailer\PHPMailer\Exception;
         }
         
         if(is_array($email_text)){
-            $email_text =  json_encode($email_text);    
+            $email_text =  json_encode($email_text);
         }
         
         if(!$email_to){
@@ -91,9 +91,9 @@ use PHPMailer\PHPMailer\Exception;
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $responce = curl_exec($ch);
-            curl_close($ch);            
+            curl_close($ch);
             
-            return ($responce==1);            
+            return ($responce==1);
         }
         
         
@@ -101,20 +101,20 @@ use PHPMailer\PHPMailer\Exception;
         $email = new PHPMailer();
         
         /*
-        $mail->IsSMTP(); 
+        $mail->IsSMTP();
         $mail->SMTPAuth   = true; 
         $mail->Port       = 25; 
-        $mail->Host       = "xx.xxx.x.x"; // SMTP server
-        $mail->Username   = "myemail@mydomain.local";  
-        $mail->Password   = <myemailpassword>;        
+        $mail->Host       = "xx.xxx.x.x";// SMTP server
+        $mail->Username   = "myemail@mydomain.local";
+        $mail->Password   = <myemailpassword>;
         
         $mail->From = 'contacto@45norte.com';
-        $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']); //recipient
+        $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']);//recipient
         */
         
         $email->CharSet = 'UTF-8';
         $email->Encoding = 'base64';
-        $email->isHTML( $is_html ); 
+        $email->isHTML( $is_html );
 
         if($replyTo!=null && $replyTo!=$email_from){
             $email->ClearReplyTos();
@@ -146,10 +146,10 @@ use PHPMailer\PHPMailer\Exception;
         if($email_attachment!=null){
             if(is_array($email_attachment)){
                 foreach($email_attachment as $attach_file){
-                    $email->addAttachment( $attach_file );    
+                    $email->addAttachment( $attach_file );
                 }
             }else{
-                $email->addAttachment($email_attachment);// , 'new.jpg'); 
+                $email->addAttachment($email_attachment);// , 'new.jpg');
             }
         }
        
@@ -243,7 +243,7 @@ use PHPMailer\PHPMailer\Exception;
     //
     function checkSmtp(){
 
-        $smtpHost = '127.0.0.1'; //'localhost';
+        $smtpHost = '127.0.0.1';//'localhost';
         $smtpPort = '25';
         $smtpTimeout = 5;
 

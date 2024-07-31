@@ -94,11 +94,11 @@
 
         if( ! $system->init(@$params['db']) ){
             //get error and response
-            $system->error_exit_api(); //exit from script
+            $system->error_exit_api();//exit from script
         }
     }
 
-    set_time_limit(0); //no limit
+    set_time_limit(0);//no limit
 
     if(@$params['file_refs']){
         downloadFileReferences($system, $params['ids']);
@@ -138,7 +138,7 @@
         $search_params['q'] = @$params['q'];
     }
     if($search_params['q']==null || $search_params['q']==''){
-        $search_params['q'] = 'sortby:-m'; //get all records
+        $search_params['q'] = 'sortby:-m';//get all records
     }
 
 
@@ -152,7 +152,7 @@
 
     $is_csv = (@$params['format'] == 'csv');
     /*if(@$params['format']=='json' && @$params['detail']!=null){
-        $search_params['detail'] = $params['detail'];    
+        $search_params['detail'] = $params['detail'];
     }else */
     if(@$params['format']){
         //search only ids - all 
@@ -179,7 +179,7 @@
                 
                 if($search_params['q']==null){
                     //query was removed 
-                    header( 'Content-Type: application/json');    
+                    header( 'Content-Type: application/json');
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
@@ -199,10 +199,10 @@
                       $search_by_field = '{"f":"'.addslashes($params['search']['value']).'"},';
                 }
                 if($search_by_type!='' || $search_by_field!=''){
-                    $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';    
+                    $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';
                     
                     $search_params['detail'] = 'count';
-                    $response = recordSearch($system, $search_params); //datatable search - reccount only
+                    $response = recordSearch($system, $search_params);//datatable search - reccount only
                     $search_params['detail'] = 'ids';
                     
                     $params['recordsFiltered'] = $response['data']['count'];
@@ -232,16 +232,16 @@
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
-                header( 'Content-Type: application/json');    
+                header( 'Content-Type: application/json');
                 echo json_encode(array('status'=>HEURIST_OK));
                 exit;
             }
         }
        
-        $response = recordSearch($system, $search_params);  //search ids
+        $response = recordSearch($system, $search_params);//search ids
     }
         
-    $system->defineConstant('DT_PARENT_ENTITY');    
+    $system->defineConstant('DT_PARENT_ENTITY');
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
     $system->defineConstant('DT_SYMBOLOGY');
@@ -286,19 +286,19 @@
                     return true;
                 }
                 return false;
-            });        
+            });
             
             $outputHandler = false;
             
             if(class_exists($classname, true)){
-                $outputHandler = new $classname($system);    
+                $outputHandler = new $classname($system);
             }
             
             if(!$outputHandler){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
                 return false;
             }else{
-                $res = $outputHandler->output( $response, $params );    
+                $res = $outputHandler->output( $response, $params );
             }
         
         }else{
@@ -415,7 +415,7 @@ function downloadFileReferences($system, $ids){
     fclose($fd);
 
     if($len>0){
-        header('Content-Length: ' . $len);   
+        header('Content-Length: ' . $len);
     }
     exit($output);
 }

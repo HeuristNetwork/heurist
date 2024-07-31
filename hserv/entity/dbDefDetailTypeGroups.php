@@ -55,7 +55,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('dtg_ID');
         if($pred!=null) array_push($where, $pred);
@@ -151,7 +151,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
 
     
@@ -196,7 +196,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s');//reset
             
             if(!(@$this->records[$idx]['dtg_Order']>0)){
                 $this->records[$idx]['dtg_Order'] = 2;

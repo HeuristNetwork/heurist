@@ -21,7 +21,7 @@ $is_inlcuded = false;
 
 if(!defined('PDIR')) {
     $is_inlcuded = true;
-    define('PDIR','../../');   
+    define('PDIR','../../');
     require_once dirname(__FILE__).'/../../hserv/System.php';
 }
 
@@ -76,13 +76,13 @@ if(!isset($message)){
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title><?php print defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist"; ?></title>
+        <title><?php print defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist";?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/initPageCss.php';?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <style>
@@ -134,7 +134,7 @@ if(!isset($message)){
                                 if(reload_target=='home'){
                                     document.location = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
                                 }else{
-                                    location.reload();    
+                                    location.reload();
                                 }
                                 
                             });
@@ -159,9 +159,9 @@ if(!isset($message)){
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
-            <div class="<?php echo $is_error?'ui-state-error':''; ?>" 
+            <div class="<?php echo $is_error?'ui-state-error':'';?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info'; ?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info';?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo USanitize::sanitizeString($message);?>
             </div>

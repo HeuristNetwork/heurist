@@ -300,7 +300,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 $value = trim( implode(',', $value) , '"');
             }else if($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
-                $value = USanitize::cleanupSpaces($value); // remove extra spacing, avoid displaying extra historical values that are actually the same
+                $value = USanitize::cleanupSpaces($value);// remove extra spacing, avoid displaying extra historical values that are actually the same
             }
 
 
@@ -534,7 +534,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     }
 
                     $last_editor[$dty_ID][$dty_idx] = $ugr_ID;
-                    array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
+                    array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
                     $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
                 }
 
@@ -611,7 +611,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 }
 
                 $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
-                array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
+                array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
             }
 
             if(!empty($user_list)){
@@ -730,7 +730,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     switch ($record_fields[$dty_ID]['type']) {
 
                         case 'geo':
-                            list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $arc_Value); // recordModify.php
+                            list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $arc_Value);// recordModify.php
                             $record['dtl_Value'] = $dtl_Value === false ? $arc_Value : $dtl_Value;
                             $record['dtl_Geo'] = $dtl_Value === false ? null : $dtl_Geo;
                             break;

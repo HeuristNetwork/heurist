@@ -31,7 +31,7 @@
 
     if(@$_REQUEST['verbose']!=1){
         
-        define('OWNER_REQUIRED',1);   
+        define('OWNER_REQUIRED',1);
         require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
         // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
         require_once 'verifyValue.php';
@@ -82,8 +82,8 @@
         //1. find all database
         $query = 'show databases';
 
-        $res = $mysqli->query($query);      
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        $res = $mysqli->query($query);
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         $databases = array();
         while (($row = $res->fetch_assoc())) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
@@ -104,13 +104,13 @@
         $origin_dbs['hdb_Heurist_Core_Definitions'] = array('rty_RecTypeGroupID'=>array(8),'rty_ID'=>array());
     }
     
-    $rty_CodesToCheck = array(); //rty ids in origin db to be checked
-    $rty_Names = array();   //concept code -> name in origin database
+    $rty_CodesToCheck = array();//rty ids in origin db to be checked
+    $rty_Names = array();//concept code -> name in origin database
     
-    $fields = array();      //per record type
-    $fields_req = array();  //requirement per record type
-    $constraints = array(); //per detail
-    $terms_codes = array(); //per detail
+    $fields = array();//per record type
+    $fields_req = array();//requirement per record type
+    $constraints = array();//per detail
+    $terms_codes = array();//per detail
     
     foreach ($origin_dbs as $db_name=>$ids){
         
@@ -145,8 +145,8 @@
         foreach($rty_IDs as $rty_ID){
             $code = $rty_Codes[$rty_ID];
             if(!@$rty_CodesToCheck[$code]){ //not already was in previous database
-                array_push($rty_IDs_ToCheck, intval($rty_ID)); 
-                array_push($rty_CodesToCheck, $code); 
+                array_push($rty_IDs_ToCheck, intval($rty_ID));
+                array_push($rty_CodesToCheck, $code);
             }
        }
         $rty_Names = array_merge($rty_Names, $rty_Names_temp);
@@ -158,7 +158,7 @@
                 .implode(',',$rty_IDs_ToCheck).')';
     
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         //gather fields ids, pointer constraints, vocabs/terms - as concept codes
         while (($row = $res->fetch_assoc())) {
@@ -181,7 +181,7 @@
                  $codes = array();
                  //$codes[] = $row['dty_PtrTargetRectypeIDs'];
                  foreach($rids as $rty_id){
-                     $codes[] = $rty_Codes[$rty_id];  
+                     $codes[] = $rty_Codes[$rty_id];
                  }
                  //keep constraints
                  $constraints[$dty_Code] = $codes;
@@ -194,7 +194,7 @@
                  $codes = array();
                  foreach($terms as $trm_id){
                      $term = $all_terms['termsByDomainLookup'][$domain][$trm_id];
-                     $codes[] = $term[$ti_dbid].'-'.$term[$ti_oid];  
+                     $codes[] = $term[$ti_dbid].'-'.$term[$ti_oid];
                  }
                  //get concept codes
                  $terms_codes[$dty_Code] = $codes;
@@ -222,17 +222,17 @@
         
         mysql__usedatabase($mysqli, $db_name);
        
-        $smsg = ""; 
+        $smsg = "";
         
         VerifyValue::reset();
         $all_terms = dbs_GetTerms($system);
         
-        $constraints2 = array(); //per detail
-        $terms_codes2 = array(); //per detail
+        $constraints2 = array();//per detail
+        $terms_codes2 = array();//per detail
         
-        $fileds_differ_terms = array(); //differenece in field list
-        $fileds_missed_terms = array(); //missed in this db
-        $fileds_missed_rectypes = array(); 
+        $fileds_differ_terms = array();//differenece in field list
+        $fileds_missed_terms = array();//missed in this db
+        $fileds_missed_rectypes = array();
         
         //find all rty-codes
         $rty_Codes2 =  mysql__select_assoc2($mysqli,'SELECT rty_ID, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code FROM defRecTypes');
@@ -266,7 +266,7 @@
                 //$query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
                 //$res = $mysqli->query($query);
                 
-                if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
+                if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error); return; }
                 $row = $res->fetch_assoc();
                 if($row){
                     if($row[0]!=$db_id || $row[1]!=$orig_id){
@@ -284,9 +284,9 @@
             .intval($db_id).' AND rty_IDInOriginatingDB='.intval($orig_id);
         
             $res = $mysqli->query($query);
-            if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error);  return; }
+            if (!$res) {  print htmlspecialchars($db_name.'  '.$query.'  '.$mysqli->error); return; }
             
-            $fields2 = array();      //per record type
+            $fields2 = array();//per record type
             
             //gather fields ids, pointer constraints, vocabs/terms - as concept codes
             while (($row = $res->fetch_assoc())) {
@@ -307,7 +307,7 @@
                             $codes[] = $code; 
                          }else{
                             $msg_error = $msg_error.'<p>Field '.$row['dty_Name'].' (code '.$row['dty_ID']
-                                .') has invalid record type constraint (code: '.$r_id.')</p>';  
+                                .') has invalid record type constraint (code: '.$r_id.')</p>';
                          }
                      }
                      //keep constraints
@@ -324,7 +324,7 @@
                          foreach($terms as $trm_id){
                              if(@$all_terms['termsByDomainLookup'][$domain][$trm_id]){
                                 $term = $all_terms['termsByDomainLookup'][$domain][$trm_id];
-                                $codes[] = $term[$ti_dbid].'-'.$term[$ti_oid];  
+                                $codes[] = $term[$ti_dbid].'-'.$term[$ti_oid];
                              }else{
                                 $msg_error = $msg_error.'<p>Term does not exist '.$trm_id.' in field '.$row['dty_ID'].'  '.$row['dty_Name'].' ('.$row['dty_JsonTermIDTree'].')</p>';
                              }
@@ -363,7 +363,7 @@
                 }
             }
             if(count($missing)>0){
-                $msg_error = $msg_error."<p style='padding-left:40px'>missing fields: ".implode(', ',$missing)."</p>"; 
+                $msg_error = $msg_error."<p style='padding-left:40px'>missing fields: ".implode(', ',$missing)."</p>";
             }
             //2. check constraints
             foreach($constraints as $dty_Code=>$codes){
@@ -458,7 +458,7 @@
         }
         
         if(count($databases)>1 && ($has_issues || @$_REQUEST['showalldbs']==1)){
-            print '<h4>db = '.htmlspecialchars($db_name).'</h4>';  
+            print '<h4>db = '.htmlspecialchars($db_name).'</h4>';
         }
         
         if($has_issues){

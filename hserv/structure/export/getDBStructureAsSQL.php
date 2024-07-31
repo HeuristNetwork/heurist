@@ -30,7 +30,7 @@ $includeUgrps=@$_REQUEST["includeUgrps"];	// returns null if not set
 
 $approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];	// returns null if not set
 
-$isHTML = (@$_REQUEST["plain"]!=1); //no html
+$isHTML = (@$_REQUEST["plain"]!=1);//no html
 // TO DO: filter for reserved and approved definitions only if this is set
 
 
@@ -219,7 +219,7 @@ function do_print_table($desc, $tname, $where=null)
 
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     if($tname=='defTermsLinks'){
-        array_shift($flds_list); //remove primary key field
+        array_shift($flds_list);//remove primary key field
     }
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
@@ -265,7 +265,7 @@ function do_print_table($desc, $tname, $where=null)
             if ($_REQUEST['pretty']) {
                 print"<br>";
             }
-                    //print_row($row, $tname); 
+                    //print_row($row, $tname);
         }//while
         $res->close();
         print "$endToken\n";

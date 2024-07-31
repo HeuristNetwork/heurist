@@ -6,7 +6,7 @@
     * 
     *  It should be included in CMS template php sript in html header section
     *   
-    *  include_once 'websiteScriptAndStyles.php'; 
+    *  include_once 'websiteScriptAndStyles.php';
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -70,7 +70,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <!-- CSS -->
 <?php 
     //PDIR.
-    include_once dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
+    include_once dirname(__FILE__).'/../../framecontent/initPageCss.php';
     
     if(true || !$edit_OldEditor){ //creates new instance of heurist
         print '<script>window.hWin = window;</script>';
@@ -83,18 +83,18 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
     var isWebPage = <?php echo $isWebPage ?'true':'false';?>;
     var current_page_id = 0;
-    var current_language = '<?php echo $website_language_def?$website_language_def:'def'; ?>';
+    var current_language = '<?php echo $website_language_def?$website_language_def:'def';?>';
     var default_language = current_language; //is is needed for edit CMS
-    var website_languages = '<?php echo $website_languages?implode(',',$website_languages):''; ?>';
-    var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false'; ?>;  //is show page title per website 
-    var isCMS_active = <?php echo @$_REQUEST['edit']?'true':'false'; ?>; //use new CMS editor and init it once
-    var isCMS_InHeuristUI = <?php echo @$_REQUEST['edit']==4 ?'true':'false'; ?>;
-    var isCMS_NewWebsite = <?php echo array_key_exists('newlycreated', $_REQUEST) ?'true':'false'; ?>;
-    var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
+    var website_languages = '<?php echo $website_languages?implode(',',$website_languages):'';?>';
+    var is_show_pagetitle_main = <?php echo $show_pagetitle?'true':'false';?>;//is show page title per website 
+    var isCMS_active = <?php echo @$_REQUEST['edit']?'true':'false';?>;//use new CMS editor and init it once
+    var isCMS_InHeuristUI = <?php echo @$_REQUEST['edit']==4 ?'true':'false';?>;
+    var isCMS_NewWebsite = <?php echo array_key_exists('newlycreated', $_REQUEST) ?'true':'false';?>;
+    var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false';?>;
     var is_execute_homepage_custom_javascript = false;  //semaphore
-    var isJsAllowed = <?php echo $website_custom_javascript_allowed?'true':'false'; ?>;
+    var isJsAllowed = <?php echo $website_custom_javascript_allowed?'true':'false';?>;
     var first_not_empty_page = 0;
-    var website_title = <?php echo $website_title; ?>; 
+    var website_title = <?php echo $website_title; ?>;
     
     var record_view_smarty_template = '<?php echo $record_view_smarty_template!=null?$record_view_smarty_template:'';?>';
     var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
@@ -225,7 +225,7 @@ if($_is_new_cms_editor || $edit_OldEditor){ //$edit_OldEditor defined in website
     box-shadow: 0px 0px 0px 5px rgb(201, 194, 249);
 }   
 
-/*     box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0); */
+/*     box-shadow: inset 0px 0px 38px 10px rgb(201, 194, 249), 0px 0px 8px 10px rgba(0,0,0,0);*/
 .cms-element-overlay{
   visibility: hidden;
   position: absolute;
@@ -314,7 +314,7 @@ function onPageInit(success)
     
     $('#main-menu').hide();
     
-    hLayoutMgr(); //init global var layoutMgr
+    hLayoutMgr();//init global var layoutMgr
     
     //cfg_widgets is from layout_defaults.js
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -324,10 +324,10 @@ function onPageInit(success)
             
         var load_initially = home_page_record_id;
         <?php if($isEmptyHomePage){
-            echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
+            echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';
         }?>
         is_execute_homepage_custom_javascript = true;
-        loadPageContent( load_initially ); //on logo click
+        loadPageContent( load_initially );//on logo click
     });
     
     //fix bug for tinymce popups - it lost focus if it is called from dialog
@@ -347,12 +347,12 @@ function onPageInit(success)
             var load_initially = home_page_record_id;
             first_not_empty_page = not_empty_page; //assign to global
             <?php if($isEmptyHomePage){
-                echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';  
+                echo 'if(typeof first_not_empty_page !== "undefined" && first_not_empty_page>0){ load_initially=first_not_empty_page;}';
             }?>
             is_execute_homepage_custom_javascript = true;
 
             //if url has "q" parameter - load page with initial search
-            var initial_query_from_url = window.hWin.HEURIST4.util.getUrlParameter('q');            
+            var initial_query_from_url = window.hWin.HEURIST4.util.getUrlParameter('q');
             var eventdata = null;
             if(initial_query_from_url){
             
@@ -363,7 +363,7 @@ function onPageInit(success)
                                  search_realm: 'search_group_1'
                                  };
             }
-            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially, eventdata); //on page init
+            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially, eventdata);//on page init
 
         }
         
@@ -437,7 +437,7 @@ function switchLanguage(event){
         //change footer
         let ele = $('div.page-footer-content');
         if(ele.length>1){
-            ele.hide(); //hide all
+            ele.hide();//hide all
             let ele2 = $(`div.page-footer-content[data-lang=${lang_code}]`);
             if(ele2.length==0){ //not found
                 $('div.page-footer-content[data-lang=""]').show();
@@ -545,7 +545,7 @@ if($website_custom_css!=null){
                 
                 if(isCMS_active){
                     if(!editCMS_instance2) {
-                        editCMS_instance2 = editCMS2(this.document);    //editCMS_Init
+                        editCMS_instance2 = editCMS2(this.document);//editCMS_Init
                     }
 
                     if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
@@ -559,7 +559,7 @@ if($website_custom_css!=null){
                     }
 
                 }else{
-                    layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );    
+                    layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
                 }
                 
                 current_page_id = pageid;
@@ -567,12 +567,12 @@ if($website_custom_css!=null){
                 var page_footer = page_target.find('#page-footer');
                 if(page_footer.length>0){  //adjust page footer height
                     page_footer.detach();
-                    page_footer.appendTo( page_target );  
+                    page_footer.appendTo( page_target );
                     page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
                 } 
 
                 timeout_count = 0;
-                afterPageLoad( document, pageid, eventdata); //execute custom script and custom css, assign page title 
+                afterPageLoad( document, pageid, eventdata);//execute custom script and custom css, assign page title 
             } // END __loadPageContent       
 
             if(page_cache[pageid]){ //this page has been already loaded
@@ -690,12 +690,12 @@ function loadRecordContent(url_or_record_id, target){
                 frm.attr('src',url);
                 frm.off('load');
                 frm.on('load', function(){
-                   container.show(); 
+                   container.show();
                    main_content.hide();
                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
                    
                    frm = frm[0];
-                   container.height(frm.contentWindow.document.body.scrollHeight);               
+                   container.height(frm.contentWindow.document.body.scrollHeight); 
                    initLinksAndImages($(frm.contentWindow.document.body));
                    
                    container.find('button.keywords').click(function(){
@@ -715,7 +715,7 @@ function loadRecordContent(url_or_record_id, target){
 } //loadRecordContent
 
 var page_cache = {};
-var usual_heurist_records = []; //record ids that are not CMS_PAGE - see loadPageContent
+var usual_heurist_records = [];//record ids that are not CMS_PAGE - see loadPageContent
 
 var previous_page_id = -1;
 
@@ -730,8 +730,8 @@ function assignPageTitle(pageid){
     var pagetitle = '';
     
     if(!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_NAME])){
-        pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);    
-        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span'); //<br>
+        pagetitle = window.hWin.HAPI4.getTranslation(page_cache[pageid][DT_NAME], current_language);
+        pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
     }
     
     var is_show_pagetitle = (is_show_pagetitle_main || 
@@ -801,14 +801,14 @@ function afterPageLoad(document, pageid, eventdata){
             if(typeof page_cache[pageid][DT_CMS_CSS]==='string'){
                 
                 var style = document.createElement('style');
-                style.type = 'text/css'; 
+                style.type = 'text/css';
                 style.innerHTML = page_cache[pageid][DT_CMS_CSS];
                 page_cache[pageid][DT_CMS_CSS] = style;    
                 document.getElementsByTagName('head')[0].appendChild(style);
                 
             }else{
                 //add style to page        
-                document.getElementsByTagName('head')[0].appendChild(page_cache[pageid][DT_CMS_CSS]);            
+                document.getElementsByTagName('head')[0].appendChild(page_cache[pageid][DT_CMS_CSS]);
             }
         }
     }
@@ -862,7 +862,7 @@ function afterPageLoad(document, pageid, eventdata){
     }
     is_execute_homepage_custom_javascript = false;
 
-    $('#main-content-container').scrollTop(0); // reset scroll
+    $('#main-content-container').scrollTop(0);// reset scroll
 
     // add current page as url parameter in browser url
     if(!is_embed){ 
@@ -873,16 +873,16 @@ function afterPageLoad(document, pageid, eventdata){
 
         var surl;
        
-        if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/'; //add last slash  
+        if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/';//add last slash  
        
         if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             //remove after web
             if(spath.indexOf('/website/')>0){
-                spath = spath.substring(0,spath.indexOf('/website/')+9);    
+                spath = spath.substring(0,spath.indexOf('/website/')+9);
             }else{
-                spath = spath.substring(0,spath.indexOf('/web/')+5);    
+                spath = spath.substring(0,spath.indexOf('/web/')+5);
             }
             
             surl = spath + home_page_record_id;
@@ -903,7 +903,7 @@ function afterPageLoad(document, pageid, eventdata){
         }else{
             //usual url parameters
             
-            var params = window.hWin.HEURIST4.util.getUrlParams(location.href);    
+            var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
         
             params['db'] = window.hWin.HAPI4.database;
             params['website'] = '';
@@ -917,14 +917,14 @@ function afterPageLoad(document, pageid, eventdata){
                 params['pageid'] = pageid;
             }
 
-            s = [];        
+            s = [];
             
             $.each(Object.keys(params),function(i,key){
                 if(key){
                     var v = encodeURIComponent(params[key]);
                     if(v!='') v = '=' + v;
                     if(key!='q'){
-                        s.push(key + v);    
+                        s.push(key + v);
                     }
                 }
             });
@@ -933,7 +933,7 @@ function afterPageLoad(document, pageid, eventdata){
                 eventdata.q){
                 s.push('q=' + eventdata.q);
             }
-            surl = spath + '?' + s.join('&'); 
+            surl = spath + '?' + s.join('&');
         
         
         
@@ -953,7 +953,7 @@ function afterPageLoad(document, pageid, eventdata){
         {
             window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
         }else{
-            $(document).trigger(eventdata.event_type, eventdata);  //for select  
+            $(document).trigger(eventdata.event_type, eventdata);//for select  
         }
     }
     
@@ -983,14 +983,14 @@ function afterPageLoad(document, pageid, eventdata){
                         }
 
                         eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART; //e.type;
-                        loadPageContent(new_pageid, eventdata); //on link or selection - execute search on different page
+                        loadPageContent(new_pageid, eventdata);//on link or selection - execute search on different page
                         
                     }else{
                         
                         eventdata.search_page = 0;
                         $('#main-recordview').hide();
                         $('#main-content').show();
-                        window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );  
+                        window.hWin.HAPI4.RecordSearch.doSearch( this, eventdata );
                         
                     }
                 }
@@ -1110,7 +1110,7 @@ function initLinksAndImages($container, search_data){
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(parts) 
                 && parts.length>2 && parts[parts.length-2]=='view'){
 
-                rec_id = parts[parts.length-1];        
+                rec_id = parts[parts.length-1];
             }else if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?' 
                 || href.indexOf('../heurist/?')===0  || href.indexOf('./?')===0)
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database )
@@ -1185,12 +1185,12 @@ function onHapiInit(success){
     
     if(!success){    
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
-            window.hWin.HEURIST4.msg.sendCoverallToBack();            
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
             return;
     }
     
     var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
-                                                window.hWin.HAPI4.sysinfo.db_version);   
+                                                window.hWin.HAPI4.sysinfo.db_version);
     if(res==-2){ //-2= db_version_req newer
     window.hWin.HEURIST4.msg.showMsgErr('<h3>Old version database</h3>'
 +'<p>You are trying to load a website using a more recent version of Heurist than the one used for the database being accessed.</p>'
@@ -1354,7 +1354,7 @@ function initHeaderTitle(){
         if(isFirstInit && ele.parent().is('#main-header')){
             ele.hide();
             if(!$('#main-logo-alt').is(':visible')){
-                ele.css({right:10}); 
+                ele.css({right:10});
             }
 
             let $img = $('#main-logo img');
@@ -1397,7 +1397,7 @@ function performCaptcha(){
         function(val){
             if(res != val){ 
                 
-                window.hWin.HEURIST4.msg.showMsgFlash("Report Failed, Incorrect Answer", 2500); 
+                window.hWin.HEURIST4.msg.showMsgFlash("Report Failed, Incorrect Answer", 2500);
             }else{
 
                 window.hWin.HEURIST4.msg.showMsgFlash("Preparing Email", 2500);
@@ -1434,13 +1434,13 @@ function _openCMSeditor(event){
             $('#main-content').show();
 
             isCMS_active = true;
-            if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document); //editCMS_Init
+            if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document);//editCMS_Init
             editCMS_instance2.startCMS({record_id: current_page_id, 
                 //content: page_cache[current_page_id],  //html or json
                 container:'#main-content',
                 close: function(){
                     isCMS_active = false;
-            }}); //see editCMS2.js
+            }});//see editCMS2.js
         }
 
         btn.html(isCMS_active?'close editor':'website editor');
@@ -1462,7 +1462,7 @@ $(document).ready(function() {
         window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
         ele.show();
     
-        $('body').find('#main-menu').hide(); //will be visible after menu init
+        $('body').find('#main-menu').hide();//will be visible after menu init
                 
         // Standalone check
         if(!window.hWin.HAPI4){
@@ -1473,7 +1473,7 @@ $(document).ready(function() {
             initHeaderElements();
             onPageInit( true );
         }
-});    
+});
 </script>    
 
 <style>
@@ -1528,7 +1528,7 @@ $ids_was_added = array();
 $resids = array();
 $records = recordSearchMenuItems($system, array($home_page_on_init), $resids, true, true);
 if(is_array($records) && !@$records['status']){
-$mainmenu_content = _getMenuContent(0, array($home_page_on_init), 0);     
+$mainmenu_content = _getMenuContent(0, array($home_page_on_init), 0);
 $mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';
 }
 
@@ -1562,7 +1562,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     //target and position
                     $pageTarget = _getFld($record,DT_CMS_TARGET);
                     //$pageStyle = _getFld($record,DT_CMS_CSS);
-                    $showTitle = _getFld($record,DT_CMS_PAGETITLE); 
+                    $showTitle = _getFld($record,DT_CMS_PAGETITLE);
                     
                     $showTitle = true; //($showTitle!==TERM_NO && $showTitle!==TERM_NO_old);
                     
@@ -1598,7 +1598,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                             $subres = _getMenuContent($page_id, $subrec, $lvl+1);
                             
                             if($subres!='') {
-                                $res = $res.'<ul>'.$subres.'</ul>'; //'.($lvl==0?' class="level-1"':'').'
+                                $res = $res.'<ul>'.$subres.'</ul>';//'.($lvl==0?' class="level-1"':'').'
                             }
                         }
                     }

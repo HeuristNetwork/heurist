@@ -66,9 +66,9 @@ class DbRegis {
         
         if(!self::$isOutSideRequest){
             //connect 
-            self::$system = new System();    
+            self::$system = new System();
             if(self::$system->init(HEURIST_INDEX_DATABASE, true, false)){ //init without paths and consts
-                self::$mysqli = self::$system->get_mysqli();    
+                self::$mysqli = self::$system->get_mysqli();
             }else{
                 self::addError();
                 return false;                
@@ -87,7 +87,7 @@ class DbRegis {
     private static function _registrationRemoteCall($params){
         
         if(@$params['db']!=null){
-            unset($params['db']); //reset to avoid recursion
+            unset($params['db']);//reset to avoid recursion
         }
         
         $reg_record = null;
@@ -110,13 +110,13 @@ class DbRegis {
             return false;
         }else{
             //add error
-            $data = json_decode($data, true);   
+            $data = json_decode($data, true);
             if(@$data['status']==HEURIST_OK){
                $reg_record =  $data['data'];
             }else{
                 //transfer error into global syst+em
                 $data['message'] = 'Heurist reference server returns error message: '.@$data['message'];
-                self::addError($data); //transfer error to global $system
+                self::addError($data);//transfer error to global $system
                 return false;
             }
         }
@@ -131,9 +131,9 @@ class DbRegis {
     {
         global $system;
         if($error==null){
-            $system->addErrorArr(self::$system->getError()); //transfer from this $system 
+            $system->addErrorArr(self::$system->getError());//transfer from this $system 
         }else if (is_array($error)){
-            $system->addErrorArr($error);    
+            $system->addErrorArr($error);
         }else{
             $system->addError($error, $msg);
         }
@@ -266,7 +266,7 @@ class DbRegis {
         if(!self::initialize()) return false; //can not connect to index database
         
         if(self::$isOutSideRequest){
-            return self::_registrationRemoteCall($params);            
+            return self::_registrationRemoteCall($params);
         }
         
         $mysqli = self::$mysqli;
@@ -289,7 +289,7 @@ class DbRegis {
         //recordDelete(self:$system,$dbID);
         $mysqli->query('set @suppress_update_trigger=NULL');
         ConceptCode::setSystem(self::$system);
-        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);        
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
         self::$system->defineConstant('RT_RELATION');
@@ -301,7 +301,7 @@ class DbRegis {
             $mysqli->rollback();
         }else{
             $res = true;
-            $mysqli->commit();    
+            $mysqli->commit();
         }
         
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
@@ -321,15 +321,15 @@ class DbRegis {
         if(!self::initialize()) return false; //can not connect to index database
         
         if(self::$isOutSideRequest){
-            return self::_registrationRemoteCall($params);            
+            return self::_registrationRemoteCall($params);
         }
         
         $sys = self::$system;
         $mysqli = self::$mysqli;
 
         // Get parameters passed from update request
-        $dbName = @$params['dbReg']; // Database name
-        $dbTitle = @$params['dbTitle']; // Database description (DT_NAME)
+        $dbName = @$params['dbReg'];// Database name
+        $dbTitle = @$params['dbTitle'];// Database description (DT_NAME)
         $dbID = intval(@$params['dbID']);
 
         if (!($dbID>0)){                   
@@ -341,7 +341,7 @@ class DbRegis {
             return false;
         }
         
-        $serverURL = @$params["serverURL"]; 
+        $serverURL = @$params["serverURL"];
         if(!$serverURL && !$dbName){ 
             self::addError(HEURIST_INVALID_REQUEST, 'Database name and url are not defined');
             return false;
@@ -351,7 +351,7 @@ class DbRegis {
             return false;
         }
 
-        $defRecTitle = '<i>'.$dbName.'</i>'; 
+        $defRecTitle = '<i>'.$dbName.'</i>';
         
         //update rec_URL and rec_Title
         if(!empty($serverURL) || !empty($dbTitle)){
@@ -373,13 +373,13 @@ class DbRegis {
 
             if(!$res && $res != $dbID){
                 self::addError(array(HEURIST_DB_ERROR,
-                        'Failed to update database registration: ' . $err_msg, $mysqli->error));                 
+                        'Failed to update database registration: ' . $err_msg, $mysqli->error)); 
                 return false;
             }
         }
 
         ConceptCode::setSystem($sys);
-        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);        
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
         
         if($dbTitle){
            self::_recordUpdateField($sys, $dbID, '2-1', $dbTitle);
@@ -411,7 +411,7 @@ class DbRegis {
         
         if(self::$isOutSideRequest){
             $params['action'] = 'info';
-            return self::_registrationRemoteCall($params);            
+            return self::_registrationRemoteCall($params);
         }
         
         $database_id = intval(@$params['dbID']);
@@ -445,11 +445,11 @@ class DbRegis {
                          'Heurist Reference Index database is not accessible at the moment. Please try later');
                 }else{
                     self::addError(HEURIST_NOT_FOUND,
-                         'Database with ID#'.$database_id.' is not found in Heurist Reference Index database');    
+                         'Database with ID#'.$database_id.' is not found in Heurist Reference Index database');
                 }
             }
         }else{
-            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');    
+            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
         }
         
         if($database_url!=null){
@@ -472,8 +472,8 @@ class DbRegis {
         if(!self::initialize()) return false; //can not connect to index database
         
         if(self::$isOutSideRequest){
-            $dbname = @$params['db']; //keep
-            $reg_rec = self::_registrationRemoteCall($params);            
+            $dbname = @$params['db'];//keep
+            $reg_rec = self::_registrationRemoteCall($params);
             
             if($dbname!=null && $reg_rec){
                  //on remote servr 
@@ -497,16 +497,16 @@ class DbRegis {
         // Get parameters passed from registration request
         // @ preceding $params avoids errors, sets Null if parameter missing
         $dbName = @$params['dbReg'];
-        $dbTitle = @$params['dbTitle']; //DT_NAME
+        $dbTitle = @$params['dbTitle'];//DT_NAME
         $dbVersion = @$params['dbVer'];
         
         $usrEmail = @$params['usrEmail'];
-        $usrPassword = @$params['usrPassword'];  //hashed
+        $usrPassword = @$params['usrPassword'];//hashed
         $usrName = @$params['usrName'];
         $usrFirstName = @$params['usrFirstName'];
         $usrLastName = @$params['usrLastName'];
         
-        $serverURL = @$params['serverURL']; 
+        $serverURL = @$params['serverURL'];
         if(!$serverURL || !$dbName || !$dbTitle){ 
             self::addError(HEURIST_INVALID_REQUEST, 'Database name and url are not defined');
             return false;
@@ -519,7 +519,7 @@ class DbRegis {
         
         // the record type for database (collection) descriptor records - fixed for Master database
         ConceptCode::setSystem($sys);
-        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);        
+        $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
         
         if(!($rty_ID_registered_database>0)){
             self::addError(HEURIST_SYSTEM_CONFIG, 'Record type "Database registration" ('.HEURIST_INDEX_DBREC.') bot found in Heurist reference index database');
@@ -575,7 +575,7 @@ class DbRegis {
             
             if(!($indexdb_user_id>0)) { // Unable to create the new user
                 self::addError(array(HEURIST_DB_ERROR,
-                        'Unable to write new user in Heurist reference index database', $mysqli->error));                 
+                        'Unable to write new user in Heurist reference index database', $mysqli->error)); 
                 return false;
             }
         }        
@@ -713,7 +713,7 @@ class DbRegis {
         }
         
         //Write the database title into the details, further data will be entered by the Heurist form
-        mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);   
+        mysql__insertupdate($mysqli, 'recDetails', 'dtl_', $detail);
     }
     
 }

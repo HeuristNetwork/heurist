@@ -55,7 +55,7 @@ class DbDefCalcFunctions extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('cfn_ID');
         if($pred!=null) array_push($where, $pred);
@@ -142,7 +142,7 @@ class DbDefCalcFunctions extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
 
     
@@ -187,7 +187,7 @@ class DbDefCalcFunctions extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['cfn_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['cfn_Modified'] = date('Y-m-d H:i:s');//reset
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['cfn_ID']>0));
         }

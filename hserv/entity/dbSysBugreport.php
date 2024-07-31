@@ -120,7 +120,7 @@ class DbSysBugreport extends DbEntityBase
         }
 
         $repro_steps = $record['2-4'];
-        $repro_steps = explode("\n", $repro_steps);  //split on line break
+        $repro_steps = explode("\n", $repro_steps);//split on line break
         $message['type:2-4'] = $repro_steps;
         
         if(count($repro_steps)>0){
@@ -191,7 +191,7 @@ class DbSysBugreport extends DbEntityBase
                 $bug_title, 
                 $sMessage,   //since 02 Dec 2021 we sent human readable message     
                 $filename, true)){
-            return array(1); //fake rec id
+            return array(1);//fake rec id
         }else{
             return false;
         }
@@ -230,7 +230,7 @@ class DbSysBugreport extends DbEntityBase
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email message is not defined.');
             return false;
         }
-        $email_from = @$fields['email']; 
+        $email_from = @$fields['email'];
         if(!$email_from){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email address is not defined.');
             return false;
@@ -238,7 +238,7 @@ class DbSysBugreport extends DbEntityBase
         
         
         $email_title = null;
-        $email_from_name = @$fields['person']; 
+        $email_from_name = @$fields['person'];
         $email_to = null;
         
         //3. get $email_to - either address from website_id record or current database owner
@@ -277,7 +277,7 @@ class DbSysBugreport extends DbEntityBase
                 $email_text,
                 null, true))
         {
-                return array(1); 
+                return array(1);
         }else{
             return false;
         }

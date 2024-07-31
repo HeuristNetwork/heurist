@@ -21,7 +21,7 @@
     */
 
     //smarty is already included via composer autoload in showReps.php    
-    //define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); 
+    //define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/');
     //require_once SMARTY_DIR.'Smarty.class.php';
     $smarty = null;
     
@@ -48,7 +48,7 @@ class Heurist_Security_Policy extends Smarty_Security {
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 
                     'array_key_exists', 'array_count_values', 'array_column', 'array_unique',
                     'asort', 'array_merge', 'array_slice', 'json_encode', 'time', 'nl2br', 'print_r',
-                    'printf', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode'); //array('escape','count');
+                    'printf', 'strstr', 'substr', 'strlen', 'strpos', 'utf8_encode');//array('escape','count');
   
   public $allow_super_globals = false; //default true
 
@@ -86,7 +86,7 @@ function initSmarty($smarty_templates_dir=null){
         $smarty->setTemplateDir($smarty_templates_dir);
         $smarty->setCompileDir($smarty_templates_dir.'compiled');
         $smarty->setCacheDir($smarty_templates_dir.'cache');
-        $smarty->setConfigDir($smarty_templates_dir.'configs');    
+        $smarty->setConfigDir($smarty_templates_dir.'configs');
         
         $smarty->registerResource("string", array("str_get_template",
             "str_get_timestamp",
@@ -102,7 +102,7 @@ function initSmarty($smarty_templates_dir=null){
         }
         
         // enable security
-        $smarty->enableSecurity('Heurist_Security_Policy');        
+        $smarty->enableSecurity('Heurist_Security_Policy');
             
     }
 }
@@ -120,7 +120,7 @@ function str_get_timestamp($tpl_name, &$tpl_timestamp, &$smarty_obj)
     // do database call here to populate $tpl_timestamp
     // with unix epoch time value of last template modification.
     // This is used to determine if recompile is necessary.
-    $tpl_timestamp = time(); // this example will always recompile!
+    $tpl_timestamp = time();// this example will always recompile!
     // return true on success, false to generate failure notification
     return true;
 }

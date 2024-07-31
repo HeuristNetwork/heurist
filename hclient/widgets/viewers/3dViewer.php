@@ -37,7 +37,7 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
 }else{
-    $req_params = filter_input_array(INPUT_GET);    
+    $req_params = filter_input_array(INPUT_GET);
 } 
 
 $is_not_inited = true;
@@ -57,7 +57,7 @@ if($system->init($db, true, false)){
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
-            $fileinfo = $listpaths[0]; //
+            $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             $allowed_exts = array('obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae', 'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim');
             
@@ -66,7 +66,7 @@ if($system->init($db, true, false)){
                 $system->initPathConstants($db);
                 
                 //$url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileinfo['ulf_ObfuscatedFileID'].'&ext=file.obj';
-                $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath']; //need extension
+                $url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];//need extension
                 $textures = array();
                 
                 //find related mtl and texture files by original file name
@@ -119,7 +119,7 @@ if($system->init($db, true, false)){
                                     
                                     $file_txt_full = fileRenameToOriginal($system, $file_txt2, $file_txt);
                                     if($file_txt_full!=null && file_exists($file_txt_full)){
-                                        array_push($textures, $file_txt);            
+                                        array_push($textures, $file_txt);
                                     }
                                 }
                                 array_push($content, $line."\n");
@@ -151,11 +151,11 @@ if($system->init($db, true, false)){
                 $is_not_inited = false;    
                 
             }else{
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Requested 3D media is not supported format');      
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Requested 3D media is not supported format');
             }
                 
         }else{
-            $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');      
+            $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');
         }
         
     }else{ // if(@$req_params['id']){
@@ -171,7 +171,7 @@ if($is_not_inited){
 //$url = EDIR."models/car.glb";
 //$url = EDIR."models/solids.obj";
 //$url = 'https://mbh.huma-num.fr/sites/default/files/mbh-3d/alcazar_ms_11_reliure.fbx';
-//$url = EDIR."models/alcazar_ms_11_reliure.fbx"; 
+//$url = EDIR."models/alcazar_ms_11_reliure.fbx";
 
 $url = str_replace('&amp;','&',htmlspecialchars($url));
 
@@ -196,7 +196,7 @@ function setup3viewer() {
     
     if(false){
         //attribute for div model="<?php echo $url?>"
-        OV.Init3DViewerElements (); // init all viewers on the page    
+        OV.Init3DViewerElements ();// init all viewers on the page    
         return;
     }
     

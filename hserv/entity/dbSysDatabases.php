@@ -51,10 +51,10 @@ class DbSysDatabases extends DbEntityBase
     public function search(){
 
         //compose WHERE 
-        $where = array(); 
+        $where = array();
         $current_user_email = null;
 
-        $mysqli = $this->system->get_mysqli(); 
+        $mysqli = $this->system->get_mysqli();
         $user = user_getById($mysqli, $this->system->get_user_id());
         if($user){
             $current_user_email = $user['ugr_eMail'];

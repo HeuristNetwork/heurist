@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 print '<!DOCTYPE html>';
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
@@ -138,10 +138,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
-                    window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );                    
+                    window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );
                     
                     if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
-                        window.close();    
+                        window.close();
                     }
                     
                     return false;
@@ -209,7 +209,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                     ?>
                             <tr class="row">
                                 <td colspan="5" style="padding-left:10px"><h2><?php echo htmlspecialchars($row["grp"]);?></h2></td>
-                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"]; ?>"></td>
+                                <td align="center"><input type="checkbox" class="group_chkbox" title="Check all record types within group" data-id="<?php echo $row["grp_id"];?>"></td>
                             </tr>
                                     <?php
                                 }
@@ -298,7 +298,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         //restore setting for non empty db
                         $(".show-record").each(function() {
                             var name = $(this).attr("name");
-                            var record = getSetting(name); //@todo - change to recordtype ID
+                            var record = getSetting(name);//@todo - change to recordtype ID
                             if(record>0) {
                                 at_least_one_marked = true;   
                                 $(this).prop("checked", true);
@@ -422,7 +422,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                     //reset settings for empty database
                     if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
-                        //localStorage.clear();    
+                        //localStorage.clear();
                     }
                     
                     $(window).resize(onVisualizeResize);

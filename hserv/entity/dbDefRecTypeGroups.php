@@ -55,7 +55,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('rtg_ID');
         if($pred!=null) array_push($where, $pred);
@@ -143,7 +143,7 @@ class DbDefRecTypeGroups extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
     
     //
@@ -186,7 +186,7 @@ class DbDefRecTypeGroups extends DbEntityBase
                 }
             }
             
-            $this->records[$idx]['rtg_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['rtg_Modified'] = date('Y-m-d H:i:s');//reset
             
             if(!(@$this->records[$idx]['rtg_Order']>0)){
                 $this->records[$idx]['rtg_Order'] = 2;

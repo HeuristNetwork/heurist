@@ -50,7 +50,7 @@ class DbRecUploadedFiles extends DbEntityBase
        $this->error_ext = 'Error inserting file metadata or unable to recognise uploaded file format. '
 .'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '
 .'Please add mime type from Admin > Manage files > Define mime types. '
-.'Otherwise please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.'.';       
+.'Otherwise please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.'.';
     }
     
     /**
@@ -76,7 +76,7 @@ class DbRecUploadedFiles extends DbEntityBase
 
         //compose WHERE 
         $where = array();
-        $from_table = array($this->config['tableName']);  //'recUploadedFiles'
+        $from_table = array($this->config['tableName']);//'recUploadedFiles'
         
         $pred = $this->searchMgr->getPredicate('ulf_ID');
         if($pred!=null) array_push($where, $pred);
@@ -106,7 +106,7 @@ class DbRecUploadedFiles extends DbEntityBase
         if($pred!=null) array_push($where, $pred);
         
 
-        $value = @$this->data['fxm_MimeType']; 
+        $value = @$this->data['fxm_MimeType'];
         $needMimeType = !($value==null || $value=='any');
         if($needMimeType){
             array_push($where, "(fxm_MimeType like '$value%')");
@@ -188,14 +188,14 @@ class DbRecUploadedFiles extends DbEntityBase
 
                         $idx = array_search('ulf_ObfuscatedFileID', $fields);
                         if($idx!==false){
-                            $fileid = $row[$idx]; 
+                            $fileid = $row[$idx];
                             $mimeType=null;
                             $external_url=null;
                             $idx = array_search('fxm_MimeType', $fields);
-                            if($idx!==false) $mimeType = $row[$idx]; 
+                            if($idx!==false) $mimeType = $row[$idx];
                             $idx = array_search('ulf_ExternalFileReference', $fields);
-                            if($idx!==false) $external_url = $row[$idx]; 
-                            array_push($row, fileGetPlayerTag($this->system, $fileid, $mimeType, null, $external_url));  //add ulf_PlayerTag  
+                            if($idx!==false) $external_url = $row[$idx];
+                            array_push($row, fileGetPlayerTag($this->system, $fileid, $mimeType, null, $external_url));//add ulf_PlayerTag  
                         }else{
                             array_push($row, '');
                         }
@@ -272,11 +272,11 @@ class DbRecUploadedFiles extends DbEntityBase
                     if ($res){
                             while ($row = $res->fetch_row()) {
                                 $relation = new stdClass();
-                                $relation->recID = intval($row[0]);  //file id 
-                                $relation->targetID = intval($row[1]);  //record id
+                                $relation->recID = intval($row[0]);//file id 
+                                $relation->targetID = intval($row[1]);//record id
                                 $relation->dtID  = intval($row[2]);
                                 array_push($direct, $relation);
-                                $headers[$row[1]] = array($row[3], $row[4]);   
+                                $headers[$row[1]] = array($row[3], $row[4]);
                             }
                             $res->close();
                             
@@ -331,7 +331,7 @@ class DbRecUploadedFiles extends DbEntityBase
         
         if($ret){
             
-            $fieldvalues = $this->data['fields']; //current record
+            $fieldvalues = $this->data['fields'];//current record
             
             /*
             if(!@$fieldvalues['ulf_OrigFileName']){
@@ -406,7 +406,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         
                         
                         //verify that url points to iiif manifest
-                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']); //check that json is iiif manifest
+                        $iiif_manifest = loadRemoteURLContent($record['ulf_ExternalFileReference']);//check that json is iiif manifest
                         $iiif_manifest = json_decode($iiif_manifest, true);
                         if($iiif_manifest!==false && is_array($iiif_manifest))
                         {
@@ -429,9 +429,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 if(@$iiif_manifest['thumbnail']){
 
                                     if(@$iiif_manifest['thumbnail']['@id']){  //v2
-                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['@id'];      
+                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['@id'];
                                     }else if(@$iiif_manifest['thumbnail']['id']){  //v3
-                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['id'];      
+                                        $this->records[$idx]['ulf_TempThumbUrl'] = @$iiif_manifest['thumbnail']['id'];
                                     }
                                 }else{
                                     //sequences -> canvases[0] -> images[0] -> resource -> @id or service -> @id
@@ -465,7 +465,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }
 
                                 //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';   
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';
                                 //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
@@ -486,7 +486,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;      
                                 
                                 //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';  
+                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';
                                 //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
@@ -498,7 +498,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
                     
                     if(!$this->records[$idx]['ulf_OrigFileName']){
-                        $this->records[$idx]['ulf_OrigFileName'] = '_remote';    
+                        $this->records[$idx]['ulf_OrigFileName'] = '_remote';
                     }
                     if(!@$this->records[$idx]['ulf_PreferredSource']){
                         $this->records[$idx]['ulf_PreferredSource'] = 'external';
@@ -509,7 +509,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             
                 if(@$record['ulf_FileUpload']){
                 
-                    $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null); //thumbnail is created here           
+                    $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null);//thumbnail is created here           
                     if(is_array($fields_for_reg)){
                         $this->records[$idx] = array_merge($this->records[$idx], $fields_for_reg);
                     }
@@ -547,7 +547,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $mysqli->real_escape_string($mimeType).'"';
             
                 if($mimeType=='application/x-zip-compressed'){
-                    $query = $query.' OR fxm_Mimetype="application/zip"'; //backward capability
+                    $query = $query.' OR fxm_Mimetype="application/zip"';//backward capability
                 }
             
                 $fileExtension = mysql__select_value($mysqli, $query);
@@ -641,7 +641,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     public function save(){
 
-        $ret = parent::save(); 
+        $ret = parent::save();
 /*
         if($ret!==false){                                 
             //treat thumbnail image
@@ -675,9 +675,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     {
                         if(!@$record['ulf_ExternalFileReference']){
                             if($record['ulf_MimeExt']=='mbtiles'){
-                                $file2['ulf_ExternalFileReference'] = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
+                                $file2['ulf_ExternalFileReference'] = substr($record['ulf_OrigFileName'],7).'.mbtiles';
                             }else{
-                                $file2['ulf_ExternalFileReference'] = $ulf_ID.'/'; //HEURIST_TILESTACKS_URL.
+                                $file2['ulf_ExternalFileReference'] = $ulf_ID.'/';//HEURIST_TILESTACKS_URL.
                             }
                         }
                         $file2['ulf_FilePath'] = '';
@@ -685,8 +685,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }else
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName'])
                     {
-                        $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
-                        $file2['ulf_FileName'] = $this->records[$rec_idx]['ulf_FileName']; 
+                        $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName'];
+                        $file2['ulf_FileName'] = $this->records[$rec_idx]['ulf_FileName'];
                     }
 
                     $res = mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
@@ -704,8 +704,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
                     $temp_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
                     if(saveURLasFile($record['ulf_TempThumbUrl'], $temp_path)){ //save to temp in scratch folder
-                        UImage::createScaledImageFile($temp_path, $thumb_name); //create thumbnail for iiif image
-                        unlink($temp_path);       
+                        UImage::createScaledImageFile($temp_path, $thumb_name);//create thumbnail for iiif image
+                        unlink($temp_path);
                     }
             }else
             //if there is file to be copied                        
@@ -721,7 +721,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 {
                     if($record['ulf_MimeExt']=='mbtiles'){
                     
-                        $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles'; 
+                        $new_name = substr($record['ulf_OrigFileName'],7).'.mbtiles';
                         
                         if( copy($tmp_name, HEURIST_TILESTACKS_DIR.$new_name) ) 
                         {
@@ -752,7 +752,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         //unzip archive to HEURIST_TILESTACKS_DIR
                         $unzip_error = null;
                         try{
-                            UArchive::unzip($this->system, $tmp_name, $dest);    
+                            UArchive::unzip($this->system, $tmp_name, $dest);
                         } catch (Exception  $e) {
                             $unzip_error = $e->getMessage();
                         }
@@ -774,7 +774,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $mimeExt = UImage::getImageType($filename);
                             
                             if($mimeExt){
-                                UImage::createScaledImageFile($filename, $thumb_name); //create thumbnail for tiled image
+                                UImage::createScaledImageFile($filename, $thumb_name);//create thumbnail for tiled image
                                 $file2['ulf_MimeExt'] = $mimeExt;    
                             }else{
                                 $file2['ulf_MimeExt'] = 'png';
@@ -798,7 +798,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     
                 }else{
                     
-                    $new_name = $this->records[$rec_idx]['ulf_FileName']; 
+                    $new_name = $this->records[$rec_idx]['ulf_FileName'];
                     
                     if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
                     {
@@ -870,10 +870,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $is_url = false;
                     //url or relative path
                     $url = trim($record['ulf_ExternalFileReference']);
-                    $description = @$record['ulf_Description'];                    
-                    $caption = @$record['ulf_Caption'];                    
-                    $copyright = @$record['ulf_Copyright'];                    
-                    $copyowner = @$record['ulf_Copyowner'];                    
+                    $description = @$record['ulf_Description'];
+                    $caption = @$record['ulf_Caption'];
+                    $copyright = @$record['ulf_Copyright'];
+                    $copyowner = @$record['ulf_Copyowner'];
                     
                     if(strpos($url,'http')===0){
                         //find if url is already registered
@@ -891,7 +891,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             $filename = HEURIST_FILESTORE_DIR.$url;
                             if(file_exists($url)){
                                 //this methods checks if file is already registered
-                                $fres = fileRegister($this->system, $filename, $description); //see recordFile.php
+                                $fres = fileRegister($this->system, $filename, $description);//see recordFile.php
                             }
                         }else {
                             $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
@@ -900,7 +900,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if($file_query){
-                        $fres = mysql__select_value($mysqli, $file_query);    
+                        $fres = mysql__select_value($mysqli, $file_query);
                     }                    
                     
                                 if($fres>0){
@@ -918,15 +918,15 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     
                                     if($is_download){
                                         //download and register , last parameter - validate name and hash
-                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields, 2); //it returns ulf_ID    
+                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields, 2);//it returns ulf_ID    
                                     }else{
-                                        $ulf_ID = $this->registerURL( $url, false, 0, $fields);    
+                                        $ulf_ID = $this->registerURL( $url, false, 0, $fields);
                                     }
                                     
                                     if($ulf_ID>0){
-                                        $cnt_imported++;    
+                                        $cnt_imported++;
                                     }else {
-                                        $cnt_error++;    
+                                        $cnt_error++;
                                     }
                                 }
                                 
@@ -1079,7 +1079,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $local_fixes = 0;
             $remote_fixes = 0;
             $dif_local_fixes = 0;
-            $to_delete = array(); // array(new_ulf_id => array(dup_ulf_ids))
+            $to_delete = array();// array(new_ulf_id => array(dup_ulf_ids))
 
             if(is_array($ids) && count($ids) > 0){ // multiple
                 $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
@@ -1096,16 +1096,16 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //find id with duplicated path+name
                 while($local_file = $local_dups->fetch_row()){
                     
-                    $path = ' IS NULL';    
-                    $fname = ' IS NULL';    
+                    $path = ' IS NULL';
+                    $fname = ' IS NULL';
                     $params = array('');
                     if(@$local_file[0]!=null){
-                        $path = '=?';    
+                        $path = '=?';
                         $params[0] = 's';
                         $params[] = $local_file[0];
                     }
                     if(@$local_file[1]!=null){
-                        $fname = '=?';    
+                        $fname = '=?';
                         $params[0] = $params[0].'s';
                         $params[] = $local_file[1];
                     }
@@ -1118,7 +1118,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         .' AND ulf_FileName '.$fname 
                         . $where_ids;
                         
-                    $res = mysql__select_param_query($mysqli, $query, $params);    
+                    $res = mysql__select_param_query($mysqli, $query, $params);
                         
                     //$res = $mysqli->query($query);
 
@@ -1190,7 +1190,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $to_delete[$new_ulf_id] = $dups_ids;
 
-                    $remote_fixes = $remote_fixes + count($dups_ids); 
+                    $remote_fixes = $remote_fixes + count($dups_ids);
                     //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
                     //$mysqli->query($del_query);
                 }
@@ -1215,7 +1215,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
             
-                    $dups_files = array(); //ulf_ID => path, size, md, array(dup_ulf_ids)
+                    $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
                     
                     while ($file_dtls = $dup_local_files->fetch_assoc()) {
                         
@@ -1223,7 +1223,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         if(@$file_dtls['ulf_FilePath']==null){
                             $res_fullpath = $file_dtls['ulf_FileName'];
                         }else{
-                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] ); //see recordFile.php
+                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] );//see recordFile.php
                         }
                        
                         if(file_exists($res_fullpath)){
@@ -1442,7 +1442,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                     $record['details'] = $details;
 
-                    $res = recordSave($this->system, $record); //see recordModify.php
+                    $res = recordSave($this->system, $record);//see recordModify.php
                     if(@$res['status'] != HEURIST_OK){
                         $cnt_error[] = $ulf_id;
                         continue;
@@ -1470,9 +1470,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['bulk_reg_filestore']){ // create new file entires 
 
-            $error = array(); // file missing or other errors
-            $skipped = array(); // already registered
-            $created = array(); // total ulf records created
+            $error = array();// file missing or other errors
+            $skipped = array();// already registered
+            $created = array();// total ulf records created
             $exists = 0; // count of files that already exists
 
             $files = array();
@@ -1577,9 +1577,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
         else if(@$this->data['import_data']){ // importing file metadata
 
-            $import_type = intval($this->data['import_data']); // import type; 1 - keep existing, 2 - append, 3 - replace
+            $import_type = intval($this->data['import_data']);// import type; 1 - keep existing, 2 - append, 3 - replace
             $id_type = @$this->data['id_type'];
-            $handled_ids = array('ulf_ID', 'ulf_ObfuscatedFileID', 'ulf_FullPath'); // , 'ulf_Checksum'
+            $handled_ids = array('ulf_ID', 'ulf_ObfuscatedFileID', 'ulf_FullPath');// , 'ulf_Checksum'
 
             if(empty($id_type) || !in_array($id_type, $handled_ids)){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid ID type provided, '. (empty($id_type) ? 'none provided' : 'provided type ' . $id_type));
@@ -1664,7 +1664,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     continue;
                                 }else{ // 2 - append value
 
-                                    $file_details[$field] = $ulf_row[$field] . " ; " . $value;
+                                    $file_details[$field] = $ulf_row[$field] . " ;" . $value;
                                 }
                             }
                         }
@@ -1694,7 +1694,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         if($ret===false){
             $mysqli->rollback();
         }else{
-            $mysqli->commit();    
+            $mysqli->commit();
         }
 
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
@@ -1702,7 +1702,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         if($ret && $is_csv_import){
             $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';
             if($cnt_skipped>0){
-                $ret = $ret.' Skipped/already exist: '.$cnt_skipped.' media resources';    
+                $ret = $ret.' Skipped/already exist: '.$cnt_skipped.' media resources';
             }
         }
 
@@ -1734,7 +1734,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         /*            
         $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT dtl_RecID '
                     .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
-        $cnt = count($recIDs_inuse);       
+        $cnt = count($recIDs_inuse);
         */
                     
         if($cnt>0){
@@ -1820,7 +1820,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             
             if(is_array($file)){
                 
-                $tmp_name  = $file[0]['name'];   //name only
+                $tmp_name  = $file[0]['name'];//name only
                 $newname   = $file[0]['original_name'];
                 $tmp_thumb = @$file[0]['thumbnailName'];
 
@@ -1840,9 +1840,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 
                 $file = new \stdClass();
                 //name with ext
-                $file->original_name = $newname?$newname:$fileinfo['basename']; //was filename
+                $file->original_name = $newname?$newname:$fileinfo['basename'];//was filename
                 $file->name = $file->original_name;
-                $file->size = filesize($tmp_name); //fix_integer_overflow
+                $file->size = filesize($tmp_name);//fix_integer_overflow
                 $file->type = @$fileinfo['extension'];
                 
                 $file->thumbnailName = $tmp_thumb;
@@ -1879,7 +1879,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 'ulf_MimeExt' => $extension?$extension:$file->type, //extension or mimetype allowed
                 'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
                 'ulf_FilePath' => 'file_uploads/',   //relative path to HEURIST_FILESTORE_DIR - db root
-                'ulf_TempFile' => $tmp_name);   //file in scratch to be copied 
+                'ulf_TempFile' => $tmp_name);//file in scratch to be copied 
                 
                 if(isset($file->thumbnailName)){
                     $ret['ulf_TempFileThumb'] = $file->thumbnailName;
@@ -1898,7 +1898,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $errorMsg = $errorMsg
                     .'. Please ask your system administrator to correct the path and/or permissions for this directory';
                     
-            $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);        
+            $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
             
             $ret = false;
         }
@@ -1917,7 +1917,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         
         if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
             $data = substr($data, strpos($data, ',') + 1);
-            $type = strtolower($type[1]); // jpg, png, gif
+            $type = strtolower($type[1]);// jpg, png, gif
 
             if (!in_array($type, [ 'jpg', 'jpeg', 'jpe', 'jfif', 'gif', 'png' ])) {
                 //throw new \Exception('invalid image type');
@@ -1939,7 +1939,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         
         $filename = USanitize::sanitizeFileName($newname.'.'.$type);
 
-        file_put_contents(HEURIST_SCRATCH_DIR.$filename, $data);        
+        file_put_contents(HEURIST_SCRATCH_DIR.$filename, $data);
         
         return $this->registerFile($filename, $newname);
     }
@@ -1981,7 +1981,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
                 $this->setData($fileinfo);
-                $ret = $this->save();   //copies temp from scratch to file_upload it returns ulf_ID
+                $ret = $this->save();//copies temp from scratch to file_upload it returns ulf_ID
                 
                 //unlink($tmp_name);
                 
@@ -2002,7 +2002,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     */
     public function downloadAndRegisterdURL($url, $fields=null, $validate_same_file=0){
         
-        $orig_name = basename($url); //get filename
+        $orig_name = basename($url);//get filename
         if(strpos($orig_name,'%')!==false){
             $orig_name = urldecode($orig_name);
         }
@@ -2014,7 +2014,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //check filename
                 $mysqli = $this->system->get_mysqli();
                 $query2 = 'SELECT ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath FROM recUploadedFiles '
-                .'WHERE ulf_OrigFileName="'.$mysqli->real_escape_string($orig_name).'"';    
+                .'WHERE ulf_OrigFileName="'.$mysqli->real_escape_string($orig_name).'"';
                 $fileinfo = mysql__select_row($mysqli, $query2);
                 if($fileinfo!=null){
                     
@@ -2030,7 +2030,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                             return $ulf_ID_already_reg;
                         }else if($validate_same_file==2){
                             //get file hash of already registered local file
-                            $old_md5 = md5_file($filepath);    
+                            $old_md5 = md5_file($filepath);
                         }
                     }
                 }
@@ -2077,7 +2077,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        
        if($fields==null)$fields = array();
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
-       $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';  //or _iiif
+       $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';//or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
 
        if(!@$fields['ulf_MimeExt']){
@@ -2088,16 +2088,16 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                if(@$ext['extension']){
                    $fields['ulf_MimeExt'] = $ext['extension'];
                }else{
-                   $fields['ulf_MimeExt'] = 'bin';  //default value
+                   $fields['ulf_MimeExt'] = 'bin';//default value
                }
            }
        }
-       $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id(); 
+       $fields['ulf_UploaderUGrpID'] = $this->system->get_user_id();
 
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
        $this->setData($fileinfo);
-       $this->setRecords(null); //reset
+       $this->setRecords(null);//reset
        $ulf_ID = $this->save();
        if($ulf_ID && is_array($ulf_ID)) $ulf_ID = $ulf_ID[0];
        

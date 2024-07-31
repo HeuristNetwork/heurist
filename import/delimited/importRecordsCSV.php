@@ -21,7 +21,7 @@
     */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');    
+define('PDIR','../../');
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';

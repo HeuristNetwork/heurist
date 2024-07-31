@@ -20,7 +20,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -135,13 +135,13 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     while(!feof($log_fd)){
 
         $line = fgets($log_fd);
-        $line = rtrim($line, "\n"); // remove trailing newlines, interaction log only uses \n
+        $line = rtrim($line, "\n");// remove trailing newlines, interaction log only uses \n
         $line_chunks = explode(',', $line);
 
         if(count($line_chunks) < 3 || (!$is_all_actions && !in_array($line_chunks[1], $action_filter))){ // check for valid entry (userID, action, timestamp) and apply action filter
             continue;
         }else if(count($line_chunks) >= 4 && strpos($line_chunks[3], 'recs') !== false){ // contains a listing of rec ids + rec count, re-make indexes
-            $part_chunks = explode(' ', $line_chunks[3]); // [0] => count, [1] => 'recs:', [2] => rec id
+            $part_chunks = explode(' ', $line_chunks[3]);// [0] => count, [1] => 'recs:', [2] => rec id
 
             if(count($line_chunks) == 4){
                 $recids = array($part_chunks[2]);
@@ -224,7 +224,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <script type="text/javascript">
             $(document).ready(function(){

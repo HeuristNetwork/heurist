@@ -25,14 +25,14 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
  
-define('ADMIN_PWD_REQUIRED', 1); 
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED', 1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 ?>            
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>          
        
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>This list shows definitions without concept codes for registered databases</p>
@@ -46,7 +46,7 @@ $mysqli = $system->get_mysqli();
     $query = 'show databases';
 
     $res = $mysqli->query($query);
-    if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+    if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
@@ -66,7 +66,7 @@ $mysqli = $system->get_mysqli();
     
     foreach ($databases as $idx=>$db_name){
 
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
         
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
@@ -83,27 +83,27 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 
 $query = 'UPDATE '.$db_name.'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID=0'
             ." WHERE (dty_ID>56 and dty_ID<73 and dty_OriginatingDBID=0 and dty_IDInOriginatingDB=0)";
-            $mysqli->query($query);            
+            $mysqli->query($query);
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             
 $query = 'UPDATE '.$db_name
 .'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID=0'
 ." WHERE (dty_OriginatingDBID='' OR dty_OriginatingDBID=0 OR dty_OriginatingDBID IS NULL "
 ." OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL)";
-        $mysqli->query($query);            
+        $mysqli->query($query);
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=0'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
-$mysqli->query($query);            
+$mysqli->query($query);
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=0'
             ." WHERE (trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL "
             ." OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL)";
-$mysqli->query($query);            
+$mysqli->query($query);
 if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         continue;
 */
@@ -124,7 +124,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             //.' OR rty_Name LIKE "% 2" OR rty_Name LIKE "% 3"';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
             $is_found = true;
@@ -169,7 +169,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
             //.' OR dty_Name LIKE "% 2" OR dty_Name LIKE "% 3"';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
                $is_found = true;
@@ -189,12 +189,12 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 /*         
 $query = 'UPDATE '.$db_name.'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID=2'
             ." WHERE (dty_ID>56 and dty_ID<73 and dty_OriginatingDBID=0 and dty_IDInOriginatingDB=0)";
-$mysqli->query($query);            
+$mysqli->query($query);
             
 $query = 'UPDATE '.$db_name.'.defDetailTypes set dty_IDInOriginatingDB = dty_ID, dty_NameInOriginatingDB = dty_Name, dty_OriginatingDBID='.$ver
             ." WHERE (dty_OriginatingDBID='' OR dty_OriginatingDBID=0 OR dty_OriginatingDBID IS NULL "
             ." OR dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL)";
-$mysqli->query($query);            
+$mysqli->query($query);
 */           
         }
         
@@ -209,7 +209,7 @@ $mysqli->query($query);
             ."OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL";
                 
             $res = $mysqli->query($query);
-            if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+            if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
             
             while (($row = $res->fetch_row())) {
                    $is_found = true;
@@ -229,13 +229,13 @@ $mysqli->query($query);
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID=2'
             ." WHERE (trm_ID>3257 and trm_ID<3297 and trm_OriginatingDBID=0 and trm_IDInOriginatingDB=0)";
-$mysqli->query($query);            
+$mysqli->query($query);
             
 $query = 'UPDATE '.$db_name.'.defTerms set trm_IDInOriginatingDB = trm_ID, trm_NameInOriginatingDB = trm_Label,'
             .' trm_OriginatingDBID='.$ver
             ." WHERE (trm_OriginatingDBID='' OR trm_OriginatingDBID=0 OR trm_OriginatingDBID IS NULL "
             ." OR trm_IDInOriginatingDB='' OR trm_IDInOriginatingDB=0 OR trm_IDInOriginatingDB IS NULL)";
-$mysqli->query($query);            
+$mysqli->query($query);
           
         }
         */
@@ -253,9 +253,9 @@ $mysqli->query($query);
             $det_types = $data['dty'];
             $terms = $data['trm'];
 
-            print '<h4 style="margin:0;padding-top:20px">'.$data['id'].' - '.substr($db_name,4).'</h4><table style="font-size:12px">';    
+            print '<h4 style="margin:0;padding-top:20px">'.$data['id'].' - '.substr($db_name,4).'</h4><table style="font-size:12px">';
             
-            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';          
+            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';
             
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';

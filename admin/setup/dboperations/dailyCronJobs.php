@@ -91,7 +91,7 @@ if (@$argv) {
     */    
 }
 
-require_once dirname(__FILE__).'/../../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
@@ -115,7 +115,7 @@ if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma
 print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);  //list of all databases without hdb_ prefix 
+$databases = mysql__getdatabases4($mysqli, false);//list of all databases without hdb_ prefix 
 
 $upload_root = $system->getFileStoreRootFolder();
 
@@ -123,20 +123,20 @@ echo "root : ".$upload_root."\n";
 
 //define('HEURIST_FILESTORE_ROOT', $upload_root );
 
-$exclusion_list = exclusion_list(); //read databases_not_to_crons 
+$exclusion_list = exclusion_list();//read databases_not_to_crons 
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 //ini_set('memory_limit','1024M');
 
 $datetime1 = date_create('now');
 $cnt_archived = 0;
-$report_list = array(); //reports errors,create,updated,intacted  by database
-$email_list = array();  //reminders 
+$report_list = array();//reports errors,create,updated,intacted  by database
+$email_list = array();//reminders 
 $url_list = array();
 $reminders = null;
 
 if($do_reminders){
-//echo ">>>>>".spl_object_id($system)."\n";      
+//echo ">>>>>".spl_object_id($system)."\n";
     $reminders = new DbUsrReminders($system, $params);
 }
 
@@ -182,7 +182,7 @@ foreach ($databases as $idx=>$db_name){
     
     $system->set_mysqli($mysqli);
     $system->set_dbname_full($db_name);
-//echo spl_object_id($system).'    >>>'.isset($mysqli)."<<<<\n";      
+//echo spl_object_id($system).'    >>>'.isset($mysqli)."<<<<\n";
     
     if($do_reports){
         $report = array(0=>0,1=>0,2=>0,3=>0);
@@ -197,7 +197,7 @@ foreach ($databases as $idx=>$db_name){
             while ($row = $res->fetch_assoc()) {
 //echo print_r($row,true);
                 if($smarty==null){ //init smarty for new db if there is at least one entry in schedule table
-                    initSmarty($system->getSysDir('smarty-templates')); //reinit global smarty object for new database
+                    initSmarty($system->getSysDir('smarty-templates'));//reinit global smarty object for new database
                     if(!isset($smarty) || $smarty==null){
                         echo 'Cannot init Smarty report engine for database '.htmlspecialchars($db_name).$eol;
                         break;
@@ -205,7 +205,7 @@ foreach ($databases as $idx=>$db_name){
                     }
                 }
 
-                $proc_start = time(); // time execution
+                $proc_start = time();// time execution
                 $rep = doReport($system, 4, 'html', $row);
                 $proc_length = time() - $proc_start;
 
@@ -226,7 +226,7 @@ foreach ($databases as $idx=>$db_name){
                     $long_reports_count ++;
                 }
             }//while
-            $res->close();        
+            $res->close();
         }
         
         if($is_ok){
@@ -249,7 +249,7 @@ foreach ($databases as $idx=>$db_name){
             echo $tabs0.htmlspecialchars($db_name);
             echo $tabs.' reminders: ';
             foreach($report as $freq=>$cnt){
-                echo $freq.':'.$cnt.'  ';  
+                echo $freq.':'.$cnt.'  ';
                 if(!@$email_list[$freq]) {$email_list[$freq] = 0;}
                 $email_list[$freq] = $email_list[$freq] + $cnt;  
             }
@@ -264,7 +264,7 @@ foreach ($databases as $idx=>$db_name){
             continue;
         }
 
-        $url_results = checkURLs($system, true); // [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
+        $url_results = checkURLs($system, true);// [0] => rec_URL, [1] => Freetext/blocktext fields, [2] => Files using external url
 
         $invalid_rec_urls = $url_results[0];
         $invalid_fb_urls = $url_results[1];
@@ -336,7 +336,7 @@ foreach ($databases as $idx=>$db_name){
 //echo $tabs0.$db_name.' cannot execute query for Records table'.$eol;
 
 
-    //echo "   ".$db_name." OK \n"; //.'  in '.$folder
+    //echo "   ".$db_name." OK \n";//.'  in '.$folder
     //if($db_name=='catts_medieval_cookbook') break;
     
 }//foreach database
@@ -359,8 +359,8 @@ if(count($email_list)>0 || count($report_list)>0 || count($url_list)>0){
     foreach($report_list as $dbname=>$rep){
         $errors = $errors + $rep[0];
         $created = $created + $rep[1];
-        $updated = $updated + $rep[2];    
-        $intacted = $intacted + $rep[3];    
+        $updated = $updated + $rep[2];
+        $intacted = $intacted + $rep[3];
     }
     $text = '';
     foreach($email_list as $freq=>$cnt){

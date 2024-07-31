@@ -25,7 +25,7 @@ function getMediaFolders($mysqli) {
         $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
         folderCreate( $mediaFolders, true );
     }
-    $dirs = explode(';', $mediaFolders); // get an array of folders
+    $dirs = explode(';', $mediaFolders);// get an array of folders
 
     //sanitize folder names
     $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
@@ -35,13 +35,13 @@ function getMediaFolders($mysqli) {
     if($row1[1]==null){
         $mediaExts = HEURIST_ALLOWED_EXT;
     }else{
-        $mediaExts = $row1[1]; // user gets to define from scratch so they can restrict what's indexed
+        $mediaExts = $row1[1];// user gets to define from scratch so they can restrict what's indexed
     }
     
     $mediaExts = explode(',', $mediaExts);
 
     if (count($dirs) == 0) {
-        $dirs = array(HEURIST_FILESTORE_DIR); // default to the data folder for this database
+        $dirs = array(HEURIST_FILESTORE_DIR);// default to the data folder for this database
         //print "<p><b>It seems that there are no media folders specified for this database</b>";
     }
                 
@@ -85,12 +85,12 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
                 chdir(HEURIST_FILESTORE_DIR);
                 $dir = realpath($dir);
                 if($dir!==false){
-                    $dir = str_replace('\\','/',$dir);         
+                    $dir = str_replace('\\','/',$dir);
                 }
                 
                 if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                     if($is_report){
-                        print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";    
+                        print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";
                     }
                     continue;
                 }
@@ -200,7 +200,7 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
             {
                 if($imode==1){
                 
-                    $file_id = fileGetByFileName( $system, $filename);  //see recordFile.php
+                    $file_id = fileGetByFileName( $system, $filename);//see recordFile.php
 
                     if($file_id>0){
                         array_push($reg_info['reg'], $filename);

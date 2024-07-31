@@ -30,22 +30,22 @@
     require_once dirname(__FILE__).'/../utilities/uSanitize.php';
     
 
-    $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
+    $response = array();//"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
     
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $req_params = filter_input_array(INPUT_POST);
     }else{
-        $req_params = filter_input_array(INPUT_GET);    
+        $req_params = filter_input_array(INPUT_GET);
     }    
 
-    $action = @$req_params['a']; //$system->getError();
+    $action = @$req_params['a'];//$system->getError();
     
     $system = new System();
     $dbname = @$req_params['db'];
     $error = System::dbname_check($dbname);
 
-    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname); //for snyk    
+    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname);//for snyk    
     
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
@@ -64,13 +64,13 @@
             $const_toinit = true;
             if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
-                $system->initPathConstants($dbname);  
+                $system->initPathConstants($dbname);
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
             
             if($reload_user_from_db){
-                $system->init($dbname, false, $const_toinit); //session and constant are defined already
+                $system->init($dbname, false, $const_toinit);//session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
@@ -151,12 +151,12 @@
             if(defined('HEURIST_FILESTORE_ROOT')){
                 $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
                 $verison_numbers = array();
-                array_push($verison_numbers, explode('.', HEURIST_VERSION)[0]); // Check using current major version
+                array_push($verison_numbers, explode('.', HEURIST_VERSION)[0]);// Check using current major version
 
                 if (file_exists($fname)){
                     list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
                     if($verison_numbers[0] < explode('.', $version_last_check)[0]){
-                        array_unshift($verison_numbers, explode('.', $version_last_check)[0]); // Check using new major version, performed first
+                        array_unshift($verison_numbers, explode('.', $version_last_check)[0]);// Check using new major version, performed first
                     }
                 }
 
@@ -295,7 +295,7 @@
             
             foreach($settings['formats'] as $key => $format){
 
-                $key = str_ireplace(' ', '_', $key); // replace spaces with underscore
+                $key = str_ireplace(' ', '_', $key);// replace spaces with underscore
                 if(in_array($key, $valid_formats)){
                     continue; // already handle
                 }
@@ -316,7 +316,7 @@
 
                 $res['content_style'] .= $css;
 
-                unset($format['styles']); // avoid inserting css into style attribute of html
+                unset($format['styles']);// avoid inserting css into style attribute of html
                 $res['formats'][$key] = $format;
 
                 $valid_formats[] = $key;
@@ -332,12 +332,12 @@
 
                     foreach($settings['style_formats'] as $idx => $style){
 
-                        $style['format'] = str_ireplace(' ', '_', $style['format']); // replace spaces with underscore
+                        $style['format'] = str_ireplace(' ', '_', $style['format']);// replace spaces with underscore
                         if($style['format'] == $key){
 
                             $res['style_formats'][] = $style;
 
-                            unset($settings['style_formats'][$idx]); // remove
+                            unset($settings['style_formats'][$idx]);// remove
                             break;
                         }
                     }
@@ -349,12 +349,12 @@
 
                     foreach($settings['block_formats'] as $idx => $block){
 
-                        $block['format'] = str_ireplace(' ', '_', $block['format']); // replace spaces with underscore
+                        $block['format'] = str_ireplace(' ', '_', $block['format']);// replace spaces with underscore
                         if($block['format'] == $key){
 
                             $res['block_formats'][] = $block;
 
-                            unset($settings['block_formats'][$idx]); // remove
+                            unset($settings['block_formats'][$idx]);// remove
                             break;
                         }
                     }
@@ -364,7 +364,7 @@
             }
 
             if(empty($res['style_formats']) && empty($res['block_formats'])){
-                $res = array(); // invalid formatting
+                $res = array();// invalid formatting
             }
         }
     }else if($action == "translate_string"){ // translate given string using Deepl's API, if able
@@ -401,7 +401,7 @@
                     $exts = explode(',',$exts);
               }
               if(!is_array($exts) || count($exts)<1){
-                    $exts = array('png','svg');    
+                    $exts = array('png','svg');
               }
               
               $source = @$req_params['source'];
@@ -421,10 +421,10 @@
         
               $source = @$req_params['source'];
               if(@$req_params['exts']){
-                    $exts = explode(',',@$req_params['exts']);    
+                    $exts = explode(',',@$req_params['exts']);
               }
               if(!is_array($exts) || count($exts)<1){
-                    $exts = array('png','svg');    
+                    $exts = array('png','svg');
               }
               
               $include_dates = false;
@@ -444,7 +444,7 @@
                       if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                           $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
                       }else{
-                          $lib_path = '/srv/BACKUP/ARCHIVE';    
+                          $lib_path = '/srv/BACKUP/ARCHIVE';
                       }
                   }else if($source==4){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
@@ -467,11 +467,11 @@
 
                   $root_dir = null;
                   if(@$req_params['root_dir']){
-                      $root_dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.@$req_params['root_dir']);     
+                      $root_dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.@$req_params['root_dir']);
                   }
 
                   $res = folderTree($root_dir, 
-                      array('systemFolders'=>$folders,'format'=>'fancy') ); //see utils_file
+                      array('systemFolders'=>$folders,'format'=>'fancy') );//see utils_file
                   $res = $res['children'];
                   //$res = folderTreeToFancyTree($res, 0, $folders);
               }else{
@@ -504,7 +504,7 @@
                       }else if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
                       }else{
-                          $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);    
+                          $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);
                           if(!$res){
                               $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Cannot rename folder "'
                                     .$dir_name.'" to name "'.$new_name.'"');
@@ -516,11 +516,11 @@
 
                       
                       if(!file_exists($folder_name)){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');             
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
                       }else if (count(scandir($folder_name))>2){
-                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$f_name.'" cannot be removed');          
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$f_name.'" cannot be removed');
                       }else{
-                          $res = folderDelete2($folder_name, true);        
+                          $res = folderDelete2($folder_name, true);
                           if(!$res){
                               $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$f_name.'" cannot be removed');
                           }
@@ -612,7 +612,7 @@
                 }
                 
                 if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check, $is_guest)){
-                    $res = $system->getCurrentUserAndSysInfo( true, $is_guest ); //including reccount and dashboard entries
+                    $res = $system->getCurrentUserAndSysInfo( true, $is_guest );//including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
 
@@ -622,7 +622,7 @@
             } else if ($action=="reset_password") {
 
                 $password = array_key_exists('new_password', $req_params) ? $req_params['new_password'] : null;
-                if(array_key_exists('new_password', $req_params)) unset($req_params['new_password']); // remove from REQUEST
+                if(array_key_exists('new_password', $req_params)) unset($req_params['new_password']);// remove from REQUEST
 
                 if($req_params['pin'] && $req_params['username'] && $password){ // update password w/ pin
                     $system->user_LogActivity('ResetPassword', "Updating password for {$req_params['username']}");
@@ -667,7 +667,7 @@
                 if($res!==false && $is_guest_registration){
                     //login at once
                     if($system->doLogin($res, null, 'remember', true, true)){
-                        $res = $system->getCurrentUserAndSysInfo( true, $is_guest_registration ); //including reccount and dashboard entries
+                        $res = $system->getCurrentUserAndSysInfo( true, $is_guest_registration );//including reccount and dashboard entries
                     }
                 }
 
@@ -836,10 +836,10 @@
 
                     $params['use_test_url'] = @$req_params['use_test_url'] == 1 || strpos($req_params['api_key'],'nakala')===1 ? 1 : 0;
 
-                    $params['status'] = 'published'; // publish uploaded file, return url to newly uploaded file on Nakala
+                    $params['status'] = 'published';// publish uploaded file, return url to newly uploaded file on Nakala
 
                     // Upload file
-                    $res = uploadFileToNakala($system, $params); //from record edit - define file field
+                    $res = uploadFileToNakala($system, $params);//from record edit - define file field
 
                 }
                 
@@ -868,6 +868,6 @@
         }
     }
     
-$system->setResponseHeader();    
+$system->setResponseHeader();
 print json_encode($response);
 ?>

@@ -51,7 +51,7 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 
-require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
 $outputfile = null;
@@ -63,7 +63,7 @@ $outputfile = null;
 // csv or text/csv
 // xml or text/xml
 // NOTE: if script $is_included it can't set Content-type
-$outputmode = 'html'; 
+$outputmode = 'html';
 $is_headless = false; //param:  snippet=1 or Content-type other than text/html and text/javascript
 
 
@@ -93,10 +93,10 @@ $execution_total_counter = 0;
 $is_jsallowed = true;
 $record_with_custom_styles = 0; //record id with custom css and style links DT_CMS_CSS and DT_CMS_EXTFILES
 
-$is_included = isset($system); //this script is included into other one
+$is_included = isset($system);//this script is included into other one
 
 if(!$is_included){
-    $system = new System(); 
+    $system = new System();
     if(!$system->init(@$_REQUEST['db'])){
         exit;
     }
@@ -153,7 +153,7 @@ function executeSmartyTemplate($system, $params){
     if($outputmode!='js' && $outputmode!='html'){
         $is_headless = true;            
     }
-    if($outputmode=='text') $outputmode = 'txt';   
+    if($outputmode=='text') $outputmode = 'txt';
            
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
@@ -164,9 +164,9 @@ function executeSmartyTemplate($system, $params){
            
     $mysqli = $system->get_mysqli();
 
-    set_time_limit(0); //no script execution time limit
+    set_time_limit(0);//no script execution time limit
 
-    $session_id = @$params['session']; //session progress id
+    $session_id = @$params['session'];//session progress id
     
     $params["f"] = 1; //always search (do not use cache)
 
@@ -194,9 +194,9 @@ function executeSmartyTemplate($system, $params){
     if(@$params['recordset']){ //we already have the list of record ids
 
         if(is_array($params['recordset'])){
-            $qresult = $params['recordset'];  
+            $qresult = $params['recordset'];
         }else{
-            $qresult = json_decode($params['recordset'], true);    
+            $qresult = json_decode($params['recordset'], true);
         }
 
         //truncate recordset for output in smarty TAB - limit does not work for publish mode
@@ -208,20 +208,20 @@ function executeSmartyTemplate($system, $params){
                 $qresult = array('records'=>array_slice($recIDs, 0, $params["limit"]) );
                 $qresult['reccount'] = count($recIDs);
             }else{
-                $qresult = array('records'=>$recIDs );        
+                $qresult = array('records'=>$recIDs );
                 $qresult['reccount'] = count($qresult['records']);
             }
         }
 
     }else { //search record ids with query params
 
-        $params['detail'] = 'ids'; // return ids only
-        $qresult = recordSearch($system, $params); //see recordSearch.php
+        $params['detail'] = 'ids';// return ids only
+        $qresult = recordSearch($system, $params);//see recordSearch.php
 
         if(@$qresult['status']==HEURIST_OK){
             $qresult = $qresult['data'];
         }else{
-            smarty_error_output( $system, null );  //output error
+            smarty_error_output( $system, null );//output error
         }
     }
 
@@ -304,7 +304,7 @@ function executeSmartyTemplate($system, $params){
         $kp = 9;
     }
     if(is_numeric($k) && $k>=0){
-        $nd = substr($content,$k+$kp, 1); //strpos($content,"*}",$k)-$k-8);
+        $nd = substr($content,$k+$kp, 1);//strpos($content,"*}",$k)-$k-8);
         if(is_numeric($nd) && $nd<3){
             $max_allowed_depth = $nd;
         }
@@ -313,7 +313,7 @@ function executeSmartyTemplate($system, $params){
 
     
     if(!isset($smarty) || $smarty==null){
-        initSmarty($system->getSysDir('smarty-templates')); //global function from smartyInit.php
+        initSmarty($system->getSysDir('smarty-templates'));//global function from smartyInit.php
         if(!isset($smarty) || $smarty==null){
             smarty_error_output($system, 'Cannot init Smarty report engine');
             exit;
@@ -329,29 +329,29 @@ function executeSmartyTemplate($system, $params){
 
     //convert to array that will assigned to smarty variable
     $results =  $qresult["records"];
-    $execution_total_counter = count($results); //$qresult["reccount"];
+    $execution_total_counter = count($results);//$qresult["reccount"];
 
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
     
     $smarty->assignByRef('heurist', $heuristRec);
     
-    $smarty->assign('results', $results); //assign record ids
+    $smarty->assign('results', $results);//assign record ids
 
     if(!empty($facet_value)){
-        $smarty->assign('selected_term', $facet_value); // facet value that trigger a search, term id(s) for now
+        $smarty->assign('selected_term', $facet_value);// facet value that trigger a search, term id(s) for now
     }
 
     try{
 
         if(method_exists($smarty, 'registerPlugin')){ // version 3
 
-            $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
-            $smarty->registerPlugin('modifier', 'translate', 'getTranslation'); // from uLocale.php
+            $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']);// from reportRecord.php
+            $smarty->registerPlugin('modifier', 'translate', 'getTranslation');// from uLocale.php
         }else{ // version 2
 
-            $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']); // from reportRecord.php
-            $smarty->register_modifier('translate', 'getTranslation'); // from uLocale.php
+            $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']);// from reportRecord.php
+            $smarty->register_modifier('translate', 'getTranslation');// from uLocale.php
         }
 
     }catch(Exception $e){
@@ -364,7 +364,7 @@ function executeSmartyTemplate($system, $params){
 
     //$smarty->getvar()
 
-    ini_set( 'display_errors' , 'false'); // 'stdout' );
+    ini_set( 'display_errors' , 'false');// 'stdout' );
     $smarty->error_reporting = 0;
 
     $need_output_filter = true;
@@ -386,17 +386,17 @@ function executeSmartyTemplate($system, $params){
             $smarty->debugging = ($replevel=="3");
         }
         if($replevel>0){
-            $smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';    
+            $smarty->debug_tpl = dirname(__FILE__).'/debug_html.tpl';
         }
 
         //save temporary template
         //this is user name $template_file = "_temp.tpl";
         $user = $system->getCurrentUser();
         
-        $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl'; //snyk SSRF
+        $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl';//snyk SSRF
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) $template_folder = $template_folder[0];
-        $file = fopen ($template_folder.$template_file, "w"); 
+        $file = fopen ($template_folder.$template_file, "w");
         fwrite($file, $template_body);
         fclose ($file);
 
@@ -412,7 +412,7 @@ function executeSmartyTemplate($system, $params){
                 $output = 'Exception on calc field execution: '.$e->getMessage();
             }
             if(file_exists($template_folder.$template_file)){
-                unlink($template_folder.$template_file);   
+                unlink($template_folder.$template_file);
             }
             echo $output;
             return true; //exit;
@@ -431,7 +431,7 @@ function executeSmartyTemplate($system, $params){
         $smarty->error_reporting = 0;
         
         if($outputfile!=null){
-            $smarty->registerFilter('output', 'smarty_output_filter');  //to preform output into file
+            $smarty->registerFilter('output', 'smarty_output_filter');//to preform output into file
             $need_output_filter = false;
         }else if($outputmode=='js'){
             $smarty->registerFilter('output', 'smarty_output_filter_wrap_js');
@@ -442,10 +442,10 @@ function executeSmartyTemplate($system, $params){
         $smarty->registerFilter('output', 'smarty_output_filter_strip_js');
     }
     
-    $smarty->registerFilter('pre', 'smarty_pre_filter'); //before compilation: handle short form term translations
+    $smarty->registerFilter('pre', 'smarty_pre_filter');//before compilation: handle short form term translations
     if($publishmode==0 && $session_id>0)
     {
-        $smarty->registerFilter('post','smarty_post_filter'); //after compilation: to add progress support
+        $smarty->registerFilter('post','smarty_post_filter');//after compilation: to add progress support
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
     }
     
@@ -455,7 +455,7 @@ function executeSmartyTemplate($system, $params){
     
     $result = true;
     
-    $smarty->assign('template_file', $template_file);    
+    $smarty->assign('template_file', $template_file);
     try{
         
         //if $outputfile is not defined - define content type
@@ -471,7 +471,7 @@ function executeSmartyTemplate($system, $params){
                 }else if($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
-                    $mimetype = "text/$outputmode";    
+                    $mimetype = "text/$outputmode";
                 }
                 
                 if(!$is_headless && $outputmode!='html'){
@@ -481,7 +481,7 @@ function executeSmartyTemplate($system, $params){
                 if($outputmode!='html'){
                     $outputfile = 'heurist_output.'.$outputmode;
                     header('Pragma: public');
-                    header('Content-Disposition: attachment; filename="'.$outputfile.'"'); 
+                    header('Content-Disposition: attachment; filename="'.$outputfile.'"');
                     //header('Content-Length: ' . strlen($tpl_res));
                 }
             }
@@ -490,14 +490,14 @@ function executeSmartyTemplate($system, $params){
         if($gparams['void']){
             $smarty->fetch($template_file);
         }else{
-            $smarty->display($template_file);    
+            $smarty->display($template_file);
         }
         
         //not record list, not from editor
         if(!$is_headless && !@$template_body && !$params["void"]){
             // log activity, rec ids separated by spaces
             log_smarty_activity($system, $results);
-            //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE); 
+            //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE);
         }
         
     } catch (Exception $e) {
@@ -510,7 +510,7 @@ function executeSmartyTemplate($system, $params){
         mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
     }
     if(!$params["void"]){
-        $mysqli->close();        
+        $mysqli->close();
     }
     
     if($publishmode==0 && $params["limit"] < count($recIDs)){
@@ -640,7 +640,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 if(strpos($src,'@import')===0){
                     $import_webfonts = $import_webfonts . $src;
                 }else{
-                    $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+                    $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';
                 }
                 $font_families[] = $font_family;
             }
@@ -811,7 +811,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                             if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
                     $head = $head.'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend",\''
                                             .$ext_file //str_replace('"','\"',$ext_file)
-                                            .'\');';                                        }
+                                            .'\');';}
                                         }
                                         
                     $head = $head.' })();</script>';
@@ -828,7 +828,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     //$tpl_source = removeHeadAndBodyTags($tpl_source);
                     
                     if(strpos($tpl_source, '<head>')>0){
-                        $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);    
+                        $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
                     }else{
                         $tpl_source = removeHeadAndBodyTags($tpl_source);
                         $tpl_source = $head.$tpl_source;
@@ -841,9 +841,9 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
             //if javascript not allowed, use html purifier to remove suspicious code
 
             $config = \HTMLPurifier_Config::createDefault();
-            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
 
-            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
             $config->set('HTML.DefinitionRev', 1);
 
             //$config = HTMLPurifier_Config::createDefault();
@@ -853,7 +853,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
             $config->set('HTML.SafeIframe', true);
             //allow YouTube, Soundlcoud and Vimeo     
             // https://w.soundcloud.com/player/
-            $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%'); 
+            $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             
             $def = $config->getHTMLDefinition(true);
             $def->addElement(
@@ -866,7 +866,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     'autoplay' => 'Bool',
                     'data-id' => 'Number'
                 ]
-            );        
+            );
             $def->addElement('source', 'Block', 'Flow', 'Common', array(
                 'src' => 'URI',
                 'type' => 'Text',
@@ -895,7 +895,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
 
             if(!empty($font_styles)){
                 if(strpos($tpl_source, '<head>')>0){
-                    $tpl_source = str_replace('</head>',$font_styles.'</head>', $tpl_source);    
+                    $tpl_source = str_replace('</head>',$font_styles.'</head>', $tpl_source);
                 }else{
                     $tpl_source = $font_styles.$tpl_source;
                 }
@@ -945,7 +945,7 @@ function removeHeadAndBodyTags($content){
             @$dom->loadHTML($content);
             $body = $dom->getElementsByTagName('body');
             if($body){
-                $content = $dom->saveHtml($body[0]); //outer html  
+                $content = $dom->saveHtml($body[0]);//outer html  
                 $content = preg_replace( '@^<body[^>]*>|</body>$@', '', $content );
                 $content = preg_replace( '@^<p[^>]*>|</p>$@', '', $content );
             }
@@ -1036,10 +1036,10 @@ function save_report_into_file($tpl_source){
                 if($use_temp){
 
                     if(unlink($res_file) === false){ // Delete old file
-                        unlink($temp_file); // on error, remove temp file
+                        unlink($temp_file);// on error, remove temp file
                         $errors = "Can't delete old report file $res_file. Check permission for file";
                     }else if(rename($temp_file, $res_file) === false){ // Rename temp file
-                        unlink($temp_file); // on error, remove temp file
+                        unlink($temp_file);// on error, remove temp file
                         $errors = "Can't rename temporary file $temp_file to $res_file. Check permissions";
                     }
                 }
@@ -1051,7 +1051,7 @@ function save_report_into_file($tpl_source){
         }
         
         if($gparams['void'] && $errors!=null){
-            echo htmlspecialchars($errors)."\n";        
+            echo htmlspecialchars($errors)."\n";
         }
     }
     
@@ -1077,7 +1077,7 @@ function save_report_into_file($tpl_source){
                 }else if($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
-                    $mimetype = "text/$outputmode";    
+                    $mimetype = "text/$outputmode";
                 }
 
                 header("Content-type: $mimetype;charset=UTF-8");
@@ -1094,7 +1094,7 @@ function save_report_into_file($tpl_source){
                 }
 
                 header('Pragma: public');
-                header('Content-Disposition: attachment; filename="'.$output_name.'"'); 
+                header('Content-Disposition: attachment; filename="'.$output_name.'"');
                 header('Content-Length: ' . strlen($tpl_res));
             }
             
@@ -1220,7 +1220,7 @@ function smarty_function_progress($params, &$smarty){
             $session_val = $execution_counter.','.$tot_count;
             $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
             if($current_val && $current_val=='terminate'){
-                $session_val = ''; //remove from db
+                $session_val = '';//remove from db
                 $res = true;
             }
 
@@ -1345,7 +1345,7 @@ function smarty_function_wrap($params, &$smarty)
 
                 if($limit>0 && $idx>=$limit) break;
 
-                $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+                $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
                 $originalFileName = $fileinfo['ulf_OrigFileName'];
                 $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
                 $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
@@ -1381,7 +1381,7 @@ function smarty_function_wrap($params, &$smarty)
                     
                 }else{ //player is default
 
-                    $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style); //see recordFile.php
+                    $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
                     
                 }
                 
@@ -1417,7 +1417,7 @@ function smarty_function_wrap($params, &$smarty)
                         $res = '<a href="https://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank" rel="noopener">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
-                        $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$system->dbname(); //"&t="+d;
+                        $url = HEURIST_BASE_URL."viewers/gmap/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".$system->dbname();//"&t="+d;
                         return "<img src=\"".$url."\" ".$size."/>";
                     }
                 }
@@ -1479,7 +1479,7 @@ function cms_content_prepare($content){
                 }
             }
         }else if(@$content['type']=='text'){
-            $cnt =  @$content['content'];    
+            $cnt =  @$content['content'];
         }else if(@$content['type']=='group' && is_array(@$content['children'])){
             $convert_links = false;
             foreach($content['children'] as $grp){
@@ -1519,7 +1519,7 @@ function smarty_error_output($system, $error_msg){
     if($publishmode>0 && $publishmode<4 && $outputfile!=null){ //save empty output into file
         save_report_into_file($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
     }else{
-        echo USanitize::sanitizeString($error_msg);    
+        echo USanitize::sanitizeString($error_msg);
     }
 }
 

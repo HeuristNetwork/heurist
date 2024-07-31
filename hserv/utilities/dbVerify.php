@@ -77,7 +77,7 @@ class DbVerify {
     //
     //
     private function _outStreamInit(){
-        $this->out = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+        $this->out = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file 
     }
     
     //
@@ -98,7 +98,7 @@ class DbVerify {
 
         $this->system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
         if($this->keep_autocommit!=null && $this->mysqli){
-            $this->mysqli->rollback();                
+            $this->mysqli->rollback();
             if($this->keep_autocommit===true) $this->mysqli->autocommit(TRUE);
         }
         if($this->out){
@@ -168,7 +168,7 @@ class DbVerify {
                     if(@$row['wkt']){
                         $dtl_value = $row['wkt'];
                     }else{
-                        $dtl_value = strip_tags($row['dtl_Value'],'<span>');    
+                        $dtl_value = strip_tags($row['dtl_Value'],'<span>');
                     }
 
 
@@ -281,7 +281,7 @@ class DbVerify {
             $resMsg .= '<br><br><button data-fix="owner_ref">Attribute them to owner # 2 Database Manager</button></div>';
         }
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }
 
     /**
@@ -375,7 +375,7 @@ class DbVerify {
                     foreach ($trmWithWrongParents as $trm_ID) {
                         $resMsg .= ('<br>'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label']);
                         if($cnt>30){
-                          $resMsg .= ('<br>'.count($trmWithWrongParents)-$cnt.' more...');      
+                          $resMsg .= ('<br>'.count($trmWithWrongParents)-$cnt.' more...');
                           break;  
                         } 
                         $cnt++;
@@ -389,7 +389,7 @@ class DbVerify {
                     foreach ($trmWithWrongInverse as $trm_ID) {
                         $resMsg .= '<br>'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label'];
                         if($cnt>30){
-                          $resMsg .= '<br>'.count($trmWithWrongInverse)-$cnt.' more...';      
+                          $resMsg .= '<br>'.count($trmWithWrongInverse)-$cnt.' more...';
                           break;  
                         } 
                         $cnt++;
@@ -415,7 +415,7 @@ class DbVerify {
             }
         }
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }
     
     /**
@@ -435,7 +435,7 @@ class DbVerify {
             $lists = json_decode($params['data'], true);
         }else{
             
-            $lists = getInvalidFieldTypes($mysqli, intval(@$params['rt'])); //in getFieldTypeDefinitionErrors.php
+            $lists = getInvalidFieldTypes($mysqli, intval(@$params['rt']));//in getFieldTypeDefinitionErrors.php
             if(!@$params['show']){
                 if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
                 && count($lists["rt_contraints"])==0){
@@ -542,7 +542,7 @@ class DbVerify {
             $resMsg = '<div>'.$resMsg.'<h3 class="res-valid">OK: All field type definitions are valid</h3></div>';
         }
                
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }    
         
         
@@ -561,7 +561,7 @@ class DbVerify {
         if(@$params['data']){
             $lists = json_decode($params['data'], true);
         }else{
-            $lists = getInvalidDefaultValues($mysqli, intval(@$params['rt'])); //in getFieldTypeDefinitionErrors.php
+            $lists = getInvalidDefaultValues($mysqli, intval(@$params['rt']));//in getFieldTypeDefinitionErrors.php
         }        
         
         $rstWithInvalidDefaultValues = @$lists["rt_defvalues"];
@@ -590,7 +590,7 @@ class DbVerify {
             $resMsg = '<h3 class="res-valid">OK: All default values in record type structures are valid</h3>';
         }
                
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }            
     
     
@@ -659,7 +659,7 @@ class DbVerify {
         }
         
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }
     
     /**
@@ -707,7 +707,7 @@ class DbVerify {
             $resMsg = $this->_outStreamRes();
         }
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }    
      
      
@@ -736,7 +736,7 @@ class DbVerify {
             .'WHERE '
             .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 '
             .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
-            .'AND child.dtl_RecID is NULL'; 
+            .'AND child.dtl_RecID is NULL';
 
             $res = $mysqli->query( $query );
             if(! $res )
@@ -769,11 +769,11 @@ class DbVerify {
 
             if(@$params['fix']==1){ 
                 //new way: add missed reverse link to alleged children
-                $dtl_ID = intval($row['dtl_ID']); //reference to parent ifd with wrong value
+                $dtl_ID = intval($row['dtl_ID']);//reference to parent ifd with wrong value
                 if($dtl_ID>0){
                     $query2 = 'UPDATE recDetails set dtl_Value='.intval($row['rec_ID']).' WHERE dtl_ID='.$dtl_ID;
                 }else{
-                    $child_ID = intval($row['dtl_Value']); //child record ID
+                    $child_ID = intval($row['dtl_Value']);//child record ID
                     $query2 = 'INSERT into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
                         .$child_ID . ','. DT_PARENT_ENTITY  .', '.intval($row['rec_ID']) . ')';
                 }
@@ -826,12 +826,12 @@ ORDER BY child.dtl_RecID";
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
                 $bibs2[] = $row;
                 $prec_ids2[$row['dtl_Value']] = 1;  //remove DT_PARENT_ENTITY from orphaned children
-                array_push($det_ids, intval($row['child_d_id'])); 
+                array_push($det_ids, intval($row['child_d_id']));
                 /*
                 if($row['parent_d_id']>0){
                 // keep dtl_ID of pointer field in parent record 
                 // to remove this 'fake' pointer in parent - that's wrong - need to remove DT_PARENT_ENTITY in child
-                $det_ids[] = $row['parent_d_id']; 
+                $det_ids[] = $row['parent_d_id'];
                 }
                 */
             }//while
@@ -997,11 +997,11 @@ HEADER;
                     </tr>
                     EOT;
             }
-            $resMsg .= "</table>\n";    
+            $resMsg .= "</table>\n";
 
         }
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }       
     
     /**
@@ -1023,7 +1023,7 @@ HEADER;
             $mysqli->query('SET SQL_SAFE_UPDATES=0');
             $mysqli->query('DELETE d.* FROM recDetails d, defDetailTypes, Records a '
                 .'WHERE (dtl_ID>0) and (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
-            and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');                
+            and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
 
             $wascorrected = $mysqli->affected_rows;     
             $mysqli->query('SET SQL_SAFE_UPDATES=1');
@@ -1060,7 +1060,7 @@ HEADER;
             $resMsg = $this->_outStreamRes();
         }  
          
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }
 
     /**
@@ -1129,7 +1129,7 @@ HEADER;
         }  
         
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }
     
     /**
@@ -1173,7 +1173,7 @@ HEADER;
             $resMsg = $this->_outStreamRes();
         }  
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }    
     
     
@@ -1218,7 +1218,7 @@ HEADER;
             $resMsg = $this->_outStreamRes();
         }  
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }   
     
     /**
@@ -1274,7 +1274,7 @@ HEADER;
         }  
         
         
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }    
     
     /**
@@ -1290,7 +1290,7 @@ HEADER;
         $mysqli = $this->mysqli;
         
 
-        $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
+        $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31));// invalid chars that need to be stripped from the data.
         $replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
         $charlist = implode('',$invalidChars);
         
@@ -1304,7 +1304,7 @@ HEADER;
         
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
         
-        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
         
         while(true){
         
@@ -1319,7 +1319,7 @@ HEADER;
                     
                     $is_finished = false;
                     
-                    $text = $row['dtl_Value']; //.chr(17);
+                    $text = $row['dtl_Value'];//.chr(17);
                     /*
                     $is_found = false;
                     foreach ($invalidChars as $charCode){
@@ -1392,9 +1392,9 @@ HEADER;
                 $resMsg = '<div><h3 class="res-valid">OK: All records have valid characters in freetext and blocktext fields.</h3></div>';
         }else{
                 if($is_error){
-                    $mysqli->rollback();    
+                    $mysqli->rollback();
                 }else{
-                    $mysqli->commit();      
+                    $mysqli->commit();
                 }
             
                 $resMsg = '<div><h3>'.$cnt.' Records with invalid characters in '.$cnt2
@@ -1404,7 +1404,7 @@ HEADER;
         
         if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
 
-        return array('status'=>$resStatus,'message'=>$resMsg);        
+        return array('status'=>$resStatus,'message'=>$resMsg);
     }    
     
     /**
@@ -1450,7 +1450,7 @@ HEADER;
                     .$resMsg;
         }
 
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     } 
     
     /**
@@ -1470,7 +1470,7 @@ HEADER;
             if(recreateRecLinks($this->system, true)){
                 $resMsg = '<div><h3 class="res-valid">Relationship cache has been successfully recreated</h3></div>';
             }else{
-                $response = $this->system->getError();    
+                $response = $this->system->getError();
                 $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 $resStatus = false;
             }
@@ -1478,7 +1478,7 @@ HEADER;
 
         if($resStatus){
 
-            $is_table_exist = hasTable($mysqli, 'recLinks');    
+            $is_table_exist = hasTable($mysqli, 'recLinks');
             
             if($is_table_exist){
 
@@ -1526,21 +1526,21 @@ HEADER;
                 }
 
             }else{
-                $resMsg .= '<div><h3 class="error">Relationship cache is not found</h3></div>';        
+                $resMsg .= '<div><h3 class="error">Relationship cache is not found</h3></div>';
             }
 
             $cache_missed = ((!$is_table_exist) || $missed_relationships>0 || $missed_links>0);
 
             if($cache_missed){
                 $resStatus = false;
-                $resMsg .= '<div>Recreate Relationship cache to restore missing entriese:</div>';        
+                $resMsg .= '<div>Recreate Relationship cache to restore missing entriese:</div>';
             }else{
-                $resMsg .= '<div><h3 class="res-valid">OK: Relationship cache is valid</h3></div>';        
+                $resMsg .= '<div><h3 class="res-valid">OK: Relationship cache is valid</h3></div>';
             }
-            $resMsg .= '<div><button data-fix="relationship_cache">Recreates Relationship Cache</button></div>';        
+            $resMsg .= '<div><button data-fix="relationship_cache">Recreates Relationship Cache</button></div>';
         }    
 
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     } 
     
     /**
@@ -1555,11 +1555,11 @@ HEADER;
         
         if(is_array($params) && @$params['fix']==1){
 
-            $rep = recreateRecDetailsDateIndex($this->system, true, false, 0, @$params['progress_report_step']); //see utils_db
+            $rep = recreateRecDetailsDateIndex($this->system, true, false, 0, @$params['progress_report_step']);//see utils_db
             
             if(is_bool($rep) && $rep==false){
                 
-                $response = $this->system->getError();    
+                $response = $this->system->getError();
                 $resMsg = '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 $resStatus = false;
             }else{
@@ -1578,7 +1578,7 @@ HEADER;
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
             $fld_dates = implode(',',prepareIds($fld_dates));
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
             $cnt_dates = intval(mysql__select_value($mysqli, $query));
 
             $query = 'SELECT count(dtl_ID) FROM recDetails WHERE dtl_DetailTypeID in ('.$fld_dates.') AND dtl_Value LIKE "%estMinDate%"';
@@ -1588,7 +1588,7 @@ HEADER;
             $resMsg .= '<div style="padding:5px">Fuzzy/complex dates:&nbsp;<b>'.intval($cnt_fuzzy_dates).'</b></div>';
             
 
-            $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
+            $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');
             
             if($is_table_exist){
         
@@ -1612,22 +1612,22 @@ HEADER;
                         $resMsg .= '<div style="padding:5px;color:red">Empty dates in index:&nbsp;<b>'.($cnt_empty).'</b></div>';
                     }
 
-                    $resMsg .= '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';        
+                    $resMsg .= '<div><h3 class="error">Recreate Details Date Index table to restore missing entries</h3></div>';
                     
                     $resStatus = false; //index is outdated 
                 }else{
-                    $resMsg .= '<div><h3 class="res-valid">OK: Record Details Date Index is valid</h3></div>';        
+                    $resMsg .= '<div><h3 class="res-valid">OK: Record Details Date Index is valid</h3></div>';
                 }
 
             }else{
                     $resStatus = false;
-                    $resMsg .= '<div><h3 class="error">Record Details Date Index table does not exist</h3></div>';        
+                    $resMsg .= '<div><h3 class="error">Record Details Date Index table does not exist</h3></div>';
             }            
             
-            $resMsg .= '<div><button data-fix="dateindex">Recreate Date Index</button></div>';        
+            $resMsg .= '<div><button data-fix="dateindex">Recreate Date Index</button></div>';
         }    
 
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     } 
     
     /**
@@ -1653,16 +1653,16 @@ HEADER;
             $trash_id = mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"');
             if($trash_id>0){
         
-                $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.intval($trash_id).' WHERE rtg_ID is null');        
+                $mysqli->query('update defRecTypes left join defRecTypeGroups on rty_RecTypeGroupID=rtg_ID set rty_RecTypeGroupID='.intval($trash_id).' WHERE rtg_ID is null');
                 
                 $cnt2 = $mysqli->affected_rows;
                 
                 $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' record types have been placed to "Trash" group</h3></div>';
             }else{
-                $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';                    
+                $resMsg .= '<div><h3 class="error">Cannot find record type "Trash" group. </h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';        
+            $resMsg .= '<div><h3 class="res-valid">OK: All Record Types belong to existing groups</h3></div>';
         }
 
         // fields types =========================
@@ -1676,16 +1676,16 @@ HEADER;
             $trash_id = mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"');
             if($trash_id>0){
         
-                $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.intval($trash_id).' WHERE dtg_ID is null');        
+                $mysqli->query('update defDetailTypes left join defDetailTypeGroups on dty_DetailTypeGroupID=dtg_ID set dty_DetailTypeGroupID='.intval($trash_id).' WHERE dtg_ID is null');
                 
                 $cnt2 = $mysqli->affected_rows;
                 
                 $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' field types have been placed to "Trash" group</h3></div>';
             }else{
-                $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';                    
+                $resMsg .= '<div><h3 class="error">Cannot find field type "Trash" group.</h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';        
+            $resMsg .= '<div><h3 class="res-valid">OK: All Base Field Types belong to existing groups</h3></div>';
         }
 
         // vocabularies =========================
@@ -1698,19 +1698,19 @@ HEADER;
             //find trash group
             $trash_id = mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"');
             if($trash_id>0){
-                $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.intval($trash_id).' WHERE trm_ParentTermID is null and vcg_ID is null');        
+                $mysqli->query('update defTerms left join defVocabularyGroups on trm_VocabularyGroupID=vcg_ID set trm_VocabularyGroupID='.intval($trash_id).' WHERE trm_ParentTermID is null and vcg_ID is null');
                 
                 $cnt2 = $mysqli->affected_rows;
                 
                 $resMsg .= '<div><h3 class="res-valid">'.$cnt2.' vocabularies have been placed to "Trash" group</h3></div>';
             }else{
-                $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';                    
+                $resMsg .= '<div><h3 class="error">Cannot vocabularies "Trash" group.</h3></div>';
             }
         }else{
-            $resMsg .= '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';        
+            $resMsg .= '<div><h3 class="res-valid">OK: All Vocabularies belong to existing groups</h3></div>';
         }
     
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     } 
     
     /**
@@ -1741,7 +1741,7 @@ HEADER;
         // values that are out of bounds (out of bounds abs(lat)>90 abs(lng)>180)
         $bibs2 = array();
         //$ids2 = array();
-        $ids2_lng = array(); //with wrong longitudes - because wrong digitizing in continual word
+        $ids2_lng = array();//with wrong longitudes - because wrong digitizing in continual word
         // invalid coordinates 
         $bibs3 = array();
         //$ids3 = array();
@@ -1760,7 +1760,7 @@ HEADER;
                 $geojson_adapter = new GeoJSON();
             }
             $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
-            $this->keep_autocommit = mysql__begin_transaction($mysqli);    
+            $this->keep_autocommit = mysql__begin_transaction($mysqli);
         }
         $isOk = true;
 
@@ -1843,7 +1843,7 @@ HEADER;
                             array_push($bibs2, $row);
                             //array_push($ids2, $row['rec_ID']);
                             if( $is_wrong_long ){
-                                array_push($ids2_lng, $row['rec_ID']);    
+                                array_push($ids2_lng, $row['rec_ID']);
                             }
                         }
                         
@@ -1863,7 +1863,7 @@ HEADER;
         if($res) $res->close();
         
         if($isOk){
-            $mysqli->commit();  
+            $mysqli->commit();
         }
         if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
 
@@ -1903,7 +1903,7 @@ HEADER;
             
         $resMsg = $this->_outStreamRes();
     
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     } 
     
     /**
@@ -1936,7 +1936,7 @@ HEADER;
         
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes WHERE dtl_DetailTypeID = dty_ID AND (dty_Type=\'freetext\' OR dty_Type=\'blocktext\') ');
 
-        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
   
         while(true){
         
@@ -2022,7 +2022,7 @@ HEADER;
             }
         }//while limit by 10000
 
-        $mysqli->commit();                
+        $mysqli->commit();
         if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
   
         $this->_outStreamInit();
@@ -2077,7 +2077,7 @@ HEADER;
 
         $resMsg = $this->_outStreamRes();
         
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     }
     
     /**
@@ -2136,12 +2136,12 @@ HEADER;
                             continue;
                         }
 
-                        $final_stage = [$dtl_ID, $swf_ID]; // use the oldest
+                        $final_stage = [$dtl_ID, $swf_ID];// use the oldest
                     }
 
                     $final_stage = empty($final_stage) ? $found_import : $final_stage;
                     if(empty($final_stage)){
-                        unset($recsWithManySWF[$rec_ID]); // $strangeRecs[] = $rec_ID;
+                        unset($recsWithManySWF[$rec_ID]);// $strangeRecs[] = $rec_ID;
                         continue;
                     }
 
@@ -2173,7 +2173,7 @@ HEADER;
             $resMsg = $this->_outStreamRes();
         }
     
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     }
     
     /**
@@ -2206,7 +2206,7 @@ HEADER;
 
         $dbterms = VerifyValue::getTerms();
   
-        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
   
         while(true){
         
@@ -2216,7 +2216,7 @@ HEADER;
                     .' FROM defDetailTypes,recDetails,Records'  // left join defTerms on dtl_Value=trm_ID
                     .' WHERE (dty_Type = "enum" or dty_Type = "relmarker") AND dty_ID = dtl_DetailTypeID AND rec_ID=dtl_RecID '
                     .' AND rec_FlagTemporary!=1 '
-                .' ORDER by dtl_DetailTypeID limit 10000 offset '.$offset);  //  and dtl_RecID=62734
+                .' ORDER by dtl_DetailTypeID limit 10000 offset '.$offset);//  and dtl_RecID=62734
         
 //, rec_Title, rec_RecTypeID,
             
@@ -2280,9 +2280,9 @@ HEADER;
                         $err_count++;
                     }
                     
-                    $this->_printList(null, null, array($row), 'recCB16'); //out one row
+                    $this->_printList(null, null, array($row), 'recCB16');//out one row
 
-                    $cnt++;  
+                    $cnt++;
                     
                 }//while
                 $res->close();
@@ -2304,7 +2304,7 @@ HEADER;
         }//while limit by 10000
 
         if($resStatus){
-            $mysqli->commit();                
+            $mysqli->commit();
         }
         if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
         
@@ -2333,16 +2333,16 @@ HEADER;
 <br>however the same term label exists in the vocabulary specified for the field.
 <br><button data-fix="expected_terms">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
 FIXMSG
-                    );                    
+                    );
                     
                 }
             }
             
-            $resMsg = $this->_outStreamRes();      
+            $resMsg = $this->_outStreamRes();
         }
         
         
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     }
     
     
@@ -2374,8 +2374,8 @@ FIXMSG
         
         $is_first = true;
 
-        $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
-        $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
+        $decade_regex = '/^\d{2,4}s$/';//words like 80s 1990s
+        $year_range_regex = '/^\d{2,4}\-\d{2,4}$/';//2-4 year ranges
         
         $offset = 0;
         $is_finished = false;
@@ -2383,7 +2383,7 @@ FIXMSG
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes '
             .'WHERE dtl_DetailTypeID = dty_ID AND dty_Type = "date"');
 
-        $this->keep_autocommit = mysql__begin_transaction($mysqli);        
+        $this->keep_autocommit = mysql__begin_transaction($mysqli);
   
         while(true){
         
@@ -2453,7 +2453,7 @@ FIXMSG
                                         }
                                     }
                                     $row['new_value'] = $t2->format($format);
-                                    $row['dtl_Value'] = $row['new_value']; // for final ambiguous check
+                                    $row['dtl_Value'] = $row['new_value'];// for final ambiguous check
                                 }catch(Exception  $e){
                                     //skip
                                 }
@@ -2485,7 +2485,7 @@ FIXMSG
                             $is_first = false;
                             $this->_printList('Auto-corrected dates', 'The following dates have been corrected as shown', null, 'recCB17');
                         }
-                        $this->_printList(null, null, array($row), 'recCB17'); //out one row
+                        $this->_printList(null, null, array($row), 'recCB17');//out one row
                         $fix_count++;
                     }else {
                     
@@ -2525,7 +2525,7 @@ FIXMSG
             }
         }//while limit by 10000
 
-        $mysqli->commit();                
+        $mysqli->commit();
         if($this->keep_autocommit===true) $mysqli->autocommit(TRUE);
 
         if($cnt==0){
@@ -2548,7 +2548,7 @@ FIXMSG
             }
         }
                     
-        $resMsg = $this->_outStreamRes();      
+        $resMsg = $this->_outStreamRes();
         
 /*
                 if(strlen($fixdate_url) > 2000){ // roughly a upper limit for the date fix url
@@ -2571,7 +2571,7 @@ FIXMSG
                 </div>
 */        
         
-        return array('status'=>$resStatus, 'message'=>$resMsg);        
+        return array('status'=>$resStatus, 'message'=>$resMsg);
     }    
              
 }

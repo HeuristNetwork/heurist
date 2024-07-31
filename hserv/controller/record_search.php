@@ -73,7 +73,7 @@
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $req_params = filter_input_array(INPUT_POST);
     }else{
-        $req_params = filter_input_array(INPUT_GET);    
+        $req_params = filter_input_array(INPUT_GET);
     }    
     
     //these are internal parameters, they cannot be sent from client side
@@ -131,7 +131,7 @@
         
     }else if(@$req_params['a'] == 'count_matches'){
 
-        $response = recordSearchMatchedValues($system, $req_params); 
+        $response = recordSearchMatchedValues($system, $req_params);
         
     }else if(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
     
@@ -161,12 +161,12 @@
         if(!($system->defineConstant('RT_CMS_HOME') &&
              $system->defineConstant('RT_CMS_MENU'))){
                 
-            $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');         
+            $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');
             
         }else if(!($system->defineConstant('DT_CMS_MENU') && 
                    $system->defineConstant('DT_CMS_TOP_MENU'))){
 
-            $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu pointer" not defined in this database');         
+            $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu pointer" not defined in this database');
             
         }else{
             
@@ -188,7 +188,7 @@
             $response = recordSearchDetailsForRecIds($system, $ids, $req_params['detail']);
         }else{
             foreach ($ids as $recID){
-                $response[$recID] = recordSearchLinkedDetails($system, $recID, $req_params['detail'], $req_params['q']);    
+                $response[$recID] = recordSearchLinkedDetails($system, $recID, $req_params['detail'], $req_params['q']);
             }
         }
         $response = array('status'=>HEURIST_OK, 'data'=> $response);
@@ -204,13 +204,13 @@
             $response[$id] = !$res || empty($res['url']) ? '' : $res['url'];
         }
 
-        $response = array('status' => HEURIST_OK, 'data' => $response);        
+        $response = array('status' => HEURIST_OK, 'data' => $response);
 
     }else{
         
         if(@$req_params['remote'] == 'master'){
             
-                if(!@$req_params['q']) $req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}'; //all registred db
+                if(!@$req_params['q']) $req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';//all registred db
                 //change hsapi to hserv when master index will be v6.5
                 $reg_url = HEURIST_INDEX_BASE_URL
                 .'hserv/controller/record_search.php?db='.HEURIST_INDEX_DATABASE.'&q='.$req_params['q'];
@@ -218,7 +218,7 @@
                     $reg_url = $reg_url.'&detail='
                         .(is_array($req_params['detail'])?json_encode($req_params['detail']):$req_params['detail']);
                 }
-                $data = loadRemoteURLContent($reg_url);  //search master index database for all regitered databases          
+                $data = loadRemoteURLContent($reg_url);//search master index database for all regitered databases          
 
                 if($data==false){
                     $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
@@ -228,7 +228,7 @@
                     $system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     $response = $system->getError();
                 }else{
-                    $response = json_decode($data, true);    
+                    $response = json_decode($data, true);
                 }
                 
             

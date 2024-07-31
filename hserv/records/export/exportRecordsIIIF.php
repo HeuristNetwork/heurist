@@ -104,7 +104,7 @@ IIIF;
         if ($_SERVER["HTTPS"] == "on") {
             $pageURL .= "s";
         }
-        $pageURL .= "://";        $_SERVER["SERVER_NAME"] */     
+        $pageURL .= "://"; $_SERVER["SERVER_NAME"] */     
         $manifest_uri = HEURIST_SERVER_URL.$_SERVER["REQUEST_URI"];
     
     $iiif_header = <<<IIIF
@@ -150,9 +150,9 @@ protected function _outputRecord($record){
 protected function _outputFooter(){
 
     if($this->iiif_version==2){        
-        fwrite($this->fd, ']}],"structures": []}'); 
+        fwrite($this->fd, ']}],"structures": []}');
     }else{
-        fwrite($this->fd, ']}');    
+        fwrite($this->fd, ']}');
     }
 }
 
@@ -166,7 +166,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
     
     $mysqli = $system->get_mysqli();
 
-    $canvas = '';    
+    $canvas = '';
     $comma = '';
     $info = array();
     
@@ -175,7 +175,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         $info = fileGetFullInfo($system, $ulf_ObfuscatedFileID);
         
         if(count($info)>0){
-            $label = trim(htmlspecialchars(strip_tags($info[0]['ulf_Description'])));    
+            $label = trim(htmlspecialchars(strip_tags($info[0]['ulf_Description'])));
             
             if($label==''){
                 //find name from linked record
@@ -184,8 +184,8 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                 .' LIMIT 1';
                 
                 $record = mysql__select_row($mysqli, $query);
-                $label = htmlspecialchars(strip_tags($record[1])); //rec_Title
-                $rectypeID = $record[0]; //rec_RecTypeID
+                $label = htmlspecialchars(strip_tags($record[1]));//rec_Title
+                $rectypeID = $record[0];//rec_RecTypeID
             }else{
                 $rectypeID = 5;
             }
@@ -209,7 +209,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                         break 2;
                     }
                 }else{
-                    array_push($info, $file['file']);    
+                    array_push($info, $file['file']);
                 }
             }
         }
@@ -257,7 +257,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         $height = 800;
         $width = 1000;
         if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!='_iiif_image'){
-            $img_size = getimagesize($resource_url);    
+            $img_size = getimagesize($resource_url);
             if(is_array($img_size)){
                 $width = $img_size[0];
                 $height = $img_size[1];
@@ -273,13 +273,13 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             $tumbnail_url = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&version=thumb&icon='.$rectypeID;
         }
         
-        $service = '';   
-        $resource_id = '';     
+        $service = '';
+        $resource_id = '';
         
         //get iiif image parameters
         if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
             
-                $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']); //retrieve iiif image.info to be included into manifest
+                $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);//retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
                 if($iiif_manifest!==false && is_array($iiif_manifest)){
                     
@@ -292,7 +292,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                     
                     $mimeType = null;
                     if(is_array($profile)){
-                        $mimeType = @$profile[1]['formats'][0]; 
+                        $mimeType = @$profile[1]['formats'][0];
                         if($mimeType) $mimeType = 'image/'.$mimeType;
                         $profile = @$profile[0];
                     }else if($profile==null){
@@ -301,11 +301,11 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                     if(!$mimeType) $mimeType= 'image/jpeg';
                     
                     if(strpos($profile, 'library.stanford.edu/iiif/image-api/1.1')>0){
-                        $quality = 'native';  
+                        $quality = 'native';
                     }else{
                         $quality = 'default';
                     }
-                    $resource_url = $iiif_manifest['@id'].'/full/full/0/'.$quality.'.jpg';                    
+                    $resource_url = $iiif_manifest['@id'].'/full/full/0/'.$quality.'.jpg';
                     $resource_id = $iiif_manifest['@id'];
                     
                     if($iiif_version==2){
@@ -336,7 +336,7 @@ SERVICE3;
         }
         
     
-        $canvas_uri = self::gen_uuid(); //uniqid('',true); 
+        $canvas_uri = self::gen_uuid();//uniqid('',true);
 
         $tumbnail_height = 200;
         $tumbnail_width = 200;

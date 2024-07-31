@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if(!defined('PDIR')) define('PDIR','../../'); //need for js scripts
+if(!defined('PDIR')) define('PDIR','../../');//need for js scripts
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 
@@ -84,7 +84,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
-    if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
+    if($required !== ''){ $message = "To perform this action you need permission to $required records";}
 }
 
 if(isset($message)){

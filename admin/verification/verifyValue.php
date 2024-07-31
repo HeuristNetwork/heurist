@@ -40,9 +40,9 @@ class VerifyValue {
     private static $mysqli = null;
     private static $initialized = false;
 
-    private static $dtyIDDefs = array();  //list of allowed terms for particular detail type ID
-    private static $dtyIDDefs_labels = array();  //with hierarchy
-    private static $dtyIDDefs_labels_plain = array(); //without hierarchy
+    private static $dtyIDDefs = array();//list of allowed terms for particular detail type ID
+    private static $dtyIDDefs_labels = array();//with hierarchy
+    private static $dtyIDDefs_labels_plain = array();//without hierarchy
     private static $dtyIDDefs_codes = array();
     private static $terms = null;
     private static $dbs_terms = null;
@@ -54,7 +54,7 @@ class VerifyValue {
 
         global $system;
         self::$system = $system;
-        self::$mysqli = $system->get_mysqli();    
+        self::$mysqli = $system->get_mysqli();
         
         self::$initialized = true;
     }
@@ -65,7 +65,7 @@ class VerifyValue {
     // it is required in case database switch
     //
     public static function reset(){
-        self::$dtyIDDefs = array();  //list of allowed terms for particular detail type ID
+        self::$dtyIDDefs = array();//list of allowed terms for particular detail type ID
         self::$dtyIDDefs_labels = array();
         self::$dtyIDDefs_labels_plain = array();
         self::$dtyIDDefs_codes = array();
@@ -109,22 +109,22 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 /*
         if ( $dtyID == DT_RELATION_TYPE) {
             //get all root terms (vocabs)
-            $allowed_terms = getTermListAll(self::$mysqli, 'relation'); //see dbsData.php
+            $allowed_terms = getTermListAll(self::$mysqli, 'relation');//see dbsData.php
             self::$dtyIDDefs[$dtyID] = $allowed_terms;
 
         } else {
 
-            $terms = getTermsFromFormat($defs); //see dbsData.php
+            $terms = getTermsFromFormat($defs);//see dbsData.php
             
             if (($cntTrm = count($terms)) > 0) {
 
                 if ($cntTrm == 1) {  //vocabulary
                     $vocabId = $terms[0];
-                    $terms = getTermOffspringList(self::$mysqli, $vocabId); //see dbsData.php
+                    $terms = getTermOffspringList(self::$mysqli, $vocabId);//see dbsData.php
                     array_push($terms, $vocabId);
                     
                 }else{
-                    $nonTerms = getTermsFromFormat($defs_nonsel); //see dbsData.php
+                    $nonTerms = getTermsFromFormat($defs_nonsel);//see dbsData.php
                     if (count($nonTerms) > 0) {
                         $terms = array_diff($terms, $nonTerms);
                     }
@@ -152,7 +152,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 public static function getTerms(){
     if(self::$terms == null){
         self::initialize();
-        self::$terms = dbs_GetTerms(self::$system); 
+        self::$terms = dbs_GetTerms(self::$system);
         self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
     }  
     return self::$dbs_terms;
@@ -198,7 +198,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
         
         //label may have fullstop in its own name - so we always search with and without hierarchy
-        $withHierarchy = true;//(strpos($label,'.')>0); 
+        $withHierarchy = true;//(strpos($label,'.')>0);
     
         self::initialize();
         self::getTerms();
@@ -217,7 +217,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
            }else{
            }*/ 
            $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
-           $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];    
+           $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];
            //remove last point
            $allowed_labels[$term_id] = trim($allowed_labels[$term_id],'.');
         }
@@ -244,7 +244,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     $label = trim($label,'.');
     /*if(strpos($label,'.')>0){
         $label = explode('.',$label);
-        $label = array_pop($label);    
+        $label = array_pop($label);
     }*/
 
     if(count($allowed_labels)>0){
@@ -254,7 +254,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         }
     }else{
         return false;
-        //$term_ID = getTermByLabel($label); //see dbsData.php
+        //$term_ID = getTermByLabel($label);//see dbsData.php
     }
 
     return $term_ID;
@@ -305,7 +305,7 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
         $term_ID = array_search($code, $allowed_codes, true);
     }else{
         return false;
-        //$term_ID = getTermByCode($code); //see dbsData.php
+        //$term_ID = getTermByCode($code);//see dbsData.php
     }
 
     return $term_ID;
@@ -329,7 +329,7 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
 
                 $allowed_types = "all";
                 if ($constraints!=null && $constraints != "") {
-                    $temp = explode(",",$constraints); //get allowed record types
+                    $temp = explode(",",$constraints);//get allowed record types
                     if (count($temp)>0) {
                         $allowed_types = $temp;
                     }

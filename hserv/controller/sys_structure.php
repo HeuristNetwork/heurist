@@ -33,7 +33,7 @@
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $req_params = filter_input_array(INPUT_POST);
     }else{
-        $req_params = filter_input_array(INPUT_GET);    
+        $req_params = filter_input_array(INPUT_GET);
     }    
     
     //get list of registered database and master index db on the same server
@@ -49,7 +49,7 @@
        }else{
                 if(@$match[1]==null || $match[1]==''){
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
-                     $data = json_encode($data); 
+                     $data = json_encode($data);
                 }else{
            
                     //load structure from remote server
@@ -66,14 +66,14 @@
                     if (@$req_params['translations']) $remoteURL = $remoteURL.'&translations='.$req_params['translations'];
                     if (@$req_params['mode']) $remoteURL = $remoteURL.'&mode='.$req_params['mode'];
 
-                    $data = loadRemoteURLContent($remoteURL); //load defitions from remote database
+                    $data = loadRemoteURLContent($remoteURL);//load defitions from remote database
                 
                     if($data==false){
                         
                         //Server not found 
                         //No response from server
                         $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
-                        $data = json_encode($data); 
+                        $data = json_encode($data);
                     }else{
 //$defs = json_decode(gzdecode($data), true);
                         
@@ -116,7 +116,7 @@
             }
             
             //combination of db and record type id eg. 1126-13            
-            $code = @$req_params['code']; //this is not concept code - these are source database and rectype id in it
+            $code = @$req_params['code'];//this is not concept code - these are source database and rectype id in it
             //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
          
             $isOK = false;  
@@ -136,9 +136,9 @@ ini_set('max_execution_time', 0);
             }
 
             if(!$isOK){
-                $system->error_exit(null);  //produce json output and exit script
+                $system->error_exit(null);//produce json output and exit script
             }
-            $response = $importDef->getReport(true); //with updated definitions and sysinfo
+            $response = $importDef->getReport(true);//with updated definitions and sysinfo
 
             $response['status'] = HEURIST_OK;            
 
@@ -246,20 +246,20 @@ ini_set('max_execution_time', 0);
     print json_encode($response);
 */
     
-ob_start(); 
+ob_start();
 echo json_encode($response);
-$output = gzencode(ob_get_contents(),6); 
-ob_end_clean(); 
+$output = gzencode(ob_get_contents(),6);
+ob_end_clean();
 
-$system->setResponseHeader();    
+$system->setResponseHeader();
 header('Content-Encoding: gzip');
 echo $output; 
-unset($output);   
+unset($output);
 
 function __getErrMsg($remoteURL, $code, $err_msg){
 
             if($code=='curl'){
-                $reason = 'This may be due to a missing server or timeout on connection';     
+                $reason = 'This may be due to a missing server or timeout on connection';
             }else if($code==HEURIST_SYSTEM_FATAL){
                 $reason = 'This may be due to an installation problem on the server';
             }else{

@@ -25,15 +25,15 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
  
-define('ADMIN_PWD_REQUIRED',1); 
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordsBatch.php';
 
 //clear url parameters
 ?>            
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>          
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>          
        
        
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
@@ -43,7 +43,7 @@ require_once dirname(__FILE__).'/../../hserv/records/edit/recordsBatch.php';
 $mysqli = $system->get_mysqli();
     
 //find all database
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 // 
 $servers = array('https:\/\/heuristref.net', 'https:\/\/heurist.sydney.edu.au', 'https:\/\/heuristplus.sydney.edu.au', 'https:\/\/heurist.huma-num.fr', 'https:\/\/heuristest.fdm.uni-hamburg.de:443');
@@ -68,7 +68,7 @@ function __correctAbsPaths(){
     
     //$databases = array('amade_testnewsystem');
     //$databases = array('osmak_9c');
-    //$databases = array('CBAP_Uncovering_Pacific_Pasts');    
+    //$databases = array('CBAP_Uncovering_Pacific_Pasts');
     
     foreach ($databases as $idx=>$db_name){
 
@@ -112,7 +112,7 @@ function __correctAbsPaths(){
             print 'ERROR: '.$system->getError()['message'];
         }
      
-        print '<hr>';   
+        print '<hr>';
     }//for
     
 }
@@ -123,7 +123,7 @@ function replaceAbsPathinCMS($recID, $val){
     
 //print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
 
-$paths0 = array('\/HEURIST', '\/html', ''); 
+$paths0 = array('\/HEURIST', '\/html', '');
 $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
 
 $cnt = 0;
@@ -137,7 +137,7 @@ foreach ($servers as $srv) {
             
             if(preg_match($s, $val, $matches)){
             
-                $res = preg_replace($s, './', $val);    
+                $res = preg_replace($s, './', $val);
                 if($res!=null && $val != $res){
                     $val = $res;
                     $cnt = $cnt + count($matches);

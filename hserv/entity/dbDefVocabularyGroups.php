@@ -45,7 +45,7 @@ class DbDefVocabularyGroups extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('vcg_ID');
         if($pred!=null) array_push($where, $pred);
@@ -133,7 +133,7 @@ class DbDefVocabularyGroups extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
     
     //
@@ -177,7 +177,7 @@ class DbDefVocabularyGroups extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['vcg_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['vcg_Modified'] = date('Y-m-d H:i:s');//reset
             $this->records[$idx]['vcg_Domain'] = ($this->records[$idx]['vcg_ID']==9 
                         || @$this->records[$idx]['vcg_Domain']=='relation')?'relation':'enum';
             

@@ -32,10 +32,10 @@
 */
 
 define('MAX_FILES', 10000);
-define('MAX_SIZE', 1073741824); // 1 GB
+define('MAX_SIZE', 1073741824);// 1 GB
 define('MAX_RATIO', 90);
 define('READ_LENGTH', 1024);
-define('WRITE_LENGTH', 4096);   //16384
+define('WRITE_LENGTH', 4096);//16384
 
 
 class UArchive {
@@ -134,13 +134,13 @@ class UArchive {
                             $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
-                            $newfile = str_replace($source.'/', '', $file2); //without folder name
+                            $newfile = str_replace($source.'/', '', $file2);//without folder name
                             if(!$zip->addFile($file, $newfile)){
                                 return $verbose?('Can not add file '.$newfile.' to archive'):false;
                             }
                             $type = strtolower(substr(strrchr($newfile, '.'), 1));
                             if(in_array($type, $do_not_compress)){
-                                $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                                $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
                             }
                             $entry_idx++;
                             
@@ -194,19 +194,19 @@ class UArchive {
         $root_folder = realpath($root_folder);
 
         if (strpos($root_folder, '\\')!==false){
-            $root_folder = str_replace('\\','/',$root_folder);  
+            $root_folder = str_replace('\\','/',$root_folder);
         } 
         
         //set current folder
-        chdir($destination);  // relatively db root  or HEURIST_FILES_DIR??        
+        chdir($destination);// relatively db root  or HEURIST_FILES_DIR??        
         $destination_dir = realpath($destination);
 
         if ($destination_dir !== false) {
             if (strpos($destination_dir, '\\')!==false){
-                $destination_dir = str_replace('\\','/',$destination_dir);  
+                $destination_dir = str_replace('\\','/',$destination_dir);
             } 
             if( substr($destination_dir, -1, 1) != '/' ){
-                $destination_dir = $destination_dir.'/'; 
+                $destination_dir = $destination_dir.'/';
             }  
             if (strpos($destination_dir, $root_folder) !== 0) {
                 //HEURIST_SCRATCH_DIR
@@ -237,7 +237,7 @@ class UArchive {
 
                     $destination_file = $destination_dir.$filename;
 
-                    $fp = $zip->getStream($filename); // Compliant
+                    $fp = $zip->getStream($filename);// Compliant
                     $currentSize = 0;
                     while (!feof($fp)) {
                         $currentSize += READ_LENGTH;
@@ -287,26 +287,26 @@ class UArchive {
             { 
                 for ( $i=0; $i < $zip->numFiles; $i++ ) 
                 { 
-                    $entry = $zip->getNameIndex($i); 
+                    $entry = $zip->getNameIndex($i);
                     if ( substr( $entry, -1 ) == '/' ) continue; // skip directories 
 
-                    $fp = $zip->getStream( $entry ); 
+                    $fp = $zip->getStream( $entry );
                     if (!$fp ) {
-                        throw new Exception('Unable to extract the file.'); 
+                        throw new Exception('Unable to extract the file.');
                     }else{                
-                        $filename = $destination.USanitize::sanitizeFileName(basename($entry)); //snyk SSRF
-                        $ofp = fopen($filename, 'w' ); 
+                        $filename = $destination.USanitize::sanitizeFileName(basename($entry));//snyk SSRF
+                        $ofp = fopen($filename, 'w' );
                         while ( ! feof( $fp ) ) 
-                            fwrite( $ofp, fread($fp, 8192) ); 
+                            fwrite( $ofp, fread($fp, 8192) );
 
-                        fclose($fp); 
-                        fclose($ofp); 
+                        fclose($fp);
+                        fclose($ofp);
 
                         $res[] = $filename;
                     }
                 } 
 
-                $zip->close(); 
+                $zip->close();
                 return $res;
             } 
             else {
@@ -412,14 +412,14 @@ class UArchive {
                             $entry_idx++;
                         }
                         else if (is_file($file) === true) { // File
-                            $newfile = str_replace($source.'/', '', $file2); //without folder name
+                            $newfile = str_replace($source.'/', '', $file2);//without folder name
 
                             $phar->addFile($file, $newfile);
 
                             // THERE IS NO WAY TO SET INDIVIDUAL COMPRESSION LEVEL PER FILE
                             //$type = strtolower(substr(strrchr($newfile, '.'), 1));
                             //if(in_array($type, $do_not_compress)){
-                            //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);    
+                            //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
                             //}
                             $entry_idx++;
                             
@@ -442,7 +442,7 @@ class UArchive {
                     }
                 }
 
-                if($verbose) echo "Add file ".htmlspecialchars(basename($source))." (size $size_mb)\n";        
+                if($verbose) echo "Add file ".htmlspecialchars(basename($source))." (size $size_mb)\n";
 
                 $phar->addFile($source, basename($source));
                 $numFiles++;
@@ -455,7 +455,7 @@ class UArchive {
                 return $verbose?$res:false;
             }
             
-            //$phar->compress(Phar::BZ2);  it does not work for large data
+            //$phar->compress(Phar::BZ2); it does not work for large data
 
             if(file_exists($destination.'.bz2')){ //
 

@@ -93,8 +93,8 @@ class GpointConverter
      */
     public function __construct($datum='WGS 84')            // Default datum is WGS 84
     {
-        $this->a = self::$ellipsoid[$datum][0];        // Set datum Equatorial Radius
-        $this->e2 = self::$ellipsoid[$datum][1];    // Set datum Square of eccentricity
+        $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
+        $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
     
@@ -105,8 +105,8 @@ class GpointConverter
      */
     public function setDatum($datum='WGS 84')
     {
-        $this->a = self::$ellipsoid[$datum][0];        // Set datum Equatorial Radius
-        $this->e2 = self::$ellipsoid[$datum][1];    // Set datum Square of eccentricity
+        $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
+        $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
     
@@ -385,7 +385,7 @@ class GpointConverter
         else if((-56 > $this->lat) && ($this->lat >= -64)) $LetterDesignator = 'E';
         else if((-64 > $this->lat) && ($this->lat >= -72)) $LetterDesignator = 'D';
         else if((-72 > $this->lat) && ($this->lat >= -80)) $LetterDesignator = 'C';
-        else $LetterDesignator = 'Z'; //This is here as an error flag to show that the Latitude is outside the UTM limits
+        else $LetterDesignator = 'Z';//This is here as an error flag to show that the Latitude is outside the UTM limits
 
         return($LetterDesignator);
     }
@@ -508,12 +508,12 @@ class GpointConverter
     {
         $e = sqrt($this->e2);
 
-        $phi     = deg2rad($this->lat);                        // Latitude to convert
-        $phi1    = deg2rad($this->firstStdParallel);            // Latitude of 1st std parallel
-        $phi2    = deg2rad($this->secondStdParallel);        // Latitude of 2nd std parallel
-        $lamda    = deg2rad($this->long);                        // Lonitude to convert
-        $phio    = deg2rad($this->latOfOrigin);                // Latitude of  Origin
-        $lamdao    = deg2rad($this->longOfOrigin);                // Longitude of  Origin
+        $phi     = deg2rad($this->lat);// Latitude to convert
+        $phi1    = deg2rad($this->firstStdParallel);// Latitude of 1st std parallel
+        $phi2    = deg2rad($this->secondStdParallel);// Latitude of 2nd std parallel
+        $lamda    = deg2rad($this->long);// Lonitude to convert
+        $phio    = deg2rad($this->latOfOrigin);// Latitude of  Origin
+        $lamdao    = deg2rad($this->longOfOrigin);// Longitude of  Origin
 
         $m1 = cos($phi1) / sqrt(( 1 - $this->e2*sin($phi1)*sin($phi1)));
         $m2 = cos($phi2) / sqrt(( 1 - $this->e2*sin($phi2)*sin($phi2)));
@@ -547,10 +547,10 @@ class GpointConverter
     {
         $e = sqrt($e2);
 
-        $phi1    = deg2rad($this->firstStdParallel);            // Latitude of 1st std parallel
-        $phi2    = deg2rad($this->secondStdParallel);        // Latitude of 2nd std parallel
-        $phio    = deg2rad($this->latOfOrigin);                // Latitude of  Origin
-        $lamdao    = deg2rad($this->longOfOrigin);                // Longitude of  Origin
+        $phi1    = deg2rad($this->firstStdParallel);// Latitude of 1st std parallel
+        $phi2    = deg2rad($this->secondStdParallel);// Latitude of 2nd std parallel
+        $phio    = deg2rad($this->latOfOrigin);// Latitude of  Origin
+        $lamdao    = deg2rad($this->longOfOrigin);// Longitude of  Origin
         $E        = $this->lccEasting;
         $N        = $this->lccNorthing;
         $Ef        = $this->falseEasting;
@@ -596,7 +596,7 @@ class GpointConverter
 
 //        Alternative formula supposed to be more accurate for short distances
 //        $dist = 2*asin(sqrt( pow(sin(($lat1-$lat2)/2),2) + cos($lat1)*cos($lat2)*pow(sin(($lon1-$lon2)/2),2)));
-        return ( $dist * 6366710 ); // from http://williams.best.vwh.net/avform.htm#GCF
+        return ( $dist * 6366710 );// from http://williams.best.vwh.net/avform.htm#GCF
     }
     
     
@@ -606,8 +606,8 @@ class GpointConverter
      */
     public function distanceFromTM(&$pt)
     { 
-        $E1 = $pt->E();     $N1 = $pt->N();
-        $E2 = $this->E();     $N2 = $this->N();
+        $E1 = $pt->E(); $N1 = $pt->N();
+        $E2 = $this->E(); $N2 = $this->N();
  
         $dist = sqrt(pow(($E1-$E2),2)+pow(($N1-$N2),2));
         return $dist; 
@@ -638,12 +638,12 @@ class GpointConverter
         $this->convertLLtoTM($LongOrigin);
         $x = (($this->E() - $rE) / $Scale)        // The easting in meters times the scale to get pixels
                                                 // is relative to the center of the image so adjust to
-            + ($rX);                            // the left coordinate.
+            + ($rX); // the left coordinate.
         $y = $rY -                              // Adjust to bottom coordinate.
-            (($rN - $this->N()) / $Scale);        // The northing in meters
+            (($rN - $this->N()) / $Scale);// The northing in meters
                                                 // relative to the equator. Subtract center point northing
                                                 // to get relative to image center and convert meters to pixels
-        $this->setXY((int)$x,(int)$y);            // Save the geo-referenced result.
+        $this->setXY((int)$x,(int)$y);// Save the geo-referenced result.
     }
 }
 ?>

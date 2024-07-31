@@ -25,13 +25,13 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled'; 
+print 'disabled';
 exit; 
 ini_set('max_execution_time', '0');
 
  
-//define('ADMIN_PWD_REQUIRED', 1); 
-define('PDIR','../../');  //need for proper path to js and css    
+//define('ADMIN_PWD_REQUIRED', 1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/utils_db_load_script.php';
@@ -39,7 +39,7 @@ require_once dirname(__FILE__).'/../../hserv/utilities/utils_db_load_script.php'
 $mysqli = $system->get_mysqli();
     
 //find all database
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 foreach ($databases as $idx=>$db_name){
     $databases[$idx] = htmlspecialchars( $db_name );
@@ -62,7 +62,7 @@ foreach ($databases as $idx=>$db_name){
 /*
 if(false){
     //find non UTF-8 in rty_TitleMask
-    __findWrongChars();   
+    __findWrongChars();
 }else if(false){
     
     __updateDatabase();
@@ -103,7 +103,7 @@ if(false){
 }else if(false){
     __convertTustep();
 }
-    __dropBkpDateIndex();    
+    __dropBkpDateIndex();
     __findRDF();
     
 __getBelegContext();
@@ -131,7 +131,7 @@ function __checkVersionDatabase(){
         $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
         $ver = mysql__select_row_assoc($mysqli, $query);
         if(!$ver){
-            print htmlspecialchars($db_name.'  >>> '.$mysqli->error);  
+            print htmlspecialchars($db_name.'  >>> '.$mysqli->error);
         }else{
 
             if($ver['sys_dbSubVersion']<3){
@@ -198,7 +198,7 @@ function __updateDatabase(){
             
         }
     }
-    print '[end report]';    
+    print '[end report]';
 }
 
 //------------------------------
@@ -229,7 +229,7 @@ function __renameDegreeToKM(){
         if(hasTable($mysqli, 'defRecStructure')){
             
             $res1 = $mysqli->query($query1);
-            $res2 = $mysqli->query($query2); 
+            $res2 = $mysqli->query($query2);
             $res2 = true;
                 if($res1 && $res2){
                     print $db_name.'<br>';
@@ -239,7 +239,7 @@ function __renameDegreeToKM(){
                 }
         }
     }//for
-    print '[end report]';    
+    print '[end report]';
 }
 
 //------------------------------
@@ -269,20 +269,20 @@ function findMissedTermLinks() {
             
             //is defTermLinks exist
             if(!hasTable($mysqli, 'defTermsLinks', $db_name)){
-                array_push($db2_with_links,$db_name);    
+                array_push($db2_with_links,$db_name);
             }
             
         }else{
             
             
             $query = "select count(*) from `$db_name`.defDetailTypes where "
-            .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; 
+            .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")';
             //dty_Type="enum" OR dty_Type="relmarker" OR  OR dty_Type="relationtype"
             $value = mysql__select_value($mysqli, $query);
             if($value>0){
 
                 $query = "select dty_ID, dty_Name, dty_JsonTermIDTree from `$db_name`.defDetailTypes where "
-                .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; // OR dty_Type="relationtype"
+                .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")';// OR dty_Type="relationtype"
                 $value = mysql__select_all($mysqli, $query);
                 
                 if($ver<3){
@@ -292,7 +292,7 @@ function findMissedTermLinks() {
                         $query = "UPDATE `$db_name`.defDetailTypes SET dty_JsonTermIDTree='' WHERE (dty_Type='relationtype')";
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.'</div>';                    
+                            print '<div style="color:red">'.$mysqli->error.'</div>';
                             exit;
                         }
                     }
@@ -311,21 +311,21 @@ function findMissedTermLinks() {
         $query = 'INSERT INTO '.$db_name.'.defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
         .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
                     //$mysqli->query($query);
-                    $report[] = '"Trash" group has been added to rectype groups';                        
+                    $report[] = '"Trash" group has been added to rectype groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select vcg_ID FROM '.$db_name.'.defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
         .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
                     //$mysqli->query($query);
-                    $report[] = '"Trash" group has been added to vocabulary groups';                        
+                    $report[] = '"Trash" group has been added to vocabulary groups';
                 }
 
                 if(!(mysql__select_value($mysqli, 'select dtg_ID FROM '.$db_name.'.defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
         $query = 'INSERT INTO '.$db_name.'.defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
-        .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+        .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
                     //$mysqli->query($query);
-                    $report[] = '"Trash" group has been added to field groups';                        
+                    $report[] = '"Trash" group has been added to field groups';
                 }
 */                
             }
@@ -395,7 +395,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
             
             if(!($fields[3]==$f_code[0] && $fields[4]==$f_code[1])){
                 //need change ccode for field
-                print '<div style="color:red">NEED CHANGE FIELD CCODES</div>';                    
+                print '<div style="color:red">NEED CHANGE FIELD CCODES</div>';
             } 
                 
             $query = 'select trm_ID, trm_Label, trm_OriginatingDBID, trm_IDInOriginatingDB from '
@@ -411,7 +411,7 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                             .' where trm_ID='.intval($fields[2]);
                         $mysqli->query($query);
                         if($mysqli->error){
-                            print '<div style="color:red">'.$mysqli->error.'</div>';                    
+                            print '<div style="color:red">'.$mysqli->error.'</div>';
                             exit;
                         }
                     }
@@ -428,14 +428,14 @@ function verifySpatialVocab($sName,$f_code,$v_code){
                 }
                 print '</table>';
             }else{
-                print '<div style="color:red">VOCAB NOT DEFINED</div>';                    
+                print '<div style="color:red">VOCAB NOT DEFINED</div>';
             } 
         }else{
             $query = 'SELECT dty_ID, dty_Name, dty_JsonTermIDTree FROM '
                 .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.intval($f_code[0]).' AND dty_IDInOriginatingDB='.intval($f_code[1]);
             $fields = mysql__select_row($mysqli, $query);
             if($fields){
-                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';                    
+                print '<div style="color:red">FIELD HAS DIFFERENT NAME '.htmlspecialchars($fields[1]).'</div>';
             }
         }
 } 
@@ -448,7 +448,7 @@ function __findWrongChars(){
     global $mysqli, $databases; 
 
 
-    print '[wrong characeters in rty_TitleMask]<br>';    
+    print '[wrong characeters in rty_TitleMask]<br>';
     
     foreach ($databases as $idx=>$db_name){
 
@@ -462,7 +462,7 @@ function __findWrongChars(){
             
             $db_name = htmlspecialchars($db_name);
             
-            $res = json_encode($list); //JSON_INVALID_UTF8_IGNORE 
+            $res = json_encode($list);//JSON_INVALID_UTF8_IGNORE 
             if(true || !$res){
 
                 foreach($list as $id => $val){
@@ -483,14 +483,14 @@ function __findWrongChars(){
             }
         }
     }
-    print '[end report]';    
+    print '[end report]';
 }
 
 function find_invalid_string($val){
     if(is_string($val)){
         $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
         if($stripped_val!=$val){
-            throw new Exception(mb_convert_encoding($val,'UTF-8'));    
+            throw new Exception(mb_convert_encoding($val,'UTF-8'));
         }
     }
 }
@@ -503,7 +503,7 @@ function __findLongTermLabels(){
     global $mysqli, $databases; 
 
 
-    print '[long term labels]<br>';    
+    print '[long term labels]<br>';
     
     foreach ($databases as $idx=>$db_name){
 
@@ -517,12 +517,12 @@ function __findLongTermLabels(){
                 print htmlspecialchars($db_name).'<br>';
                 foreach($list as $id=>$row){
                     print '<div style="padding-left:100px">'.$id.'&nbsp;'.intval($row['chars']).'&nbsp;'.intval($row['len'])
-                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).'</div>';    
+                        .'&nbsp;'.htmlspecialchars($row['trm_Label']).'</div>';
                 }
                 
             }
     }
-    print '[end report]';    
+    print '[end report]';
     
 }
 
@@ -534,7 +534,7 @@ function __setTermNameTo255(){
     global $mysqli, $databases; 
 
 
-    print '[set both trm_Label and trm_NameInOriginatingDB  to varchar(250)]<br>';    
+    print '[set both trm_Label and trm_NameInOriginatingDB  to varchar(250)]<br>';
     
     foreach ($databases as $idx=>$db_name){
 
@@ -551,7 +551,7 @@ $query = "ALTER TABLE `defTerms` "
             print htmlspecialchars($db_name).'<br>';
         }
     }    
-    print '[end update]';    
+    print '[end update]';
 }
 
 /*
@@ -580,13 +580,13 @@ function __setTermYesNo(){
     
     global $mysqli, $databases; 
     
-    print '[Fix Yes/No terms]<br>';    
+    print '[Fix Yes/No terms]<br>';
     
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
 
-        print htmlspecialchars($db_name).' ';    
+        print htmlspecialchars($db_name).' ';
         
         if(!hasTable($mysqli, 'defTermsLinks')){
             print ' defTermsLinks does not exist<br>';
@@ -608,7 +608,7 @@ function __setTermYesNo(){
         $vocab = getLocalCode(99, 5445);
         
 // get all enum fields        
-        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"'); //, 'intval' snyk does not see it
+        $enums = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes WHERE dty_Type="enum"');//, 'intval' snyk does not see it
         $enums = prepareIds($enums);
         $enums = 'dtl_DetailTypeID IN ('.implode(',',$enums).')';
         
@@ -692,7 +692,7 @@ function __recreateProceduresTriggers(){
     
     global $mysqli, $databases; 
     
-    print 'Recreate procedures and triggers<br>';    
+    print 'Recreate procedures and triggers<br>';
     
     foreach ($databases as $idx=>$db_name){
 
@@ -742,7 +742,7 @@ function __addOtherSources(){
     if ($res){
         
         $query_match = 'SELECT dtl_RecID FROM recDetails WHERE `dtl_DetailTypeID`=36 AND dtl_Value=';
-        $query_update = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Annotation) VALUES '; //1107
+        $query_update = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value,dtl_Annotation) VALUES ';//1107
         $query_check = 'SELECT dtl_ID FROM recDetails WHERE dtl_DetailTypeID=1107 AND dtl_RecID=';
         
         
@@ -756,15 +756,15 @@ function __addOtherSources(){
             
             $nid = $row[1];
             
-            $rec_ID = mysql__select_value($mysqli, $query_match.$nid);        
+            $rec_ID = mysql__select_value($mysqli, $query_match.$nid);
             
             if($rec_ID>0){
-print '<br>'.htmlspecialchars($row[3]);            
+print '<br>'.htmlspecialchars($row[3]);
                 $nids = explode('|',$row[3]);
                 if(count($nids)>0){
                     $values = array();
                     foreach ($nids as $id=>$nid){
-                        $os_rec_ID = mysql__select_value($mysqli, $query_match.$nid);        
+                        $os_rec_ID = mysql__select_value($mysqli, $query_match.$nid);
                         if($os_rec_ID>0){
                             $dtl_ID = mysql__select_value($mysqli, $query_check.$rec_ID.' AND dtl_Value='.$os_rec_ID);
                             if($dtl_ID>0){ //already added?
@@ -780,7 +780,7 @@ print '<br>&nbsp;&nbsp;&nbsp;'.$val;
                         }
                     }
                     if(count($values)>0){
-                        $res2 = $mysqli->query($query_update.implode(',',$values));                        
+                        $res2 = $mysqli->query($query_update.implode(',',$values));
                         $cnt = $cnt + $mysqli->affected_rows;
                     }
                 }
@@ -808,7 +808,7 @@ function __renameField39(){
 
     global $mysqli, $databases; 
     
-    print 'Rename field #2-39<br>';    
+    print 'Rename field #2-39<br>';
     
     $old1 = 'Representative image or thumbnail';
     $new1 = 'Primary / preferred image';
@@ -864,14 +864,14 @@ function __correctGetEstDate(){
     global $mysqli, $databases; 
     
     //$databases = array('hdb_MPCE_Mapping_Print_Charting_Enlightenment');
-    print '__correctGetEstDate<br>';    
+    print '__correctGetEstDate<br>';
     
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
         
 
-        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100'; //' and rdi_DetailTypeID=1151';
+        $query = 'SELECT dtl_ID, dtl_Value, dtl_RecID FROM recDetails, recDetailsDateIndex where rdi_DetailID=dtl_ID AND rdi_estMaxDate>2100';//' and rdi_DetailTypeID=1151';
         $res = $mysqli->query($query);
         if ($res){
             $cnt=0;
@@ -985,20 +985,20 @@ function __delete_OLD_RecType_And_Term_Icons_Folders(){
         
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/rectype-icons/';
         if(file_exists($old_path)){
-            folderDelete($old_path, true);    
+            folderDelete($old_path, true);
             $cnt++;
         }
         
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-images/';
         if(file_exists($old_path)){
-            folderDelete($old_path, true);    
+            folderDelete($old_path, true);
             $cnt++;
         }
 
         $old_path = HEURIST_FILESTORE_ROOT . $db_name . '/term-icons/';
         if(file_exists($old_path)){
-            folderDelete($old_path, true);    
+            folderDelete($old_path, true);
             $cnt++;
         }
         
@@ -1170,7 +1170,7 @@ function __updateDatabases_To_V14($db_process){
         }*/
 
         if( !$system->set_dbname_full($db_name, true) ){
-                $response = $system->getError();    
+                $response = $system->getError();
                 print '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 break;
         }
@@ -1218,7 +1218,7 @@ function __updateDatabases_To_V14($db_process){
             }
             
             if(!updateDatabseTo_v1_3_12($system)){
-                $response = $system->getError();    
+                $response = $system->getError();
                 print '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 break;
             }
@@ -1231,7 +1231,7 @@ function __updateDatabases_To_V14($db_process){
             if(recreateRecDetailsDateIndex($system, true, true)){
             
             }else{
-                $response = $system->getError();    
+                $response = $system->getError();
                 print '<div><h3 class="error">'.$response['message'].'</h3></div>';
                 break;
             }
@@ -1282,7 +1282,7 @@ function __removeDuplicationValues(){
         $mysqli->query($q);
         $cnt = $cnt + $mysqli->affected_rows;  
     }
-    $res->close();    
+    $res->close();
     
     print 'DONE. Removed '.$cnt.' duplications';
 }
@@ -1331,7 +1331,7 @@ function __convertTustep(){
     // Convert the codepoints to entities
     //$str = preg_replace("/\\\\u([0-9a-fA-F]{4})/", "&#x\\1;", $str);
     
-    //preg_replace_callback("/(@[^\0-\x]@u)/isU", function($n) { return hexToString($n[0] ); }, $s);
+    //preg_replace_callback("/(@[^\0-\x]@u)/isU", function($n) { return hexToString($n[0] );}, $s);
 
     $matches = array();
     preg_match_all("/\&[0-9a-zA-Z]+;/", $s, $matches);
@@ -1468,19 +1468,19 @@ $tustep_to_html = array(
     print '<br>';
 */    
     $cnt = 0;
-    $missed = array();     //dty_Type="freetext" OR blocktext
+    $missed = array();//dty_Type="freetext" OR blocktext
     $txt_field_types = mysql__select_list2($mysqli, 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="freetext" OR dty_Type="blocktext"','intval');
-    $txt_field_types = prepareIds($txt_field_types); //snyk does see intval in previous function  
+    $txt_field_types = prepareIds($txt_field_types);//snyk does see intval in previous function  
    
     $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Value=? WHERE dtl_ID=?');
-    $keep_autocommit = mysql__begin_transaction($mysqli);    
+    $keep_autocommit = mysql__begin_transaction($mysqli);
     $isOk = true;
    
     // dtl_RecID=18 AND   dtl_RecID=85057 AND 
     //     
     $query = 'SELECT dtl_ID, dtl_Value, dtl_DetailTypeID, dtl_RecID FROM recDetails, Records '
     .'WHERE dtl_RecID=rec_ID AND rec_RecTypeID NOT IN (51,52) AND dtl_DetailTypeID in ('.implode(',',$txt_field_types).')';
-    //.' AND rec_ID IN (1593,4060 ,8603, 11704, 22025, 22491, 25393 , 25570, 28848, 28959    )';     
+    //.' AND rec_ID IN (1593,4060 ,8603, 11704, 22025, 22491, 25393 , 25570, 28848, 28959    )';
     $res = $mysqli->query($query);
     if ($res){
         while ($row = $res->fetch_row()){
@@ -1507,7 +1507,7 @@ $tustep_to_html = array(
             //2. Decode HTML entities    
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
             
-            $m2 = str_replace('#%#%#', '&amp;', $m); //convert back
+            $m2 = str_replace('#%#%#', '&amp;', $m);//convert back
 
             //3. List unrecognized
             if($m2!=$row[1]){
@@ -1525,10 +1525,10 @@ $tustep_to_html = array(
             preg_match_all("/\&[0-9a-zA-Z]+;/", $m, $matches);
 
             if(is_Array(@$matches[0]) && count($matches[0])>0){
-                    $missed = array_merge_unique($missed, $matches[0]);            
+                    $missed = array_merge_unique($missed, $matches[0]);
             }
             
-            $m = str_replace('#%#%#', '&amp;', $m); //convert back
+            $m = str_replace('#%#%#', '&amp;', $m);//convert back
             
             //update in database
             /*  
@@ -1549,7 +1549,7 @@ $tustep_to_html = array(
     }
     
     if($isOk){
-        $mysqli->commit();  
+        $mysqli->commit();
     }
     if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
@@ -1600,7 +1600,7 @@ function __findRDF(){
             $dtl_cnt = intval(mysql__select_value($mysqli, 'select count(dtl_ID) from recDetails, defDetailTypes '
                 .'where dty_ID=dtl_DetailTypeID and dty_SemanticReferenceURL!=""'));
             
-            echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";     //$s1/$s2 
+            echo  "<div style='font-weight:$s'>$db_name rty: $r1/$r2&nbsp;&nbsp;&nbsp;dty: $d1/$d2 &nbsp;&nbsp;&nbsp;trm:$t1/$t2 &nbsp;&nbsp;&nbsp;Records:$rec_cnt1/$rec_cnt2 $dtl_cnt</div>";//$s1/$s2 
         }
     }
     print '<br>END';
@@ -1615,7 +1615,7 @@ function __dropBkpDateIndex(){
     
         if($db_name=='') continue;
 
-        $db_name = htmlspecialchars($db_name);        
+        $db_name = htmlspecialchars($db_name);
         
         mysql__usedatabase($mysqli, $db_name);
         
@@ -1624,7 +1624,7 @@ function __dropBkpDateIndex(){
             print $db_name.'<br>';
         }
     }
-    print '<br>END';                                                                           
+    print '<br>END'; 
 }
 
 function __findBelegSpan($context){
@@ -1730,8 +1730,8 @@ function __getBelegContext(){
      mysql__usedatabase($mysqli, 'HiFoS');
      
      //'ids:628,477'   '[{"t":"102"},{"fc:1184":">1"}]'
-     $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids')); // 'limit'=>10, 
-//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids')); // 'limit'=>10, 
+     $res = recordSearch($system, array('q'=>'[{"t":"102"},{"fc:1184":">1"}]', 'detail'=>'ids'));// 'limit'=>10, 
+//     $res = recordSearch($system, array('q'=>'ids:628', 'detail'=>'ids'));// 'limit'=>10, 
 //     echo var_dump($res);
      
      $ids = @$res['data']['records'];
@@ -1744,7 +1744,7 @@ function __getBelegContext(){
              $val = $rec['details'][1094];
              $val = array_shift($val);
              
-//$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';             
+//$val = ' wqe q <span class="Beleg">a</span><span class="Beleg"><span class="Beleg">s</span> hey sachte</span> qewqdqw';
 /*
 $val = '<span class="Beleg">
     <span style="mso-char-type: symbol; mso-symbol-font-family: Mediaevum;">
@@ -1764,7 +1764,7 @@ $val = '<span class="Beleg">
          }
      }     
      
-//print '</body></html>';     
+//print '</body></html>';
 }
 
 //
@@ -1819,11 +1819,11 @@ function __fixDirectPathImages(){
                 $k = stripos($val, $path);
                 
                 $start = strripos(substr($val,0,$k), '<img');
-                $end = strpos($val,'/>',$k); 
+                $end = strpos($val,'/>',$k);
                 if($end>0){
                     $end = $end+2;   
                 }else{
-                    $end = strpos($val,'>',$k); 
+                    $end = strpos($val,'>',$k);
                     if($end>0){
                          $end = $end+1;   
                     }
@@ -1836,7 +1836,7 @@ function __fixDirectPathImages(){
                     //extract image tag
                     $img = substr($val, $start, $end-$start);
                 
-                    print $rec_ID.' <xmp>'.$img.'</xmp>';                
+                    print $rec_ID.' <xmp>'.$img.'</xmp>';
                     
                     $img2 = str_replace('\"','"',$img);
                     
@@ -1864,18 +1864,18 @@ function __fixDirectPathImages(){
                     }
                     
                     if($obf!=null){
-                        $imgele->setAttribute('src', './?db='.$db_name.'&file='.$obf); //.'&fancybox=1'
+                        $imgele->setAttribute('src', './?db='.$db_name.'&file='.$obf);//.'&fancybox=1'
                         $img2 = $doc->saveHTML($imgele);
                         $img2 = str_replace('"','\"',$img2);
                         
-                        print '<xmp>'.$img2.'</xmp><br>';                
+                        print '<xmp>'.$img2.'</xmp><br>';
                     }
                     
                     $was_replaced = true;
                     $val_orig = str_replace($img,$img2,$val_orig);
                     
-                    $val = substr($val, $end+1); //rest
-                    //$val = trim(substr(strstr($val, $path), strlen($path)));    
+                    $val = substr($val, $end+1);//rest
+                    //$val = trim(substr(strstr($val, $path), strlen($path)));
                 
                 }else{
                     $success = false;
@@ -1915,10 +1915,10 @@ function __fixDirectPathImages(){
                     
                     $surl = substr($val, $k, $m);
                 
-                    print $rec_ID.' '.$surl.'<br>';                
+                    print $rec_ID.' '.$surl.'<br>';
                 
-                    $val = substr($val, $k+$m+1); //rest
-                    //$val = trim(substr(strstr($val, $path), strlen($path)));    
+                    $val = substr($val, $k+$m+1);//rest
+                    //$val = trim(substr(strstr($val, $path), strlen($path)));
                 
                 }else{
                     print 'end of url not found '.substr($val, $k, 50);

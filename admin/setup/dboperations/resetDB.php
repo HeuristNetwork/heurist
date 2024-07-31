@@ -40,7 +40,7 @@ if($isSystemInited){
     $mysqli = $system->get_mysqli();
     $user_record = user_getById($mysqli, 2);
         
-    $res = DbUtils::databaseDrop(false, DEMO_DB, false);    
+    $res = DbUtils::databaseDrop(false, DEMO_DB, false);
                             
     if($res) { 
         

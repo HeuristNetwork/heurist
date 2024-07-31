@@ -39,7 +39,7 @@ function exist_similar($mysqli, $url) {
 
 	$res = mysql__select_value($mysqli, 'select count(rec_ID) from Records '
         .' where rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%" '
-        .' or rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%"');   //http://www.
+        .' or rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%"');//http://www.
 	
 	return ($res>0);
 }

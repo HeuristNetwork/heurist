@@ -91,7 +91,7 @@ class DbUsrRecPermissions extends DbEntityBase
         }
 
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('rcp_RecID');
         if($pred!=null) array_push($where, $pred);
@@ -154,7 +154,7 @@ class DbUsrRecPermissions extends DbEntityBase
                 $recids[] = $record['rcp_RecID'];
             }
             $recids = array_unique($recids);
-            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids();//current user groups ids + itself
             
             //verify that current owner is "everyone" or current user is member of owner group
             $query = 'SELECT count(rec_OwnerUGrpID) FROM Records WHERE rec_ID in ('.implode(',',$recids)
@@ -217,7 +217,7 @@ class DbUsrRecPermissions extends DbEntityBase
         $recids = array_unique($recids);
         
         //array of inserted or updated record IDs
-        $results = array(); 
+        $results = array();
         
         //start transaction
         $mysqli = $this->system->get_mysqli();
@@ -235,7 +235,7 @@ class DbUsrRecPermissions extends DbEntityBase
             //add new permissions
             $query = array();
             foreach($this->records as $rec_idx => $record){
-                $query[] = '(' .$record['rcp_UGrpID'] .',' . $record['rcp_RecID'] . ', "view" )';   
+                $query[] = '(' .$record['rcp_UGrpID'] .',' . $record['rcp_RecID'] . ', "view" )';
             }
             $query = ' INSERT INTO '.$this->config['tableName']
                .' (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',', $query);
@@ -273,7 +273,7 @@ class DbUsrRecPermissions extends DbEntityBase
         
         if(!@$this->data['rcp_RecID']){ //array of record ids
         
-            $this->records = array(); //need to validate permissions
+            $this->records = array();//need to validate permissions
             $recids = prepareIds($this->data['rcp_RecID']);
             foreach ($recids as $id){
                 $this->records = array('rcp_RecID'=>$id);
@@ -296,7 +296,7 @@ class DbUsrRecPermissions extends DbEntityBase
             $group_ids_to_delete = prepareIds($this->data['rcp_UGrpID']);
             
             //current user must be a member of all provided groups
-            $grp_ids = $this->system->get_user_group_ids(); //current user groups ids + itself
+            $grp_ids = $this->system->get_user_group_ids();//current user groups ids + itself
             
             foreach ($group_ids_to_delete as $id){
                 if(!in_array($id, $grp_ids)){

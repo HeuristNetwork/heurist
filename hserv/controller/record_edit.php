@@ -120,7 +120,7 @@
                 }else{
                     $mysqli->rollback();
                 }
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);                
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);

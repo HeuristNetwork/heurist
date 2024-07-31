@@ -81,7 +81,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
             while ($row = $res->fetch_assoc()) {
                 doReport($system, $update_mode, $format, $row);
             }
-            $res->close();        
+            $res->close();
         }
 
     }else if(is_numeric($rps_ID)){
@@ -132,13 +132,13 @@ function doReport($system, $update_mode, $format, $row){
         if(strpos(@$row['rps_URL'],'&mode=')!==false){
             $params = array();
             parse_str($row['rps_URL'], $params);
-            $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']); //for snyk    
+            $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']);//for snyk    
         }else{
             $format = null;
         }
     }
     if($format==null || !preg_match('/html|js|txt|csv|xml|json|css/',$format)){
-        $format = 'html'; //default
+        $format = 'html';//default
     }
 
 	$filename = basename(($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template']);
@@ -169,7 +169,7 @@ function doReport($system, $update_mode, $format, $row){
             if($row['rps_IntervalMinutes']>0){
                 $dt1 = new DateTime("now");
                 $dt2 = new DateTime();
-                $dt2->setTimestamp(filemtime($outputfile)); //get file time
+                $dt2->setTimestamp(filemtime($outputfile));//get file time
                 $interval = $dt1->diff( $dt2 );
 
                 $tot_minutes = ($interval->days*1440 + $interval->h*60 + $interval->i);
@@ -190,7 +190,7 @@ function doReport($system, $update_mode, $format, $row){
                         }else if($ext=='json'){
                             $mimetype = 'application/json';
                         }else{
-                            $mimetype = "text/$ext";    
+                            $mimetype = "text/$ext";
                         }
                         
                         if($ext!='html'){
@@ -199,7 +199,7 @@ function doReport($system, $update_mode, $format, $row){
                         
                         if($ext!='html'){
                             header('Pragma: public');
-                            header('Content-Disposition: attachment; filename="'.$filename.'"'); 
+                            header('Content-Disposition: attachment; filename="'.$filename.'"');
                         }
                     }
                     
@@ -224,7 +224,7 @@ function doReport($system, $update_mode, $format, $row){
 
 	$hquery = $row['rps_HQuery'];
 	if(strpos($hquery, "&q=")>0){
-		parse_str($hquery, $params); //parse query and put to parameters
+		parse_str($hquery, $params);//parse query and put to parameters
 	}else{
 		$params = array("q"=>$hquery);
 	}
@@ -241,14 +241,14 @@ function doReport($system, $update_mode, $format, $row){
 	$params["mode"] 	= $format;
 	$params["publish"] 	= $publish;
 	$params["rps_id"] 	= $row['rps_ID'];
-    $params["void"]     = ($update_mode==4); //no browser output
+    $params["void"]     = ($update_mode==4);//no browser output
 
-	$success = executeSmartyTemplate($system, $params); //in showReps
+	$success = executeSmartyTemplate($system, $params);//in showReps
     
     if(!$success) $res = 0;
 
     if($update_mode==4){
-        echo htmlspecialchars($outputfile.'  '.($res==0?'error':($res==1?'created':'updated')))."\n";                
+        echo htmlspecialchars($outputfile.'  '.($res==0?'error':($res==1?'created':'updated')))."\n";
     }
     
     return $res;

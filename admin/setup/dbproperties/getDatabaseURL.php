@@ -30,14 +30,14 @@
 */
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 
-$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false); //this is reference server
+$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);//this is reference server
 if($isOutSideRequest){ //this is request from outside - redirect to master index    
 
     $reg_url = HEURIST_INDEX_BASE_URL 
     .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
     .'&remote=1&id='.$database_id;
 
-    $data = loadRemoteURLContentSpecial($reg_url); //get registered database URL
+    $data = loadRemoteURLContentSpecial($reg_url);//get registered database URL
 
     if (!$data) {
         global $glb_curl_error;
@@ -45,7 +45,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 
         $error_msg = "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"
             . $error_code . "<br>"
-            . "URL requested: ".$reg_url."<br><br>";        
+            . "URL requested: ".$reg_url."<br><br>";
     }else{
 
         $data = json_decode($data, true);
@@ -66,10 +66,10 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     //on this server
 
     $system2 = new System();
-    $system2->init(HEURIST_INDEX_DATABASE, true, false); //init without paths and consts
+    $system2->init(HEURIST_INDEX_DATABASE, true, false);//init without paths and consts
 
     if(@$_REQUEST['remote']){ 
-        $database_id = @$_REQUEST["id"];   
+        $database_id = @$_REQUEST["id"];
     }
     $rec = array();
     if($database_id>0){
@@ -93,20 +93,20 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             if(err){
                 $error_msg = 'Heurist Reference Index database is not accessible at the moment. Please try later';
             }else{
-                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';    
+                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Reference Index';
             }
         }
     }else{
-        $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';    
+        $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';
     }
 
     if(@$_REQUEST['remote']) {
         header('Content-type: text/javascript');
 
         if(isset($error_msg)){
-            $res = array('error_msg'=>$error_msg);    
+            $res = array('error_msg'=>$error_msg);
         }else{
-            $res = array('rec_URL'=>$database_url);    
+            $res = array('rec_URL'=>$database_url);
         }
         print json_encode($res);
     }

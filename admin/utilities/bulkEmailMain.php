@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
  
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
@@ -32,7 +32,7 @@ if (@$_REQUEST["exportCSV"] == 1) {
     if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
         echo "The System Administrator password is invalid, please re-try in the previous tab/window";
     }else{
-        getCSVDownload($_REQUEST);    
+        getCSVDownload($_REQUEST);
     }
     exit;
 }
@@ -96,7 +96,7 @@ while($email = $email_list->fetch_row()){
         continue;
     }
 
-    $emails[$email[0]] = $email[1]; //id -> title
+    $emails[$email[0]] = $email[1];//id -> title
 
     $has_emails = true;
 }
@@ -259,9 +259,9 @@ if(!$has_emails || empty($emails)) {
 
         <script type="text/javascript">
 
-            window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>');
+            window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
 
-            var all_emails = <?php echo json_encode($emails)?>; // Object of Email records id->title
+            var all_emails = <?php echo json_encode($emails)?>;// Object of Email records id->title
             
             var current_db = "<?php echo $current_db ?>";
             var getting_databases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
@@ -1219,7 +1219,7 @@ if(!$has_emails || empty($emails)) {
 
                 </div>
 
-                <input name="db" value="<?php echo htmlspecialchars($_REQUEST['db']); ?>" style="display: none;" readonly />
+                <input name="db" value="<?php echo htmlspecialchars($_REQUEST['db']);?>" style="display: none;" readonly />
 
                 <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="0" type="hidden"/>

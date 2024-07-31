@@ -22,7 +22,7 @@
 //&callback=initMap" async defer  for gmap
 //<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 //
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
 $system->defineConstants();
@@ -195,7 +195,7 @@ $system->defineConstants();
         var mylayout = $('#mapping').layout(layout_opts);
         
         $('#map').css('padding',0);
-        //$('#map').attr('data-mapid', 'code provided by google'); //google mapid 
+        //$('#map').attr('data-mapid', 'code provided by google');//google mapid 
         
         // Mapping data
         var mapdata = [];
@@ -255,7 +255,7 @@ $system->defineConstants();
                                     var params = {id:'main', recordset:recset, title:'Current results' };
                                     mapping.map_control.addRecordsetLayer(params);
                                 }
-                            );                        
+                            );
                                         
 
                         }else{
@@ -406,11 +406,11 @@ $system->defineConstants();
 
             
             function __drodown_mapDataSources(e) {
-                $('.menu-or-popup').hide(); //hide other
+                $('.menu-or-popup').hide();//hide other
                 var $menu_layers = $( menu_datasets )
                 .show()
                 .position({my: "right top", at: "right bottom", of: btn_datasets });
-                $( document ).one( "click", function() { $menu_layers.hide(); });
+                $( document ).one( "click", function() { $menu_layers.hide();});
                 return false;
             }
             
@@ -446,13 +446,13 @@ $system->defineConstants();
            
            /*
             if(is_collapsed===true){
-                $(legend).css('top', mh-nt-50);   
+                $(legend).css('top', mh-nt-50);
             }else{
             
                 if(mh-nt-ch < 70){
                     $(legend).css('top', 50);
                 }else{
-                    $(legend).css('top', mh-nt-ch);        
+                    $(legend).css('top', mh-nt-ch);
                 }
             }
             */

@@ -84,7 +84,7 @@ private static function _readDataFile($filename, $type=null, $validate=true){
         if(strpos($filename,'websiteStarterRecords')===0 || strpos($filename,'webpageStarterRecords')===0){
             $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
         }else if (!file_exists($filename)) {
-            $filename = HEURIST_SCRATCH_DIR.basename($filename);    
+            $filename = HEURIST_SCRATCH_DIR.basename($filename);
         }
         
         if(!file_exists($filename)){
@@ -176,7 +176,7 @@ private static function hmlToJson($filename){
     {
         foreach($xml_recs->children() as $xml_rec){
 			$rectype = $xml_rec->type->attributes();
-			$rectype_id = ''.$rectype['id']; //may be not defined
+			$rectype_id = ''.$rectype['id'];//may be not defined
 
 			if(is_numeric($xml_rec->id) || is_numeric(trim($xml_rec->id))){ // Check record's id, checking if file is template
 				$hasValidIdCount++;
@@ -254,7 +254,7 @@ private static function hmlToJson($filename){
 						  
 							$ids = explode('-', $trm_cCode);
 							if ($ids && (count($ids) == 2) && is_numeric($ids[0]) && ($ids[0] > 0)){
-									$detail = ''.$dets['termID'];         
+									$detail = ''.$dets['termID'];
 							} 
 					   }
 					   
@@ -455,11 +455,11 @@ public static function importDefintions($filename, $session_id){
         if(!$res){
             /*$err = self::$system->getError();
             if($err && $err['status']!=HEURIST_NOT_FOUND){
-                self::$system->error_exit(null);  //produce json output and exit script
+                self::$system->error_exit(null);//produce json output and exit script
             }*/
         }else{
             //need to call refresh client side defintions
-            $res = 'ok'; //$importDef->getReport(false);
+            $res = 'ok';//$importDef->getReport(false);
         }
     }
     
@@ -477,7 +477,7 @@ public static function importRecordsFromDatabase($params){
     $remote_path = HEURIST_BASE_URL.'hserv/controller/record_output.php?format=json&depth=0&db='
             .$params['source_db'];//.'&q='.$query;
     
-    $search_params = array();        
+    $search_params = array();
     if(@$params['recID']>0){
         $params['q'] = 'ids:'.$params['recID'];
     }else if(@$params['ids']){
@@ -497,13 +497,13 @@ public static function importRecordsFromDatabase($params){
     // convert tlcmap dataset to map layer and creates parent mapspace
     // see record_output.php
     if(@$params['tlcmapspace']!=null){
-        $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);    
+        $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);
     }
 
     // save file that produced with record_output.php from source to temp file  
-    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
+    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");// . $file_id;
 
-    $filesize = saveURLasFile($remote_path, $heurist_path); //save json import from remote db to tempfile in scratch folder
+    $filesize = saveURLasFile($remote_path, $heurist_path);//save json import from remote db to tempfile in scratch folder
 
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
@@ -523,7 +523,7 @@ public static function importRecordsFromDatabase($params){
         if(@$params['tlcmapshot'] && $res!==false){
             //find map document among imported records
             self::$system->defineConstant('RT_MAP_DOCUMENT');
-            $mysqli = self::$system->get_mysqli();           
+            $mysqli = self::$system->get_mysqli();
             $map_doc_rec_id = mysql__select_value($mysqli, 
                 'select rec_ID from Records where rec_ID in ('
                 .implode(',',$res['ids']).') and rec_RecTypeID='.RT_MAP_DOCUMENT);
@@ -534,7 +534,7 @@ public static function importRecordsFromDatabase($params){
             }
         }
         
-        unlink($heurist_path); //remove temp file
+        unlink($heurist_path);//remove temp file
         
         return $res;
     }else{
@@ -557,11 +557,11 @@ public static function importRecordsFromDatabase($params){
 public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
 
     if(($rec_ID>0) && self::$system->defineConstant('DT_THUMBNAIL')){
-        //$mysqli = self::$system->get_mysqli();           
+        //$mysqli = self::$system->get_mysqli();
 
         //2. save encoded image as file and register it
         $entity = new DbRecUploadedFiles(self::$system);
-        $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID); //it returns ulf_ID
+        $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID);//it returns ulf_ID
         if( is_bool($ulf_ID) && !$ulf_ID ){
             return false;
         }
@@ -634,7 +634,7 @@ public static function importRecords($filename, $params){
     $cnt_ignored = 0;
     $ids_exist = array();
     $rec_ids_details_empty = array();
-    $resource_notfound = array();  //target id, source id, field name, value
+    $resource_notfound = array();//target id, source id, field name, value
     
     $home_page_id = 0;
     $page_id_for_blog = 0; //for cms init find record with DT_EXTENDED_DESCRIPTION=='BLOG TEMPLATE'
@@ -679,7 +679,7 @@ EOD;
             $tot_count = count(@$data['heurist']['database']['records']);
         }
         if(!($tot_count>0)){
-            $tot_count = count($data['heurist']['records']);  
+            $tot_count = count($data['heurist']['records']);
         } 
         
         //init progress
@@ -688,8 +688,8 @@ EOD;
         $imp_rectypes = $data['heurist']['database']['rectypes'];
         
         //need to copy files
-        $source_url = @$data['heurist']['database']['url']; //base url of database
-        $source_db = @$data['heurist']['database']['db']; //name of database 
+        $source_url = @$data['heurist']['database']['url'];//base url of database
+        $source_db = @$data['heurist']['database']['db'];//name of database 
         
         ini_set('max_execution_time', '0');
         
@@ -708,7 +708,7 @@ EOD;
             
             if(!$dbsource_is_registered){
                 //if source is not smae, definitions with conceptcodes 0000-xx will be imported with concept codes 9999-xxx
-                $dbsource_is_same = ($params['same_source']==1); 
+                $dbsource_is_same = ($params['same_source']==1);
             }else{
                 //if source is registered - source is different
                 $dbsource_is_same = !$dbsource_is_registered;
@@ -742,16 +742,16 @@ EOD;
                 $res2 = $importDef->doPrepare(  array('defType'=>'term', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
                             'databaseURL'=>$databaseURL, 
-                            'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
+                            'definitionID'=>$mapping_defs['vocabularies']));//array of vocabularies to be imported
                             
                 if($res2 && @$mapping_defs['import_vocabularies']==1){
-                        $res2 = $importDef->doImport(); //sync/import vocabularies
+                        $res2 = $importDef->doImport();//sync/import vocabularies
                 }
                 
                 if($res2){
                     //mapping for fields and rectypes
-                    $importDef->doMapping($mapping_defs); //need for getTargetIdBySourceId
-                    $defs = $importDef->getDefinitions(); //terms aready here (target defs)
+                    $importDef->doMapping($mapping_defs);//need for getTargetIdBySourceId
+                    $defs = $importDef->getDefinitions();//terms aready here (target defs)
                     
                     $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
                     $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
@@ -782,7 +782,7 @@ EOD;
                     mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
                     return false;
                 }
-                self::$system->clearError();  
+                self::$system->clearError();
             }  
             
         }
@@ -796,22 +796,22 @@ EOD;
         $file_entity = new DbRecUploadedFiles(self::$system);
         $file_entity->setNeedTransaction(false);
         
-        $records = $data['heurist']['records']; //records to be imported
+        $records = $data['heurist']['records'];//records to be imported
         
         $records_corr_alphanum = array();
-        $records_corr = array(); //correspondance: source rec id -> target rec id
-        $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
-        $keep_rectypes = array(); //keep rectypes for furhter rectitle update
-        $recid_already_checked = array(); //keep verified H-ID resource records
+        $records_corr = array();//correspondance: source rec id -> target rec id
+        $resource_fields = array();//source rec id -> field type id -> field value (target recid)
+        $keep_rectypes = array();//keep rectypes for furhter rectitle update
+        $recid_already_checked = array();//keep verified H-ID resource records
         
-        $parent_child_links = array(); //keep parent_id => child_id
+        $parent_child_links = array();//keep parent_id => child_id
         
         //term 
-        $enum_fields = array(); //source rec id -> field type id -> field value (term label)
-        $enum_fields_values = array(); //rectype -> field id -> value
+        $enum_fields = array();//source rec id -> field type id -> field value (term label)
+        $enum_fields_values = array();//rectype -> field id -> value
         
         $is_rollback = false;
-        $keep_autocommit = mysql__begin_transaction($mysqli);    
+        $keep_autocommit = mysql__begin_transaction($mysqli);
         $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
         
         self::$system->defineConstant('DT_PARENT_ENTITY');
@@ -868,7 +868,7 @@ EOD;
                         $target_RecID = 0;
                     }
                 }else{
-                    $cnt_ignored++;                
+                    $cnt_ignored++;
                     continue; 
                 }
                 
@@ -889,7 +889,7 @@ EOD;
                         if($dbsource_is_same){
                             $local_id = DbsImport::getLocalCode('detailtypes', $defs, $unique_field_id, false);
                         }else{
-                            $local_id = DbsImport::getLocalCode('detailtypes', $importDef->getDefinitions('source'), $unique_field_id, false);                            
+                            $local_id = DbsImport::getLocalCode('detailtypes', $importDef->getDefinitions('source'), $unique_field_id, false); 
                         }
                             
 
@@ -935,7 +935,7 @@ EOD;
             
             if(!($recTypeID>0)) {
                 //skip this record - record type not found
-                $cnt_ignored++;                
+                $cnt_ignored++;
                 continue; 
             }
             
@@ -951,7 +951,7 @@ EOD;
             //}    
             
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
-                $record_src['rec_ID'] = uniqid(); //''.microtime();
+                $record_src['rec_ID'] = uniqid();//''.microtime();
             }else {
                 
                 //in case source id is not numerics or more than MAX INT                
@@ -960,7 +960,7 @@ EOD;
                     if(@$records_corr_alphanum[$rec_id_low]){ //aplhanum->random int
                         $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_low];
                     }else{
-                        $rand_id = rand(900000000,999999999); //random_int
+                        $rand_id = rand(900000000,999999999);//random_int
                         $records_corr_alphanum[$rec_id_low] = $rand_id;
                         $record_src['rec_ID'] = $rand_id; 
                     }
@@ -982,7 +982,7 @@ EOD;
             $record['details'] = array();
             
             if(@$record_src['details']==null){
-                array_push($rec_ids_details_empty, $record_src['rec_ID']); 
+                array_push($rec_ids_details_empty, $record_src['rec_ID']);
                 continue;
             }
 
@@ -1037,7 +1037,7 @@ EOD;
                             //by local id or concept code
                             $termID = DbsImport::getLocalCode($def_field[$idx_type], $defs, $value, false);
                         }else{
-                            $termID = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value); 
+                            $termID = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value);
                         }
                         // if not numeric - it can be term code or term label
                         $termID = self::validateEnumeration($recTypeID, $ftId, 
@@ -1117,8 +1117,8 @@ EOD;
                             $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$value);
                             
                             $file_entity->setData($fileinfo);
-                            $file_entity->setRecords(null); //reset
-                            $dtl_UploadedFileID = $file_entity->save();   //register remote url - it returns ulf_ID
+                            $file_entity->setRecords(null);//reset
+                            $dtl_UploadedFileID = $file_entity->save();//register remote url - it returns ulf_ID
                            
                        }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
                        
@@ -1142,13 +1142,13 @@ EOD;
                                 }else{
                                     $file_URL = $source_url;
                                 }
-                                $file_URL = $file_URL.'&file='.$value['ulf_ObfuscatedFileID']; //download
-                                saveURLasFile($file_URL, $tmp_file); //save imported image to temp file in scratch folder
+                                $file_URL = $file_URL.'&file='.$value['ulf_ObfuscatedFileID'];//download
+                                saveURLasFile($file_URL, $tmp_file);//save imported image to temp file in scratch folder
                             }
 
                             //register imported image
                             if(file_exists($tmp_file)){
-                                $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, $newfilename); //it returns ulf_ID
+                                $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, $newfilename);//it returns ulf_ID
                             }
                                 
                                 
@@ -1161,7 +1161,7 @@ EOD;
                             if($dtl_UploadedFileID===false){
                                 $err_msg = self::$system->getError();
                                 $err_msg = $err_msg['message'];
-                                self::$system->clearError();  
+                                self::$system->clearError();
                                 $dtl_UploadedFileID = null;
                             }else{
                                 $dtl_UploadedFileID = $dtl_UploadedFileID[0];
@@ -1170,7 +1170,7 @@ EOD;
                        }
                         
                        if($tmp_file && file_exists($tmp_file)){
-                            unlink($tmp_file);    
+                            unlink($tmp_file);
                        }
                         
                        
@@ -1179,7 +1179,7 @@ EOD;
                 }
                 else if($def_field[$idx_type] == "resource"){ 
                    
-                   $new_values = array(); 
+                   $new_values = array();
                    //keep source record id to replace it to new target record id 
                    if(!@$resource_fields[$record_src['rec_ID']]){
                        $resource_fields[$record_src['rec_ID']] = array();
@@ -1198,7 +1198,7 @@ EOD;
                        $resourse_id = null;
                        
                        if(is_array($value)){
-                           $value = $value['id'];    
+                           $value = $value['id'];
                        }
                        if(strpos($value,'H-ID-')===0){ //there is such id in target
                            $value = substr($value,5);
@@ -1227,7 +1227,7 @@ EOD;
                                if(@$records_corr_alphanum[$rec_id_low]){
                                    $value = $records_corr_alphanum[$rec_id_low];
                                }else{
-                                   $rand_id = rand(900000000,999999999); //was random_int
+                                   $rand_id = rand(900000000,999999999);//was random_int
                                    $records_corr_alphanum[$rec_id_low] = $rand_id;
                                    $value = $rand_id; 
                                }
@@ -1253,7 +1253,7 @@ EOD;
                 if(is_array($new_values) && count($new_values)>0)
                 {
                     if (isset($record['details'][$ftId])){
-                        array_push($record['details'][$ftId], ...$new_values);    
+                        array_push($record['details'][$ftId], ...$new_values);
                     }else{
                         $record['details'][$ftId] = $new_values; 
                     }
@@ -1277,7 +1277,7 @@ EOD;
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
             
             //no transaction, suppress parent-child
-            $out = recordSave(self::$system, $record, false, true, $update_mode, $record_count);  //see recordModify.php
+            $out = recordSave(self::$system, $record, false, true, $update_mode, $record_count);//see recordModify.php
 
             if ( @$out['status'] != HEURIST_OK ) {
                 $is_rollback = true;
@@ -1285,7 +1285,7 @@ EOD;
             }
             
             //source rec id => target rec id
-            $new_rec_id  = intval($out['data']); //new record id
+            $new_rec_id  = intval($out['data']);//new record id
             $records_corr[$record_src['rec_ID']] = $new_rec_id; 
             $keep_rectypes[$new_rec_id] = $record['RecTypeID'];
             
@@ -1318,9 +1318,9 @@ EOD;
             $cnt_imported++;
             
             if($target_RecID==0){
-                $cnt_inserted++;    
+                $cnt_inserted++;
             }else{
-                $cnt_updated++;    
+                $cnt_updated++;
             }
             
             
@@ -1444,7 +1444,7 @@ EOD;
                 }//for
             }
             if(!$is_rollback){ 
-                $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
+                $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];
                 //update record title
                 foreach ($keep_rectypes as $rec_id=>$rty_id){
                     $mask = @$defs['rectypes']['typedefs'][$rty_id]['commonFields'][$idx_mask];
@@ -1471,9 +1471,9 @@ EOD;
                              'details_empty'=>$rec_ids_details_empty, 
                              'home_page_id'=>$home_page_id,
                              'page_id_for_blog'=>$page_id_for_blog,
-                             'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
+                             'resource_notfound'=>$resource_notfound  );//if value is H-ID-nnn
                 if(count($records_corr)<1000){
-                    $res['ids'] = array_values($records_corr);    
+                    $res['ids'] = array_values($records_corr);
                 }
                 if(count($ids_exist)<1000){
                     $res['exists'] = $ids_exist;    
@@ -1566,7 +1566,7 @@ private static function validateEnumeration($recTypeID, $dt_id, $term_value, $db
 //
 private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
     
-//@todo use dbDefTerms _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});    
+//@todo use dbDefTerms _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
 
     $recStruc = $dbdefs['rectypes']['typedefs'];
     $dt_def = $recStruc[$recTypeID]['dtFields'][$dt_id];
@@ -1577,14 +1577,14 @@ private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
     $defs = $dt_def[$idx_term_tree];
     $defs_nonsel = $dt_def[$idx_term_nosel];
     
-    $domain = $dt_def[$idx_fieldtype]=='enum'?'enum':'relation'; //for domain
+    $domain = $dt_def[$idx_fieldtype]=='enum'?'enum':'relation';//for domain
 
-    $terms = getTermsFromFormat($defs); //see dbsData.php
+    $terms = getTermsFromFormat($defs);//see dbsData.php
         
     if (($cntTrm = count($terms)) > 0) {
 
         if ($cntTrm > 1) {  //vocabulary
-            $nonTerms = getTermsFromFormat($defs_nonsel); //see dbsData.php
+            $nonTerms = getTermsFromFormat($defs_nonsel);//see dbsData.php
             if (count($nonTerms) > 0) {
                 $terms = array_diff($terms, $nonTerms);
             }
@@ -1599,7 +1599,7 @@ private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
         $mysqli = self::$system->get_mysqli();
         
         $query = 'select trm_ID from defTerms where trm_ParentTermID='
-                        .$parentID.' and trm_Label="'.$mysqli->real_escape_string($term_label).'"';    
+                        .$parentID.' and trm_Label="'.$mysqli->real_escape_string($term_label).'"';
         $trmID = mysql__select_value($mysqli, $query);
         if($trmID>0){
             //already exists
