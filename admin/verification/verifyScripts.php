@@ -1551,7 +1551,7 @@ $tustep_to_html = array(
     if($isOk){
         $mysqli->commit();
     }
-    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
     print '<br>Replaced in '.$cnt.' fields';
     
@@ -1935,7 +1935,7 @@ function __fixDirectPathImages(){
             $mysqli->rollback();
         }
         
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         }else{
             print 'CMS rectypes not defined '.$rty_ID_1.' '.$rty_ID_2.' '.$dty_ID;

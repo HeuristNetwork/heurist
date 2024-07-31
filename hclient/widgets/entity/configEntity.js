@@ -506,7 +506,7 @@ $.widget( "heurist.configEntity", {
                     }
                     ele[0].selectedIndex = 0;
                     
-                    let recset = new hRecordSet(response.data);
+                    let recset = new HRecordSet(response.data);
                     if(recset.length()>0){
                         
                         recset.each(function(recID, rec){

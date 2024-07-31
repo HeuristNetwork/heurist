@@ -368,7 +368,7 @@ class DbDefRecStructure extends DbEntityBase
         if($ret){
             $mysqli->commit();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             
         return $ret;        
     }

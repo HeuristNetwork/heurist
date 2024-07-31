@@ -132,7 +132,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             response = window.hWin.HEURIST4.util.isJSON(response);
 
             if(response.status == window.hWin.ResponseStatus.OK){
-                let recordset = new hRecordSet(response.data);
+                let recordset = new HRecordSet(response.data);
                 recordset.each2(function(trm_ID, term){
                      window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
                 });
@@ -225,7 +225,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         let record = recordset.getFirstRecord();
                         if(!record || !record.d){
                             window.hWin.HEURIST4.msg.showMsgErr(
@@ -335,7 +335,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     recordset.each2(function(id, record){
                         for(let i in dlg_response){
                             for(let j = 0; j < dlg_response[i].length; j++){
@@ -365,7 +365,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                let recordset = new hRecordSet(response.data);
+                                let recordset = new HRecordSet(response.data);
                                 recordset.each2(function(id, record){
                                     for(let i in dlg_response){
                                         for(let j = 0; j < dlg_response[i].length; j++){
@@ -487,7 +487,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        let recordset = new hRecordSet(response.data);
+        let recordset = new HRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

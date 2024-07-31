@@ -93,7 +93,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 {a:'search', 'entity':this.options.entity.entityName, 'details':'ids'},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                entityData = new hRecordSet(response.data);
+                                entityData = new HRecordSet(response.data);
                                 window.hWin.HAPI4.EntityMgr.setEntityData(
                                             that.options.entity.entityName,
                                             entityData);

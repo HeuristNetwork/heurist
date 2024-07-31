@@ -25,8 +25,8 @@
 */
 
 
-function hRecordSet(initdata) {
-    const _className = "hRecordSet",
+function HRecordSet(initdata) {
+    const _className = "HRecordSet",
     _version   = "0.4";
 
     let total_count = 0,   //number of records in query  - not match to  length()
@@ -1379,7 +1379,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 
         * @param  _records - list of objects/records
         * 
-        * @returns {hRecordSet}
+        * @returns {HRecordSet}
         */
         getSubSet: function(_records, _order){
             
@@ -1390,7 +1390,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 _order = that.getIds2(_records);    
             }
             
-            return new hRecordSet({
+            return new HRecordSet({
                 entityName: that.entityName,
                 queryid: queryid,
                 count: _order.length,
@@ -1772,7 +1772,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 relationship2 = jQuery.unique( relationship2 );
             }
             
-            return new hRecordSet({
+            return new HRecordSet({
                 entityName: that.entityName,
                 queryid: queryid,
                 count: Math.max(order_new.length,total_count), //keep from original

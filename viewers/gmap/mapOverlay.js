@@ -81,7 +81,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 loading_mapdoc_list = false;
                     
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var resdata = new hRecordSet(response.data);
+                    var resdata = new HRecordSet(response.data);
 
                     var mapdocs = '';
                     //ele.append("<option value='-1'>"+(resdata.length()>0?'select...':'none available')+"</option>");
@@ -1157,7 +1157,7 @@ map.data.addListener('mouseover', function(event) {
                     function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                    source.recordset = hRecordSet(response.data);
+                    source.recordset = HRecordSet(response.data);
                     source.recordset.setMapEnabled( true );
                     _addRecordsetLayer(source, index);
 

@@ -114,7 +114,7 @@ function editSymbology(current_value, mode_edit, callback){
                 
             }
             
-            let recdata = current_value ? new hRecordSet({count:1, order:[1], 
+            let recdata = current_value ? new HRecordSet({count:1, order:[1], 
                 records:{1:current_value}, 
                 fields: {'stub':0}}) :null;
                 //Object.getOwnPropertyNames(current_value)
@@ -816,7 +816,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
                 window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         let record = recordset.getFirstRecord();
                         if(record){
                             calculateImageExtentFromWorldFile(_editing, recordset.fld(record,'ulf_ObfuscatedFileID'));

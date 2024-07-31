@@ -472,7 +472,7 @@ class DbSysUsers extends DbEntityBase
         }else{
             $mysqli->rollback();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
     }
@@ -591,7 +591,7 @@ class DbSysUsers extends DbEntityBase
             $mysqli->rollback();
         }    
 
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $return;
     }
@@ -798,7 +798,7 @@ class DbSysUsers extends DbEntityBase
         }else{
             $mysqli->rollback();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
     }

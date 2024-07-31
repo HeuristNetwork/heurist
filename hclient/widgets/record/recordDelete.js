@@ -164,7 +164,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        let resdata = new hRecordSet(response.data);
+                        let resdata = new HRecordSet(response.data);
                         
                         that.recordList.resultList('updateResultSet', resdata, null); //render
 

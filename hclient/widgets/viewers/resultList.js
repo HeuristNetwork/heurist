@@ -423,7 +423,7 @@ $.widget( "heurist.resultList", {
                                 that.applyViewMode( that._query_request.viewmode );
                         }
 
-                        that._renderRecordsIncrementally(recset); //hRecordSet - render record on search finish
+                        that._renderRecordsIncrementally(recset); //HRecordSet - render record on search finish
                         
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
@@ -2652,7 +2652,7 @@ $.widget( "heurist.resultList", {
     },
 
     /**
-    * return hRecordSet of selected records
+    * return HRecordSet of selected records
     */
     getSelected: function( idsonly ){
 
@@ -2699,7 +2699,7 @@ $.widget( "heurist.resultList", {
     },
 
     /**
-    * selection - hRecordSet or array of record Ids
+    * selection - HRecordSet or array of record Ids
     *
     * @param record_ids
     */
@@ -3834,7 +3834,7 @@ $.widget( "heurist.resultList", {
 
             if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 
 
-                let resp = new hRecordSet( response.data );
+                let resp = new HRecordSet( response.data );
                 this._currentRecordset.fillHeader( resp );
 
                 //remove records that we can't recieve data
@@ -4178,7 +4178,7 @@ $.widget( "heurist.resultList", {
         }
 
         if(this.sortResultList.resultList('getRecordSet') == null){
-            this.sortResultList.resultList('updateResultSet', new hRecordSet());
+            this.sortResultList.resultList('updateResultSet', new HRecordSet());
         }
 
         if(this._is_sortResultList_tab_based){
@@ -4599,7 +4599,7 @@ $.widget( "heurist.resultList", {
         window.hWin.HAPI4.RecordMgr.search(request, (response) => {
             if(response.status == window.hWin.ResponseStatus.OK){
 
-                let records = new hRecordSet(response.data);
+                let records = new HRecordSet(response.data);
 
                 records.each2((id, record) => {
                     let rec_div = that.div_content.find('.recordDiv[recid="'+ id +'"]');
@@ -4628,7 +4628,7 @@ $.widget( "heurist.resultList", {
 
             let cnt = this._collection.length;
             let rs = {count:cnt,entityName:"Records",offset:0,reccount:cnt,records:this._collection};           
-            this._currentRecordset = new hRecordSet(rs);
+            this._currentRecordset = new HRecordSet(rs);
 
         }else{
             this._isCollectionUsed = false;

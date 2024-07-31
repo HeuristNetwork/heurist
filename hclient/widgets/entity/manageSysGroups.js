@@ -193,7 +193,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                     function(response){
                                         if(response.status == window.hWin.ResponseStatus.OK){
-                                            let resp = new hRecordSet( response.data );
+                                            let resp = new HRecordSet( response.data );
                                             let rec_updated = resp.getFirstRecord();
                                             let cnt = resp.fld(rec_updated, 'ugr_Members');
 
@@ -500,7 +500,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();

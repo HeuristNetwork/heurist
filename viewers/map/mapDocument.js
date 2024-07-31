@@ -158,7 +158,7 @@ function hMapDocument( _options )
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
+                        var resdata = new HRecordSet(response.data);
                         map_documents = resdata;
                         
                         if($.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
@@ -329,7 +329,7 @@ function hMapDocument( _options )
               
                                 var order = 1;                  
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    var resdata = new hRecordSet(response.data);
+                                    var resdata = new HRecordSet(response.data);
                                     var rec = resdata.getFirstRecord();
                                     order = resdata.values(rec, DT_MAP_LAYER);
                                     if(!order) order = 1;
@@ -351,7 +351,7 @@ function hMapDocument( _options )
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
+                        var resdata = new HRecordSet(response.data);
                         map_documents_content[mapdoc_id] = resdata;
 
                         _openMapDocument( mapdoc_id, deferred);
@@ -573,7 +573,7 @@ console.log(treedata);
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
+                        var resdata = new HRecordSet(response.data);
                         
                         //add to map_document recordset
                         //var idx, records = resdata.getRecords();
@@ -780,7 +780,7 @@ console.log(treedata);
     //
     function _isDocumentLoaded(mapdoc_id){
             var recset = map_documents_content[mapdoc_id];
-            return (!window.hWin.HEURIST4.util.isnull(recset) && (typeof recset.isA == "function") && recset.isA('hRecordSet'));
+            return (!window.hWin.HEURIST4.util.isnull(recset) && (typeof recset.isA == "function") && recset.isA('HRecordSet'));
     }
         
     
@@ -845,7 +845,7 @@ console.log(treedata);
             
             const dataset_name = dataset_options.name;
             
-            if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+            if( (typeof data.isA == "function") && data.isA("HRecordSet") ){
                     
                     var recset = data;
                     
@@ -865,7 +865,7 @@ console.log(treedata);
             }
                 
             if(!_isDocumentLoaded(mapdoc_id)){
-                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset - list of layers for mapdocument
+                map_documents_content[mapdoc_id] = new HRecordSet(); //create new recordset - list of layers for mapdocument
             }
             
             //recset - list of layers in mapdoc
@@ -952,12 +952,12 @@ console.log(treedata);
         //
         addRecordSet: function(mapdoc_id, recordset, dataset_name){
 
-            if( (typeof recordset.isA == "function") && recordset.isA("hRecordSet") ){
+            if( (typeof recordset.isA == "function") && recordset.isA("HRecordSet") ){
                     
             }
                 
             if(!_isDocumentLoaded(mapdoc_id)){
-                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset
+                map_documents_content[mapdoc_id] = new HRecordSet(); //create new recordset
             }
             
             var recset = map_documents_content[mapdoc_id];
@@ -1339,7 +1339,7 @@ console.log(treedata);
 
             if(!_isDocumentLoaded(mapdoc_id)){
 
-               map_documents_content[mapdoc_id] = new hRecordSet();
+               map_documents_content[mapdoc_id] = new HRecordSet();
             }else{
                 
                 var to_remove = [];

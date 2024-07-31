@@ -234,7 +234,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             //via entity data
             this._cachedRecordset = $Db.rst(this.options.rty_ID);  //from  rst_Index
             if(this._cachedRecordset==null){
-                this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
+                this._cachedRecordset = new HRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
             }
             /*from server
             var that = this;
@@ -1441,7 +1441,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    let recset = hRecordSet(response.data); // get recset
+                    let recset = HRecordSet(response.data); // get recset
                     let fields = recset.getRecord( response.data.order[0] ); // get fields from recset
                     fields['rst_ID'] = rec_ID; // set id values
 

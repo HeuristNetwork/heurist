@@ -121,7 +121,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     
                     recordset.each2(function(trm_ID, term){
                          window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
@@ -1072,7 +1072,7 @@ _rendererResultList: function (recordset, record) {
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        let recordset = new hRecordSet(response.data);
+        let recordset = new HRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

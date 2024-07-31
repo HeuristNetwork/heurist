@@ -24,8 +24,8 @@
 //
 // 
 //
-function hLayout(args) {
-     const _className = "hLayout",
+function HLayout(args) {
+     const _className = "HLayout",
          _version   = "0.4";      
 
     var Hul = window.hWin.HEURIST4.util;

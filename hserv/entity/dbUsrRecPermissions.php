@@ -256,7 +256,7 @@ class DbUsrRecPermissions extends DbEntityBase
             $mysqli->commit();
             $res = array($mysqli->insert_id);
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         return $res;
         
     } 

@@ -903,7 +903,7 @@ class DbDefTerms extends DbEntityBase
                 $mysqli->commit();
             }
             
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             
         
             return $ret;

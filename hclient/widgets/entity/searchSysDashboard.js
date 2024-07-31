@@ -151,7 +151,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
+                                {recordset:new HRecordSet(response.data), request:request} );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

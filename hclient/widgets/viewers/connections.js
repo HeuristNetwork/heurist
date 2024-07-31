@@ -79,7 +79,7 @@ $.widget( "heurist.connections", {
                 //find all relation within given result set
                 that.recordset_changed = true;
                 that.options.relations = null;
-                that.options.recordset = data.recordset; //hRecordSet
+                that.options.recordset = data.recordset; //HRecordSet
                 that._refresh();
                 
 
@@ -262,7 +262,7 @@ $.widget( "heurist.connections", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
-                that2.option("recordset", recordset); //hRecordSet
+                that2.option("recordset", recordset); //HRecordSet
                 that2.loadanimation(false);
                 
             });

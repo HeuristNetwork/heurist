@@ -636,7 +636,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         }else{
             if($use_transaction){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             }
             return $response;
         }
@@ -693,7 +693,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $stmt->close();
             if($use_transaction){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             }
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
         }
@@ -718,7 +718,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             $syserror = $mysqli->error;
             if($use_transaction){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             }
             return $system->addError(HEURIST_DB_ERROR, 'Cannot delete old details', $syserror);
         }
@@ -759,7 +759,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                 $syserror = $mysqli->error;
                 if($use_transaction){
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 }
                 
                 /** REMOVED BY IAN 20/3/2022 - this is an instant email in a low level loop 
@@ -795,7 +795,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         $syserror = $mysqli->error;
                         if($use_transaction){
                             $mysqli->rollback();
-                            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                         }
                         return $system->addError(HEURIST_DB_ERROR, 
                             'Cannot save value. Cannot insert reverse pointer for child record', $syserror);
@@ -814,7 +814,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         $syserror = $mysqli->error;
                         if($use_transaction){
                             $mysqli->rollback();
-                            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                         }
                         return $system->addError(HEURIST_DB_ERROR, 
                             'Cannot save value. Cannot insert pointer for parent record', $syserror);
@@ -837,7 +837,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $syserror = $mysqli->error;
         if($use_transaction){
             $mysqli->rollback();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         }
         return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
     }
@@ -903,7 +903,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
     if($use_transaction){
         $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
     }
     
     //send notification email
@@ -1101,7 +1101,7 @@ function recordDelete($system, $recids, $need_transaction=true,
             }else{
                 $mysqli->commit();
             }
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         }
         return $res;
 
@@ -1427,7 +1427,7 @@ function recordUpdateOwnerAccess($system, $params){
 
 
         //restore
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         return $res;
 
 

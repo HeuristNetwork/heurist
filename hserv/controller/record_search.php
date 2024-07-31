@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Record search
     * 
     * parameters

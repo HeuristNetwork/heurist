@@ -113,7 +113,7 @@ function hMapLayer2( _options ) {
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
+                        var resdata = new HRecordSet(response.data);
                         
                         // detect map layer record                        
                         resdata.each(function(recID, record){
@@ -950,7 +950,7 @@ function hMapLayer2( _options ) {
                         
 
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            //var resdata = new hRecordSet(response.data);
+                            //var resdata = new HRecordSet(response.data);
                             //assign symbol for each element of layer
                             options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
                                 function(layer){

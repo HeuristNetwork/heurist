@@ -272,7 +272,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                     function(response){
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            that._onSearchResult(new hRecordSet(response.data));
+                            that._onSearchResult(new HRecordSet(response.data));
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
@@ -343,7 +343,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                 res_records[recID] = values;
             }
 
-            var res_recordset = new hRecordSet({
+            var res_recordset = new HRecordSet({
                 count: res_orders.length,
                 offset: 0,
                 fields: fields,

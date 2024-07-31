@@ -1570,7 +1570,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             (this.options.selectOnSave===true || this.options.select_mode=='select_single'))
         {
                 $Db.dty().addRecord(recID, fieldvalues); 
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;    
@@ -2256,7 +2256,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         )+'</div>');
         }
         
-        this._cachedRecordset = new hRecordSet(rdata);
+        this._cachedRecordset = new HRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
         
         this.searchForm.searchDefDetailTypes('startSearch');

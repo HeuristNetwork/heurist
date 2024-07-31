@@ -1130,7 +1130,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             
                 this._additionMode = null; //reset
                 if(this.options.select_mode=='select_single'){
-                    this._selection = new hRecordSet();
+                    this._selection = new HRecordSet();
                     this._selection.addRecord(recID, fieldvalues);
                     this._selectAndClose();
                     return;        
@@ -1142,7 +1142,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 }else if(this.options.select_mode == 'manager' && this.options.edit_mode == 'editonly'){
 
                     // update cached record set
-                    this._lastFileDetails = new hRecordSet();
+                    this._lastFileDetails = new HRecordSet();
                     this._lastFileDetails.addRecord(recID, fieldvalues);
                 }
             }

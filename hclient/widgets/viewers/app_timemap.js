@@ -146,7 +146,7 @@ $.widget( "heurist.app_timemap", {
                         let sub_request = {q: sub_query, w: 'all', detail:'ids', id:window.hWin.HEURIST4.util.random()};
                         that.option("recordset", sub_request); 
                     }else{
-                        that.option("recordset", data.recordset); //hRecordSet
+                        that.option("recordset", data.recordset); //HRecordSet
                     }
                         
                     that._refresh();

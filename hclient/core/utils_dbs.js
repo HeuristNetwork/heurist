@@ -1215,7 +1215,7 @@ window.hWin.HEURIST4.dbs = {
     
     $Db = window.hWin.HEURIST4.dbs
     
-    rty,dty,rst,rtg,dtg,trm,swf = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
+    rty,dty,rst,rtg,dtg,trm,swf = dbdef(entityName,....)  access HEntityMgr.entity_data[entityName]
     
     set(entityName, id, field, newvalue)    
         id - localcode or concept code. For rst this are 2 params rtyID, dtyID
@@ -2630,7 +2630,7 @@ window.hWin.HEURIST4.dbs = {
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    let recset = new hRecordSet(response.data);
+                    let recset = new HRecordSet(response.data);
                     if(recset.length()>0){
 
                         let cfn_record = recset.getFirstRecord();
@@ -2650,7 +2650,7 @@ window.hWin.HEURIST4.dbs = {
                                 if(response.status == window.hWin.ResponseStatus.OK){
 
                                     let rectypes = null;
-                                    let recset = new hRecordSet(response.data);
+                                    let recset = new HRecordSet(response.data);
                                     if(recset.length()>0){
                                         rectypes = [];
                                         recset.each2(function(id, rec){

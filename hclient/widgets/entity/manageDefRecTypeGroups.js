@@ -265,7 +265,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='editonly'){
             
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 this._selection.addRecord(recID, fieldvalues);
                 this._currentEditID = null;
                 this._selectAndClose();

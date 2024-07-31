@@ -1041,7 +1041,7 @@ window.hWin.HEURIST4.ui = {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] 
                                                          : window.hWin.HEURIST4.allUsersCache = [];
                         if(recordset.count_total()>0){
@@ -1764,7 +1764,7 @@ window.hWin.HEURIST4.ui = {
                 
                 if( query_or_recordset && 
                     (typeof query_or_recordset.isA == "function") && 
-                        query_or_recordset.isA("hRecordSet") )
+                        query_or_recordset.isA("HRecordSet") )
                 {
                     //array of record ids 
                     this.updateRecordList(null, {recordset:query_or_recordset});
@@ -1796,7 +1796,7 @@ window.hWin.HEURIST4.ui = {
                         //that.loadanimation(false);
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            let recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
 
                                 widget.updateRecordList(null, {recordset:recset});
@@ -2124,7 +2124,7 @@ window.hWin.HEURIST4.ui = {
                                         f:[DT_RELATION_TYPE,DT_RELATED_REC_ID]},  
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    let recordset = new hRecordSet(response.data);
+                                    let recordset = new HRecordSet(response.data);
                                     if(recordset.length()>0){
                                         let record = recordset.getFirstRecord();
                                         let term_ID = recordset.fld(record,DT_RELATION_TYPE);
@@ -2139,7 +2139,7 @@ window.hWin.HEURIST4.ui = {
                                         window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+related_ID, w: "e", f:"header"},  
                                         function(response){
                                             if(response.status == window.hWin.ResponseStatus.OK){
-                                                let recordset = new hRecordSet(response.data);
+                                                let recordset = new HRecordSet(response.data);
                                                 if(recordset.length()>0){
                                                     let record = recordset.getFirstRecord();
                                                     let rec_Title = recordset.fld(record,'rec_Title');
@@ -2250,7 +2250,7 @@ window.hWin.HEURIST4.ui = {
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"header"},  
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     if(recordset.length()>0){
                         let record = recordset.getFirstRecord();
                         if($.isFunction(callback)){
@@ -2429,7 +2429,7 @@ window.hWin.HEURIST4.ui = {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            let groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
+                            let groups = new HRecordSet(response.data).makeKeyValueArray(fieldTitle);
 
                             if(configMode.entity == 'SysImportFiles'){
                                 for(const idx in groups){
@@ -2559,7 +2559,7 @@ window.hWin.HEURIST4.ui = {
     showPublishDialog: function( options ){
         
         //OK! script as been loaded
-        if( typeof hPublishDialog==='undefined' || !$.isFunction(hPublishDialog)){        
+        if( typeof HPublishDialog==='undefined' || !$.isFunction(HPublishDialog)){        
             let that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
@@ -2569,7 +2569,7 @@ window.hWin.HEURIST4.ui = {
             );        
         }else{
             if(!window.hWin.HEURIST4.ui.publishDlg) {
-                window.hWin.HEURIST4.ui.publishDlg = new hPublishDialog();                        
+                window.hWin.HEURIST4.ui.publishDlg = new HPublishDialog();                        
             }
             window.hWin.HEURIST4.ui.publishDlg.openPublishDialog( options );
         }

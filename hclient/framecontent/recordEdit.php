@@ -336,7 +336,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                                     //that.loadanimation(false);
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         
-                                        var recset = new hRecordSet(response.data);
+                                        var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
                                             $container.manageRecords('addEditRecord', recset.getOrder()[0]);

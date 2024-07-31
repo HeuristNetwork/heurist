@@ -1251,7 +1251,7 @@ class DbUtils {
             $mysqli->rollback();
         }
 
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         //$mysqli->close();
 
         return $res;

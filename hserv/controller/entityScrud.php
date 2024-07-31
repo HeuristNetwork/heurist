@@ -4,7 +4,7 @@
     * Entity SCRUD controller - web interface. It uses functions from entityScrudSrv.php
     * search, create, read, update and delete
     * 
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Add/replace/delete details in batch
     *
     * @package     Heurist academic knowledge management system

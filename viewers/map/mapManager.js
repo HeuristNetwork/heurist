@@ -468,7 +468,7 @@ function hMapManager( _options )
         //create treeview data
         var treedata = [];
         
-        if( (typeof resdata.isA == "function") && resdata.isA("hRecordSet") ){
+        if( (typeof resdata.isA == "function") && resdata.isA("HRecordSet") ){
         
             var idx, records = resdata.getRecords();
             for(idx in records){

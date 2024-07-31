@@ -1408,7 +1408,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             window.hWin.HAPI4.RecordMgr.search(request, function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var resdata = new hRecordSet(response.data);
+                    var resdata = new HRecordSet(response.data);
 
                         map_overlays = [];
 
@@ -1618,7 +1618,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         //perform search
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recordset = new hRecordSet(response.data);
+                    var recordset = new HRecordSet(response.data);
                     var record = recordset.getFirstRecord();
                     _current_overlay = new hMapLayer({gmap:gmap, recordset:recordset});
                 }else{

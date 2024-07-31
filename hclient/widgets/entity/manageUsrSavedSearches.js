@@ -296,7 +296,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();

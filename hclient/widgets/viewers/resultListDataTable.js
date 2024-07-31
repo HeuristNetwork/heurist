@@ -110,7 +110,7 @@ $.widget( "heurist.resultListDataTable", {
     that._dout('search finished');
     
                     that._current_query = data.query;
-                    that.options.recordset = data.recordset; //hRecordSet
+                    that.options.recordset = data.recordset; //HRecordSet
 
                     that._refresh();
                     that.loadanimation(false);

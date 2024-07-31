@@ -430,7 +430,7 @@ $.widget( "heurist.embedDialog", {
         window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        let resdata = new hRecordSet(response.data);
+                        let resdata = new HRecordSet(response.data);
                         let idx, records = resdata.getRecords();
                         for(idx in records){
                             if(idx)

@@ -856,7 +856,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
 						if(response.status == window.hWin.ResponseStatus.OK){
 
-							let resdata = new hRecordSet(response.data);
+							let resdata = new HRecordSet(response.data);
 							let idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
 							for(idx in records){
 								if(idx)

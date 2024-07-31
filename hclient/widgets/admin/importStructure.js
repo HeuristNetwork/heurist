@@ -64,7 +64,7 @@ $.widget( "heurist.importStructure", {
         onClose:null
     },
 
-    //cached records hRecordSet for databases
+    //cached records HRecordSet for databases
     _cachedRecordset_dbs:null,
 
     _is_rename_target: false,
@@ -375,7 +375,7 @@ $.widget( "heurist.importStructure", {
 
                     response.data.fields.push('rec_ScratchPad');
 
-                    that._cachedRecordset_dbs = new hRecordSet(response.data);
+                    that._cachedRecordset_dbs = new HRecordSet(response.data);
 
                     //prepare recordset - extract database name and transfer title to notes
                     that._cachedRecordset_dbs.each(function(recID, record){

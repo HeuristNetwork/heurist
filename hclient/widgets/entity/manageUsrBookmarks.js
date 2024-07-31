@@ -66,7 +66,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            let recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
                                 that.updateRecordList(null, {recordset:recset});
                                 that.addEditRecord( recset.getOrder()[0] );

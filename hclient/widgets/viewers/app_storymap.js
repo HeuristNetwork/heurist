@@ -750,7 +750,7 @@ $.widget( "heurist.app_storymap", {
                                 
                                 window.hWin.HAPI4.RecordMgr.search(request,
                                     function(response) {
-                                        that._resultset = new hRecordSet(response.data);
+                                        that._resultset = new HRecordSet(response.data);
                                         
                                         //sort
                                         if(that.options.elementOrder){
@@ -785,7 +785,7 @@ $.widget( "heurist.app_storymap", {
                                         that._startNewStory(recID);        
                                     });
                             }else{
-                                that._resultset = new hRecordSet();
+                                that._resultset = new HRecordSet();
                                 that._startNewStory(recID);
                             }
                             
@@ -803,7 +803,7 @@ $.widget( "heurist.app_storymap", {
                 window.hWin.HAPI4.RecordMgr.search(request,
                     function(response) {
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            that._resultset = new hRecordSet(response.data);
+                            that._resultset = new HRecordSet(response.data);
                             that._startNewStory(recID);
                             
                         }else{

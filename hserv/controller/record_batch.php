@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Add/replace/delete details in batch
     *
     * @package     Heurist academic knowledge management system

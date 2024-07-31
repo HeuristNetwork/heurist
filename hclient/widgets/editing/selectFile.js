@@ -238,7 +238,7 @@ $.widget( "heurist.selectFile", {
                         
                         that._is_source_changed = false;
                         
-                        let recset = new hRecordSet(response.data);
+                        let recset = new HRecordSet(response.data);
                         if(recset.length()>0){
                             
                             if(that.options.isdialog){

@@ -529,7 +529,7 @@ abstract class DbEntityBase
                     //rollback
                     if($this->need_transaction){
                         $mysqli->rollback();
-                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                     }
                     $this->system->addError(HEURIST_INVALID_REQUEST, 
                         'Cannot save data in table '.$this->config['entityName'], $ret);
@@ -578,7 +578,7 @@ abstract class DbEntityBase
         if($this->need_transaction){
             //commit
             $mysqli->commit();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             
             $this->_cleanDbDefCache();
         }

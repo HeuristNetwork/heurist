@@ -853,7 +853,7 @@ $.widget( "heurist.svs_list", {
                 function(response){
                     let desc = '';
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        let resp = new hRecordSet( response.data );
+                        let resp = new HRecordSet( response.data );
                         
                         let rec = resp.getFirstRecord();
                         if(rec){

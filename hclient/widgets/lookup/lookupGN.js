@@ -141,7 +141,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
      * Result list rendering function called for each record
      * 
      * Param:
-     *  recordset (hRecordSet) => Heurist Record Set
+     *  recordset (HRecordSet) => Heurist Record Set
      *  record (json) => Current Record being rendered
      * 
      * Return: html
@@ -400,7 +400,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             }
 
             if(res_orders.length>0){        
-                let res_recordset = new hRecordSet({
+                let res_recordset = new HRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,

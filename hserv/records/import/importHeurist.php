@@ -1458,11 +1458,11 @@ EOD;
         
         if($is_rollback){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 $res = false;
         }else{
                 $mysqli->commit();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 $res = array('count_imported'=>$cnt_imported, 
                              'count_ignored'=>$cnt_ignored, //rectype not found 
                              'count_inserted'=>$cnt_inserted,

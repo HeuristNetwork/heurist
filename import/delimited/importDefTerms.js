@@ -330,7 +330,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
             _setCurtain(2);
             
             if(content==''){
-                //$(recordList).resultList('updateResultSet', new hRecordSet());
+                //$(recordList).resultList('updateResultSet', new HRecordSet());
             }else{
             
                         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));

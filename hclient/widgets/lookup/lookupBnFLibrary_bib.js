@@ -321,7 +321,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
      * Result list rendering function called for each record
      * 
      * Param:
-     *  recordset (hRecordSet) => Heurist Record Set
+     *  recordset (HRecordSet) => Heurist Record Set
      *  record (json) => Current Record being rendered
      * 
      * Return: html
@@ -910,7 +910,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 //res_records = this.removeDupAuthors(fields.indexOf('author'), res_records);
 
                 // Create the record set for the resultList
-                let res_recordset = new hRecordSet({
+                let res_recordset = new HRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,

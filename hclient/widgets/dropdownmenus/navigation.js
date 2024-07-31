@@ -36,7 +36,7 @@ $.widget( "heurist.navigation", {
        supp_options: null  //options to init page after load
     },
     
-    menuData: null, //hRecordSet
+    menuData: null, //HRecordSet
 
     pageStyles:{},  //menu_id=>styles
     pageStyles_original:{}, //keep to restore  element_id=>css
@@ -150,7 +150,7 @@ $.widget( "heurist.navigation", {
             
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
-                that.menuData = new hRecordSet(response.data);
+                that.menuData = new HRecordSet(response.data);
                 that._onGetMenuData();   
             }else{
                 $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.divMainMenu);

@@ -18,7 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hPublishDialog( _options )
+function HPublishDialog( _options )
 {    
     const _className = "PublishDialog",
     _version   = "0.4";

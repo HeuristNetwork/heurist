@@ -469,7 +469,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
         
         if(qstr==''){
-            this._trigger( "onresult", null, {recordset:new hRecordSet()} );
+            this._trigger( "onresult", null, {recordset:new HRecordSet()} );
         }else{
             this._trigger( "onstart" );
 
@@ -502,7 +502,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     }
                     
                     that._trigger( "onresult", null, 
-                        {recordset:new hRecordSet(response.data), request:request} );
+                        {recordset:new HRecordSet(response.data), request:request} );
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }

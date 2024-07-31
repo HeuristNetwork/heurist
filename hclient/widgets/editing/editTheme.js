@@ -56,7 +56,7 @@ function editTheme(current_value, callback){
 
 function __editTheme_continue(){
     
-    let recdata = current_value ? new hRecordSet({count:1, order:[1], 
+    let recdata = current_value ? new HRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
         //Object.getOwnPropertyNames(current_value)

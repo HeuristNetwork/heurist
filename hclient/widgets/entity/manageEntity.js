@@ -141,9 +141,9 @@ $.widget( "heurist.manageEntity", {
     //system name of entity  - define it to load entity config from server
     _entityName: '', 
     
-    //selected records hRecordSet
+    //selected records HRecordSet
     _selection:null,
-    //cached records hRecordSet
+    //cached records HRecordSet
     _cachedRecordset:null,
     //reference to edit form
     _editing:null,
@@ -755,7 +755,7 @@ $.widget( "heurist.manageEntity", {
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                let recset = new hRecordSet(response.data);
+                                let recset = new HRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -1941,7 +1941,7 @@ $.widget( "heurist.manageEntity", {
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                let recordset = new hRecordSet(response.data);
+                                let recordset = new HRecordSet(response.data);
                                 that._initEditForm_step4(recordset);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);

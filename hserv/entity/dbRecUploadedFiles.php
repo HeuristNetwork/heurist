@@ -1697,7 +1697,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $mysqli->commit();
         }
 
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         if($ret && $is_csv_import){
             $ret = 'Uploaded / registered: '.$cnt_imported.' media resources. ';

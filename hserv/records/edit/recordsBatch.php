@@ -376,7 +376,7 @@ class RecordsBatch
             if($res<0){
                 $syserror = $mysqli->error;
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 return $this->system->addError(HEURIST_DB_ERROR, 
                     'Unable to insert reverse pointer for child record ID:'.$child_id.' - ', $syserror);
             }else if($res==0){ 
@@ -428,14 +428,14 @@ class RecordsBatch
         if(!$res){
             $syserror = $mysqli->error;
             $mysqli->rollback();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             return $this->system->addError(HEURIST_DB_ERROR, 
                 'Unable to set value in record sructure table', $syserror);
         }
         
         
         $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return $this->result_data;
     }
@@ -652,7 +652,7 @@ class RecordsBatch
             $mysqli->commit();
             $res_data = $this->result_data;
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return $res_data;
         
@@ -2076,7 +2076,7 @@ public methods
                 if($result['status'] != HEURIST_OK){
 
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
                     return false;
                 }
@@ -2092,7 +2092,7 @@ public methods
                     if($result['status'] != HEURIST_OK){
 
                         $mysqli->rollback();
-                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
                         return false;
                     }
@@ -2122,7 +2122,7 @@ public methods
                     $system->addError(HEURIST_DB_ERROR, "An SQL error occurred while attempting to update the original values from record #$rec_id");
 
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
                     return false;
                 }
@@ -2135,7 +2135,7 @@ public methods
             if(!$record){
 
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 return false;
             }
 
@@ -2151,7 +2151,7 @@ public methods
             if($result['status'] != HEURIST_OK || $result['data'] != $record['ID']){
 
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
                 return false;
             }
@@ -2160,7 +2160,7 @@ public methods
         }
 
         $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         $final_count = count($new_records);// get final count of new records
 
@@ -2948,7 +2948,7 @@ public methods
         if($res){
             $mysqli->commit();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return $res?$this->result_data:false;
     }

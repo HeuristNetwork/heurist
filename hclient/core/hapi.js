@@ -44,7 +44,7 @@ Localization routines (assigned to window.hWin)
     HRes = returns url or loads content for localized resource
     HRJ = returns localized value for json (options in widget)
 
-LayoutMgr   hLayout object (@todo replace to new version from CMS)
+LayoutMgr   HLayout object (@todo replace to new version from CMS)
 
 Classes for server interaction
 
@@ -141,12 +141,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
-        if (typeof hLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hLayout)
+        if (typeof HLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HLayout)
             && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
-            that.LayoutMgr = new hLayout();
+            that.LayoutMgr = new HLayout();
         }
-        if (typeof hRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hRecordSearch)) {
-            that.RecordSearch = new hRecordSearch();
+        if (typeof HRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HRecordSearch)) {
+            that.RecordSearch = new HRecordSearch();
         }
 
         if (!window.onresize) {
@@ -235,7 +235,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      */
 
     /**
-     * internal function see hSystemMgr, hRecordMgr - ajax request to server
+     * internal function see HSystemMgr, HRecordMgr - ajax request to server
      *
      * @param {string} action - name of php script in hserv/controller folder on server side
      * @param {Request} request - data to be sent to server side
@@ -449,7 +449,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *
     * @returns {Object}
     */
-    function hSystemMgr() {
+    function HSystemMgr() {
 
         let that = {
 
@@ -1435,9 +1435,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     * - get_facets
     * - search_related
     *
-    * @returns {hRecordMgr}
+    * @returns {HRecordMgr}
     */
-    function hRecordMgr() {
+    function HRecordMgr() {
 
         /**
          * @typedef Record
@@ -1470,7 +1470,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             * @param {string} [request.rt] - optional: rectype
             * @param {string} [request.ro] - optional: owner
             * @param {string} [request.rv] - optional: visibility
-            * @param {callserverCallback} callback - response hRecordSet object
+            * @param {callserverCallback} callback - response HRecordSet object
             */
             addRecord: function (request, callback) {
                 if (request) {
@@ -1486,7 +1486,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              *
              * @param {Request} request - request.a will be set to s|save
              * @param {Record} request.record - record data to be saved
-             * @param {callserverCallback} callback - response hRecordSet object
+             * @param {callserverCallback} callback - response HRecordSet object
              */
             saveRecord: function (request, callback) {
                 if (request) request.a = 's';
@@ -1631,7 +1631,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     callback = function (response) {
                         let resdata = null;
                         if (response.status == window.hWin.ResponseStatus.OK) {
-                            resdata = new hRecordSet(response.data);
+                            resdata = new HRecordSet(response.data);
                         } else {
 
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1773,7 +1773,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *
     * @returns {Object}
     */
-    function hEntityMgr() {
+    function HEntityMgr() {
 
         let entity_configs = {};
         let entity_data = {};
@@ -1927,7 +1927,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //create separate recordset for every rectype
                 for (let rty_ID in rst_index) {
                     let _order = Object.keys(rst_index[rty_ID]);
-                    rst_index[rty_ID] = new hRecordSet({
+                    rst_index[rty_ID] = new HRecordSet({
                         entityName: 'defRecStructure',
                         count: _order.length,
                         records: rst_index[rty_ID],
@@ -2038,7 +2038,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         function (response) {
                             if (response.status == window.hWin.ResponseStatus.OK) {
 
-                                entity_data[response.data.entityName] = new hRecordSet(response.data);
+                                entity_data[response.data.entityName] = new HRecordSet(response.data);
 
                                 if (response.data.entityName == 'defRecStructure') {
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
@@ -2085,7 +2085,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     entity_data[entityName] = data;
                 } else {
                     
-                    entity_data[entityName] = new hRecordSet(data[entityName]);
+                    entity_data[entityName] = new HRecordSet(data[entityName]);
 
                     //build rst index
                     if (entityName == 'defRecStructure') {
@@ -2188,7 +2188,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ 
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         window.hWin.HAPI4.EntityMgr.setEntityData(key, recordset); // save to local cache
 
                         callback.call(this, recordset);
@@ -2490,15 +2490,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         //UserMgr: new hUserMgr(),
 
-        SystemMgr: new hSystemMgr(),
+        SystemMgr: new HSystemMgr(),
 
         /*SystemMgr: function(){
-        return hSystemMgr();
+        return HSystemMgr();
         },*/
 
-        RecordMgr: new hRecordMgr(),
+        RecordMgr: new HRecordMgr(),
 
-        EntityMgr: new hEntityMgr(),
+        EntityMgr: new HEntityMgr(),
 
         //assign it later since we may have different search managers - incremental, partial...
         RecordSearch: null, //class that responsible for search and incremental loading of result
@@ -2757,7 +2757,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
             }
             if (selection) {
-                if ((typeof selection.isA == "function") && selection.isA("hRecordSet")) {
+                if ((typeof selection.isA == "function") && selection.isA("HRecordSet")) {
                     if (selection.length() > 0) {
                         return (needIds) ? selection.getIds() : selection; //array of record ids
                     }

@@ -24,7 +24,7 @@ function hEditing(_options) {
          _version   = "0.4";
 
      let $container = null,
-         recdata = null,     //hRecordSet with data to be edited
+         recdata = null,     //HRecordSet with data to be edited
          editing_inputs = [],
          recstructure,
          onChangeCallBack=null,

@@ -64,7 +64,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     window.hWin.HEURIST4.allUsersCache = [];                    
                     recordset.each2(function(id,rec){
                         window.hWin.HEURIST4.allUsersCache.push({id: id, name: rec['ugr_FullName']});

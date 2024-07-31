@@ -89,7 +89,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
     }else{
         $mysqli->rollback();
     }
-    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
     return $upgrade_success; 
 }  

@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hSystemMgr in hapi.js
+    * Application interface. See HSystemMgr in hapi.js
     *   database definitions - record types, record structure, field types, terms
     *
     * @package     Heurist academic knowledge management system

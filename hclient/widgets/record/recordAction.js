@@ -87,7 +87,7 @@ $.widget( "heurist.recordAction", {
             this._currentRecordsetColIds = window.hWin.HAPI4.currentRecordsetCollected;
         }else{
             //Testing
-            this._currentRecordset = new hRecordSet({count: "0",offset: 0,reccount: 0,records: [], rectypes:[]});
+            this._currentRecordset = new HRecordSet({count: "0",offset: 0,reccount: 0,records: [], rectypes:[]});
             this._currentRecordsetSelIds = null;
             this._currentRecordsetColIds = null;
         }

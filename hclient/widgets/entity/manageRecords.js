@@ -1984,7 +1984,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            let recordset = new hRecordSet(response.data);
+                            let recordset = new HRecordSet(response.data);
                             that._renderSummaryReminders(recordset, panel);
                         }
                     });        
@@ -2080,7 +2080,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            let recordset = new hRecordSet(response.data);
+                            let recordset = new HRecordSet(response.data);
                             that._renderSummaryBookmarks(recordset, panel);
                         }
                     });        
@@ -2710,7 +2710,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             let allowCreateIndependentChildRecord = false;
             
             if(response){ // && response.length()>0
-                that._currentEditRecordset = new hRecordSet(response.data);
+                that._currentEditRecordset = new HRecordSet(response.data);
                 if(that._currentEditRecordset.length()==0){
                     let sMsg = 'Record does not exist in database or has status "hidden" for non owners';
                     window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
@@ -4062,7 +4062,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 function(response){ 
                                
                                     if(response!=null && response.status == window.hWin.ResponseStatus.OK){
-                                        let recset = new hRecordSet(response.data);
+                                        let recset = new HRecordSet(response.data);
                                         let rec = recset.getFirstRecord();
                                         if(window.hWin.HEURIST4.util.isempty(sName)){
                                             var val = recset.fld(rec, dtId_Name);    
@@ -4114,7 +4114,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                                         if(response!=null && response.status == window.hWin.ResponseStatus.OK){
                                             let summary_ext = [];
-                                            let recset = new hRecordSet(response.data);
+                                            let recset = new HRecordSet(response.data);
                                             recset.each(function(recID, rec){
                                                 let layer_extent2 = recset.fld(rec, dtId_Geo);
                                                 let layer_extent = window.hWin.HEURIST4.geo.getWktBoundingBox([layer_extent2]);
@@ -6849,7 +6849,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     return;
                 }
 
-                let recset = new hRecordSet(response.data);
+                let recset = new HRecordSet(response.data);
 
                 if(recset.length() == 0){
                     that._checkStructureFromSource(NEXT_ATTEMPT);

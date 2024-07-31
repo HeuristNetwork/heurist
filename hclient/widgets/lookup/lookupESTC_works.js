@@ -204,7 +204,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
 
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         let record = recordset.getFirstRecord();
                         if(!record || !record.d){
                             window.hWin.HEURIST4.msg.showMsgErr(
@@ -289,7 +289,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
 
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         recordset.each2(function(id, record){
                             for(let i in dlg_response){
                                 for(let j = 0; j < dlg_response[i].length; j++){
@@ -390,7 +390,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
         if(!response.data){
             response.data = response;
         }
-        let recordset = new hRecordSet(response.data);
+        let recordset = new HRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

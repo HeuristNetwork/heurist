@@ -151,7 +151,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         selectRecordScope.empty();
 
         if(!window.hWin.HAPI4.currentRecordset){
-            window.hWin.HAPI4.currentRecordset = new hRecordSet({count:"0",offset: 0,reccount: 1,records:[], rectypes:[]});
+            window.hWin.HAPI4.currentRecordset = new HRecordSet({count:"0",offset: 0,reccount: 1,records:[], rectypes:[]});
         }
 
         let opt, selScope = selectRecordScope.get(0);

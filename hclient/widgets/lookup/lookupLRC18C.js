@@ -265,7 +265,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             response = window.hWin.HEURIST4.util.isJSON(response);
 
             if(response.status == window.hWin.ResponseStatus.OK){
-                let recordset = new hRecordSet(response.data);
+                let recordset = new HRecordSet(response.data);
                 recordset.each2(function(trm_ID, term){
                      window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
                 });
@@ -398,7 +398,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                                     
                                     let sImported = '', sExisted = '';
                                     
-                                    let recordset = new hRecordSet(response.data);
+                                    let recordset = new HRecordSet(response.data);
                                     
                                     if(cnt>0){
                                         for(var i=0; i<ids.length; i++)
@@ -596,7 +596,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        let recordset = new hRecordSet(response.data);
+        let recordset = new HRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

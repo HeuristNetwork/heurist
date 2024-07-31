@@ -301,7 +301,7 @@ $.widget( "heurist.resultListCollection", {
                 (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
                 
         if(_collection && _collection.length>0){
-            this.recordList.resultList('updateResultSet', new hRecordSet(_collection));
+            this.recordList.resultList('updateResultSet', new HRecordSet(_collection));
             this.recordList.show();
             $('#mywidget_3249').css('top',175); //hardcode for tlcmap
             

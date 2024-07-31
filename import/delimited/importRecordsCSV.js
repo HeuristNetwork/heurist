@@ -524,7 +524,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             $('#dependencies_preview').css('background',$('#sa_primary_rectype').css('background'));
                             
-                            var resp = new hRecordSet( response.data );
+                            var resp = new HRecordSet( response.data );
                             var record = resp.getFirstRecord();
                             var ses = resp.fld(record, 'sif_ProcessingInfo');
                             

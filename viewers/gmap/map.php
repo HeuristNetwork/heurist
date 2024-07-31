@@ -241,7 +241,7 @@ $system->defineConstants();
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
-                            var recset = new hRecordSet(response.data);
+                            var recset = new HRecordSet(response.data);
                            
                             //var mapdataset = recset.toTimemap();
                             //mapping.load([mapdataset]);

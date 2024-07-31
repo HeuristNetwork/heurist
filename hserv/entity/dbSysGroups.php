@@ -357,7 +357,7 @@ class DbSysGroups extends DbEntityBase
         }else{
             $mysqli->rollback();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
     }
@@ -469,7 +469,7 @@ class DbSysGroups extends DbEntityBase
             */
         }
               
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return $ret;
     }

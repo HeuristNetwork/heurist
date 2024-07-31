@@ -253,7 +253,7 @@ $.widget( "heurist.recordListExt", {
 
                 if(!that._isSameRealm(data)) return;
                 
-                that.options.recordset = data.recordset; //hRecordSet
+                that.options.recordset = data.recordset; //HRecordSet
 
                 that._run_initial = true;
 

@@ -500,7 +500,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
                         if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         let records = recordset.getRecords();
 
                         for(i in records) {
@@ -555,7 +555,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
                     if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
 
-                    let recordset = new hRecordSet(response.data);  // Retieve Search Results
+                    let recordset = new HRecordSet(response.data);  // Retieve Search Results
 
                     recordset.each2(function(id, record){
                         if(record.d && record.d[1]){ // use just the keyword's name
@@ -730,7 +730,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
                     if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
 
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     let records = recordset.getRecords();
 
                     let ids = [];
@@ -1065,7 +1065,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
                     if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
 
-                    let recordset = new hRecordSet(response.data);
+                    let recordset = new HRecordSet(response.data);
                     let record = recordset.getFirstRecord();
                     let details = record.d;
 

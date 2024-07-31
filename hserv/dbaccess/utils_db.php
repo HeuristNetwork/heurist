@@ -1336,7 +1336,7 @@
                             $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
                             if($cnt_dates<150000){
                                 $mysqli->rollback();
-                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                             }
                             return false;
                         }

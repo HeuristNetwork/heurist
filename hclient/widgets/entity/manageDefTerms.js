@@ -1754,7 +1754,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //this._currentEditID<0 && 
         if(this.options.select_mode=='select_single'){
 
-            this._selection = new hRecordSet();
+            this._selection = new HRecordSet();
             //{fields:{}, order:[recID], records:[fieldvalues]});
             this._selection.addRecord(recID, fieldvalues);
             this._selectAndClose();
@@ -3282,7 +3282,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         )+'</div>');
         }
         
-        this._cachedRecordset = new hRecordSet(rdata);
+        this._cachedRecordset = new HRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
         
         if(this.options.import_structure){

@@ -1635,7 +1635,7 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HAPI4.EntityMgr.doRequest(req, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            let recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
                                 recset.each2(function(id, val){
                                     groups.push([val['ugr_ID'], val['ugr_Name']]);
@@ -1662,7 +1662,7 @@ $.widget( "heurist.editing_input", {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             let gIDs = [];
-                            let recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
                                 records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
                                 
@@ -4644,7 +4644,7 @@ $.widget( "heurist.editing_input", {
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                                    let recordset = new hRecordSet(response.data);
+                                    let recordset = new HRecordSet(response.data);
                                     let record = recordset.getFirstRecord();
 
                                     if(record){
@@ -4698,7 +4698,7 @@ $.widget( "heurist.editing_input", {
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     ele.empty();
 
-                                    let recordset = new hRecordSet(response.data);
+                                    let recordset = new HRecordSet(response.data);
                                     if(recordset.length()>0){
                                         let record = recordset.getFirstRecord();
                                         let rec_Title = recordset.fld(record,'rec_Title');
@@ -6613,7 +6613,7 @@ $.widget( "heurist.editing_input", {
 
                 window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        let recset = new hRecordSet(response.data);
+                        let recset = new HRecordSet(response.data);
                         that._enumsHasImages = (recset.length() > 0);
                         if(that._enumsHasImages){
                             that.input_cell.find('.ui-icon-image').show();

@@ -81,7 +81,7 @@ function onPageInit(success){
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recordset = new hRecordSet(response.data);
+                        var recordset = new HRecordSet(response.data);
                           
                         var records_ids = recordset.getIds(MAXITEMS);
                         if(records_ids.length>0){

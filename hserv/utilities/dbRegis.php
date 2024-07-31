@@ -304,7 +304,7 @@ class DbRegis {
             $mysqli->commit();
         }
         
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
     
         return $res;    
     }

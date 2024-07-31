@@ -174,7 +174,7 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
 
     /**
     * Load timemap datasets
-    * @see hRecordSet.toTimemap()
+    * @see HRecordSet.toTimemap()
     *
     * @param _mapdata
     */

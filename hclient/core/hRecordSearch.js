@@ -1,5 +1,5 @@
 /**
-* Search wrapper for hRecordMgr.search. 
+* Search wrapper for HRecordMgr.search. 
 * It executes this method either callback or global events.
 * It allows to load entire set of records (incremental search by chunks has been disabled)
 * 
@@ -33,8 +33,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hRecordSearch() {
-     const _className = "hRecordSearch",
+function HRecordSearch() {
+     const _className = "HRecordSearch",
          _version   = "0.4";
      let _query_request = null,
          _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
@@ -59,7 +59,7 @@ function hRecordSearch() {
                            window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
                     }
                     
-                    callback( hRecordSet(response.data) );
+                    callback( HRecordSet(response.data) );
                 }else{
                     callback( null );
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -151,7 +151,7 @@ function hRecordSearch() {
                                window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
                         }
                         
-                        recordset = new hRecordSet(response.data);
+                        recordset = new HRecordSet(response.data);
                         recordset.setRequest( qr  );
 
                 }else{

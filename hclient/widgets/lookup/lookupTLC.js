@@ -364,7 +364,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             if(res_orders.length>0){
 
                 // initialise recordset
-                let res_recordset = new hRecordSet({
+                let res_recordset = new HRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,
