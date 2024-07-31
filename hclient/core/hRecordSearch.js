@@ -39,12 +39,6 @@ function HRecordSearch() {
      let _query_request = null,
          _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
          
-    /**
-    * Initialization
-    */
-    function _init( ) {
-    }
-    
     //
     // standalone search with callback (without event trigger)
     //

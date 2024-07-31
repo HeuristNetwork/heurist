@@ -56,9 +56,9 @@ function hMapLayer( _options ) {
             
             _map_overlay = _addTiledImage( null );
             
-        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+        //}else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-            _map_overlay = _addImage();
+        //    _map_overlay = _addImage();
             
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
             
@@ -184,14 +184,6 @@ function hMapLayer( _options ) {
         }
         
         return imageLayer;
-    }
-    
-    //
-    // add image
-    //
-    function _addImage(){
-        
-        
     }
     
     //

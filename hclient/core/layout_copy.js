@@ -558,14 +558,6 @@ function HLayout(args) {
         //setTimeout(function(){$container.show();},1000);
     }
 
-    //
-    // init either tabs or accordion or groups
-    //
-    function _initLayoutGroups($container){
-        
-    }
-    
-    
     /**
     * Adds application/widgets to specified pane
     *

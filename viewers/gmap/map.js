@@ -2288,9 +2288,6 @@ function sane_link_opener(link) {
         return false;
     }
 }
-//stub
-function showPlayer(obj, id, url) {
-}
 
 // this function is required for printing local time form map popup info
 function printLTime(sdate, ele){
