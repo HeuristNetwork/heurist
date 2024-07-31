@@ -1,48 +1,57 @@
-<div id="div_fieldset">
-            <div style="min-height:10px">&nbsp;</div>
+<fieldset id="div_fieldset">
+
+            <legend style="padding:5px" class="heurist-helper3">
+                This function processes the current query looking for records in another (or the same) entity type based on matching the values of a field in each entity type.<br>
+                Fields to be matched may be text or numeric.<br>
+                The current query must contain only a single record type (this is enforced to avoid accidental errors).<br><br>
+                Where a match is found it will insert the ID of the matched record into a record pointer field in the source record.
+            </legend>
+            
             <div>
-                <div id="div_source_header" class="header" style="width: 200px;text-align: right;display:inline-block;">
-                    <span style="line-height: 21px;">Source record:</span>
-                </div>
+                <div class="header" style="width:200px">Source records scope:</div>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
                 
             <!-- link field selector -->
-            <div id="source_field" 
-                    style="margin-top:15px;margin-bottom:15px;max-height: 40%;overflow: auto;border:none;">
+            <div>
+                <div class="header">Field in which to insert record pointers:</div>
+                <select id="sel_pointer_field" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                <!-- <div id="source_field"  style="margin-bottom:15px;max-height: 40%;overflow: auto;border:none;"></div> -->
+            </div>
+                
+            <div>
+                <div class="header">Field to be matched:</div>
+                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="max-width:30em;min-height: 24px;"></select>
+                <span id="count_source_unique" style="padding-left:5px;font-weight:bold"></span>
             </div>
 
-            <div style="padding: 0.2em; min-width: 600px;" class="input">
-                <div class="header" style="width: 200px;text-align: right;display:inline-block;"><label for="sel_fieldtype_source">Field to be matched:</label></div>
-                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="max-width:30em;min-height: 24px;"></select>
-                <span id="source_unique_count"></span>
+            <div>
             </div>
             
-            <div style="padding-top: 2em;">
-                <div id="div_target_header" class="header" style="width: 200px;text-align: right;display:inline-block;">
-                    <span style="line-height:21px">Entity type in which to seek matches:</span>
-                </div>
+            <div>
+                <div class="header">Entity type in which to seek matches:</div>
                 <select id="target_record_type" class="text ui-widget-content ui-corner-all" style="min-width:25em"></select>
-                <span id="target_rty_count"></span>
+                <span id="count_target_rty" style="padding-left:5px;font-weight:bold"></span>
+                <div class="heurist-helper2">Only entity types compatible with the selected record pointer field are shown</div>
             </div>
             
             <!-- target field selector -->
-            <div style="padding: 0.2em; min-width: 600px;" class="input">
-                <div class="header" style="width: 200px;text-align: right;display:inline-block;"><label for="sel_fieldtype_target">Field in which to seek matches:</label></div>
-                <select id="sel_fieldtype_target" class="ui-widget-content ui-corner-all" style="max-width:30em;min-height: 24px;"></select>
-                <span id="target_matches"></span>
+            <div>
+                <div class="header">Field in which to seek matches:</div>
+                <select id="sel_fieldtype_target" class="ui-widget-content ui-corner-all" style="margin-top:15px;margin-bottom:15px;max-width:30em;min-height: 24px;"></select>
+                <span id="count_target_matches" style="padding-left:5px;font-weight:bold"></span>
             </div>
 
 
-            <div style="padding: 0.2em; min-width: 600px;" class="input">
-                <div class="header" style="width: 200px;text-align: right;display:inline-block;">
+            <div>
+                <div class="header">
                     Existing values behaviour:
                 </div>
                 <label><input name="to_replace" type="radio" checked value="add"/>add value (no duplication)</label>
                 <label><input name="to_replace" type="radio" value="replace"/>replace existing value(s)</label>
             </div>
 
-</div>            
+</fieldset>            
             
 <div class="ent_wrapper progressbar_div" style="display: none; background:white">
         <div class="loading" style="display:none;height:100%"></div>

@@ -121,6 +121,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     _fillSelectFieldTypes: function (party, recRecTypeID) {
 
         this.element.find('#'+party+'_field').empty();
+        
+        
             
         var details = $Db.rst(recRecTypeID);
             
@@ -130,12 +132,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         if(party=='source')
         {
             
-        var that = this;
-        // get structures for both record types and filter out link and relation maker fields for links
-        //                                      and text and numeric fields for matching             
-        details.each2(function(dty, detail) {
+            var fieldPointerSel = this.element.find('#sel_pointer_field');
+            fieldPointerSel.empty();
             
-            var field_type = $Db.dty(dty, 'dty_Type');
+            var that = this;
+            // get structures for both record types and filter out link and relation maker fields for links
+            //                                      and text and numeric fields for matching             
+            details.each2(function(dtyID, detail) {
+            
+            var field_type = $Db.dty(dtyID, 'dty_Type');
             var req_type  = detail['rst_RequirementType'];
             
             //|| field_type=='relmarker')
@@ -145,25 +150,25 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             
             //get name, contraints
             var dtyName = detail['rst_DisplayName'];
-                
+/* for list of radio buttons                
                 //add UI elements
     $('<div class="field_item" style="line-height:2.5em;padding-left:20px">'
-    +'<label style="font-style:italic">' //for="cb'+party+'_cb_'+dty+'"
-    +'<input name="link_field" type="radio" id="cb'+party+'_cb_'+dty+'" '
-    +' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"'
+    +'<label style="font-style:italic">' //for="cb'+party+'_cb_'+dtyID+'"
+    +'<input name="link_field" type="radio" id="cb'+party+'_cb_'+dtyID+'" '
+    +' data-party="'+party+'" value="'+dtyID+'" data-type="'+field_type+'"'
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
     + dtyName+'</label>&nbsp;'
     + '<div style="display:inline-block;vertical-align:-webkit-baseline-middle;padding-left:20px">'
-    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row;line-height:21px"></div></div>'
+    + '<div id="rt_'+party+'_sel_'+dtyID+'" style="display:table-row;line-height:21px"></div></div>'
     +'<div>').appendTo(that.element.find('#'+party+'_field'));
     
     
                 if(field_type=='relmarker'){
-                    that._createInputElement_Relation( party, recRecTypeID, dty ); 
+                    that._createInputElement_Relation( party, recRecTypeID, dtyID ); 
                 }
-            
-            
-            that._on(that.element.find('#cbsource_cb_'+dty),{change:that._fillTargetRecordTypes});
+                that._on(that.element.find('#cbsource_cb_'+dty),{change:that._fillTargetRecordTypes});
+*/            
+                window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), dtyID, dtyName);
         });//for fields
 
         
@@ -171,11 +176,21 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             if(this.element.find('input[type="radio"][name="link_field"]').length>0){
                 $(this.element.find('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').change();
             }
-        }
+            
+            
+            this._on( fieldPointerSel, { change: that._fillTargetRecordTypes} );        
+            //if(fieldPointerSel.selectedIndex<0) fieldPointerSel.selectedIndex=0;
+            window.hWin.HEURIST4.ui.initHSelect(fieldPointerSel, false);
+            fieldPointerSel.trigger('change');
+            
+            
+        }//for source 
         
+        // create matching field
         var fieldSelect = $('#sel_fieldtype_'+party);
         window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, ['freetext','blocktext'], null);
-        
+                     //,{useHtmlSelect:true});
+        window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
         this._on(fieldSelect,{change:this._findMatchesCount});
         
         fieldSelect.trigger('change');
@@ -194,7 +209,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         if(fieldSelect.attr('id')=='sel_fieldtype_source'){
 
-            var cnt_info = this.element.find('#source_unique_count').text('');
+            var cnt_info = this.element.find('#count_source_unique').text('');
             
             if(fieldSelect.val()>0){
                 cnt_info.addClass('ui-icon ui-icon-loading-status-balls rotate')
@@ -203,7 +218,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                 function(response){     
                     cnt_info.removeClass('ui-icon ui-icon-loading-status-balls rotate')
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        cnt_info.text(response.data);                
+                        cnt_info.text(response.data+' values');                
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -216,7 +231,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             var fieldSelectTrg = this.element.find('#sel_fieldtype_target');
             var fieldSelectSrc = this.element.find('#sel_fieldtype_source');
 
-            var cnt_info2 = this.element.find('#target_matches').text('');
+            var cnt_info2 = this.element.find('#count_target_matches').text('');
             
             if(fieldSelectSrc.val()>0 && fieldSelectTrg.val()>0){
                 cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
@@ -233,7 +248,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                 function(response){     
                     cnt_info2.removeClass('ui-icon ui-icon-loading-status-balls rotate')
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        cnt_info2.text(response.data);                
+                        cnt_info2.text(response.data+' matches');                
                         that._enableActionButton();
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -279,18 +294,18 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     },
     
     _onTargetRtySelectChange: function(){
-        this.element.find('#target_rty_count').text('');
+        this.element.find('#count_target_rty').text('');
         this.target_RecTypeID = this.targetRtySelect.val(); 
         if(this.target_RecTypeID>0){
             var rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
             if(rty_usage_cnt>0){
                 this._fillSelectFieldTypes('target', this.target_RecTypeID);
-                this.element.find('#target_rty_count').text( rty_usage_cnt );
+                this.element.find('#count_target_rty').text( rty_usage_cnt + ' records' );
             }
         }     
-        if(this.element.find('#target_rty_count').text()==''){
+        if(this.element.find('#count_target_rty').text()==''){
             this.element.find('#sel_fieldtype_target').empty();
-            this.element.find('#target_matches').empty();
+            this.element.find('#count_target_matches').empty();
             this._enableActionButton();
         }
         
@@ -391,7 +406,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     _enableActionButton: function (){
         
-        var isEnabled = (parseInt($('#target_matches').text())>0);
+        var isEnabled = (parseInt($('#count_target_matches').text())>0);
         
         if(isEnabled){
             var sel_field  = this.element.find('input[type="radio"][name="link_field"]:checked');
