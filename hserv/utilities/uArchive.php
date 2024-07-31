@@ -115,7 +115,7 @@ class UArchive {
                         }
                     }
 
-                    if(!$is_filtered) continue; //exclude not in $only_these_folders
+                    if(!$is_filtered) {continue;} //exclude not in $only_these_folders
 
                     // Determine real path
                     $file = realpath($file);
@@ -288,7 +288,7 @@ class UArchive {
                 for ( $i=0; $i < $zip->numFiles; $i++ ) 
                 { 
                     $entry = $zip->getNameIndex($i);
-                    if ( substr( $entry, -1 ) == '/' ) continue; // skip directories 
+                    if ( substr( $entry, -1 ) == '/' ) {continue;} // skip directories 
 
                     $fp = $zip->getStream( $entry );
                     if (!$fp ) {
@@ -396,7 +396,7 @@ class UArchive {
                         }
                     }
 
-                    if(!$is_filtered) continue; //exclude not in $only_these_folders
+                    if(!$is_filtered) {continue;} //exclude not in $only_these_folders
 
                     // Determine real path
                     $file = realpath($file);

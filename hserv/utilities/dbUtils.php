@@ -1342,7 +1342,7 @@ class DbUtils {
                         
                         if(strtolower($table)=='usrrecpermissions'){
                             $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
-                            if(!($cnt>0)) continue;
+                            if(!($cnt>0)) {continue;}
                         }else if($table=='sysUGrps'){
                             $cnt = mysql__select_value($mysqli, "SELECT count(*) FROM `". $db_source ."`.sysUGrps WHERE ugr_Enabled != 'n' AND ugr_Enabled != 'y'");
 

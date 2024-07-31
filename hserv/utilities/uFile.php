@@ -324,7 +324,7 @@
                 $url = HEURIST_BASE_URL.$dir;
             }
             
-            if (!(file_exists($folder) && is_dir($folder))) continue;
+            if (!(file_exists($folder) && is_dir($folder))) {continue;}
             
             
             $files = scandir($folder);
@@ -802,7 +802,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                             if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
                             {
                                 $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
-                                if(!$res) break;
+                                if(!$res) {break;}
                             }
                         }
 
@@ -1385,7 +1385,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
                 }
             }
             
-            if($line_no>10) break;
+            if($line_no>10) {break;}
             $line_no++;
         }   
         rewind($handle);

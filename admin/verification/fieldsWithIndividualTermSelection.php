@@ -97,7 +97,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             }else{
                 $cnt2++;
             }
-            if($is_vocab) continue;
+            if($is_vocab) {continue;}
             */
             
             //parse
@@ -150,7 +150,7 @@ $is_csv = (@$_REQUEST['html']!=1);
             }
         } 
         $cnt4++;
-        //if($cnt4>20) break;
+        //if($cnt4>20) {break;}
     }//while  databases
     if(!$is_csv){
         //  print '<tr><td colspan="2"></td><td>'.$cnt2.'</td><td>'.$cnt3.'</td></tr>';

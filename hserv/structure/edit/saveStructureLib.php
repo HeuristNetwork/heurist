@@ -711,7 +711,7 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
         foreach($dt as $dty_ID=>$fld){ 
             if($dty_ID>0 && @$fld['commonFields'][$di['dty_Type']]=='separator'){
                 $seps[] = $dty_ID;  
-                if(count($seps)==2) break;
+                if(count($seps)==2) {break;}
             }
         }
 

@@ -214,7 +214,7 @@ use Shapefile\ShapefileReader;
                         
                         /* v2 old way
                         $shapeFile->getRecord(Shapefile::GEOMETRY_GEOJSON_FEATURE)) { //GEOMETRY_WKT
-                        if ($record['dbf']['_deleted']) continue;
+                        if ($record['dbf']['_deleted']) {continue;}
                         
                         $record['shp']
                         */

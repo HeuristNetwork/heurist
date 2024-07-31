@@ -32,8 +32,8 @@ if(defined('IS_INDEX_PAGE')){
     $_REQUEST['list'] = 1;
     define('ERROR_REDIR','startup/index.php');//redirects to startup page - list of all databases
 }else{
-    if(!defined('PDIR')) define('PDIR','../../');//need for proper path to js and css
-    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+    if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
+    define('ERROR_REDIR', {dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');}
     
     $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 }

@@ -220,7 +220,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	$record_tobebookmarked = array();
 
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
-		if (! @$checked) continue;
+		if (! @$checked) {continue;}
 
 		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], 
                                 (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), 
@@ -232,7 +232,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 			continue;
 		}
 
-		if (! @$rec_id) continue;	/* malformed URL */
+		if (! @$rec_id) {continue;}	/* malformed URL */
 
 		array_push($record_tobebookmarked, $rec_id);
 	}
@@ -506,7 +506,7 @@ We recommend bookmarking a few links at a time.<br>The list is reloaded after ea
 			$linkno = 0;
 			foreach (@$urls as $url => $title) {
 				++$linkno;
-				if (! @$disambiguate_rec_ids[$url]) continue;
+				if (! @$disambiguate_rec_ids[$url]) {continue;}
 
 				print_link($url, $title);
 				$ignore[$url] = 1;
@@ -709,7 +709,7 @@ function print_link($url, $title) {
 
 function common_substring($url, $base_url) {
 	for ($i=0; $i < strlen($url) && $i < strlen($base_url);++$i) {
-		if ($url[$i] != $base_url[$i]) break;
+		if ($url[$i] != $base_url[$i]) {break;}
 	}
 
 	return '<span style="color: black;">'.htmlspecialchars(substr($url, 0, $i)).'</span>'.htmlspecialchars(substr($url, $i));

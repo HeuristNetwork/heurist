@@ -597,7 +597,7 @@
             
             $fields = array();
             foreach($table_prefix as $fieldname=>$field_config){
-                if(@$field_config['dty_Role']=='virtual') continue;
+                if(@$field_config['dty_Role']=='virtual') {continue;}
                 if(@$field_config['dty_Role']=='primary'){
                     $primary_field = $fieldname;
                     $primary_field_type = $field_config['dty_Type'];
@@ -643,7 +643,7 @@
 
             if(is_array($table_prefix)){
                 
-                if(!in_array($fieldname, $fields)) continue;
+                if(!in_array($fieldname, $fields)) {continue;}
                 
             }else if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
                 //$fieldname = $table_prefix.$fieldname;
@@ -1178,7 +1178,7 @@
                     $dtl_NewValue = '';
                     $error = '';
                     
-                    if(trim($dtl_Value)=='') continue;
+                    if(trim($dtl_Value)=='') {continue;}
                     
                     $iYear = intval($row[3]);
                     

@@ -163,7 +163,7 @@ $mysqli = $system->get_mysqli();
                 }
                 $res3->close();
                 
-                if(count($dups_ids)<2) continue;
+                if(count($dups_ids)<2) {continue;}
                 
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
@@ -214,7 +214,7 @@ $mysqli = $system->get_mysqli();
                 }
                 $res3->close();
                 
-                if(count($dups_ids)<2) continue;
+                if(count($dups_ids)<2) {continue;}
                 
                 $files_duplicates[$external_url] = $dups_ids;
                 
@@ -348,7 +348,7 @@ $mysqli = $system->get_mysqli();
     //
     while ( $res = $res1->fetch_assoc() ) {
 
-            //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) continue;
+            //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) {continue;}
         
             //verify path
             $res['db_fullpath'] = null;

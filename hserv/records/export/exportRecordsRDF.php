@@ -341,7 +341,7 @@ private function _setResourceProps($record, &$resource){
         
         $field_URI = $this->_getFieldURI($rty_ID, $dty_ID);
         
-        if($field_URI==null) continue; //sematic url is not defined
+        if($field_URI==null) {continue;} //sematic url is not defined
         
         $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dtype];
 

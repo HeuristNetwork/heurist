@@ -955,13 +955,13 @@
                 $dbname = mysql__select_value($mysqli, 
                     'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \''
                         .$mysqli->real_escape_string($ldb).'\'');
-                if(!$dbname) continue;
+                if(!$dbname) {continue;}
                 
                 $ldb = preg_replace('/[^a-zA-Z0-9_]/', '', $ldb);//for snyk
                 
                 //2. find sys_UGrpsDatabase in linked database - this database must be in list
                 $linked_dbs2 = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
-                if(!$linked_dbs2) continue; //this database is not mutually linked
+                if(!$linked_dbs2) {continue;} //this database is not mutually linked
                 $linked_dbs2 = explode(',', $linked_dbs2);
                 foreach ($linked_dbs2 as $ldb2){
                     if(strpos($ldb2, HEURIST_DB_PREFIX)!==0){
@@ -1424,7 +1424,7 @@
                                 foreach($prefs as $service_id=>$service){
                                     if(@$service['service']==$serviceName){
                                          $result[$service_id] = $service;
-                                         if(!$search_all_groups) break;
+                                         if(!$search_all_groups) {break;}
                                     }
                                 }
                             }

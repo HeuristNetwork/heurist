@@ -246,7 +246,7 @@ function do_print_table2( $tname, $id=0 )
 
     while ($row = $res->fetch_assoc()) { 
         
-        if($prefix=='rty' && !(@$row[$id_field]>0)) continue;
+        if($prefix=='rty' && !(@$row[$id_field]>0)) {continue;}
         
         print "<$prefix>";
         foreach($flds_list as $fld => $type){

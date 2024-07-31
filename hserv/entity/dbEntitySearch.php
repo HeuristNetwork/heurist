@@ -292,7 +292,7 @@ class DbEntitySearch
             
             $value = $this->_cleanQuotedValue($value);
 
-            if($value=='') continue;
+            if($value=='') {continue;}
             
             $mysqli = $this->system->get_mysqli();
             

@@ -589,7 +589,7 @@ if($step=="1"){  //first step - info about current status
 
                 foreach ($content as $zkey => $value){
 
-                    if(!$value) continue;
+                    if(!$value) {continue;}
                     
                     $is_empty_zotero_entry = false;
 
@@ -627,7 +627,7 @@ if($step=="1"){  //first step - info about current status
                             $ctype = @$creator->$prop;
 
                             $key = @$mapping_dt[$ctype];
-                            if(!$key) continue;
+                            if(!$key) {continue;}
 
                             $prop = 'name';
                             $title = @$creator->$prop;
@@ -1193,7 +1193,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
     foreach($recdetails as $dt_id=>$recdata){  //detail id in main record
 
 
-        if(!@$alldettypes['typedefs'][$dt_id]) continue;  //detail type not found
+        if(!@$alldettypes['typedefs'][$dt_id]) {continue;}  //detail type not found
 
         $dt_type = $alldettypes['typedefs'][$dt_id]['commonFields'][$fi_dettype];
         if($dt_type=='enum' || $dt_type=='relationtype'){

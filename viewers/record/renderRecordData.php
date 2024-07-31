@@ -1155,7 +1155,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                 foreach($sel_ids as $id){
                     
                     $id = intval($id);
-                    if(!($id>0)) continue;
+                    if(!($id>0)) {continue;}
                     
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
@@ -1954,7 +1954,7 @@ function print_public_details($bib) {
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-                //if($is_map_popup) break;
+                //if($is_map_popup) {break;}
             }else{
                 print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }
@@ -2187,7 +2187,7 @@ function print_public_details($bib) {
         $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
                 .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
 
-        if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
+        if(!(mysql__select_value($mysqli, $query)>0)) {continue;} //not in structure
 
         if( $has_translations && isset( $translations[$bd['dty_ID']] ) && !in_array($bd['dtl_ID'], $translations[$bd['dty_ID']]['values']) ){
             continue;
@@ -2410,8 +2410,8 @@ function print_relation_details($bib) {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print Temporal::toHumanReadable($bd['StartDate'], true, 1);//compact
-				if (@$bd['EndDate']) print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);
+				if (@$bd['StartDate']) {print Temporal::toHumanReadable($bd['StartDate'], true, 1);}//compact
+				if (@$bd['EndDate']) {print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);}
 			print '</div></div>';
 		}
 		$from_res->close();
@@ -2498,8 +2498,8 @@ function print_relation_details($bib) {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+				if (@$bd['StartDate']) {print htmlspecialchars($bd['StartDate']);}
+				if (@$bd['EndDate']) {print ' until ' . htmlspecialchars($bd['EndDate']);}
 			print '</div></div>';
         }
         $to_res->close();
@@ -2743,13 +2743,13 @@ function orderComments($cmts) {
         //handle root nodes
         if ($cmt['owner'] == 0) {
             // skip deleted or children with deleted parents
-            if ($cmt['deleted']) continue;
+            if ($cmt['deleted']) {continue;}
             $level = $cmts[$id]["level"] = 0;
             array_push($orderedCmtIds,$id);
         }else {	//note this algrithm assumes comments are ordered by date and that a child comment always has a more recent date
             // handle deleted or children of deleted
             if ($cmts[$cmt["owner"]]["deleted"]) $cmt["deleted"] = true;
-            if ($cmt["deleted"]) continue;
+            if ($cmt["deleted"]) {continue;}
             $ownerIndex = array_search($cmt["owner"],$orderedCmtIds);
             $insertIndex = count($orderedCmtIds);//set insertion to end of array as default
             if($ownerIndex === FALSE) {  // breaks assumption write code to fix up the ordering here

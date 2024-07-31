@@ -477,7 +477,7 @@ public static function output($data, $params){
 
         $idx++;
 
-        if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
+        if(!@$fields[$rty_ID]) {continue;} //none of fields for this record type marked to output
 
 
         if($has_advanced){ // everything is putting into memory
@@ -1095,7 +1095,7 @@ public static function output_header($data, $params)
         $placeholders = null;
         $cnt_cols = count($columns);
         if($cnt_cols>1){
-            if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
+            if(!@$fields[$rty_ID]) {continue;} //none of fields for this record type marked to output
             
             //prepare terms
             if(is_array(@$terms_pickup[$rty_ID])){  //there are enum fields for this rt

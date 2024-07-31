@@ -61,7 +61,7 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_no_action = false;
+    if (@$ARGV['-purge']) {$arg_no_action = false;}
 
 }else{
     
@@ -240,7 +240,7 @@ function exclusion_list(){
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            if($line=='' || substr($line,0,1)=='#') continue;
+            if($line=='' || substr($line,0,1)=='#') {continue;}
             $res[] = $line;
         }
         fclose($handle);

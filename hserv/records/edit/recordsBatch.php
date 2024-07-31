@@ -1485,7 +1485,7 @@ class RecordsBatch
                             }
                         }
                     }//foreach
-                    if(@$sqlErrors[$recID]) continue;
+                    if(@$sqlErrors[$recID]) {continue;}
 
                     //update record edit date
                     $rec_update['rec_ID'] = $recID;

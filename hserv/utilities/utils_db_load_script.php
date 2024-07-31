@@ -385,7 +385,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         else
           $dumpline .= gzgets($file, DATA_CHUNK_LENGTH);
       }
-      if ($dumpline==="") break;
+      if ($dumpline==="") {break;}
 
 // Remove UTF8 Byte Order Mark at the file beginning if any
 

@@ -49,7 +49,7 @@ $mysqli = $system->get_mysqli();
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
     while (($row = $res->fetch_row())) {
-        if( strpos($row[0], 'hdb_DEF19')===0 || strpos($row[0], 'hdb_def19')===0) continue;
+        if( strpos($row[0], 'hdb_DEF19')===0 || strpos($row[0], 'hdb_def19')===0) {continue;}
         
         if( strpos($row[0], 'hdb_')===0 ){
             //if($row[0]>'hdb_Masterclass_Cookbook')
@@ -67,7 +67,7 @@ $mysqli = $system->get_mysqli();
         $query = 'SELECT sys_dbSubVersion from `'.$db_name.'`.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         
-        //if($ver<3) continue;
+        //if($ver<3) {continue;}
 
         
         $rec_types = array();

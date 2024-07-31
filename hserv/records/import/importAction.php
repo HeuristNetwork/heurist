@@ -342,7 +342,7 @@ private static function findRecordIds($imp_session, $params){
                     }
                     */
                     
-                    if($keyvalue=='') continue;
+                    if($keyvalue=='') {continue;}
                     
                     
                     if(@$pairs[$keyvalue]){  //we already found record for this combination
@@ -1617,7 +1617,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                     
                     $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
                     $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);
-                    if (!($allOutWGS && $allInteger)) break;                
+                    if (!($allOutWGS && $allInteger)) {break;}                
                 }
             }
             
@@ -1726,7 +1726,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
         
         while ($row = $res->fetch_row()){
             
-            //if(!($row[0]==575)) continue;
+            //if(!($row[0]==575)) {continue;}
 
             $is_error = false;
             $newvalue = array();

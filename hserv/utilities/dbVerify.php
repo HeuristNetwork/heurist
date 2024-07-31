@@ -822,8 +822,8 @@ ORDER BY child.dtl_RecID";
         $det_ids = array();
         if($res){
             while ($row = $res->fetch_assoc()){
-                if($row['rec_FlagTemporary']==1) continue;
-                if(in_array( $row['child_d_id'], $det_ids)) continue;
+                if($row['rec_FlagTemporary']==1) {continue;}
+                if(in_array( $row['child_d_id'], $det_ids)) {continue;}
                 $bibs2[] = $row;
                 $prec_ids2[$row['dtl_Value']] = 1;  //remove DT_PARENT_ENTITY from orphaned children
                 array_push($det_ids, intval($row['child_d_id']));

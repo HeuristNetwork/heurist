@@ -1482,11 +1482,11 @@ function deleteOneRecord($system, $id, $rectype){
         $id = intval($id);
         //
         $mysqli->query('delete from recDetails where dtl_RecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         //
         $mysqli->query('delete from Records where rec_ID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
         array_push($deleted, $id);
 
         //remove pointer fields
@@ -1494,52 +1494,52 @@ function deleteOneRecord($system, $id, $rectype){
             foreach ($links as $relation) {
                 $mysqli->query('delete from recDetails where dtl_RecID = ' . intval($relation->sourceID)
                     .' and dtl_DetailTypeID = '.intval($relation->dtID).' and dtl_Value='.$id);
-                if ($mysqli->error) break;
+                if ($mysqli->error) {break;}
             }
         }
 
         ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
 
         $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from usrRecPermissions where rcp_RecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from recForwarding where rfw_NewRecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from usrRecTagLinks where rtl_RecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from recThreadedComments where cmt_RecID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
 
         //change all woots with title bookmark: to user:
         $mysqli->query('update woots set woot_Title="user:" where woot_Title in (select concat("boomark:",bkm_ID) as title from usrBookmarks where bkm_recID = ' . $id.')');
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
 
         $mysqli->query('delete from usrBookmarks where bkm_recID = ' . $id);
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
         $bkmk_count = $bkmk_count + $mysqli->affected_rows;
 
         //delete from woot
         $mysqli->query('delete from woot_ChunkPermissions where wprm_ChunkID in '.
             '(SELECT chunk_ID FROM woots, woot_Chunks where chunk_WootID=woot_ID and woot_Title="record:'.$id.'")');
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from woot_Chunks where chunk_WootID in '.
             '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from woot_RecPermissions where wrprm_WootID in '.
             '(SELECT woot_ID FROM woots where woot_Title="record:'.$id.'")');
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('delete from woots where woot_Title="record:'.$id.'"');
-        if ($mysqli->error) break;
+        if ($mysqli->error) {break;}
 
         $mysqli->query('SET foreign_key_checks = 1');
 
@@ -2508,7 +2508,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
     $details2 = array();
     foreach ($details as $dtyID => $pairs) {
 
-        if((is_array($pairs) && count($pairs)==0) || $pairs=='') continue; //empty value
+        if((is_array($pairs) && count($pairs)==0) || $pairs=='') {continue;} //empty value
 
         if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
             $dtyID = substr($dtyID, 2);
@@ -2609,7 +2609,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     }
                 }else{
                     $err_msg = checkMaxLength('#'.$dtyID, $rval);
-                    if($err_msg!=null) break;
+                    if($err_msg!=null) {break;}
                 }
             }
 
@@ -2898,11 +2898,11 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
             } //switch
 
 
-            if($isValid==='ignore') continue;
+            if($isValid==='ignore') {continue;}
 
             //ignore all errors and skip empty values
             if($validation_mode==0 && $isValid!==true){
-                if(strlen(super_trim($dtl_Value))==0) continue;
+                if(strlen(super_trim($dtl_Value))==0) {continue;}
                 $isValid = true;
             }
 

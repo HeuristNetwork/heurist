@@ -56,7 +56,7 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-db']) $arg_database = explode(',', $ARGV['-db']);
+    if (@$ARGV['-db']) {$arg_database = explode(',', $ARGV['-db']);}
 
 }else{
     /*web browser
@@ -85,7 +85,7 @@ if( !$system->init(null, false, false) ){
 }
 
 // Setup server name
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}
 
 if(!defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME)){
     exit('The script was unable to determine the server\'s name, please define it within heuristConfigIni.php then re-run this script.');

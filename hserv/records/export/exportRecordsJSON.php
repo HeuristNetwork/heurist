@@ -387,7 +387,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                 $dty_ID = 'lt'.$dty_ID;
             }
 
-            if(!in_array($dty_ID, $columns[$rt_id])) continue;
+            if(!in_array($dty_ID, $columns[$rt_id])) {continue;}
 
             $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
 
@@ -588,7 +588,7 @@ private static function _getMediaViewerData($record){
     
         foreach($info as $fileinfo){
             
-            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) continue;
+            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) {continue;}
     
             $mimeType = $fileinfo['fxm_MimeType'];
         
@@ -597,7 +597,7 @@ private static function _getMediaViewerData($record){
             if(strpos($mimeType,"video/")===0){
                 $resource_type = 'Video';
             }else if(strpos($mimeType,"audio/")===0){
-                if(strpos($mimeType,"soundcloud")>0) continue;
+                if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
             }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
                 $resource_type = 'Image';

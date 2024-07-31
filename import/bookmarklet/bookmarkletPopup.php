@@ -374,7 +374,7 @@ doBookmark: function(rectype) {
 	if (! sel  &&  frames) {
 		for (i=0; i < frames.length; ++i) {
 			sel = findSelection(frames[i]);
-			if (sel) break;
+			if (sel) {break;}
 		}
 	}
 	var favicon = Heurist.findFavicon();

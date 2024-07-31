@@ -575,7 +575,7 @@ class System {
         foreach ($folders as $folder_name=>$folder){        
             if(!$is_for_backup || @$folder[3]===true){
 
-                if($is_for_backup==2 && $folder_name=='documentation_and_templates') continue;
+                if($is_for_backup==2 && $folder_name=='documentation_and_templates') {continue;}
                 
                 if($is_for_backup==2){
                     $folder_name = realpath($dbfolder.$folder_name);
@@ -717,7 +717,7 @@ class System {
         
         foreach ($folders as $folder_name=>$folder){
             
-                if($folder[0]=='') continue;
+                if($folder[0]=='') {continue;}
             
                 $allowWebAccess = (@$folder[2]===true);
             
@@ -1681,7 +1681,7 @@ class System {
                 if( $userID_in_linkedDB>0 ){
                     //3. find sys_UGrpsDatabase in linked database - this database must be in list
                     $linked_dbs2 = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
-                    if(!$linked_dbs2) continue; //this database is not mutually linked
+                    if(!$linked_dbs2) {continue;} //this database is not mutually linked
                     $linked_dbs2 = explode(',', $linked_dbs2);
                     foreach ($linked_dbs2 as $ldb2){
                         if(strpos($ldb2, HEURIST_DB_PREFIX)!==0){

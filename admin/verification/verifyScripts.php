@@ -892,7 +892,7 @@ function __correctGetEstDate(){
                     print htmlspecialchars($rec_ID.'  '.$dtl_Value.'  '.$dtl_NewValue).'<br>';
                                     
                     $cnt++;
-                    if($cnt>10) break;
+                    if($cnt>10) {break;}
                 }else{
                     print htmlspecialchars($rec_ID.'  '.$dtl_Value).'<br>';
                     $is_invalid = true;
@@ -1104,7 +1104,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
                     
                         //if icon exist skip
                         list($fname, $ctype,$url) = resolveEntityFilename('defTerms', $trm_id, 'icon', $db_name, $ext);
-                        if($fname!=null) continue;
+                        if($fname!=null) {continue;}
                         
                         $new_icon = $path.$object[1];
                         if(file_exists($new_icon)){
@@ -1156,7 +1156,7 @@ function __updateDatabases_To_V14($db_process){
 
     foreach ($databases as $idx=>$db_name){
         
-        if($db_name=='') continue;
+        if($db_name=='') {continue;}
         
         if($db_process!=null){
             $db_name = $db_process;
@@ -1239,7 +1239,7 @@ function __updateDatabases_To_V14($db_process){
         
         $cnt_db++;
         
-        //if($db_name=='bnf_lab_musrdm_test') break;
+        //if($db_name=='bnf_lab_musrdm_test') {break;}
         if($db_process!=null){
             break;   
         }
@@ -1259,7 +1259,7 @@ function __removeDuplicationValues(){
     $cnt = 0;
     /*
     foreach ($databases as $idx=>$db_name){
-        if($db_name=='') continue;
+        if($db_name=='') {continue;}
     }
     */
     
@@ -1298,7 +1298,7 @@ function __listOfAdminUsers(){
     
     foreach ($databases as $idx=>$db_name){
     
-        if($db_name=='') continue;
+        if($db_name=='') {continue;}
         
         mysql__usedatabase($mysqli, $db_name);
 
@@ -1488,7 +1488,7 @@ $tustep_to_html = array(
             //skip json content
             if(strpos($row[1],'{')===0 || strpos($row[1],'[')===0){
                 $r = json_decode($row[1],true);
-                if(is_array($r)) continue;
+                if(is_array($r)) {continue;}
             }
     
             $s = ''.$row[1];
@@ -1502,7 +1502,7 @@ $tustep_to_html = array(
                     $not_found = false;
                 }
             }
-            if($not_found) continue;
+            if($not_found) {continue;}
             
             //2. Decode HTML entities    
             $m = html_entity_decode($s, ENT_QUOTES|ENT_HTML401, 'UTF-8' );
@@ -1517,7 +1517,7 @@ $tustep_to_html = array(
                 print '<xmp>'.$m2.'</xmp>';
                 */
                 $cnt++;
-                //if($cnt>1000) break;
+                //if($cnt>1000) {break;}
             }
             
             //find missed unconverted HTML entities
@@ -1571,7 +1571,7 @@ function __findRDF(){
 
     foreach ($databases as $idx=>$db_name){
     
-        if($db_name=='') continue;
+        if($db_name=='') {continue;}
         
         mysql__usedatabase($mysqli, $db_name);
         
@@ -1613,7 +1613,7 @@ function __dropBkpDateIndex(){
 
     foreach ($databases as $idx=>$db_name){
     
-        if($db_name=='') continue;
+        if($db_name=='') {continue;}
 
         $db_name = htmlspecialchars($db_name);
         

@@ -500,7 +500,7 @@ abstract class DbEntityBase
             $fieldvalues = $record;
             $values = array();
             foreach($this->fields as $fieldname=>$field_config){
-                if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) continue;
+                if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) {continue;}
                 $values[$fieldname] = $record[$fieldname];
                 
                 /*if(@$field_config['dty_Role']=='primary'){
@@ -707,7 +707,7 @@ abstract class DbEntityBase
         $fieldvalues = $this->data['fields'];//current record
         
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') continue;
+            if(@$field_config['dty_Role']=='virtual') {continue;}
                 
             $value = @$fieldvalues[$fieldname];
             
@@ -737,12 +737,12 @@ abstract class DbEntityBase
         $isinsert = ($rec_ID<1);
             
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') continue;
+            if(@$field_config['dty_Role']=='virtual') {continue;}
             
             if(array_key_exists($fieldname, $fieldvalues)){
                 $value = $fieldvalues[$fieldname];
             }else{
-                if(!$isinsert) continue;
+                if(!$isinsert) {continue;}
                 $value = null;
             }
             
@@ -884,7 +884,7 @@ abstract class DbEntityBase
             $iterator = new \RecursiveIteratorIterator($directory);
             
             foreach ($iterator as $filepath => $info) {  //rec. iteration need to copy all versions (thumb and full img)
-                  if(!$info->isFile()) continue;
+                  if(!$info->isFile()) {continue;}
                   
                   $filename = $info->getFilename();
                   $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
@@ -944,7 +944,7 @@ abstract class DbEntityBase
         $iterator = new \IteratorIterator($directory);//Recursive      
         
         foreach ($iterator as $filepath => $info) {
-              if(!$info->isFile()) continue;
+              if(!$info->isFile()) {continue;}
               
               $filename = $info->getFilename();
               $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);

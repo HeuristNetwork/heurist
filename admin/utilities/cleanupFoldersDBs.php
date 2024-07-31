@@ -65,8 +65,8 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_need_action = true;   
-    if (@$ARGV['-report']) $arg_need_report = true;
+    if (@$ARGV['-purge']) {$arg_need_action = true;}   
+    if (@$ARGV['-report']) {$arg_need_report = true;}
 
     $is_command_line = true;
     
@@ -105,9 +105,9 @@ if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }
 
-if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'
-if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');
+if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');}
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}//'heurist.huma-num.fr'
+if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');}
 
 //print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 

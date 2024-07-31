@@ -70,14 +70,14 @@ function fetch_relation_details($recID, $i_am_primary) {
                 }
                 break;
             case $relTrgDT: // linked resource
-                if (!$i_am_primary) break;
+                if (!$i_am_primary) {break;}
 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
                                     'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
                                     ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
                 break;
             case $relSrcDT:
-                if ($i_am_primary) break;
+                if ($i_am_primary) {break;}
                 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
                                     'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.

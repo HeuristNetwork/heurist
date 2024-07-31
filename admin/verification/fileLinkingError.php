@@ -75,7 +75,7 @@ $mysqli = $system->get_mysqli();
     $dbs = mysql__getdatabases4($mysqli, true);
     foreach ($dbs as $db){
         
-        //if($counter>50) break;
+        //if($counter>50) {break;}
         $counter++;
         
         print "<h2>".htmlspecialchars($db)."</h2>";

@@ -86,18 +86,18 @@ if (@$argv) {
             array_push($ARGV, $argv[$i]);
         }
     }
-    if (@$ARGV['-db']) $_REQUEST["db"] = $ARGV['-db'];
-    if (@$ARGV['-f']) $_REQUEST['f'] = $ARGV['-f'];
+    if (@$ARGV['-db']) {$_REQUEST["db"] = $ARGV['-db'];}
+    if (@$ARGV['-f']) {$_REQUEST['f'] = $ARGV['-f'];}
     $_REQUEST['q'] = @$ARGV['-q'];
     $_REQUEST['w'] = @$ARGV['-w'] ? $ARGV['-w'] : 'a';// default to ALL RESOURCES
-    if (@$ARGV['-stype']) $_REQUEST['stype'] = $ARGV['-stype'];
+    if (@$ARGV['-stype']) {$_REQUEST['stype'] = $ARGV['-stype'];}
     $_REQUEST['style'] = '';
     $_REQUEST['depth'] = @$ARGV['-depth'] ? $ARGV['-depth'] : 0;
-    if (@$ARGV['-rev']) $_REQUEST['rev'] = $ARGV['-rev'];
-    if (@$ARGV['-woot']) $_REQUEST['woot'] = $ARGV['-woot'];
-    if (@$ARGV['-stub']) $_REQUEST['stub'] = '1';
-    if (@$ARGV['-fc']) $_REQUEST['fc'] = '1';// inline file content
-    if (@$ARGV['-file']) $_REQUEST['file'] = '1';// inline file content
+    if (@$ARGV['-rev']) {$_REQUEST['rev'] = $ARGV['-rev'];}
+    if (@$ARGV['-woot']) {$_REQUEST['woot'] = $ARGV['-woot'];}
+    if (@$ARGV['-stub']) {$_REQUEST['stub'] = '1';}
+    if (@$ARGV['-fc']) {$_REQUEST['fc'] = '1';}// inline file content
+    if (@$ARGV['-file']) {$_REQUEST['file'] = '1';}// inline file content
 
 }
 

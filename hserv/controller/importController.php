@@ -213,7 +213,7 @@ if(!$system->init(@$_REQUEST['db'])){
                     $sz = $sz + fputcsv($fp, $row, ',', '"');
                     $cnt++;
                     
-                    //if($cnt>2) break;
+                    //if($cnt>2) {break;}
                 }
                 rewind($fp);
                 // read the entire line into a variable...

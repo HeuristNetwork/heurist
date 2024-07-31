@@ -123,7 +123,7 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_no_action = false;
+    if (@$ARGV['-purge']) {$arg_no_action = false;}
 
 }else{
     //report only
@@ -163,9 +163,9 @@ if( !$system->init(null, false, false) ){
 
 
 
-if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'
-if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');
+if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');}
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}//'heurist.huma-num.fr'
+if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');}
 
 print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
@@ -502,7 +502,7 @@ if($need_email){
                         $err = $system->getError();
                         $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name. "
                                 .$err['message']."\n");
-                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
                         $cnt_dumped++;
                     }
@@ -589,7 +589,7 @@ if($need_email){
 
                         $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n"
                                     .$err['message']."\n");
-                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
                         $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
                         
@@ -682,10 +682,10 @@ function exclusion_list(){
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            //if($line=='' || substr($line,0,1)=='#') continue; //remark
+            //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
             if(strpos($line,'#')!==false){
                 $line = trim(strstr($line,'#',true));
-                if($line=='') continue;
+                if($line=='') {continue;}
             }
             $res[] = $line;
         }

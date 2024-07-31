@@ -46,11 +46,11 @@ $dosed = array();
 
 
 foreach ($iterator as $filepath => $info) {
-      if(!$info->isFile()) continue;
+      if(!$info->isFile()) {continue;}
       
       //$filename = $info->getFilename();
       $pathname = $info->getPath();
-      if(strpos($pathname,$ext3)>0 || strpos($pathname,$ext1)>0 || strpos($pathname,$ext2)>0 ) continue;
+      if(strpos($pathname,$ext3)>0 || strpos($pathname,$ext1)>0 || strpos($pathname,$ext2)>0 ) {continue;}
       
       
       //works since PHP 5.3.6 only $extension = $info->getExtension();

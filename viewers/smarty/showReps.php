@@ -1343,7 +1343,7 @@ function smarty_function_wrap($params, &$smarty)
 
             foreach ($values as $idx => $fileinfo){
 
-                if($limit>0 && $idx>=$limit) break;
+                if($limit>0 && $idx>=$limit) {break;}
 
                 $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
                 $originalFileName = $fileinfo['ulf_OrigFileName'];

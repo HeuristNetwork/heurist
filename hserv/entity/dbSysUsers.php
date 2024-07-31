@@ -570,7 +570,7 @@ class DbSysUsers extends DbEntityBase
         $query = "INSERT INTO sysUsrGrpLinks (ugl_UserID, ugl_Role, ugl_GroupID) VALUES ";
         if($res->num_rows > 0){
             while($row = $res->fetch_assoc()){
-                if($row['ugr_ID'] == 0) continue;
+                if($row['ugr_ID'] == 0) {continue;}
                 $query = $query . "(2, 'admin', " . intval($row['ugr_ID']) . "), ";
             }
         }else{

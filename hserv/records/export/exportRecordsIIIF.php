@@ -229,12 +229,12 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
         $resource_type = null;
 
         if(strpos($mimeType,"video/")===0){
-            if(strpos($mimeType,"youtube")>0 || strpos($mimeType,"vimeo")>0) continue;
+            if(strpos($mimeType,"youtube")>0 || strpos($mimeType,"vimeo")>0) {continue;}
             
             $resource_type = 'Video';
         }else if(strpos($mimeType,"audio/")===0){
             
-            if(strpos($mimeType,"soundcloud")>0) continue;
+            if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
         }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){

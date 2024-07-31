@@ -719,7 +719,7 @@ class DbDefTerms extends DbEntityBase
                                                 }
                                             }
                                         }
-                                        if(!$ret) break;
+                                        if(!$ret) {break;}
                                 }
 
                             }
@@ -1022,7 +1022,7 @@ class DbDefTerms extends DbEntityBase
                 
                     foreach($translation as $field_name=>$value){
                         
-                        if($field_name=='ref_id') continue;
+                        if($field_name=='ref_id') {continue;}
                         
                         list($lang_code, $value) = extractLangPrefix($value);
                         

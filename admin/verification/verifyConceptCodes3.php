@@ -71,9 +71,9 @@ $mysqli = $system->get_mysqli();
         $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         $ver = intval($ver);
-        if(!($ver>0)) continue;
+        if(!($ver>0)) {continue;}
 /* assign values for unregistered databases
-        if($db_name=='hdb_johns_test_028') continue;
+        if($db_name=='hdb_johns_test_028') {continue;}
         $query = 'UPDATE '.$db_name
 .'.defRecTypes set rty_IDInOriginatingDB = rty_ID, rty_NameInOriginatingDB = rty_Name, rty_OriginatingDBID=0'
 ." WHERE (rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL "

@@ -94,7 +94,7 @@ if(!@$_REQUEST['mail']){
              //check subfolders
              foreach ($folders as $folder_name=>$folder){
                  
-                 if($folder[0]=='' || $folder[0]==null || $folder_name=='uploaded_tilestacks') continue;
+                 if($folder[0]=='' || $folder[0]==null || $folder_name=='uploaded_tilestacks') {continue;}
                  
                  $subdir = $dir.$folder_name.'/';
                  $check = folderExists($subdir, true);

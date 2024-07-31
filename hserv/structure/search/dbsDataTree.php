@@ -141,7 +141,7 @@
                 
                 foreach ($details as $dtKey => $dtValue){
                     
-                    if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') continue;
+                    if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') {continue;}
                     
                     if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
                         
@@ -240,7 +240,7 @@
 
                 foreach ($details as $dtID => $dtValue){
                     
-                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
+                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') {continue;}
 
                     $dt_type = $dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type']];
                     if($dt_type=='resource' || $dt_type=='relmarker'){
@@ -329,7 +329,7 @@
             if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){ //not itself
                 
                 $details = @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!is_array($details)) continue;
+                if(!is_array($details)) {continue;}
                 
                 foreach ($details as $dtID => $dtValue){
                 

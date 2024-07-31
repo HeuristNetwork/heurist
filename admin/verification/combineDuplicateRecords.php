@@ -316,8 +316,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
-                                    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
-                                    if(!@$rec_requirements[$record['rec_RecTypeID']][$rd_type]) continue;
+                                    if (! $detail) {continue;}    //FIXME  check if required and mark it as missing and required
+                                    if(!@$rec_requirements[$record['rec_RecTypeID']][$rd_type]) {continue;}
                                     $reqmnt = $rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_RequirementType'];
                                     $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
                                     print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
@@ -369,10 +369,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '</td>';
                                 }
 
-                                if ($record['rec_URL']) print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.htmlspecialchars($record['rec_URL']).'</a></td></tr>';
+                                if ($record['rec_URL']) {print '<tr><td>URL</td><td><a href="'.$record['rec_URL'].'">'.htmlspecialchars($record['rec_URL']).'</a></td></tr>';}
 
-                                if ($record['rec_Added']) print '<tr><td>Added</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';
-                                if ($record['rec_Modified']) print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';
+                                if ($record['rec_Added']) {print '<tr><td>Added</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';}
+                                if ($record['rec_Modified']) {print '<tr><td>Modifed</td><td style="padding-left:10px;">'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';}
 
 
                                 print '</table></td><td>';
@@ -447,7 +447,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     $master_details = $record['details'];
                                 }
                                 foreach ($record['details'] as $rd_type => $detail) {
-                                    if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
+                                    if (! $detail) {continue;}    //FIXME  check if required and mark it as missing and required
                                     // check to see if the master record already has the same detail with the identical value ignoring leading and trailing spaces
                                     $removeIndices = array();
                                     if (!$is_master && @$master_details[$rd_type]){
@@ -476,8 +476,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     foreach ($removeIndices as $i){
                                         unset($detail[$i]);
                                     }
-                                    if (count($detail) == 0) continue;
-                                    if(!@$rec_requirements[$master_rec_type][$rd_type]) continue;
+                                    if (count($detail) == 0) {continue;}
+                                    if(!@$rec_requirements[$master_rec_type][$rd_type]) {continue;}
                                     $reqmnt = $rec_requirements[$master_rec_type][$rd_type]['rst_RequirementType'];
                                     $color = ($reqmnt == 'required' ? 'red': ($reqmnt == 'recommended'? 'black':'grey'));
                                     print '<tr><td style=" color: '.$color .';">'.$bdts[$rd_type].'</td>';
@@ -510,14 +510,16 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     print '</td>';
                                 }
 
-                                if ($record['rec_URL']) print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
+                                if ($record['rec_URL']) {
+                                    
+                                    print '<tr><td>URL</td><td><input type="radio" name="URL" '.($is_master?"checked=checked":"").
                                     ' title="'.($is_master?"Click to keep URL with Master record":"Click to replace URL in Master record (overwrite)").
                                     '" value="'.$record['rec_URL'].
                                     '" id="URL'.$record['rec_ID'].
                                     '"><a href="'.$record['rec_URL'].'">'.$record['rec_URL'].'</a></td></tr>';
-
-                                if ($record['rec_Added']) print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';
-                                if ($record['rec_Modified']) print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';
+                                }
+                                if ($record['rec_Added']) {print '<tr><td>Add &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Added'], 0, 10)).'</td></tr>';}
+                                if ($record['rec_Modified']) {print '<tr><td>Mod &nbsp;&nbsp;&nbsp;'.htmlspecialchars(substr($record['rec_Modified'], 0, 10)).'</td></tr>';}
 
 
                                 print '</table></td><td>';
@@ -735,7 +737,7 @@ function do_fix_dupe()
     //parse form data
     foreach($_REQUEST as $key => $value){
         preg_match('/(add|update|keep)(\d+)/',$key,$matches);
-        if (! $matches) continue;
+        if (! $matches) {continue;}
         $prepared_values = array();
         if(is_array($value)){
             foreach($value as $idx => $val){
@@ -888,12 +890,12 @@ function do_fix_dupe()
     foreach ($delete_bkm_IDs as $delete_dup_bkm_ID) {
         //copy soon to be deleted dup bookmark data to master record bookmark  by concat notes and pwd_reminder, max of ratings and copy zotero if non existant
         $master_bkm_ID = @$dup_delete_bkm_ID_to_master_bkm_id[$delete_dup_bkm_ID];
-        if(!($master_bkm_ID>0 && $delete_dup_bkm_ID>0)) continue;
+        if(!($master_bkm_ID>0 && $delete_dup_bkm_ID>0)) {continue;}
         
         $master_pers_record = mysql__select_row_assoc($mysqli, 'select * from usrBookmarks where bkm_ID='.$master_bkm_ID);
         $delete_dup_pers_record = mysql__select_row_assoc($mysqli, 'select * from usrBookmarks where bkm_ID='.$delete_dup_bkm_ID);
         
-        if(!($master_pers_record && $delete_dup_pers_record)) continue;
+        if(!($master_pers_record && $delete_dup_pers_record)) {continue;}
         
         //        $master_pers_record['pers_notes'] .= $delete_dup_pers_record['pers_notes'];
         if(strlen(@$delete_dup_pers_record['bkm_PwdReminder'])>0){

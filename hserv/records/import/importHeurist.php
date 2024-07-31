@@ -922,10 +922,10 @@ EOD;
                             $records_corr[$record_src['rec_ID']] = $target_RecID; 
                             $keep_rectypes[$target_RecID] = $recTypeID;
                             
-                            if(!($update_mode>0)) continue; //no update allowed
+                            if(!($update_mode>0)) {continue;} //no update allowed
                             
                         }else{
-                            if(!$allow_insert) continue;
+                            if(!$allow_insert) {continue;}
                             $target_RecID = 0;
                         }
                         

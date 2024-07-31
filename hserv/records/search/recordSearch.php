@@ -2158,7 +2158,7 @@ function recordSearch($system, $params, $relation_query=null)
         $is_get_relation_records = (@$params['getrelrecs']==1);//get all related and relationship records
 
         foreach($flat_rules as $idx => $rule){ //loop for all rules
-            if($idx==0) continue;
+            if($idx==0) {continue;}
 
             $is_last = (@$rule['islast']==1);
 

@@ -247,7 +247,7 @@
    
             $msg_error = '';
        
-            if(array_search($rty_Code, $rty_Codes2)==false) continue;//there is no such record type
+            if(array_search($rty_Code, $rty_Codes2)==false) {continue;}//there is no such record type
             
             list($db_id, $orig_id) = explode('-',$rty_Code);
             
@@ -340,7 +340,7 @@
             
             //analyze
             
-            if(count($fields2)===0) continue; //there is no such record type
+            if(count($fields2)===0) {continue;} //there is no such record type
             
             //1. check fields 
             $missing = array();

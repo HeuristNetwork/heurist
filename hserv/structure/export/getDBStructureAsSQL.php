@@ -244,7 +244,7 @@ function do_print_table($desc, $tname, $where=null)
             $vals = array();
             foreach($flds_list as $fld => $type){
 
-                if($prefix=='rty' && !($row[$id_field]>0)) continue;
+                if($prefix=='rty' && !($row[$id_field]>0)) {continue;}
 
                 $val = $row[$fld];
                 if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){

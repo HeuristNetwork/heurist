@@ -230,8 +230,8 @@ class ReportActions {
         for ($i=0; $i < $len; ++$i) {
 
             $exp = $matches[1][$i];
-            if(!trim($exp)) continue; //empty{}
-            if(substr($exp,0,1)=="*" && substr($exp,-1)=="*") continue; //this is comment
+            if(!trim($exp)) {continue;} //empty{}
+            if(substr($exp,0,1)=="*" && substr($exp,-1)=="*") {continue;} //this is comment
 
         //3. find words within this text
             if (! preg_match_all('/(\\$([a-zA-Z_0-9.])+)/', $exp, $matches2) ){
@@ -450,9 +450,9 @@ class ReportActions {
             $match_idx = -1;
             $match_offset = -1;
             for ($i=0; $i < count($search);++$i) {
-                if($search[$i]==null || $search[$i]=='') continue;
+                if($search[$i]==null || $search[$i]=='') {continue;}
                 $offset = strpos($subject, $search[$i]);
-                if ($offset === FALSE) continue;
+                if ($offset === FALSE) {continue;}
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
                     $match_offset = $offset;

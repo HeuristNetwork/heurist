@@ -343,7 +343,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         if ($placemark_elements && $placemark_elements->length) {
           foreach ($placemark_elements as $placemark) {
                 $properties = self::parseKMLPlacemark($placemark, $geom_types);
-                if($properties==null) continue;
+                if($properties==null) {continue;}
                 if($line_no==0){
                     $fields = array_keys($properties);
                     //always add geometry, timestamp, timespan_begin, timespan_end
@@ -528,7 +528,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8');//to send back to client
                     array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
                 }
-                //if(count($err_encoding)>100) break;
+                //if(count($err_encoding)>100) {break;}
             }
 
             $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
@@ -556,12 +556,12 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             else{
                 $line_no++;
 
-                if(trim($line)=="") continue;
+                if(trim($line)=="") {continue;}
 
                 if($len!=count($fields)){        //number of columns differs from header
                     // Add error to log if wrong field count
                     array_push($err_colnums, array("cnt"=>count($fields), "no"=>$line_no, "line"=>htmlspecialchars(substr($line,0,2000))));
-                    if(count($err_colnums)>100) break; //too many mistakes
+                    if(count($err_colnums)>100) {break;} //too many mistakes
                 }else{
                     $k=0;
                     $newfields = array();

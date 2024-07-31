@@ -1895,7 +1895,7 @@ $mysqli->commit();
             $rt = $this->sourceTerms->getTerm($term_id);
 
             $parent_id = @$rt[$idx_parent];
-            if($parent_id>0) continue; //this is not vocabulary
+            if($parent_id>0) {continue;} //this is not vocabulary
             
             if($is_old_db_version){
                 $rt[$idx_vcg_grp] = 11;

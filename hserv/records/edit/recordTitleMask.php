@@ -200,7 +200,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
         *        (this is what we replace with an empty string if there is no substitution value available)
         */
 
-        if(!trim($matches[3][$i])) continue; //empty []
+        if(!trim($matches[3][$i])) {continue;} //empty []
         
         $value = self::__fill_field($matches[3][$i], $rt, $mode, $rec_id);
 
@@ -376,7 +376,7 @@ private static function __get_forempty($rec_id, $rt){
             if($val){
                 array_push($title, $val);
                 $cnt++;
-                if($cnt>2) break;
+                if($cnt>2) {break;}
             }
         }
     }
@@ -1159,7 +1159,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 if($rec_value){
                     $res_rt = $rec_value['rec_RecTypeID'];//resource rt
                     
-                    if($inner_rectype>0 && $inner_rectype!=$res_rt) continue;
+                    if($inner_rectype>0 && $inner_rectype!=$res_rt) {continue;}
                     
                     $fld_value = self::__fill_field($inner_field_name, $res_rt, $mode, $rec_id);
                     if(is_array($fld_value)){
@@ -1185,9 +1185,9 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                 $field_not_found = null;
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);
-                    if (!$rtid) continue;
+                    if (!$rtid) {continue;}
                     if($inner_rectype>0){
-                        if($inner_rectype!=$rtid) continue; //skip  
+                        if($inner_rectype!=$rtid) {continue;} //skip  
                     }else{
                         list($rtid, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $rtid );
                     } 
@@ -1279,9 +1279,9 @@ if (! function_exists('array_str_replace')) {
             $match_idx = -1;
             $match_offset = -1;
             for ($i=0; $i < count($search);++$i) {
-                if($search[$i]==null || $search[$i]=='') continue;
+                if($search[$i]==null || $search[$i]=='') {continue;}
                 $offset = mb_strpos($subject, $search[$i]);
-                if ($offset === FALSE) continue;
+                if ($offset === FALSE) {continue;}
                 if ($match_offset == -1  ||  $offset < $match_offset) {
                     $match_idx = $i;
                     $match_offset = $offset;

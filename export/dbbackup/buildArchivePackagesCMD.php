@@ -62,10 +62,10 @@ if (@$argv) {
             array_push($ARGV, $argv[$i]);
         }
     }
-    if (@$ARGV['-db']) $arg_database = $ARGV['-db'];
-    if (@$ARGV['-nofiles']) $arg_skip_files = true;
-    if (@$ARGV['-hml']) $arg_skip_hml = false;
-    if (@$ARGV['-nodocs']) $arg_include_docs = false;
+    if (@$ARGV['-db']) {$arg_database = $ARGV['-db'];}
+    if (@$ARGV['-nofiles']) {$arg_skip_files = true;}
+    if (@$ARGV['-hml']) {$arg_skip_hml = false;}
+    if (@$ARGV['-nodocs']) {$arg_include_docs = false;}
 
 
 
