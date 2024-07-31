@@ -21,10 +21,10 @@
 */
 
 function hImportDefRecTypes(_rtg_ID = null) {
-    var _className = "ImportDefRecTypes",
-    _version   = "0.6",
+    const _className = "ImportDefRecTypes",
+    _version   = "0.6";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata = null,
     
     _return_results = !window.hWin.HEURIST4.util.isempty(_rtg_ID);

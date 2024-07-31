@@ -40,11 +40,11 @@ var originalOutliers = [];
 */ 
 function CrosstabsAnalysis(_query, _query_domain) {
 
-    var _className = 'CrosstabsAnalysis';
+    const _className = 'CrosstabsAnalysis';
     
-    var _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
+    const _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
 
-    var MAX_FOR_AUTO_RETRIEVE = 6000;
+    const MAX_FOR_AUTO_RETRIEVE = 6000;
 
     var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }

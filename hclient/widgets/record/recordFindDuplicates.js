@@ -41,7 +41,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     _destroy: function() {
         this._super(); 
         
-        var treediv = this.element.find('.rtt-tree');
+        let treediv = this.element.find('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -52,7 +52,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         
     _initControls: function() {
 
-        var that = this;
+        let that = this;
 
         this._super();    
 
@@ -62,14 +62,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
             this.element.find('.ent_wrapper').css({top:'36px'});
             
-            var fele = this.element.find('.ent_wrapper:first');
+            let fele = this.element.find('.ent_wrapper:first');
             
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
             
             //append action buttons
             this.toolbar =  this.element.find('#div_button-toolbar');
-            var btns = this._getActionButtons();
-            for(var idx in btns){
+            let btns = this._getActionButtons();
+            for(let idx in btns){
                 this._defineActionButton2(btns[idx], this.toolbar);
             }
         }
@@ -80,8 +80,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
-        var that = this;
+        let res = this._super();
+        let that = this;
         res[1].text = window.hWin.HR('Find Duplications');
         res[1].css = {'margin-left':'20px'};
         
@@ -109,7 +109,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        var opt, selScope = this.selectRecordScope.get(0);
+        let opt, selScope = this.selectRecordScope.get(0);
         
         this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
         {
@@ -137,23 +137,23 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var rty_ID = this.selectRecordScope.val();
+            let rty_ID = this.selectRecordScope.val();
 
             this.element.find('#div_result').empty();
             
             if(rty_ID>0){
 
 
-                var settings = this.getSettings(true);            
+                let settings = this.getSettings(true);            
                 if(!settings) return;
 
                 settings.fields = settings.fields[rty_ID];
 
                 //unique session id    
-                var session_id = Math.round((new Date()).getTime()/1000);
+                let session_id = Math.round((new Date()).getTime()/1000);
                 this._showProgress( session_id, false, 1000 );
 
-                var request = {
+                let request = {
                     a        : 'dupes',
                     db       : window.hWin.HAPI4.database,
                     rty_ID   : rty_ID,
@@ -163,8 +163,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     sort_field: settings.sort_field,
                     distance : settings.distance};
 
-                var url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
-                var that = this;
+                let url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
+                let that = this;
 
                 window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
                     that._hideProgress();
@@ -183,7 +183,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         
                         if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
 
-                            var sMsg = '<p>Finding duplicates in '+response.message+' records will be extremely slow and could overload our server under some circumstances.</p>' 
+                            let sMsg = '<p>Finding duplicates in '+response.message+' records will be extremely slow and could overload our server under some circumstances.</p>' 
 +'<p>In order to streamline the process, please specify a field on which to sort the records. Typically use the constructed title, or a name or title field which will ensure that potential duplicates sort close to one-another. The sort is alphabetical.</p>' 
 +'<p>We then search for duplicates in a sliding window of 10,000 records within this sorted list</p>'
 +'<p>You may further increase speed by setting "Group by beginning"</p>';
@@ -215,12 +215,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     getSettings: function( mode_action ){
         
-            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',addedby:'rec_AddedBy',notes:'rec_ScratchPad'};
+            let header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',addedby:'rec_AddedBy',notes:'rec_ScratchPad'};
             function __removeLinkType(dtid){
                 if(header_fields[dtid]){
                     dtid = header_fields[dtid];
                 }else{
-                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                    let linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
                     if(isNaN(Number(linktype))){
                         dtid = dtid.substr(2);
                     }
@@ -232,8 +232,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 if(ids.length < lvl) return;
                 
                 //take last two - these are rt:dt
-                var rtid = ids[ids.length-lvl-1];
-                var dtid = __removeLinkType(ids[ids.length-lvl]);
+                let rtid = ids[ids.length-lvl-1];
+                let dtid = __removeLinkType(ids[ids.length-lvl]);
                 
                 if(!selectedFields[rtid]){
                     selectedFields[rtid] = [];    
@@ -254,9 +254,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
             //get selected fields from treeview
             var selectedFields = mode_action?{}:[];
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
-            var fieldIds = tree.getSelectedNodes(false);
-            var k, len = fieldIds.length;
+            let tree = this.element.find('.rtt-tree').fancytree("getTree");
+            let fieldIds = tree.getSelectedNodes(false);
+            let k, len = fieldIds.length;
             
             if(len<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -266,12 +266,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             
             
             for (k=0;k<len;k++){
-                var node =  fieldIds[k];
+                let node =  fieldIds[k];
                 
                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
                 
                 if(mode_action){
-                    var ids = node.data.code.split(":");
+                    let ids = node.data.code.split(":");
                     __addSelectedField(ids, 1, 0);
                 }else{
                     selectedFields.push(node.data.code);
@@ -291,11 +291,11 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _onRecordScopeChange: function() 
     {
-        var isdisabled = this._super();
+        let isdisabled = this._super();
         
         //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
         
-        var rtyID = this.selectRecordScope.val();
+        let rtyID = this.selectRecordScope.val();
         
         if(this._selectedRtyID!=rtyID ){
             if(rtyID>0){
@@ -316,26 +316,26 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _loadRecordTypesTreeView: function(rtyID){
         
-        var that = this;
+        let that = this;
 
         if(this._selectedRtyID!=rtyID ){
             
             this._selectedRtyID = rtyID;
             
             
-            var allowed_fieldtypes = ['rec_Title','rec_AddedBy','rec_URL','rec_ScratchPad',
+            let allowed_fieldtypes = ['rec_Title','rec_AddedBy','rec_URL','rec_ScratchPad',
                 'enum','freetext','blocktext',
                 'year','date','integer','float','resource'];
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
+            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
             
             treedata = treedata[0].children;
             treedata[0].selected = true;
             //treedata[0].expanded = true; //first expanded
             
             //load treeview
-            var treediv = this.element.find('.rtt-tree');
+            let treediv = this.element.find('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }
@@ -351,8 +351,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     if( data.node.hasChildren() ){
                         
                         if(data.node.isExpanded()){
-                            for(var i=0; i<data.node.children.length; i++){
-                                var node = data.node.children[i];
+                            for(let i=0; i<data.node.children.length; i++){
+                                let node = data.node.children[i];
                                 if(node.key=='rec_ID' || node.key=='rec_Title'){
                                     node.setSelected(true);
                                 }
@@ -408,7 +408,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 }
             });
             
-            var tree = treediv.fancytree('getTree');
+            let tree = treediv.fancytree('getTree');
             tree.visit(function(node){
                 if(node.lazy){
                     node.folder = false;
@@ -429,15 +429,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _fixDuplicatesPopup: function(event){
         
-        var sGroupID = $(event.target).attr('data-action-merge');
-        var sRecIds = Object.keys(this.dupes[sGroupID]);
+        let sGroupID = $(event.target).attr('data-action-merge');
+        let sRecIds = Object.keys(this.dupes[sGroupID]);
 
-        var url = window.hWin.HAPI4.baseURL
+        let url = window.hWin.HAPI4.baseURL
                 + 'admin/verification/combineDuplicateRecords.php?bib_ids='
                 + sRecIds.join(',')
                 + '&db=' + window.hWin.HAPI4.database;
                 
-        var that = this;
+        let that = this;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
             width:800, height:600,
@@ -448,7 +448,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
                     that.element.find('.group_'+sGroupID).hide();
 
-                    var cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
+                    let cur_query = $.extend(true, {}, window.hWin.HEURIST4.current_query_request);
                     cur_query.id = null;
                     cur_query.source = null;
                     cur_query.no_menu_switch = 1;
@@ -466,15 +466,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _ignoreGroup: function(event){
 
-        var sGroupID = $(event.target).attr('data-action-ignore');
-        var sRecIds = Object.keys(this.dupes[sGroupID]);
+        let sGroupID = $(event.target).attr('data-action-ignore');
+        let sRecIds = Object.keys(this.dupes[sGroupID]);
 
-        var request = {
+        let request = {
             a        : 'dupes',
             db       : window.hWin.HAPI4.database,
             ignore   : sRecIds.join(',')};
 
-        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
+        let url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
 
         window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
 
@@ -493,12 +493,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _ignoreClear: function(){
 
-        var request = {
+        let request = {
             a        : 'dupes',
             db       : window.hWin.HAPI4.database,
             ignore   : 'clear'};
 
-        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
+        let url = window.hWin.HAPI4.baseURL + 'hserv/controller/recordVerify.php'
 
         window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
 
@@ -518,9 +518,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     //
     _renderDuplicates: function(){
         
-            var dupes = this.dupes;
+            let dupes = this.dupes;
             
-            var s = '<div style="padding:10px;">' + this.summary['scope'] + ' records have been checked.'
+            let s = '<div style="padding:10px;">' + this.summary['scope'] + ' records have been checked.'
                     + '<p>There are '+this.summary['cnt_records']
                             + ' potential duplicates grouped in '
                             +  this.summary['cnt_groups'] +' groups</b></p>';
@@ -539,10 +539,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 //onsole.log(dupes);            
 
             
-            var grp_cnt = Object.keys(dupes).length;
-            for(var i=0; i<grp_cnt; i++) {
+            let grp_cnt = Object.keys(dupes).length;
+            for(let i=0; i<grp_cnt; i++) {
 
-                var rec_ids = Object.keys(dupes[i]);
+                let rec_ids = Object.keys(dupes[i]);
         
                 s = s + '<div style="padding: 10px 20px;" class="group group_'+i+'">';
                 
@@ -557,7 +557,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         
                 //list of records    
                 s = s + '<ul style="padding: 10px 30px;" class="group_'+i+'">';
-                for(var j=0; j<rec_ids.length; j++) {
+                for(let j=0; j<rec_ids.length; j++) {
                     
                     s = s + '<li>'
                     + '<a target="_new" href="'+window.hWin.HAPI4.baseURL+'viewers/record/viewRecord.php?db='
@@ -588,20 +588,20 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     _fillSortField: function(){
         
-                    var tree = this.element.find('.rtt-tree').fancytree("getTree");
-                    var fieldIds = tree.getSelectedNodes(false);
-                    var k, len = fieldIds.length;
+                    let tree = this.element.find('.rtt-tree').fancytree("getTree");
+                    let fieldIds = tree.getSelectedNodes(false);
+                    let k, len = fieldIds.length;
                     
-                    var sel = this.element.find('#sort_field');
-                    var keep_val = sel.val();
+                    let sel = this.element.find('#sort_field');
+                    let keep_val = sel.val();
                     sel.empty();
                     
                     for (k=0;k<len;k++){
-                        var node =  fieldIds[k];
+                        let node =  fieldIds[k];
                         if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
                         
                         if(node.data.type=='freetext' || node.data.type=='blocktext'){
-                            var key = node.key.split(':');
+                            let key = node.key.split(':');
                             key = key[key.length-1];
                             window.hWin.HEURIST4.ui.addoption(sel[0], key, node.data.name);
                         }

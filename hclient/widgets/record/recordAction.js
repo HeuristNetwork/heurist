@@ -102,12 +102,12 @@ $.widget( "heurist.recordAction", {
             
         
         //init layout
-        var that = this;
+        let that = this;
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
             
-            var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
+            let url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
                     ?this.options.htmlContent
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + (this.options.path?this.options.path:'widgets/record/')+this.options.htmlContent
@@ -145,7 +145,7 @@ $.widget( "heurist.recordAction", {
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
         
         this.element.find('label[for="sel_record_scope"]').text(window.hWin.HR('recordAction_select_lbl'));
         
@@ -190,7 +190,7 @@ $.widget( "heurist.recordAction", {
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        let that = this;        
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
@@ -214,9 +214,9 @@ $.widget( "heurist.recordAction", {
     //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
-        var btn = $('<button>').button(btn_opts)
+        let btn = $('<button>').button(btn_opts)
                     .click(options.click)
                     .appendTo(container);
         if(options.id){
@@ -251,14 +251,14 @@ $.widget( "heurist.recordAction", {
             
             if(options.position==null) options.position = { my: "center", at: "center", of: window };
             
-            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
             var that = this;
             
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -290,7 +290,7 @@ $.widget( "heurist.recordAction", {
     popupDialog: function(){
         if(this.options.isdialog){
 
-            var $dlg = this._as_dialog.dialog("open");
+            let $dlg = this._as_dialog.dialog("open");
             
             
             if(this._as_dialog.attr('data-palette')){
@@ -309,7 +309,7 @@ $.widget( "heurist.recordAction", {
             
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -328,7 +328,7 @@ $.widget( "heurist.recordAction", {
             this._as_dialog.dialog("close");
         }else{
             
-            var canClose = true;
+            let canClose = true;
             if($.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
@@ -361,7 +361,7 @@ $.widget( "heurist.recordAction", {
     //
     _fillSelectRecordScope: function (){
 
-        var scope_types = this.options.scope_types;
+        let scope_types = this.options.scope_types;
         this.selectRecordScope.empty();
         
         if(scope_types=='none'){
@@ -369,11 +369,11 @@ $.widget( "heurist.recordAction", {
             return;    
         }
 
-        var opt, selScope = this.selectRecordScope.get(0);
+        let opt, selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope,'',window.hWin.HR('recordAction_select_hint'));
         
-        var is_initscope_empty = window.hWin.HEURIST4.util.isempty(scope_types);
+        let is_initscope_empty = window.hWin.HEURIST4.util.isempty(scope_types);
         if(is_initscope_empty) scope_types = [];   
         
         if(scope_types.indexOf('all')>=0){
@@ -394,7 +394,7 @@ $.widget( "heurist.recordAction", {
                 window.hWin.HR('Current results set (count=') + this._currentRecordset.length()+')');
         }
 
-        var rectype_Ids = [];
+        let rectype_Ids = [];
         if (!is_initscope_empty){
             for (var rty in scope_types)
             if(rty>=0 && scope_types[rty]>0 && $Db.rty(scope_types[rty],'rty_Name')){ 
@@ -408,7 +408,7 @@ $.widget( "heurist.recordAction", {
             if(rty>=0){
                 rty = rectype_Ids[rty];
                 
-                var name = $Db.rty(rty,'rty_Plural');
+                let name = $Db.rty(rty,'rty_Plural');
                 if(!name) name = $Db.rty(rty,'rty_Name');
                 
                 window.hWin.HEURIST4.ui.addoption(selScope,rty,
@@ -428,7 +428,7 @@ $.widget( "heurist.recordAction", {
     //    
     _onRecordScopeChange: function () 
     {
-        var isdisabled = (this.selectRecordScope.val()=='');
+        let isdisabled = (this.selectRecordScope.val()=='');
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
         
         return isdisabled;
@@ -448,20 +448,20 @@ $.widget( "heurist.recordAction", {
              this._hideProgress();
              return;
         }
-        var that = this;
+        let that = this;
        
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progressCounter = 0;        
+        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
         this.element.find('#div_fieldset').hide();
         this.element.find('.ent_wrapper').hide();
-        var progress_div = this.element.find('.progressbar_div').show();
+        let progress_div = this.element.find('.progressbar_div').show();
         $('body').css('cursor','progress');
-        var btn_stop = progress_div.find('.progress_stop').button({label:window.hWin.HR('Abort')});
+        let btn_stop = progress_div.find('.progress_stop').button({label:window.hWin.HR('Abort')});
         
         this._on(btn_stop,{click: function() {
             
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._hideProgress();
                     //if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
@@ -470,9 +470,9 @@ $.widget( "heurist.recordAction", {
                 });
             }});
         
-        var div_loading = progress_div.find('.loading').show();
-        var pbar = progress_div.find('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
+        let div_loading = progress_div.find('.loading').show();
+        let pbar = progress_div.find('#progressbar');
+        let progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
         //pbar.progressbar('value', 0);
         /*{
@@ -487,7 +487,7 @@ $.widget( "heurist.recordAction", {
         
         this._progressInterval = setInterval(function(){ 
             
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            let request = {t:(new Date()).getMilliseconds(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                
@@ -495,7 +495,7 @@ $.widget( "heurist.recordAction", {
                     that._hideProgress();
                 }else{
                     //it may return terminate,done,
-                    var resp = response?response.split(','):[];
+                    let resp = response?response.split(','):[];
                     if(response=='terminate' || resp.length!=2){
                         if(response=='terminate' || is_autohide){
                             that._hideProgress();
@@ -507,7 +507,7 @@ $.widget( "heurist.recordAction", {
                     }else{
                         div_loading.hide();
                         if(resp[0]>0 && resp[1]>0){
-                            var val = resp[0]*100/resp[1];
+                            let val = resp[0]*100/resp[1];
                             pbar.progressbar( "value", val );
                             progressLabel.text(resp[0]+' of '+resp[1]);
                         }else{

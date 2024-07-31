@@ -34,8 +34,8 @@
 
 function ShowReps( is_snippet_editor ) {
 
-    var _className = "ShowReps",
-    _originalFileName,
+    const _className = "ShowReps";
+    let _originalFileName,
 
     _needListRefresh = false, //if true - reload list of templates after editor exit
     _keepTemplateValue,

@@ -111,7 +111,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             .insertBefore(this.recordList);
         
 
-        var that = this;
+        let that = this;
 
         this.editForm.css({'top':0, 'padding-top':'20px'});
 
@@ -166,7 +166,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
         //init viewer 
-        var that = this;
+        let that = this;
 
         if(this.options.select_mode=='manager'){
 
@@ -250,12 +250,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
 
-                                var trg = $(event.target).hasClass('recordDiv')
+                                let trg = $(event.target).hasClass('recordDiv')
                                 ?$(event.target)
                                 :$(event.target).parents('.recordDiv');
 
-                                var trm_ID = $(ui.draggable).parent().attr('recid');
-                                var vocab_id = trg.attr('recid');
+                                let trm_ID = $(ui.draggable).parent().attr('recid');
+                                let vocab_id = trg.attr('recid');
                                 if(trm_ID>0 && vocab_id>0 && that.options.reference_trm_manger){
 
                                     if(that.options.reference_trm_manger.find('#rbDnD_merge').is(':checked')){
@@ -310,7 +310,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     this.addEditRecord(-1);
                 }else  if(this.options.selection_on_init>0){
                     //is vocabulary
-                    var vcg_ID = $Db.trm(this.options.selection_on_init, 'trm_VocabularyGroupID');
+                    let vcg_ID = $Db.trm(this.options.selection_on_init, 'trm_VocabularyGroupID');
                     rg_options['selection_on_init'] = vcg_ID; //select group
                 }
 
@@ -359,7 +359,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         click: function() { that._onActionListener(null, 'term-import-translations'); }}
                 ];
 
-                var btn_array2 = [
+                let btn_array2 = [
                     {showText:false, icons:{primary:'ui-icon-menu'}, text:window.hWin.HR('Show as plain list'),
                         css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                         click: function() { that._onActionListener(null, 'viewmode-list'); }},
@@ -410,7 +410,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 }
 
-                var del_multi_btn = {showText:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
+                let del_multi_btn = {showText:true, text:window.hWin.HR('Delete selected'), //Delete selected terms
                                     css:{'margin-left':'0.75em','display':'inline-block',padding:'2px'}, id:'btnDelMulti',
                                     click: function() { that._onActionListener(null, 'term-delete-mutliple'); }};
                 this._defineActionButton2(del_multi_btn, c1);
@@ -434,7 +434,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 this._dropped = false;
 
-                var trm_empty_remark = 'No terms in selected vocabulary.<br><br>Add or import new ones<br><br>'
+                let trm_empty_remark = 'No terms in selected vocabulary.<br><br>Add or import new ones<br><br>'
                     + '<div style="display: inline-block;margin: 10px 0 0 35px;color: green;font-style: italic;">'
                         + 'Terms can be added directly when editing the data for a record.<br><br>'
                         + 'Terms are added automatically when importing data from a<br>CSV, XML, or JSON file containing terms.'
@@ -476,9 +476,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     $(ui.helper).css("cursor", 'not-allowed');
                                 }
                                 
-                                var ele = that.recordList.find('.div-result-list-content');
+                                let ele = that.recordList.find('.div-result-list-content');
                                 
-                                var bot = ele.offset().top+ele.height();
+                                let bot = ele.offset().top+ele.height();
                                 if(that.scrollInterval>0) clearInterval(that.scrollInterval);
                                 that.scrollInterval = 0;
 
@@ -499,7 +499,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             hoverClass: 'ui-drag-drop', //highlight
                             drop: function( event, ui ){
 
-                                var trg = $(event.target).hasClass('recordDiv')
+                                let trg = $(event.target).hasClass('recordDiv')
                                 ?$(event.target)
                                 :$(event.target).parents('.recordDiv');
 
@@ -512,8 +512,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 that.scrollInterval = 0;
                                 window.hWin.HEURIST4.util.stopEvent(event);
 
-                                var trm_ID = $(ui.draggable).parent().attr('recid');
-                                var trm_ParentTermID = trg.attr('recid');
+                                let trm_ID = $(ui.draggable).parent().attr('recid');
+                                let trm_ParentTermID = trg.attr('recid');
                                 if(trm_ID!=trm_ParentTermID && trm_ID>0 && trm_ParentTermID>0){
 
                                     if(that.rbMergeOnDnD.is(':checked')){
@@ -526,7 +526,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         });
 
                         // move to root of vocabulary                                
-                        var _move_to_top = {
+                        let _move_to_top = {
                             scope: 'vocab_change',
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
@@ -540,8 +540,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 
                                 if (that._dropped) return;
 
-                                var trm_ID = $(ui.draggable).parent().attr('recid');
-                                var trm_ParentTermID = that.options.trm_VocabularyID;
+                                let trm_ID = $(ui.draggable).parent().attr('recid');
+                                let trm_ParentTermID = that.options.trm_VocabularyID;
                                 if(trm_ID>0){
                                     if(!that.rbMergeOnDnD.is(':checked')){
                                         that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);
@@ -556,7 +556,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             $.each(that.recordList.find('.recordDiv'),
                                 function(i,pitem){
                                     pitem = $(pitem);
-                                    var recID =pitem.attr('recID');
+                                    let recID =pitem.attr('recID');
                                     if(window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0){
 
                                         pitem.find('span.ui-icon-triangle-1-s') 
@@ -678,9 +678,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         this.selectedRecords(selected_recs); //assign
 
                         if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
-                            var recs = selected_recs.getOrder();
+                            let recs = selected_recs.getOrder();
                             if(recs && recs.length>0){
-                                var recID = recs[recs.length-1];
+                                let recID = recs[recs.length-1];
                                 this._onActionListener(event, {action:'edit',recID:recID}); 
                                 //edit-inline disabled 2020-12-01            
                             }
@@ -740,7 +740,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             //add vocabulary
-            var sel = $('<div style="float:left"><label>From vocabulary: </label><br>'
+            let sel = $('<div style="float:left"><label>From vocabulary: </label><br>'
                 +'<select type="text" style="max-width:330px;min-width:15em;" '
                 +'class="text ui-widget-content ui-corner-all"></select></div>')
             .appendTo(c1);
@@ -812,11 +812,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     selectVocabulary: function(vocab_id){
         
-        var vcg_ID = $Db.trm(vocab_id, 'trm_VocabularyGroupID');
+        let vcg_ID = $Db.trm(vocab_id, 'trm_VocabularyGroupID');
 
         if(vcg_ID>0){
             this.vocabulary_groups.manageDefVocabularyGroups('selectRecordInRecordset', vcg_ID);    
-            var that = this;
+            let that = this;
             setTimeout(function(){that.selectRecordInRecordset(vocab_id);},300);
         }
 
@@ -828,7 +828,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _loadData: function( is_first_call ){
 
-        var that = this;
+        let that = this;
 
         if(this.use_remote && this.options.import_structure){
             this.recordList.resultList('resetGroups');
@@ -859,7 +859,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return;
         }else if(this.options.auxilary=='vocabulary'){
             //show vocabs only
-            var recset = $Db.trm()
+            let recset = $Db.trm()
                     .getSubSetByRequest({'trm_ParentTermID':'=0', 'sort:trm_Label':1},
                                             this.options.entity.fields);
             this.updateRecordList(null, {recordset:recset});
@@ -881,13 +881,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         const that = this;
 
-        var sGroupTitle = '<h3 style="margin:0;padding:0 8px" class="truncate">';
+        let sGroupTitle = '<h3 style="margin:0;padding:0 8px" class="truncate">';
         if(this.options.auxilary=='vocabulary'){
             //filter by group
 
             if(this.options.trm_VocabularyGroupID>0){
 
-                var vcg_id = this.options.trm_VocabularyGroupID;
+                let vcg_id = this.options.trm_VocabularyGroupID;
                 this.filterRecordList(null, {'trm_VocabularyGroupID':vcg_id, 'sort:trm_Label':1});
 
                 sGroupTitle += (window.hWin.HEURIST4.util.htmlEscape($Db.vcg(vcg_id,'vcg_Name'))
@@ -901,9 +901,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     this.selectRecordInRecordset( this.options.selection_on_init );    
                     this.options.selection_on_init = null;
                 }else{
-                    var rdiv = this.recordList.find('.recordDiv:first');
+                    let rdiv = this.recordList.find('.recordDiv:first');
                     if(rdiv.length){
-                        var rec_ID = rdiv.attr('recid');
+                        let rec_ID = rdiv.attr('recid');
                         rdiv.click();
                     }else if($.isFunction(this.options.onSelect)){
                         this.options.onSelect.call( this, null );
@@ -919,12 +919,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(this.options.trm_VocabularyID>0){ //filter by vocabulary
 
-                var vocab_id = this.options.trm_VocabularyID;
+                let vocab_id = this.options.trm_VocabularyID;
 
                 //this.setTitle('Manage Terms: '+$Db.trm(vocab_id,'trm_Label'));
                 //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
 
-                var subset = $Db.trm_TreeData(vocab_id, 'flat'); //returns recordset
+                let subset = $Db.trm_TreeData(vocab_id, 'flat'); //returns recordset
 
                 if(!this.recordList.resultList('instance')) return;
                 
@@ -933,10 +933,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(this.recordTree && this.recordTree.fancytree('instance')){
 
                     //filtered
-                    var treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
+                    let treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
                     
                     // subset.getTreeViewData('trm_Label', 'trm_ParentTermID',vocab_id);
-                    var tree = this.recordTree.fancytree('getTree');
+                    let tree = this.recordTree.fancytree('getTree');
                     tree.reload(treedata);
                 }
 
@@ -975,7 +975,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             if(this.options.isFrontUI){
-                var ele = this.element.find('.coverall-div');
+                let ele = this.element.find('.coverall-div');
                 if(ele.length>0) ele.remove();
                 //var that = this;
                 //setTimeout(function(){that.element.find('.coverall-div').remove();},1000);
@@ -991,17 +991,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _recordListItemRenderer:function(recordset, record){
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
-        var recID = recordset.fld(record, 'trm_ID');
+        let recID = recordset.fld(record, 'trm_ID');
 
-        var sBold = '';
-        var sWidth = '250';
-        var sPad = '';
-        var sRef = '';
-        var sHint = '';
-        var sLabel = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'));
-        var sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
-        var recTitle = '', sFontSize='';
-        var html;
+        let sBold = '';
+        let sWidth = '250';
+        let sPad = '';
+        let sRef = '';
+        let sHint = '';
+        let sLabel = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'));
+        let sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
+        let recTitle = '', sFontSize='';
+        let html;
 
 
         if(this.options.auxilary=='vocabulary'){
@@ -1032,8 +1032,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             +'</div>';
 
         }else{
-            var parents = recordset.fld(record, 'trm_Parents').split(',');
-            var lvl = (parents.length);
+            let parents = recordset.fld(record, 'trm_Parents').split(',');
+            let lvl = (parents.length);
 
             if(lvl>0){
                 parents = ' data-parent=";'+parents.join(';')+';"';
@@ -1041,11 +1041,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 parents = '';
             }
 
-            var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
-            var real_vocab_name = '';
+            let ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+            let real_vocab_name = '';
             
             if(ref_lvl!==false){
-                var vocab_id = $Db.getTermVocab(recID); //real vocab
+                let vocab_id = $Db.getTermVocab(recID); //real vocab
                 real_vocab_name = 
                     window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))
                     +'.'+window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'));
@@ -1053,12 +1053,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 sRef = '<span style="color:blue;font-size:smaller;">&nbsp; →'+real_vocab_name+'</span>.';
             }
 
-            var sLabelHint = sLabel;
+            let sLabelHint = sLabel;
             sLabel = sRef + sLabel;
 
-            var inv_id = $Db.trm(recID, 'trm_InverseTermID');
+            let inv_id = $Db.trm(recID, 'trm_InverseTermID');
             if ( inv_id>0 ){
-                var sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
+                let sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
                 if(sInvLabel) {
                     sLabel = sLabel + 
                     '&nbsp;&nbsp;&nbsp;<span style="font-size:smaller;font-style:italic;">inv: '+sInvLabel+'</span>';    
@@ -1071,8 +1071,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sPad = '<span style="font-size:'+(1+lvl * 0.1)+'em">'+('&nbsp;'.repeat(lvl*4))+'</span>';
             sFontSize = 'font-size:'+(1.1 - lvl * 0.1)+'em;';
 
-            var sCode = $Db.trm(recID, 'trm_Code');
-            var sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
+            let sCode = $Db.trm(recID, 'trm_Code');
+            let sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
 
             sHint = 'title="'+sLabelHint+'<br>'
             + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
@@ -1096,23 +1096,23 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             +`<img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${recIcon}"); vertical-align:bottom;' />`
             +'&nbsp;&nbsp;<span class="term_usage"></span></div>';
 
-            var html_thumb = '';
+            let html_thumb = '';
             
-            var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', null, null, true);
+            let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', null, null, true);
 
             html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                     +recThumb+'&quot;);opacity:1;top:45px;"></div>';
                     
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
-            var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
+            let exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
 
-            var sclass = 'white-borderless', sstyle = '';
+            let sclass = 'white-borderless', sstyle = '';
             if( !window.hWin.HEURIST4.util.isempty(this.options.select_mode_reference) ){
                 sclass = '';
                 sstyle = 'style="background:transparent;border:none;"';
             }
 
-            var alt_btn_content = '&nbsp;';
+            let alt_btn_content = '&nbsp;';
             if(this.options.edit_mode == 'popup'){
                 alt_btn_content = '<span class="ui-icon ui-icon-triangle-1-e" style="color: black;opacity: 0.2;" />';
             }
@@ -1189,14 +1189,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(this.options.edit_mode == 'popup'){
 
-            var record_divs = this.recordList.find('.recordDiv');
+            let record_divs = this.recordList.find('.recordDiv');
             if(this.options.auxilary=='vocabulary'){ // add mouseenter/mouseleave
                 
                 this._on(record_divs, {
                     'mouseenter': function(event){ // reduce size
 
-                        var trm_id = $(event.target).attr('recid');
-                        var widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '178' : '225') + 'px';
+                        let trm_id = $(event.target).attr('recid');
+                        let widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '178' : '225') + 'px';
 
                         $(event.target).find('.item.truncate').css({
                             'max-width': widths,
@@ -1205,8 +1205,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     },
                     'mouseleave': function(event){ // increase size
 
-                        var trm_id = $(event.target).attr('recid');
-                        var widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '205' : '250') + 'px';
+                        let trm_id = $(event.target).attr('recid');
+                        let widths = ($Db.trm(trm_id, 'trm_Domain')=='relation' ? '205' : '250') + 'px';
 
                         $(event.target).find('.item.truncate').css({
                             'max-width': widths,
@@ -1251,7 +1251,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _deleteAndClose: function(unconditionally, recIDs = null){
 
-        var that = this;
+        let that = this;
 
         recIDs = recIDs == null ? [ this._currentEditID ] : recIDs;
         let is_multi = recIDs.length > 1;
@@ -1262,14 +1262,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(recIDs==null || recIDs.length == 0) return;
 
-            var request = {
+            let request = {
                 'a'          : 'delete',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'recID'      : recIDs
             };
 
-            var it_was_vocab = recIDs.length == 1 && $Db.trm(recIDs[0], 'trm_ParentTermID') == 0;
+            let it_was_vocab = recIDs.length == 1 && $Db.trm(recIDs[0], 'trm_ParentTermID') == 0;
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
@@ -1337,7 +1337,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super(recID); 
 
         //get all children
-        var all_ids = $Db.trm_TreeData(recID, 'set', true);
+        let all_ids = $Db.trm_TreeData(recID, 'set', true);
 
         //remove defs on client side
         $Db.trm_RemoveLinks(recID);
@@ -1365,8 +1365,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         this.inverse_termid_old = 0;
 
-        var ele, currentDomain = null;
-        var isVocab = !(this.options.trm_VocabularyID>0);
+        let ele, currentDomain = null;
+        let isVocab = !(this.options.trm_VocabularyID>0);
         if(isVocab){
 
             if(this._edit_dialog && this._edit_dialog.dialog('instance')){
@@ -1389,7 +1389,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 currentDomain = $Db.vcg( this.options.trm_VocabularyGroupID, 'vcg_Domain' );
             }else if(this._currentEditID==-1 && window.hWin.HEURIST4.util.isempty(this.options.trm_VocabularyGroupID)){
                 // Select the first vocab group option, avoid default 'select...'
-                var first_id = $(ele.find('.input-div option')[1]).val();
+                let first_id = $(ele.find('.input-div option')[1]).val();
                 if(!window.hWin.HEURIST4.util.isempty(first_id)){
                     ele.editing_input('setValue', first_id, true);
                     currentDomain = $Db.vcg(first_id, 'vcg_Domain');
@@ -1406,12 +1406,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 if(this.options.reference_trm_manger.find('div').length > 0){
-                    var divs = this.options.reference_trm_manger.find('div');
-                    var $title_container = $(divs[divs.length-1]);
+                    let divs = this.options.reference_trm_manger.find('div');
+                    let $title_container = $(divs[divs.length-1]);
 
                     if($title_container.find('span').length > 0){
 
-                        var label = $title_container.find('span').attr('title');
+                        let label = $title_container.find('span').attr('title');
                         label = label + (label.search(/vocab/i) == -1 ? ' vocab' : '');
 
                         this._editing.setFieldValueByName('trm_Label', label, true);
@@ -1425,9 +1425,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else
         {
 
-            var dlg = this._getEditDialog(true);
+            let dlg = this._getEditDialog(true);
             if(dlg && dlg.dialog('instance')){
-                var s = (this._currentEditID>0?'Edit':'Add')+' Term';
+                let s = (this._currentEditID>0?'Edit':'Add')+' Term';
                 if(this.options.trm_VocabularyID>0){
                     s = s + ' to vocabulary "'
                     +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this.options.trm_VocabularyID,'trm_Label'))+'"';
@@ -1465,7 +1465,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._editing.getFieldByName('trm_VocabularyGroupID').hide();
 
 
-            var vocab_ID = $Db.getTermVocab(this.options.trm_VocabularyID);
+            let vocab_ID = $Db.getTermVocab(this.options.trm_VocabularyID);
             currentDomain = $Db.trm(vocab_ID, 'trm_Domain');
 
             if( currentDomain=='enum' ){
@@ -1474,7 +1474,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else{
                 ele = this._editing.getFieldByName('trm_InverseTermID');
                 ele.show();
-                var cfg = ele.editing_input('getConfigMode');
+                let cfg = ele.editing_input('getConfigMode');
                 cfg.initial_filter = vocab_ID;
                 cfg.popup_options = {};
                 cfg.popup_options.width = 400;
@@ -1487,8 +1487,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(this._currentEditID>0){
                     //detect: is it symmetrical?
-                    var val = '1';
-                    var trm_InverseTermID = $Db.trm(this._currentEditID, 'trm_InverseTermID');
+                    let val = '1';
+                    let trm_InverseTermID = $Db.trm(this._currentEditID, 'trm_InverseTermID');
                     if(trm_InverseTermID>0){
                         this.inverse_termid_old = $Db.trm(trm_InverseTermID, 'trm_InverseTermID');
                         val = (this._currentEditID == this.inverse_termid_old)?'1':'0';
@@ -1503,7 +1503,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         // Add suggested/provided label
         ele = this._editing.getFieldByName('trm_Label');
-        var suggested_name = this.options.suggested_name;
+        let suggested_name = this.options.suggested_name;
         if(!window.hWin.HEURIST4.util.isempty(suggested_name) && this._currentEditID <= 0 && ele.val() == ''){
             if(isVocab && suggested_name.search(/vocab/i) == -1){
                 suggested_name += ' vocab';
@@ -1518,7 +1518,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         ele = this._editing.getFieldByName('trm_ID');
         if(this._currentEditID>0){
-			var conceptID = $Db.getConceptID('trm',this._currentEditID);
+			let conceptID = $Db.getConceptID('trm',this._currentEditID);
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;( '
                 +(!window.hWin.HEURIST4.util.isnull(conceptID) ? conceptID : "Concept ID is not defined")+' )');
             //$('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>') 
@@ -1528,7 +1528,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         //on ENTER save
         this._on( this.editForm.find('input.text,textarea.text'), { keypress: function(e){        
-            var code = (e.keyCode ? e.keyCode : e.which);
+            let code = (e.keyCode ? e.keyCode : e.which);
             if (code == 13) {
                 window.hWin.HEURIST4.util.stopEvent(e);
                 e.preventDefault();
@@ -1540,11 +1540,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //defaultBeforeClose
 
 
-        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
             +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
         this._on( ele.find('input'), {change: function( event){
-            var ishelp_on = $(event.target).is(':checked');
+            let ishelp_on = $(event.target).is(':checked');
             this.usrPreferences['help_on'] = ishelp_on;
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         }});
@@ -1577,7 +1577,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     contextOnClose: function(){
         
-        var last_vocab_id = this.vocabularies_div?this.vocabularies_div.manageDefTerms('getLastAddedVocabulary'):0;
+        let last_vocab_id = this.vocabularies_div?this.vocabularies_div.manageDefTerms('getLastAddedVocabulary'):0;
         
         return last_vocab_id>0?last_vocab_id:this.options.trm_VocabularyID;
     },
@@ -1587,11 +1587,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     _getEditDialogButtons: function(){
-        var btns = this._super();
+        let btns = this._super();
 
         if(this.options.edit_mode=='editonly'){ //for popup
 
-            var that = this;
+            let that = this;
 
             if(this.options.container){
                 //inlin/inside resultList - edit terms
@@ -1688,7 +1688,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super(changed_element);
 
         if(this._toolbar && this.options.edit_mode=='editonly'){
-            var isChanged = this._editing.isModified();
+            let isChanged = this._editing.isModified();
             this._toolbar.find('#btnEditAll').css('visibility', isChanged?'hidden':'visible');
         }
 
@@ -1703,9 +1703,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             if(!this.options.container){ //for popup
             
-                var keepParent = $Db.trm(recID,'trm_ParentTermID');
-                var isVocab = !(keepParent>0); //new term is added
-                var sName = (isVocab)?'Vocabulary':'Term';
+                let keepParent = $Db.trm(recID,'trm_ParentTermID');
+                let isVocab = !(keepParent>0); //new term is added
+                let sName = (isVocab)?'Vocabulary':'Term';
                 if(isVocab){
                     this.options.trm_VocabularyGroupID = $Db.trm(recID,'trm_VocabularyGroupID');
                     this.options.trm_VocabularyID = recID;    
@@ -1783,12 +1783,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if($Db.trm(recID)==null)
                     $Db.trm().addRecord(recID, fieldvalues);                
 
-                var parent_id = $Db.trm(recID, 'trm_ParentTermID');                
+                let parent_id = $Db.trm(recID, 'trm_ParentTermID');                
                 if(parent_id>0){
                     
                     if(!$Db.trm_IsChild(parent_id, recID)){
                         //add - to avoid duplication                    
-                        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+                        let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
                         if(!t_idx[parent_id]) t_idx[parent_id] = []; 
                         t_idx[parent_id].push(recID);        
                     }
@@ -1818,9 +1818,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         {
 
             //update inverse terms
-            var inverse_termid = fieldvalues['trm_InverseTermID'];
+            let inverse_termid = fieldvalues['trm_InverseTermID'];
             //var inverse_termid_old = @$record['old_inverse_id'];
-            var is_symmetrical = (fieldvalues['trm_InverseSymmetrical']!=0);
+            let is_symmetrical = (fieldvalues['trm_InverseSymmetrical']!=0);
 
             if(this.inverse_termid_old!=inverse_termid && is_symmetrical)
             {
@@ -1830,7 +1830,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
                 if (this.inverse_termid_old>0){
                     //clear mutual inversion for previous inversion
-                    var invid = $Db.trm(this.inverse_termid_old, 'trm_InverseTermID');
+                    let invid = $Db.trm(this.inverse_termid_old, 'trm_InverseTermID');
                     if(invid==recID){
                         $Db.trm(this.inverse_termid_old, 'trm_InverseTermID', null);
                     }
@@ -1857,7 +1857,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(fields==null) return; //validation failed
 
         if(!window.hWin.HEURIST4.util.isempty(fields['trm_Parents'])){
-            var parents = fields['trm_Parents'].split(',');
+            let parents = fields['trm_Parents'].split(',');
             //request['trm_parentID'] = parents[parents.length - 1];
 
             // set parent field to acutal parent field, to avoid moving it
@@ -1866,7 +1866,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
         
-        var lbl = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
+        let lbl = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
 
         if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && lbl.search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
             lbl += ' vocab';
@@ -1885,14 +1885,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     mergeTerms: function(params){
 
-        var that = this;   
+        let that = this;   
 
 
-        var trm_ID = params['trm_ID'];
-        var target_id = params['trm_ParentTermID'];
+        let trm_ID = params['trm_ID'];
+        let target_id = params['trm_ParentTermID'];
 
-        var vocab_id = $Db.getTermVocab(target_id);
-        var vocab_id2 = $Db.getTermVocab(trm_ID);
+        let vocab_id = $Db.getTermVocab(target_id);
+        let vocab_id2 = $Db.getTermVocab(trm_ID);
         if((this.options.trm_VocabularyID!=vocab_id) || (this.options.trm_VocabularyID!=vocab_id2))
         {
             window.hWin.HEURIST4.msg.showMsgFlash( 'Merge with reference is not allowed' ); 
@@ -1900,7 +1900,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
 
-        var parents = $Db.trm(target_id, 'trm_Parents');
+        let parents = $Db.trm(target_id, 'trm_Parents');
         if(parents){
             parents = parents.split(',');
             if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, parents)>=0){
@@ -1911,7 +1911,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return;
         }    
 
-        var $dlg, buttons = [
+        let $dlg, buttons = [
             {text:window.hWin.HR('Cancel'),
                 //id:'btnRecCancel',
                 css:{'float':'right',margin:'.5em .4em .5em 0'},  
@@ -1922,7 +1922,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 class: 'ui-button-action',
                 click: function() { 
 
-                    var request = {
+                    let request = {
                         'a'          : 'action',
                         'entity'     : that.options.entity.entityName,
                         'request_id' : window.hWin.HEURIST4.util.random(),
@@ -1930,7 +1930,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         'retain_id'  : target_id                 
                     };
 
-                    var fieldvalues = {};
+                    let fieldvalues = {};
 
                     if($dlg.find('#term1_code_cb').is(':checked')){ 
                         request['trm_Code'] = $dlg.find('#term1_code').text();
@@ -2004,11 +2004,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     $dlg.css({padding:0});
 
                     //init elements on dialog open
-                    var val1 = $Db.trm(target_id,'trm_OriginatingDBID');
+                    let val1 = $Db.trm(target_id,'trm_OriginatingDBID');
                     if(val1>0){
                         val1 = ' ['+val1+'-'+$Db.trm(target_id,'trm_IDInOriginatingDB')+']';
                     }else val1 = '';
-                    var val2 = $Db.trm(trm_ID,'trm_OriginatingDBID');
+                    let val2 = $Db.trm(trm_ID,'trm_OriginatingDBID');
                     if(val2>0){
                         val2 = ' ['+val2+'-'+$Db.trm(trm_ID,'trm_IDInOriginatingDB')+']';
                     }else val2 = '';
@@ -2038,8 +2038,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     $dlg.find('#term2_desc_cb').prop('checked',val2 && !val1);
 
                     $dlg.find('input[type="checkbox"]').on({change:function(e){
-                        var id = $(e.target).attr('id');
-                        var id2 = id.indexOf('1')>0 ?id.replace('1','2') :id.replace('2','1');
+                        let id = $(e.target).attr('id');
+                        let id2 = id.indexOf('1')>0 ?id.replace('1','2') :id.replace('2','1');
                         if(!$dlg.find('#'+id2).is(':disabled')){
                             $dlg.find('#'+id2).prop('checked', !$(e.target).is(':checked'));
                         }                   
@@ -2061,14 +2061,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(params['trm_ParentTermID']>0){
 
-            var trm_ID = params['trm_ID']; //term to be moved
-            var new_parent_id = params['trm_ParentTermID']; //destination
-            var old_parent_ids = [];
+            let trm_ID = params['trm_ID']; //term to be moved
+            let new_parent_id = params['trm_ParentTermID']; //destination
+            let old_parent_ids = [];
 
             var vocab_id = $Db.getTermVocab(trm_ID); //real vocabulary
             
             //real vocabulary is different from current - this is reference
-            var isRef = (this.options.trm_VocabularyID!=vocab_id); //current vocabulary 
+            let isRef = (this.options.trm_VocabularyID!=vocab_id); //current vocabulary 
             if (isRef) {
                 var parents = $Db.trm(trm_ID, 'trm_Parents');
                 if(parents){
@@ -2089,7 +2089,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             var that = this;
-            var new_vocab_id;
+            let new_vocab_id;
 
             //if new parent is vocabulary
             if( !($Db.trm(new_parent_id, 'trm_ParentTermID')>0) ){
@@ -2107,7 +2107,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         return;
                     }
                     //2. check there is not term with the same name
-                    var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
+                    let trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
                     if(trm_labels.indexOf(lbl.toLowerCase())>=0){
 
@@ -2125,7 +2125,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         };
                         btns['Move term with disambiguation'] = function(){
 
-                            var i = 2;
+                            let i = 2;
                             while(true){
 
                                 var new_label = lbl + ' ' + i;
@@ -2136,8 +2136,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 }
                             }
 
-                            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
-                            var old_vocab_id = old_parent_ids[0];
+                            let old_parent_id = old_parent_ids[old_parent_ids.length-1];
+                            let old_vocab_id = old_parent_ids[0];
 
                             if(isRef){
                                 that._saveEditAndClose( {'trm_ID': params['trm_ID'], 'trm_Label': new_label},
@@ -2219,7 +2219,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         };
                         btns['Move term with disambiguation'] = function(){
 
-                            var i = 2;
+                            let i = 2;
                             while(true){
 
                                 var new_label = lbl + ' ' + i;
@@ -2230,8 +2230,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 }
                             }
 
-                            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
-                            var old_vocab_id = old_parent_ids[0];
+                            let old_parent_id = old_parent_ids[old_parent_ids.length-1];
+                            let old_vocab_id = old_parent_ids[0];
 
                             if(isRef){
                                 that._saveEditAndClose( {'trm_ID': params['trm_ID'], 'trm_Label': new_label},
@@ -2281,10 +2281,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             }
             
-            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
+            let old_parent_id = old_parent_ids[old_parent_ids.length-1];
 
             if(isRef){
-                var old_vocab_id = old_parent_ids[0];
+                let old_vocab_id = old_parent_ids[0];
                 //change parent for reference  @todo - take correct old_parent_ids
                 $Db.setTermReferences(trm_ID, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id,
                             function(){
@@ -2322,9 +2322,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _onActionListener: function(event, action){
 
-        var that = this;
+        let that = this;
 
-        var keep_action = action;
+        let keep_action = action;
         if(action && action.action){
             recID =  action.recID;
             action = action.action;
@@ -2346,7 +2346,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             return true;
         }else if(action=='moveup'){
             //move term to level up
-            var parent_id = $Db.trm(recID, 'trm_ParentTermID');
+            let parent_id = $Db.trm(recID, 'trm_ParentTermID');
             parent_id = $Db.trm(parent_id, 'trm_ParentTermID');
             if(parent_id>0)
                 this.changeVocabularyGroup({trm_ID:recID, trm_ParentTermID:parent_id}, true);            
@@ -2379,7 +2379,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 return true;        
             }            
             //open multi selector
-            var popup_options = {
+            let popup_options = {
                 select_mode:'select_multi',
                 select_mode_reference: 'reference', 
                 select_mode_target: $Db.trm(this.options.trm_VocabularyID,'trm_Label'),
@@ -2390,7 +2390,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 title: 'Add terms by reference',
                 onselect:function(event, data){
 
-                    var sels;
+                    let sels;
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                         sels = data.selection.getIds();
                     }else{
@@ -2421,10 +2421,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
                 //find usage of this vocab in enum base fields
-                var refs = [];               
+                let refs = [];               
                 $Db.dty().each2(function(dty_ID, record){ 
 
-                    var dty_Type = record['dty_Type'];
+                    let dty_Type = record['dty_Type'];
                     if((dty_Type=='enum' || dty_Type=='relmarker') && 
                         (recID == record['dty_JsonTermIDTree'])) 
                     {
@@ -2453,17 +2453,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else{
 
                 //check for reference    
-                var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+                let ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
 
                 if(ref_lvl===false){//this term is not a reference
 
-                    var sMsg = '';
+                    let sMsg = '';
 
                     //check usage as reference
-                    var v_ids = $Db.trm_getAllVocabs(recID);
+                    let v_ids = $Db.trm_getAllVocabs(recID);
                     if(v_ids.length>1){
-                        var names = [];
-                        for(var i=0; i<v_ids.length; i++){
+                        let names = [];
+                        for(let i=0; i<v_ids.length; i++){
                             names.push($Db.trm(v_ids[i],'trm_Label'));    
                         }
 
@@ -2498,10 +2498,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         'You are going to remove the term reference. Actual term is retained.', 
                         function(){ 
                             //find parent 
-                            var parents = $Db.trm(recID, 'trm_Parents');
+                            let parents = $Db.trm(recID, 'trm_Parents');
                             if(parents){
                                 parents = parents.split(',');
-                                var parent_id = parents[parents.length-1]; 
+                                let parent_id = parents[parents.length-1]; 
                                 if(parent_id>0){
                                     //removing refterm entry in trm links
                                     $Db.setTermReferences(recID, 0, 0, that.options.trm_VocabularyID, parent_id,
@@ -2532,7 +2532,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._toogleTermsBranch(recID);
         }
 
-        var is_resolved = this._super(event, keep_action);
+        let is_resolved = this._super(event, keep_action);
 
         if(!is_resolved){
             /*
@@ -2634,7 +2634,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     .getTreeViewData('trm_Label', 'trm_ParentTermID',
                     this.options.trm_VocabularyID);
                     */                                                 
-                    var treedata = $Db.trm_TreeData(this.options.trm_VocabularyID, 'tree');
+                    let treedata = $Db.trm_TreeData(this.options.trm_VocabularyID, 'tree');
 
                     this.recordTree.fancytree(
                         {
@@ -2669,7 +2669,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _toogleTermsBranch: function(recID, force_expand_collapse)
     {
-        var is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
+        let is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
         
         if(force_expand_collapse==1) is_collapsed = true;
         else if(force_expand_collapse==-1) is_collapsed = false;
@@ -2690,10 +2690,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         is_collapsed =!is_collapsed;
 
-        var ele = this.recordList.find('div.recordDiv[recID='+recID+']')
+        let ele = this.recordList.find('div.recordDiv[recID='+recID+']')
         .find('span.ui-icon-triangle-1-'+(is_collapsed?'s':'e'));
         
-        var k = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID);
+        let k = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID);
         
         if(is_collapsed){
             if(k<0) window.hWin.HEURIST4.ui.collapsed_terms.push(recID);
@@ -2710,7 +2710,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _onFindTerms: function(event){
 
-        var input_name = $(event.target);
+        let input_name = $(event.target);
 
         if(this.fields_list_div == null){
             //init for the first time
@@ -2729,18 +2729,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }});
         }
 
-        var setdis = input_name.val().length<3;
+        let setdis = input_name.val().length<3;
 
         //find terms
         if(input_name.val().length>1){
 
-            var term_name, term_code, is_added = false;
+            let term_name, term_code, is_added = false;
 
             this.fields_list_div.empty();  
 
-            var that = this;
+            let that = this;
 
-            var entered = input_name.val().toLowerCase();
+            let entered = input_name.val().toLowerCase();
 
             //find among fields that are not in current record type
             $Db.trm().each(function(trm_ID, rec){
@@ -2751,11 +2751,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(term_name.toLowerCase().indexOf( entered )>=0 || 
                     (term_code && term_code.toLowerCase().indexOf( entered )>=0))
                 {
-                    var ele = $('<div>').css({'padding-top':'4px','border-bottom':'0.5px solid lightgray'})
+                    let ele = $('<div>').css({'padding-top':'4px','border-bottom':'0.5px solid lightgray'})
                                 .appendTo(that.fields_list_div);
 
                     //find parents
-                    var s = '', ids = [trm_ID];
+                    let s = '', ids = [trm_ID];
                     do{
                         var term_parent = $Db.trm(trm_ID, 'trm_ParentTermID');
                         if(term_parent>0){
@@ -2765,7 +2765,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         trm_ID = term_parent;
                     }while(term_parent>0);
 
-                    var is_valid_domain = true;
+                    let is_valid_domain = true;
                     //get vocabulary group
                     if(that.options.filter_groups){
                         is_valid_domain = ($Db.trm(ids[ids.length-1], 'trm_Domain')==that.options.filter_groups);
@@ -2782,8 +2782,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             
                             window.hWin.HEURIST4.util.stopEvent(event);
 
-                            var ele = $(event.target).hide();
-                            var trm_IDs = ele.attr('trm_IDs');
+                            let ele = $(event.target).hide();
+                            let trm_IDs = ele.attr('trm_IDs');
                             if(!trm_IDs) trm_IDs = ele.parent().attr('trm_IDs');
                             if(trm_IDs) trm_IDs = trm_IDs.split(',');
                             
@@ -2791,7 +2791,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 
                                 that.fields_list_div.hide();
                                 //select vocabulary group, select vocab
-                                var vocab_id  = trm_IDs[trm_IDs.length-1];
+                                let vocab_id  = trm_IDs[trm_IDs.length-1];
 
                                 if(that.options.select_mode!='manager'){
                                     that.vocabularies_sel.val(vocab_id);//.change();
@@ -2802,8 +2802,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 if(trm_IDs.length>1){
                                     setTimeout(function(){
                                         //find all parents and expand them in resultList
-                                        var trm_ID = trm_IDs[0];
-                                        var parents = $Db.trm(trm_ID, 'trm_Parents');
+                                        let trm_ID = trm_IDs[0];
+                                        let parents = $Db.trm(trm_ID, 'trm_Parents');
                                         if(parents){
                                             parents = parents.split(',');
                                             $.each(parents, function(i, parent_ID){
@@ -2842,7 +2842,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     _getValidatedValues: function(){
 
-        var fields = this._super();  
+        let fields = this._super();  
         if(fields!==null){
 
             let trm_id = fields['trm_ID'];
@@ -2899,15 +2899,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sTitle = 'Import vocabularies (excluding terms) for vocabulary group: '+
             window.hWin.HEURIST4.util.htmlEscape($Db.vcg(parent_ID,'vcg_Name'));                
         }else{
-            var isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
+            let isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
 
             sTitle = 'Import terms '+(isTerm?'as children of term: ' :'of vocabulary: ')+
             window.hWin.HEURIST4.util.htmlEscape($Db.trm(parent_ID,'trm_Label'));                
         }
 
-        var that = this;
+        let that = this;
 
-        var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?db="
+        let sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?db="
         + window.hWin.HAPI4.database +
         (isVocab?'&vcg_ID=':'&trm_ID=')+parent_ID;
 
@@ -2949,13 +2949,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     importTermsTranslations: function(parent_ID) {
 
-        var isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
+        let isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
         sTitle = 'Import terms translations for '+(isTerm?'children of term: ' :'vocabulary: ')+
         window.hWin.HEURIST4.util.htmlEscape($Db.trm(parent_ID,'trm_Label'));                
 
-        var that = this;
+        let that = this;
 
-        var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?trn=1&db="
+        let sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?trn=1&db="
         + window.hWin.HAPI4.database + '&trm_ID=' +parent_ID;
 
         window.hWin.HEURIST4.msg.showDialog(sURL, {
@@ -2992,9 +2992,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     exportTerms: function(parent_ID, isVocab) {
 
-        var trm_Children = [];
+        let trm_Children = [];
         if(isVocab){
-            var vocabs = $Db.trm_getVocabs();
+            let vocabs = $Db.trm_getVocabs();
             $.each(vocabs, function(i,trm_ID){  
                 if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==parent_ID){
                     trm_Children.push(trm_ID);
@@ -3007,14 +3007,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             s = 'Term,Internal code,Parent term,Parent internal code,Standard Code,Description\n';
         }
 
-        var vocab_name = $Db.trm(parent_ID, 'trm_Label');
+        let vocab_name = $Db.trm(parent_ID, 'trm_Label');
         vocab_name = (!vocab_name) ? 'heurist' : window.hWin.HAPI4.database + '_v' + parent_ID + '_' + vocab_name;
 
-        for(var i=0; i<trm_Children.length; i++){
-            var trm_ID = trm_Children[i];
-            var term = $Db.trm(trm_ID);
+        for(let i=0; i<trm_Children.length; i++){
+            let trm_ID = trm_Children[i];
+            let term = $Db.trm(trm_ID);
 
-            var aline = ['"'+term['trm_Label']+'"',trm_ID,'',0,'"'+term['trm_Code']+'"','"'+term['trm_Description']+'"'];
+            let aline = ['"'+term['trm_Label']+'"',trm_ID,'',0,'"'+term['trm_Code']+'"','"'+term['trm_Description']+'"'];
 
             if(isVocab){
                 var parent_ID = term['trm_VocabularyGroupID'];
@@ -3215,7 +3215,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     
     getRecordsetFromRemote: function( terms, hideDisabled, vocab_only ){
         
-        var rdata = { 
+        let rdata = { 
             entityName:'defTerms',
             total_count: 0,
             fields:[],
@@ -3227,38 +3227,38 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         rdata.fields = terms.commonFieldNames;
         rdata.fields.unshift('trm_ID');
         
-        var idx_ccode = 0;
-        var idx_parent_terms = 0;
+        let idx_ccode = 0;
+        let idx_parent_terms = 0;
         if(this.options.import_structure){
             rdata.fields.push('trm_ID_local');
             idx_ccode = terms.fieldNamesToIndex.trm_ConceptID;
             idx_parent_terms = terms.fieldNamesToIndex.trm_ParentTermID;
         }
 
-        var idx_groupid = terms.fieldNamesToIndex.trm_VocabularyGroupID;
-        var hasFieldToImport = false;
-        var trash_id = -1;
+        let idx_groupid = terms.fieldNamesToIndex.trm_VocabularyGroupID;
+        let hasFieldToImport = false;
+        let trash_id = -1;
 
-        for (var key in terms.groups){
+        for (let key in terms.groups){
             if(terms.groups[key].name == 'Trash'){
                 trash_id = terms.groups[key].id;
                 break;
             }
         }
 
-        for (var r_id in terms.termsByDomainLookup.enum)
+        for (let r_id in terms.termsByDomainLookup.enum)
         {
             if(r_id>0){
-                var term = terms.termsByDomainLookup.enum[r_id];
-                var isHidden = (term[idx_groupid] == trash_id || (vocab_only && term[idx_parent_terms] != null));
+                let term = terms.termsByDomainLookup.enum[r_id];
+                let isHidden = (term[idx_groupid] == trash_id || (vocab_only && term[idx_parent_terms] != null));
 
                 if(hideDisabled && isHidden){
                     continue;
                 }
                 
                 if(this.options.import_structure){
-                    var concept_code =  term[ idx_ccode ];
-                    var local_trmID = $Db.getLocalID( 'trm', concept_code );
+                    let concept_code =  term[ idx_ccode ];
+                    let local_trmID = $Db.getLocalID( 'trm', concept_code );
                     term.push( local_trmID );
                     hasFieldToImport = hasFieldToImport || !(local_trmID>0);
                 }
@@ -3299,7 +3299,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 */
 function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_ID, callback){
     
-    var $dlg, buttons = [
+    let $dlg, buttons = [
         {text:window.hWin.HR('Cancel'),
             //id:'btnRecCancel',
             css:{'float':'right',margin:'.5em .4em .5em 0px'},  
@@ -3309,7 +3309,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
             class: 'ui-button-action',
             click: function() { 
                 
-                var mode = $dlg.find('input[name="corr_mode"]:checked').val();
+                let mode = $dlg.find('input[name="corr_mode"]:checked').val();
                 //move,ref,use
                 if(mode=='ref'){
                     // add new term by reference into correct vocabulary 
@@ -3318,18 +3318,18 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                 }else if(mode=='move'){
                     // move term
                     
-                    var request = {
+                    let request = {
                         'a'          : 'save',
                         'entity'     : 'defTerms',
                         'request_id' : window.hWin.HEURIST4.util.random(),
                         'fields'     : {trm_ID:trm_ID, trm_ParentTermID:correct_vocab_id},
                         'isfull'     : 0
                         };
-                        var that = this;                                                
+                        let that = this;                                                
                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    var old_parent_id = $Db.trm(trm_ID, 'trm_ParentTermID'); 
+                                    let old_parent_id = $Db.trm(trm_ID, 'trm_ParentTermID'); 
                                     //update on client side
                                     $Db.changeParentInIndex(correct_vocab_id, trm_ID, old_parent_id);
                                     $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
@@ -3374,8 +3374,8 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
 //
 //
 function showWarningAboutTermUsage(recID, refs){
-    var sList = '';
-    for(var i=0; i<refs.length; i++) if(refs[i]>0){
+    let sList = '';
+    for(let i=0; i<refs.length; i++) if(refs[i]>0){
         sList += ('<a href="#" data-dty_ID="'+refs[i]+'">'+$Db.dty(refs[i],'dty_Name')+'</a><br>');
     }
 
@@ -3388,7 +3388,7 @@ function showWarningAboutTermUsage(recID, refs){
 
     $dlg.find('a[data-dty_ID]').click(function(e){
 
-        var rg_options = {
+        let rg_options = {
             isdialog: true, 
             edit_mode: 'editonly',
             select_mode: 'manager',
@@ -3406,7 +3406,7 @@ function onTermSaveError(response){
         if(response.sysmsg && response.sysmsg.reccount){
 
             //children detailtypes reccount records
-            var res = response.sysmsg;    
+            let res = response.sysmsg;    
 
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.detailtypes)){
                 showWarningAboutTermUsage( recID, res.detailtypes );                                  
@@ -3414,10 +3414,10 @@ function onTermSaveError(response){
             }
 
             var recID = response.sysmsg.recID;
-            var is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
+            let is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
 
             
-            var s = '';
+            let s = '';
             if(res['fields']){
                 $.each(res['fields'],function(i,dty_ID){
                     s = s + $Db.dty(dty_ID,'dty_Name'); 
@@ -3426,7 +3426,7 @@ function onTermSaveError(response){
             }
             
 
-            var sMsg = '<p>'+(res.children==0?'Term':('Terms in '+(is_vocab?'Vocabulary':'Branch'))) 
+            let sMsg = '<p>'+(res.children==0?'Term':('Terms in '+(is_vocab?'Vocabulary':'Branch'))) 
             + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
             + (res.children==0?'is':'are') +  ' in use'+s
             + ' by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
@@ -3443,7 +3443,7 @@ function onTermSaveError(response){
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
                 {default_palette_class: 'ui-heurist-design'});        
 
-            var url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&w=a&q=ids:' + res.records.join(',') + '&nometadatadisplay=true';
+            let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&w=a&q=ids:' + res.records.join(',') + '&nometadatadisplay=true';
             $dlg.find('a.records-list').attr('href', url);
             $dlg.find('a.records-list').on({click:function(e){
                 $dlg.dialog('close');

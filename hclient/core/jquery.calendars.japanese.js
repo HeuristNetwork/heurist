@@ -51,7 +51,7 @@ Implementation of the Traditional Japanese Calendar,
 		   @return  (boolean) true if this is a leap year, false if not
 		   @throws  error if an invalid year or a different calendar used */
 		leapYear: function (year) {
-			var date = this._validate(year, this.minMonth, this.minDay,
+			let date = this._validate(year, this.minMonth, this.minDay,
 				$.calendars.local.invalidYear || $.calendars.regional[''].invalidYear);
 			var year = date.year() + (date.year() < 0 ? 1 : 0); // No year zero
 			return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
@@ -68,7 +68,7 @@ Implementation of the Traditional Japanese Calendar,
 		 */
 		weekOfYear: function (year, month, day) {
 			// Find Thursday of this week starting on Monday
-			var checkDate = this.newDate(year, month, day);
+			let checkDate = this.newDate(year, month, day);
 			checkDate.add(4 - (checkDate.dayOfWeek() || 7), 'd');
 			return Math.floor((checkDate.dayOfYear() - 1) / 7) + 1;
 		},
@@ -82,7 +82,7 @@ Implementation of the Traditional Japanese Calendar,
 		 * @returns {int} count of days within the month
 		 */
 		daysInMonth: function (year, month) {
-			var date = this._validate(year, month, this.minDay,
+			let date = this._validate(year, month, this.minDay,
 				$.calendars.local.invalidMonth || $.calendars.regional[''].invalidMonth);
 			return this.daysPerMonth[date.month() - 1] +
 				(date.month() == 2 && this.leapYear(date.year()) ? 1 : 0);

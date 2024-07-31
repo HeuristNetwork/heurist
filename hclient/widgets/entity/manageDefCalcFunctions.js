@@ -72,19 +72,19 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             //load calculation record for given record id
             if(this.options.cfn_ID>0){
-                    var request = {};
+                    let request = {};
                     request['cfn_ID']  = this.options.cfn_ID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    var that = this;                                                
+                    let that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
+                                let recset = new hRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -105,7 +105,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         }else{
             this.searchForm.searchDefCalcFunctions(this.options);
 
-            var iheight = 6;
+            let iheight = 6;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
@@ -151,7 +151,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         //assign record id    
         if(this.options.edit_mode=='editonly' && this.options.cfn_ID>0){
-            var ele2 = this._editing.getFieldByName('cfn_ID');
+            let ele2 = this._editing.getFieldByName('cfn_ID');
             ele2.editing_input('setValue', this.options.cfn_ID );
         }
   
@@ -177,7 +177,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this field calculation?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -193,12 +193,12 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     .css({'overflow-x': 'none !important', height:'400px', width:'100% !important'})
                     .appendTo( this.editForm );
            
-        var that = this;            
-        var surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
+        let that = this;            
+        let surl = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.html?db=' + window.hWin.HAPI4.database;
         
         this.dosframe.on('load', function(){
             
-           var showReps = that.dosframe[0].contentWindow.showReps; 
+           let showReps = that.dosframe[0].contentWindow.showReps; 
 
            showReps.initSnippetEditor( that._editing.getValue('cfn_FunctionSpecification')[0], null, 
             function(instance){
@@ -248,9 +248,9 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     +fld(fldname)+'</div>';
         }
         
-        var recID   = fld('cfn_ID');
+        let recID   = fld('cfn_ID');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2('cfn_Name','50ex');
         
         // add edit/remove action buttons

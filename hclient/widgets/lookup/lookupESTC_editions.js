@@ -51,7 +51,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     //
     _initControls: function () {
 
-        var that = this;
+        let that = this;
         this.element.find('fieldset > div > .header').css({width: '85px', 'min-width': '85px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
@@ -102,7 +102,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         this._on(this.element.find('input'), {
             'keyup': function(event){
 
-                var $inputs_with_value = that.element.find('input').filter(function(){ return $(this).val(); });
+                let $inputs_with_value = that.element.find('input').filter(function(){ return $(this).val(); });
 
                 if($(event.target).val() != ''){
                     window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), false);
@@ -114,7 +114,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
 
         //Populate Bookformat dropdown on lookup page
-        var request = {
+        let request = {
             serviceType: 'ESTC',
             db:'ESTC_Helsinki_Bibliographic_Metadata',
             a: 'search', 
@@ -124,7 +124,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             trm_ParentTermID: 5430
         };
 
-        var selBf = this.element.find('#select_bf').empty();
+        let selBf = this.element.find('#select_bf').empty();
         window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
 
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
@@ -132,7 +132,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             response = window.hWin.HEURIST4.util.isJSON(response);
 
             if(response.status == window.hWin.ResponseStatus.OK){
-                var recordset = new hRecordSet(response.data);
+                let recordset = new hRecordSet(response.data);
                 recordset.each2(function(trm_ID, term){
                      window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
                 });
@@ -148,7 +148,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     /* Render Lookup query results */
     _rendererResultList: function (recordset, record) {
         function fld(fldname, width) {
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
             s = s ? s : '';
             if (width > 0) {
                 s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
@@ -156,13 +156,13 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             return s;
         }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + '1';
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recIcon = window.hWin.HAPI4.iconBaseURL + '1';
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
             + window.hWin.HAPI4.iconBaseURL + '1&version=thumb&quot;);"></div>';
 
-        var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
+        let html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
             + html_thumb
 
             + '<div class="recordIcons">'
@@ -181,7 +181,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     //
     //
     startSearchOnEnterPress: function (e) {
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -192,21 +192,21 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     /* Show a confirmation window after user selects a record from the lookup query results */
     /* If the user clicks "Check Author", then call method _checkAuthor*/
     doAction: function () {
-        var that = this;
+        let that = this;
         
-        var sels = this.recordList.resultList('getSelected', false); //get complete record that's been selected
+        let sels = this.recordList.resultList('getSelected', false); //get complete record that's been selected
         if(!sels){ return; }
 
-        var dlg_response = {};
-        var fields = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+        let dlg_response = {};
+        let fields = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
         if(sels.length() == 1){
 
-            var record = sels.getFirstRecord();
-            var details = record.d;
+            let record = sels.getFirstRecord();
+            let details = record.d;
 
             if(!details){
-                var sel_Rec_ID = sels.fld(record, 'rec_ID'); 
+                let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
                 var query_request = { 
                     serviceType: 'ESTC',
                     org_db: window.hWin.HAPI4.database,
@@ -225,14 +225,14 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        var recordset = new hRecordSet(response.data);
-                        var record = recordset.getFirstRecord();
+                        let recordset = new hRecordSet(response.data);
+                        let record = recordset.getFirstRecord();
                         if(!record || !record.d){
                             window.hWin.HEURIST4.msg.showMsgErr(
                             'We are having trouble performing your request on the ESTC server. '
                             +'Impossible obtain details for selected record '+sel_Rec_ID);
                         }else{
-                            var recset = that.recordList.resultList('getRecordSet');
+                            let recset = that.recordList.resultList('getRecordSet');
                             recset.addRecord2(sel_Rec_ID, record);
                             that.doAction();        
                         }
@@ -244,13 +244,13 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             }
             
             
-            var recpointers = [];
-            var term_id = '';
+            let recpointers = [];
+            let term_id = '';
 
-            for(var i = 0; i < fields.length; i++){
+            for(let i = 0; i < fields.length; i++){
 
-                var dty_ID = this.options.mapping.fields[fields[i]];
-                var field_name = fields[i];
+                let dty_ID = this.options.mapping.fields[fields[i]];
+                let field_name = fields[i];
 
                 if(dty_ID == '' || !dty_ID){
                     continue;
@@ -335,10 +335,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    var recordset = new hRecordSet(response.data);
+                    let recordset = new hRecordSet(response.data);
                     recordset.each2(function(id, record){
-                        for(var i in dlg_response){
-                            for(var j = 0; j < dlg_response[i].length; j++){
+                        for(let i in dlg_response){
+                            for(let j = 0; j < dlg_response[i].length; j++){
                                 if(dlg_response[i][j] == id){
                                     dlg_response[i][j] = record['rec_Title'];
                                 }
@@ -348,7 +348,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                     if(term_id != ''){
 
-                        var request = {
+                        let request = {
                             serviceType: 'ESTC',
                             db: 'ESTC_Helsinki_Bibliographic_Metadata',
                             a: 'search',
@@ -365,10 +365,10 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                var recordset = new hRecordSet(response.data);
+                                let recordset = new hRecordSet(response.data);
                                 recordset.each2(function(id, record){
-                                    for(var i in dlg_response){
-                                        for(var j = 0; j < dlg_response[i].length; j++){
+                                    for(let i in dlg_response){
+                                        for(let j = 0; j < dlg_response[i].length; j++){
                                             if(dlg_response[i][j] == id){
                                                 dlg_response[i][j] = record['trm_Label'];
                                             }
@@ -402,9 +402,9 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
 
-        var that = this;
+        let that = this;
 
-        var query = {"t":"30"}; //search for Books
+        let query = {"t":"30"}; //search for Books
 
         if (this.element.find('#edition_name').val() != '') {
             query['f:1'] = '@'+this.element.find('#edition_name').val() ;
@@ -444,7 +444,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
             query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
         }
 
-        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
+        let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
@@ -453,7 +453,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = { 
+        let query_request = { 
             serviceType: 'ESTC',
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -487,7 +487,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        var recordset = new hRecordSet(response.data);
+        let recordset = new hRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

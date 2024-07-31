@@ -44,7 +44,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Create links');
         return res;
     },
@@ -54,21 +54,21 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     _fillSelectRecordScope: function (){
 
-        var scope_types = this.options.scope_types;
+        let scope_types = this.options.scope_types;
         this.selectRecordScope.empty();
         
-        var useHtmlSelect = false;
+        let useHtmlSelect = false;
         
         if(scope_types=='none'){
             this.selectRecordScope.parent().hide();
             return;    
         }
 
-        var opt, selScope = this.selectRecordScope.get(0); //selector
+        let opt, selScope = this.selectRecordScope.get(0); //selector
         //window.hWin.HEURIST4.ui.addoption(selScope,0,'please select the records to be affected …');
 
-        var rty_ID = 0;
-        var rectype_Ids = this._currentRecordset.getRectypes();
+        let rty_ID = 0;
+        let rectype_Ids = this._currentRecordset.getRectypes();
         
         if(rectype_Ids.length==1){
 
@@ -124,7 +124,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         
             
-        var details = $Db.rst(recRecTypeID);
+        let details = $Db.rst(recRecTypeID);
             
         if(details)
         {   
@@ -132,16 +132,16 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         if(party=='source')
         {
             
-            var fieldPointerSel = this.element.find('#sel_pointer_field');
+            let fieldPointerSel = this.element.find('#sel_pointer_field');
             fieldPointerSel.empty();
             
-            var that = this;
+            let that = this;
             // get structures for both record types and filter out link and relation maker fields for links
             //                                      and text and numeric fields for matching             
             details.each2(function(dtyID, detail) {
             
-            var field_type = $Db.dty(dtyID, 'dty_Type');
-            var req_type  = detail['rst_RequirementType'];
+            let field_type = $Db.dty(dtyID, 'dty_Type');
+            let req_type  = detail['rst_RequirementType'];
             
             //|| field_type=='relmarker')
             if ( (field_type!='resource') || req_type=='forbidden' ) {
@@ -149,7 +149,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             }
             
             //get name, contraints
-            var dtyName = detail['rst_DisplayName'];
+            let dtyName = detail['rst_DisplayName'];
 /* for list of radio buttons                
                 //add UI elements
     $('<div class="field_item" style="line-height:2.5em;padding-left:20px">'
@@ -187,7 +187,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }//for source 
         
         // create matching field
-        var fieldSelect = $('#sel_fieldtype_'+party);
+        let fieldSelect = $('#sel_fieldtype_'+party);
         window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, ['freetext','blocktext'], null);
                      //,{useHtmlSelect:true});
         window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
@@ -203,13 +203,13 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //    
     _findMatchesCount: function(event){
         
-        var fieldSelect = $(event.target);
+        let fieldSelect = $(event.target);
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true);
         
         if(fieldSelect.attr('id')=='sel_fieldtype_source'){
 
-            var cnt_info = this.element.find('#count_source_unique').text('');
+            let cnt_info = this.element.find('#count_source_unique').text('');
             
             if(fieldSelect.val()>0){
                 cnt_info.addClass('ui-icon ui-icon-loading-status-balls rotate')
@@ -228,15 +228,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         if(this.target_RecTypeID>0){
 
-            var fieldSelectTrg = this.element.find('#sel_fieldtype_target');
-            var fieldSelectSrc = this.element.find('#sel_fieldtype_source');
+            let fieldSelectTrg = this.element.find('#sel_fieldtype_target');
+            let fieldSelectSrc = this.element.find('#sel_fieldtype_source');
 
-            var cnt_info2 = this.element.find('#count_target_matches').text('');
+            let cnt_info2 = this.element.find('#count_target_matches').text('');
             
             if(fieldSelectSrc.val()>0 && fieldSelectTrg.val()>0){
                 cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
                 
-                var that = this;
+                let that = this;
             
                 window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
                                 rec_IDs: this._getRecordsScope().join(','),
@@ -266,11 +266,11 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     _fillTargetRecordTypes: function(event){
 
-        var dtID = $(event.target).val();
+        let dtID = $(event.target).val();
         
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
         
-        var rt_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
+        let rt_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
         if(!$.isArray(rt_constraints)){
             if(window.hWin.HEURIST4.util.isempty(rt_constraints)){
@@ -297,7 +297,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this.element.find('#count_target_rty').text('');
         this.target_RecTypeID = this.targetRtySelect.val(); 
         if(this.target_RecTypeID>0){
-            var rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
+            let rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
             if(rty_usage_cnt>0){
                 this._fillSelectFieldTypes('target', this.target_RecTypeID);
                 this.element.find('#count_target_rty').text( rty_usage_cnt + ' records' );
@@ -318,9 +318,9 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
 
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
     
-        var $field = this.element.find('#rt_'+party+'_sel_'+dtID).empty();
+        let $field = this.element.find('#rt_'+party+'_sel_'+dtID).empty();
 
-        var dt = $Db.dty(dtID);
+        let dt = $Db.dty(dtID);
 
         let vocab_id = dt['dty_JsonTermIDTree'];
         let trm_id = null;
@@ -345,7 +345,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
         
         //var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
-        var dtFields = {};
+        let dtFields = {};
         dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
         dtFields['rst_RequirementType'] = 'optional';
         dtFields['rst_MaxValues'] = 1;
@@ -356,9 +356,9 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         dtFields['rst_DefaultValue'] = trm_id;
         dtFields['dtID'] = dtID;
         
-        var that = this;
+        let that = this;
 
-        var ed_options = {
+        let ed_options = {
             recID: -1,
             dtID: dtID,
 
@@ -390,9 +390,9 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     //
     getFieldValue: function (input_id) {
-        var ele =  this.element.find('#'+input_id);
+        let ele =  this.element.find('#'+input_id);
         if(ele.length>0){
-            var sel = ele.editing_input('getValues');
+            let sel = ele.editing_input('getValues');
             if(sel && sel.length>0){
                 return sel[0];
             }
@@ -406,15 +406,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     //
     _enableActionButton: function (){
         
-        var isEnabled = (parseInt($('#count_target_matches').text())>0);
+        let isEnabled = (parseInt($('#count_target_matches').text())>0);
         
         if(isEnabled){
-            var sel_field  = this.element.find('input[type="radio"][name="link_field"]:checked');
+            let sel_field  = this.element.find('input[type="radio"][name="link_field"]:checked');
             
             if(sel_field.attr('data-type')=='relmarker'){
                 //in case relmarker check if reltype selected
-                var dtyID = sel_field.val()
-                var termID = this.getFieldValue('rt_source_sel_'+dtyID);        
+                let dtyID = sel_field.val()
+                let termID = this.getFieldValue('rt_source_sel_'+dtyID);        
                 isEnabled = (termID>0);
             }                
         }  
@@ -423,8 +423,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     
     _getRecordsScope: function()
     {
-        var isSelection = (this.selectRecordScope.val()=='selected');
-        var currentScope = isSelection?this._currentRecordsetSelIds:this._currentRecordset.getIds();
+        let isSelection = (this.selectRecordScope.val()=='selected');
+        let currentScope = isSelection?this._currentRecordsetSelIds:this._currentRecordset.getIds();
         return currentScope;
         
     },
@@ -441,19 +441,19 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             return;
         }
      
-        var ele = this.element.find('input[type="radio"][name="link_field"]:checked');
-        var dty_ID = ele.val();
-        var trm_ID = 0;
-        var data_type = ele.attr('data-type');   //resource or relmarker
+        let ele = this.element.find('input[type="radio"][name="link_field"]:checked');
+        let dty_ID = ele.val();
+        let trm_ID = 0;
+        let data_type = ele.attr('data-type');   //resource or relmarker
         if(data_type!='resource'){
             trm_ID = this.getFieldValue('rt_source_sel_'+dty_ID);
         }
         
-        var currentScope = this._getRecordsScope();
+        let currentScope = this._getRecordsScope();
         
-        var session_id = Math.round((new Date()).getTime()/1000);
+        let session_id = Math.round((new Date()).getTime()/1000);
         
-        var request = {a: 'add_links_by_matching',
+        let request = {a: 'add_links_by_matching',
                             session: session_id,
                             dty_ID:  dty_ID,
                             trm_ID: trm_ID,
@@ -468,7 +468,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this.element.find('#div_result').empty();
         this._showProgress( session_id, false, 1000 );
         
-        var that = this;
+        let that = this;
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
             

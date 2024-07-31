@@ -41,7 +41,7 @@
 */
 function hMapDocument( _options )
 {    
-    var _className = "MapDocument",
+    const _className = "MapDocument",
     _version   = "0.4";
 
     // default options

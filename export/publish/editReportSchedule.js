@@ -34,24 +34,18 @@
 
 function ReportScheduleEditor() {
 
-        var _className = "ReportScheduleEditor",
-            _entity, //object (report schedule) to edit
+        const _className = "ReportScheduleEditor";
+        let _entity, //object (report schedule) to edit
             _recID,     // its ID
             _updatedFields = [], //field names which values were changed to be sent to server
             _updatedDetails = []; //field values
             
-        var _reports = [];    
+        let _reports = [];    
 
     /**
     * Initialization of input form
     */
     function _init() {
-
-        var typeID = "smarty",
-            templatefile = '',
-            qlabel = '',
-            hquery = '';
-
 
         document.getElementById("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ window.hWin.HAPI4.database + "/generated-reports)";
 
@@ -60,8 +54,8 @@ function ReportScheduleEditor() {
 
         if (!Number(_recID)>0) { _recID = 0; }
             
-        var _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
-        var request = {method:'getreport', recID:_recID};
+        const _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
+        const request = {method:'getreport', recID:_recID};
             
         window.hWin.HEURIST4.util.sendRequest(_url, request, null, _continueInit);
         
@@ -70,7 +64,7 @@ function ReportScheduleEditor() {
     
     function _continueInit(response){
 
-        var typeID = "smarty",
+        let typeID = "smarty",
             templatefile = '',
             qlabel = '',
             hquery = '';
@@ -82,10 +76,10 @@ function ReportScheduleEditor() {
 
         _reports = response['data'];
         
-        typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
-        templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
+        let typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
+        let templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
         
-        hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
+        let hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
             
             
         if(window.hWin.HEURIST4.util.isempty(typeID)){
@@ -94,7 +88,7 @@ function ReportScheduleEditor() {
         if(window.hWin.HEURIST4.util.isnull(hquery)){
             hquery = '';
         }else{
-            var _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
+            let _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
             if(!window.hWin.HEURIST4.util.isnull(_qlabel)){
                 qlabel = _qlabel;
             }
@@ -130,7 +124,7 @@ function ReportScheduleEditor() {
     */
     function _updateTemplatesList(context) {
 
-            var sel = document.getElementById('rps_Template'),
+            let sel = document.getElementById('rps_Template'),
                 option,
                 keepSelIndex = sel.selectedIndex;
 

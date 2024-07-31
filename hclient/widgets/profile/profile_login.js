@@ -17,14 +17,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var login_dialog = null;
+let login_dialog = null;
 
 //
 //isforsed - if true - it is not possible to get out from login other than switch database
 //
 function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
-    var is_secondary_parent = false;
+    let is_secondary_parent = false;
     if(!parentwin){
         parentwin = window.hWin;  
     }else{
@@ -37,7 +37,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
     function __onDialogClose($dlg) {
              
-            var allFields = $dlg.find('input');       
+            let allFields = $dlg.find('input');       
             allFields.val( "" ).removeClass( "ui-state-error" );
             
             if($.isFunction(callback)){
@@ -65,15 +65,15 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         }
 */
 
-        var sel = $dlg.find('#saml_sp');
+        let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             
-        var sp_entity = sel.val();
+        let sp_entity = sel.val();
         
-        var surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
+        let surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
         
 //console.log(surl); 
-        var isFrameAllowed = false;
+        let isFrameAllowed = false;
         if(!isFrameAllowed){
             surl = surl + '&noframe=1';
             window.hWin.location = surl;
@@ -193,15 +193,15 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             function(){ 
 
             
-            var iWidth = 450;
+            let iWidth = 450;
             
-            var show_guest_login = (typeof prepared_params !== 'undefined' && prepared_params['guest_data']);
+            let show_guest_login = (typeof prepared_params !== 'undefined' && prepared_params['guest_data']);
             
             if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
-                var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                let sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                 if(sp_keys.length>0){
 
-                    var sel = $dlg.find('#saml_sp');
+                    let sel = $dlg.find('#saml_sp');
                     
                     //hide standard login
                     if(window.hWin.HAPI4.sysinfo.hideStandardLogin==1){
@@ -274,7 +274,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 $dlg.find('#span-reccount').text('');
             }
             
-            var allFields = $dlg.find('input');
+            let allFields = $dlg.find('input');
             
             const saml_login_only = window.hWin.HAPI4.sysinfo.hideStandardLogin==1 && 
                                     $.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides);
@@ -287,7 +287,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                         return;
                 }else
                 if(saml_login_only){
-                        var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+                        let sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
                         if(sp_keys.length>0){
                             __onSamlLogin();
                             return;
@@ -307,16 +307,16 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     resetPassword($dlg);
                 }else{
 
-                    var username = $dlg.find('#username');
-                    var password = $dlg.find('#password');
-                    var session_type = $dlg.find('input[name="session_type"]');
+                    let username = $dlg.find('#username');
+                    let password = $dlg.find('#password');
+                    let session_type = $dlg.find('input[name="session_type"]');
                     if(session_type.is("input[type=checkbox]")){
                         session_type = 'remember';
                     }else{
                         session_type = session_type.val();
                     }
 
-                    var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1 )
+                    let bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1 )
                     && window.hWin.HEURIST4.msg.checkLength( password, "password", null, 1 );         //3,63
 
                     if ( bValid ) {
@@ -327,7 +327,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             //start login on enter press
             allFields.on("keypress",function(event){
-                var code = (event.keyCode ? event.keyCode : event.which);
+                let code = (event.keyCode ? event.keyCode : event.which);
                 if (code == 13) {
                     __doLogin();
                 }
@@ -344,7 +344,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 setupResetPin($dlg);
             });
 
-            var arr_buttons = [];
+            let arr_buttons = [];
             let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
             if(2 & reg_status){
                 arr_buttons.push({text:window.hWin.HR('Import profile from another DB'), click: function(){
@@ -655,17 +655,17 @@ function setupCaptcha($dlg){
 //
 function doRegister( parentwin, is_guest=false ){
 
-    var is_secondary_parent = false;
+    let is_secondary_parent = false;
     if(!parentwin){
         parentwin = window.hWin;  
     }else{
         is_secondary_parent = true;
     } 
-    var $doc = $(parentwin.document['body']);
+    let $doc = $(parentwin.document['body']);
 
     if($.isFunction($doc.profile_edit)){
 
-        var profile_edit_dialog = $('#heurist-profile-dialog');
+        let profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }

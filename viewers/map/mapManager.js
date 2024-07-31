@@ -118,10 +118,10 @@ L.control.addmapdoc = function(opts) {
     
 function hMapManager( _options )
 {    
-    var _className = "MapManager",
-    _version   = "0.4",
+    const _className = "MapManager",
+    _version   = "0.4";
 
-    options = {
+    let options = {
         container: null,  
         mapwidget: null,   
         visible_panels: null,

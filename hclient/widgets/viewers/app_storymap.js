@@ -125,11 +125,11 @@ $.widget( "heurist.app_storymap", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         this._cache_story_places = {};
         
-        var cssOverview = {};
+        let cssOverview = {};
         
         if(this.options.reportOverviewMode=='no' || this.options.reportOverviewMode=='inline' || this.options.reportEndPageMode == 'tabs'){
             cssOverview = {display:'none'};
@@ -147,7 +147,7 @@ $.widget( "heurist.app_storymap", {
             this.options.elementsPlaceholder = '<br><br>There are no story elements to display for the selected item';
         }
         
-        var layout = [{"name":"StoryMap","type":"group","css":{}, //"position":"relative","height":"100%"
+        let layout = [{"name":"StoryMap","type":"group","css":{}, //"position":"relative","height":"100%"
             "children":
             [{"name":"TabControl","type": ((this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab')?"tabs":"group"),
                 "css":{},"folder":true,"dom_id":"tabCtrl","children":
@@ -173,7 +173,7 @@ $.widget( "heurist.app_storymap", {
                                     }
                                 },
                                 "rendererExpandDetails": function(recset, recID){
-                                    var rep = (recID==that.options.storyRecordID)
+                                    let rep = (recID==that.options.storyRecordID)
                                         ?that.options.reportOverview
                                         :(recID=='0'+that.options.storyRecordID?that.options.reportEndPage
                                          :that.options.reportElement);
@@ -234,7 +234,7 @@ $.widget( "heurist.app_storymap", {
         this._tabs = this.element.find('.ui-tabs:first');
         if(this._tabs.length>0 && this._tabs.tabs('instance')){  //TAB VIEW
             
-            var h = this.element.find('.ui-tabs-nav:first').height(); //find('#tabCtrl').
+            let h = this.element.find('.ui-tabs-nav:first').height(); //find('#tabCtrl').
             this.pnlOverview.height(this.element.height() - h);
             this._resultList.height(this.element.height() - h); //465
             this.pnlStory.height(this.element.height() - h); //465
@@ -282,10 +282,10 @@ $.widget( "heurist.app_storymap", {
             this.pnlStoryReport = $('<div>').css({overflow:'auto'})
                 .appendTo(this.pnlStory);
                 
-            var css = ' style="height:28px;line-height:28px;display:inline-block;'
+            let css = ' style="height:28px;line-height:28px;display:inline-block;'
                 +'text-decoration:none;text-align: center;font-weight: bold;color:black;'
                 
-            var navbar = $('<div style="top:2px;right:46px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
+            let navbar = $('<div style="top:2px;right:46px;position:absolute;z-index: 800;border: 2px solid #ccc; background:white;'
                 +'background-clip: padding-box;border-radius: 4px;">' //;width:64px;
             +'<a id="btn-prev" '+css+'width:30px;border-right: 1px solid #ccc" href="#" '
                 +'title="Previous" role="button" aria-label="Previous">&lt;</a>'
@@ -408,7 +408,7 @@ $.widget( "heurist.app_storymap", {
     //
     _initCompleted: function(){
         
-        var that = this;
+        let that = this;
         
         if(this._mapping){
             
@@ -454,7 +454,7 @@ $.widget( "heurist.app_storymap", {
 
                         if(data.selection && data.selection.length==1){
                             
-                            var recID = data.selection[0];
+                            let recID = data.selection[0];
                         
                             that._checkForStory(recID); //load certain story
                         
@@ -462,7 +462,7 @@ $.widget( "heurist.app_storymap", {
                     }
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
-                    var recset = data.recordset; //record in main result set (for example Persons)
+                    let recset = data.recordset; //record in main result set (for example Persons)
 
                     let placeholder = !window.hWin.HEURIST4.util.isempty(that.options.storyPlaceholder) && that.options.storyPlaceholder != 'def' ? 
                                         that.options.storyPlaceholder : '';
@@ -541,10 +541,10 @@ $.widget( "heurist.app_storymap", {
     _onScroll: function(event, that) {
         //if(this._disable_onScroll) return;
         
-        var ele = $(event.target); //this.div_content;
+        let ele = $(event.target); //this.div_content;
         $.each(ele.find('.recordDiv'), function(i,item){
-            var tt = $(item).position().top;
-            var h = -($(item).height()-50);
+            let tt = $(item).position().top;
+            let h = -($(item).height()-50);
             if(tt>h && tt<50){
                 if(that._expected_onScroll>0 && that._expected_onScroll!=$(item).attr('recid')){
 
@@ -577,7 +577,7 @@ $.widget( "heurist.app_storymap", {
             this._resultList.resultList('scrollToRecordDiv', recID, true);
             //sometimes it is called before addition of stub element at the end of list
             if(this._currentElementID!=recID){
-                var that = this;
+                let that = this;
                 this._expected_onScroll_timeout =  setTimeout(function(){that._scrollToStoryElement(that._expected_onScroll)},300);
                 return;
             }
@@ -590,8 +590,8 @@ $.widget( "heurist.app_storymap", {
             
         }else
         {
-            var order = this._resultset.getOrder();
-            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            let order = this._resultset.getOrder();
+            let idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
         
             this._onNavigateStatus( idx );    
             this._startNewStoryElement( recID );
@@ -604,7 +604,7 @@ $.widget( "heurist.app_storymap", {
     //
     _onNavigate: function(is_forward){
         
-        var order = this._resultset.getOrder();
+        let order = this._resultset.getOrder();
         var recID = 0, idx=-1;
         
         if(this._currentElementID>0){
@@ -642,11 +642,11 @@ $.widget( "heurist.app_storymap", {
     //
     _onNavigateStatus: function(idx){
 
-        var order = this._resultset.getOrder();
-        var dis_next = false, dis_prev = false;
-        var len = order.length;
-        var is_inline_overview = (this.options.reportOverviewMode=='inline');
-        var is_inline_endpage = (this.options.reportEndPageMode=='inline');
+        let order = this._resultset.getOrder();
+        let dis_next = false, dis_prev = false;
+        let len = order.length;
+        let is_inline_overview = (this.options.reportOverviewMode=='inline');
+        let is_inline_endpage = (this.options.reportEndPageMode=='inline');
 
         if(idx >= (is_inline_endpage?len:len-1)){
           idx = is_inline_endpage?len:len-1; 
@@ -675,7 +675,7 @@ $.widget( "heurist.app_storymap", {
         
         if(this.options.storyRecordID != recID || is_forced){
 
-            var that = this;
+            let that = this;
             
             this._initial_div_message.hide();
             
@@ -685,7 +685,7 @@ $.widget( "heurist.app_storymap", {
                 
                 if(this._cache_story_time && this._cache_story_time[this.options.storyRecordID]){
 
-                    var story_time = this._cache_story_time[this.options.storyRecordID];
+                    let story_time = this._cache_story_time[this.options.storyRecordID];
                     $.each(story_time, function(i,item){
                         if(item.rec_ID == that._currentElementID){
                             that._currentTime = item.when[0];
@@ -704,7 +704,7 @@ $.widget( "heurist.app_storymap", {
                 this.options.storyRectypes = this.options.storyRectypes.split(',');
             }
             
-            var request;
+            let request;
             
             let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090'); //configuration field for animation and style
             let DT_DATE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'];     //9
@@ -719,9 +719,9 @@ $.widget( "heurist.app_storymap", {
                     function(response) {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            var details = response.data.records[recID]['d'];
-                            var recIDs = [];
-                            for(var dty_ID in details){
+                            let details = response.data.records[recID]['d'];
+                            let recIDs = [];
+                            for(let dty_ID in details){
                                 if(dty_ID>0){
                                     recIDs = recIDs.concat(details[dty_ID]);
                                 }
@@ -732,9 +732,9 @@ $.widget( "heurist.app_storymap", {
                                 recIDs = recIDs.join(',');
                                 
                                 //returns story elements in exact order
-                                var request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}]};
+                                let request = {q:[{ids:recIDs},{sort:('set:'+recIDs)}]};
                                 
-                                var detail_fields = [];
+                                let detail_fields = [];
                                 if(that.options.elementOrder=='def'){
                                     detail_fields = [DT_DATE,DT_START_DATE,DT_END_DATE];
                                 }else if(that.options.elementOrder){
@@ -754,16 +754,16 @@ $.widget( "heurist.app_storymap", {
                                         
                                         //sort
                                         if(that.options.elementOrder){
-                                            var sortFields = {};
+                                            let sortFields = {};
                                             if(that.options.elementOrder=='def'){
                                                 
                                                 that._resultset.each(function(recID, record){
-                                                    var dt_st = that._resultset.fld(record, DT_START_DATE);
-                                                    var dt_end = that._resultset.fld(record, DT_END_DATE);
+                                                    let dt_st = that._resultset.fld(record, DT_START_DATE);
+                                                    let dt_end = that._resultset.fld(record, DT_END_DATE);
                                                     if(!dt_st){
                                                         dt_st = that._resultset.fld(record, DT_DATE);
                                                     }
-                                                    var dres = window.hWin.HEURIST4.util.parseDates(dt_st, dt_end);
+                                                    let dres = window.hWin.HEURIST4.util.parseDates(dt_st, dt_end);
                                                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(dres) && dres.length==2){
                                                         that._resultset.setFld(record, DT_START_DATE, dres[0]);
                                                         that._resultset.setFld(record, DT_END_DATE, dres[1]);
@@ -836,7 +836,7 @@ $.widget( "heurist.app_storymap", {
             
             //clear map
             if(this._nativelayer_id>0 && this._mapping.app_timemap('instance')){
-                var mapwidget = this._mapping.app_timemap('getMapping');
+                let mapwidget = this._mapping.app_timemap('getMapping');
                 
                 mapwidget.removeLayer( this._nativelayer_id );
                 this._nativelayer_id = -1;
@@ -853,7 +853,7 @@ $.widget( "heurist.app_storymap", {
         
         //remove previous story layer
         if(this._mapping){
-            var mapwidget = this._mapping.app_timemap('getMapping');
+            let mapwidget = this._mapping.app_timemap('getMapping');
             if(this._all_stories_id>0){
                 mapwidget.removeLayer( this._all_stories_id );
                 this._all_stories_id = 0;
@@ -895,7 +895,7 @@ $.widget( "heurist.app_storymap", {
     //
     _resizeStoryTabPages: function(){
         if(this.options.reportElementMode=='tabs'){  
-                var div_content = this._resultList.find('.div-result-list-content');
+                let div_content = this._resultList.find('.div-result-list-content');
                 if(div_content.tabs('instance')){
                     try{
                         div_content.tabs('pagingResize');
@@ -1000,18 +1000,18 @@ $.widget( "heurist.app_storymap", {
             
             if(!(delay>0)) delay = 10; 
             
-            var rh = this._resultList.height();
-            var rdiv = this._resultList.find('.recordDiv');
+            let rh = this._resultList.height();
+            let rdiv = this._resultList.find('.recordDiv');
             rdiv.css('padding','20px 0px');
             if(rdiv.length>1){
-                var rdiv0 = $(rdiv[0]);
+                let rdiv0 = $(rdiv[0]);
                 rdiv = $(rdiv[rdiv.length-1]);
-                var that = this;
+                let that = this;
                 setTimeout(function(){ 
                     if(rdiv0.height() < 101){
                         rdiv0.css({'min-height':'100px'});
                     }
-                    var stub_height = (rdiv.height() < rh-100)? rh-100 :0;
+                    let stub_height = (rdiv.height() < rh-100)? rh-100 :0;
                     
                     that._resultList.find('.div-result-list-content').find('.stub_space').remove();
                     if(stub_height>0){
@@ -1029,8 +1029,8 @@ $.widget( "heurist.app_storymap", {
     //
     updateOverviewPanel: function(recID){
 
-            var infoURL;
-            var isSmarty = false;
+            let infoURL;
+            let isSmarty = false;
             
             if( typeof this.options.reportOverview === 'string' 
                             && this.options.reportOverview.substr(-4)=='.tpl' ){
@@ -1057,11 +1057,11 @@ $.widget( "heurist.app_storymap", {
             if (!((this.options.reportOverviewMode=='no') ||
               (this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs')))
             { //inline, tab, header
-                var that = this;
+                let that = this;
                 this.pnlOverview.addClass('loading').css({'overflow-y':'auto'})
                     .load(infoURL, function(){ 
                         
-                        var ele2 = $(this);
+                        let ele2 = $(this);
                         ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
 
                         if(ele2.find('div[data-recid]').length>0){ //for standard view
@@ -1103,7 +1103,7 @@ $.widget( "heurist.app_storymap", {
                                 tabs.tabs( "refresh" );                                
                                 */
                             }else{
-                                var ele = that._resultList.find('.div-result-list-content');    
+                                let ele = that._resultList.find('.div-result-list-content');    
                                 $('<div class="recordDiv outline_suppress expanded" recid="0" tabindex="0">')
                                     .html(that.pnlOverview.html()).prependTo(ele);
                             }
@@ -1117,7 +1117,7 @@ $.widget( "heurist.app_storymap", {
                                 
                         }else{
                             //tab
-                            var h = ele2[0].scrollHeight+10;
+                            let h = ele2[0].scrollHeight+10;
                             if(ele2.find('div[data-recid]').length>0){
                                 ele2.find('div[data-recid]').css('max-height','100%');
                             }
@@ -1148,7 +1148,7 @@ $.widget( "heurist.app_storymap", {
     //
     updateEndPagePanel: function(recID){
 
-        var infoURL;
+        let infoURL;
         
         if( typeof this.options.reportEndPage === 'string' 
                         && this.options.reportEndPage.substr(-4)=='.tpl' ){
@@ -1174,11 +1174,11 @@ $.widget( "heurist.app_storymap", {
         
         if (!((this.options.reportEndPageMode=='no') || (this.options.reportOverviewMode=='inline' && this.options.reportElementMode=='tabs')))
         { //inline, tab, footer
-            var that = this;
+            let that = this;
             this.pnlEndPage.addClass('loading').css({'overflow-y':'auto'})
                 .load(infoURL, function(){ 
                     
-                    var ele2 = $(this);
+                    let ele2 = $(this);
                     ele2.removeClass('loading');//.height('auto');    
 
                     if(that.options.reportEndPageMode == 'footer'){
@@ -1245,7 +1245,7 @@ $.widget( "heurist.app_storymap", {
                             
                     }else{
                         //tab
-                        var h = ele2[0].scrollHeight+10;
+                        let h = ele2[0].scrollHeight+10;
                         if(ele2.find('div[data-recid]').length>0){
                             ele2.find('div[data-recid]').css('max-height','100%');
                         }
@@ -1277,9 +1277,9 @@ $.widget( "heurist.app_storymap", {
         
         if(!this._mapping) return; //there is not associated map widget
 
-        var that = this;
+        let that = this;
         
-        var mapwidget = this._mapping.app_timemap('getMapping');
+        let mapwidget = this._mapping.app_timemap('getMapping');
         
         if(!this._mapping_onselect){ //assign event listener
             
@@ -1295,7 +1295,7 @@ $.widget( "heurist.app_storymap", {
 
                 if(rec_ids.length>0){
                     //find selected record id among stories
-                    var rec = that._resultset_main.getById(rec_ids[0]);
+                    let rec = that._resultset_main.getById(rec_ids[0]);
                     if(rec){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                             {selection:[rec_ids[0]], source:that.element.attr('id'), 
@@ -1343,19 +1343,19 @@ $.widget( "heurist.app_storymap", {
         
         //---------
         // find all story elements
-        var request = {q:{ids:recset.getIds()}, detail:this.options.storyFields.join(',')};
+        let request = {q:{ids:recset.getIds()}, detail:this.options.storyFields.join(',')};
 
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    var storyIDs = [];
-                    var storiesByRecord = {};
-                    for (var recID in response.data.records){
+                    let storyIDs = [];
+                    let storiesByRecord = {};
+                    for (let recID in response.data.records){
                         if(recID>0){
-                            var details = response.data.records[recID]['d'];
+                            let details = response.data.records[recID]['d'];
                             storiesByRecord[recID] = [];
-                            for(var dty_ID in details){
+                            for(let dty_ID in details){
                                 if(dty_ID>0){
                                     storyIDs = storyIDs.concat(details[dty_ID]);
                                     storiesByRecord[recID] = storiesByRecord[recID].concat(details[dty_ID]);
@@ -1365,14 +1365,14 @@ $.widget( "heurist.app_storymap", {
                     }//for
                     
                     //find filtered stories
-                    var query = [{ids:storyIDs}];
+                    let query = [{ids:storyIDs}];
 
                     if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
                         query = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
                     }
                     
         
-                    var server_request = {
+                    let server_request = {
                                     q: query, 
                                     leaflet: 1, 
                                     simplify: 1, //simplify paths with more than 1000 vertices
@@ -1382,7 +1382,7 @@ $.widget( "heurist.app_storymap", {
                                     
                     window.hWin.HAPI4.RecordMgr.search_new(server_request,
                         function(response){
-                            var geojson_data = null
+                            let geojson_data = null
                             if(response['geojson']){
                                 geojson_data = response['geojson'];
                             }else{
@@ -1390,10 +1390,10 @@ $.widget( "heurist.app_storymap", {
                             }
                             //REPLACE rec id and title to main result set
                             function __findMainId(storyID){
-                                var rec = null;
+                                let rec = null;
                                 recset.each2(function(recID, record){
                                     if(recID>0 && storiesByRecord[recID]){
-                                        var idx = window.hWin.HEURIST4.util.findArrayIndex(storyID, storiesByRecord[recID]);
+                                        let idx = window.hWin.HEURIST4.util.findArrayIndex(storyID, storiesByRecord[recID]);
                                         if(idx>=0){
                                             rec = record;
                                             return false;
@@ -1420,7 +1420,7 @@ $.widget( "heurist.app_storymap", {
                             }
 
                             if(response['timeline']){
-                                var aused = [];
+                                let aused = [];
                                 for(var i=0; i<response['timeline'].length; i++){
                                     var storyID = response['timeline'][i]['rec_ID'];
                                     //find original resulet set it
@@ -1460,7 +1460,7 @@ $.widget( "heurist.app_storymap", {
     //
     updateTimeLine: function(recID){
         
-        var that = this;
+        let that = this;
         
         if(this.options.storyRecordID != recID) return; //story already changed to different one
         
@@ -1485,7 +1485,7 @@ $.widget( "heurist.app_storymap", {
             }
             
             //update timeline
-            var mapwidget = this._mapping.app_timemap('getMapping');
+            let mapwidget = this._mapping.app_timemap('getMapping');
             mapwidget.isMarkerClusterEnabled = false;
             
             this._storylayer_id = mapwidget.addGeoJson(
@@ -1502,18 +1502,18 @@ $.widget( "heurist.app_storymap", {
             //     
             if(this._currentTime!=null){
 
-                var start0 = that._currentTime[0];
-                var end0 = that._currentTime[3] ?that._currentTime[3] :start0;
+                let start0 = that._currentTime[0];
+                let end0 = that._currentTime[3] ?that._currentTime[3] :start0;
                 
                 $.each(that._cache_story_time[that.options.storyRecordID],function(i,item){
                
                     if(item.when && item.when[0]){
                     
-                        var start = item.when[0][0];
-                        var end = item.when[0][3] ?item.when[0][3] :start;
+                        let start = item.when[0][0];
+                        let end = item.when[0][3] ?item.when[0][3] :start;
                     
                         //intersection
-                        var res = false;
+                        let res = false;
                         if(start == end){
                             res = (start>=start0 && start<=end0);
                         }else{
@@ -1535,7 +1535,7 @@ $.widget( "heurist.app_storymap", {
             
         }else{
             
-            var server_request = {
+            let server_request = {
                             q: {ids: this._resultset.getIds()}, //list of story elements/events
                             leaflet: 1, 
                             simplify: 1, //simplify paths with more than 1000 vertices
@@ -1544,7 +1544,7 @@ $.widget( "heurist.app_storymap", {
                             format:'geojson'};
             window.hWin.HAPI4.RecordMgr.search_new(server_request,
                 function(response){
-                    var geojson_data = null
+                    let geojson_data = null
                     if(response['geojson']){
                         geojson_data = response['geojson'];
                     }else{
@@ -1601,8 +1601,8 @@ $.widget( "heurist.app_storymap", {
             if(this.options.reportElementMode=='slide'){   //one by one   
 
                 
-                var infoURL;
-                var isSmarty = false;
+                let infoURL;
+                let isSmarty = false;
                 
                 if( typeof this.options.reportElement === 'string' 
                                 && this.options.reportElement.substr(-4)=='.tpl' ){
@@ -1623,14 +1623,14 @@ $.widget( "heurist.app_storymap", {
                 }
                 
                 
-                var that = this;
+                let that = this;
 
                 function __load_content(){
                     that.pnlStoryReport.addClass('loading').css({'overflow-y':'auto'})
                         .load(infoURL, function(){ 
                             
                             
-                            var ele2 = $(this);
+                            let ele2 = $(this);
                             ele2.removeClass('loading').css('min-height','200px');//.height('auto');    
 
                             if(ele2.find('div[data-recid]').length>0){ //for standard view
@@ -1705,14 +1705,14 @@ $.widget( "heurist.app_storymap", {
     // 5. execute animation
     _animateStoryElement_B: function(recID){
 
-        var that = this;
+        let that = this;
 
         if ( that._cache_story_places[recID] ){ //cache is loaded already
             
-            var pl = that._cache_story_places[recID]['places'];
+            let pl = that._cache_story_places[recID]['places'];
             if( pl.length==0){
                 //no geodata, zoom to story element on timeline
-                var mapwidget = that._mapping.app_timemap('getMapping');
+                let mapwidget = that._mapping.app_timemap('getMapping');
                 mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
             }else{
                 //map is already cleared in _startNewStoryElement
@@ -1721,7 +1721,7 @@ $.widget( "heurist.app_storymap", {
             return;    
         }
 
-        var request = {q: 'ids:'+recID, detail:'detail'};
+        let request = {q: 'ids:'+recID, detail:'detail'};
 
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
@@ -1732,14 +1732,14 @@ $.widget( "heurist.app_storymap", {
                     // 1. find all resource fields that points to places               
                     that._cache_story_places[recID] = {};
                     that._cache_story_places[recID]['places'] = [];
-                    var RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];
+                    let RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];
                     if(response.data.count==1){
-                        var details = response.data.records[recID]['d'];
-                        var dty_ID;   
+                        let details = response.data.records[recID]['d'];
+                        let dty_ID;   
                         for(dty_ID in details){
-                            var field = $Db.dty(dty_ID);
+                            let field = $Db.dty(dty_ID);
                             if(field['dty_Type']=='resource'){
-                                var ptr = field['dty_PtrTargetRectypeIDs'];
+                                let ptr = field['dty_PtrTargetRectypeIDs'];
                                 if(ptr && window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, ptr.split(','))>=0){
                                     that._cache_story_places[recID][dty_ID] = details[dty_ID];   
                                 } 
@@ -1770,12 +1770,12 @@ $.widget( "heurist.app_storymap", {
                         
                         if (that._cache_story_places[recID]['places'].length==0){
                             //no geodata, zoom to story element on timeline
-                            var mapwidget = that._mapping.app_timemap('getMapping');
+                            let mapwidget = that._mapping.app_timemap('getMapping');
                             mapwidget.vistimeline.timeline('zoomToSelection', [recID]); //select and zoom 
                             return;
                         }
 
-                        var qq = {ids:that._cache_story_places[recID]['places']};
+                        let qq = {ids:that._cache_story_places[recID]['places']};
                         
                         if(that.options.reportElementMapMode=='filtered'){ //additional filter for places 
                             qq = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );
@@ -1784,7 +1784,7 @@ $.widget( "heurist.app_storymap", {
 
 
                         // 2. retrieve all places from server side as geojson
-                        var server_request = {
+                        let server_request = {
                             q: qq,
                             leaflet: 1, 
                             simplify: 1, //simplify paths with more than 1000 vertices
@@ -1793,9 +1793,9 @@ $.widget( "heurist.app_storymap", {
                         window.hWin.HAPI4.RecordMgr.search_new(server_request,
                             function(response){
 
-                                var geojson_data = null;
+                                let geojson_data = null;
                                 //var timeline_data = [];
-                                var layers_ids = [];
+                                let layers_ids = [];
                                 if(response['geojson']){
                                     geojson_data = response['geojson'];
                                     //not used timeline_data = response['timeline']; 
@@ -1841,15 +1841,15 @@ $.widget( "heurist.app_storymap", {
         
         if(this._currentElementID != recID) return; //user can switch to different story
         
-        var that = this;
+        let that = this;
         
-        var mapwidget = that._mapping.app_timemap('getMapping');
+        let mapwidget = that._mapping.app_timemap('getMapping');
         
         if(window.hWin.HEURIST4.util.isnull(this._L)) this._L = mapwidget.getLeaflet();
         
         let DT_STORY_ANIMATION = $Db.getLocalID('dty', '2-1090');
-        var record = this._resultset.getRecord(recID);
-        var anime = this._resultset.fld(record, DT_STORY_ANIMATION);
+        let record = this._resultset.getRecord(recID);
+        let anime = this._resultset.fld(record, DT_STORY_ANIMATION);
 
         let default_story_element_style = 
         window.hWin.HEURIST4.util.isempty(anime)
@@ -1945,7 +1945,7 @@ $.widget( "heurist.app_storymap", {
             
             if(step_idx>=aSteps.length) return; //animation is completed
             
-            var step = aSteps[step_idx];
+            let step = aSteps[step_idx];
             
             aActions = step['actions'];
             if(!aActions && step['action']){
@@ -1965,7 +1965,7 @@ $.widget( "heurist.app_storymap", {
             
             //2.find places for current step
             
-            var places, scope = null;
+            let places, scope = null;
             
             //2a get scope - @todo array/combination of scopes
             if(step['scope']=='begin'){
@@ -1988,7 +1988,7 @@ $.widget( "heurist.app_storymap", {
             }
             
             if(scope){
-                var scope2 = scope;
+                let scope2 = scope;
                 if(scope.indexOf('-')>0){
                     scope = $Db.getLocalID('dty', scope);
                 }
@@ -2003,11 +2003,11 @@ $.widget( "heurist.app_storymap", {
             
             //2b get ranges within scope
             aRanges = []; //reset
-            var range = places.length;
+            let range = places.length;
             if(step['range'] && step['range']>0 && step['range']<places.length){
                 range = step['range'];
             
-                var start = 0, end = 0;
+                let start = 0, end = 0;
                 while (end<places.length){
                     
                     end = start+range;
@@ -2039,15 +2039,15 @@ $.widget( "heurist.app_storymap", {
         }
         
         
-        var range_of_places = aRanges[range_idx];
+        let range_of_places = aRanges[range_idx];
         
-        var mapwidget = this._mapping.app_timemap('getMapping');
-        var L = this._L;
-        var top_layer = mapwidget.all_layers[this._nativelayer_id];
+        let mapwidget = this._mapping.app_timemap('getMapping');
+        let L = this._L;
+        let top_layer = mapwidget.all_layers[this._nativelayer_id];
         
-        var layers = this._getPlacesForRange(top_layer, range_of_places);
+        let layers = this._getPlacesForRange(top_layer, range_of_places);
        
-        var action = aActions[action_idx];
+        let action = aActions[action_idx];
                
         // 
         //take list of required actions on story element change
@@ -2069,9 +2069,9 @@ $.widget( "heurist.app_storymap", {
         // show_report - popup on map
 
 
-        var that = this;
+        let that = this;
 
-        var promise = new Promise(function(_resolve, _reject){
+        let promise = new Promise(function(_resolve, _reject){
             
             that._animationResolve = _resolve;
             that._animationReject = _reject;
@@ -2139,15 +2139,15 @@ $.widget( "heurist.app_storymap", {
     //
     _getPlacesForRange: function(top_layer, range_of_places){
 
-        var layers = [];
-        var L = this._L;
+        let layers = [];
+        let L = this._L;
 
 
         top_layer.eachLayer(function(layer){
               if (layer instanceof L.Layer && layer.feature)  //(!(layer.cluster_layer_id>0)) &&
               {
                     if(layer.feature.properties.rec_ID>0){
-                        var idx = window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, range_of_places);
+                        let idx = window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, range_of_places);
                         if(idx>=0) layers.push(layer);
                     }
 
@@ -2177,11 +2177,11 @@ $.widget( "heurist.app_storymap", {
     //
     actionBounds: function(recID, layers, mode, duration){
         
-        var mapwidget = this._mapping.app_timemap('getMapping');
+        let mapwidget = this._mapping.app_timemap('getMapping');
         var useRuler = (layers.length==1), bounds = [];
         
         $.each(layers, function(i, layer){
-            var bnd = mapwidget.getLayerBounds(layer, useRuler);
+            let bnd = mapwidget.getLayerBounds(layer, useRuler);
             bounds.push( bnd );    
         });
 
@@ -2212,7 +2212,7 @@ $.widget( "heurist.app_storymap", {
             if(duration==0){
                 this._animationResolve();
             }else{
-                var that = this;
+                let that = this;
                 setTimeout(function(){
                         if(that._terminateAnimation===true || that._terminateAnimation==recID){
                             //animation terminated actionBounds
@@ -2257,21 +2257,21 @@ $.widget( "heurist.app_storymap", {
     actionFadeIn: function(recID, nativemap, layers, startOpacity, finalOpacity, opacityStep, duration, show_delay, need_reverce) 
     {
         
-        var steps = Math.abs(finalOpacity-startOpacity)/Math.abs(opacityStep);
+        let steps = Math.abs(finalOpacity-startOpacity)/Math.abs(opacityStep);
         if(need_reverce) steps = steps * 2;
         
         if(!(duration>0)) duration = 1000;        
-        var delay = duration/steps;
+        let delay = duration/steps;
         
         if(!show_delay) show_delay = 0;
 
         
-        var that = this;
-        var L = this._L;
-        var opacity = startOpacity;
+        let that = this;
+        let L = this._L;
+        let opacity = startOpacity;
         function __changeOpacity() {
             
-            var iOK = (opacityStep>0)
+            let iOK = (opacityStep>0)
                     ?(opacity < finalOpacity)
                     :(finalOpacity < opacity);
 
@@ -2339,14 +2339,14 @@ $.widget( "heurist.app_storymap", {
         if(!duration) duration = 2000;
         if(!steps) steps = 20;
         
-        var that = this;
-        var delay = duration/steps;
+        let that = this;
+        let delay = duration/steps;
         
-        var colors = window.hWin.HEURIST4.ui.getColourGradient(startColour, endColour, steps);
-        var color_step = 0;
+        let colors = window.hWin.HEURIST4.ui.getColourGradient(startColour, endColour, steps);
+        let color_step = 0;
         
-        var mapwidget = this._mapping.app_timemap('getMapping');
-        var top_layer = mapwidget.all_layers[this._nativelayer_id];
+        let mapwidget = this._mapping.app_timemap('getMapping');
+        let top_layer = mapwidget.all_layers[this._nativelayer_id];
         
         function __changeColor() {
             if ( color_step<colors.length ) {
@@ -2358,9 +2358,9 @@ $.widget( "heurist.app_storymap", {
                         return false;
                     }
                     
-                    var clr = colors[color_step];
+                    let clr = colors[color_step];
                     
-                    var style = {color:clr, fillColor:clr};
+                    let style = {color:clr, fillColor:clr};
                     
                     mapwidget.applyStyleForLayer(top_layer, lyr, style);
                     
@@ -2386,12 +2386,12 @@ $.widget( "heurist.app_storymap", {
         if(!duration) duration = 1000;
         if(!steps) steps = 10;
         
-        var that = this;
-        var delay = duration/steps;
-        var count = 0;
-        var mapwidget = this._mapping.app_timemap('getMapping');
-        var is_visible = [];
-        var is_terminated = false;
+        let that = this;
+        let delay = duration/steps;
+        let count = 0;
+        let mapwidget = this._mapping.app_timemap('getMapping');
+        let is_visible = [];
+        let is_terminated = false;
 
         var interval = window.setInterval(function() {
             
@@ -2450,8 +2450,8 @@ $.widget( "heurist.app_storymap", {
         if(!delay) delay = 500;
 
             var that = this;
-            var mapwidget = this._mapping.app_timemap('getMapping');
-            var top_layer = mapwidget.all_layers[this._nativelayer_id];
+            let mapwidget = this._mapping.app_timemap('getMapping');
+            let top_layer = mapwidget.all_layers[this._nativelayer_id];
             
             setTimeout(function(){
 
@@ -2486,15 +2486,15 @@ $.widget( "heurist.app_storymap", {
         
         //var recID = this._currentElementID;
         
-        var gd = this._cache_story_places[recID]['geojson'];
+        let gd = this._cache_story_places[recID]['geojson'];
         //gather all verties
-        var begin_pnt = [], end_pnt = [], tran_pnt = [];
+        let begin_pnt = [], end_pnt = [], tran_pnt = [];
         
         function _fillPnts(ids, pnt){
 
             if(!window.hWin.HEURIST4.util.isempty(ids))
-            for (var k=0; k<=ids.length; k++){
-                for (var i=0; i<gd.length; i++){
+            for (let k=0; k<=ids.length; k++){
+                for (let i=0; i<gd.length; i++){
                     if(gd[i]['id']==ids[k] && gd[i]['geometry']['type']=='Point'){
                         pnt.push(gd[i]['geometry']['coordinates']);
                         break;
@@ -2509,7 +2509,7 @@ $.widget( "heurist.app_storymap", {
         _fillPnts(this._cache_story_places[recID][DT_END_PLACES], end_pnt);
         _fillPnts(this._cache_story_places[recID][DT_TRAN_PLACES], tran_pnt);
         
-        var path = null;
+        let path = null;
         //create link path from begin to end place
         if (begin_pnt.length>0 || end_pnt.length>0 || tran_pnt.length>0){
             //$geovalues = array();
@@ -2531,7 +2531,7 @@ $.widget( "heurist.app_storymap", {
                     
                     //lines from last transition to end points
                     if(end_pnt.length>0){
-                        var last = tran_pnt.length-1;
+                        let last = tran_pnt.length-1;
                         for(var i=0; i<end_pnt.length; i++){
                             path.geometry.coordinates.push([tran_pnt[last], end_pnt[i]]);
                         }                

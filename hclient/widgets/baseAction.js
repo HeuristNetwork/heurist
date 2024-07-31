@@ -84,12 +84,12 @@ $.widget( "heurist.baseAction", {
         }
         
         //init layout
-        var that = this;
+        let that = this;
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){  //load general layout      
             
-            var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
+            let url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
                     ?this.options.htmlContent
                     :window.hWin.HAPI4.baseURL+'hclient/' 
                         + this.options.path + this.options.htmlContent
@@ -128,7 +128,7 @@ $.widget( "heurist.baseAction", {
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
         
         //find and activate event listeners for elements
         
@@ -140,7 +140,7 @@ $.widget( "heurist.baseAction", {
             
             if(this.options.innerTitle){ 
 
-                var fele = this.element.children().get(0);//('fieldset');
+                let fele = this.element.children().get(0);//('fieldset');
                 
                 //titlebar            
                 this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
@@ -197,7 +197,7 @@ $.widget( "heurist.baseAction", {
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        let that = this;        
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
@@ -221,9 +221,9 @@ $.widget( "heurist.baseAction", {
     //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        let btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
-        var btn = $('<button>').button(btn_opts)
+        let btn = $('<button>').button(btn_opts)
                     .click(options.click)
                     .appendTo(container);
         if(options.id){
@@ -258,14 +258,14 @@ $.widget( "heurist.baseAction", {
             
             if(options.position==null) options.position = { my: "center", at: "center", of: window };
             
-            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
             var that = this;
             
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -297,7 +297,7 @@ $.widget( "heurist.baseAction", {
     popupDialog: function(){
         if(this.options.isdialog){
 
-            var $dlg = this._as_dialog.dialog("open");
+            let $dlg = this._as_dialog.dialog("open");
             
             
             if(this._as_dialog.attr('data-palette')){
@@ -316,7 +316,7 @@ $.widget( "heurist.baseAction", {
             
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -335,7 +335,7 @@ $.widget( "heurist.baseAction", {
             this._as_dialog.dialog("close");
         }else{
             
-            var canClose = true;
+            let canClose = true;
             if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }

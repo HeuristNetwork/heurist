@@ -31,7 +31,7 @@ widget:
 
 */
 
-var editCMS_instance2 = null;
+let editCMS_instance2 = null;
 // global variables defined in websiteScriptAndStyles
 //  window.hWin.layoutMgr - global variable defined in hLayoutMgr
 //  page_cache
@@ -46,11 +46,11 @@ var editCMS_instance2 = null;
 //
 function editCMS2(website_document){
 
-    var _className = "EditCMS2";
+    const _className = "EditCMS2";
 
-    var _lockDefaultEdit = false;
+    let _lockDefaultEdit = false;
     
-    var _panel_treePage,     // panel with treeview for current page 
+    let _panel_treePage,     // panel with treeview for current page 
         _panel_treeWebSite,  // panel with tree menu - website structure
         _panel_propertyView, // panel with selected element properties
         _edit_Element = null,  //instance of edit element class editCMS_ElementCfg
@@ -61,22 +61,22 @@ function editCMS2(website_document){
         _layout_content,   // JSON config 
         _layout_container; // main-content with CMS content
 
-    var default_palette_class = 'ui-heurist-publish';
+    let default_palette_class = 'ui-heurist-publish';
         
-    var page_was_modified = false;
-    var delay_onmove = 0, __timeout = 0;
+    let page_was_modified = false;
+    let delay_onmove = 0, __timeout = 0;
     
-    var current_edit_mode = 'page', //or website
+    let current_edit_mode = 'page', //or website
         _editCMS_SiteMenu = null; 
         
-    var _keep_EditPanelWidth = 0;  
+    let _keep_EditPanelWidth = 0;  
     
-    var _editor_panel_frame,
+    let _editor_panel_frame,
         _editor_panel = null,
         _ws_doc = website_document, //website document
         _ws_body = $(website_document).find('body');
     
-    var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+    let RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     
     //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
@@ -86,10 +86,10 @@ function editCMS2(website_document){
     DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
     TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'];
 
-    var dim = {h:_ws_body.innerHeight(), w:_ws_body.innerWidth()};
+    let dim = {h:_ws_body.innerHeight(), w:_ws_body.innerWidth()};
     dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
     
-    var options;
+    let options;
     
     function _loadTinyMCE(callback) {
        const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
@@ -128,10 +128,10 @@ function editCMS2(website_document){
             if(isCMS_NewWebsite){
                 isCMS_NewWebsite = false;
 
-                var $dlg;
-                var button = {};
+                let $dlg;
+                let button = {};
                 button[window.hWin.HR('OK')] = function(){
-                    var search_param = window.location.search.replace('&newlycreated', '');
+                    let search_param = window.location.search.replace('&newlycreated', '');
                     window.history.pushState({}, document.title, window.location.pathname + search_param);
                     $dlg.dialog('close');
                 };
@@ -143,7 +143,7 @@ function editCMS2(website_document){
             window.onbeforeunload = _onbeforeunload;
                 
             
-                var new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
+                let new_ele = $('<div class="ui-layout-center"></div>');//.prependTo(body);
                                              
                 _ws_body.children().appendTo(new_ele);
                 
@@ -208,7 +208,7 @@ function editCMS2(website_document){
                             +'</div>'
                         +'</div></div>').appendTo(_ws_body);
            
-                    var layout_opts =  {
+                    let layout_opts =  {
                         applyDefaultStyles: true,
                         maskContents:       true,  //alows resize over iframe
                         //togglerContent_open:    '&nbsp;',
@@ -238,19 +238,19 @@ function editCMS2(website_document){
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
-                            var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
                             tog.removeClass('prominent-cardinal-toggler togglerVertical');
                             tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').hide();
                         },
                         onclose_end : function( ){ 
-                            var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
                             tog.addClass('prominent-cardinal-toggler togglerVertical');
 
                             if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
                                 tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
                             }else{
 
-                                var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                                let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
                                 $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                             }
                         },
@@ -267,14 +267,14 @@ function editCMS2(website_document){
 
                     if(true){ // this.usrPreferences.structure_closed==0, only if panel is closed by default
 
-                        var tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                        let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
                         tog.addClass('prominent-cardinal-toggler togglerVertical');
 
                         if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
                             tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
                         }else{
 
-                            var margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                            let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
                             $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                         }
                     }
@@ -338,7 +338,7 @@ function editCMS2(website_document){
     function _initEditControls(need_callback){
         
         if(!_editor_panel){
-            var innerDoc = _editor_panel_frame[0].contentDocument || _editor_panel_frame[0].contentWindow.document;
+            let innerDoc = _editor_panel_frame[0].contentDocument || _editor_panel_frame[0].contentWindow.document;
             
             _editor_panel = $(innerDoc.body);
         }
@@ -475,8 +475,8 @@ function editCMS2(website_document){
         
         if(page_was_modified){
             
-            var $dlg;
-            var _buttons = [
+            let $dlg;
+            let _buttons = [
                 {text:window.hWin.HR('Save'), 
                     click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
@@ -493,7 +493,7 @@ function editCMS2(website_document){
                 }
             ];            
             
-            var sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
+            let sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, {appendTo: 'body'});
 
             return true;     
@@ -538,7 +538,7 @@ function editCMS2(website_document){
         }else {
             return;
         }
-        var opts = {};
+        let opts = {};
         if(page_cache[options.record_id]){
             opts = {page_name:window.hWin.HAPI4.getTranslation(page_cache[options.record_id][DT_NAME], current_language)};  
             //call global function from websiteScriptAndStyles
@@ -554,7 +554,7 @@ function editCMS2(website_document){
                                 page_was_modified = true;
                                 _layout_content = res;
                                 
-var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
+let sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
 +'<p>If this page uses complex formatting we cannot be sure of converting correctly through this automatic process.</p>'
 +'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
 +'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
@@ -611,7 +611,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
         
-        var selector = '.tinymce-body';
+        let selector = '.tinymce-body';
         if(key>0){
             selector = selector + '[data-hid='+key+']';
         }
@@ -625,7 +625,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
         }
 
-        var inlineConfig = {
+        let inlineConfig = {
             selector: selector,
             menubar: false,
             inline: true,
@@ -672,15 +672,15 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 // ----- Event handles -----
                 editor.on('change', function(e) {
                     if(tinymce.activeEditor && tinymce.activeEditor.targetElm){
-                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        let key = $(tinymce.activeEditor.targetElm).attr('data-hid');
                         //update in _layout_content
-                        var l_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, key);
+                        let l_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, key);
                         if(l_cfg){
-                            var new_content = tinymce.activeEditor.getContent();
+                            let new_content = tinymce.activeEditor.getContent();
                             page_was_modified = (page_was_modified || l_cfg.content!=new_content);
                             _onPageChange();
                             
-                            var lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
+                            let lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
                             if(lang==default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
                                 lang = '';
                             }
@@ -696,7 +696,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
 
                 editor.on('click', function (e) {
                     //adjust tinymce toolbar
-                    var $toolbar = _ws_body.find('.tox-toolbar-dock-transition'); //$('body')
+                    let $toolbar = _ws_body.find('.tox-toolbar-dock-transition'); //$('body')
                     if($toolbar.length > 0 && $toolbar.width() < 400){
                         $toolbar.css('width', '400px');
                     }
@@ -719,8 +719,8 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                         _layout_container.find('.cms-element-overlay').css('visibility','hidden');
 
                         //highlight editing element in tree
-                        var key = $(tinymce.activeEditor.targetElm).attr('data-hid');
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
+                        let key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(key);
                         _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                     
@@ -872,7 +872,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     //         
     function __addHeuristMedia(){
 
-        var popup_options = {
+        let popup_options = {
             isdialog: true,
             select_mode: 'select_single',
             edit_addrecordfirst: false, //show editor atonce
@@ -885,14 +885,14 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 if(data){
 
                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                        var recordset = data.selection;
-                        var record = recordset.getFirstRecord();
+                        let recordset = data.selection;
+                        let record = recordset.getFirstRecord();
 
                         //always add media as reference to production version of heurist code (not dev version)
-                        var thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                        let thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
                         +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
 
-                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+                        let playerTag = recordset.fld(record,'ulf_PlayerTag');
 
                         let $dlg;
                         let msg = 'Enter a caption below (optional):<br><br>'
@@ -941,7 +941,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         }else{
         
         //init treeview
-        var fancytree_options =
+        let fancytree_options =
         {
             checkbox: false,
             //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -976,7 +976,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 dragStart: function(node, data) {
 
                     let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
-                    var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                    let is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
                     
                     return !(is_last_root || is_cardinal);
@@ -992,9 +992,9 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     // data.otherNode - dragging node
                     // node - target
                     //let is_root = node.getParent().isRootNode();
-                    var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+                    let is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                                node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
-                    var hitMode = (is_cardinal)?'child' :data.hitMode;                    
+                    let hitMode = (is_cardinal)?'child' :data.hitMode;                    
                     
                     data.otherNode.moveTo(node, hitMode);    
                     //change layout content and redraw page
@@ -1034,7 +1034,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
     //
     //
     function _hideMenuInTree(){
-        var ele = _panel_treePage.find('.lid-actionmenu');
+        let ele = _panel_treePage.find('.lid-actionmenu');
         ele.hide(); //menu icon
         ele.find('span[data-action]').hide(); //popup menu
     }        
@@ -1092,7 +1092,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 mode='page';
             }
         }else{
-            var activePage = (mode=='page')?1:0;
+            let activePage = (mode=='page')?1:0;
             if(_tabControl.tabs('option','active')!=activePage){
                 _tabControl.tabs({active:activePage});
                 return;    
@@ -1158,7 +1158,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         setTimeout(function(){
             $.each( _panel_treePage.find('.fancytree-node'), function( idx, item ){
                 
-                var ele_ID = $(item).find('span[data-lid]').attr('data-lid');
+                let ele_ID = $(item).find('span[data-lid]').attr('data-lid');
 
                 _defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
             });
@@ -1167,7 +1167,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             
             // find all dragable elements - text and widgets
             _layout_container.find('div.brick').each(function(i, item){   //
-                var ele_ID = $(item).attr('data-hid');
+                let ele_ID = $(item).attr('data-hid');
                  //left:2px;top:2px;
                 _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
             });
@@ -1184,23 +1184,23 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
             ele_ID = ''+ele_ID;
-            var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
+            let node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_ID);
 
             if(node==null){
                 return;
             }
 
-            var is_intreeview = $(item).hasClass('fancytree-node');
+            let is_intreeview = $(item).hasClass('fancytree-node');
             if(is_intreeview && !$(item).hasClass('fancytree-hide')){       
                 $(item).css('display','block');   
             }
 
-            var is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
+            let is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
             let is_last_root = node.getParent().isRootNode() && node.getParent().countChildren(false) == 1;
-            var is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
+            let is_cardinal = (node.data.type=='north' || node.data.type=='south' || 
                 node.data.type=='east' || node.data.type=='west' || node.data.type=='center');
 
-            var actionspan = '<div class="lid-actionmenu mceNonEditable" '
+            let actionspan = '<div class="lid-actionmenu mceNonEditable" '
             +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
             +'font-size:'+(is_intreeview?'12px;right:13px':'16px')
             +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
@@ -1231,10 +1231,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 let stitle = 'To enable multilanguage support define more than one language for web home parameter "Languages"';
                 let codes = '';
                 if(website_languages!=''){
-                    var langs = website_languages.split(',');
+                    let langs = website_languages.split(',');
                     if(langs.length>0){
                         stitle = 'Define translation for this text element';
-                        for(var i=0;i<langs.length;i++){
+                        for(let i=0;i<langs.length;i++){
                             codes = codes
                             +'<span data-action="translate" data-lang="'+langs[i]
                                     +'" style="display:block;padding:4px;text-align:right">'
@@ -1256,7 +1256,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 
                 actionspan.find('span[data-action]').hide();
                 actionspan.find('span.ui-icon-menu').click(function(event){
-                    var ele = $(event.target);
+                    let ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
                     ele.parent().find('span[data-action]').show();
@@ -1269,11 +1269,11 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 actionspan.find('span[data-action]').hide();
                 actionspan.find('span.ui-icon-gear').click(function(event){ // edit widget
 
-                    var ele = $(event.target);
+                    let ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
                     
-                    var is_widget = ele.parent().prev().hasClass('heurist-widget');
+                    let is_widget = ele.parent().prev().hasClass('heurist-widget');
                     
                     if(is_widget){
                         ele.parent().find('span[data-action="edit"]').click();
@@ -1293,7 +1293,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             // menu for action span
             //
             actionspan.find('span[data-action]').click(function(event){
-                var ele = $(event.target);
+                let ele = $(event.target);
 
                 window.hWin.HEURIST4.util.stopEvent(event);
 
@@ -1302,10 +1302,10 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                 setTimeout(function(){
                     _lockDefaultEdit = false;
 
-                    var ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
+                    let ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
                     _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
 
-                    var action = ele.attr('data-action');
+                    let action = ele.attr('data-action');
                     if(!action) action = ele.parent().attr('data-action');
                     if(action=='element'){
 
@@ -1317,7 +1317,7 @@ var sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
                     }else if(action=='translate'){
                        
                        //reload the only text element in different language
-                       var lang = ele.attr('data-lang');
+                       let lang = ele.attr('data-lang');
                         
                        //change or add content of specified language
                        _layoutTranslateElement(ele_ID, lang)
@@ -1346,7 +1346,7 @@ function(value){
 
                     }else if(action=='delete'){
                         //different actions for separator and field
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_ID);
+                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_ID);
                         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Are you sure you wish to delete element "'+node.title+'"?', 
@@ -1373,10 +1373,10 @@ function(value){
                 
                 if(_panel_propertyView.is(':visible')) return;
 
-                var el = document.elementFromPoint(event.pageX, event.pageY);
+                let el = document.elementFromPoint(event.pageX, event.pageY);
                 if($(el).hasClass('ui-icon-gear')) return;
 
-                var node;
+                let node;
                 if($(event.target).hasClass('brick')){ 
                     //cms element
                     
@@ -1406,7 +1406,7 @@ function(value){
                     if(node){
                         //_hideMenuInTree();
                         
-                        var ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
+                        let ele = node.find('.lid-actionmenu'); //$(event.target).children('.lid-actionmenu');
                         ele.find('span[data-action]').hide();
                         ele.find('span.ui-icon-menu').show();
                         ele.hide();//css('visibility','hidden');
@@ -1432,7 +1432,7 @@ function(value){
                     if(_panel_propertyView.is(':visible')) return;
 
                     
-                    var node, ele_ID;
+                    let node, ele_ID;
 
                     if(__timeout>0) clearTimeout(__timeout);
                     __timeout = 0;
@@ -1443,7 +1443,7 @@ function(value){
                         return;
                     }
 
-                    var is_in_page = ($(event.target).hasClass('brick') || $(event.target).parents('div.brick:first').length>0);
+                    let is_in_page = ($(event.target).hasClass('brick') || $(event.target).parents('div.brick:first').length>0);
 
                     if( is_in_page ){
                         //div.editable in container 
@@ -1459,18 +1459,18 @@ function(value){
                         }
 
                         //node =  $(event.target);
-                        var ele_id = node.attr('data-hid');
+                        let ele_id = node.attr('data-hid');
                         _layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
-                        var ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
+                        let ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
 
-                        var parent = node.parents('div.ui-layout-pane:first');
+                        let parent = node.parents('div.ui-layout-pane:first');
                         if(parent.length==0 || parent.parents('div[data-hid]').length==0){
                             parent = _layout_container;  
                         }
-                        var pos = node.position();
-                        var margin_top = parseInt(node.css('margin-top'));
+                        let pos = node.position();
+                        let margin_top = parseInt(node.css('margin-top'));
                         if(!(margin_top>0)) margin_top = 2;
-                        var margin_left = parseInt(node.css('margin-left'));
+                        let margin_left = parseInt(node.css('margin-left'));
                         if(!(margin_left>0)) margin_left = 2;
                         
                         ele.find('span[data-action]').hide();  
@@ -1541,13 +1541,13 @@ function(value){
     //
     function _showOverlayForElement( ele_ID ){
         if(ele_ID>0){
-            var cms_ele = _layout_container.find('div[data-hid='+ele_ID+']');
+            let cms_ele = _layout_container.find('div[data-hid='+ele_ID+']');
             
             if(cms_ele.hasClass('cms-element-editing')) return;
             
-            var pos = cms_ele.offset(); //realtive to document
-            var pos2 = _layout_container.offset();
-            var overlay_ele = $('.cms-element-overlay');
+            let pos = cms_ele.offset(); //realtive to document
+            let pos2 = _layout_container.offset();
+            let overlay_ele = $('.cms-element-overlay');
             if(overlay_ele.length==0){
                 overlay_ele = $('<div>').addClass('cms-element-overlay').appendTo(_layout_container); //attr('data-lid',ele_ID).insertAfter
             }
@@ -1567,10 +1567,10 @@ function(value){
     //
     function _layoutRemoveElement(ele_id){
 
-        var tree = _panel_treePage.fancytree('getTree');
-        var node = tree.getNodeByKey(''+ele_id);
-        var parentnode = node.getParent();
-        var parent_container, parent_children, parent_element;
+        let tree = _panel_treePage.fancytree('getTree');
+        let node = tree.getNodeByKey(''+ele_id);
+        let parentnode = node.getParent();
+        let parent_container, parent_children, parent_element;
         
         if(parentnode.isRootNode() && parentnode.countChildren(false) == 1){
             //cannot remove root element
@@ -1592,8 +1592,8 @@ function(value){
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
         //find index in _layout_content
-        var idx = -1;
-        for(var i=0; i<parent_children.length; i++){
+        let idx = -1;
+        for(let i=0; i<parent_children.length; i++){
           if(parent_children[i].key==ele_id){
               idx = i;
               break;
@@ -1629,11 +1629,11 @@ function(value){
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
         
-        var affected_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        let affected_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
         
 
-        var oldparent = window.hWin.layoutMgr.layoutContentFindParent(_layout_content, ele_id);
-        var parent_children;
+        let oldparent = window.hWin.layoutMgr.layoutContentFindParent(_layout_content, ele_id);
+        let parent_children;
         
         //remove from old parent -----------
         if(oldparent=='root'){
@@ -1641,7 +1641,7 @@ function(value){
         }else{
             parent_children = oldparent.children;
         }
-        var idx = -1;
+        let idx = -1;
         for(var i=0; i<parent_children.length; i++){
           if(parent_children[i].key==ele_id){
               idx = i;
@@ -1651,11 +1651,11 @@ function(value){
         parent_children.splice(idx, 1); //remove from children
         
         //add to new parent  ---------------
-        var tree = _panel_treePage.fancytree('getTree');
-        var node = tree.getNodeByKey(''+ele_id);
-        var prevnode = node.getPrevSibling();
-        var parentnode = node.getParent();
-        var parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+        let tree = _panel_treePage.fancytree('getTree');
+        let node = tree.getNodeByKey(''+ele_id);
+        let prevnode = node.getPrevSibling();
+        let parentnode = node.getParent();
+        let parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
         parent_children = parent_element ? parent_element.children : _layout_content;
         
         if(prevnode==null){
@@ -1687,17 +1687,17 @@ function(value){
     //
     function _layoutTranslateElement(ele_id, lang_id){
         
-        var affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
-        var lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
+        let affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
+        let lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
         
         //need switch
         if(affected_ele.attr('data-lang')==lang || (current_language==lang && !affected_ele.attr('data-lang'))){
             return;
         }
 
-        var affected_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        let affected_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
 
-        var content = 'content';
+        let content = 'content';
         if(default_language!=lang && lang!='def' && !window.hWin.HEURIST4.util.isempty(lang)){
             content = content + lang;
             if(!affected_cfg[content]){ //if not found -  add new content
@@ -1732,7 +1732,7 @@ function(value){
 
       
         //1. show div with properties over treeview
-        var h = _panel_treePage.find('ul.fancytree-container').height() + 10;
+        let h = _panel_treePage.find('ul.fancytree-container').height() + 10;
 
         h = (h<175)?h:175; 
         _panel_treePage.css('height',h+'px');//_panel_treePage.hide();
@@ -1748,7 +1748,7 @@ function(value){
 
         //scroll tree that selected element will be visible
         var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
-        var top1 = $(node.li).position().top;
+        let top1 = $(node.li).position().top;
         _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
         $(node.li).find('.fancytree-node').removeClass('fancytree-active');
@@ -1766,21 +1766,21 @@ function(value){
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
         
-        var ele = _layout_container.find('div[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
+        let ele = _layout_container.find('div[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
 
         if(!ele.css('background-image') || ele.css('background-image')=='none'){
             ele.addClass('headline marching-ants marching');
         }
         
-        var element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        let element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
         
-        var is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
+        let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
                 element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
             
         if(is_cardinal){
              //find parent
              var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
-             var parentnode = node.getParent();
+             let parentnode = node.getParent();
              ele_id = parentnode.key;
              element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
         }
@@ -1804,7 +1804,7 @@ function(value){
                         window.hWin.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
 
                         //update treeview                    
-                        var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
+                        let node = _panel_treePage.fancytree('getTree').getNodeByKey(''+new_cfg.key);
                         node.setTitle(new_cfg.title);
                         _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
                                     'position:absolute;right:8px;padding:2px;margin-top:0px;');
@@ -1828,7 +1828,7 @@ function(value){
 
                     // find all dragable elements - text and widgets
                     _layout_container.find('div.brick').each(function(i, item){   //
-                        var ele_ID = $(item).attr('data-hid');
+                        let ele_ID = $(item).attr('data-hid');
                          //left:2px;top:2px;
                         _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
                     });
@@ -1850,7 +1850,7 @@ function(value){
         
         //border: 1px dotted gray; border-radius: 4px;margin: 4px;
         
-        var new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
+        let new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
         
         if(widget_type=='group'){
             new_ele = {name:'Group', type:'group', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, children:[ new_ele ]};
@@ -1907,14 +1907,14 @@ function(value){
         }
         else if(widget_type=='text_banner'){
 
-            var imgs = [
+            let imgs = [
  'https://images.unsplash.com/photo-1524623243236-187b50e18f9f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1228&q=80',
  'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
  //'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80',
  'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
  'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1171&q=80'];
  
-            var k = Math.floor(Math.random() * 4);
+            let k = Math.floor(Math.random() * 4);
             
             new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
@@ -1986,9 +1986,9 @@ function(value){
     //    
     function _layoutInsertElement_continue(ele_id, new_element_json){
 
-        var tree = _panel_treePage.fancytree('getTree');
-        var parentnode = tree.getNodeByKey(ele_id);
-        var parent_container, parent_children, parent_element;
+        let tree = _panel_treePage.fancytree('getTree');
+        let parentnode = tree.getNodeByKey(ele_id);
+        let parent_container, parent_children, parent_element;
 
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
@@ -2046,7 +2046,7 @@ function(value){
             parentnode.addChildren(new_element_json);    
             //parentnode.addNode(new_element_json);
         }else{
-            var beforenode = parentnode.getNextSibling();
+            let beforenode = parentnode.getNextSibling();
             parentnode = parentnode.getParent();
             parentnode.addChildren(new_element_json, beforenode);    
             //parentnode.addNode(new_element_json, 'after');
@@ -2080,7 +2080,7 @@ function(value){
         }
         
         // 1. load template files
-        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
 
         // 2. Loads template json
         $.getJSON(sURL, 
@@ -2110,14 +2110,14 @@ function(value){
         
         window.hWin.HEURIST4.msg.bringCoverallToFront();
         
-        var newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
-        var contents = [];
+        let newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
+        let contents = [];
         
         //remove keys and titles,  extract "content" into separate set of values
         // each content:lang value will be saved in separate detail
         function __cleanLayout(items){
             
-            for(var i=0; i<items.length; i++){
+            for(let i=0; i<items.length; i++){
                 items[i].key = null;
                 delete items[i].key;
                 items[i].title = null;
@@ -2134,7 +2134,7 @@ function(value){
         }
         __cleanLayout(newval);
 
-        var newname = newval[0].name;
+        let newname = newval[0].name;
         
         // if page consist one group and one text without css - save only content of this text
         // it allows edit content in standard record edit
@@ -2151,7 +2151,7 @@ function(value){
         if(false){ //need encoding
             newval = window.hWin.HEURIST4.util.bytesToBase64(new TextEncoder().encode(newval));    
         }
-        var request = {a: 'addreplace',
+        let request = {a: 'addreplace',
                         recIDs: options.record_id,
                         dtyID: DT_EXTENDED_DESCRIPTION,
                         rVal: newval,
@@ -2163,8 +2163,8 @@ function(value){
                 
                 if(response.status == hWin.ResponseStatus.OK){
                     if(response.data.errors==1){
-                        var errs = response.data.errors_list;
-                        var errMsg = errs[Object.keys(errs)[0]];
+                        let errs = response.data.errors_list;
+                        let errMsg = errs[Object.keys(errs)[0]];
                         window.hWin.HEURIST4.msg.showMsgErr( errMsg );
                     }else
                     if(response.data.noaccess==1){

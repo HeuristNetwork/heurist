@@ -35,8 +35,8 @@ var reportManager;
 */
 function ReportManager(_isFilterMode, _isWindowMode) {
 
-		var _className = "ReportManager",
-            _dataTable,
+		const _className = "ReportManager";
+        let  _dataTable,
             _dataTableParams,
             
 			_myDataTable,

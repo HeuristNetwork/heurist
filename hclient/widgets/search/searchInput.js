@@ -60,7 +60,7 @@ $.widget( "heurist.searchInput", {
     // the constructor
     _create: function() {
         
-        var that = this;
+        let that = this;
         
         if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){
             
@@ -114,7 +114,7 @@ $.widget( "heurist.searchInput", {
             .css({'text-align': 'center', flex: '0 0 35px'})
             .appendTo( this.div_search );
         
-        var linkGear = $('<a>',{href:'#', 
+        let linkGear = $('<a>',{href:'#', 
             title:window.hWin.HR('filter_builder_hint')})
             .css({'display':'inline-block','opacity':'0.5','margin-top': '0.6em', width:'20px'})
             .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
@@ -147,7 +147,7 @@ $.widget( "heurist.searchInput", {
    
         this._on( this.input_search, {
             keypress: function(e){
-                var code = (e.keyCode ? e.keyCode : e.which);
+                let code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
@@ -155,7 +155,7 @@ $.widget( "heurist.searchInput", {
                 }
             },
             keydown: function(e){
-                var code = (e.keyCode ? e.keyCode : e.which);
+                let code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 65 && e.ctrlKey) {
                     e.target.select();
                 }
@@ -187,7 +187,7 @@ $.widget( "heurist.searchInput", {
        
        this.btn_start_search.button('option','label', window.hWin.HRJ('search_button_label', this.options, this.options.language));
 
-       var lbl = null;
+       let lbl = null;
        if(this.options.search_input_label){
             lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
        }
@@ -223,7 +223,7 @@ $.widget( "heurist.searchInput", {
    //
    _doSearch: function(){
 
-        var qsearch = this.input_search.val();
+        let qsearch = this.input_search.val();
         
         qsearch = qsearch.replace(/,\s*$/, "");
 
@@ -243,7 +243,7 @@ $.widget( "heurist.searchInput", {
             // w  all|bookmark
             // stype  key|all   - key-search tags, all-title and pointer record title, by default rec_Title
 
-            var that = this;
+            let that = this;
 
             if(this.options.sup_filter){
                 qsearch = window.hWin.HEURIST4.query.mergeHeuristQuery(this.options.sup_filter, qsearch);    
@@ -251,7 +251,7 @@ $.widget( "heurist.searchInput", {
             
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
             
-            var request = {}; //window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+            let request = {}; //window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             request.q = qsearch;
             request.w  = this.options.search_domain;
@@ -282,21 +282,21 @@ $.widget( "heurist.searchInput", {
             return;
         }
         
-        var that = this;
+        let that = this;
 
         
         if(this.options.is_h6style){
-            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
-                    var pos = this.element.offset();
+                    let pos = this.element.offset();
                     widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
             }
         }else{
             
             if(!$.isFunction($('body')['showSearchBuilder'])){ 
             
-                var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
-                var scripts = [ path+'searchBuilder.js', 
+                let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
+                let scripts = [ path+'searchBuilder.js', 
                                 path+'searchBuilderItem.js',
                                 path+'searchBuilderSort.js'];
                 $.getMultiScripts(scripts)
@@ -350,7 +350,7 @@ $.widget( "heurist.searchInput", {
     
     _onSearchGlobalListener: function(e, data){
 
-        var that = this;
+        let that = this;
 
         if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART) {
 
@@ -366,7 +366,7 @@ $.widget( "heurist.searchInput", {
 
                 //request is from some other widget (outside)
                 if(data.source!=that.element.attr('id')){
-                    var qs;
+                    let qs;
                     if($.isArray(data.q)){
                         qs = JSON.stringify(data.q);
                     }else{

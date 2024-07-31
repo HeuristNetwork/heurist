@@ -49,7 +49,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         //this.element => dialog inner content
         //this._as_dialog => dialog container
 
-        var that = this;
+        let that = this;
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({width:'55px', 'min-width':'55px', display: 'inline-block'});
@@ -118,7 +118,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
      */
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -149,7 +149,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
          */
         function fld(fldname, width){
 
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
 
             if(window.hWin.HEURIST4.util.isempty(s) && s !== ''){
                 s = '';
@@ -182,14 +182,14 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         }
 
         // Generic details, not completely necessary
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('name', 30) + fld('authorId', 40) + fld('orcid', 20); 
+        let recTitle = fld('name', 30) + fld('authorId', 40) + fld('orcid', 20); 
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
                 + '<div class="recordIcons">'
                 +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -204,7 +204,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
      * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
      */
     _getActionButtons: function(){
-        var res = this._super(); //dialog buttons
+        let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
         return res;
     },
@@ -225,7 +225,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var that = this;
+        let that = this;
 
         if(!recset){
             // get selected recordset
@@ -234,16 +234,16 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
 
         if(recset && recset.length() == 1){
 
-            var res = {};
-            var rec = recset.getFirstRecord(); // get selected record
+            let res = {};
+            let rec = recset.getFirstRecord(); // get selected record
 
-            var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(var k=0; k<map_flds.length; k++){
+            for(let k=0; k<map_flds.length; k++){
 
-                var dty_ID = this.options.mapping.fields[map_flds[k]];
-                var val = recset.fld(rec, map_flds[k]);
+                let dty_ID = this.options.mapping.fields[map_flds[k]];
+                let val = recset.fld(rec, map_flds[k]);
 
                 // Check that val and id are valid, add to response object
                 if(dty_ID>0 && val){
@@ -273,7 +273,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
      */
     closingAction: function(dlg_response){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(dlg_response)){
             dlg_response = {};
@@ -294,10 +294,10 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
      */
     _doSearch: function(){
 
-        var that = this;
+        let that = this;
 
         // Construct base url for external request
-        var sURL = 'https://api.nakala.fr/authors/search?q='; // base URL for Nakala request
+        let sURL = 'https://api.nakala.fr/authors/search?q='; // base URL for Nakala request
         
         // Construct query portion of url
         // any field
@@ -314,7 +314,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
         // for record_lookup.php
-        var request = {
+        let request = {
             service: sURL, // request url
             serviceType: 'nakala_author' // requesting service, otherwise the request will result in an error
         };
@@ -348,31 +348,31 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
 
         this.recordList.show();
 
-        var is_wrong_data = true;
+        let is_wrong_data = true;
 
-        var maxRecords = $('#rec_limit').val(); // limit number of returned records
+        let maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
         let is_array = window.hWin.HEURIST4.util.isArray(array_data);
 
         if (is_array && array_data.length > 0) {
 
-            var res_records = {}, res_orders = [];
+            let res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
-            var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-            var map_flds = Object.keys(this.options.mapping.fields).concat('rec_url');
+            let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
+            let map_flds = Object.keys(this.options.mapping.fields).concat('rec_url');
             fields = fields.concat(map_flds);
 
             // Parse json to Record Set
-            var i=0;
+            let i=0;
             for(const recID in array_data){
 
-                var record = array_data[recID];
-                var values = [recID, this.options.mapping.rty_ID];
+                let record = array_data[recID];
+                let values = [recID, this.options.mapping.rty_ID];
 
                 // Add current record details, field by field
-                for(var k=0; k<map_flds.length; k++){
+                for(let k=0; k<map_flds.length; k++){
                     values.push(record[map_flds[k]]);
                 }
 
@@ -383,7 +383,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
             if(res_orders.length>0){
 
                 // Create the record set for the resultList
-                var res_recordset = new hRecordSet({
+                let res_recordset = new hRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,

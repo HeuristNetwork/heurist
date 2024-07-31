@@ -23,7 +23,7 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
 
         this.selectViewmode = this.element.find('#sel_viewmode');
         this.selectViewmode.tabs()
@@ -68,7 +68,7 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
             request['trm_Domain'] = this.currentDomain();
 
@@ -92,7 +92,7 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
                 request['details']    = 'list'; //'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
@@ -107,7 +107,7 @@ $.widget( "heurist.searchDefTerms", $.heurist.searchEntity, {
     },
     
     currentDomain:function(){
-            var domain = this.selectGroup.tabs('option','active');
+            let domain = this.selectGroup.tabs('option','active');
             return domain==1?'relation':'enum';
     },
     

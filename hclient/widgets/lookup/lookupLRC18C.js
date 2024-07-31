@@ -187,7 +187,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     //
     //
     _initControls: function () {
-        var that = this;
+        let that = this;
         this.element.find('fieldset > div > .header').css({width: '100px', 'min-width': '100px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
@@ -247,7 +247,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         window.hWin.HEURIST4.util.setDisabled(this.element.find('#btnLookupLRC18C'), true);
 
         //Populate Bookformat dropdown on lookup page
-        var request = {
+        let request = {
             serviceType: 'ESTC',
             db:'ESTC_Helsinki_Bibliographic_Metadata',
             a: 'search', 
@@ -257,7 +257,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             trm_ParentTermID: 5430
         };
 
-        var selBf = this.element.find('#select_bf').empty();
+        let selBf = this.element.find('#select_bf').empty();
         window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
 
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
@@ -265,7 +265,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             response = window.hWin.HEURIST4.util.isJSON(response);
 
             if(response.status == window.hWin.ResponseStatus.OK){
-                var recordset = new hRecordSet(response.data);
+                let recordset = new hRecordSet(response.data);
                 recordset.each2(function(trm_ID, term){
                      window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
                 });
@@ -281,7 +281,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Render Lookup query results */
     _rendererResultList: function (recordset, record) {
         function fld(fldname, width) {
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
             s = s ? s : '';
             if (width > 0) {
                 s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
@@ -289,14 +289,14 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             return s;
         }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + '1';
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recIcon = window.hWin.HAPI4.iconBaseURL + '1';
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
             + window.hWin.HAPI4.iconBaseURL + '1&version=thumb&quot;);"></div>';
         fld('properties.edition', 15)
 
-        var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
+        let html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
             + html_thumb
 
             + '<div class="recordIcons">'
@@ -315,7 +315,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     //
     //
     startSearchOnEnterPress: function (e) {
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -326,9 +326,9 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Show a confirmation window after user selects a record from the lookup query results */
     /* If the user clicks "Check Author", then call method _checkAuthor*/
     doAction: function () {
-        var that = this;
+        let that = this;
         
-        var sels = this.recordList.resultList('getSelected', true); //ids of selected records
+        let sels = this.recordList.resultList('getSelected', true); //ids of selected records
 
         if(sels && sels.length>0){
             
@@ -350,7 +350,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 
 */            
             
-                var request = { 
+                let request = { 
                     serviceType: 'ESTC',
                     action: 'import_records',
                     source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -368,18 +368,18 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                     response = window.hWin.HEURIST4.util.isJSON(response);
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        var target_dty_ID = that.options.mapping.fields['properties.edition']
+                        let target_dty_ID = that.options.mapping.fields['properties.edition']
         
-                        var cnt = response.data.count_imported;
-                        var cnt_ex = response.data.cnt_exist;
-                        var cnt_i = response.data.count_ignored;
-                        var ids = response.data.ids;  //all
-                        var ids_ex  = response.data.exists; //skipped
+                        let cnt = response.data.count_imported;
+                        let cnt_ex = response.data.cnt_exist;
+                        let cnt_i = response.data.count_ignored;
+                        let ids = response.data.ids;  //all
+                        let ids_ex  = response.data.exists; //skipped
                         if(!ids_ex) ids_ex = [];
                         
-                        var rec_ids = ids.concat(ids_ex);
+                        let rec_ids = ids.concat(ids_ex);
                         
-                        var query_request = { 
+                        let query_request = { 
                             serviceType: 'ESTC',
                             org_db: window.hWin.HAPI4.database,
                             db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -396,9 +396,9 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
                                 if(response.status == window.hWin.ResponseStatus.OK){                        
                                     
-                                    var sImported = '', sExisted = '';
+                                    let sImported = '', sExisted = '';
                                     
-                                    var recordset = new hRecordSet(response.data);
+                                    let recordset = new hRecordSet(response.data);
                                     
                                     if(cnt>0){
                                         for(var i=0; i<ids.length; i++)
@@ -462,7 +462,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
 
-        var that = this;
+        let that = this;
 
         edition_name = "";
         edition_date = "";
@@ -553,7 +553,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
         }
 
-        var missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
+        let missingSearch = (Object.keys(query).length <= 2); // query has t and sortby keys at minimum
 
         if(missingSearch){
             window.hWin.HEURIST4.msg.showMsgFlash('Please specify some criteria to narrow down the search...', 1000);
@@ -562,7 +562,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = { 
+        let query_request = { 
             serviceType: 'ESTC',
             org_db: window.hWin.HAPI4.database,
             db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -596,7 +596,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        var recordset = new hRecordSet(response.data);
+        let recordset = new hRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

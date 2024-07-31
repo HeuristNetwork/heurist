@@ -38,7 +38,7 @@ $.widget( "heurist.editTranslations", {
     // the constructor
     _init: function() {
 
-        var that = this;
+        let that = this;
 
         
         this._container = $('<div class="ent_content_full" style="top:0;padding:10px"/>')
@@ -46,9 +46,9 @@ $.widget( "heurist.editTranslations", {
 
         if(this.options.is_dialog){
             
-            var $dlg;
+            let $dlg;
             
-            var arrButtons = {};
+            let arrButtons = {};
             arrButtons[window.hWin.HR('Apply')] = function() {
                 that._onCloseDialog();
                 if(that._as_dialog && that._as_dialog.dialog('instance')) that._as_dialog.dialog( "close" );
@@ -65,7 +65,7 @@ $.widget( "heurist.editTranslations", {
                 title: 'Define Translations',
                 buttons: arrButtons,
                 resizeStop: function( event, ui ) {
-                    var pele = that.element.parents('div[role="dialog"]');
+                    let pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', width:pele.width()-24 });
                 },
                 close:function(){
@@ -101,7 +101,7 @@ $.widget( "heurist.editTranslations", {
         +'</div>')
         .appendTo( this._container ).hide();
         
-        for (var i=0; i<this.options.values.length; i++){
+        for (let i=0; i<this.options.values.length; i++){
             
             this._createEntry( this.options.values[i] , true);
 
@@ -111,7 +111,7 @@ $.widget( "heurist.editTranslations", {
         
         this._on(this._btn_add, {click:function(){
             //take defaul value
-            var ele = this.element.find('[data-def=1]');
+            let ele = this.element.find('[data-def=1]');
             
             this._createEntry(ele.val(), false);
             this._adjustDimension();
@@ -195,15 +195,15 @@ $.widget( "heurist.editTranslations", {
     _adjustDimension: function(){
         
         
-        var ch = this.element.find('div.ent_content_full')[0].scrollHeight;
+        let ch = this.element.find('div.ent_content_full')[0].scrollHeight;
  
         if(ch<150) ch = 150;
 
-        var topPos = 0;
+        let topPos = 0;
         if(this.options.is_dialog){        
-            var pos = this._as_dialog.dialog('option', 'position');
+            let pos = this._as_dialog.dialog('option', 'position');
             if(pos && pos.of && !(pos.of instanceof Window)){
-                var offset = $(pos.of).offset();
+                let offset = $(pos.of).offset();
                 topPos = (offset?offset.top:0)+40;
             }
             
@@ -211,7 +211,7 @@ $.widget( "heurist.editTranslations", {
 
             //var dh =  this._dialog.dialog('option', 'height');
 
-            var ht = Math.min(ch, window.innerHeight-topPos);
+            let ht = Math.min(ch, window.innerHeight-topPos);
 
             this._as_dialog.dialog('option', 'height', ht);    
         }else{
@@ -232,9 +232,9 @@ $.widget( "heurist.editTranslations", {
     //
     _createEntry: function(value, check_default){
 
-        var sel_container, values_container, input_ele, that = this;
+        let sel_container, values_container, input_ele, that = this;
         
-        var cont = $('<div>').css({margin:'5px'}).insertBefore(this._btn_add);
+        let cont = $('<div>').css({margin:'5px'}).insertBefore(this._btn_add);
         
         // selector container - to select language
         this.sel_container = $('<div>')
@@ -247,7 +247,7 @@ $.widget( "heurist.editTranslations", {
             
         
         var _is_default = false;    
-        var lang = '';
+        let lang = '';
         
         if(check_default){
             
@@ -308,7 +308,7 @@ $.widget( "heurist.editTranslations", {
             input_ele.attr('data-def',1);
         }
         
-        var inpt_id = input_ele.attr('id');
+        let inpt_id = input_ele.attr('id');
 
         if(_is_default){
             //label for first value
@@ -317,11 +317,11 @@ $.widget( "heurist.editTranslations", {
             +'<label>Default language</label></div>')
                 .appendTo( this.sel_container );
         }else{
-            var ind = -1;
+            let ind = -1;
 
             //find last seleted
             if(!check_default){
-                var ele = this.element.find('select:last');
+                let ele = this.element.find('select:last');
                 if(ele.length>0){
                     ind = ele[0].selectedIndex;
                     if(ind<0) ind = 0;
@@ -329,7 +329,7 @@ $.widget( "heurist.editTranslations", {
             }
             
             // 2. field selector for field or links tokens
-            var sel = $( '<select>' )
+            let sel = $( '<select>' )
                 .attr('title', 'Select language' )
                 .attr('data-input-id', inpt_id)
                 .addClass('text ui-corner-all')
@@ -363,18 +363,18 @@ $.widget( "heurist.editTranslations", {
 
         if(this._was_changed){
             
-            var that = this;
+            let that = this;
             
-            var eles = this.element.find('textarea,input');
+            let eles = this.element.find('textarea,input');
             
-            var res = [];
+            let res = [];
             
             eles.each(function(i, item){
                 item = $(item); 
-                var val = item.val().trim();
+                let val = item.val().trim();
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     //find language
-                    var sel = that.element.find('select[data-input-id="'+item.attr('id')+'"]');
+                    let sel = that.element.find('select[data-input-id="'+item.attr('id')+'"]');
                     if(sel.length>0 && sel.val() && !item.attr('data-def')){
                         res.push(sel.val()+':'+val);
                     }else{

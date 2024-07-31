@@ -18,13 +18,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var _theme_editing_symbology;
+let _theme_editing_symbology;
 
 function editTheme(current_value, callback){
 
-    var edit_dialog = null; //assigned on popup_dlg.dialog
+    let edit_dialog = null; //assigned on popup_dlg.dialog
     
-    var popup_dlg = $('#heurist-dialog-editTheme');
+    let popup_dlg = $('#heurist-dialog-editTheme');
 
     if(popup_dlg.length>0){
         popup_dlg.empty();
@@ -33,17 +33,17 @@ function editTheme(current_value, callback){
             .appendTo( $(window.hWin.document).find('body') );
     }
 
-    var editForm = $('<div class="ent_content_full editForm" style="top:0">')
+    let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
     _theme_editing_symbology = new hEditing({container:editForm, 
         onchange:
         function(){
             if(edit_dialog){
-                var ele = edit_dialog.parent().find('#btnRecSave');
+                let ele = edit_dialog.parent().find('#btnRecSave');
                 if(ele){
-                    var isChanged = _theme_editing_symbology.isModified();
-                    var mode = isChanged?'visible':'hidden';
+                    let isChanged = _theme_editing_symbology.isModified();
+                    let mode = isChanged?'visible':'hidden';
                     edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
                 }
             }
@@ -56,13 +56,13 @@ function editTheme(current_value, callback){
 
 function __editTheme_continue(){
     
-    var recdata = current_value ? new hRecordSet({count:1, order:[1], 
+    let recdata = current_value ? new hRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
         //Object.getOwnPropertyNames(current_value)
 
                    
-    var editFields = [                
+    let editFields = [                
         {"dtID": "name",
             "dtFields":{
                 "dty_Type":"freetext",
@@ -317,7 +317,7 @@ function __editTheme_continue(){
     
     _theme_editing_symbology.initEditForm( editFields, recdata, true );
 
-    var edit_buttons = [
+    let edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
             id:'btnRecCancel',
             css:{'float':'right'}, 
@@ -328,11 +328,11 @@ function __editTheme_continue(){
             id:'btnRecSave',
             css:{'visibility':'hidden', 'float':'right'},  
             click: function() { 
-                var res = _theme_editing_symbology.getValues(); //all values
+                let res = _theme_editing_symbology.getValues(); //all values
                 //remove empty values
-                var propNames = Object.getOwnPropertyNames(res);
-                for (var i = 0; i < propNames.length; i++) {
-                    var propName = propNames[i];
+                let propNames = Object.getOwnPropertyNames(res);
+                for (let i = 0; i < propNames.length; i++) {
+                    let propName = propNames[i];
                     if (window.hWin.HEURIST4.util.isempty(res[propName])) {
                         delete res[propName];
                     }
@@ -365,7 +365,7 @@ function __editTheme_continue(){
         beforeClose: function(){
             //show warning in case of modification
             if(_theme_editing_symbology.isModified()){
-                var $dlg, buttons = {};
+                let $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
                     edit_dialog.parent().find('#btnRecSave').click();

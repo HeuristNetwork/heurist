@@ -55,7 +55,7 @@ $.widget( "heurist.searchEntity", {
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
 
-            var that = this;
+            let that = this;
             
             if(this._need_load_content && this.options.entity.searchFormContent){        
                 this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/'+this.options.entity.searchFormContent+'?t'+window.hWin.HEURIST4.util.random(), 
@@ -112,7 +112,7 @@ $.widget( "heurist.searchEntity", {
                 this._on( this.btn_summary, { click: this.startSearch });
             }
                 
-            var right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+4;
+            let right_padding = window.hWin.HEURIST4.util.getScrollBarWidth()+4;
             this.element.find('#div-table-right-padding').css('min-width',right_padding);
         
         
@@ -126,7 +126,7 @@ $.widget( "heurist.searchEntity", {
     //
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -144,7 +144,7 @@ $.widget( "heurist.searchEntity", {
         
             this._trigger( "onstart" );
             
-            var that = this;
+            let that = this;
             window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
                 function(response){
                         that._trigger( "onresult", null, {recordset:response} );

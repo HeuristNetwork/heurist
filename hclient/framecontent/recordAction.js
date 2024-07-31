@@ -40,12 +40,12 @@ _startAction - start the action
 
 */
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
-    var _className = "RecordAction",
-    _version   = "0.4",
+    const _className = "RecordAction",
+    _version   = "0.4";
 
-    selectRecordScope, allSelectedRectypes;
+    let selectRecordScope, allSelectedRectypes;
 
-    var action_type = _action_type,
+    let action_type = _action_type,
         init_scope_type = _scope_type,
         init_field_type = _field_type,
         init_field_value = _field_value,
@@ -71,7 +71,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //fill header with description
         $('#div_header').html(window.hWin.HR('record_action_'+action_type));
         
-        var btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
+        let btn_start_action = $('#btn-ok').button({label:window.hWin.HR('Go')});
         
         selectRecordScope = $('#sel_record_scope')
         .on('change',
@@ -154,13 +154,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HAPI4.currentRecordset = new hRecordSet({count:"0",offset: 0,reccount: 1,records:[], rectypes:[]});
         }
 
-        var opt, selScope = selectRecordScope.get(0);
+        let opt, selScope = selectRecordScope.get(0);
 
         opt = new Option("please select the records to be affected …", "");
         selScope.appendChild(opt);
 
-        var is_initscope_empty = window.hWin.HEURIST4.util.isempty(init_scope_type);
-        var inititally_selected = '';
+        let is_initscope_empty = window.hWin.HEURIST4.util.isempty(init_scope_type);
+        let inititally_selected = '';
         
         if(init_scope_type=='all'){
             opt = new Option("All records", "All");
@@ -190,9 +190,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             if(is_initscope_empty){
                 //find all types for result and add option for each with counts.
-                var rectype_Ids = window.hWin.HAPI4.currentRecordset.getRectypes();
+                let rectype_Ids = window.hWin.HAPI4.currentRecordset.getRectypes();
 
-                for (var rty in rectype_Ids){
+                for (let rty in rectype_Ids){
                     if(rty>=0){
                         rty = rectype_Ids[rty];
                         opt = new Option('only: '+$Db.rty(rty,'rty_Plural'), rty);
@@ -219,9 +219,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _onRecordScopeChange() {
         
-        var isdisabled = (selectRecordScope.val()=='');
+        let isdisabled = (selectRecordScope.val()=='');
         //window.hWin.HEURIST4.util.setDisabled($('#btn-ok'), isdisabled);
-        var ele = $('#btn-ok');
+        let ele = $('#btn-ok');
         ele.off('click');
         if(isdisabled){
             ele.addClass('ui-state-disabled');
@@ -257,7 +257,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     // record type selector for change record type action
     // 
     function _fillSelectRecordTypes() {
-        var rtSelect = $('#sel_recordtype');
+        let rtSelect = $('#sel_recordtype');
         rtSelect.empty();
         return window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), false );
     }
@@ -266,17 +266,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _fillSelectFieldTypes() {
 
-        var fieldSelect = $('#sel_fieldtype').get(0);
+        let fieldSelect = $('#sel_fieldtype').get(0);
         if(init_scope_type>0){
             window.hWin.HEURIST4.ui.createSelector(fieldSelect, 
                 {key:init_scope_type, title: $Db.dty(init_scope_type, 'dty_Name')});
                 
         }else{
 
-            var scope_type = selectRecordScope.val();
+            let scope_type = selectRecordScope.val();
         
-            var rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
-            var rtys = {};
+            let rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
+            let rtys = {};
             var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
 
             //get record types
@@ -290,9 +290,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 //loop all selected records
                 for(i in window.hWin.HAPI4.currentRecordsetSelection){
 
-                    var rty_total_count = window.hWin.HAPI4.currentRecordset.getRectypes().length;
+                    let rty_total_count = window.hWin.HAPI4.currentRecordset.getRectypes().length;
                     var recID = window.hWin.HAPI4.currentRecordsetSelection[i];
-                    var record  = window.hWin.HAPI4.currentRecordset.getById(recID) ;
+                    let record  = window.hWin.HAPI4.currentRecordset.getById(recID) ;
                     rty = window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
 
                     if (!rtys[rty]){
@@ -308,7 +308,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = [scope_type];
             }
 
-            var allowed = Object.keys($Db.baseFieldType);
+            let allowed = Object.keys($Db.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             //allowed.splice(allowed.indexOf("geo"),1);
@@ -335,7 +335,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _createInputElements(){
 
-        var $fieldset = $('#div_widget>fieldset');
+        let $fieldset = $('#div_widget>fieldset');
         $fieldset.empty();
 
         if(action_type=='add_detail'){
@@ -440,15 +440,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
                 window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list', 'include_test': 1}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var repositories = window.hWin.HEURIST4.util.isJSON(response.data);
+                        let repositories = window.hWin.HEURIST4.util.isJSON(response.data);
                         
                         //service_id, service_label, usr_ID, usr_Name
 
                         let $sel_repos = $fieldset.find('#sel_repository');
                         for (let i = 0; i < repositories.length; i++) {
-                            var repo = repositories[i];
-                            var repo_name = repo[1];
-                            var usr_name = repo[3];
+                            let repo = repositories[i];
+                            let repo_name = repo[1];
+                            let usr_name = repo[3];
                             //usr_name = window.hWin.HAPI4.SystemMgr.getUserNameLocal(repo[2]);    
                             
                             window.hWin.HEURIST4.ui.addoption($sel_repos[0], 
@@ -537,7 +537,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.msg.showMsgErr(response.message);
                     }
                      
-                    var inpt = this;
+                    let inpt = this;
                     $btn_upload.off('click');
                     $btn_upload.on({click: function(){
                         $(inpt).trigger('click');
@@ -578,19 +578,19 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     function _createInputElement(input_id, input_label, init_value){
 
-        var $fieldset = $('#div_widget>fieldset');
+        let $fieldset = $('#div_widget>fieldset');
 
-        var dtID = $('#sel_fieldtype').val();//
+        let dtID = $('#sel_fieldtype').val();//
         
-        var rectypeID;
+        let rectypeID;
 
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
 
-        var scope_type = selectRecordScope.val();
+        let scope_type = selectRecordScope.val();
         if(Number(scope_type)>0){
             rectypeID = Number(scope_type)
         }else{
-            var i, rtyIDs
+            let i, rtyIDs
             if(scope_type=="Current"){
                 rtyIDs = window.hWin.HAPI4.currentRecordset.getRectypes();
             }else{
@@ -608,7 +608,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(window.hWin.HEURIST4.util.isempty(rectypeID)) return;
 
    
-        var field_type = $Db.dty(dtID, 'dty_Type');
+        let field_type = $Db.dty(dtID, 'dty_Type');
         if(field_type=='geo'){
             
             $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
@@ -630,7 +630,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
 
         //window.hWin.HEURIST4.util.cloneObj(
-        var dtFields = $Db.rst(rectypeID, dtID);
+        let dtFields = $Db.rst(rectypeID, dtID);
 
         dtFields['rst_DisplayName'] = input_label;
         dtFields['rst_RequirementType'] = 'optional';
@@ -651,7 +651,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
 
-        var ed_options = {
+        let ed_options = {
             recID: -1,
             dtID: dtID,
             values: init_value,
@@ -663,14 +663,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             force_displayheight: (field_type=='blocktext') ? 10 : null
         };
 
-        var ele = $("<div>").attr('id',input_id).appendTo($fieldset);
+        let ele = $("<div>").attr('id',input_id).appendTo($fieldset);
         ele.editing_input(ed_options);
 
         // special case for selects, menuWidget needs to be moved down closer to the widget element
         if(ele.find('select').length > 0){
 
-            var id = ele.find('select').attr('id');
-            var widget_ele, menu_parent;
+            let id = ele.find('select').attr('id');
+            let widget_ele, menu_parent;
 
 			// check that the select is supposed to be a hSelect/selectmenu
             if(ele.find('select').hSelect('instance') != undefined){ 
@@ -709,7 +709,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     //
     //
     function getFieldValue(input_id) {
-        var sel = $('#'+input_id).editing_input('getValues');
+        let sel = $('#'+input_id).editing_input('getValues');
         if(sel && sel.length>0){
             return sel[0];
         }else{
@@ -736,14 +736,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             return;
         }
 
-        var request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
+        let request = { tag: $('#cb_add_tags').is(':checked')?1:0 };
 
         if(action_type=='reset_thumbs'){
            request['a'] = action_type; 
         }else
         if(action_type!='rectype_change'){
 
-            var dtyID = $('#sel_fieldtype').val();
+            let dtyID = $('#sel_fieldtype').val();
             if(window.hWin.HEURIST4.util.isempty(dtyID) && action_type!='extract_pdf') {
                 alert('Field is not defined');
                 return;
@@ -804,7 +804,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 if($('#cb_match_only').is(':checked')){
                     request['match_only'] = 1;
                 }
-                var url_substring = $('#url_substring').val();
+                let url_substring = $('#url_substring').val();
                 if(!window.hWin.HEURIST4.util.isempty(url_substring)){
                     request['url_substring'] = url_substring;
                 }
@@ -879,7 +879,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         }
 
-        var scope_type = selectRecordScope.val();
+        let scope_type = selectRecordScope.val();
 
         if(scope_type=="Selected"){
             scope = window.hWin.HAPI4.currentRecordsetSelection;
@@ -893,7 +893,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         if(action_type=='rectype_change'){
             
-            var rtyID = $('#sel_recordtype').val();
+            let rtyID = $('#sel_recordtype').val();
             if(!(rtyID>0)){
                 alert('Select new record type');
                 return;
@@ -945,7 +945,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
-            var  success = (response.status == window.hWin.ResponseStatus.OK);
+            let  success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
                 
@@ -970,17 +970,17 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 *       errors     - sql error on search or updata
                 errors_list
                 */
-                var sResult = '';
+                let sResult = '';
                 for(key in response){
                     if(key && key.indexOf('_')<0 && response[key]>0){
                         //main report entry
-                        var lbl_key = 'record_action_'+key;
-                        var lbl = window.hWin.HR(lbl_key);
+                        let lbl_key = 'record_action_'+key;
+                        let lbl = window.hWin.HR(lbl_key);
                         if(lbl==lbl_key){ //not translated
                             //not found - try to find specified for particular action
                             lbl = window.hWin.HR(lbl_key+'_'+action_type);
                         }
-                        var tag_link = '';
+                        let tag_link = '';
                         if(response[key+'_tag']){
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
@@ -1012,7 +1012,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         +tag_link+'</div>';
                         
                         if(key=='errors' && response['errors_list']){
-                            var recids = Object.keys(response['errors_list']);
+                            let recids = Object.keys(response['errors_list']);
                             if(recids && recids.length>0){
                                 sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
                                 for(key in response['errors_list']){
@@ -1114,7 +1114,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
 
     //public members
-    var that = {
+    let that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},

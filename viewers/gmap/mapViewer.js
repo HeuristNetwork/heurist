@@ -41,7 +41,7 @@ if(window.hWin && window.hWin.HAPI4){
 function MapViewer() {
 
 	//private members
-	var _className = "MapViewer";
+	const _className = "MapViewer";
     							//id                               content
 	var hintDiv = new HintDiv('mapPopup', 300, 300, '<div id="map_viewer" style="width:100%;height:100%;"></div>');
 

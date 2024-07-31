@@ -20,10 +20,10 @@
 */
 
 function hImportDefDetailTypes(_dtg_ID = null) {
-    var _className = "ImportDefDetailTypes",
-    _version   = "0.6",
+    const _className = "ImportDefDetailTypes",
+    _version   = "0.6";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata = null,
     
     _return_results = !window.hWin.HEURIST4.util.isempty(_dtg_ID);

@@ -62,7 +62,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             show_toolbar: false,  
             show_viewmode: false,  
             rendererHeader: function(){
-                var s = '<div style="width:40px"></div>'
+                let s = '<div style="width:40px"></div>'
             +'<div style="width:12em;border:none;">Name</div>'
             +'<div style="width:12em;border-right:none;border-left:1px solid gray;">Notes</div>'
             +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Group</div>'
@@ -87,8 +87,8 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         //update dialog title
         if(this.options.isdialog){ // &&  !this.options.title
-            var title = null;
-            var usr_ID = 0;
+            let title = null;
+            let usr_ID = 0;
             
             
             if(this.options.title){
@@ -133,7 +133,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchUsrSavedSearches(this.options);
         
-        var iheight = 7;
+        let iheight = 7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
@@ -183,12 +183,12 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         //rem_ToUserName        
         
         
-        var recID   = fld('svs_ID');
+        let recID   = fld('svs_ID');
         
-        var qsearch = recordset.fld(record, 'svs_Query');
-        var params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+        let qsearch = recordset.fld(record, 'svs_Query');
+        let params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
         
-        var iconBtn = 'ui-icon-search';
+        let iconBtn = 'ui-icon-search';
         if(params.type==3){
             iconBtn = 'ui-icon-box';
         }else {
@@ -201,14 +201,14 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             }
         }
         
-        var group_id = recordset.fld(record, 'svs_UGrpID');
+        let group_id = recordset.fld(record, 'svs_UGrpID');
         //var group_name = window.hWin.HAPI4.usr_names({UGrpID:group_id});
-        var group_name = (group_id==window.hWin.HAPI4.user_id())
+        let group_name = (group_id==window.hWin.HAPI4.user_id())
                             ?window.hWin.HAPI4.currentUser['ugr_FullName']
                             :window.hWin.HAPI4.sysinfo.db_usergroups[group_id];
         
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + '<div class="recordSelector"><input type="checkbox" /></div>'
                 + '<div class="recordIcons"><span class="ui-icon '+iconBtn+'"/></div>'
                 + fld2('svs_Name','39ex')
@@ -239,7 +239,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
-        var request = {
+        let request = {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
@@ -247,7 +247,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
                 'db'         : this.options.database  
                 
         };
-        var svs_UGrpID = this.searchForm.find('#input_search_group').val();
+        let svs_UGrpID = this.searchForm.find('#input_search_group').val();
         if(svs_UGrpID>0){
             request['svs_UGrpID'] = svs_UGrpID;
         }
@@ -320,7 +320,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this filter?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        

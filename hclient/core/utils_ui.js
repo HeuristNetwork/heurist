@@ -106,7 +106,7 @@ window.hWin.HEURIST4.ui = {
     //
     addoption: function(sel, value, text, disabled, selected, hidden)
     {
-        var option = document.createElement("option");
+        let option = document.createElement("option");
         //option = new Option(text,value);
         option.text = text; //window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
@@ -153,12 +153,12 @@ window.hWin.HEURIST4.ui = {
             return $inpt;
         }else if(options.type=='radio'){
             
-            var $parent = null;
+            let $parent = null;
             if($inpt!=null){
                 $parent = $inpt.parent();
             }
             
-            var $inpt_group = $('<div>').attr('radiogroup',1).uniqueId()
+            let $inpt_group = $('<div>').attr('radiogroup',1).uniqueId()
                         .css({background: 'none', padding: '2px'});
                         
            if($parent!=null) {
@@ -166,7 +166,7 @@ window.hWin.HEURIST4.ui = {
                 $inpt.remove();
            }
                         
-            var id = $inpt_group.attr('id');
+            let id = $inpt_group.attr('id');
             
             for (idx in options.values)
             if(idx>=0){
@@ -228,7 +228,7 @@ window.hWin.HEURIST4.ui = {
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title,disabled,depth, border, selected, hidden;
+            let idx,key,title,disabled,depth, border, selected, hidden;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -255,11 +255,11 @@ window.hWin.HEURIST4.ui = {
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
                             if(!window.hWin.HEURIST4.util.isnull(topOptions[idx].optgroup)){
-                                var grp = document.createElement("optgroup");
+                                let grp = document.createElement("optgroup");
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                var opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled, selected, hidden);
+                                let opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled, selected, hidden);
                                 if(topOptions[idx].group>0){
                                     $(opt).attr('group', topOptions[idx].group);
                                 }else if(depth>0){
@@ -291,7 +291,7 @@ window.hWin.HEURIST4.ui = {
     //
     createTermSelect: function(selObj, options){
       
-        var vocab_id =  options.vocab_id, 
+        let vocab_id =  options.vocab_id, 
             defaultTermID =  options.defaultTermID>0?options.defaultTermID:null,
             topOptions =  options.topOptions,
             supressTermCode = options.supressTermCode,
@@ -302,12 +302,12 @@ window.hWin.HEURIST4.ui = {
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
             
-        var data = $Db.trm_TreeData(vocab_id, 'select', false, lang_code);                
-        var termCode;
+        let data = $Db.trm_TreeData(vocab_id, 'select', false, lang_code);                
+        let termCode;
         let vcg_Trash = $Db.getTrashGroupId('vcg');
        
         //add optgroups and options
-        for(var i=0; i<data.length; i++){
+        for(let i=0; i<data.length; i++){
             
             if(data[i].is_vocab){
 
@@ -356,11 +356,11 @@ window.hWin.HEURIST4.ui = {
     //
     createVocabularySelect: function(selObj, options) {
 
-        var defaultTermID =  options.defaultTermID,
+        let defaultTermID =  options.defaultTermID,
         topOptions = options.topOptions,
         useGroups = options.useGroups;
 
-        var domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
+        let domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
         let vcg_Trash = $Db.getTrashGroupId('vcg');
 
         if (!(useGroups>0 || useGroups===false)){
@@ -368,7 +368,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         //vocab groups    
-        var vgroups=[], vocabs = {};
+        let vgroups=[], vocabs = {};
         if(useGroups!==true){
             if(useGroups===false){
                 vocabs['0'] = [];
@@ -381,9 +381,9 @@ window.hWin.HEURIST4.ui = {
 
         //find all vocabularies and group them by vocab groups
         $Db.trm().each(function(trmID, record){
-            var parent_id = this.fld(record, 'trm_ParentTermID');
+            let parent_id = this.fld(record, 'trm_ParentTermID');
             if(!(parent_id>0)){
-                var grp_id = this.fld(record, 'trm_VocabularyGroupID');
+                let grp_id = this.fld(record, 'trm_VocabularyGroupID');
                 if(grp_id>0 && grp_id!=vcg_Trash){ 
                     if(useGroups===false){
                         vocabs['0'].push(trmID);
@@ -422,10 +422,10 @@ window.hWin.HEURIST4.ui = {
 
             if(useGroups===true  && grp_id>0 && vocabs[grp_id].length>1){
                 //add group header
-                var group_name = $Db.vcg(grp_id,'vcg_Name');
+                let group_name = $Db.vcg(grp_id,'vcg_Name');
                 if(!group_name) group_name = 'Group# '+grp_id+' (missing)';
                 
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, group_name);
+                let opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, group_name);
                 $(opt).attr('disabled', 'disabled');
                 $(opt).attr('group', 1);
             }
@@ -436,8 +436,8 @@ window.hWin.HEURIST4.ui = {
             });
 
             $.each(vocabs[grp_id],function(i,trm_id){
-                var trm_name = $Db.trm(trm_id,'trm_Label');
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, trm_id, trm_name);
+                let trm_name = $Db.trm(trm_id,'trm_Label');
+                let opt = window.hWin.HEURIST4.ui.addoption(selObj, trm_id, trm_name);
                 $(opt).attr('depth', 1);
 
                 if (trm_id == defaultTermID || trm_name == defaultTermID) {
@@ -460,8 +460,8 @@ window.hWin.HEURIST4.ui = {
     //
     createEntityGroupSelect: function(entity, selObj, topOptions) {
 
-        var recset = $Db[entity]();
-        var options = recset.makeKeyValueArray(entity+'_Name');
+        let recset = $Db[entity]();
+        let options = recset.makeKeyValueArray(entity+'_Name');
         let trash_id = $Db.getTrashGroupId(entity);
 
         for(let idx=1; idx<options.length; idx++){
@@ -511,17 +511,17 @@ window.hWin.HEURIST4.ui = {
     
     createRectypeSelectNew: function(selObj, options) {
         
-        var rectypeList = options.rectypeList;
-        var topOptions = options.topOptions;
-        var useHtmlSelect = (options.useHtmlSelect===true);
-        var useIcons = (options.useIcons===true); //!useHtmlSelect && 
-        var useCounts = (options.useCounts===true);
-        var useGroups = (options.useGroups!==false);
-        var useIds = (options.useIds===true);
-        var useCheckboxes = (options.useCheckboxes===true);
-        var eventHandlers  = options.eventHandlers;
+        let rectypeList = options.rectypeList;
+        let topOptions = options.topOptions;
+        let useHtmlSelect = (options.useHtmlSelect===true);
+        let useIcons = (options.useIcons===true); //!useHtmlSelect && 
+        let useCounts = (options.useCounts===true);
+        let useGroups = (options.useGroups!==false);
+        let useIds = (options.useIds===true);
+        let useCheckboxes = (options.useCheckboxes===true);
+        let eventHandlers  = options.eventHandlers;
         
-        var showAllRectypes = (options.showAllRectypes===true); //otherwise only non-hidden
+        let showAllRectypes = (options.showAllRectypes===true); //otherwise only non-hidden
  
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
@@ -529,8 +529,8 @@ window.hWin.HEURIST4.ui = {
         
         //recordset 
         let rtg_Trash = $Db.getTrashGroupId('rtg');
-        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1, 'rty_RecTypeGroupID': `!=${rtg_Trash}` });
-        var index;
+        let rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1, 'rty_RecTypeGroupID': `!=${rtg_Trash}` });
+        let index;
 
         if(rectypes){ 
 
@@ -549,8 +549,8 @@ window.hWin.HEURIST4.ui = {
         
             if(useCounts){//sort by count
                 rectypeList.sort(function(a,b){
-                     var ac = $Db.rty(a,'rty_RecCount');   
-                     var bc = $Db.rty(b,'rty_RecCount');   
+                     let ac = $Db.rty(a,'rty_RecCount');   
+                     let bc = $Db.rty(b,'rty_RecCount');   
                                         
                      if(isNaN(ac)) ac = 0;
                      if(isNaN(bc)) bc = 0;
@@ -558,17 +558,17 @@ window.hWin.HEURIST4.ui = {
                 });
             }
             
-            var isEmpty = true;
+            let isEmpty = true;
         
-            for (var idx in rectypeList)
+            for (let idx in rectypeList)
             {
                 if(idx){
-                    var rectypeID = rectypeList[idx];
+                    let rectypeID = rectypeList[idx];
                     var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rectypeID,'rty_Name'));
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
 
-                        var rty_Count = 0;
+                        let rty_Count = 0;
                         if(useCounts){
                             rty_Count = $Db.rty(rectypeID,'rty_RecCount');
                             if(isNaN(rty_Count) || rty_Count<1) continue;
@@ -599,8 +599,8 @@ window.hWin.HEURIST4.ui = {
         }else{  //show rectypes separated by groups
         
             //var groups = $Db.rtg().makeKeyValueArray('rtg_Name');
-            var groups = {};
-            var groups_order = $Db.rtg().getSubSetByRequest({ 'sort:rtg_Order':1 });
+            let groups = {};
+            let groups_order = $Db.rtg().getSubSetByRequest({ 'sort:rtg_Order':1 });
             
             groups_order.each(function(rtgID, record){
                 groups[rtgID] = {title:$Db.rtg(rtgID,'rtg_Name'),rty:[]};
@@ -614,7 +614,7 @@ window.hWin.HEURIST4.ui = {
                     &&
                     (showAllRectypes || $Db.rty(rtyID,'rty_ShowInLists')==1)){
                         
-                    var grp_id = $Db.rty(rtyID,'rty_RecTypeGroupID');
+                    let grp_id = $Db.rty(rtyID,'rty_RecTypeGroupID');
                     if(groups[grp_id] && groups[grp_id]['rty']){
                         groups[grp_id]['rty'].push(rtyID);
                     }else{
@@ -627,14 +627,14 @@ window.hWin.HEURIST4.ui = {
             
             groups_order = groups_order.getOrder();
             
-            for(var k=0; k<groups_order.length; k++){
+            for(let k=0; k<groups_order.length; k++){
                 
-                var rtgID  = groups_order[k];
+                let rtgID  = groups_order[k];
                 if(groups[rtgID].rty.length>0){
                 
                     //add header    
                     if(useHtmlSelect){
-                        var grp = document.createElement("optgroup");
+                        let grp = document.createElement("optgroup");
                         grp.label = groups[rtgID].title;
                         selObj.appendChild(grp);
                     }else{
@@ -645,9 +645,9 @@ window.hWin.HEURIST4.ui = {
 
 
                     //add rectypes
-                    for (var i=0; i<groups[rtgID].rty.length; i++){
+                    for (let i=0; i<groups[rtgID].rty.length; i++){
                         
-                        var rtyID = groups[rtgID]['rty'][i];
+                        let rtyID = groups[rtgID]['rty'][i];
                         var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID, 'rty_Name'));
 
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
@@ -666,7 +666,7 @@ window.hWin.HEURIST4.ui = {
                             $(opt).attr('entity-id', rtyID);
                         }
                         if(useCheckboxes){
-                            var r = window.hWin.HEURIST4.util.findArrayIndex(rtyID, options.marked);
+                            let r = window.hWin.HEURIST4.util.findArrayIndex(rtyID, options.marked);
                             $(opt).attr('rt-checkbox', (r>=0)?1:0);
                             $(opt).attr('data-id', rtyID);
                         }
@@ -700,16 +700,16 @@ window.hWin.HEURIST4.ui = {
 
         window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
         
-        var showDetailType = false;
-        var addLatLongForGeo = false;
-        var requriedHighlight = false;
-        var selectedValue = null;
-        var show_parent_rt = false; //show parent entity field
-        var useHtmlSelect = true;
-        var useIds = false;
-        var initial_indent = 0;
-        var eventHandlers = null;
-        var extraOptions = {};
+        let showDetailType = false;
+        let addLatLongForGeo = false;
+        let requriedHighlight = false;
+        let selectedValue = null;
+        let show_parent_rt = false; //show parent entity field
+        let useHtmlSelect = true;
+        let useIds = false;
+        let initial_indent = 0;
+        let eventHandlers = null;
+        let extraOptions = {};
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
@@ -734,8 +734,8 @@ window.hWin.HEURIST4.ui = {
             // if number of record types is less than 10 form structure
             // name of field as specified in detailtypes
             //       names of field as specified in record structure (disabled items)
-            var dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
-            var rtys = {};
+            let dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
+            let rtys = {};
             var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
             
             //for all rectypes find all fields as Detail names sorted
@@ -743,11 +743,11 @@ window.hWin.HEURIST4.ui = {
                 rty = rtyIDs[i];
                 rtyName = $Db.rty(rty, 'rty_Name');
                 
-                var dtFields = $Db.rst(rty);
+                let dtFields = $Db.rst(rty);
                 
                 dtFields.each2(function(dty, detail){
                     
-                      var field_type = $Db.dty(dty, 'dty_Type');
+                      let field_type = $Db.dty(dty, 'dty_Type');
                       if(allowedlist!=null && 
                          allowedlist.indexOf(field_type)<0){
                          //not allowed - skip
@@ -773,8 +773,8 @@ window.hWin.HEURIST4.ui = {
                 
                 //sort by name - case insensitive
                 dtyNames.sort(function(a, b) {
-                    var nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
-                    var nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
+                    let nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
+                    let nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
                     return nameA.localeCompare(nameB);
                 });
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
@@ -790,8 +790,8 @@ window.hWin.HEURIST4.ui = {
                   
                   //sort RectypeName.FieldName
                     dtys[dtyName].sort(function(a, b){
-                        var nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
-                        var nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
+                        let nameA = a.toLocaleUpperCase(); // ignore upper and lowercase
+                        let nameB = b.toLocaleUpperCase(); // ignore upper and lowercase
                         return nameA.localeCompare(nameB);
                     });
                   
@@ -812,29 +812,29 @@ window.hWin.HEURIST4.ui = {
         //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             
-            var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
+            let rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
             details = $Db.rst(rectype);
             if(!details) return selObj; //structure not defined
                 
-            var arrterm = [];
+            let arrterm = [];
             rectype = ''+rectype;
             
-            var child_rectypes = [];
+            let child_rectypes = [];
             if(show_parent_rt){
-                var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+                let DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
                 //get all child rectypes
-                var all_structs = $Db.rst_idx2();
-                for (var rty_ID in all_structs){
-                    var recset = all_structs[rty_ID];
+                let all_structs = $Db.rst_idx2();
+                for (let rty_ID in all_structs){
+                    let recset = all_structs[rty_ID];
                     recset.each2(function(dty_ID, record){
                     
                         if(record['rst_CreateChildIfRecPtr']==1){
-                            var fieldtype = $Db.dty(dty_ID, 'dty_Type');
-                            var constraint = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
+                            let fieldtype = $Db.dty(dty_ID, 'dty_Type');
+                            let constraint = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
                             if(fieldtype=='resource' && constraint && constraint.split(',').indexOf(rectype)>=0){
                                 
-                                    var name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
+                                    let name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
                                     
                                     if(showDetailType){
                                         name = name + ' [record pointer]';
@@ -851,22 +851,22 @@ window.hWin.HEURIST4.ui = {
             }
 
             
-            var trash_id = $Db.getTrashGroupId('dtg');
+            let trash_id = $Db.getTrashGroupId('dtg');
                                         
             details.each2(function(dtyID, detail){
                 if(dtyID){
 
-                    var field_reqtype = detail['rst_RequirementType'];
+                    let field_reqtype = detail['rst_RequirementType'];
                     
                     if(field_reqtype=='forbidden' || detail['dty_DetailTypeGroupID'] == trash_id) return true; 
                         //2021-02-19 || $Db.dty(dtyID, 'dty_ShowInLists')==0
                     
-                    var field_type = $Db.dty(dtyID, 'dty_Type');
+                    let field_type = $Db.dty(dtyID, 'dty_Type');
 
                     if(allowedlist==null || allowedlist.indexOf(field_type)>=0)
                     {
 
-                        var name = detail['rst_DisplayName'];
+                        let name = detail['rst_DisplayName'];
 
                         if(addLatLongForGeo && field_type=="geo"){
 
@@ -890,8 +890,8 @@ window.hWin.HEURIST4.ui = {
 
             //sort by name
             arrterm.sort(function(a, b) {
-                var nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
-                var nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
+                let nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
+                let nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
                 return nameA.localeCompare(nameB);
             });
             
@@ -915,7 +915,7 @@ window.hWin.HEURIST4.ui = {
 
             $Db.dtg().each2(function(groupID, group){
             
-                var arrterm = [];
+                let arrterm = [];
                 
                 $Db.dty().each2(function(detailID, field)
                 {
@@ -932,7 +932,7 @@ window.hWin.HEURIST4.ui = {
                     
                     //add header    
                     if(useHtmlSelect){
-                        var grp = document.createElement("optgroup");
+                        let grp = document.createElement("optgroup");
                         grp.label = group['dtg_Name'];
                         selObj.appendChild(grp);
                     }else{
@@ -943,13 +943,13 @@ window.hWin.HEURIST4.ui = {
 
                     //sort by name
                     arrterm.sort(function(a, b) {
-                        var nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
-                        var nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        let nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        let nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
                         return nameA.localeCompare(nameB);
                     });
                     
                     //add to select
-                    var i=0, cnt= arrterm.length;
+                    let i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                         $(opt).attr('depth',1);
@@ -1041,7 +1041,7 @@ window.hWin.HEURIST4.ui = {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recordset = new hRecordSet(response.data);
+                        let recordset = new hRecordSet(response.data);
                         groups == 'all_users_non_admins' ? window.hWin.HEURIST4.allUsersNonAdmin = [] 
                                                          : window.hWin.HEURIST4.allUsersCache = [];
                         if(recordset.count_total()>0){
@@ -1076,13 +1076,13 @@ window.hWin.HEURIST4.ui = {
         }
 
         var idx;
-        var addedontop = [];
+        let addedontop = [];
         if(topOptions){  //list of options that must be on top of list
             for (idx in topOptions)
             {
                 if(idx){
-                    var key = topOptions[idx].key;
-                    var title = topOptions[idx].title;
+                    let key = topOptions[idx].key;
+                    let title = topOptions[idx].title;
                     if(!window.hWin.HEURIST4.util.isnull(title))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, key, title, (topOptions[idx].disabled==true));
@@ -1149,22 +1149,22 @@ window.hWin.HEURIST4.ui = {
             
             selObj.find('option').each(
                 function(idx, item){
-                    var opt = $(item);
-                    var depth = parseInt(opt.attr('depth'));
+                    let opt = $(item);
+                    let depth = parseInt(opt.attr('depth'));
                     if(depth>0) { 
                         //for non mozilla add manual indent
-                        var a = new Array( 2 + ((depth<7)?depth:7)*2 );
+                        let a = new Array( 2 + ((depth<7)?depth:7)*2 );
                         opt.html(a.join('&nbsp;&nbsp;') + opt.text());       
                     }
             });
             
         }else{
             
-            var parent_ele = selObj.parents('.selectmenu-parent');
+            let parent_ele = selObj.parents('.selectmenu-parent');
             if(!parent_ele || parent_ele.length==0){
                 
                 if ( selObj[0].ownerDocument.location !== window.location ){ //inside iframe
-                    var win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
+                    let win = selObj[0].ownerDocument.defaultView || selObj[0].ownerDocument.parentWindow;
                     parent_ele = $(win.frameElement).parents('.ui-dialog');
                     if(parent_ele.length==0){
                         //parent_ele = $(win.frameElement).parents('.ui-menu6-container');
@@ -1206,7 +1206,7 @@ window.hWin.HEURIST4.ui = {
                 selObj.hSelect("destroy"); 
             }
             
-            var onSelectMenu, onOpenMenu, onCloseMenu;
+            let onSelectMenu, onOpenMenu, onCloseMenu;
             if(eventHandlers && $.isPlainObject(eventHandlers)){
                 if($.isFunction(eventHandlers.onOpenMenu)){
                     onOpenMenu = eventHandlers.onOpenMenu;
@@ -1221,7 +1221,7 @@ window.hWin.HEURIST4.ui = {
                 onOpenMenu = eventHandlers;
             }
              
-            var menu = selObj.hSelect({ 
+            let menu = selObj.hSelect({ 
                 style: 'dropdown',
                 position: {collision: "flip"},  //(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
                 appendTo: parent_ele,
@@ -1237,15 +1237,15 @@ window.hWin.HEURIST4.ui = {
                 },
                 open: function(event, ui){
                     //increase width of dropdown to avoid word wrap
-                    var wmenu = $(event.target).hSelect( "menuWidget" );  //was menu
+                    let wmenu = $(event.target).hSelect( "menuWidget" );  //was menu
                     wmenu.width( wmenu.width()+20 ); 
-                    var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
-                    var pos = wmenu_div.position().top;
+                    let wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
+                    let pos = wmenu_div.position().top;
 
-                    var bodyheight = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+                    let bodyheight = (window.hWin?window.hWin.innerHeight:window.innerHeight);
                     
                     if(bodyheight>0 && pos+wmenu.height()>bodyheight){
-                        var newtop = bodyheight-wmenu.height()-5;
+                        let newtop = bodyheight-wmenu.height()-5;
                         if(newtop<0){
                             newtop = 2;
                             wmenu_div.height(bodyheight-2);
@@ -1254,7 +1254,7 @@ window.hWin.HEURIST4.ui = {
                     }
                     
                     if ( selObj[0].ownerDocument.location !== window.location ){
-                        var wbtn = $(event.target).hSelect('widget');
+                        let wbtn = $(event.target).hSelect('widget');
                         if($(event.target).hasClass('adjust-to-button')){
                             wmenu_div.css('left', wbtn.position().left);      
                         }
@@ -1273,13 +1273,13 @@ window.hWin.HEURIST4.ui = {
                 }
             });
 
-            var dwidth = selObj.css('width');    
+            let dwidth = selObj.css('width');    
             if(!dwidth || dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
             
-            var dminwidth = selObj.css('min-width');    
+            let dminwidth = selObj.css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
-            var menuwidget = menu.hSelect( "menuWidget" );
+            let menuwidget = menu.hSelect( "menuWidget" );
             menuwidget.css( {'background':'#F4F2F4'}); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'280px','font-size':'12px'});
             menuwidget.parent('div.ui-selectmenu-menu').css('zIndex',69999);
@@ -1312,7 +1312,7 @@ window.hWin.HEURIST4.ui = {
                 exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2); //beginner default
             }
             
-            var is_exit = false;
+            let is_exit = false;
             if(!$context){
                 is_exit = true;
                 $context = $(window.hWin.document);
@@ -1351,9 +1351,9 @@ window.hWin.HEURIST4.ui = {
             
             if($context.hasClass('manageRecords')){
                 //special bhaviour for record edit form
-                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_records');
+                let prefs = window.hWin.HAPI4.get_prefs_def('prefs_records');
                 if(prefs){
-                    var ishelp_on = (prefs['help_on']==true || prefs['help_on']=='true');
+                    let ishelp_on = (prefs['help_on']==true || prefs['help_on']=='true');
                     window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $context);
                 }
             }
@@ -1371,16 +1371,16 @@ window.hWin.HEURIST4.ui = {
     initDialogHintButtons: function($dialog, button_container_id, helpcontent_url, hideExpLevelButton){
         
         //IJ 2018-12-04 hide it! 
-        var hasContextHelp =  !window.hWin.HEURIST4.util.isempty(helpcontent_url);
+        let hasContextHelp =  !window.hWin.HEURIST4.util.isempty(helpcontent_url);
         hideExpLevelButton = true; //always hide
         
-        var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
+        let titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
             titlebar = $dialog.find(button_container_id);
         } 
         
         if(!hideExpLevelButton){
-            var $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
+            let $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
                 +'<li data-user-admin-status="1"><a><span class="ui-icon"/>Intermediate</a></li>'
                 +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
@@ -1392,7 +1392,7 @@ window.hWin.HEURIST4.ui = {
                     .appendTo(titlebar)
                     .on('click', function(event){
                            //show popup menu 
-                           var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+                           let exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
                            
                            $help_menu.find('span').removeClass('ui-icon-check');
                            $help_menu.find('li[data-user-admin-status="'+exp_level+'"] > a > span').addClass('ui-icon-check');
@@ -1405,7 +1405,7 @@ window.hWin.HEURIST4.ui = {
                                //mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
                                click: function(event){ 
                                    //change level
-                                   var exp_level = $(event.target).parents('li').attr('data-user-admin-status');
+                                   let exp_level = $(event.target).parents('li').attr('data-user-admin-status');
 
                                    window.hWin.HAPI4.save_pref('userCompetencyLevel', exp_level);
 
@@ -1430,7 +1430,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(hasContextHelp){                    
-            var $info_button = $('<div>')
+            let $info_button = $('<div>')
                     .addClass('dialog-title-button')
                     .css({'right':'26px'})
                     .appendTo(titlebar);
@@ -1445,7 +1445,7 @@ window.hWin.HEURIST4.ui = {
     //                  
     switchHintState: function(usrPrefKey, $dialog, needReverse){
             
-            var ishelp_on, prefs;
+            let ishelp_on, prefs;
             if(usrPrefKey==null){
                 ishelp_on = window.hWin.HAPI4.get_prefs('help_on');   
             }else{
@@ -1511,19 +1511,19 @@ window.hWin.HEURIST4.ui = {
     initHelper: function( options ){
         
         
-        var $help_button = $(options.button);
+        let $help_button = $(options.button);
 
         if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info  carat-2-e
             $help_button.button({icons:{primary:"ui-icon-circle-help"}, label:window.hWin.HR('Show context help'), text:false});
         }
         
-        var is_popup = false;
+        let is_popup = false;
         if(!options.container){
             is_popup = true;
             options.container = $(document.body);
         }
-        var _innerTitle;
-        var oEffect = {effect:'slide',direction:'right',duration:500};
+        let _innerTitle;
+        let oEffect = {effect:'slide',direction:'right',duration:500};
         
         function __closeHelpDiv($helper_div){
             oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1, width:'auto'}); };
@@ -1533,7 +1533,7 @@ window.hWin.HEURIST4.ui = {
         
         $help_button.on('click', function(event){
             
-                        var $helper_div = options.container.find('.ui-helper-popup');
+                        let $helper_div = options.container.find('.ui-helper-popup');
                         
                         if($helper_div.length==0){
                             $helper_div = $('<div>').addClass('ui-helper-popup')
@@ -1595,10 +1595,10 @@ window.hWin.HEURIST4.ui = {
                                         
                                     }else{
 
-                                        var div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
-                                        var div_width  = Math.min(700, $(document.body).width() *0.8);
+                                        let div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
+                                        let div_width  = Math.min(700, $(document.body).width() *0.8);
                                        
-                                        var head = $helper_div.find('#content>h2');
+                                        let head = $helper_div.find('#content>h2');
                                         if(head.length==1){
                                             if(!options.title) options.title = head.text();
                                             head.empty();
@@ -1642,7 +1642,7 @@ window.hWin.HEURIST4.ui = {
                                                     width:300,'font-size':'0.9em',padding:'4px'});
                                         */
                                         
-                                        var head = $helper_div.find('#content>h2');
+                                        let head = $helper_div.find('#content>h2');
                                         if(head.length==1){
                                             if(!options.title) options.title = head.text();
                                             head.empty();
@@ -1725,7 +1725,7 @@ window.hWin.HEURIST4.ui = {
         
         if(popup_options && popup_options.edit_structure){
             //check that select record type is opened - resize and position this popup
-            var ele = $('body').find('div[id^="heurist-dialog-DefRecTypes"]');
+            let ele = $('body').find('div[id^="heurist-dialog-DefRecTypes"]');
             if(ele.length>0){
                 popup_options.forced_Width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.6;
                 popup_options.position = {my: "left top", at: "left top", of: ele };
@@ -1772,7 +1772,7 @@ window.hWin.HEURIST4.ui = {
                     return;
                 }
                 
-                var query_request = null;
+                let query_request = null;
                 
                 if(query_or_recordset){
                     if(!$.isPlainObject(query_or_recordset)){ //just string
@@ -1782,7 +1782,7 @@ window.hWin.HEURIST4.ui = {
                     query_request = {q:'ids:'+rec_ID, w:'e'}; //including temporary
                 }
                 
-                var widget = this; //reference to manageRecords
+                let widget = this; //reference to manageRecords
                 
                 //find record or add after complete of initialiation of popup
                 if(query_request){
@@ -1796,7 +1796,7 @@ window.hWin.HEURIST4.ui = {
                         //that.loadanimation(false);
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            var recset = new hRecordSet(response.data);
+                            let recset = new hRecordSet(response.data);
                             if(recset.length()>0){
 
                                 widget.updateRecordList(null, {recordset:recset});
@@ -1840,7 +1840,7 @@ window.hWin.HEURIST4.ui = {
     //
     openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){
     
-            var url = window.hWin.HAPI4.baseURL,
+            let url = window.hWin.HAPI4.baseURL,
                 dwidth, dheight, dtitle;    
             
             if(!popup_options) popup_options = {};
@@ -1907,7 +1907,7 @@ window.hWin.HEURIST4.ui = {
         
         //headers[targetID][0], headers[targetID][2] + headers[targetID][3]
        
-        var rec_Title = info['rec_Title'];
+        let rec_Title = info['rec_Title'];
         if(info['dtl_StartDate'] || info['dtl_EndDate']){
             rec_Title += ': ';
             if(info['dtl_StartDate']){
@@ -1919,15 +1919,15 @@ window.hWin.HEURIST4.ui = {
         }
         rec_Title = window.hWin.HEURIST4.util.stripTags(rec_Title); //was htmlEscape
         
-        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-        var sRelBtn = '';
+        let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+        let sRelBtn = '';
        
-        var isHiddenRecord = false;
+        let isHiddenRecord = false;
         
         if(selector_function !== false ){
                 
             
-                var not_owner = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member( info['rec_OwnerUGrpID'] ));
+                let not_owner = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member( info['rec_OwnerUGrpID'] ));
                 if(not_owner){
                      selector_function = false;
                      //this record hidden for current user
@@ -1935,7 +1935,7 @@ window.hWin.HEURIST4.ui = {
                 }
         }
         
-        var isEdit = (selector_function!==false);
+        let isEdit = (selector_function!==false);
         
         if(info['trm_ID']>0){
             //margin-left:0.5em;
@@ -1947,14 +1947,14 @@ window.hWin.HEURIST4.ui = {
             +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
-        var reltype = ''
+        let reltype = ''
         if(info['trm_ID']>0){
-            var term_ID = info['trm_ID'];
+            let term_ID = info['trm_ID'];
             if (info['is_inward']){
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
-            var lbl = $Db.trm(term_ID, 'trm_Label');
-            var len = lbl.length;
+            let lbl = $Db.trm(term_ID, 'trm_Label');
+            let len = lbl.length;
             lbl = window.hWin.HEURIST4.util.htmlEscape(lbl);
             //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
             reltype = '<div style="display:table-cell;min-width:'+(Math.min(20,len)+1)+'ex;'
@@ -1962,7 +1962,7 @@ window.hWin.HEURIST4.ui = {
                 +  lbl + '</div>'
         }
         
-        var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
+        let rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
                         + '<img alt src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
@@ -1971,7 +1971,7 @@ window.hWin.HEURIST4.ui = {
                         + '"/>'
                         + '</div>';
         
-        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
+        let ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="display: table-row;margin-bottom:0.2em;'
                         +(isEdit?'background:#F4F2F4 !important;':'')+'">' //padding-bottom:0.2em;
@@ -2016,7 +2016,7 @@ window.hWin.HEURIST4.ui = {
         if(isEdit){
             
             if($.isFunction(selector_function)){
-                var triangle_icon = ele.find('.ui-icon-triangle-1-e');
+                let triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
                    triangle_icon.click(selector_function);
@@ -2033,7 +2033,7 @@ window.hWin.HEURIST4.ui = {
                     'You are about to delete link between records<br><br>Are you sure?',
                      function(){
                         
-                          var recID = ele.attr('data-relID');
+                          let recID = ele.attr('data-relID');
                          
                           if(recID>0){  
                               
@@ -2093,7 +2093,7 @@ window.hWin.HEURIST4.ui = {
 
         if(info['relation_recID']>0){
             
-            var bele = ele.find('.btn-rel');
+            let bele = ele.find('.btn-rel');
             
             $('<img alt src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
                             + top.HAPI4.iconBaseURL + '1\');"/>'
@@ -2106,17 +2106,17 @@ window.hWin.HEURIST4.ui = {
             .click(function(event){
                 event.preventDefault();
                 
-                var recID = ele.attr('data-relID');
+                let recID = ele.attr('data-relID');
                 window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
                     {relmarker_field: info['relmarker_field'], relmarker_is_inward: info['is_inward'],
                     selectOnSave:true, edit_obstacle: true, onselect:
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                            var recordset = res.selection;
-                            var record = recordset.getFirstRecord();
-                            var related_ID = recordset.fld(record, 'rec_ID'); //relationship record                             
-                            var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
-                            var DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
+                            let recordset = res.selection;
+                            let record = recordset.getFirstRecord();
+                            let related_ID = recordset.fld(record, 'rec_ID'); //relationship record                             
+                            let DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
+                            let DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
                                 [info['is_inward']?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
 
                             // e - search for temp also
@@ -2124,32 +2124,32 @@ window.hWin.HEURIST4.ui = {
                                         f:[DT_RELATION_TYPE,DT_RELATED_REC_ID]},  
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    var recordset = new hRecordSet(response.data);
+                                    let recordset = new hRecordSet(response.data);
                                     if(recordset.length()>0){
-                                        var record = recordset.getFirstRecord();
-                                        var term_ID = recordset.fld(record,DT_RELATION_TYPE);
+                                        let record = recordset.getFirstRecord();
+                                        let term_ID = recordset.fld(record,DT_RELATION_TYPE);
                                         //update relation type !!!!
                                         if(info['is_inward']){
                                             term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);
                                         }
                                         ele.find('.detailType').text($Db.trm(info['trm_ID'], 'trm_Label')); 
-                                        var related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
+                                        let related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
 
                                         // e - search for temp also
                                         window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+related_ID, w: "e", f:"header"},  
                                         function(response){
                                             if(response.status == window.hWin.ResponseStatus.OK){
-                                                var recordset = new hRecordSet(response.data);
+                                                let recordset = new hRecordSet(response.data);
                                                 if(recordset.length()>0){
-                                                    var record = recordset.getFirstRecord();
-                                                    var rec_Title = recordset.fld(record,'rec_Title');
+                                                    let record = recordset.getFirstRecord();
+                                                    let rec_Title = recordset.fld(record,'rec_Title');
                                                     if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
                                         
                                                     ele.find('.related_record_title')
                                                             .text( window.hWin.HEURIST4.util.stripTags(rec_Title) )
                                                             .attr('data-recid', related_ID);
                                                             
-                                                    var rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
+                                                    let rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
                                                     //@todo - update record type icon
                                                 }
                                             }
@@ -2182,7 +2182,7 @@ window.hWin.HEURIST4.ui = {
                 );
         });        
         */
-        var btn_edit = ele.find('div.btn-edit');
+        let btn_edit = ele.find('div.btn-edit');
         if(btn_edit.length>0){
             
             
@@ -2212,7 +2212,7 @@ window.hWin.HEURIST4.ui = {
                     .attr('data-recID', info['rec_ID'])
                     .click(function(event){
            
-            var recID = $(event.target).hasClass('ui-button')
+            let recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')
                     :$(event.target).parent('.ui-button').attr('data-recID');
           
@@ -2220,9 +2220,9 @@ window.hWin.HEURIST4.ui = {
             {selectOnSave:true, edit_obstacle: true, onselect: 
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                            var recordset = res.selection;
-                            var record = recordset.getFirstRecord();
-                            var rec_Title = window.hWin.HEURIST4.util.stripTags(recordset.fld(record,'rec_Title')); //was htmlEscape
+                            let recordset = res.selection;
+                            let record = recordset.getFirstRecord();
+                            let rec_Title = window.hWin.HEURIST4.util.stripTags(recordset.fld(record,'rec_Title')); //was htmlEscape
                             
                             ele.find('span[data-recID='+recID+']').text(rec_Title);
                         }
@@ -2250,9 +2250,9 @@ window.hWin.HEURIST4.ui = {
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"header"},  
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recordset = new hRecordSet(response.data);
+                    let recordset = new hRecordSet(response.data);
                     if(recordset.length()>0){
-                        var record = recordset.getFirstRecord();
+                        let record = recordset.getFirstRecord();
                         if($.isFunction(callback)){
                             callback(recordset.fld(record,'rec_Title'));    
                         }
@@ -2270,14 +2270,14 @@ window.hWin.HEURIST4.ui = {
     //    
     createLanguageSelect: function($select, topOptions, defValue, showName, eventHandlers){
         
-            var languages = window.hWin.HAPI4.sysinfo.common_languages;
-            var content = [];
+            let languages = window.hWin.HAPI4.sysinfo.common_languages;
+            let content = [];
             
-            var opts = topOptions?topOptions:[];
-            var keys = Object.keys(languages);
+            let opts = topOptions?topOptions:[];
+            let keys = Object.keys(languages);
             if(keys.length>0){
-                for (var i in keys){ //ISO639-2 (alpha3)
-                    var code = keys[i]; 
+                for (let i in keys){ //ISO639-2 (alpha3)
+                    let code = keys[i]; 
                     opts.push({key:code, title:(showName===false?code:languages[code]['name'])});
                     
                     content.push('<option value="'+code+'">'+(showName===false?code:languages[code]['name'])+'</option>');
@@ -2332,15 +2332,15 @@ window.hWin.HEURIST4.ui = {
     //
     createTemplateSelector: function($select, topOptions, defValue, options){
         
-        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-        var request = {mode:'list', db:window.hWin.HAPI4.database};
+        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+        let request = {mode:'list', db:window.hWin.HAPI4.database};
         
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
             function(context){
                 
-                var opts = topOptions?topOptions:[];
+                let opts = topOptions?topOptions:[];
                 if(context && context.length>0){
-                    for (var i=0; i<context.length; i++){
+                    for (let i=0; i<context.length; i++){
                         opts.push({key:context[i].filename, title:context[i].name});
                     } // for
                 }
@@ -2361,8 +2361,8 @@ window.hWin.HEURIST4.ui = {
     // configMode.filter_group
     createEntitySelector: function(selObj, configMode, topOptions, callback){
         
-        var request = {a:'search','details':'name'};
-        var fieldTitle;
+        let request = {a:'search','details':'name'};
+        let fieldTitle;
         
         if(configMode.entity=='SysUsers'){
             fieldTitle = 'ugr_Name';
@@ -2429,7 +2429,7 @@ window.hWin.HEURIST4.ui = {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
+                            let groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
 
                             if(configMode.entity == 'SysImportFiles'){
                                 for(const idx in groups){
@@ -2477,7 +2477,7 @@ window.hWin.HEURIST4.ui = {
         
         entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
                             
-        var widgetName = 'manage'+entityName;
+        let widgetName = 'manage'+entityName;
         
         if(!options) options = {};
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
@@ -2485,7 +2485,7 @@ window.hWin.HEURIST4.ui = {
         
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
-            var manage_dlg;
+            let manage_dlg;
             
             if(!options.container){ //container not defined - add new one to body
             
@@ -2510,8 +2510,8 @@ window.hWin.HEURIST4.ui = {
         
         }else{
             
-            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
-            var scripts = [ path+widgetName+'.js'];
+            let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/entity/';
+            let scripts = [ path+widgetName+'.js'];
             
             //entities without search option
             if(!(entityName=='UsrBookmarks' || 
@@ -2545,8 +2545,8 @@ window.hWin.HEURIST4.ui = {
     //
     showImportStructureDialog: function(options){
     
-            var  doc_body = $(window.hWin.document).find('body');
-            var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
+            let  doc_body = $(window.hWin.document).find('body');
+            let manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
                 .appendTo( doc_body )
                 .importStructure( options );
                 
@@ -2560,7 +2560,7 @@ window.hWin.HEURIST4.ui = {
         
         //OK! script as been loaded
         if( typeof hPublishDialog==='undefined' || !$.isFunction(hPublishDialog)){        
-            var that = this;
+            let that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
                 function(){ 
@@ -2588,9 +2588,9 @@ window.hWin.HEURIST4.ui = {
                     element.val(JSON.stringify(value));   
                 }
                 
-                var parent_div = element.parent(); //$dlg.find(sname+'_div')
+                let parent_div = element.parent(); //$dlg.find(sname+'_div')
         
-                var $btn_edit_clear = $('<span>')
+                let $btn_edit_clear = $('<span>')
                 .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
                 .attr('tabindex', '-1')
                 .attr('title', 'Reset default symbology')
@@ -2600,13 +2600,13 @@ window.hWin.HEURIST4.ui = {
                     .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
                         function(){element.val('');}); }});
                 
-                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                let $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
                     .addClass('smallbutton btn_add_term')
                     .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                     .appendTo( parent_div );
                 
                 $btn_edit_switcher.on( { click: function(){
-                        var current_val = window.hWin.HEURIST4.util.isJSON( element.val() );
+                        let current_val = window.hWin.HEURIST4.util.isJSON( element.val() );
                         if(!current_val) current_val = {};
                         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 0, function(new_value){
                             element.val(JSON.stringify(new_value));
@@ -2676,7 +2676,7 @@ window.hWin.HEURIST4.ui = {
     //
     showEditCMSwin: function( options ){
         
-        var surl = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&pageid=';
+        let surl = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&pageid=';
        
         if( window.hWin.HEURIST4.util.isNumber( options ) ){
             surl = surl + options;
@@ -2701,9 +2701,9 @@ window.hWin.HEURIST4.ui = {
         if(!options) options = {};
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
-        var  doc_body = $(window.hWin.document).find('body');
+        let  doc_body = $(window.hWin.document).find('body');
         
-        var widgetName = actionName;
+        let widgetName = actionName;
         
         if(actionName.indexOf('db')===0){
             widgetName = 'dbAction';
@@ -2712,7 +2712,7 @@ window.hWin.HEURIST4.ui = {
         
         if($.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
         
-            var manage_dlg;
+            let manage_dlg;
             
             if(!options.container){ //container not defined - add new one to body
                 
@@ -2743,10 +2743,10 @@ window.hWin.HEURIST4.ui = {
             
             //options.path
             
-            var path = window.hWin.HAPI4.baseURL + 'hclient/'
+            let path = window.hWin.HAPI4.baseURL + 'hclient/'
                 +(options.path?options.path:'widgets/record/');
             
-            var scripts = [ path+actionName+'.js'];
+            let scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
                 scripts = [path+'recordAccess.js', path+'recordAdd.js'];
             }else if( actionName=='thematicMapping'){
@@ -2792,8 +2792,8 @@ window.hWin.HEURIST4.ui = {
     
     getMousePos: function(e){
 
-        var posx = 0;
-        var posy = 0;
+        let posx = 0;
+        let posy = 0;
         if (!e) var e = window.event;
         if (e.pageX || e.pageY)     {
             posx = e.pageX;
@@ -2812,8 +2812,8 @@ window.hWin.HEURIST4.ui = {
     
     validateName: function(name, lbl, maxlen){
       
-            var swarn = "";
-            var regex = /[\[\].\$]+/;
+            let swarn = "";
+            let regex = /[\[\].\$]+/;
             var name = name.toLowerCase();
             if( name=="id" || name=="modified" || name=="rectitle"){
                    swarn = lbl+", you defined, is a reserved word. Please try an alternative";
@@ -2837,15 +2837,15 @@ window.hWin.HEURIST4.ui = {
     preventChars: function(event){
 
         event = event || window.event;
-        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+        let charCode = typeof event.which == "number" ? event.which : event.keyCode;
         if (charCode && charCode > 31)
         {
-            var keyChar = event.key?event.key:String.fromCharCode(charCode);
+            let keyChar = event.key?event.key:String.fromCharCode(charCode);
             // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
             // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
-            var sWarn = '';
+            let sWarn = '';
             
-            var value = $(event.target).val();
+            let value = $(event.target).val();
             if((value.indexOf('<')>=0 && keyChar=='>') || 
                (value.indexOf('>')>0 && keyChar=='<')){
                    sWarn = 'Both < and > are forbid';
@@ -2856,7 +2856,7 @@ window.hWin.HEURIST4.ui = {
             
             if(sWarn!=''){
                 event.returnValue = false;
-                var trg = event.target;
+                let trg = event.target;
                 
                 window.hWin.HEURIST4.util.stopEvent(event);
                 
@@ -2875,11 +2875,11 @@ window.hWin.HEURIST4.ui = {
     //
     //
     preventNonNumeric: function(evt) {
-        var theEvent = evt || window.event;
-        var key = theEvent.keyCode || theEvent.which;
+        let theEvent = evt || window.event;
+        let key = theEvent.keyCode || theEvent.which;
         if(key==37 || key==39) return;
         key = String.fromCharCode( key );
-        var regex = /[0-9]|\./;
+        let regex = /[0-9]|\./;
         if( !regex.test(key) ) {
             window.hWin.HEURIST4.util.stopEvent(theEvent);
         }
@@ -2889,8 +2889,8 @@ window.hWin.HEURIST4.ui = {
     //
     //
     preventNonAlphaNumeric: function(evt) {
-        var theEvent = evt || window.event;
-        var keyCode = theEvent.keyCode || theEvent.which;
+        let theEvent = evt || window.event;
+        let keyCode = theEvent.keyCode || theEvent.which;
         //if(key==37 || key==39) return;  // % '
         if(keyCode > 31){
             let key = String.fromCharCode( keyCode );
@@ -2914,7 +2914,7 @@ window.hWin.HEURIST4.ui = {
     //
     rgbToHex: function (r, g, b) {
         function __componentToHex(c) {
-          var hex = c.toString(16);
+          let hex = c.toString(16);
           return hex.length == 1 ? "0" + hex : hex;
         }
       return "#" + __componentToHex(r) + __componentToHex(g) + __componentToHex(b);
@@ -2943,7 +2943,7 @@ window.hWin.HEURIST4.ui = {
     
     hexToRgbStr: function (hex, opacity) {
         
-        var rgb = window.hWin.HEURIST4.ui.hexToRgb(hex);
+        let rgb = window.hWin.HEURIST4.ui.hexToRgb(hex);
         if(rgb!=null){
 
             if(opacity>1){
@@ -2981,14 +2981,14 @@ window.hWin.HEURIST4.ui = {
 
         function __getColour(startColour, endColour, min, max, value) {
             
-            var startRGB = window.hWin.HEURIST4.ui.hexToRgb(startColour);
-            var endRGB = window.hWin.HEURIST4.ui.hexToRgb(endColour);
+            let startRGB = window.hWin.HEURIST4.ui.hexToRgb(startColour);
+            let endRGB = window.hWin.HEURIST4.ui.hexToRgb(endColour);
 
-            var percentFade = __map(value, min, max, 0, 1);
+            let percentFade = __map(value, min, max, 0, 1);
 
-            var diffRed = endRGB.r - startRGB.r;
-            var diffGreen = endRGB.g - startRGB.g;
-            var diffBlue = endRGB.b - startRGB.b;
+            let diffRed = endRGB.r - startRGB.r;
+            let diffGreen = endRGB.g - startRGB.g;
+            let diffBlue = endRGB.b - startRGB.b;
 
             diffRed = (diffRed * percentFade) + startRGB.r;
             diffGreen = (diffGreen * percentFade) + startRGB.g;
@@ -2996,14 +2996,14 @@ window.hWin.HEURIST4.ui = {
 
             //var result = "rgb(" + Math.round(diffRed) + ", " + Math.round(diffGreen) + ", " + Math.round(diffBlue) + ")";
             
-            var result = window.hWin.HEURIST4.ui.rgbToHex(Math.round(diffRed), Math.round(diffGreen), Math.round(diffBlue));
+            let result = window.hWin.HEURIST4.ui.rgbToHex(Math.round(diffRed), Math.round(diffGreen), Math.round(diffBlue));
             
             return result;
         }
 
-        var res = [startColour];
-        for(var i=0; i<steps; i++){
-            var value = (i + 1) % steps;
+        let res = [startColour];
+        for(let i=0; i<steps; i++){
+            let value = (i + 1) % steps;
             res.push( __getColour(startColour, endColour, 0, steps, value) );   
         }
         res[res.length-1] = endColour;
@@ -3025,7 +3025,7 @@ window.hWin.HEURIST4.ui = {
         if(window.hWin.HEURIST4.ui.wait_timeout) clearTimeout(window.hWin.HEURIST4.ui.wait_timeout);
         window.hWin.HEURIST4.ui.wait_timeout = 0;
 
-        var events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'focus']; //'mousemove', 
+        let events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'focus']; //'mousemove', 
         events.forEach(function(name) {
             window.hWin.document.removeEventListener(name, window.hWin.HEURIST4.ui.onInactiveReset); 
         });    
@@ -3066,7 +3066,7 @@ window.hWin.HEURIST4.ui = {
                       }
                   }, window.hWin.HEURIST4.ui.wait_ms); 
 
-              var events = ['mousedown', 'keypress', 'scroll', 'touchstart', 'focus']; //'mousemove', 
+              let events = ['mousedown', 'keypress', 'scroll', 'touchstart', 'focus']; //'mousemove', 
               events.forEach(function(name) {
                         window.hWin.document.addEventListener(name, window.hWin.HEURIST4.ui.onInactiveReset, true); 
               });        
@@ -3079,8 +3079,8 @@ window.hWin.HEURIST4.ui = {
   // enlarge an image, usually, for when it is clicked
   //
   showPlayer: function(obj, container, id, url){
-    var that = this;
-    var currentImg = obj;
+    let that = this;
+    let currentImg = obj;
 
     if ($(container).hasClass("thumb_image")){  //thumb to player
         currentImg.style.display = 'none';
@@ -3095,25 +3095,25 @@ window.hWin.HEURIST4.ui = {
             fail: function(jqXHR, textStatus, errorThrown ) {
             },
             success: function( response, textStatus, jqXHR ){
-                var obj = jqXHR.responseText;
+                let obj = jqXHR.responseText;
                 if (obj){
-                    var  elem = container.querySelector('#player'+id);
+                    let  elem = container.querySelector('#player'+id);
                     elem.innerHTML = obj;
                     elem.style.display = 'block';
 
                     //calculate width for data and image                             
-                    var player = elem;
+                    let player = elem;
                     if($(player.parentNode.parentNode).hasClass('production')){
 
-                        var img = $(player).find('img');
+                        let img = $(player).find('img');
                         if(img.length>0){
 
                             img = img[0];
 
                             function __onImgLoaded(){
 
-                                var w_img = $(img).width();
-                                var w_win = window.innerWidth;
+                                let w_img = $(img).width();
+                                let w_win = window.innerWidth;
 
                                 if(w_win-w_img<600){
                                     //draw image above data
@@ -3158,7 +3158,7 @@ window.hWin.HEURIST4.ui = {
 
   hidePlayer: function(id, container){
     //clear and hide player div
-    var  elem = container.querySelector('#player'+id);
+    let  elem = container.querySelector('#player'+id);
     elem.innerHTML = '';
     elem.style.display = 'none';
 
@@ -3205,7 +3205,7 @@ window.hWin.HEURIST4.ui = {
 
         if($tree_element.length > 0 && $tree_element.fancytree('instance') !== undefined){
 
-            var root = $tree_element.fancytree('getRootNode');
+            let root = $tree_element.fancytree('getRootNode');
 
             root.sortChildren((a, b) => {
 
@@ -3253,15 +3253,15 @@ window.hWin.HEURIST4.ui = {
         options = $.extend(options, {selector:'a[data-fancybox="home-roll-images"]'
                             ,maxHeight:'430px',duration:5000,fade_duration:300});
                             
-        var imgs = [];
+        let imgs = [];
         
         if(!options.content){
         
             //image rollover with effects
             container.find('.gallery-slideshow').hide();
 
-            var selector = '.gallery-slideshow > '+options.selector;
-            var thumbs = container.find(selector); //all thumbnails
+            let selector = '.gallery-slideshow > '+options.selector;
+            let thumbs = container.find(selector); //all thumbnails
             
             options.content = [];
             $(thumbs).each(function(idx, alink){
@@ -3272,7 +3272,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         
-        var title_ele = $('<h4>').css({'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
+        let title_ele = $('<h4>').css({'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
             color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute', 'z-index':9999})
             .appendTo( container );
         if(!options.showTitle){
@@ -3280,7 +3280,7 @@ window.hWin.HEURIST4.ui = {
         }
 
         //init slide show
-        var idx = 0;
+        let idx = 0;
         function __onImageLoad(){
 
             setInterval(function(){                               
@@ -3307,10 +3307,10 @@ window.hWin.HEURIST4.ui = {
         
 
         //load full images
-        var z_index = options.content.length;
+        let z_index = options.content.length;
         $.each(options.content, function(idx, item){
             //add images
-            var img = $('<img>').css({'z-index':z_index,'max-height':options.maxHeight,'position':'absolute'}).appendTo( container );
+            let img = $('<img>').css({'z-index':z_index,'max-height':options.maxHeight,'position':'absolute'}).appendTo( container );
             z_index--;  
             if(options.maxWidth){
                 img.css('max-width',options.maxWidth);
@@ -3400,7 +3400,7 @@ hSelect - decendant of jquery.selectmenu
 $.widget( "heurist.hSelect", $.ui.selectmenu, {
     
    _renderButtonItem: function( item ) {
-      var buttonItem = $( "<span>", {
+      let buttonItem = $( "<span>", {
         "class": "ui-selectmenu-text"
       })
       //this._setText( buttonItem, item.label );
@@ -3420,7 +3420,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
    },
    */
   _renderItem: function( ul, item ) {
-    var li = $( "<li>" ),
+    let li = $( "<li>" ),
       wrapper = $( "<div>", { html: item.label } ); 
 
     if ( item.disabled ) {
@@ -3440,7 +3440,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         li.hide();
     }    
     
-    var rt_checkbox = item.element.attr( "rt-checkbox" );
+    let rt_checkbox = item.element.attr( "rt-checkbox" );
     if(rt_checkbox>=0){
         $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
                 + ' data-id="'+item.element.attr( 'data-id' )
@@ -3448,7 +3448,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
           .appendTo( wrapper );    
     }
     
-    var icon_url = item.element.attr( "icon-url" );
+    let icon_url = item.element.attr( "icon-url" );
     if(icon_url){
     
         $('<span style="float:left;padding-right:2px"><img alt src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -3457,19 +3457,19 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     }
 
-    var rt_count = item.element.attr( "rt-count" );
+    let rt_count = item.element.attr( "rt-count" );
     if(rt_count>0){
         $('<span style="float:right;padding-right:2px">'+rt_count+'</span>')
           .appendTo( wrapper );    
     }
 
-    var entity_id = item.element.attr( 'entity-id' );
+    let entity_id = item.element.attr( 'entity-id' );
     if(entity_id>0){
         $('<span style="font-size:0.7em;font-style:italic;padding-left:1em">id'+entity_id+'</span>')
           .appendTo( wrapper );    
     }
     
-    var depth = parseInt($(item.element).attr('depth'));
+    let depth = parseInt($(item.element).attr('depth'));
     if(!(depth>0)) depth = 0;
     wrapper.attr('data-depth', depth);
     if(rt_checkbox>=0) depth = depth + 1;
@@ -3481,10 +3481,10 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
   
   hideOnMouseLeave: function(parent){
       
-        var myTimeoutId = -1;
+        let myTimeoutId = -1;
         
         //show hide function
-        var _hide = function(ele) {
+        let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 ele.hSelect('close');
                 //$( ele ).hide();
@@ -3519,8 +3519,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
 $.fn.sideFollow = function(dtime) {
 
-    var floating = $(this);
-    var originalTop =  parseInt(floating.attr('data-top'));
+    let floating = $(this);
+    let originalTop =  parseInt(floating.attr('data-top'));
     if(!(originalTop>=0)) originalTop = 180;
 
     dtime = dtime ?dtime :1000;
@@ -3532,7 +3532,7 @@ $.fn.sideFollow = function(dtime) {
     });
 
     function goFollow() {
-        var scrollTop = $(this).scrollTop();
+        let scrollTop = $(this).scrollTop();
         floating.animate({
             top: originalTop + scrollTop
         }, {

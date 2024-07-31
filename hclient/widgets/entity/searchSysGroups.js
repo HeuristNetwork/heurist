@@ -23,10 +23,10 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
 
         if(this.options.subtitle){
-            var ele = this.element.find('.sub-title');
+            let ele = this.element.find('.sub-title');
             if(ele.length>0){
                 ele.html('<h3>'+this.options.subtitle+'</h3>');
             }
@@ -66,7 +66,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         this.input_search_role = this.element.find('#input_search_type');
         
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         if(smode=='manager'){
             if(this.options.ugl_UserID>0){
                 smode = 'manager_for_user';
@@ -114,14 +114,14 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
             if(this.input_search.val()!=''){
                 request['ugr_Name'] = this.input_search.val();
             }
         
             // actually we may take list of groups from currentUser['ugr_Groups']
-            var gr_role = this.input_search_role.val();
+            let gr_role = this.input_search_role.val();
             if(gr_role!='' && gr_role!='any'){
                 
                 if(gr_role=='admin'){
@@ -160,7 +160,7 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
             request['details']    = 'id'; //'id';
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
-            var that = this;                                                
+            let that = this;                                                
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){

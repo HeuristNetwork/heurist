@@ -22,12 +22,12 @@
 //
 function imgFilter( current_cfg, main_callback, $container=null ){
 
-    var _className = 'imgFilter';
-    var _default_values = {};
+    const _className = 'imgFilter';
+    let _default_values = {};
     
     function _init(){
 
-        var buttons= [
+        let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 id:'btnCancel',
                 css:{'float':'right','margin-left':'10px','margin-right':'20px'}, 
@@ -46,7 +46,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
                 //disabled:'disabled',
                 css:{'float':'right'}, 
                 click: function() { 
-                        var config = _getValues();
+                        let config = _getValues();
                         main_callback.call(this, config);
                         $dlg.dialog( "close" );    
         }}];
@@ -97,7 +97,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
             }});
 
             if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')])){
-                var val = parseFloat(current_cfg[item.attr('name')]);
+                let val = parseFloat(current_cfg[item.attr('name')]);
                 item.val( val ).change();    
             }
             
@@ -118,14 +118,14 @@ function imgFilter( current_cfg, main_callback, $container=null ){
     //
     function _getValues(){
         
-        var filter_cfg = {};
-        var filter = '';
+        let filter_cfg = {};
+        let filter = '';
         $.each($dlg.find('input'), function(idx, item){
             item = $(item);
             
-            var val = item.val();
+            let val = item.val();
             if(val!=_default_values[item.attr('name')]){
-                var suffix = item.attr('data-suffix');
+                let suffix = item.attr('data-suffix');
                 if(!suffix) suffix = '';
                 
                 filter_cfg[item.attr('name')] = val+suffix;
@@ -140,7 +140,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

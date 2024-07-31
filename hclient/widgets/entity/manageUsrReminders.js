@@ -62,19 +62,19 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             //load reminder for given record id
             if(this.options.rem_RecID>0){
-                    var request = {};
+                    let request = {};
                     request['rem_RecID']  = this.options.rem_RecID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    var that = this;                                                
+                    let that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
+                                let recset = new hRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -96,7 +96,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             this.searchForm.searchUsrReminders(this.options);
             
             
-            var iheight = 6;
+            let iheight = 6;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
@@ -118,7 +118,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
 //----------------------------------------------------------------------------------    
     _getValidatedValues: function(){
         
-        var fields = this._super();
+        let fields = this._super();
         
         if(fields!=null){
             //validate that at least on recipient is defined
@@ -138,12 +138,12 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
 
         //assign record id    
         if(this.options.edit_mode=='editonly' && this.options.rem_RecID>0){
-            var ele2 = this._editing.getFieldByName('rem_RecID');
+            let ele2 = this._editing.getFieldByName('rem_RecID');
             ele2.editing_input('setValue', this.options.rem_RecID );
         }
         
-        var ele = this._editing.getFieldByName('rem_IsPeriodic');
-        var res = ele.editing_input('getValues'); 
+        let ele = this._editing.getFieldByName('rem_IsPeriodic');
+        let res = ele.editing_input('getValues'); 
         if(res[0]=='now'){
             
             this._sendReminder();
@@ -158,18 +158,18 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     //
     _sendReminder: function(){
 
-        var fields = this._getValidatedValues(); 
+        let fields = this._getValidatedValues(); 
         if(fields==null) return; //validation failed
         
-        var request = {                                                                                        
+        let request = {                                                                                        
             'a'          : 'action',
             'entity'     : this.options.entity.entityName,
             'request_id' : window.hWin.HEURIST4.util.random(),
             'fields'     : fields                     
             };
             
-            var that = this;                                                
-            var dlged = this._getEditDialog();
+            let that = this;                                                
+            let dlged = this._getEditDialog();
             if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
 
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -200,7 +200,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this reminder?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -211,26 +211,26 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
 
         this._super();
     
-        var that = this;
-        var ele = this._editing.getFieldByName('rem_IsPeriodic');
+        let that = this;
+        let ele = this._editing.getFieldByName('rem_IsPeriodic');
         
         if(this.options.edit_mode=='editonly'){
         
             //reminder
-            var val = this._getField('rem_StartDate');
+            let val = this._getField('rem_StartDate');
             
-            var isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';
+            let isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';
             
             function __onChangeType(){ 
-                var ele1 = that._editing.getFieldByName('rem_Freq');
-                var ele2 = that._editing.getFieldByName('rem_StartDate');
+                let ele1 = that._editing.getFieldByName('rem_Freq');
+                let ele2 = that._editing.getFieldByName('rem_StartDate');
                 
-                var btn_save;
+                let btn_save;
                 if(that._toolbar){
                     btn_save = that._toolbar.find('#btnRecSave');
                 }
                 
-                var res = ele.editing_input('getValues'); 
+                let res = ele.editing_input('getValues'); 
                 if(res[0]=='now'){
                         ele2.editing_input('setValue', '');
                         ele1.hide();
@@ -255,15 +255,15 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             ele.hide();
         }
         
-        var ele1 = this._editing.getFieldByName('rem_ToWorkgroupID');
-        var ele2 = this._editing.getFieldByName('rem_ToUserID');
-        var ele3 = this._editing.getFieldByName('rem_ToEmail');
+        let ele1 = this._editing.getFieldByName('rem_ToWorkgroupID');
+        let ele2 = this._editing.getFieldByName('rem_ToUserID');
+        let ele3 = this._editing.getFieldByName('rem_ToEmail');
         
         
         function __onChange2( ){
-           var res = $(this.element).editing_input('getValues')
+           let res = $(this.element).editing_input('getValues')
            if(res[0]!=''){
-               var dtID = $(this.element).editing_input('option','dtID');
+               let dtID = $(this.element).editing_input('option','dtID');
                if(dtID!='rem_ToWorkgroupID') ele1.editing_input('setValue', '');
                if(dtID!='rem_ToUserID') ele2.editing_input('setValue', '');
                if(dtID!='rem_ToEmail') ele3.editing_input('setValue', '');
@@ -316,13 +316,13 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         //rem_ToUserName        
         
         
-        var recID   = fld('rem_ID');
-        var recipient = fld('rem_ToWorkgroupName');
+        let recID   = fld('rem_ID');
+        let recipient = fld('rem_ToWorkgroupName');
         if(!recipient) recipient = fld('rem_ToUserName');
         if(!recipient) recipient = fld('rem_ToEmail');
         recipient = '<div class="truncate" style="display:inline-block;width:17ex">'+recipient+'</div>';
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2('rem_RecTitle','35ex') + ' ' + recipient 
                 + fld2('rem_Freq','7ex')+fld2('rem_StartDate','14ex')
                 + fld2('rem_Message','50ex'); //position:absolute;left:500px;bottom:6px

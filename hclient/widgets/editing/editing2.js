@@ -20,10 +20,10 @@
 */
 
 function hEditing(_options) {
-     var _className = "Editing",
+     const _className = "Editing",
          _version   = "0.4";
 
-     var $container = null,
+     let $container = null,
          recdata = null,     //hRecordSet with data to be edited
          editing_inputs = [],
          recstructure,
@@ -114,7 +114,7 @@ function hEditing(_options) {
 
         //create form, fieldset and input elements according to record type/entity structure
 
-        var record = recdata.getFirstRecord();
+        let record = recdata.getFirstRecord();
         /*if(record){
             var recID = recdata.fld(record, 'rec_ID');
             var rectypeID = recdata.fld(record, 'rec_RecTypeID');
@@ -123,10 +123,10 @@ function hEditing(_options) {
         }*/
         if(record!=null){
             //fill form with values
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                var val = recdata.values(record, ele.editing_input('option', 'dtID'));
+                let val = recdata.values(record, ele.editing_input('option', 'dtID'));
                 if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
                 ele.editing_input('setValue', val );
             }
@@ -135,7 +135,7 @@ function hEditing(_options) {
     }
     
     function _setDisabled(mode){
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 ele.editing_input('setDisabled', mode);
@@ -161,7 +161,7 @@ function hEditing(_options) {
         
         if(_recstructure) recstructure = _recstructure;
                 
-        var recID = '';
+        let recID = '';
         if(window.hWin.HEURIST4.util.isRecordSet(recdata)){
             //for edit mode
                 //get record ID
@@ -169,10 +169,10 @@ function hEditing(_options) {
                 record = recdata.getFirstRecord();
                 
                 function __findRecID(fields){
-                    var idx;
+                    let idx;
                     for (idx=0; idx<fields.length; idx++){
                        if(fields[idx].groupType){
-                           var _recID = __findRecID(fields[idx].children)
+                           let _recID = __findRecID(fields[idx].children)
                            if(_recID>0) return _recID;
                        }else
                        if(fields[idx]['keyField']){
@@ -220,8 +220,8 @@ function hEditing(_options) {
         
         function __processGroupInside(fields){
         
-            var prev_children = null;
-            var idx = 0;
+            let prev_children = null;
+            let idx = 0;
             while(idx<fields.length){
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                     
@@ -250,11 +250,11 @@ function hEditing(_options) {
         __processGroupInside(recstructure);
         
         function __createGroup(fields, groupContainer, fieldContainer){
-            var idx, tab_index;
+            let idx, tab_index;
                 
-            var currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
-            var groupTabHeader, groupEle;
-            var hasVisibleFields = false;
+            let currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
+            let groupTabHeader, groupEle;
+            let hasVisibleFields = false;
             
             //var groupEle,      //current accordion or tab control
             //    fieldContainer, groupTabHeader;
@@ -285,7 +285,7 @@ function hEditing(_options) {
                             headerHelpText = '';
                         }
 
-                        var hele = $('<h4>')
+                        let hele = $('<h4>')
                             .text(headerText).addClass('separator').appendTo(fieldContainer);
                         
                         hele.css({'margin-bottom':'4px'});
@@ -381,7 +381,7 @@ function hEditing(_options) {
                     var headerHelpText = fields[idx]['groupHelpText'];
                     var is_header_visible = fields[idx]['groupTitleVisible'];
                     
-                    var newFieldContainer = $('<fieldset>').uniqueId();
+                    let newFieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
                         newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
@@ -503,7 +503,7 @@ function hEditing(_options) {
                         fields[idx].is_insert_mode = _is_insert;
                         
                         
-                        var inpt = $('<div>').css('display','block !important')
+                        let inpt = $('<div>').css('display','block !important')
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
                         //mark each field with dty_ID         
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
@@ -555,7 +555,7 @@ function hEditing(_options) {
         _setFocus();
         adjustHelpWidth();
         
-        var $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
+        let $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
                 .addClass('hidden_field_warning')
@@ -567,16 +567,16 @@ function hEditing(_options) {
         let is_Records = recdata && recdata.entityName=='Records';
         if(is_Records && $container.find('ul[role="tablist"]').length>0){
             
-            var tab_groups = $container.find('ul[role="tablist"]');
+            let tab_groups = $container.find('ul[role="tablist"]');
             $.each(tab_groups, function(idx, group){
-                var $tabs = $(group).find('a');
-                var max_char = 30;
+                let $tabs = $(group).find('a');
+                let max_char = 30;
 
                 $tabs.attr('style', 'max-width:'+max_char+'ex;width:auto;padding-right:30px !important;cursor:pointer;').addClass('truncate');
             });
 			
 			if($container.find('ul[role="tablist"]').length>1){
-                var groups = $container.children('div');
+                let groups = $container.children('div');
 
                 $.each(groups, function(idx, group){
                     if(idx == 0){
@@ -600,7 +600,7 @@ function hEditing(_options) {
     //
     function _setFocus(){
         if(editing_inputs.length>0){
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 if(ele.editing_input('instance') && ele.editing_input('focus')){
@@ -615,9 +615,9 @@ function hEditing(_options) {
     //
     function adjustHelpWidth(){
         
-        var maxW = 300;
+        let maxW = 300;
         if(editing_inputs.length>0){
-            var idx, ele; 
+            let idx, ele; 
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 maxW = Math.max(maxW, ele.editing_input('getInputWidth'));
@@ -647,11 +647,11 @@ function hEditing(_options) {
     // returns array with at least one empty value
     //
     function _getValue(dtID){
-        var idx, ele, values = [];
+        let idx, ele, values = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
-                var vals = ele.editing_input('getValues');
+                let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
                     return ele.editing_input('getValues');
                 }else{
@@ -667,10 +667,10 @@ function hEditing(_options) {
     //    
     function _getValues(needArrays){
         
-        var idx, ele, details = {};
+        let idx, ele, details = {};
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            var vals = ele.editing_input('getValues');
+            let vals = ele.editing_input('getValues');
             //var vals = ele.list("getValues"); 
             //var vals = ele.data("editing_input").getValues();
             if(vals && vals.length>0){
@@ -693,13 +693,13 @@ function hEditing(_options) {
     // 
     function _getFieldsVisibility(){
         
-        var idx, ele, details = {};
+        let idx, ele, details = {};
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+            let dty_ID = ele.editing_input('option', 'dtID'); //field type id
             
             if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
-                var vals = ele.editing_input('getVisibilities');
+                let vals = ele.editing_input('getVisibilities');
                 if(vals && vals.length>0){
                     details[ dty_ID ] = vals;
                 }
@@ -716,14 +716,14 @@ function hEditing(_options) {
         if(recdata!=null){ //for edit mode
             record = recdata.getFirstRecord();
         
-            var idx, ele;
+            let idx, ele;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 
-                var dty_ID = ele.editing_input('option', 'dtID'); //field type id
+                let dty_ID = ele.editing_input('option', 'dtID'); //field type id
                 
                 if(window.hWin.HEURIST4.util.isNumber(dty_ID) && dty_ID>0){
-                    var visibilities = recdata.getFieldVisibilites(record, dty_ID); //from record['v']
+                    let visibilities = recdata.getFieldVisibilites(record, dty_ID); //from record['v']
                     ele.editing_input('setVisibilities', visibilities);
                 }
             }
@@ -738,10 +738,10 @@ function hEditing(_options) {
         if(recdata!=null){ //for edit mode
             record = recdata.getFirstRecord();
 
-            var idx, ele, details = {};
+            let idx, ele, details = {};
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                var vals = ele.editing_input('getValues');
+                let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
                     recdata.setFld(record, ele.editing_input('option', 'dtID'), vals);
                 }
@@ -757,7 +757,7 @@ function hEditing(_options) {
         }else if(that.wasModified==1){
             return true;
         }else{
-            var idx;
+            let idx;
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 
@@ -777,7 +777,7 @@ function hEditing(_options) {
     
     function _validate(){
         
-        var idx, res = true;
+        let idx, res = true;
         for (idx in editing_inputs) {
             res = $(editing_inputs[idx]).editing_input('validate') && res;
         }
@@ -789,7 +789,7 @@ function hEditing(_options) {
     // returns input element for given field
     // 
     function _getFieldByName(fieldName){
-        var idx, ele;
+        let idx, ele;
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')  == fieldName){
@@ -803,7 +803,7 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByValue(fieldName, value){
-        var idx, ele, ress = [], val;
+        let idx, ele, ress = [], val;
         if(value==='[not empty]'){
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
@@ -828,7 +828,7 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByClass(className){
-        var idx, ele, ress = [];
+        let idx, ele, ress = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.hasClass(className)){
@@ -844,7 +844,7 @@ function hEditing(_options) {
     // fieldName is rec_XXX or dty_ID
     // 
     function _getInputs(fieldName){
-        var ele = _getFieldByName(fieldName);
+        let ele = _getFieldByName(fieldName);
         if(ele && ele.length>0){
             return ele.editing_input('getInputs');
         }
@@ -946,7 +946,7 @@ function hEditing(_options) {
         // editing element will be recreated!
         //
         setFieldValueByName:function(fieldName, value, is_changed){
-            var ele = _getFieldByName(fieldName);
+            let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
                 ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
                 if(is_changed!==false){
@@ -964,10 +964,10 @@ function hEditing(_options) {
         //
         setFieldValueByName2:function(fieldName, value, is_changed){
         
-            var ele = _getFieldByName(fieldName);
+            let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
                 
-                    var elements = ele.editing_input('getInputs') //_getInputs(fieldName);               
+                    let elements = ele.editing_input('getInputs') //_getInputs(fieldName);               
                     $(elements[0]).val( value );
                             
                     if(is_changed!==false){
@@ -1010,7 +1010,7 @@ function hEditing(_options) {
             
             if(val===0){
                 that.wasModified = 0;    
-                var idx;
+                let idx;
                 for (idx in editing_inputs) {
                     ele = $(editing_inputs[idx]);
                     

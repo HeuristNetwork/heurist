@@ -23,7 +23,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         this.btn_search_start.css('float','right');   
         
@@ -47,9 +47,9 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
-            var val = this.input_search_group.val();
+            let val = this.input_search_group.val();
             if(val!='any'){
                 if(val=='Workgroup') request['rem_ToWorkgroupID'] = '-NULL';
                 else if(val=='User') request['rem_ToUserID'] = '-NULL';
@@ -78,7 +78,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
                 request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

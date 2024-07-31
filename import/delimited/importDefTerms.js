@@ -21,10 +21,10 @@
 */
 
 function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
-    var _className = "ImportDefTerms",
-    _version   = "0.4",
+    const _className = "ImportDefTerms",
+    _version   = "0.4";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata,
     
     _isTranslation = false,

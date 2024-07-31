@@ -20,7 +20,7 @@
 
 
 function hMappingDraw(_mapdiv_id, _initial_wkt) {
-    var _className = "MappingDraw",
+    const _className = "MappingDraw",
     _version   = "0.4";
 
     var mapdiv_id = null;

@@ -84,7 +84,7 @@ $.widget( "heurist.recordListExt", {
             this._is_publication = true;
         }
         
-        var that = this;
+        let that = this;
 
         this.div_content = this.element;
         if(this.div_content.parent('.tab_ctrl').length==0 && !this.element.attr('data-widgetid')){
@@ -280,23 +280,23 @@ $.widget( "heurist.recordListExt", {
                         //that.option("selection",  null);
                         that.options.selection = null;
                     }else{
-                        var sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
+                        let sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
                         that.options.selection = sel;
                         //that.option("selection", sel);
                     }
 
-                    var smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
+                    let smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
                         && that.options['url'].indexOf('renderRecordData') != -1 && smarty_template != 'default'){
 
-                        var recIDs_list = that.options.selection;
+                        let recIDs_list = that.options.selection;
 
                         if(recIDs_list.length>0){
-                            var recID = recIDs_list[recIDs_list.length-1];
+                            let recID = recIDs_list[recIDs_list.length-1];
 
                             // check if the custom report exists
-                            var req_url = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-                            var request = {mode: 'check', template: smarty_template, db: window.hWin.HAPI4.database}; 
+                            let req_url = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+                            let request = {mode: 'check', template: smarty_template, db: window.hWin.HAPI4.database}; 
 
                             window.hWin.HEURIST4.util.sendRequest(req_url, request, null, function(response){
 
@@ -315,7 +315,7 @@ $.widget( "heurist.recordListExt", {
                                     }
                                 }else{
 
-                                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                         "You have specified a custom report format '"+ smarty_template.slice(0, -4) +"' to use in this view,<br>"
                                         + "however this format no longer exists.<br><br>Please go to Design > My preferences to choose a new format.", 
                                         null,
@@ -376,7 +376,7 @@ $.widget( "heurist.recordListExt", {
     //
     loadURL: function( newurl ){
         
-        var that = this;
+        let that = this;
 
         this._current_url = newurl;
         this.loadanimation(true);
@@ -411,7 +411,7 @@ $.widget( "heurist.recordListExt", {
             
             var fdoc = this.dosframe[0].contentWindow.document;
             
-            var style = document.createElement('style');
+            let style = document.createElement('style');
             style.type = 'text/css'; 
             style.innerHTML = this.options.custom_css_for_frame;
             fdoc.getElementsByTagName('head')[0].appendChild(style);
@@ -421,13 +421,13 @@ $.widget( "heurist.recordListExt", {
         if(this.options.is_frame_based){                
             
             var fdoc = this.dosframe[0].contentWindow.document;
-            var smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
+            let smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
             
             if(this._is_publication && $.isFunction(initLinksAndImages))
             {
                 //init "a href" for CMS pages
                 if(!window.hWin.HEURIST4){
-                    var script = document.createElement('script');
+                    let script = document.createElement('script');
                     script.type = 'text/javascript';
                     script.src = window.hWin.HAPI4.baseURL + 'hclient/core/detectHeurist.js';
                     fdoc.getElementsByTagName('head')[0].appendChild(script);
@@ -441,14 +441,14 @@ $.widget( "heurist.recordListExt", {
             }else if(smarty_template){
                 
                 $(fdoc.body).find('a').each(function(i,link){
-                    var href = $(link).attr('href');
+                    let href = $(link).attr('href');
                     if ((href && href.indexOf('q=')===0) || $(link).attr('data-query')) 
                     {
-                        var query = $(link).attr('data-query')
+                        let query = $(link).attr('data-query')
                                 ? $(link).attr('data-query')
                                 : href.substring(2);
                         
-                        var request = {detail:'ids', neadall:1, w:'a', q:query};
+                        let request = {detail:'ids', neadall:1, w:'a', q:query};
                         if(this.options.search_realm) request['search_realm'] = this.options.search_realm;
                         
                         if(!href || href=='#' || href.indexOf('q=')===0){
@@ -507,7 +507,7 @@ $.widget( "heurist.recordListExt", {
     // Execute search and update dataset independently
     //
     doSearch: function(query){
-        var request = {q:query, w: 'a', detail: 'ids', 
+        let request = {q:query, w: 'a', detail: 'ids', 
                         source: 'init', search_realm: this.options.search_realm };
         window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
     },
@@ -554,7 +554,7 @@ $.widget( "heurist.recordListExt", {
     _refresh: function(){
 
         if(this.options.title!=''){
-            var id = this.element.attr('id');
+            let id = this.element.attr('id');
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
@@ -571,7 +571,7 @@ $.widget( "heurist.recordListExt", {
         }
 
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
-        var content_updated = false;
+        let content_updated = false;
 
         if(this.options.is_single_selection || this.options.is_multi_selection){ //reload content on every selection event
 
@@ -674,7 +674,7 @@ $.widget( "heurist.recordListExt", {
 
         }else{ //content has been loaded already ===============================
 
-            var query_string_all = null,
+            let query_string_all = null,
             query_string_sel = null,
             query_string_main = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( this._query_request, true );
 
@@ -699,7 +699,7 @@ $.widget( "heurist.recordListExt", {
             
 
             if (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
-                var recIDs_list = this.options.selection;
+                let recIDs_list = this.options.selection;
                 if(!window.hWin.HEURIST4.util.isempty(recIDs_list.length)){
                     //NOT USED
                     query_string_sel = 'db=' + window.hWin.HAPI4.database
@@ -713,7 +713,7 @@ $.widget( "heurist.recordListExt", {
 
                 this.dosframe.show();
 
-                var showReps = this.dosframe[0].contentWindow.showReps;
+                let showReps = this.dosframe[0].contentWindow.showReps;
                 if(showReps){
                     //@todo - reimplement - send on server JSON with list of record IDs
                     //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
@@ -727,7 +727,7 @@ $.widget( "heurist.recordListExt", {
                     }
                     
                 }else{
-                    var showMap = this.dosframe[0].contentWindow.showMap;
+                    let showMap = this.dosframe[0].contentWindow.showMap;
                     if(showMap){ //not used anymore
                         showMap.processMap();
                     }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
@@ -747,7 +747,7 @@ $.widget( "heurist.recordListExt", {
             }else{
                 this.element.width()
                 
-                var opts = {
+                let opts = {
                     window:  window.hWin, //opener is top most heurist window
                     title: window.hWin.HR('Record Info'),
                     width: this.options.popup_width,
@@ -788,7 +788,7 @@ $.widget( "heurist.recordListExt", {
         this.element.off("myOnShowEvent");
         $(this.document).off(this._events);
 
-        var that = this;
+        let that = this;
         
         if(this.reportPopupDlg){
             if(this.reportPopupDlg.dialog('instance')){
@@ -832,10 +832,10 @@ $.widget( "heurist.recordListExt", {
         
         if(!this.options.is_frame_based) return;
 
-        var showReps = this.dosframe[0].contentWindow.showReps;
+        let showReps = this.dosframe[0].contentWindow.showReps;
         if(!showReps) return;
 
-        var recordset, recIDs_list = [];
+        let recordset, recIDs_list = [];
 
         if (this.options.recordset!=null) {
             /* art2304
@@ -845,7 +845,7 @@ $.widget( "heurist.recordListExt", {
             }
             */
 
-            var tot_cnt = this.options.recordset.length();
+            let tot_cnt = this.options.recordset.length();
 
             recIDs_list = this.options.recordset.getIds(limit);
             recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, "recIDs":recIDs_list};
@@ -865,21 +865,21 @@ $.widget( "heurist.recordListExt", {
 /* @todo */
         if(!this.options.is_frame_based) return;
         
-        var crosstabs = this.dosframe[0].contentWindow.crosstabsAnalysis;
+        let crosstabs = this.dosframe[0].contentWindow.crosstabsAnalysis;
         if(!crosstabs) return;
 
-        var recordset, recIDs_list = [];
+        let recordset, recIDs_list = [];
 
         if (this.options.recordset!=null) {
 
-            var tot_cnt = this.options.recordset.length();
+            let tot_cnt = this.options.recordset.length();
             window.hWin.HEURIST4.totalQueryResultRecordCount = tot_cnt;
 
             recIDs_list = this.options.recordset.getIds();//limit
 
-            var rectype_first = 0;
+            let rectype_first = 0;
             if(recIDs_list.length>0){
-                var rec = this.options.recordset.getFirstRecord();
+                let rec = this.options.recordset.getFirstRecord();
                 rectype_first = this.options.recordset.fld(rec, 'rec_RecTypeID');
             }
 

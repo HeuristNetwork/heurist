@@ -130,7 +130,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         }else{
         
-            var iheight = 7.4;
+            let iheight = 7.4;
             
             if(this.options.edit_mode=='inline'){            
                 iheight = iheight + 8;
@@ -141,13 +141,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         //init viewer 
-        var that = this;
+        let that = this;
         
         if(this.options.select_mode=='manager'){
             //init image viewer for result list
             this.recordList.resultList('option','onPageRender',function(){
                 //$(that.recordList.find('.ent_content_full'))
-                var ele = $(that.recordList.find('.ent_content_full')); //.find('a')
+                let ele = $(that.recordList.find('.ent_content_full')); //.find('a')
                 
 //@todo repalce with fancybox                ele.yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&file=(?:\w+)$/i});
             });
@@ -193,9 +193,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         this._currentEditRecordset = recordset; 
 
-        var i_id = this.getEntityFieldIdx('ulf_ID');
+        let i_id = this.getEntityFieldIdx('ulf_ID');
         
-        var isLocal = true;
+        let isLocal = true;
         if(recordset!=null){
             //edit
             this.options.entity.fields[i_id].dtFields['rst_Display'] = 'readonly'; //path to download
@@ -206,16 +206,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             isLocal = (this._additionMode=='local');
         }
         
-        var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
-        var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
-        var i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
-        var i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
+        let i_url = this.getEntityFieldIdx('ulf_HeuristURL');
+        let i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
+        let i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
+        let i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
 
-        var i_mime_loc = this.getEntityFieldIdx('fxm_MimeType'); // for local
-        var i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
+        let i_mime_loc = this.getEntityFieldIdx('fxm_MimeType'); // for local
+        let i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
 
-        var i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
-        var i_descr = this.getEntityFieldIdx('ulf_Description');   // for external
+        let i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
+        let i_descr = this.getEntityFieldIdx('ulf_Description');   // for external
         
         this.options.entity.fields[i_url_ext].dtFields['rst_DisplayHelpText'] =
             'URL of an external file. This must DIRECTLY point to a renderable file or stream eg. image, video.<br>'
@@ -295,11 +295,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _afterInitEditForm: function(){
 
-        var that = this;
+        let that = this;
 
         this._super();
 
-        var isLocal = true;
+        let isLocal = true;
 
         if(this._currentEditRecordset){ //edit       
 
@@ -317,15 +317,15 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype
                 
             //list of records that refer to this file    
-            var relations = this._currentEditRecordset.getRelations();    
+            let relations = this._currentEditRecordset.getRelations();    
             if(relations && relations.direct && relations.direct.length>0){
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
                 
-                var direct = relations.direct;
-                var headers = relations.headers;
-                var ele1=null;
-                for(var k in direct){
-                    var targetID = direct[k].targetID;
+                let direct = relations.direct;
+                let headers = relations.headers;
+                let ele1=null;
+                for(let k in direct){
+                    let targetID = direct[k].targetID;
                     
                     if(!headers[targetID]){
                         //there is not such record in database
@@ -443,7 +443,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             response = response.result;
                             that._last_upload_details = [];
                             if(response.status==window.hWin.ResponseStatus.OK){
-                                var data = response.data;
+                                let data = response.data;
                                 $.each(data.files, function (index, file) {
 
                                     if(file.error){
@@ -463,7 +463,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                 window.hWin.HEURIST4.msg.showMsgErr(response.message);
                             }
                                 
-                            var inpt = this;
+                            let inpt = this;
                             that._edit_dialog.find('#btn_upload_file_repository').off('click');
                             that._edit_dialog.find('#btn_upload_file_repository').on({click: function(){
                                 $(inpt).click();
@@ -568,7 +568,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                             that._currentEditID = null;
                                             that._editing.setFieldValueByName2('ulf_ExternalFileReference', newsel+'/', false);
                                             
-                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
                                             //that.onEditFormChange();
@@ -619,7 +619,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                             that._currentEditID = null;
                                             that._editing.setFieldValueByName2('ulf_ExternalFileReference', res.filename, false);
                                             
-                                            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                             ele2.editing_input('setValue', 'png' );
                                             ele2.show();
                                             //that.onEditFormChange();
@@ -648,17 +648,17 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         if(!isLocal){ //remote - detect mimetype when URL is changed
 
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
-            var inpt = ele.editing_input('getInputs');
+            let inpt = ele.editing_input('getInputs');
             //ele.editing_input('option', 'change', function(){
                 this._on($(inpt[0]), {
                     blur:function(){
                         
-                        var ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
+                        let ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
                     
                         if (ele.editing_input('instance')==undefined) return;
                         
                         //auto detect extension of external service
-                        var curr_url = ele.editing_input('getValues'); 
+                        let curr_url = ele.editing_input('getValues'); 
                         // remarked since we need to check it on server side
                         //var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
                         //if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
@@ -694,13 +694,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
             if(this._init_MimeExt){
                 //this._editing.setFieldValueByName2('ulf_MimeExt', this._init_MimeExt, false);    
-                var ele3 = this._editing.getFieldByName('ulf_MimeExt');
+                let ele3 = this._editing.getFieldByName('ulf_MimeExt');
                 ele3.editing_input('setValue', this._init_MimeExt, false );
                 ele3.show();
             }
             
         }else{
-            var urls = this._editing.getValue('ulf_ExternalFileReference');
+            let urls = this._editing.getValue('ulf_ExternalFileReference');
             if(urls){
                 this._previousURL = urls[0];    
             }else{
@@ -715,14 +715,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _getValidatedValues: function(){
         
-        var res = this._super();
+        let res = this._super();
         
-        var val = this._editing.getValue('ulf_ExternalFileReference');
-        var isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
+        let val = this._editing.getValue('ulf_ExternalFileReference');
+        let isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
         if(!isLocal && res){
             
-            var mimeext = this._editing.getValue('ulf_MimeExt');
-            var err_msg = this._validateExt( mimeext[0] );        
+            let mimeext = this._editing.getValue('ulf_MimeExt');
+            let err_msg = this._validateExt( mimeext[0] );        
             if(err_msg){
                 window.hWin.HEURIST4.msg.showMsgErr( err_msg );
                 res = null;
@@ -734,7 +734,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _validateExt: function( ext ){
         
-        var msg_error = '';
+        let msg_error = '';
         if(ext==null) ext = '';
 
         if(!ext){
@@ -752,7 +752,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }else{
 
             //allowed extensions
-            var allowed_ext = window.hWin.HAPI4.sysinfo.media_ext+',soundcloud,vimeo,youtube,json'.split(',');
+            let allowed_ext = window.hWin.HAPI4.sysinfo.media_ext+',soundcloud,vimeo,youtube,json'.split(',');
 
             if(allowed_ext.indexOf(ext)<0){
 
@@ -792,7 +792,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         if(this._additionMode=='tiled' || this._editing.getValue('ulf_OrigFileName')[0].indexOf('_tiled')==0 ){
             //special case for tiled image stack            
-            var ele2 = this._editing.getFieldByName('ulf_MimeExt');
+            let ele2 = this._editing.getFieldByName('ulf_MimeExt');
             if(this._previousURL){
                 ele2.show();
             }else{
@@ -804,9 +804,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
   
         window.hWin.HEURIST4.msg.showMsgFlash('Getting resource type', false);
   
-        var that = this;
+        let that = this;
 
-        var url = that._previousURL;
+        let url = that._previousURL;
 
         that._requestForMimeType_Timeout = 0;
         that._requestForMimeType = true;                          
@@ -814,14 +814,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         window.hWin.HAPI4.SystemMgr.get_url_content_type(url, function(response){
             
             that._requestForMimeType = false;
-            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
             
-            var ext = '';
+            let ext = '';
             if(response.status == window.hWin.ResponseStatus.OK){
                 ext = response.data.extension;
                 
                 if(response.data.needrefresh){
-                    var cfg = ele2.editing_input('getConfigMode');
+                    let cfg = ele2.editing_input('getConfigMode');
                     window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
                 }
                 
@@ -829,7 +829,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             if(ext==null) ext = '';
 
             
-            var msg_error = that._validateExt( ext );
+            let msg_error = that._validateExt( ext );
             
             ele2.editing_input('setValue', ext );
             ele2.show();
@@ -874,15 +874,15 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        var recID   = fld('ulf_ID');
+        let recID   = fld('ulf_ID');
         
-        var rectype = fld('ulf_ExternalFileReference')?'external':'local';
+        let rectype = fld('ulf_ExternalFileReference')?'external':'local';
         //var isEnabled = (fld('ugr_Enabled')=='y');
         
-        var recTitle;
-        var recTitleHint;
+        let recTitle;
+        let recTitleHint;
         if(rectype=='external'){
-            var val = fld('ulf_OrigFileName');
+            let val = fld('ulf_OrigFileName');
             if(val.indexOf('_tiled')==0){
                 rectype = 'tiled';
                 if(val.indexOf('_tiled@')==0){ 
@@ -907,9 +907,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp; [ '+fld('ulf_FilePath')+' ] &nbsp;&nbsp; [ '+fld('ulf_FileSizeKB')+'KB ]</div>';
         }
         
-        var recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
+        let recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
         
-        var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
+        let html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
         window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                     fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
             
@@ -986,7 +986,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     _uploadFileAndRegister: function( is_tiled ){
         
         //find file element
-        var that = this;
+        let that = this;
         
     
         function __initEditForm_cont(){
@@ -1004,27 +1004,27 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         }
                     }], null);
                 that._editing_uploadfile.getContainer().hide(); //this form is hidden
-                var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
+                let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
                 ele.find('.fileupload').click(); //open file select dialog
         }        
         
         if(!this._editing_uploadfile){ //form is not yet defined
 
-                var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
+                let container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
                 this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
                     //registerAtOnce is true, so we get new file id
                     
-                    var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
-                    var res = ele.editing_input('getValues'); 
-                    var ulf_ID = res[0];
+                    let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
+                    let res = ele.editing_input('getValues'); 
+                    let ulf_ID = res[0];
 
                     if(ulf_ID>0){
                         if(that.options.edit_addrecordfirst){
                             
-                            var fields = that._editing_uploadfile.getValues(false);     
+                            let fields = that._editing_uploadfile.getValues(false);     
                             fields['ulf_ID'] = (''+ulf_ID);
                             that._afterSaveEventHandler(ulf_ID, fields ); //trigger onselect
                             
@@ -1049,7 +1049,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     
     _saveEditAndClose: function(fields, afterAction, ignoreCheck){
 
-        var that = this;
+        let that = this;
         
         var ignoreCheck = true; //ARTEM 2021-07-27 - always ignore check for rendereability
 
@@ -1063,11 +1063,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 var btns = {};
 
                 btns[window.hWin.HR('Re-Specify URL')] = function(){
-                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                     $dlg.dialog('close');
                 };
                 btns[window.hWin.HR('Accept as is')] = function(){
-                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                     $dlg.dialog('close');
                     that._saveEditAndClose(fields, afterAction, true);
                 };
@@ -1136,7 +1136,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     return;        
                 }else if(this.searchForm && this.searchForm.searchRecUploadedFiles('instance')){ // trigger search refresh
                     
-                    var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
+                    let domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
                     //it was insert - select recent and search
                     this.searchForm.searchRecUploadedFiles('searchRecent', domain);
                 }else if(this.options.select_mode == 'manager' && this.options.edit_mode == 'editonly'){
@@ -1156,10 +1156,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             this._super(); 
         }else{
             
-            var that = this;
+            let that = this;
             
             //get full field info to update local definitions
-            var request = {
+            let request = {
                 'a'          : 'search',
                 'entity'     : that.options.entity.entityName,
                 'details'    : 'related_records', 
@@ -1168,7 +1168,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recs = response.data;
+                    let recs = response.data;
                     if(recs.length==0){
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(
@@ -1177,7 +1177,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             {default_palette_class:that.options.default_palette_class});        
                         
                     }else{
-                        var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
+                        let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         ((recs.length==1)?'There is a reference':('There are '+recs.length+' references'))
                         +' from record(s) to this File.<br>You must delete the records'
@@ -1209,7 +1209,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             return;
         }
 
-        var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
+        let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
         window.open(url, '_blank');
     },
 
@@ -1218,7 +1218,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _handleExternalRepository: function(){
 
-        var that = this;
+        let that = this;
         let selected_repo = this._edit_dialog.find('#external_repos').val();
         let uploaded_file = this._edit_dialog.find('#upload_file_repository').attr('filename');
 
@@ -1354,7 +1354,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             err_msg = 'Year/date created should be dash separated';
                         }else if(created.length > 4){
 
-                            var date = new Date(created);
+                            let date = new Date(created);
                             let time = date.getTime();
                             if(Number.isNaN(time)){
                                 err_msg = 'Invalid Year/date created';
@@ -1540,7 +1540,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _afterExternalUpload: function(external_url){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(external_url)){
             return;
@@ -1610,7 +1610,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _deleteUnused: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
@@ -1618,7 +1618,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
-        var request = {
+        let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'delete_unused': ids,
@@ -1639,7 +1639,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                     let del_func = function() {
 
-                        var req = {
+                        let req = {
                             'a': 'batch',
                             'entity': that.options.entity.entityName,
                             'delete_unused': keys.join(','),
@@ -1710,15 +1710,15 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _combineDups: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
         }
 
-        var ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
+        let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
-        var request = {
+        let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'merge_duplicates': 'all' //ids
@@ -1753,13 +1753,13 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     _refreshIndex: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
         }
 
-        var request = {
+        let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'request_id': window.hWin.HEURIST4.util.random(),
@@ -1792,20 +1792,20 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     _createMediaRecords: function(){
 
-        var that = this;
+        let that = this;
 
         if(!this._checkUserPermissions(1)){
             return;
         }
 
-        var ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
+        let ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
 
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
             window.hWin.HEURIST4.msg.showMsgFlash('Select some files to create media records...', 4000);
             return;
         }
 
-        var request = {
+        let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'create_media_records': ids

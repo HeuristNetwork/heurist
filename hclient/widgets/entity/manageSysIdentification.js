@@ -42,7 +42,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             return false;
         }
 
-        var that = this;
+        let that = this;
         
 
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
@@ -53,7 +53,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             });
         
         if(!this.options.isdialog){
-            var fele = this.element.find('.ent_wrapper:first');
+            let fele = this.element.find('.ent_wrapper:first');
             $(fele).on("mouseleave", function(e){
                 if($(e.target).is('button')){ return; } // for Rectype Select popup
                 
@@ -70,10 +70,10 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     // change label for remove
     _getEditDialogButtons: function(){
-        var btns = this._super();
+        let btns = this._super();
         
-        var that = this;
-        for(var idx in btns){
+        let that = this;
+        for(let idx in btns){
             if(btns[idx].id=='btnRecRemove'){
                 //remove this button -    
                 btns.splice(idx,1);
@@ -95,7 +95,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         this._super();
         
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
-        var ele = this.editForm.find('input[type=file]');  //this._as_dialog.find
+        let ele = this.editForm.find('input[type=file]');  //this._as_dialog.find
         if(ele.length>0){
             ele.fileupload('option','pasteZone', this.editForm); //this._as_dialog);
         }
@@ -117,7 +117,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 	
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
-        var that = this;
+        let that = this;
 
         if(!this.options.isdialog){
             var fele = this.element.find('.ent_wrapper:first');
@@ -141,13 +141,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
         if(!window.hWin.HEURIST4.util.isempty(fields['sys_SyncDefsWithDB'])){
             
-            var z_key = fields['sys_SyncDefsWithDB'].split(',');
+            let z_key = fields['sys_SyncDefsWithDB'].split(',');
 
             if(z_key.length != 4){
 
-                var btn = {};
+                let btn = {};
                 btn[window.hWin.HR('OK')] = function(){
-                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                    let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                     $dlg.dialog('close');
 
                     if(!that.options.isdialog){
@@ -163,7 +163,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             }
         }
         
-        var lookup_external_service = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
+        let lookup_external_service = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
         if(lookup_external_service){ // Valid value
             fields['sys_ExternalReferenceLookups'] = JSON.stringify(lookup_external_service);
         }else{ // Invalid value / None
@@ -176,7 +176,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
         
-        var that = this;
+        let that = this;
         
         //reload local sysinfo
         window.hWin.HAPI4.SystemMgr.sys_info(function(){

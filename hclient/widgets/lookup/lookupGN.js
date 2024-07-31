@@ -52,10 +52,10 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        var that = this;
+        let that = this;
 
         //fill countries dropdown
-        var ele = this.element.find('#inpt_country');
+        let ele = this.element.find('#inpt_country');
         this._country_vocab_id = $Db.getLocalID('trm','2-509');
         if(this._country_vocab_id > 0){
             window.hWin.HEURIST4.ui.createTermSelect(ele.get(0), {vocab_id:this._country_vocab_id,topOptions:'select...',useHtmlSelect:false});
@@ -127,7 +127,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
      */
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -150,10 +150,10 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
         
         function fld(fldname, width){
 
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
 
-            var title = s;
+            let title = s;
 
             if(fldname == 'recordLink'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -166,17 +166,17 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             return s;
         }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID'); 
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID'); 
 
-        var recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('recordLink', 12);
+        let recTitle = fld('name', 40) + fld('adminName1', 20) + fld('countryCode', 6) + fld('fcodeName', 40) + fld('fclName', 20) + fld('recordLink', 12);
 
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
                 + html_thumb            
                 + '<div class="recordIcons">'
                 +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -191,7 +191,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
      * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
      */
     _getActionButtons: function(){
-        var res = this._super(); //dialog buttons
+        let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
         //res[1].disabled = null;
         return res;
@@ -212,18 +212,18 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
     doAction: function(){
 
         //detect selection
-        var recset = this.recordList.resultList('getSelected', false);
+        let recset = this.recordList.resultList('getSelected', false);
         
         if(recset && recset.length() == 1){
             
-            var res = {};
-            var rec = recset.getFirstRecord();
+            let res = {};
+            let rec = recset.getFirstRecord();
             
-            var map_flds = Object.keys(this.options.mapping.fields);
+            let map_flds = Object.keys(this.options.mapping.fields);
             
-            for(var k=0; k<map_flds.length; k++){
-                var dty_ID = this.options.mapping.fields[map_flds[k]];
-                var val = recset.fld(rec, map_flds[k]);
+            for(let k=0; k<map_flds.length; k++){
+                let dty_ID = this.options.mapping.fields[map_flds[k]];
+                let val = recset.fld(rec, map_flds[k]);
                 
                 if(map_flds[k]=='countryCode' && this._country_vocab_id>0){
                     val = $Db.getTermByCode(this._country_vocab_id, val);
@@ -268,8 +268,8 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             }
             if(this.element.find('#inpt_country').val()!=''){
     
-                var term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
-                var _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
+                let term_label = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Label');
+                let _countryCode = $Db.trm(this.element.find('#inpt_country').val(), 'trm_Code');
     
                 if(_countryCode == ''){
                     
@@ -312,8 +312,8 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var that = this;
-        var request = {service:sURL, serviceType:'geonames', is_XML: xml_response};             
+        let that = this;
+        let request = {service:sURL, serviceType:'geonames', is_XML: xml_response};             
         //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
@@ -340,21 +340,21 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
         
         this.recordList.show();
 
-        var is_wrong_data = true;
+        let is_wrong_data = true;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
         if (json_data) {
 
-            var res_records = {}, res_orders = [];
+            let res_records = {}, res_orders = [];
 
-            var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
             if(DT_GEO_OBJECT>0 && !this.options.mapping.fields['location']){
                 this.options.mapping.fields['location'] = DT_GEO_OBJECT;
             }
 
-            var fields = ['rec_ID', 'rec_RecTypeID'];
-            var map_flds = Object.keys(this.options.mapping.fields);
+            let fields = ['rec_ID', 'rec_RecTypeID'];
+            let map_flds = Object.keys(this.options.mapping.fields);
 
             fields = fields.concat(map_flds);
             fields = fields.concat('recordLink');
@@ -362,22 +362,22 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             if(!json_data.geonames) json_data.geonames = json_data;
             
             //parse json
-            var i=0;
-            var data = json_data.geonames;
+            let i=0;
+            let data = json_data.geonames;
 
             if(!window.hWin.HEURIST4.util.isArray(data)){
                 data = [data];
             }
 
             for(;i<data.length;i++){
-                var feature = data[i];
+                let feature = data[i];
                 
-                var recID = i+1;
+                let recID = i+1;
                 
                 var val;
-                var values = [recID, this.options.mapping.rty_ID];
+                let values = [recID, this.options.mapping.rty_ID];
                 
-                for(var k=0; k<map_flds.length; k++){
+                for(let k=0; k<map_flds.length; k++){
                     
                     if(map_flds[k]=='location'){
                         if(feature[ 'lng' ] && feature[ 'lat' ]){
@@ -400,7 +400,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             }
 
             if(res_orders.length>0){        
-                var res_recordset = new hRecordSet({
+                let res_recordset = new hRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,

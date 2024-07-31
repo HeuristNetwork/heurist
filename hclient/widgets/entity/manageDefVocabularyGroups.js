@@ -66,7 +66,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             return;
         }
 
-        var that = this;
+        let that = this;
         
         this.recordList.resultList({
             show_toolbar:false,
@@ -85,15 +85,15 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                         hoverClass: 'ui-drag-drop',
                         drop: function( event, ui ){
 
-                            var trg = $(event.target).hasClass('recordDiv')
+                            let trg = $(event.target).hasClass('recordDiv')
                                         ?$(event.target)
                                         :$(event.target).parents('.recordDiv');
                                         
-                var trm_ID = $(ui.draggable).parent().attr('recid');
-                var vcg_ID = trg.attr('recid');
+                let trm_ID = $(ui.draggable).parent().attr('recid');
+                let vcg_ID = trg.attr('recid');
                         if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
                             
-                            var params = {trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID};
+                            let params = {trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID};
                         
                             that.options.reference_vocab_manger
                                 .manageDefTerms('changeVocabularyGroup',params);
@@ -106,7 +106,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         });
 
         //specify add new/save order buttons above record list
-        var btn_array = [
+        let btn_array = [
             {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
                   css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                   click: function() { that._onActionListener(null, 'add'); }},
@@ -159,10 +159,10 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     _recordListItemRenderer: function(recordset, record){
         
         
-        var recID   = recordset.fld(record, 'vcg_ID');
-        var recName = recordset.fld(record, 'vcg_Name');
+        let recID   = recordset.fld(record, 'vcg_ID');
+        let recName = recordset.fld(record, 'vcg_Name');
         
-        var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
+        let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{
@@ -247,7 +247,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this._super(); 
             
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this vocabulary group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
@@ -260,12 +260,12 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _onActionListener: function(event, action){
 
-        var isresolved = this._super(event, action);
+        let isresolved = this._super(event, action);
 
         if(!isresolved && action=='save-order'){
             
-            var recordset = this.getRecordSet();
-            var that = this;
+            let recordset = this.getRecordSet();
+            let that = this;
             window.hWin.HEURIST4.dbs.applyOrder(recordset, 'vcg', function(res){
                 that._toolbar.find('#btnApplyOrder').hide();
             });

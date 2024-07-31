@@ -27,10 +27,10 @@
 
 
 function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
-    var _className = "Mapping",
+    const _className = "Mapping",
     _version   = "0.4";
 
-    var mapdiv_id = null,
+    let mapdiv_id = null,
     timelinediv_id = null,
     _current_stack_setting = true,
 

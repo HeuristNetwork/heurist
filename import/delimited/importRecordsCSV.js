@@ -21,10 +21,10 @@
 */
 
 function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
-    var _className = "ImportRecordsCSV",
-    _version   = "0.4",
+    const _className = "ImportRecordsCSV",
+    _version   = "0.4";
 
-    imp_ID,   //import session
+    let imp_ID,   //import session
     imp_session,  //json with session parameters
     
     currentSeqIndex = -1,  

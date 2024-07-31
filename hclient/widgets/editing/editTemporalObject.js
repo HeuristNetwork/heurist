@@ -49,7 +49,7 @@ function switchDev (toAsym) {
 //
 function calendarPopup(buttonElt) {
 
-	var callback =	function(date)
+	let callback =	function(date)
 	{
 		if (date) {
 			document.getElementById("simpleDate").value = date;
@@ -57,7 +57,7 @@ function calendarPopup(buttonElt) {
 			calendarViewer.close();
 		}
 	}
-	var date = document.getElementById("simpleDate").value;
+	let date = document.getElementById("simpleDate").value;
     
 	if(window.hWin.HEURIST4.util.isempty(date) && window.hWin && window.hWin.HAPI4){
 		date = window.hWin.HAPI4.get_prefs_def('record-edit-date','');
@@ -68,9 +68,9 @@ function calendarPopup(buttonElt) {
 
 function getOffset(obj) {
 
-        var x = y = 0;
-        var sleft = 0;//obj.ownerDocument.body.scrollLeft;
-        var stop = 0; //obj.ownerDocument.body.scrollTop;
+        let x = y = 0;
+        let sleft = 0;//obj.ownerDocument.body.scrollLeft;
+        let stop = 0; //obj.ownerDocument.body.scrollTop;
         while (obj) {
             x += obj.offsetLeft;
             y += obj.offsetTop;
@@ -81,16 +81,16 @@ function getOffset(obj) {
 
 
 function setPDBtoTPQ () {
-	var tpq = document.getElementById("TPQ");
-	var pdb = document.getElementById("PDB");
+	let tpq = document.getElementById("TPQ");
+	let pdb = document.getElementById("PDB");
 	if (typeof tpq == "object" && typeof pdb == "object" && tpq.value) {
 		pdb.value = tpq.value
 	}
 }
 
 function setPDEtoTAQ () {
-	var taq = document.getElementById("TAQ");
-	var pde = document.getElementById("PDE");
+	let taq = document.getElementById("TAQ");
+	let pde = document.getElementById("PDE");
 	if (typeof taq == "object" && typeof pde == "object" && taq.value) {
 		pde.value = taq.value
 	}
@@ -185,16 +185,16 @@ function dRangeDraw() {
 */
 
 function drawLabel ( ctx, label, xPos, yPos, maxX) {
-	var pxLen = ctx.measureText(label).width;
+	let pxLen = ctx.measureText(label).width;
 	ctx.fillText(label, xPos - pxLen/2, yPos, maxX);
 }
 
-var TemporalPopup = (function () {
+let TemporalPopup = (function () {
 	//private members
-	var _className = "Applet";  // I know this is a singleton and the application object, but hey it matches the pattern.
-	var _type2TabIndexMap = {};
+	const _className = "Applet";  // I know this is a singleton and the application object, but hey it matches the pattern.
+	let _type2TabIndexMap = {};
 
-	var _change_tab_only = false;
+	let _change_tab_only = false;
 
 	function _init () {
 
@@ -210,7 +210,7 @@ var TemporalPopup = (function () {
 			}
 		} else if (that.originalInputString) { // non temporal non empty string
 			try {
-					var tDate = TDate.parse(that.originalInputString);
+					let tDate = TDate.parse(that.originalInputString);
 					that.origTemporal = new Temporal();
 					that.origTemporal.setType("s");  // simple date
 					that.origTemporal.setTDate("DAT",tDate);
@@ -238,7 +238,7 @@ var TemporalPopup = (function () {
         $('#display-div').tabs({
         	beforeActivate: function( event, ui ) {
 
-	            var curType = ui.oldPanel.attr('id'),
+	            let curType = ui.oldPanel.attr('id'),
 	                newType = ui.newPanel.attr('id');
 
 	            _updateUIFromTemporal(that.curTemporal, false); //do not dates
@@ -289,7 +289,7 @@ var TemporalPopup = (function () {
         
 		// select the tab for the initial temporal's type and change the label to show the user this is where things started
         _updateUIFromTemporal(that.curTemporal, true);
-        var active_idx = _type2TabIndexMap[ that.curTemporal.getType() ? that.curTemporal.getType():'s' ];
+        let active_idx = _type2TabIndexMap[ that.curTemporal.getType() ? that.curTemporal.getType():'s' ];
         $('#display-div').tabs('option','active',active_idx);
         
 		//dRangeDraw();
@@ -352,8 +352,8 @@ var TemporalPopup = (function () {
 			//late_date = convert($latest, false);
 		}
         
-        var tDate1 = TDate.parse(early_date);
-        var tDate2 = TDate.parse(late_date);
+        let tDate1 = TDate.parse(early_date);
+        let tDate2 = TDate.parse(late_date);
         //if(tDate1.getYear()>tDate2.getYear())
 
 		if( tDate1.compare(tDate2) >= 0 ){ //new Date(early_date).getTime() >= new Date(late_date).getTime()){
@@ -383,11 +383,11 @@ var TemporalPopup = (function () {
 
     function _updateGeorgianDate(){
         
-        var type = that.curTemporal.getType();
+        let type = that.curTemporal.getType();
         if(calendar && calendar.name.toLowerCase()!='gregorian' && type && type!='c'){
 
-            var value = '';
-            var from_calendar_type = calendar.name.toLowerCase();
+            let value = '';
+            let from_calendar_type = calendar.name.toLowerCase();
             
             if (type === "s") {
                 //value = convert($("#simpleDate"), true);
@@ -417,7 +417,7 @@ var TemporalPopup = (function () {
 
     //changedates - false for tab switch, it assign date intputs on init only
 	function _updateUIFromTemporal (temporal, changedates) {
-		var type = temporal.getType();
+		let type = temporal.getType();
 		if (!type) {
 			return;
 		}
@@ -445,11 +445,11 @@ var TemporalPopup = (function () {
             
         }
 
-		var fields = Temporal.getFieldsForType(type);
-		for(var i =0; i< fields.length; i++) {
-			var code = fields[i];
+		let fields = Temporal.getFieldsForType(type);
+		for(let i =0; i< fields.length; i++) {
+			let code = fields[i];
 			var val = temporal.getStringForCode(code);
-			var elem = $( "#" + type + code);
+			let elem = $( "#" + type + code);
 			if (elem.length == 0) {
 				elem = $("#" + code);
 			}
@@ -506,19 +506,19 @@ var TemporalPopup = (function () {
     //
     //
 	function _updateTemporalFromUI (temporal) {
-		var type = temporal.getType();
+		let type = temporal.getType();
         
-        var togregorian = true;
+        let togregorian = true;
         
         //store values in native calendar
-        var from_calendar_type = (calendar && calendar.name)?calendar.name.toLowerCase():'';
+        let from_calendar_type = (calendar && calendar.name)?calendar.name.toLowerCase():'';
         let is_japanese_cal = (from_calendar_type === 'japanese');
         
         if(from_calendar_type!='' && from_calendar_type!='gregorian'){
 
-            var isj = (from_calendar_type=='julian');
+            let isj = (from_calendar_type=='julian');
 
-            var value = '';
+            let value = '';
             if (type === "s") {
                 value = formatGregJulian($("#simpleDate").val(), isj);
             }else if (type === "f") {
@@ -537,9 +537,9 @@ var TemporalPopup = (function () {
             temporal.removeObjForCode("CLD");
         }
     
-		var fields = Temporal.getFieldsForType(type);
-		for(var i =0; i< fields.length; i++) {
-			var code = fields[i];
+		let fields = Temporal.getFieldsForType(type);
+		for(let i =0; i< fields.length; i++) {
+			let code = fields[i];
 			var elem = $( "#" + type + code);
 			if (elem.length == 0) {
 				elem = $("#" + code);
@@ -558,7 +558,7 @@ var TemporalPopup = (function () {
 						break;
 					default :
 						if (elem.val()) {
-							var val = elem.val();
+							let val = elem.val();
 							if (code == "RNG") {
 								val = "P" + val + $("#level").val();
 							}
@@ -579,15 +579,15 @@ var TemporalPopup = (function () {
 		}
 		if (type === "s") {
 
-			var strDate = ($("#simpleTime").val());
+			let strDate = ($("#simpleTime").val());
 			if (strDate && $("#tzone").val()) {
-				var zone = $("#tzone").val().match(/^\s*(?:UTC|GMT)?\s*([\+|\-]?\d?\d:?(?:\d\d)?)?/)[1];
+				let zone = $("#tzone").val().match(/^\s*(?:UTC|GMT)?\s*([\+|\-]?\d?\d:?(?:\d\d)?)?/)[1];
 				if (zone) {
 					strDate += " " + zone;
 				}
 			}
             var elem = $("#simpleDate");
-            var dt = elem.val();
+            let dt = elem.val();
             if(togregorian){
                 /*if(calendar && calendar.name!='gregorian'){
                     temporal.addObjForString("CL2", elem.val());
@@ -647,14 +647,14 @@ var TemporalPopup = (function () {
 
     function _initJqCalendar(temporal){
 
-        var defaultDate = null;
+        let defaultDate = null;
 
         let calendar_type = temporal.getStringForCode("CLD");
         calendar_type = !calendar_type ? 'gregorian' : calendar_type.toLowerCase();
 
         fixCalendarPickerCMDs();
 
-        var type = temporal.getType();
+        let type = temporal.getType();
         if (!type) {
             return;
         }
@@ -746,7 +746,7 @@ var TemporalPopup = (function () {
             let new_calendar = $(this).val();
             if(!new_calendar) return;
             
-            var old_calendar = calendar.name.toLowerCase();            
+            let old_calendar = calendar.name.toLowerCase();            
 
             calendar = $.calendars.instance(new_calendar);
             if(!calendar) return;
@@ -1038,7 +1038,7 @@ var TemporalPopup = (function () {
 					alert(e);
 					return;
 				}
-				var validity = Temporal.checkValidity(that.curTemporal);
+				let validity = Temporal.checkValidity(that.curTemporal);
 				if (validity[0]) {  // valid temporal
 					if (validity[2]) { //some extra code fields, so remove them
 						for (var i=0; i<validity[2].length; i++) {
@@ -1047,7 +1047,7 @@ var TemporalPopup = (function () {
 					}
 					window.close( that.curTemporal.toString());
 				}else{
-					var msg = "";
+					let msg = "";
 					for (var i = 0; i < validity[1].length; i++) {
 					 if (!msg){
 						msg = Temporal.getStringForCode(validity[1][i]);

@@ -32,18 +32,18 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-var g_version = "1";
+let g_version = "1";
 
 
 function Temporal (strInitTemporal) {
     //private members
-    var _className = "Temporal";
-    var _ver = g_version;				//version number for data representation
-    var _type = null;					// type of temporal with the default to be a simple date
-    var _strTemporal = strInitTemporal;
-    var _dates = {};
-    var _durations = {};
-    var _fields = {};
+    const _className = "Temporal";
+    let _ver = g_version;				//version number for data representation
+    let _type = null;					// type of temporal with the default to be a simple date
+    let _strTemporal = strInitTemporal;
+    let _dates = {};
+    let _durations = {};
+    let _fields = {};
 
     function _init (){	//initailization code
         if (!_strTemporal) { // empty string return basic temporal
@@ -65,8 +65,8 @@ function Temporal (strInitTemporal) {
 
         // function toString  returns an encode serialized string representation of the temporal
         toString: function () {
-            var temp = "|VER=" + _ver + "|TYP=" + _type;
-            var i;
+            let temp = "|VER=" + _ver + "|TYP=" + _type;
+            let i;
             for ( i in _dates) {
                 temp += "|" + i + "=" + _dates[i].toString();
             }
@@ -80,8 +80,8 @@ function Temporal (strInitTemporal) {
         },
         
         getAllFields: function(){
-            var res = {VER:_ver, TYP:_type};
-            var i;
+            let res = {VER:_ver, TYP:_type};
+            let i;
             for ( i in _dates) {
                 res[i] = _dates[i].toString();
             }
@@ -99,8 +99,8 @@ function Temporal (strInitTemporal) {
         //        
         toJSON: function () {
 
-            var $tDate = that.getAllFields();
-            var $timespan= {};
+            let $tDate = that.getAllFields();
+            let $timespan= {};
             
                     if ($tDate["CLD"] && $tDate["CL2"] && ($tDate["CLD"].toLowerCase()!='gregorian')) {
                             let $cld = $tDate["CL2"]+" "+$tDate["CLD"];
@@ -188,7 +188,7 @@ function Temporal (strInitTemporal) {
         _deviationToText: function ($value, $prefix){
         
             if($value){
-                var dvp = $value.match(/(\d+)Y/);
+                let dvp = $value.match(/(\d+)Y/);
                 if(dvp && dvp[1])
                     return $prefix + dvp[1]+' years';
             }
@@ -197,7 +197,7 @@ function Temporal (strInitTemporal) {
     
         _deviationSuffix: function( $timestamp ){
             
-            var $res = '';
+            let $res = '';
             if($timestamp['deviation']){
                 $res = that._deviationToText($timestamp['deviation'], ' ±');
             }else{
@@ -216,15 +216,15 @@ function Temporal (strInitTemporal) {
 
             try{
             
-            var $date = that.toJSON();
+            let $date = that.toJSON();
             
             $calendar = $date['calendar'];
-            var isgj = (!$calendar || $calendar.toLowerCase()=='gregorian' || $calendar.toLowerCase()=='julian');
+            let isgj = (!$calendar || $calendar.toLowerCase()=='gregorian' || $calendar.toLowerCase()=='julian');
             $res = {};
 
             $res['Type'] = '';
             
-            var $is_simple_range = true; 
+            let $is_simple_range = true; 
 
             if($date['timestamp']){
 
@@ -266,7 +266,7 @@ function Temporal (strInitTemporal) {
             }else{ //timespan - range
 
 
-                var $from = '',
+                let $from = '',
                     $to = '';
                 
                 $is_simple_range = true;
@@ -338,7 +338,7 @@ function Temporal (strInitTemporal) {
             if($date['labcode']) $res['Labaratory Code'] = $date['labcode'];
             if($date['calibarated']) $res['Calibarated'] = 'yes';
 
-            var $res2 = '';
+            let $res2 = '';
             
             if($is_compact){
                 
@@ -358,7 +358,7 @@ function Temporal (strInitTemporal) {
                                     $res['Probable End']+':<'+$res['Terminus Ante Quem'];
                 }
                 
-                var supinfo = [];
+                let supinfo = [];
                 if($res['Determination']) supinfo.push($res['Determination']);
                 if($date['calibrated']) supinfo.push('Calibarated');
                 if(!isgj) {
@@ -369,8 +369,8 @@ function Temporal (strInitTemporal) {
                 }
                 
             }else{
-                for(var $key in $res){
-                    var $val = $res[$key];   
+                for(let $key in $res){
+                    let $val = $res[$key];   
                     $res2 = $res2+$key+': '+$val+$separator;
                 }
             }
@@ -400,7 +400,7 @@ function Temporal (strInitTemporal) {
         },
 
         getTDate: function (code) {
-            var a = _dates;
+            let a = _dates;
             if ( _dates[code] ) {
                 return _dates[code];
             } else {
@@ -439,7 +439,7 @@ function Temporal (strInitTemporal) {
 
         removeField: function (code) {
             if ( Temporal.fieldsDict[code] && typeof _fields[code] === "object" ) {
-                var temp = _fields[code];
+                let temp = _fields[code];
                 delete _fields[code];
                 return temp;
             }
@@ -449,7 +449,7 @@ function Temporal (strInitTemporal) {
         setTDuration: function (code, tDur) {
             if ( Temporal.tDurationDict[code] ) {
                 if (typeof tDur === "object" && typeof tDur.getClass === "function" && tDur.getClass() === "TemporalDuration") {
-                    var temp = null;
+                    let temp = null;
                     if ( _durations[code] ) {
                         temp = _durations[code];
                     }
@@ -464,7 +464,7 @@ function Temporal (strInitTemporal) {
 
         removeTDuration: function (code) {
             if ( Temporal.tDurationDict[code] && typeof _durations[code] === "object" ) {
-                var temp = _durations[code];
+                let temp = _durations[code];
                 delete _durations[code];
                 return temp;
             }
@@ -474,7 +474,7 @@ function Temporal (strInitTemporal) {
         setTDate: function (code,tDate) {
             if ( Temporal.tDateDict[code] ) {
                 if (typeof tDate === "object" && typeof tDate.getClass === "function" && tDate.getClass() === "TemporalDate") {
-                    var temp = null;
+                    let temp = null;
                     if ( _dates[code] ) {
                         temp = _dates[code];
                     }
@@ -489,7 +489,7 @@ function Temporal (strInitTemporal) {
 
         removeTDate: function (code) {
             if ( Temporal.tDateDict[code] && typeof _dates[code] === "object" ) {
-                var temp = _dates[code];
+                let temp = _dates[code];
                 delete _dates[code];
                 return temp;
             }
@@ -570,7 +570,7 @@ Temporal.parse = function () {
         return null;
     }
     //setup  input arguments
-    var temporal, str;
+    let temporal, str;
     if (arguments.length>1) {
         temporal = arguments[0];
         if ( typeof temporal.getClass !== "function" || temporal.getClass() !== "Temporal") {
@@ -588,11 +588,11 @@ Temporal.parse = function () {
     }
 
     // if not a valid temporal string try to see if this is a recognisable date string
-    var fieldType;
+    let fieldType;
     if ( !Temporal.isValidFormat(str)) {
         if(!(str.indexOf("VER=")>=0 || str.indexOf("TYP=")>=0)){
             try {
-                var tDate = TDate.parse(str);
+                let tDate = TDate.parse(str);
                 if(tDate) { fieldType = "DAT"; }	// save string as a TDate object
             }
             catch(e) {	// save string in COM field and keep an empty simple date temporal
@@ -614,7 +614,7 @@ Temporal.parse = function () {
     str = str.replace(/^\|/,"");
     str = str.replace(/VER=[^\|]+\|?/,"");
 
-    var type = str.match(/TYP=(.)\|?/); // match for TYP followed by a single letter defining the temporal type followed optionally by a | vertical bar
+    let type = str.match(/TYP=(.)\|?/); // match for TYP followed by a single letter defining the temporal type followed optionally by a | vertical bar
     if (type && type.length === 2) {
         if ( temporal.setType(type[1])) {
             str = str.replace(/TYP=[^\|]+\|?/,"");
@@ -626,9 +626,9 @@ Temporal.parse = function () {
         throw "Temporal parse exception - no Temporal Type code ";
     }
 
-    var fields = Temporal.getFieldsForString(type, str);  // get the list of field headers for this type
+    let fields = Temporal.getFieldsForString(type, str);  // get the list of field headers for this type
     
-    var val,i;
+    let val,i;
     for (i=0; i < fields.length; i++) {
         val = str.match(new RegExp("\\|?" + fields[i] + "=([^\\|]+)","i"));
         if (val && val.length === 2) {
@@ -735,11 +735,11 @@ Temporal.cloneObj = function(obj) {
     if(obj === null) return obj;
 
     if(isArray(obj)){
-        var newA = [];
+        let newA = [];
         for(var i in obj) newA.push(Temporal.cloneObj(obj[i]));
         return newA;
     }else{
-        var newO = {};
+        let newO = {};
         for(var i in obj) newO[i] = Temporal.cloneObj(obj[i]);
         return newO;
     }
@@ -763,7 +763,7 @@ Temporal.isValidFormat = function ( str ) {
     if (str.search(/\|/) === -1) {
         return false;
     }
-    var type = str.match(/TYP=(.)/)[1],
+    let type = str.match(/TYP=(.)/)[1],
     map = Temporal.typeFieldMap(type),
     headers = str.match(/\D\D\D=/g).join(""),
     i,j;
@@ -772,7 +772,7 @@ Temporal.isValidFormat = function ( str ) {
         if (headers.search("TYP=") !== -1) { // must have a type
             headers = headers.replace("TYP=","");
             for (i=0; i < map.req.length; i++) { // for each required fields pattern
-                var temp = headers,
+                let temp = headers,
                 valid = true,
                 r1 = map.req[i];
                 for (j=0; j < r1.length; j++) { // must have all require fields
@@ -806,15 +806,15 @@ Temporal.checkValidity = function ( temporal ) {
     if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>g_version) {
         return false;
     }
-    var type = temporal.getType();
-    var map = Temporal.typeFieldMap(type);
-    var ret = [false,[],[],""];
-    var headers = temporal.toString().match(/\D\D\D=/g).join("");
-    var i,j;
+    let type = temporal.getType();
+    let map = Temporal.typeFieldMap(type);
+    let ret = [false,[],[],""];
+    let headers = temporal.toString().match(/\D\D\D=/g).join("");
+    let i,j;
     headers = headers.replace("VER=","");
     headers = headers.replace("TYP=","");
     for (i=0; i < map.req.length; i++) { // for each required fields pattern
-        var temp = headers;
+        let temp = headers;
         var valid = true;
 
         for (j=0; j < map.req[i].length; j++) { // must have all require fields
@@ -909,14 +909,14 @@ Temporal.getFieldsForString = function (type,str) {
         return "";
     }
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
-        var fields;
-        var map = Temporal.typeFieldMap(type);
-        var headers = str.match(/[A-Za-z][A-Za-z][A-Za-z|2]=/g).join("");
+        let fields;
+        let map = Temporal.typeFieldMap(type);
+        let headers = str.match(/[A-Za-z][A-Za-z][A-Za-z|2]=/g).join("");
         if (!headers) {  // no valid headers - requires 3 letter
             return "";
         }
         var temp;
-        for (var i=0; i < map.req.length; i++) {  //for each required fields combination/pattern
+        for (let i=0; i < map.req.length; i++) {  //for each required fields combination/pattern
             var temp = headers,
             valid = true;
             for (var j=0; j < map.req[i].length; j++) { //check that all required fields for this pattern are present
@@ -951,19 +951,19 @@ Temporal.getFieldsForString = function (type,str) {
 // Temporal Date object extend by date.js
 var TDate = function (strDate) {
     //private members
-    var _className = "TemporalDate";
-    var _origString = strDate && strDate.toString ? strDate.toString() : "";
-    var _dateFormat = "ymd";
-    var _year = null;
-    var _month = null;
-    var _day = null;
-    var _hours = null;
-    var _minutes = null;
-    var _seconds = null;
-    var _milliseconds = null;
-    var _milliSep = null;
-    var _tzOffset = null;
-    var _tz = null;
+    const _className = "TemporalDate";
+    let _origString = strDate && strDate.toString ? strDate.toString() : "";
+    let _dateFormat = "ymd";
+    let _year = null;
+    let _month = null;
+    let _day = null;
+    let _hours = null;
+    let _minutes = null;
+    let _seconds = null;
+    let _milliseconds = null;
+    let _milliSep = null;
+    let _tzOffset = null;
+    let _tz = null;
 
 
     //public members
@@ -1024,11 +1024,11 @@ var TDate = function (strDate) {
         },
 
         toString : function (format) {
-            var frmPart = function (s,fillLength) {
+            let frmPart = function (s,fillLength) {
                 if (!s) {
                     return "";
                 }
-                var neg = s<0;
+                let neg = s<0;
                 if (neg) {
                     s = s.replace(/\-/,"");
                     if(fillLength==4) fillLength=6; //special case - required 6 digits for visjs timeline
@@ -1250,7 +1250,7 @@ var TDate = function (strDate) {
         },
 
         setTimezoneOffset: function (str) {
-            var h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
+            let h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
             if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
                 _tzOffset = '00:00';
                 //throw " TDate exception - invalid string supplied to setTimezone() - " + str;
@@ -1263,7 +1263,7 @@ var TDate = function (strDate) {
         },
 
         compare: function (tDate2) {
-            var ret;
+            let ret;
             function comp (a,b) {
                 a = parseInt(isNaN(a)?0:a);
                 b = parseInt(isNaN(b)?0:b);
@@ -1323,7 +1323,7 @@ TDate.parse = function () {
         return null;
     }
     //setup  input arguments
-    var tDate, str;
+    let tDate, str;
     if (arguments.length>1) {
         tDate = arguments[0];
         if ( typeof tDate.getClass !== "function" || tDate.getClass() !== "TemporalDate") {
@@ -1368,22 +1368,22 @@ TDate.parse = function () {
     }
 
 
-    var temp = str.replace(/(GMT|UTC)/,"");   //remove  GMT or UTC marker
+    let temp = str.replace(/(GMT|UTC)/,"");   //remove  GMT or UTC marker
     temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
     temp = temp.replace(/\s*\([^\)]+\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)
     temp = temp.replace(/\s*(sun|mon|tues?|wed(nes)?|thur?s?|fri)(day)?\.?,?\s*/i,"");  //remove any day indicators
     temp = temp.replace(/([012]?\d)\s*(th|rd|nd|st)(\s*of)?/i,"$1d");
     temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
     if (temp.match(/\d\d?\s*(?:am|pm)/i)) {  //  12 hour clock need to convert
-        var t12 = temp.match(/(?:\s+(\d\d?)([:\.,]\d\d?\d?){0,3})\s*(am|pm)/i);
+        let t12 = temp.match(/(?:\s+(\d\d?)([:\.,]\d\d?\d?){0,3})\s*(am|pm)/i);
         if ( t12[3].match(/pm/i) ) {
             t12[1] = (12 + (t12[1]-0)).toString() + (t12[2] ? t12[2] : "");
         }
         temp = temp.replace(/\d\d?([:\.,]\d\d?\d?){0,3}\s*(am|pm)/i, t12[1]);
     }
 
-    var periodDesignator = "";
-    var BCE = false,
+    let periodDesignator = "";
+    let BCE = false,
     p = temp.match(/(?:\b|\d)(bce|ce|bc|ad)\b/i);
     if (p){
         temp = temp.replace(p[1], '');
@@ -1393,18 +1393,18 @@ TDate.parse = function () {
         }
     }
 
-    var t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
+    let t = temp.match(/\b[^\.\-\d:,\s\+\/]/);
     while (t && t[0] && t[0] !== "T") { // possible word for month
-        var word = temp.match(/^\s*(?:\-?\d+(?:d|m)?[\.\-:,\s\+\/]\s*)*([^\.\-\d:,\s\+\/]{1,20}\.?)\s*(?:\-?\d+(?:d|m)?\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
-        var valid = false;
+        let word = temp.match(/^\s*(?:\-?\d+(?:d|m)?[\.\-:,\s\+\/]\s*)*([^\.\-\d:,\s\+\/]{1,20}\.?)\s*(?:\-?\d+(?:d|m)?\s)*/);//(/^\s*(?:\d+\s)*\s*([^\.\-\d:\s\+\/]{1,20}\.?)\s*(?:\d+\s)*/);
+        let valid = false;
         if (word) {
             word = word[1];
             var m = word.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i);
             if (m) {
-                var month = {jan:'1',feb:'2',mar:'3',apr:'4',may:'5',jun:'6',jul:'7',aug:'8',sep:'9',oct:'10',nov:'11',dec:'12'};
+                let month = {jan:'1',feb:'2',mar:'3',apr:'4',may:'5',jun:'6',jul:'7',aug:'8',sep:'9',oct:'10',nov:'11',dec:'12'};
                 temp = temp.replace( word,''+month[m[1].toLowerCase()]+'m');
             } else{
-                var roman = { i:'1',ii:'2',iii:'3',iv:'4',v:'5',vi:'6',vii:'7',viii:'8',ix:'9',x:'10',xi:'11',xii:'12', iiii:'4', viiii:'9'};
+                let roman = { i:'1',ii:'2',iii:'3',iv:'4',v:'5',vi:'6',vii:'7',viii:'8',ix:'9',x:'10',xi:'11',xii:'12', iiii:'4', viiii:'9'};
                 m = roman[word.toLowerCase()];
                 if (m) {
                     temp = temp.replace( word,'' + m +'m');
@@ -1427,22 +1427,22 @@ TDate.parse = function () {
         throw "TDate parser exception -  unrecognized format should be date and/or time with or without timezone  - " + str;
     }
 
-    var _year = null;
-    var _month = null;
-    var _day = null;
-    var _dateFormat = "";
-    var _hours = null;
-    var _minutes = null;
-    var _seconds = null;
-    var _milliseconds = null;
-    var _milliSep = ".";
-    var _tzOffset = null;
+    let _year = null;
+    let _month = null;
+    let _day = null;
+    let _dateFormat = "";
+    let _hours = null;
+    let _minutes = null;
+    let _seconds = null;
+    let _milliseconds = null;
+    let _milliSep = ".";
+    let _tzOffset = null;
 
     function _setDatePart(date,format) {
         if ( ! date || !date.length || !format || !format.length || format.length !== date.length) {
             throw "TDate parser exception - internal function call error setDatePart" ;
         }
-        for (var i=0; i < date.length; i++) {
+        for (let i=0; i < date.length; i++) {
             switch ( format[i] ) {
                 case "y" :
                     _year = date[i];
@@ -1481,10 +1481,10 @@ TDate.parse = function () {
             _year = date[0];
             _dateFormat = "y";
         } else {
-            var yearFound = false;
-            var dayFound = false;
-            var monthFound = false;
-            var dateFormat = [];
+            let yearFound = false;
+            let dayFound = false;
+            let monthFound = false;
+            let dateFormat = [];
             for (var i = 0; i < date.length; i++) {
                 if (!date[i]) {
                     if ( i === date.length - 1 ) {
@@ -1493,10 +1493,10 @@ TDate.parse = function () {
                     }
                     throw "TDate parser exception -  empty value in date string is not allowed  - " + (temp && temp[1] ? temp[1] : "" );
                 }
-                var codedDatePart = date[i].match(/(\d\d?)(m|d)/);
+                let codedDatePart = date[i].match(/(\d\d?)(m|d)/);
                 if (codedDatePart) {  // found character which codes the meaning of this number
                     date[i] = codedDatePart[1];
-                    var numFormat = codedDatePart[2],
+                    let numFormat = codedDatePart[2],
                     num = Number(date[i]);
                     if (numFormat == "m") {
                         if (monthFound){
@@ -1562,7 +1562,7 @@ TDate.parse = function () {
                 }
                 }
                 */
-                var val = Number(date[i]);
+                let val = Number(date[i]);
                 if ( !yearFound && (date[i].length > 2 || val < 1 || val > 31 || (dayFound && monthFound)) ) { // definitely a year
                     if ( date.length === 3 && i === 1) { // year is the middle and not allowed
                         throw "TDate parser exception -  unrecognized date string  unexpected year - " + (temp && temp[1] ? temp[1] : "" );
@@ -1635,7 +1635,7 @@ TDate.parse = function () {
                     }
                 }
             }
-            var dFrm = dateFormat.join("");
+            let dFrm = dateFormat.join("");
             if ( dFrm.match(/ymdmdymd|ymdmdyd|ydmdymd|ymdym/)) {
                 throw "TDate parser exception -  ambiguous date string supplied  - " + (temp && temp[1] ? temp[1] : "" );
             }
@@ -1679,7 +1679,7 @@ TDate.parse = function () {
         _year = "-" + _year;
     }
 
-    var time = temp[2];
+    let time = temp[2];
     if (time) {  //  Has Time
         if ( ((_year && _month) || _month) && !_day) {
             throw "TDate parser exception - time code with year/month or month without day information not allowed - " + str;
@@ -1707,7 +1707,7 @@ TDate.parse = function () {
         }
     }
 
-    var zone = temp[3];
+    let zone = temp[3];
     if (zone) { //  Has Time Zone
         if (!_hours) {
             throw "TDate parser exception - time zone without Time hours information not allowed - " + str;
@@ -1765,16 +1765,16 @@ TDate.parse = function () {
 
 TDate.getMonthName = function (index,shortName) {
     if (index >0  && index <= 12) {
-        var name = ["dummy","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][index - 0];
+        let name = ["dummy","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][index - 0];
         return shortName ? name.substring(0,3) : name;
     }
     return null;
 }
 
 TDate.getDayName = function (y,m,d,shortName) {
-    var index = (new Date(y,m,d)).getDay();  // FIXME : uses Javascript to figure out day of week, should create algorithm and use cultural info.
+    let index = (new Date(y,m,d)).getDay();  // FIXME : uses Javascript to figure out day of week, should create algorithm and use cultural info.
     if ( index >= 0 && index < 7 ) {
-        var name = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][index - 0];
+        let name = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][index - 0];
         return shortName ? name.substring(0,3) : name;
     }
     return null;
@@ -1833,14 +1833,14 @@ TDate.isLeapYear = function (year) {
 // wrapper for Date object to use it as a duration
 var TDuration = function (strDuration) {
     //private members
-    var _className = "TemporalDuration";
-    var _origString = strDuration;
-    var _year = null;
-    var _month = null;
-    var _day = null;
-    var _hour = null;
-    var _minute = null;
-    var _second = null;
+    const _className = "TemporalDuration";
+    let _origString = strDuration;
+    let _year = null;
+    let _month = null;
+    let _day = null;
+    let _hour = null;
+    let _minute = null;
+    let _second = null;
 
     // parse the string assuming ISO to get precision and set Duration
     function _parseStr (str) {
@@ -1859,7 +1859,7 @@ var TDuration = function (strDuration) {
         if (str.match(/T$/)) {
             throw "TDuration exception - Time specifier (T) without a time period - " + str;
         }
-        var dur = str.match(/^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/); //separate date and time values
+        let dur = str.match(/^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/); //separate date and time values
 
         if (!dur[0]) {
             throw "TDuration exception - invalid duration string passed to parseStr - " + str;
@@ -1933,7 +1933,7 @@ var TDuration = function (strDuration) {
         },
 
         toString: function () {
-            var temp = "";
+            let temp = "";
             if (_year || _month || _day || _hour || _minute || _second) {
                 temp += "P";
                 if ( _year ) {
@@ -2048,7 +2048,7 @@ var TDuration = function (strDuration) {
 // is given string is in temporal format
 function isTemporal(str) {
 
-    var res = false;
+    let res = false;
 
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
         res = true;
@@ -2058,7 +2058,7 @@ function isTemporal(str) {
         }else if (str.search(/TYP=s/) != -1 ) {
             if (str.match(/DAT=([^\|]+)/)) {
                 if (str.search(/COM=[^\|]+/) == -1) {
-                    var dt = str.match(/DAT=([^\|]+)/)[1];
+                    let dt = str.match(/DAT=([^\|]+)/)[1];
                     res = (dt.length>10);
                 }
             }else if (str.search(/COM=[^\|]+/) != -1) {
@@ -2074,15 +2074,15 @@ function formatGregJulian(val, isneed){
         if(isneed && val){
             //convert gregorian and julian dates as  -500-05-15 => 15 May 500 BCE
 
-            var tDate = TDate.parse(val);
-            var isbce = (tDate.getYear()<0);
-            var day = Number(tDate.getDay());
+            let tDate = TDate.parse(val);
+            let isbce = (tDate.getYear()<0);
+            let day = Number(tDate.getDay());
             
-            var hrs = Number(tDate.getHours());
-            var min = Number(tDate.getMinutes());
-            var sec = Number(tDate.getSeconds());
+            let hrs = Number(tDate.getHours());
+            let min = Number(tDate.getMinutes());
+            let sec = Number(tDate.getSeconds());
             
-            var res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
+            let res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMM')+' '+Math.abs(tDate.getYear())+(isbce?' BCE':'');
             
             if(hrs>0||min>0||sec>0){
                res = res + ' ' +tDate.toString('HH:mm:ss zz');
@@ -2101,11 +2101,11 @@ function formatGregJulian(val, isneed){
  *
  */
 function temporalToHumanReadableString(inputStr) {
-    var str = inputStr;
-    var cld = '';
+    let str = inputStr;
+    let cld = '';
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 
-        var cldname = 'gregorian';
+        let cldname = 'gregorian';
         if (str.match(/CLD=([^\|]+)/)){ //calendar
               cldname = str.match(/CLD=([^\|]+)/)[1].toLowerCase();
         }
@@ -2117,7 +2117,7 @@ function temporalToHumanReadableString(inputStr) {
             if(cld.indexOf('null')>=0) cld = cld.substr(4); //some dates were saved in wrong format - fix it
         }
 
-        var isgj = (cldname=='gregorian' || cldname=='julian');
+        let isgj = (cldname=='gregorian' || cldname=='julian');
 
         if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) { //Sortby Date
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
@@ -2141,20 +2141,20 @@ function temporalToHumanReadableString(inputStr) {
 
             str = (s_approx+' '+ str).trim();
         }else if (str.search(/TYP=c/) != -1 ) { //c14 date
-            var bce = str.match(/BCE=([^\|]+)/);
+            let bce = str.match(/BCE=([^\|]+)/);
             bce = bce ? bce[1]: null;
-            var c14 = str.match(/BPD=([^\|]+)/);
+            let c14 = str.match(/BPD=([^\|]+)/);
             c14 = c14 ? c14[1]: (bce ? bce:" c14 temporal");
-            var suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
+            let suff = str.match(/CAL=([^\|]+)/) ? " Cal" : "";
             suff += bce ? " BCE" : " BP";
             
-            var dev = str.match(/DEV=P(\d+)Y/);
+            let dev = str.match(/DEV=P(\d+)Y/);
             if(dev){
                 dev = " ±" + dev[1] + " yr" + (dev[1]>1?"s":"");    
             }else{
-                var dvp = str.match(/DVP=P(\d+)Y/); //positive
+                let dvp = str.match(/DVP=P(\d+)Y/); //positive
             
-                var dvn = str.match(/DVN=P(\d+)Y/); //negative
+                let dvn = str.match(/DVN=P(\d+)Y/); //negative
 
                 dev = (dvp?" +" + dvp[1] + " yr" + (dvp[1]>1?"s":""):'')
                        +
@@ -2163,21 +2163,21 @@ function temporalToHumanReadableString(inputStr) {
             
             str = c14 + dev + suff;
         }else if (str.search(/TYP=p/) != -1 ) {// probable date
-            var tpq = str.match(/TPQ=([^\|]+)/);
+            let tpq = str.match(/TPQ=([^\|]+)/);
             tpq = tpq ? tpq[1]: null;
-            var taq = str.match(/TAQ=([^\|]+)/);
+            let taq = str.match(/TAQ=([^\|]+)/);
             taq = taq ? taq[1]: null;
-            var pdb = str.match(/PDB=([^\|]+)/);
+            let pdb = str.match(/PDB=([^\|]+)/);
             pdb = pdb ? pdb[1]: (tpq ? tpq:"");
-            var pde = str.match(/PDE=([^\|]+)/);
+            let pde = str.match(/PDE=([^\|]+)/);
             pde = pde ? pde[1]: (taq ? taq:"");
             str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
-            var dat = str.match(/DAT=([^\|]+)/);
+            let dat = str.match(/DAT=([^\|]+)/);
             dat = dat ? formatGregJulian(dat[1], isgj): "";
-            var rng = str.match(/RNG=P(\d*)(Y|M|D)/);  //range for fuzzy date in year,months or days
+            let rng = str.match(/RNG=P(\d*)(Y|M|D)/);  //range for fuzzy date in year,months or days
             if(rng && rng.length>1){
-                var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
+                let units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
                 rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
                 str = dat + rng;
             }else{
@@ -2198,15 +2198,15 @@ function temporalSimplifyDate(sdate) {
         if( (sdate.match(/-?(\d*[.])?\d+/g) || []).length==1 ) {    
             //decimal to YMD
             
-            var val = sdate;
+            let val = sdate;
 
             if(Math.round(val) == val){ //years
                 return ''+Math.round(val);
             }else{
-                var parts = val.split('.');
-                var year = parts[0];
-                var month = parts[1]?parts[1].substr(0,2):0;
-                var day = parts[1]?parts[1].substr(2):0;
+                let parts = val.split('.');
+                let year = parts[0];
+                let month = parts[1]?parts[1].substr(0,2):0;
+                let day = parts[1]?parts[1].substr(2):0;
 
                 val = year;
                 if(month>0){
@@ -2222,7 +2222,7 @@ function temporalSimplifyDate(sdate) {
         }else{
         
         
-            var s = sdate;
+            let s = sdate;
             if(s.indexOf("-00-00")>0){
                 s = s.replace("-00-00","-01-01");
             }
@@ -2248,7 +2248,7 @@ function fixCalendarPickerCMDs(){
 
     // Fix an issue with the 'enabled' check for prev, prevJump, next, and nextJump commands
     $.calendars.picker.commands.prev.enabled = function(inst){
-        var minDate = inst.curMinDate();
+        let minDate = inst.curMinDate();
         let goPrev = true;
         if(minDate){
             let newDate = inst.drawDate.newDate();
@@ -2261,7 +2261,7 @@ function fixCalendarPickerCMDs(){
     };
 
     $.calendars.picker.commands.prevJump.enabled = function(inst) {
-        var minDate = inst.curMinDate();
+        let minDate = inst.curMinDate();
         let goPrev = true;
         if(minDate){
             let newDate = inst.drawDate.newDate();
@@ -2274,7 +2274,7 @@ function fixCalendarPickerCMDs(){
     };
 
     $.calendars.picker.commands.next.enabled = function(inst) {
-        var maxDate = inst.get('maxDate');
+        let maxDate = inst.get('maxDate');
         let goNext = true;
         if(maxDate){
             let newDate = inst.drawDate.newDate();
@@ -2286,7 +2286,7 @@ function fixCalendarPickerCMDs(){
     };
 
     $.calendars.picker.commands.nextJump.enabled = function(inst) {
-        var maxDate = inst.get('maxDate');
+        let maxDate = inst.get('maxDate');
         let goNext = true;
         if(maxDate){
             let newDate = inst.drawDate.newDate();

@@ -38,11 +38,11 @@
 function HintDiv(_id, _width, _height, _initcontent) {
 
 	//private members
-	var _className = "HintDiv";
+	const _className = "HintDiv";
 
-	var popup_div = null,
+	let popup_div = null,
 		hideTimer,
-		needHideTip = true;
+		needHideTip = true,
 		id = _id,
 		width = _width,
 		height = _height,
@@ -52,7 +52,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	{
 		if(popup_div===null){
 
-			var _map_popup = document.createElement('div');
+			let _map_popup = document.createElement('div');
 			_map_popup.id = id;
 			document.body.appendChild(_map_popup);
 			popup_div = $("#"+id);
@@ -117,8 +117,8 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	*/
 	function _getMousePos(e){
 
-		var posx = 0;
-		var posy = 0;
+		let posx = 0;
+		let posy = 0;
 		if (!e) var e = window.event;
 		if (e.pageX || e.pageY){
 			posx = e.pageX;
@@ -139,10 +139,10 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	*/
 	function _showPopupDivAt(xy, border_top, border_right, border_height, offset){
 
-		var div_height =  popup_div.height();
-		var div_width =  popup_div.width();
-		var pageHeight = popup_div.parents().height();
-		var scrollValue = popup_div.parents().scrollTop();
+		let div_height =  popup_div.height();
+		let div_width =  popup_div.width();
+		let pageHeight = popup_div.parents().height();
+		let scrollValue = popup_div.parents().scrollTop();
 		if(!offset) {
 			offset = 5;
 		}
@@ -161,7 +161,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//
 	function _showAt(event)
 	{
-		var xy = _getMousePos(event);
+		let xy = _getMousePos(event);
 		_showAtXY(xy);
 	}
 
@@ -173,10 +173,10 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		//var _map_popup = $("#mapPopup");
 		//_map_popup.html(xy[0]+",  "+xy[1]+"<br>");
 
-		var border_top = $(window).scrollTop();
-		var border_right = $(window).width();
-		var border_height = $(window).height();
-		var offset =0;
+		let border_top = $(window).scrollTop();
+		let border_right = $(window).width();
+		let border_height = $(window).height();
+		let offset =0;
 
 		_showPopupDivAt(xy, border_top ,border_right ,border_height, offset );
 
@@ -203,7 +203,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	}
 
 	//public members
-	var that = {
+	let that = {
 
 		showAt: function(event){
 			_showAt(event);
@@ -217,7 +217,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 				divid = id+"-content";
 			}
 
-			var my_tooltip = $("#"+divid);
+			let my_tooltip = $("#"+divid);
 			my_tooltip.html(divcontent);
 
 			_setSize([my_tooltip.width(), my_tooltip.height()+25]);

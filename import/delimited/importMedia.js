@@ -20,10 +20,10 @@
 */
 
 function hImportMedia() {
-    var _className = "ImportMedia",
-    _version   = "0.4",
+    const _className = "ImportMedia",
+    _version   = "0.4";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata;
     
     function _init(){

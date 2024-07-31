@@ -20,10 +20,10 @@
 */
 
 function hImportFileData() {
-    var _className = "ImportFileData",
-    _version   = "0.6",
+    const _className = "ImportFileData",
+    _version   = "0.6";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata = null;
     
     function _init(){

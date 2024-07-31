@@ -23,7 +23,7 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         
         this.btn_add_record = this.element.find('#btn_add_record');
@@ -50,7 +50,7 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
             request['cfn_Name'] = this.input_search.val();    
             
@@ -64,7 +64,7 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
                 request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

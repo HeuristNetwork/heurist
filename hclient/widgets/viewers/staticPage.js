@@ -35,7 +35,7 @@ $.widget( "heurist.staticPage", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.div_content = $('<div>').css({width:'100%', height:'100%'})  //.css('overflow','auto')
         /*.css({
@@ -86,7 +86,7 @@ $.widget( "heurist.staticPage", {
     _refresh: function(){
 
         if(this.options.title!=''){
-            var id = this.element.attr('id');
+            let id = this.element.attr('id');
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
@@ -97,7 +97,7 @@ $.widget( "heurist.staticPage", {
         //if(this.dosframe.attr('src')!==this.options.url){
         if(this._loaded_url!==this.options.url){
 
-            var url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
+            let url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
             url = url.replace("[layout]",  window.hWin.HAPI4.sysinfo['layout']);
             if(this.options.url.indexOf('http://')<0 && this.options.url.indexOf('https://')<0){
                 this.options.url = window.hWin.HAPI4.baseURL + url;
@@ -107,7 +107,7 @@ $.widget( "heurist.staticPage", {
             if(this.options.isframe){
 
                 if(!this.dosframe){
-                    var that = this;
+                    let that = this;
                     this.element.css({overflow: 'hidden'});
                     this.dosframe = $( "<iframe>" ).css({overflow:'hidden !important', width:'100% !important'}).appendTo( this.div_content );
                     this.dosframe.on('load', function(){

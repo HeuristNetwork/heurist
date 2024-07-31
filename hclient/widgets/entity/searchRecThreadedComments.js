@@ -23,7 +23,7 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         this.btn_search_start.css('float','right');   
         
@@ -43,7 +43,7 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
             request['cmt_Text'] = this.input_search.val();    
             
@@ -64,7 +64,7 @@ $.widget( "heurist.searchRecThreadedComments", $.heurist.searchEntity, {
                 request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

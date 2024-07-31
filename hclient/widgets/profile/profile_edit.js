@@ -68,7 +68,7 @@ $.widget( "heurist.profile_edit", {
 
         if(this.edit_form.is(':empty') ){
 
-            var that = this;
+            let that = this;
 
             this.edit_form.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
                 function(){
@@ -79,7 +79,7 @@ $.widget( "heurist.profile_edit", {
                     that.edit_form.find('label').each(function(){
                         $(this).html(window.hWin.HR($(this).html()));
                     });
-                    var allFields = that.edit_form.find('input');
+                    let allFields = that.edit_form.find('input');
 
                     that.edit_form.find( "#accordion" ).accordion({collapsible: true, heightStyle: "content", active: false});
 
@@ -171,7 +171,7 @@ $.widget( "heurist.profile_edit", {
     //----
     _fromDataToUI: function(){
 
-        var allFields = this.edit_form.find('input, textarea');
+        let allFields = this.edit_form.find('input, textarea');
 
         allFields.val( "" ).removeClass( "ui-state-error" );
 
@@ -185,10 +185,10 @@ $.widget( "heurist.profile_edit", {
             if(this.options.edit_data && this.options.edit_data['ugr_ID']==this.options.ugr_ID) {
                 this.options.edit_data['ugr_Password']='';
             }else{
-                var that = this;
+                let that = this;
                 window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: this.options.ugr_ID},
                     function(response){
-                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        let  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             that.options.edit_data = response.data;
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
@@ -237,7 +237,7 @@ $.widget( "heurist.profile_edit", {
 
         for(id in this.options.edit_data){
             if(!window.hWin.HEURIST4.util.isnull(id)){
-                var inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
+                let inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
                 //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
             }
         }
@@ -268,10 +268,10 @@ $.widget( "heurist.profile_edit", {
     },
 
     _refreshCaptcha: function(){
-        var that = this;
+        let that = this;
         that.edit_form.find('#ugr_Captcha').val('');
-        var $dd = that.edit_form.find('#imgdiv');
-        var id = window.hWin.HEURIST4.util.random();
+        let $dd = that.edit_form.find('#imgdiv');
+        let id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
             $dd.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
@@ -282,15 +282,15 @@ $.widget( "heurist.profile_edit", {
 
     _doSave: function(){
         
-        var parentWin = this.options.parentwin;
+        let parentWin = this.options.parentwin;
 
-        var that = this;
-        var allFields = this.edit_form.find('input, textarea');
-        var err_text = '';
+        let that = this;
+        let allFields = this.edit_form.find('input, textarea');
+        let err_text = '';
 
         // validate mandatory fields
         allFields.each(function(){
-            var input = $(this);
+            let input = $(this);
             if(input.hasClass('mandatory') && input.val()==''){
                 input.addClass( "ui-state-error" );
                 err_text = err_text + ', '+that.edit_form.find('label[for="' + input.attr('id') + '"]').html();
@@ -298,8 +298,8 @@ $.widget( "heurist.profile_edit", {
         });
         if(this.options.isregistration){
         	//remove/trim spaces
-        	var ele = this.edit_form.find("#ugr_Captcha");
-        	var val = ele.val().trim().replace(/\s+/g,'');
+        	let ele = this.edit_form.find("#ugr_Captcha");
+        	let val = ele.val().trim().replace(/\s+/g,'');
         	
             var ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
@@ -312,14 +312,14 @@ $.widget( "heurist.profile_edit", {
         if(err_text==''){
             // validate email
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
-            var email = this.edit_form.find("#ugr_eMail");
-            var bValid = parentWin.HEURIST4.util.checkEmail(email);
+            let email = this.edit_form.find("#ugr_eMail");
+            let bValid = parentWin.HEURIST4.util.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }
 
             // validate login
-            var login = this.edit_form.find("#ugr_Name");
+            let login = this.edit_form.find("#ugr_Name");
             if(!parentWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
@@ -330,8 +330,8 @@ $.widget( "heurist.profile_edit", {
                 }
             }
             // validate passwords
-            var password = this.edit_form.find("#ugr_Password");
-            var password2 = this.edit_form.find("#password2");
+            let password = this.edit_form.find("#ugr_Password");
+            let password2 = this.edit_form.find("#password2");
             if(password.val()!=password2.val()){
                 err_text = err_text + ', '+window.hWin.HR(' Passwords do not match');
                 password.addClass( "ui-state-error" );
@@ -359,7 +359,7 @@ $.widget( "heurist.profile_edit", {
         if(err_text==''){
             // fill data with values from UI
             allFields.each(function(){
-                var input = $(this);
+                let input = $(this);
                 if(input.attr('id').indexOf("ugr_")==0){ // that.options.edit_data[input.attr('id')]!=undefined)
 
                     if(input.attr('type') === "checkbox"){
@@ -386,7 +386,7 @@ $.widget( "heurist.profile_edit", {
                 window.hWin.HAPI4.SystemMgr.user_save( that.options.edit_data,
                     function(response){
                         that.enable_register(true);
-                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        let  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");
@@ -430,15 +430,15 @@ $.widget( "heurist.profile_edit", {
 
     //these functions is used in edit_profile.html
     autofill_login: function (value){
-        var ele = this.edit_form.find('#ugr_Name');
+        let ele = this.edit_form.find('#ugr_Name');
         if(ele && ele.val()==''){
             ele.val(value);
         }
     },
     
     enable_register: function (value){
-        var that = this;
-        var ele = this.edit_form.parent().find('#btn_save');
+        let that = this;
+        let ele = this.edit_form.parent().find('#btn_save');
         if(ele){
             if(value){
                 ele.removeAttr("disabled");

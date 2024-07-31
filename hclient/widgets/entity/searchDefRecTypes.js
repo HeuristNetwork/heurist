@@ -22,7 +22,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
         
         //this.widgetEventPrefix = 'searchDefRecTypes';
         
@@ -32,7 +32,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         window.hWin.HRA(this.element);
 
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
@@ -45,7 +45,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             //this.btn_find_record.hide();
             //this.element.find('#inner_title').hide();
             
-            var ele = this.element.find('#div_show_all_groups');
+            let ele = this.element.find('#div_show_all_groups');
             ele.parent().css('float','left');
             ele.hide();
         }else{
@@ -193,12 +193,12 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     //    
     configureUI: function(){
         
-        var that = this;
+        let that = this;
 
-        var popele = that.element.find('#div_ui_config');
+        let popele = that.element.find('#div_ui_config');
         
-        var flist = popele.find( ".toggles" );
-        var opts = this.options.ui_params['fields'];
+        let flist = popele.find( ".toggles" );
+        let opts = this.options.ui_params['fields'];
         
         flist.controlgroup( {
             direction: "vertical"
@@ -216,27 +216,27 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         popele.find('input[name="edit"]').prop('checked', 'checked');
         
         //sort
-        var cnt = flist.children().length;
-        var items = flist.children().sort(
+        let cnt = flist.children().length;
+        let items = flist.children().sort(
             function(a, b) {
-                    var vA = opts.indexOf($(a).attr('for'));
-                    var vB = opts.indexOf($(b).attr('for'));
+                    let vA = opts.indexOf($(a).attr('for'));
+                    let vB = opts.indexOf($(b).attr('for'));
                     if(!(vA>=0)) vA = cnt;
                     if(!(vB>=0)) vB = cnt;
                     return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
             });
-        var cop = flist.children();
+        let cop = flist.children();
         flist.append(items);    
         
         flist.controlgroup('refresh');
         
-        var $dlg_pce = null;
+        let $dlg_pce = null;
 
-        var btns = [
+        let btns = [
             {text:window.hWin.HR('Apply'),
                 click: function() { 
                     
-                    var fields = [];
+                    let fields = [];
                     /*popele.find('input[type="checkbox"]:checked').each(function(idx,item){
                         fields.push($(item).attr('name'));
                     });*/
@@ -250,7 +250,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     });
                     
                     //get new parameters
-                    var params = { 
+                    let params = { 
                         fields: fields
                     };
                     
@@ -291,18 +291,18 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
             if(!this.input_search) return;
             
-            var request = {}
+            let request = {}
             
-            var is_search_one_group = (!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0)
+            let is_search_one_group = (!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0)
         
             if(!is_search_one_group && this.input_search.val()!=''){
-                var s = this.input_search.val();
+                let s = this.input_search.val();
                 if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
                      request['rty_ID'] = s;   
                      s = '';
                 }else if (s.indexOf('-')>0){
                     
-                    var codes = s.split('-');
+                    let codes = s.split('-');
                     if(codes.length==2 
                         && window.hWin.HEURIST4.util.isNumber(codes[0])
                         && window.hWin.HEURIST4.util.isNumber(codes[1])
@@ -337,7 +337,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
                 }
             
-                var sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
+                let sGroupTitle = '<h4 style="margin:0;padding-bottom:5px;">';
                 if(is_search_one_group)
                 {
                     this.input_search.parent().hide();
@@ -380,7 +380,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 //we may search users in any database
                 request['db']     = this.options.database;
 
-                var that = this;                                                
+                let that = this;                                                
            
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

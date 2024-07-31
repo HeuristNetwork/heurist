@@ -67,7 +67,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         this.recordList.resultList('option', 'show_toolbar', false);
         this.recordList.resultList('option', 'view_mode', 'list');
 
-        var that = this;
+        let that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
                 that.updateRecordList(null, {recordset:response});
@@ -93,11 +93,11 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         
-        var recID   = fld('fxm_Extension');
-        var recTitle = '<span style="display:inline-block;width:4em">'+fld('fxm_Extension') + '</span>  ' 
+        let recID   = fld('fxm_Extension');
+        let recTitle = '<span style="display:inline-block;width:4em">'+fld('fxm_Extension') + '</span>  ' 
                         + fld('fxm_FiletypeName'); //fld2('fxm_MimeType');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
         }else{
@@ -147,9 +147,9 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     
     _getEditDialogButtons: function(){
                                     
-            var that = this;        
+            let that = this;        
             
-            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+            let btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                 click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                       
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New File Type'),

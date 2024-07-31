@@ -40,8 +40,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
-        var that = this;
+        let res = this._super();
+        let that = this;
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
         /*
@@ -61,12 +61,12 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     doAction: function(mode){
 
-            var header_fields = {ids:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tag:'rec_Tags'};
+            let header_fields = {ids:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tag:'rec_Tags'};
             function __removeLinkType(dtid){
                 if(header_fields[dtid]){
                     dtid = header_fields[dtid];
                 }else{
-                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                    let linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
                     if(isNaN(Number(linktype))){
                         dtid = dtid.substr(2);
                     }
@@ -78,8 +78,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 if(ids.length < lvl) return;
                 
                 //take last two - these are rt:dt
-                var rtid = ids[ids.length-lvl-1];
-                var dtid = __removeLinkType(ids[ids.length-lvl]);
+                let rtid = ids[ids.length-lvl-1];
+                let dtid = __removeLinkType(ids[ids.length-lvl]);
                 
                 if(!selectedFields[rtid]){
                     selectedFields[rtid] = [];    
@@ -100,9 +100,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             //get selected fields from treeview
             var selectedFields = {};
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
-            var fieldIds = tree.getSelectedNodes(false);
-            var k, len = fieldIds.length;
+            let tree = this.element.find('.rtt-tree').fancytree("getTree");
+            let fieldIds = tree.getSelectedNodes(false);
+            let k, len = fieldIds.length;
             
             if(len<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -112,15 +112,15 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             
             
             for (k=0;k<len;k++){
-                var node =  fieldIds[k];
+                let node =  fieldIds[k];
                 
                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
                 
-                var ids = node.data.code.split(":");
+                let ids = node.data.code.split(":");
                 
                 __addSelectedField(ids, 1, 0);
             }
-            var request = {
+            let request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'rec_RecTypeID': this.options.recordType,
                 'db': window.hWin.HAPI4.database,
@@ -141,7 +141,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 }};
                 
             
-            var url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
+            let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
             
             this.element.find('#postdata').val( JSON.stringify(request) );
             this.element.find('#postform').attr('action', url);
@@ -190,15 +190,15 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         $('.rtt-tree').parent().show();
         
-        var that = this;
+        let that = this;
 
         this.element.find('#selectAll').on("click", function(e){
-            var treediv = that.element.find('.rtt-tree');
+            let treediv = that.element.find('.rtt-tree');
 
-            var check_status = $(e.target).is(":checked");
+            let check_status = $(e.target).is(":checked");
 
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
-                var tree = treediv.fancytree("getTree");
+                let tree = treediv.fancytree("getTree");
                 tree.visit(function(node){
                     if(!node.hasChildren() && node.data.type != "relmarker" && node.data.type != "resource" 
                         && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
@@ -215,18 +215,18 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     _loadRecordTypesTreeView: function(rtyID){
         
-        var that = this;
+        let that = this;
         
         var rtyID = this.options.recordType;
 
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['ID','url','tags','all'] );
+            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['ID','url','tags','all'] );
             
             treedata[0].expanded = true; //first expanded
             
             //load treeview
-            var treediv = this.element.find('.rtt-tree');
+            let treediv = this.element.find('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
                 treediv.fancytree("destroy");
             }
@@ -242,8 +242,8 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     if( data.node.hasChildren() ){
                         
                         if(data.node.isExpanded()){
-                            for(var i=0; i<data.node.children.length; i++){
-                                var node = data.node.children[i];
+                            for(let i=0; i<data.node.children.length; i++){
+                                let node = data.node.children[i];
                                 if(node.key=='rec_ID' || node.key=='rec_Title'){
                                     node.setSelected(true);
                                 }
@@ -263,11 +263,11 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     }
                 },
                 lazyLoad: function(event, data){
-                    var node = data.node;
-                    var parentcode = node.data.code; 
-                    var rectypes = node.data.rt_ids;
+                    let node = data.node;
+                    let parentcode = node.data.code; 
+                    let rectypes = node.data.rt_ids;
                     
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                    let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                         rectypes, ['ID','url','tags','all'], parentcode );
                     if(res.length>1){
                         data.result = res;
@@ -278,9 +278,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                     return data;                                                   
                 },
                 select: function(e, data) {
-                    var node = data.node;
-                    var fieldIds = node.tree.getSelectedNodes(false);
-                    var isdisabled = fieldIds.length<1;
+                    let node = data.node;
+                    let fieldIds = node.tree.getSelectedNodes(false);
+                    let isdisabled = fieldIds.length<1;
                     window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
                 },
                 click: function(e, data){
@@ -289,7 +289,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                         return false;
                     }
 
-                    var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                    let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
 
                     if(isExpander){
                         return;

@@ -21,7 +21,7 @@
 
 
 function BaseClass(args) {
-     var _className = "BaseClass",
+     const _className = "BaseClass",
          _version   = "0.4";
 
     /**
@@ -32,7 +32,7 @@ function BaseClass(args) {
     }
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

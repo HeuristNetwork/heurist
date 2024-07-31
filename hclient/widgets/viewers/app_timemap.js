@@ -71,7 +71,7 @@ $.widget( "heurist.app_timemap", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         //???? this.element.hide();
 
@@ -116,7 +116,7 @@ $.widget( "heurist.app_timemap", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
                     
                     if(that.options.leaflet && that.mapframe[0].contentWindow){
-                        var mapping = that.mapframe[0].contentWindow.mapping;
+                        let mapping = that.mapframe[0].contentWindow.mapping;
                         if(mapping) {
                             if(that.map_resize_timer>0) clearTimeout(that.map_resize_timer);
                             that.map_resize_timer = setTimeout(function(){
@@ -140,10 +140,10 @@ $.widget( "heurist.app_timemap", {
                     
                     if(that.options.current_search_filter){
                         //data.recordset
-                        var sub_query = window.hWin.HEURIST4.query.mergeHeuristQuery(
+                        let sub_query = window.hWin.HEURIST4.query.mergeHeuristQuery(
                                     data.recordset.getIds(2000), that.options.current_search_filter);
                                     
-                        var sub_request = {q: sub_query, w: 'all', detail:'ids', id:window.hWin.HEURIST4.util.random()};
+                        let sub_request = {q: sub_query, w: 'all', detail:'ids', id:window.hWin.HEURIST4.util.random()};
                         that.option("recordset", sub_request); 
                     }else{
                         that.option("recordset", data.recordset); //hRecordSet
@@ -256,11 +256,11 @@ $.widget( "heurist.app_timemap", {
                 
                 //adding url parameters to map.php from widget options
               
-                var mapdoc = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                let mapdoc = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
                 if(mapdoc>0){
                     this.options.mapdocument = mapdoc;    
                 }
-                var url;
+                let url;
                 if(this.options.leaflet){
                     url = window.hWin.HAPI4.baseURL + 'viewers/map/map.php?';
                 }else{
@@ -272,7 +272,7 @@ $.widget( "heurist.app_timemap", {
             
                     if(!this.options.leaflet){ //for leafleat we assign parameters onMapInit
                         
-                        for(var key in this.options.layout_params){
+                        for(let key in this.options.layout_params){
                             if(key=='style' && window.hWin.HEURIST4.util.isJSON(this.options.layout_params[key])){
                                 url = url + '&'+key + '=' +  encodeURIComponent(JSON.stringify( this.options.layout_params[key] ));
                             }else{
@@ -349,12 +349,12 @@ $.widget( "heurist.app_timemap", {
             //all stuff below for google maps only
             
             //access mapping object in mapframe to referesh content 
-            var mapping = null;
+            let mapping = null;
             if(this.mapframe[0].contentWindow){
                 mapping = this.mapframe[0].contentWindow.mapping;
             }
 
-            var that = this;
+            let that = this;
 
             if(!mapping){
                 this.is_map_inited = false; 
@@ -377,7 +377,7 @@ $.widget( "heurist.app_timemap", {
                         { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                 },
                 function(){ //callback function on native map init completion
-                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
+                    let params = {id:'main', recordset:that.options.recordset, title:'Current query'};
                     that.addRecordsetLayer(params, -1);
                 }
             );
@@ -395,9 +395,9 @@ $.widget( "heurist.app_timemap", {
         //execte once - assign listeners
         if(!this.is_map_inited){ 
             
-            var that=this;
+            let that=this;
             
-            var mapping = this.mapframe[0].contentWindow.mapping;
+            let mapping = this.mapframe[0].contentWindow.mapping;
             
             //assign listeneres
             mapping.mapping('option', {'layout_params':this.options.layout_params});        
@@ -443,17 +443,17 @@ $.widget( "heurist.app_timemap", {
                 return;
             }
         
-            var that=this;
+            let that=this;
         
             if(!that.map_curr_search_inited && that.options.recordset){
 
-                    var mapping = this.mapframe[0].contentWindow.mapping;
+                    let mapping = this.mapframe[0].contentWindow.mapping;
                 
                     that.map_curr_search_inited = true;
                     
                     if(that.map_cache_got && that.options.use_cache){
                         //do not reload current search since first request loads full dataset - just hide items that are not in current search
-                        var _selection = null;
+                        let _selection = null;
                         if(that.options.recordset=='show_all' || that.options.recordset=='hide_all'){
                             _selection = that.options.recordset;
                             that.options.recordset = null;
@@ -478,7 +478,7 @@ $.widget( "heurist.app_timemap", {
     }
     
     , updateDataset: function(data, dataset_name){
-        var mapping = null;
+        let mapping = null;
         if(this.mapframe[0].contentWindow){
             mapping = this.mapframe[0].contentWindow.mapping;
             if(mapping){
@@ -511,7 +511,7 @@ $.widget( "heurist.app_timemap", {
         }
         
         if (this.mapframe[0].contentWindow.mapping) {
-            var  mapping = this.mapframe[0].contentWindow.mapping;  
+            let  mapping = this.mapframe[0].contentWindow.mapping;  
             
             if(this.options.leaflet){ //leaflet
 
@@ -537,12 +537,12 @@ $.widget( "heurist.app_timemap", {
         }
 
         if (this.mapframe[0].contentWindow.mapping) {
-            var  mapping = this.mapframe[0].contentWindow.mapping;  
+            let  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
                 //if layer is visible - select and zoom to record in search results
-                var recID = selection[0];
-                var layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
+                let recID = selection[0];
+                let layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
                 (layer_rec['layer']).getMapData();
                 
             }
@@ -556,12 +556,12 @@ $.widget( "heurist.app_timemap", {
     , _zoomToLayer: function (selection) {
         
         if (this.mapframe[0].contentWindow.mapping && selection && selection.length>0) {
-            var  mapping = this.mapframe[0].contentWindow.mapping;  
+            let  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
                 //if layer is visible - select and zoom to record in search results
-                var recID = selection[0];
-                var layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
+                let recID = selection[0];
+                let layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
                 if(layer_rec && layer_rec['layer']){
                     (layer_rec['layer']).zoomToLayer();    
                 }
@@ -582,12 +582,12 @@ $.widget( "heurist.app_timemap", {
         }
 
         if (this.mapframe[0].contentWindow.mapping) {
-            var  mapping = this.mapframe[0].contentWindow.mapping;  
+            let  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
             
                 if(!(mapdoc_ID>=0)) mapdoc_ID = 0;
-                var mapManager = mapping.mapping( 'getMapManager' );
+                let mapManager = mapping.mapping( 'getMapManager' );
                 mapManager.setLayersVisibility(mapdoc_ID, selection, new_visiblity);
                 /*
                 //if layer is visible - select and zoom to record in search results
@@ -639,7 +639,7 @@ $.widget( "heurist.app_timemap", {
     
     //google to remove
     , getMapDocumentDataById: function(mapdocument_id){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             return mapping.map_control.getMapDocumentDataById(mapdocument_id);
         }else{
@@ -649,7 +649,7 @@ $.widget( "heurist.app_timemap", {
     
     //google to remove
     , loadMapDocumentById: function(recId){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.loadMapDocumentById(recId);  //see viewers/gmap/map.js
         }
@@ -661,7 +661,7 @@ $.widget( "heurist.app_timemap", {
     */
     //google to remove
     , addQueryLayer: function(params){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.addQueryLayer(params);
         }
@@ -669,7 +669,7 @@ $.widget( "heurist.app_timemap", {
     
     //google to remove
     , addRecordsetLayer: function(params){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.addRecordsetLayer(params);
         }
@@ -677,7 +677,7 @@ $.widget( "heurist.app_timemap", {
     
     //google to remove
     , editLayerProperties: function( dataset_id, legendid, callback ){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.editLayerProperties(dataset_id, legendid, callback);
         }
@@ -685,7 +685,7 @@ $.widget( "heurist.app_timemap", {
     
     //leaflet
     zoomToSelection:function(selection, fly_params){
-        var mapping = this.mapframe[0].contentWindow.mapping;
+        let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
             mapping.mapping('zoomToSelection', selection, fly_params );
         }
@@ -696,7 +696,7 @@ $.widget( "heurist.app_timemap", {
     //
     , getMapping: function(){
         if(this.mapframe[0].contentWindow){
-            var map = this.mapframe[0].contentWindow.mapping;
+            let map = this.mapframe[0].contentWindow.mapping;
             return map.mapping('instance');
         }else{
             return null;

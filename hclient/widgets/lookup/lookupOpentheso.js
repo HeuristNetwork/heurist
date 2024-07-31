@@ -409,7 +409,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -560,7 +560,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     closingAction: function(dlg_response){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(dlg_response)){
             dlg_response = {};
@@ -581,7 +581,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
      */
     _doSearch: function(){
 
-        var that = this;
+        let that = this;
 
         let sURL = this._servers[this._sel_elements['server'].val()]['uri'];
         let th_id = this._sel_elements['theso'].val();
@@ -620,7 +620,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, null, '<span style="color: white;">Performing search...</span>'); // show loading cover
 
         // for record_lookup.php
-        var request = {
+        let request = {
             service: sURL, // request url
             serviceType: 'opentheso', // requesting service, otherwise no
             preferred_lang: window.hWin.HEURIST4.util.isempty(language) || language.length != 2 ? 'fr' : language
@@ -656,7 +656,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
         this.recordList.show();
 
-        var is_wrong_data = true;
+        let is_wrong_data = true;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 

@@ -48,7 +48,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        var that = this;
+        let that = this;
 
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
@@ -110,7 +110,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     //
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -128,14 +128,14 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
         function fld(fldname, width){
 
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
 
             if(fldname == 'properties.LGA'){ 
                 s = s.lga; 
             }
 
             s = s?s:'';
-            var title = s;
+            let title = s;
 
             if(fldname == 'recordLink'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -148,17 +148,17 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             return s;
         }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
 
-        var recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
+        let recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('recordLink', 12); 
 
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
                         + html_thumb
                         + '<div class="recordIcons">'
                         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -174,7 +174,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     // By default there are two 'Go' and 'Cancel', these can be edited or more buttons can be added
     //
     _getActionButtons: function(){
-        var res = this._super(); // setups and retrieves default dialog buttons
+        let res = this._super(); // setups and retrieves default dialog buttons
 
         /*
             res[0] => Cancel/Close: Closes dialog
@@ -192,7 +192,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     doAction: function(){
 
         // retrieve selected record/s
-        var sel = this.recordList.resultList('getSelected', false);
+        let sel = this.recordList.resultList('getSelected', false);
 
         if(sel && sel.length() == 1){
 
@@ -201,7 +201,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
                 //create new record 
                 window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-                var rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
+                let rectype_id = (!window.hWin.HEURIST4.util.isempty(this.options.rectype_for_new_record)) ? this.options.rectype_for_new_record : this.options.mapping.rty_ID;
 
                 this._addNewRecord(rectype_id, sel);                     
             }else{
@@ -219,7 +219,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
-        var sURL;
+        let sURL;
 
         // get base url
         if(this.options.mapping.service=='tlcmap'){
@@ -255,8 +255,8 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             sURL = sURL + '&state=' + this.element.find('#inpt_state').val();
         }
 
-        var that = this;
-        var request = {service:sURL, serviceType:'tlcmap'};             
+        let that = this;
+        let request = {service:sURL, serviceType:'tlcmap'};             
 
         // performing request - see controller hserv/controller/record_lookup.php for service external lookups
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
@@ -284,17 +284,17 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
         
         this.recordList.show();
        
-        var is_wrong_data = true;
+        let is_wrong_data = true;
                         
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // validate response as GeoJSON
             
-            var res_records = {}, res_orders = [];
+            let res_records = {}, res_orders = [];
 
-            var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
 
             // Retrieve fields for records, any additional fields that are not part of the new record (e.g. url to original record) can be added here
-            var fields = ['rec_ID','rec_RecTypeID'];
-            var map_flds = Object.keys(this.options.mapping.fields);
+            let fields = ['rec_ID','rec_RecTypeID'];
+            let map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);
             fields = fields.concat('recordLink');
             
@@ -305,19 +305,19 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             if(!geojson_data.features) geojson_data.features = geojson_data;
             
             // Parse GeoJSON, special handling can be done here (e.g. creating Geo Objects for Geospatial fields)
-            var i=0;
+            let i=0;
             for(;i<geojson_data.features.length;i++){
-                var feature = geojson_data.features[i];
+                let feature = geojson_data.features[i];
                 
-                var recID = i+1;
+                let recID = i+1;
                 
-                var hasGeo = false;
-                var values = [recID, this.options.mapping.rty_ID];
+                let hasGeo = false;
+                let values = [recID, this.options.mapping.rty_ID];
                 for(var k=0; k<map_flds.length; k++){
                     
-                    var val = feature[ map_flds[k][0] ];
+                    let val = feature[ map_flds[k][0] ];
                     
-                    for(var m=1; m<map_flds[k].length; m++){
+                    for(let m=1; m<map_flds[k].length; m++){
                         if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
                             val = val[ map_flds[k][m] ];
                         }
@@ -327,12 +327,12 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
                     if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
                         if(!window.hWin.HEURIST4.util.isempty(val)){
                             val = {"type": "Feature", "geometry": val};
-                            var wkt = stringifyMultiWKT(val);    
+                            let wkt = stringifyMultiWKT(val);    
                             if(window.hWin.HEURIST4.util.isempty(wkt)){
                                 val = '';
                             }else{
                                 //@todo the same code mapDraw.php:134
-                                var typeCode = 'm';
+                                let typeCode = 'm';
                                 if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
                                     if(wkt.indexOf('LINESTRING')>=0){
                                         typeCode = 'l';
@@ -364,7 +364,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             if(res_orders.length>0){
 
                 // initialise recordset
-                var res_recordset = new hRecordSet({
+                let res_recordset = new hRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,
@@ -391,9 +391,9 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
     //
     _addNewRecord: function (rectype_id, field_values){
         
-        var that = this;
+        let that = this;
 
-        var request = {
+        let request = {
             a: 'save',
             ID: 0,
             RecTypeID: rectype_id,

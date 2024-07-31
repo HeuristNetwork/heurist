@@ -17,21 +17,21 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var layoutMgr;  
+let layoutMgr;  
 
 function hLayoutMgr(){
 
-    var _className = "hLayoutMgr";
+    const _className = "hLayoutMgr";
 
-    var pnl_counter = 1;   //counter to assign unique key for layout elements
+    let pnl_counter = 1;   //counter to assign unique key for layout elements
 
-    var body = $(this.document).find('body');
+    let body = $(this.document).find('body');
     
-    var isEditMode = false;
+    let isEditMode = false;
     
-    var _supp_options = {}; //defined in layoutInit dynamic options with current status params
+    let _supp_options = {}; //defined in layoutInit dynamic options with current status params
     
-    var _main_layout_cfg = null;
+    let _main_layout_cfg = null;
 
     // layout.key    - unique key within page - it is assigned from scratch every time page is loaded
     // it is assigned to data-lid - attribute in layout title and data-hid for div element
@@ -129,11 +129,11 @@ function hLayoutMgr(){
         }
         
         
-        for(var i=0; i<layout.length; i++){
+        for(let i=0; i<layout.length; i++){
             
             _layoutInitKey(layout, i);
             
-            var ele = layout[i];
+            let ele = layout[i];
             
             if(ele.type=='cardinal'){
                 
@@ -210,7 +210,7 @@ function hLayoutMgr(){
             layout.dom_id = 'cms-tabs-' + layout.key;  
         }
         
-        var $d; //result
+        let $d; //result
         
         if(forStorage){
             //attributes
@@ -231,7 +231,7 @@ function hLayoutMgr(){
         
             if(layout.appid && _main_layout_cfg!=null){
                 //assign search_realm and map_widget_id
-                var widget_name = layout.appid;
+                let widget_name = layout.appid;
                 if(!layout.options) layout.options = {};
                 //find map widget on this page
                 if(widget_name=='heurist_StoryMap'){
@@ -252,7 +252,7 @@ function hLayoutMgr(){
                 //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
                 if(!layout.options.search_realm){ //not defined yet
                 
-                    var need_assign = true;
+                    let need_assign = true;
                     
                     if(widget_name=='heurist_Map')
                     {
@@ -271,7 +271,7 @@ function hLayoutMgr(){
                     }
                     //assign search realm
                     if(need_assign){
-                        var sg = layoutMgr.layoutContentFindMainRealm(_main_layout_cfg);    
+                        let sg = layoutMgr.layoutContentFindMainRealm(_main_layout_cfg);    
                         if(sg=='') sg = 'search_group_1';
                         layout.options.search_realm = sg;
                     }
@@ -280,7 +280,7 @@ function hLayoutMgr(){
          
             // assign id for new content and widgety divs
             // it is saved in configuration
-            var uid = ''+Math.floor(Math.random() * 10000);
+            let uid = ''+Math.floor(Math.random() * 10000);
             //Math.floor(Math.random() * Date.now())
             do{
                 if(layout.appid){
@@ -313,7 +313,7 @@ function hLayoutMgr(){
     function _layoutInitGroup(layout, container, forStorage){
         
         //create parent div
-        var $d = _layoutCreateDiv(layout, 'cms-element brick', forStorage);
+        let $d = _layoutCreateDiv(layout, 'cms-element brick', forStorage);
         
         $d.appendTo(container);
                 
@@ -340,7 +340,7 @@ function hLayoutMgr(){
     // 
     function _layoutInitText(layout, container, forStorage){
         
-        var $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick', forStorage);
+        let $d = _layoutCreateDiv(layout, 'editable tinymce-body cms-element brick', forStorage);
 
         $d.appendTo(container);
             
@@ -353,11 +353,11 @@ function hLayoutMgr(){
             $d.css( layout.css );    
         }
         
-        var content = 'content'; //default name of attribute
+        let content = 'content'; //default name of attribute
         
         if(forStorage){
             //keep content for all languages
-            var aLangs = [];
+            let aLangs = [];
             Object.keys(layout).forEach(key => {
                 if(key.indexOf('content')===0){
                     aLangs.push(key);
@@ -366,7 +366,7 @@ function hLayoutMgr(){
             
             if(aLangs.length>1){
                 aLangs.forEach((lang) => {
-                    var lang_code = lang.substring(7);
+                    let lang_code = lang.substring(7);
                     if(!lang_code) lang_code = 'def';
                     $(`<div css="${lang_code=='def'?'':'display:none'}" data-lang="${lang_code}">${layout[lang]}</div>`).appendTo($d);    
                 });
@@ -377,7 +377,7 @@ function hLayoutMgr(){
         }else{
         
             if(_supp_options['lang']){ //current language
-                var lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'], 'def'); //returns 'def' if not found
+                let lang = window.hWin.HAPI4.getLangCode3(_supp_options['lang'], 'def'); //returns 'def' if not found
                 if(layout[content+lang]){ //if not found use the default
                     content = content+lang;
                 }
@@ -396,10 +396,10 @@ function hLayoutMgr(){
     //
     function _layoutAddWidget(layout, container, forStorage){
 
-        var $d = _layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
+        let $d = _layoutCreateDiv(layout, 'editable heurist-widget cms-element brick');
 
         //remove previous one
-        var old_widget = container.find('div[data-hid='+layout.key+']');
+        let old_widget = container.find('div[data-hid='+layout.key+']');
         if(old_widget.length>0){
             //parent_ele = old_widget.parent();
             //var prev_sibling = old_widget.prev();
@@ -439,7 +439,7 @@ function hLayoutMgr(){
 
         
         //default min-height position depends on widget
-        var app = _getWidgetById(layout.appid);
+        let app = _getWidgetById(layout.appid);
         if(app.minw>0 && !layout.css['minWidth']){
             layout.css['minWidth'] = app.minw;
         }
@@ -466,7 +466,7 @@ function hLayoutMgr(){
     //
     function _getWidgetById(id){
 
-        var i;
+        let i;
         for(i=0; i<cfg_widgets.length; i++){
             if(cfg_widgets[i].id==id){
                 return cfg_widgets[i];
@@ -482,7 +482,7 @@ function hLayoutMgr(){
 
         //var layout = _layoutContentFindElement(_layout_cfg, container.attr('data-lid'));
 
-        var app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
+        let app = _getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
 
         if(!layout.options) layout.options = {};
         
@@ -561,16 +561,16 @@ function hLayoutMgr(){
         $parent.appendTo(container);
         
         
-        var layout_opts = {applyDefaultStyles: true, maskContents: true};
+        let layout_opts = {applyDefaultStyles: true, maskContents: true};
     
-        for(var i=0; i<layout.children.length; i++){
+        for(let i=0; i<layout.children.length; i++){
             
             _layoutInitKey(layout.children, i);
             
             lpane = layout.children[i];
-            var pos = lpane.type;
+            let pos = lpane.type;
             
-            var opts = lpane.options;
+            let opts = lpane.options;
             if(!opts) opts = {};
             
             if(!$.isEmptyObject(opts)){
@@ -641,7 +641,7 @@ function hLayoutMgr(){
     function _layoutInitTabs(layout, container, forStorage){
         
         
-        var $d;
+        let $d;
         
         layout.dom_id = 'cms-tabs-'+layout.key;
         
@@ -673,9 +673,9 @@ function hLayoutMgr(){
         if(!forStorage) {
             //tab header
             $d = body.find('#'+layout.dom_id);
-            var groupTabHeader = $('<ul>').prependTo($d);
+            let groupTabHeader = $('<ul>').prependTo($d);
             
-            for(var i=0; i<layout.children.length; i++){
+            for(let i=0; i<layout.children.length; i++){
           
                 //.addClass('edit-form-tab')
                 $('<li>').html('<a href="#'+layout.children[i].dom_id
@@ -693,7 +693,7 @@ function hLayoutMgr(){
     //
     function _layoutInitAccordion(layout, container, forStorage){
        
-        var $d;
+        let $d;
         
         layout.dom_id = 'cms-tabs-'+layout.key;
         
@@ -719,7 +719,7 @@ function hLayoutMgr(){
         if(!forStorage){
        
         //accordion headers
-        for(var i=0; i<layout.children.length; i++){
+        for(let i=0; i<layout.children.length; i++){
       
             $d = body.find('#'+layout.children[i].dom_id);
             
@@ -750,11 +750,11 @@ function hLayoutMgr(){
             }
         }
         
-        for(var i=0; i<content.length; i++){
+        for(let i=0; i<content.length; i++){
             if(content[i].key == ele_key){
                 return  content[i];
             }else if(content[i].children && content[i].children.length>0){
-                var res = _layoutContentFindElement(content[i].children, ele_key);    
+                let res = _layoutContentFindElement(content[i].children, ele_key);    
                 if(res) return res;
             }
         }
@@ -774,11 +774,11 @@ function hLayoutMgr(){
             }
         }
         
-        for(var i=0; i<content.length; i++){
+        for(let i=0; i<content.length; i++){
             if(content[i].appid == widget_name){
                 return  content[i];
             }else if(content[i].children && content[i].children.length>0){
-                var res = _layoutContentFindWidget(content[i].children, widget_name);    
+                let res = _layoutContentFindWidget(content[i].children, widget_name);    
                 if(res) return res;
             }
         }
@@ -790,7 +790,7 @@ function hLayoutMgr(){
     //
     function _layoutContentFindAllWidget(content){
 
-        var res = [];
+        let res = [];
         
         if(!$.isArray(content)){
             if(content.children && content.children.length>0){
@@ -801,7 +801,7 @@ function hLayoutMgr(){
             }
         }
         
-        for(var i=0; i<content.length; i++){
+        for(let i=0; i<content.length; i++){
             if(content[i].appid){
                 res.push(content[i]);
             }else if(content[i].children && content[i].children.length>0){
@@ -817,8 +817,8 @@ function hLayoutMgr(){
     //
     function _layoutContentFindMainRealm(content){
         //find all widgets on page
-        var res = {};
-        var widgets = _layoutContentFindAllWidget(content);
+        let res = {};
+        let widgets = _layoutContentFindAllWidget(content);
         for(var i=0; i<widgets.length; i++){
             if(!widgets[i].options.search_page && widgets[i].options.search_realm){
                 if(res[widgets[i].options.search_realm]>0){
@@ -829,8 +829,8 @@ function hLayoutMgr(){
             }
         }
         //find max usage
-        var max_usage = 0; 
-        var max_sg = ''
+        let max_usage = 0; 
+        let max_sg = ''
         widgets = Object.keys(res);
         for(var i=0; i<widgets.length; i++){
             if(res[widgets[i]]>max_usage){
@@ -846,7 +846,7 @@ function hLayoutMgr(){
     //
     function _layoutContentFindParent(parent, ele_key){
         
-        var children;
+        let children;
         if($.isArray(parent)){
             children = parent;
             parent = 'root';
@@ -854,11 +854,11 @@ function hLayoutMgr(){
             children = parent.children;    
         }
         
-        for(var i=0; i<children.length; i++){
+        for(let i=0; i<children.length; i++){
             if(children[i].key == ele_key){
                 return  parent;
             }else if(children[i].children && children[i].children.length>0){
-                var res = _layoutContentFindParent(children[i], ele_key);    
+                let res = _layoutContentFindParent(children[i], ele_key);    
                 if(res) return res;
             }
         }
@@ -870,9 +870,9 @@ function hLayoutMgr(){
     //    
     function _layoutContentSaveElement(content, new_cfg){
             
-        var ele_key = new_cfg.key;
+        let ele_key = new_cfg.key;
         
-        for(var i=0; i<content.length; i++){
+        for(let i=0; i<content.length; i++){
             if(content[i].key == ele_key){
                 content[i] = new_cfg;
                 return true 
@@ -897,13 +897,13 @@ function hLayoutMgr(){
             
         }else if(layout.template=='blog'){
             
-           var ele = _layoutContentFindWidget(layout, 'heurist_SearchTree');
+           let ele = _layoutContentFindWidget(layout, 'heurist_SearchTree');
            if (ele && ele.options.init_svsID=='????') {
                 layout.template = null;
 
                 try{
                 
-                var sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/blog.js';
+                let sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/blog.js';
                 // 3. Execute template script to replace template variables, adds filters and smarty templates
                     $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
                           //function in blog.js
@@ -930,17 +930,17 @@ function hLayoutMgr(){
     function _convertOldCmsFormat(container, lvl){
 
 
-        var res = [];
+        let res = [];
 
         $.each(container.children(), function(idx, ele){
 
             ele = $(ele);
 
-            var child;
+            let child;
 
             if(ele.attr('data-heurist-app-id')){
                 //this is widget
-                var opts = window.hWin.HEURIST4.util.isJSON(ele.text());
+                let opts = window.hWin.HEURIST4.util.isJSON(ele.text());
 
                 child = {appid: ele.attr('data-heurist-app-id'),
                     options: opts};
@@ -952,8 +952,8 @@ function hLayoutMgr(){
             }else 
                 if(ele.find('div[data-heurist-app-id]').length==0){ //no widgets
 
-                    var tag = ele[0].nodeName;
-                    var s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
+                    let tag = ele[0].nodeName;
+                    let s = '<' + tag + '>'+ele.html()+'</' + tag + '>';
 
                     child = {name:"Content "+lvl+'.'+idx, 
                         type:"text", 
@@ -976,7 +976,7 @@ function hLayoutMgr(){
                 if(ele.attr('style')){
 
 
-                    var styles = ele.attr('style').split(';'),
+                    let styles = ele.attr('style').split(';'),
                     i= styles.length,
                     css = {},
                     style, k, v;
@@ -1025,7 +1025,7 @@ function hLayoutMgr(){
         
         ele = $(ele);
 
-        var res;
+        let res;
         
         if(ele.length>1){
 
@@ -1052,7 +1052,7 @@ function hLayoutMgr(){
                 res = {};
             }
             
-            var translations = ele.children('[data-lang]');
+            let translations = ele.children('[data-lang]');
             if(translations.length>0){
                 translations.each((i,item)=>{
                     res['content'+item.getAttribute('data-lang')] = item.html();                    
@@ -1075,7 +1075,7 @@ function hLayoutMgr(){
                    
             if(ele.attr('style')){
                 if(res.type=='north' || res.type=='south' || res.type=='west' || res.type=='east'){
-                    var cardinal_opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-cms-options'));
+                    let cardinal_opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-cms-options'));
                     if(cardinal_opts){
                         res['options'] = cardinal_opts;        
                     }
@@ -1093,7 +1093,7 @@ function hLayoutMgr(){
                 res.appid = res.options.appid;
             }else{
                 
-                var children = ele.children('[data-cms-type]');
+                let children = ele.children('[data-cms-type]');
                 if(children.length>0){
                     
                     res.children = [];
@@ -1118,7 +1118,7 @@ function hLayoutMgr(){
     }
     
     function css2json(css) {
-        var s = {};
+        let s = {};
         if (!css) return s;
         if (css instanceof CSSStyleDeclaration) {
             for (var i in css) {
@@ -1129,7 +1129,7 @@ function hLayoutMgr(){
         } else if (typeof css == "string") {
             css = css.split("; ");
             for (var i in css) {
-                var l = css[i].split(": ");
+                let l = css[i].split(": ");
                 s[l[0].toLowerCase()] = (l[1]);
             }
         }
@@ -1148,7 +1148,7 @@ function hLayoutMgr(){
         console.log(content);
         
         //to html
-        var res = _layoutInitFromJSON(content, null, true, true);
+        let res = _layoutInitFromJSON(content, null, true, true);
         console.log(res);
         
         //and back to json
@@ -1253,13 +1253,13 @@ function hLayoutMgr(){
         //
         layoutCheckWidgets: function(){
             
-            var widgets = body.find('div.heurist-widget');
-            var are_all_widgets_inited = true;
+            let widgets = body.find('div.heurist-widget');
+            let are_all_widgets_inited = true;
             
             $.each(widgets, function(i, item){
-                var widgetname = $(item).attr('data-widgetname');
+                let widgetname = $(item).attr('data-widgetname');
                 if(widgetname){
-                    var is_inited = $(item)[widgetname]('instance') && $(item)[widgetname]('option', 'init_completed');
+                    let is_inited = $(item)[widgetname]('instance') && $(item)[widgetname]('option', 'init_completed');
                     if(is_inited===false){
                         are_all_widgets_inited = false;
                         return false;

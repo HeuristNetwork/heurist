@@ -21,11 +21,11 @@
 //
 function editCMS_SelectElement( callback ){
 
-    var $dlg;
+    let $dlg;
 
-    var selected_element = null, selected_name='';
+    let selected_element = null, selected_name='';
 
-    var t_components = {
+    let t_components = {
         
         header1:{name:'Web pages', description:'#web_pages', is_section_header: true},
 
@@ -75,7 +75,7 @@ function editCMS_SelectElement( callback ){
     };
 
 
-    var buttons= [
+    let buttons= [
         {text:window.hWin.HR('Cancel'), 
             id:'btnCancel',
             css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
@@ -140,16 +140,16 @@ function editCMS_SelectElement( callback ){
                 window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website&id=39&pageid=708');
 
                 //load list of groups and elements and init selector
-                var sel = $dlg.find('#components');
+                let sel = $dlg.find('#components');
                 $.each(t_components, function(key, item){
                     if(item.is_group_header || item.is_section_header){
-                        var grp = document.createElement("optgroup");
+                        let grp = document.createElement("optgroup");
                         grp.label = item.name;
                         sel[0].appendChild(grp);
 
                         grp.classList.add(item.is_group_header ? 'group-header' : 'section-header');
                     }else if(item.is_separator){
-                        var opt = window.hWin.HEURIST4.ui.addoption(sel[0], null, ' ', true);
+                        let opt = window.hWin.HEURIST4.ui.addoption(sel[0], null, ' ', true);
                         opt.classList.add('separator-opt')
                     }else{
                         window.hWin.HEURIST4.ui.addoption(sel[0], key, item.name);
@@ -159,8 +159,8 @@ function editCMS_SelectElement( callback ){
 
                 sel.change(function(e){
                     window.hWin.HEURIST4.util.setDisabled( $dlg.parents('.ui-dialog').find('#btnDoAction'), false );
-                    var sel = e.target;
-                    var t_name = $(sel).val();
+                    let sel = e.target;
+                    let t_name = $(sel).val();
                     selected_element  = t_name;
                     selected_name = sel.options[sel.selectedIndex].text;
 

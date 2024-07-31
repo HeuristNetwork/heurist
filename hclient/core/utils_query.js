@@ -33,9 +33,9 @@ window.hWin.HEURIST4.query = {
     // JSON to URL
     // hQueryComposeURL
     composeHeuristQueryFromRequest: function(query_request, encode){
-            var query_string = 'db=' + window.hWin.HAPI4.database;
+            let query_string = 'db=' + window.hWin.HAPI4.database;
             
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            let mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
             if(mapdocument>0){
                 query_string = query_string + '&mapdocument='+mapdocument;
             }
@@ -61,7 +61,7 @@ window.hWin.HEURIST4.query = {
                     query_string = query_string + '&q=' + sq;
                 }
                 
-                var rules = query_request.rules;
+                let rules = query_request.rules;
                 if(!window.hWin.HEURIST4.util.isempty(rules)){
                     if($.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
                         rules = JSON.stringify(query_request.rules);
@@ -98,8 +98,8 @@ window.hWin.HEURIST4.query = {
     composeHeuristQuery2: function(params, encode){
         if(params){
 
-            var query, rules = params.rules;
-            var query_to_save = [];
+            let query, rules = params.rules;
+            let query_to_save = [];
 
             if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=='all' || params.w=='a')){
                 query_to_save.push('w='+params.w);
@@ -161,7 +161,7 @@ window.hWin.HEURIST4.query = {
             return null;
         }
         
-        for(var k=0; k<rules.length; k++){
+        for(let k=0; k<rules.length; k++){
             delete rules[k]['codes'];
             var rl = null;
             if(rules[k]['levels'] && rules[k]['levels'].length>0){
@@ -183,11 +183,11 @@ window.hWin.HEURIST4.query = {
     //
     mergeHeuristQuery: function(){
         
-        var res_query = [];
+        let res_query = [];
         
         if(arguments.length>0){
 
-            var idx=1, len = arguments.length;
+            let idx=1, len = arguments.length;
             
             res_query = arguments[0];
             for (;idx<len;idx++){
@@ -205,7 +205,7 @@ window.hWin.HEURIST4.query = {
         function __prepareQuery(query){
             
             var query_a, rules = false, sPlain = false;
-            var isJson = false;
+            let isJson = false;
             
             var query_a = window.hWin.HEURIST4.util.isJSON(query);
             if( query_a ){
@@ -234,7 +234,7 @@ window.hWin.HEURIST4.query = {
                     query = {plain: encodeURIComponent(query)}; //query1.split('"').join('\\\"')};    
                 }
             }
-            var res = {q:query};    
+            let res = {q:query};    
             if(rules){
                 res['rules'] = rules;
             }
@@ -281,8 +281,8 @@ window.hWin.HEURIST4.query = {
         }
 */        
 
-        var q1 = __prepareQuery(query1);
-        var q2 = __prepareQuery(query2);
+        let q1 = __prepareQuery(query1);
+        let q2 = __prepareQuery(query2);
 
         if(q1['plain'] && q2['plain'])
         {
@@ -316,9 +316,9 @@ window.hWin.HEURIST4.query = {
     parseHeuristQuery: function(qsearch)
     {
         
-        var type = -1;
+        let type = -1;
         
-        var query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
+        let query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
         if(qsearch){
             
             var res = {};
@@ -336,7 +336,7 @@ window.hWin.HEURIST4.query = {
                 
             }else{ //it may be aquery in form of json
             
-                var r = window.hWin.HEURIST4.util.isJSON(qsearch);
+                let r = window.hWin.HEURIST4.util.isJSON(qsearch);
                 if(r!==false){
                     
                     if(window.hWin.HEURIST4.util.isArray(r.rectypes)){
@@ -399,7 +399,7 @@ window.hWin.HEURIST4.query = {
     //    
     hQueryStringify: function(request, query_only){
         
-        var res = {};
+        let res = {};
         
         if(window.hWin.HEURIST4.util.isempty(request.q)){
             return '';
@@ -453,16 +453,16 @@ window.hWin.HEURIST4.query = {
     //
     hQueryCopyPopup: function(request, pos_element){
         
-        var res = window.hWin.HEURIST4.query.hQueryStringify(request);
+        let res = window.hWin.HEURIST4.query.hQueryStringify(request);
         
-        var buttons = {};
+        let buttons = {};
         buttons[window.hWin.HR('Copy')]  = function() {
             
-            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-            var target = $dlg.find('#dlg-prompt-value')[0];
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            let target = $dlg.find('#dlg-prompt-value')[0];
             target.focus();
             target.setSelectionRange(0, target.value.length);
-            var succeed;
+            let succeed;
             try {
                 succeed = document.execCommand("copy");
                 
@@ -474,11 +474,11 @@ window.hWin.HEURIST4.query = {
             
         }; 
         buttons[window.hWin.HR('Close')]  = function() {
-            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
             $dlg.dialog( "close" );
         };
         
-        var opts = {width:450, buttons:buttons, default_palette_class: 'ui-heurist-explore'}
+        let opts = {width:450, buttons:buttons, default_palette_class: 'ui-heurist-explore'}
         if(pos_element){
             if(pos_element.my){
                 opts.my = pos_element.my;
@@ -505,12 +505,12 @@ window.hWin.HEURIST4.query = {
     //
     createFacetQuery: function(code, need_query, respect_relation_direction){
 
-        var result = {};
+        let result = {};
         
         code = code.split(':');
 
-        var dtid = code[code.length-1];
-        var linktype = dtid.substr(0,2);
+        let dtid = code[code.length-1];
+        let linktype = dtid.substr(0,2);
         if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
             //unconstrained link
             code.push('0');         //!!!!!!!!
@@ -525,20 +525,20 @@ window.hWin.HEURIST4.query = {
 
             //create query to search facet values
             function __crt( idx ){
-                var res = null;
+                let res = null;
                 if(idx>0){  //this is relation or link
 
                     res = [];
 
-                    var pref = '';
-                    var qp = {};
+                    let pref = '';
+                    let qp = {};
 
                     if(code[idx]>0){ //if 0 - unconstrained
                         qp['t'] = code[idx];
                         res.push(qp);
                     }
 
-                    var fld = code[idx-1]; //link field
+                    let fld = code[idx-1]; //link field
                     if(fld.indexOf('lf')==0){
                         pref = 'linked_to';    
                     }else if(fld.indexOf('lt')==0){

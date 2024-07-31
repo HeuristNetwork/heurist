@@ -47,10 +47,10 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = this.selectRecordScope.val();
+            let scope_val = this.selectRecordScope.val();
             if(scope_val=='') return;
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -62,7 +62,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
                 }   
             }
         
-            var request = {
+            let request = {
                 'a'          : 'batch',
                 'entity'     : 'usrBookmarks',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -74,7 +74,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

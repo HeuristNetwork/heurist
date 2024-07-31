@@ -120,10 +120,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }else if(this.options.actionName=='register')
         {
             
-            var that = this;
+            let that = this;
             window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
                 if(!window.hWin.HEURIST4.util.isempty(response)){
-                    var record = response.getFirstRecord();
+                    let record = response.getFirstRecord();
                     that._$('.dbDescription').text(record[17]);
                     that._$('#dbTitle').val(record[17]).trigger('keyup');
                 }});
@@ -153,8 +153,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 
                 this._on(this._$('#dbTitle'),{keyup:
                         function ( event ){
-                            var len = $(event.target).val().length;
-                            var ele = this._$('#cntChars').text(len);
+                            let len = $(event.target).val().length;
+                            let ele = this._$('#cntChars').text(len);
                             ele.parent().css('color',(len<40)?'red':'#6A7C99');
                         }
                 });
@@ -165,7 +165,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
 
         //user and database name inputs        
-        var ele = this._$('#uname');
+        let ele = this._$('#uname');
         if(ele.val()=='' && window.hWin.HAPI4.currentUser){
             ele.val(window.hWin.HAPI4.currentUser.ugr_Name.substr(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
         }
@@ -201,7 +201,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     doAction: function(){
         
-        var request;
+        let request;
         
         if(this.options.actionName=='create' 
             || this.options.actionName=='rename'
@@ -214,7 +214,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 return;  
            } 
            
-           var ele = this._$('#uname');
+           let ele = this._$('#uname');
            
            request = {uname : (ele.length>0?ele.val().trim():''), 
                       dbname: dbname}; 
@@ -241,7 +241,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }else if(this.options.actionName=='clear' || this.options.actionName=='delete'){
 
            //challenged word
-           var chpwd = this._$('#db-password').val().trim();
+           let chpwd = this._$('#db-password').val().trim();
            if(chpwd==''){
                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define challenge word'));
                return;  
@@ -265,13 +265,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            } 
            
            //check for source/archive file
-           var dbarchive_file = this._$('#selectedZip').text();
+           let dbarchive_file = this._$('#selectedZip').text();
            if(dbarchive_file==''){
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of source zip archive'));
                 return;  
            }
            
-           var dbarchive_folder = this._$('input[name=selArchiveFolder]:checked').val();
+           let dbarchive_folder = this._$('input[name=selArchiveFolder]:checked').val();
 
            request = {file: dbarchive_file,
                       folder: dbarchive_folder, //id
@@ -303,22 +303,22 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
            
         }else if(this.options.actionName=='verify'){
             
-            var actions=[];
-            var cont_steps = this._$('.progressbar_div > .loading > ol');
+            let actions=[];
+            let cont_steps = this._$('.progressbar_div > .loading > ol');
             cont_steps.empty();
             
             this._$('.verify-actions:checked').each((i, item)=>{
-                var action = item.value
+                let action = item.value
                 actions.push(action);
                 $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
             });
             
-            var btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
+            let btn_stop = $('<button class="ui-button-action" style="margin-top:10px">Terminate</button>').appendTo(cont_steps);
             btn_stop.button();
             this._on(btn_stop,{click:function(){
-                var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
-                var that = this;
+                let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+                let request = {terminate:1, t:(new Date()).getMilliseconds(), session:this._session_id};
+                let that = this;
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     that._session_id = 0;
                     that._hideProgress();
@@ -368,7 +368,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         request['session'] = this._session_id;
 
         this._showProgress( this._session_id, false, (this.options.actionName=='register')?0:1000 );
-        var that = this;
+        let that = this;
         
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
 
@@ -392,9 +392,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _checkNewDefinitions: function(){
 
-        var that = this;
+        let that = this;
       
-        var request = {action: 'check_newdefs',        
+        let request = {action: 'check_newdefs',        
                        db: window.hWin.HAPI4.database};
         
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
@@ -417,8 +417,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _selectArchive: function(){
         
-        var that = this;
-        var src_folder = this._$('input[name=selArchiveFolder]:checked').val();
+        let that = this;
+        let src_folder = this._$('input[name=selArchiveFolder]:checked').val();
         
         
         if(!this._select_file_dlg){
@@ -438,7 +438,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         
                         //suggest database name
                         if(that._$('#dbname').val().trim()==''){
-                            var sname = res.filename; 
+                            let sname = res.filename; 
                             if(sname.indexOf('hdb_')==0){
                                 sname = sname.substring(4);
                             }
@@ -474,7 +474,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _afterActionEvenHandler: function( response, terminatation_message ){
         
         this._$('.ent_wrapper').hide();
-        var div_res = this._$("#div_result").show();
+        let div_res = this._$("#div_result").show();
         
         if(response && response.newdbname){
             this._$('#newdbname').text(response.newdbname);  
@@ -582,10 +582,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         var that = this;
        
         this._$('.ent_wrapper').hide();
-        var progress_div = this._$('.progressbar_div').show();
+        let progress_div = this._$('.progressbar_div').show();
         
-        var div_loading = progress_div.find('.loading').show();
-        var all_li = div_loading.find('li');
+        let div_loading = progress_div.find('.loading').show();
+        let all_li = div_loading.find('li');
         if(all_li.length>0){
             all_li.css('color','lightgray');
             $(all_li[0]).css('color','black');
@@ -593,15 +593,15 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         }
         
         var that = this;
-        var currStep = 0;
+        let currStep = 0;
         
         if(t_interval>900){
 
-            var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+            let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
                 
             this._progressInterval = setInterval(function(){ 
                 
-                var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+                let request = {t:(new Date()).getMilliseconds(), session:session_id};            
                 
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
@@ -623,9 +623,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         if(window.hWin.HEURIST4.util.isNumber(newStep)){
                             //set finished step in solid black
                             newStep = parseInt(newStep);
-                            var all_li = div_loading.find('li');
+                            let all_li = div_loading.find('li');
                             if(newStep>0){
-                                var arr = all_li.slice(0,newStep);
+                                let arr = all_li.slice(0,newStep);
                                 arr.css('color','black');
                                 arr.find('span.processing').remove(); //remove rotation icon
                                 //set current step (if exists) with loading icon
@@ -637,7 +637,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                                     }else{
                                         percentage = 'processing...'
                                     }
-                                    var ele = $(all_li[newStep]).find('span.percentage');
+                                    let ele = $(all_li[newStep]).find('span.percentage');
                                     if(ele.length==0){
                                         percentage = '<span class="percentage">'+percentage+'</span>';
                                         $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span> '
@@ -650,7 +650,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                             }
                         }else{
                             let cont = div_loading.find('ol');
-                            var li_ele = cont.find('li:contains("'+newStep+'")');
+                            let li_ele = cont.find('li:contains("'+newStep+'")');
                             if(li_ele.length==0){
                                 $('<li>'+newStep+'</li>').appendTo(cont);    
                             }else if(percentage>0){
@@ -688,8 +688,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     //
     _initVerification: function(){
         
-        var cont1 = this._$('#actions');
-        var cont2 = this._$('#actions_slow');
+        let cont1 = this._$('#actions');
+        let cont2 = this._$('#actions_slow');
         
         for (const action in this._verification_actions){
            let is_slow = (this._verification_actions[action].slow==1); 
@@ -702,7 +702,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         // Mark all checkbox
         //
         this._on(this._$('input[data-mark-actions]'),{click:(event)=>{
-            var is_checked = $(event.target).is(':checked');
+            let is_checked = $(event.target).is(':checked');
             this._$('input.verify-actions[data-slow!=1]').prop('checked',is_checked);
         }});
 
@@ -742,8 +742,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //if(this._session_id==0) return;
             this._session_id = 0;
     
-            var div_res = this._$("#div_result");
-            var is_reload = false;
+            let div_res = this._$("#div_result");
+            let is_reload = false;
             
             if(response['reload']){
                 is_reload = response['reload'];
@@ -752,8 +752,8 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
             if(is_reload){
                 
-                var action = Object.keys(response)[0];
-                var res = response[action];
+                let action = Object.keys(response)[0];
+                let res = response[action];
                 
                 div_res.find('a[href="#'+action+'"]').parent()
                     .css("background-color", res['status']?'#6AA84F':'#E60000');                
@@ -765,9 +765,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             
                 div_res.empty();
                 
-                var tabs = $('<div id="linkbar" style="margin:5px;"><ul id="links"></ul></div>').appendTo(div_res);
+                let tabs = $('<div id="linkbar" style="margin:5px;"><ul id="links"></ul></div>').appendTo(div_res);
                 
-                var tab_header = div_res.find('#links');
+                let tab_header = div_res.find('#links');
 
                 for (const [action, res] of Object.entries(response)) {
                     // add tab header
@@ -787,15 +787,15 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //
             this._on(this._$('button[data-fix]').button(),{click:(event)=>{
             
-                var action = $(event.target).attr('data-fix');
+                let action = $(event.target).attr('data-fix');
                 
-                var request = {checks: action, fix:1, reload:1};
+                let request = {checks: action, fix:1, reload:1};
                 
-                var marker = $(event.target).attr('data-selected');
-                var sel_ids = [];
+                let marker = $(event.target).attr('data-selected');
+                let sel_ids = [];
                 
                 if(marker){
-                    var sels = this._$('input[name="'+marker+'"]:checked');
+                    let sels = this._$('input[name="'+marker+'"]:checked');
 
                     sels.each((i,item)=>{
                         sel_ids.push(item.value);
@@ -808,7 +808,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     }
                 }
                 
-                var cont_steps = this._$('.progressbar_div > .loading > ol');
+                let cont_steps = this._$('.progressbar_div > .loading > ol');
                 cont_steps.empty();
                 $('<li>'+this._verification_actions[action].name+'</li>').appendTo(cont_steps);
                 
@@ -820,9 +820,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //
             this._on(this._$('input[data-mark-all]'),{click:(event)=>{
                 
-                var ele = $(event.target)
-                var name = ele.attr('data-mark-all');
-                var is_checked = ele.is(':checked');
+                let ele = $(event.target)
+                let name = ele.attr('data-mark-all');
+                let is_checked = ele.is(':checked');
                 
                 this._$('input[name="'+name+'"]').prop('checked',is_checked);
             }});
@@ -832,9 +832,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //
             this._on(this._$('a[data-show-selected]'),{click:(event)=>{
                 
-                var name = $(event.target).attr('data-show-selected');
-                var sels = this._$('input[name="'+name+'"]:checked');
-                var ids = [];
+                let name = $(event.target).attr('data-show-selected');
+                let sels = this._$('input[name="'+name+'"]:checked');
+                let ids = [];
 
                 sels.each((i,item)=>{
                     ids.push(item.value);
@@ -854,9 +854,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             //
             this._on(this._$('a[data-show-all]'),{click:(event)=>{
                 
-                var name = $(event.target).attr('data-show-all');
-                var sels = this._$('input[name="'+name+'"]');
-                var ids = [];
+                let name = $(event.target).attr('data-show-all');
+                let sels = this._$('input[name="'+name+'"]');
+                let ids = [];
 
                 sels.each((i,item)=>{
                     ids.push(item.value);

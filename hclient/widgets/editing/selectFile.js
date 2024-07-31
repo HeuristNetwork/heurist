@@ -59,9 +59,9 @@ $.widget( "heurist.selectFile", {
             return;
         }
         
-        var that = this;
+        let that = this;
         
-        var sFilter = '';
+        let sFilter = '';
         
         if(this.options.showFilter){
             sFilter = '<div class="ent_header">'
@@ -83,7 +83,7 @@ $.widget( "heurist.selectFile", {
         
         this._is_archive_folder = parseInt(this.options.source)>0;
 
-        var emptyMessage = `Specified files (${this.options.extensions}) are not found in `
+        let emptyMessage = `Specified files (${this.options.extensions}) are not found in `
             +(this._is_archive_folder?'given folder':this.options.source);
         
         //resultList with images
@@ -108,8 +108,8 @@ $.widget( "heurist.selectFile", {
                        empty_remark: emptyMessage,
                        renderer: function(recordset, record){ 
                            
-                           var recID   = recordset.fld(record, 'file_id');
-                           var recThumb;
+                           let recID   = recordset.fld(record, 'file_id');
+                           let recThumb;
                            if(recordset.fld(record, 'file_url')){
                                 recThumb = recordset.fld(record, 'file_url')+recordset.fld(record, 'file_name');    
                            }else{
@@ -118,11 +118,11 @@ $.widget( "heurist.selectFile", {
                                             + recordset.fld(record, 'file_name');
                            }
                            
-                           var html;
+                           let html;
         
                            if(that.options.source.indexOf('assets')<0) {
                                
-                               var sz = (that.options.extensions=='zip')
+                               let sz = (that.options.extensions=='zip')
                                ? Math.round(recordset.fld(record, 'file_size')/1024/1024)+'MB'
                                : Math.round(recordset.fld(record, 'file_size')/1024)+'KB';
 
@@ -140,7 +140,7 @@ $.widget( "heurist.selectFile", {
                                
                            }else{
 
-                               var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
+                               let html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
                                +recThumb+'&quot;);opacity:1;height:'+that.options.size+'px !important">'
                                +'</div>';
 
@@ -158,10 +158,10 @@ $.widget( "heurist.selectFile", {
                             
                                     //var recordset = that.recordList.resultList('getRecordSet');
                                     //recordset = recordset.getSubSetByIds(selected_recs);
-                                    var recordset = selected_recs;
-                                    var record = recordset.getFirstRecord();
-                                    var filename = recordset.fld(record, 'file_name')
-                                    var res = { filename: filename,
+                                    let recordset = selected_recs;
+                                    let record = recordset.getFirstRecord();
+                                    let filename = recordset.fld(record, 'file_name')
+                                    let res = { filename: filename,
                                                 url:recordset.fld(record, 'file_url')+filename,
                                                 path:recordset.fld(record, 'file_dir')+filename};
 
@@ -207,8 +207,8 @@ $.widget( "heurist.selectFile", {
     //
     filterRecordList: function(event){
         
-        var val = this.element.find('.input_search').val().trim();
-        var subset;
+        let val = this.element.find('.input_search').val().trim();
+        let subset;
         if(val==''){
             subset = this._cachedRecordset;
         }else{
@@ -224,7 +224,7 @@ $.widget( "heurist.selectFile", {
     _gettingFiles: function(){
         
             //search for images in given array of folder
-            var that = this;           
+            let that = this;           
             
             window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
             $('body').css('cursor','progress');
@@ -247,14 +247,14 @@ $.widget( "heurist.selectFile", {
                                     that._as_dialog.dialog('open');
                                 }else{
 
-                                    var $dlg = that.element.dialog({
+                                    let $dlg = that.element.dialog({
                                         autoOpen: true,
                                         height: 640,
                                         width: 840,
                                         modal: true,
                                         title: window.hWin.HR(that.options.title),
                                         resizeStop: function( event, ui ) {
-                                            var pele = that.element.parents('div[role="dialog"]');
+                                            let pele = that.element.parents('div[role="dialog"]');
                                             that.element.css({overflow: 'none !important', width:pele.width()-24 });
                                         },
                                         close:function(){

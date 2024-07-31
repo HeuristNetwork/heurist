@@ -36,7 +36,7 @@ $.widget( "heurist.connections", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         this.framecontent = $('<div>')
                    .css({
@@ -174,13 +174,13 @@ $.widget( "heurist.connections", {
                         
                     }else{
                         
-                        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+                        let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                     
-                        var records_ids = this.options.recordset.getIds(MAXITEMS);
-                        var relations = this.options.relations;
+                        let records_ids = this.options.recordset.getIds(MAXITEMS);
+                        let relations = this.options.relations;
                         
                         // Parse response to spring diagram format
-                        var data = this._parseData(records_ids, relations);
+                        let data = this._parseData(records_ids, relations);
                         this._doVisualize(data);
                     
                     }
@@ -202,7 +202,7 @@ $.widget( "heurist.connections", {
         this.element.off("myOnShowEvent");
         $(this.document).off(this._events);
 
-        var that = this;
+        let that = this;
 
         // remove generated elements
         this.graphframe.remove();
@@ -242,21 +242,21 @@ $.widget( "heurist.connections", {
             return;
         }
         
-        var that2 = this; 
+        let that2 = this; 
         //get first MAXITEMS records and send their IDS to server to get related record IDS
-        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
-        var records_ids = recordset.getIds(MAXITEMS);
+        let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        let records_ids = recordset.getIds(MAXITEMS);
         if(records_ids.length>0){
             
             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
             {
-                var resdata = null;
+                let resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
                     that2.option("relations", response.data);
                     
                     // Parse response to spring diagram format
-                    var data = that2._parseData(records_ids, response.data);
+                    let data = that2._parseData(records_ids, response.data);
                     that2._doVisualize(data);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -282,17 +282,17 @@ $.widget( "heurist.connections", {
     * @returns {Object}
     */
     , _parseData: function (records_ids, relations) {
-        var data = {}; 
-        var nodes = {};                         
-        var links = [];
+        let data = {}; 
+        let nodes = {};                         
+        let links = [];
 
         if(records_ids !== undefined && relations !== undefined) {
             // Construct nodes for each record
-            var i;
+            let i;
             for(i=0;i<records_ids.length;i++) {
-                var recId = records_ids[i];
+                let recId = records_ids[i];
                 if(relations.headers[recId]){
-                    var node = {id: parseInt(recId),
+                    let node = {id: parseInt(recId),
                                 name: relations.headers[recId][0],  //record title   records[id][5]
                                 image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
                                 count: 0,
@@ -311,16 +311,16 @@ $.widget( "heurist.connections", {
             * @param relations  Array of relations
             */
             function __getLinks(nodes, relations) {
-                var links = [];
+                let links = [];
                 
                 // Go through all relations
-                for(var i = 0; i < relations.length; i++) { 
+                for(let i = 0; i < relations.length; i++) { 
                     // Null check
-                    var source = relations[i].recID;
-                    var target = relations[i].targetID;
-                    var dtID = relations[i].dtID;
-                    var trmID = relations[i].trmID;
-                    var relationName = "Floating relationship";
+                    let source = relations[i].recID;
+                    let target = relations[i].targetID;
+                    let dtID = relations[i].dtID;
+                    let trmID = relations[i].trmID;
+                    let relationName = "Floating relationship";
                     if(dtID > 0) {
                         relationName = $Db.dty(dtID, 'dty_Name');
                     }else if(trmID > 0) {
@@ -330,7 +330,7 @@ $.widget( "heurist.connections", {
                     // Link check  - both source and target must be in main result set (nodes)
                     if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
                         // Construct link
-                        var link = {source: nodes[source],
+                        let link = {source: nodes[source],
                                     target: nodes[target],
                                     targetcount: 1,
                                     relation: {id: dtID>0?dtID:trmID, 
@@ -352,8 +352,8 @@ $.widget( "heurist.connections", {
         }
 
         // Construct data object with nodes as array
-        var array = [];
-        for(var id in nodes) {
+        let array = [];
+        for(let id in nodes) {
             array.push(nodes[id]);
         }
         return {nodes: array, links: links};
@@ -363,7 +363,7 @@ $.widget( "heurist.connections", {
     , _doVisualize: function (data) {
         
         if( !window.hWin.HEURIST4.util.isnull(this.graphframe) && this.graphframe.length > 0 ){
-            var that = this;
+            let that = this;
             this.graphframe[0].contentWindow.showData(data, this.options.selection, 
                     function(selected){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 

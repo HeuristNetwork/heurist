@@ -50,7 +50,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
     recordList: null,
 
     _initControls: function () {
-        var that = this;
+        let that = this;
         this.element.find('fieldset > div > .header').css({width: '80px', 'min-width': '80px'})
         this.options.resultList = $.extend(this.options.resultList,
             {
@@ -112,16 +112,16 @@ $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
             }
         );
 */
-        var request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 
+        let request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 
                     'details':'list', 'trm_ParentTermID':5430};
 
-        var selBf = this.element.find('#select_bf').empty();
+        let selBf = this.element.find('#select_bf').empty();
         window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recordset = new hRecordSet(response.data);
+                    let recordset = new hRecordSet(response.data);
                     
                     recordset.each2(function(trm_ID, term){
                          window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
@@ -149,7 +149,7 @@ $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
     /* Render Lookup query results */
 _rendererResultList: function (recordset, record) {
     function fld(fldname, width) {
-        var s = recordset.fld(record, fldname);
+        let s = recordset.fld(record, fldname);
         s = s ? s : '';
         if (width > 0) {
             s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
@@ -157,14 +157,14 @@ _rendererResultList: function (recordset, record) {
         return s;
     }
 
-    var recID = fld('rec_ID');
-    var rectypeID = fld('rec_RecTypeID');
-    var recIcon = window.hWin.HAPI4.iconBaseURL + '1';
-    var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+    let recID = fld('rec_ID');
+    let rectypeID = fld('rec_RecTypeID');
+    let recIcon = window.hWin.HAPI4.iconBaseURL + '1';
+    let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
         + window.hWin.HAPI4.iconBaseURL + '1&version=thumb&quot;);"></div>';
     fld('properties.edition', 15)
 
-    var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
+    let html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
         + html_thumb
 
         + '<div class="recordIcons">'
@@ -180,7 +180,7 @@ _rendererResultList: function (recordset, record) {
 },
 
     startSearchOnEnterPress: function (e) {
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -303,7 +303,7 @@ _rendererResultList: function (recordset, record) {
     /* Show a confirmation window after user selects a record from the lookup query results */
     /* If the user clicks "Check Author", then call method _checkAuthor*/
     doAction: function () {
-        var that = this;
+        let that = this;
         estcRecordListWindow = this;
 
         estc_edition_id = that.element.context.querySelector(".selected_last").getAttribute('recid');
@@ -337,7 +337,7 @@ _rendererResultList: function (recordset, record) {
         //get all terms for given vocabulary
         //var current_terms = window.hWin.HEURIST4.ui.getPlainTermsList('enum', keysDict[type]);
         
-        var current_terms = $Db.trm_TreeData(keysDict[type], 'select');
+        let current_terms = $Db.trm_TreeData(keysDict[type], 'select');
         
         term = String(term).toLowerCase();
         
@@ -366,8 +366,8 @@ _rendererResultList: function (recordset, record) {
     /* If not create a term and call method postAddingTerm */
     _addTermThatDoesNotExist: function (type, term, id, rec_data) {
         that = this;
-        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveTerms
-        var oTerms = {
+        let baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php"; //saveTerms
+        let oTerms = {
             terms: {
                 colNames: ['trm_Label', 'trm_InverseTermID', 'trm_Description', 'trm_Domain', 'trm_ParentTermID', 'trm_Status', 'trm_Code', 'trm_SemanticReferenceURL'],
                 defs: {},
@@ -376,7 +376,7 @@ _rendererResultList: function (recordset, record) {
         // Key of the dict 'oTerms.terms.defs['0-2626']' needs to be a negative number other than -1.
         oTerms.terms.defs['0-2626'] = [term, 0, "Imported from ESTC database", "enum", keysDict[type], "open", "", ""];
 
-        var request = {
+        let request = {
             method: 'saveTerms',
             db: window.hWin.HAPI4.database,
             data: oTerms
@@ -397,7 +397,7 @@ _rendererResultList: function (recordset, record) {
 
     /* Check if Edition exists in Libraries database */
     _checkIfEditionExistsInLibraries: function (estc_edition_id) {
-        var that = this;
+        let that = this;
         query_string = 'ids%3A' + estc_edition_id;
         urlToCheckEditioninLibraries = that._getQueryURL(query_string, "libraries")
 
@@ -503,7 +503,7 @@ _rendererResultList: function (recordset, record) {
         }
 
         ids.forEach(buildAuthorDict);
-        var author_rec_data = {
+        let author_rec_data = {
             ID: 0, RecTypeID: 10,
             no_validation: true, //allows save without filled required field 1061
             details: {
@@ -607,7 +607,7 @@ _rendererResultList: function (recordset, record) {
             work_ids.forEach(checkIdInEditionWorkDetails)
         }
 
-        var work_record_data = {
+        let work_record_data = {
             ID: 0, RecTypeID: 56,
             no_validation: false, //allows save without filled required field 1061
             details: {
@@ -757,7 +757,7 @@ _rendererResultList: function (recordset, record) {
                     }
 
                     // Build Edition Record dict
-                    var edition_rec_data = {
+                    let edition_rec_data = {
                         ID: 0, RecTypeID: 55,
                         no_validation: false,
                         details: {
@@ -968,7 +968,7 @@ _rendererResultList: function (recordset, record) {
 
         if(true){ //use json format and fulltext search
 
-            var query = {"t":"30"}; //search for Books
+            let query = {"t":"30"}; //search for Books
 
             if (this.element.find('#edition_name').val() != '') {
                 query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
@@ -1054,8 +1054,8 @@ _rendererResultList: function (recordset, record) {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
-        var that = this;
+        let query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
+        let that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
             function (response) {
@@ -1072,7 +1072,7 @@ _rendererResultList: function (recordset, record) {
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();
-        var recordset = new hRecordSet(response.data);
+        let recordset = new hRecordSet(response.data);
         this.recordList.resultList('updateResultSet', recordset);
     },
 });

@@ -29,10 +29,10 @@ hapi.doImportAction -> importController.php -> ImportHeurist::importDefintions -
 */
 
 function hImportRecords(_max_upload_size) {
-    var _className = "ImportRecords",
-    _version   = "0.4",
+    const _className = "ImportRecords",
+    _version   = "0.4";
     
-    btnUploadData,
+    let btnUploadData,
     upload_file_name,  //file on server with original uploaded data
     progressInterval,
     session_id,

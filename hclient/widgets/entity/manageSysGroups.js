@@ -59,8 +59,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         //update dialog title
-        var title = null;
-        var usr_ID = 0;
+        let title = null;
+        let usr_ID = 0;
         
         if(this.options.title){
             title = this.options.title;
@@ -102,7 +102,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchSysGroups(this.options);
 
-        var iheight = 5;
+        let iheight = 5;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
@@ -173,9 +173,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                     .css({'background':'gray !important', 'max-height':'1em'});*/
                 })
                 .click(function(event){
-                    var group_ID = $(event.target).parents('.recordDiv').attr('recid');
+                    let group_ID = $(event.target).parents('.recordDiv').attr('recid');
 
-                    var options = {select_mode: 'manager',
+                    let options = {select_mode: 'manager',
                         ugl_GroupID: group_ID,
                         edit_mode:'popup',
                         title: ("Manage Users of Workgroup #"+group_ID),
@@ -184,7 +184,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         beforeClose:function(){
                             
                             if(window.hWin.HAPI4.has_access(group_ID)){ //current user is admin of given group
-                                var request = {
+                                let request = {
                                     'a'          : 'search',
                                     'entity'     : 'sysGroups',
                                     'details'    : 'count',
@@ -193,11 +193,11 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                     function(response){
                                         if(response.status == window.hWin.ResponseStatus.OK){
-                                            var resp = new hRecordSet( response.data );
-                                            var rec_updated = resp.getFirstRecord();
-                                            var cnt = resp.fld(rec_updated, 'ugr_Members');
+                                            let resp = new hRecordSet( response.data );
+                                            let rec_updated = resp.getFirstRecord();
+                                            let cnt = resp.fld(rec_updated, 'ugr_Members');
 
-                                            var record = that.getRecordSet().getById(group_ID);
+                                            let record = that.getRecordSet().getById(group_ID);
                                             that.getRecordSet().setFld(record, 'ugr_Members', cnt);
                                             that.recordList.resultList('refreshPage');  
                                         }else{
@@ -220,10 +220,10 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                 //event listeners for adminSelector and memberSelector    
                 function __onRoleSelectorClick(event){
-                    var ele = $(event.target);
+                    let ele = $(event.target);
 
-                    var newRole = 'remove';
-                    var currentStatus = ele.is(':checked');                                                    
+                    let newRole = 'remove';
+                    let currentStatus = ele.is(':checked');                                                    
                     if(currentStatus){
                         if(ele.parent().hasClass('adminSelector')){
                             newRole = 'admin';
@@ -240,8 +240,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         return false;
                     }
 
-                    var item = ele.parents('.recordDiv');
-                    var group_ID = item.attr('recid');  
+                    let item = ele.parents('.recordDiv');
+                    let group_ID = item.attr('recid');  
 
 
                     if(that.options.select_mode=='select_roles'){
@@ -253,7 +253,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                             that._select_roles[group_ID] = newRole;
                         }
                         item.attr('data-value', newRole);
-                        var cb2;
+                        let cb2;
                         if(ele.parent().hasClass('adminSelector')){
                             cb2 = item.find('.memberSelector > input');
                         }else{
@@ -264,7 +264,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                         return;
                     }
 
-                    var request = {};
+                    let request = {};
                     request['a']        = 'action';
                     request['entity']   = 'sysGroups';
                     request['role']     = newRole;
@@ -281,7 +281,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                     window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
                                 }else{
                                     item.attr('data-value', newRole);
-                                    var cb2;
+                                    let cb2;
                                     if(ele.parent().hasClass('adminSelector')){
                                         cb2 = item.find('.memberSelector > input');
                                     }else{
@@ -303,7 +303,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                                 
                             }else{
                                 //restore current value - rollback
-                                var restoreRole = item.attr('data-value');
+                                let restoreRole = item.attr('data-value');
                                 item.find('.adminSelector > input').prop('checked', (restoreRole=='admin') );
                                 item.find('.memberSelector > input').prop('checked',(restoreRole=='member') );
                                 window.hWin.HEURIST4.msg.showMsgErr(response);      
@@ -338,13 +338,13 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             }else{
                 sstyle = '';
             }
-            var val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+            let val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
             return '<div class="truncate" '+sstyle+' title="'+tip_text+'">'+val+'</div>';
         }
         
-        var cur_mode = this.recordList.resultList('getCurrentViewMode');
-        var is_list = (cur_mode=='list');
-        var is_icon = (cur_mode=='icons');
+        let cur_mode = this.recordList.resultList('getCurrentViewMode');
+        let is_list = (cur_mode=='list');
+        let is_icon = (cur_mode=='icons');
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
 
@@ -387,7 +387,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                     +(show_role?fld('ugl_Role'):'')+'</div>';
         }
 
-        var flexs = (is_list?'margin: 0px 15px;flex:0 0 25px;':'position:absolute;right:4px;');
+        let flexs = (is_list?'margin: 0px 15px;flex:0 0 25px;':'position:absolute;right:4px;');
         
         let btn_edit = '<div title="Click to edit group" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" '
         +   'style="height:16px;top:4px;'+flexs+'">'
@@ -476,7 +476,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
-        var request = {
+        let request = {
             'a'          : 'search',
             'entity'     : this.options.entity.entityName,
             'details'    : 'list',
@@ -533,7 +533,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         this._super();
         //hide after edit init btnRecRemove for group=1
         if(this._currentEditID==window.hWin.HAPI4.sysinfo.db_managers_groupid){ //sys_OwnerGroupID
-            var ele = this._toolbar;
+            let ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
         }
 
@@ -542,7 +542,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     _changeUserRole: function(group_id, user_ids, new_role){
 
-        var request = {
+        let request = {
             'a'          : 'action',
             'entity'     : this.options.entity.entityName,
             'request_id' : window.hWin.HEURIST4.util.random(),
@@ -551,13 +551,13 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             'role'       : new_role, //admin,member,remove
         };
 
-        var that = this;                                                
+        let that = this;                                                
         //that.loadanimation(true);
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    var recID = response.data[0];
+                    let recID = response.data[0];
                     fields[ that.options.entity.keyField ] = (''+recID);
 
                     //update record in cache
@@ -602,7 +602,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        

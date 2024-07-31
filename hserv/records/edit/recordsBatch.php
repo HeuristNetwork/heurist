@@ -2941,7 +2941,6 @@ public methods
                 if($current_val=='terminate'){ //session was terminated from client side
                     $system->addError(HEURIST_ACTION_BLOCKED, 'Action has been terminated by user');                
                     return false;
-                    break;
                 }
             }
         }

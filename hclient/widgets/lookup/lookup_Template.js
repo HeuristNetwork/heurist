@@ -57,7 +57,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         //this.element => dialog inner content
         //this._as_dialog => dialog container
 
-        var that = this;
+        let that = this;
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({width:'100px', 'min-width':'100px', display: 'inline-block'});
@@ -126,7 +126,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      */
     startSearchOnEnterPress: function(e){
         
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -157,7 +157,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
          */
         function fld(fldname, width){
 
-            var s = recordset.fld(record, fldname);
+            let s = recordset.fld(record, fldname);
 
             if(fldname == 'author'){ // special handling for author details
 
@@ -165,12 +165,12 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                     return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
                 }
 
-                var creator_val = '';
+                let creator_val = '';
 
-                for(var idx in s){
+                for(let idx in s){
 
-                    var cur_string = '';
-                    var cur_obj = s[idx];
+                    let cur_string = '';
+                    let cur_obj = s[idx];
 
                     if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
                         cur_string = cur_obj['firstname'];
@@ -193,9 +193,9 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                 s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
             }else if(window.hWin.HEURIST4.util.isObject(s)){
 
-            	var display_val = '';
+            	let display_val = '';
 
-            	for(var key in s){
+            	for(let key in s){
 
                     if(display_val != ''){
                         display_val += ', ';
@@ -222,14 +222,14 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         }
 
         // Generic details, not completely necessary
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;' + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var recTitle = fld('author', 50) + fld('date', 7) + fld('title', 75) + fld('biburl', 12); 
+        let recTitle = fld('author', 50) + fld('date', 7) + fld('title', 75) + fld('biburl', 12); 
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
             + html_thumb
                 + '<div class="recordIcons">'
                 +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -244,7 +244,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
      */
     _getActionButtons: function(){
-        var res = this._super(); //dialog buttons
+        let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
         return res;
     },
@@ -288,14 +288,14 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
         // Retrieve the selected record(s) as a record set from the result list widget
-        var recset = this.recordList.resultList('getSelected', false);
+        let recset = this.recordList.resultList('getSelected', false);
 
         if(recset && recset.length() == 1){
 
-            var res = {};
-            var rec = recset.getFirstRecord(); // Get first record, otherwise use getRecords() to retrieve all selected records as an array
+            let res = {};
+            let rec = recset.getFirstRecord(); // Get first record, otherwise use getRecords() to retrieve all selected records as an array
 
-            var map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of record
+            let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of record
 
             if(this.options.mapping.options.dump_record == true){
                 res['BnF_ID'] = recset.fld(rec, 'BnF_ID'); // add BnF ID
@@ -303,12 +303,12 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             res['ext_url'] = recset.fld(rec, 'biburl'); // add BnF URL
 
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
-            for(var k=0; k<map_flds.length; k++){
+            for(let k=0; k<map_flds.length; k++){
 
                 field_name = map_flds[k];
-                var dty_ID = this.options.mapping.fields[field_name];
+                let dty_ID = this.options.mapping.fields[field_name];
                 val = recset.fld(rec, field_name);
-                var field_type = $Db.dty(dty_ID, 'dty_Type');
+                let field_type = $Db.dty(dty_ID, 'dty_Type');
 
                 if(val != null && dty_ID != ''){
 
@@ -420,8 +420,8 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                             val = [val];
                         }
 
-                        var vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
-                        var term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
+                        let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+                        let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
                         for(var i=0; i<val.length; i++){
 
@@ -468,7 +468,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      */
     closingAction: function(dlg_response){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HEURIST4.util.isempty(dlg_response)){
             dlg_response = {};
@@ -489,10 +489,10 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
      */
     _doSearch: function(){
 
-        var that = this;
+        let that = this;
 
         // Construct base url for external request
-        var sURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=20&startRecord=1'; // base URL for BnF request
+        let sURL = 'https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&recordSchema=intermarcxchange&maximumRecords=20&startRecord=1'; // base URL for BnF request
 
         // Check that something has been entered
         if(this.element.find('#inpt_any').val()==''){
@@ -501,7 +501,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         }
         
         // Construct query portion of url
-        var query = '(';
+        let query = '(';
 
         // any field
         if(this.element.find('#inpt_any').val()!=''){
@@ -520,7 +520,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
         // for record_lookup.php
-        var request = {
+        let request = {
             service: sURL, // request url
             serviceType: 'bnflibrary_bib' // requesting service, otherwise the request will result in an error
         };
@@ -560,9 +560,9 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
 
         this.recordList.show();
 
-        var is_wrong_data = true;
+        let is_wrong_data = true;
 
-        var maxRecords = $('#rec_limit').val(); // limit number of returned records
+        let maxRecords = $('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
@@ -571,24 +571,24 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             
             if(!json_data.result) return false;
 
-            var res_records = {}, res_orders = [];
+            let res_records = {}, res_orders = [];
 
             // Prepare fields for mapping
             // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
-            var fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
-            var map_flds = Object.keys(this.options.mapping.fields);
+            let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
+            let map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);            
             
             // Parse json to Record Set
-            var i=0;
+            let i=0;
             for(;i<json_data.result.length;i++){
 
-                var record = json_data.result[i];                
-                var recID = i+1;
-                var values = [recID, this.options.mapping.rty_ID];
+                let record = json_data.result[i];                
+                let recID = i+1;
+                let values = [recID, this.options.mapping.rty_ID];
 
                 // Add current record details, field by field
-                for(var k=0; k<map_flds.length; k++){
+                for(let k=0; k<map_flds.length; k++){
 
                     // With the current setup for API search, the 'Rights' field is no longer sent
                     if(map_flds[k]=='rights'){
@@ -609,7 +609,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                 res_records = this.removeDupAuthors(fields.indexOf('author'), res_records); // just removing duplicates
 
                 // Create the record set for the resultList
-                var res_recordset = new hRecordSet({
+                let res_recordset = new hRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,
@@ -644,9 +644,9 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             return records;
         }
 
-        for(var i in records){
+        for(let i in records){
 
-            var author_details = records[i][author_key];
+            let author_details = records[i][author_key];
 
             if(author_details){
 

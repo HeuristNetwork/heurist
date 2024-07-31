@@ -30,15 +30,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
 
-        var that = this;
+        let that = this;
 
         //-----------------
         this.element.css('min-width','255px');
         this.selectRectype = this.element.find('#sel_rectypes');
         
-        var rt_list = this.options.rectype_set;
-        var is_expand_rt_list = false;
-        var is_only_rt = false;
+        let rt_list = this.options.rectype_set;
+        let is_expand_rt_list = false;
+        let is_only_rt = false;
         if(!window.hWin.HEURIST4.util.isempty(rt_list)){
             if(!window.hWin.HEURIST4.util.isArray(rt_list)){
                 rt_list = rt_list.split(',');
@@ -68,8 +68,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record');    
         this.btn_select_rt = this.element.find( "#btn_select_rt");
         
-        var is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
-        var is_addonly = (that.options.pointer_mode == 'addonly');
+        let is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
+        let is_addonly = (that.options.pointer_mode == 'addonly');
         
         if(that.options.pointer_mode != 'addorbrowse'){
             $('#addrec_helper > .heurist-helper1').css('visibility','hidden');
@@ -103,7 +103,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             .addClass('ui-button-action')
             .click(function(e) {
 
-                var search_val = that.element.find('#fill_in_data').val();
+                let search_val = that.element.find('#fill_in_data').val();
                 search_val = search_val == '' ? that.options.init_filter : search_val;
                 if(!window.hWin.HEURIST4.util.isempty(search_val)){
                     window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
@@ -128,9 +128,9 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.find('label[for="sel_rectypes-button"]').hide();
             this.element.find('#sel_rectypes-button').hide();
             this.btn_select_rt.hide();
-            var cont = this.element.find('#row_tabulator');
+            let cont = this.element.find('#row_tabulator');
 
-            var groupTabHeader = $('<ul>').appendTo(cont);
+            let groupTabHeader = $('<ul>').appendTo(cont);
             
             if(rt_list.length > 1){
                     $('<li>').html('<a href="#rty'+ rt_list.join(',') +'"><span style="font-weight:bold">All valid types</span></a>')
@@ -138,12 +138,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     $('<div id="rty'+ rt_list.join(',') +'">').appendTo(cont);
             }
 
-            for(var idx=0; idx<rt_list.length; idx++){
+            for(let idx=0; idx<rt_list.length; idx++){
                 
-                var rectypeID = rt_list[idx];
+                let rectypeID = rt_list[idx];
                 if(rectypeID>0){
-                    var name = $Db.rty(rectypeID,'rty_Name');
-                    var label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
+                    let name = $Db.rty(rectypeID,'rty_Name');
+                    let label = window.hWin.HEURIST4.util.htmlEscape(name.trim());
                     if(!name) continue;
 
                     $('<li>').html('<a href="#rty'+rectypeID
@@ -156,7 +156,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             
             //on switch - change filter
             cont.tabs({activate:function( event, ui ) {
-                var rtyid = ui.newPanel.attr('id').substr(3);
+                let rtyid = ui.newPanel.attr('id').substr(3);
                 that._select_mode = 1; //search
                 that.selectRectype.val( rtyid ).hSelect('refresh');
                 that.selectRectype.change();
@@ -195,7 +195,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
                 if(is_addonly){
 
-                    var search_val = that.element.find('#fill_in_data').val();
+                    let search_val = that.element.find('#fill_in_data').val();
                     search_val = search_val == '' ? that.options.init_filter : search_val;
                     if(!window.hWin.HEURIST4.util.isempty(search_val)){
                         window.hWin.HEURIST4.util.copyStringToClipboard(search_val);
@@ -263,7 +263,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }});
 		
         // User Preference for filter buttons
-        var filter_pref = window.hWin.HAPI4.get_prefs_def('rSearch_filter', 'rb_alphabet');
+        let filter_pref = window.hWin.HAPI4.get_prefs_def('rSearch_filter', 'rb_alphabet');
         if (filter_pref != 'rb_alphabet'){
             this.element.find('#'+filter_pref).prop('checked', true);
         }
@@ -312,7 +312,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 __onSelectRecType(this.selectRectype);
             }else{
                 if(this.options.parentselect>0){
-                    var ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
+                    let ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
                     ele.find('span').text( $Db.rty(this.options.parentselect,'rty_Name') );
                 }
                 //start search
@@ -356,7 +356,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-        var ele = this.element.find('#row_parententity_helper2').hide();
+        let ele = this.element.find('#row_parententity_helper2').hide();
         ele = this.element.find('#parententity_header');
 
         if(ele.is(':visible')){
@@ -369,9 +369,9 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         var request = {}
 
-        var qstr = '', domain = 'a', qobj = [];
+        let qstr = '', domain = 'a', qobj = [];
         
-        var links_count = null;
+        let links_count = null;
 
         //by record type
         let rectype_filter = this.selectRectype.val();
@@ -390,8 +390,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         //by title        
         if(this.input_search.val().trim()!=''){
-            var is_whole_phrase = true;
-            var s = this.input_search.val().trim();
+            let is_whole_phrase = true;
+            let s = this.input_search.val().trim();
             if(s.length>4 && s[0]=='"' && s[s.length-1]=='"'){
                 s = s.substring(1,s.length-2);
                 is_whole_phrase = true;
@@ -405,7 +405,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 qstr = qstr + ' title:'+s;
                 qobj.push({"title":s});
             }else{        
-                for(var i=0;i<s.length;i++)
+                for(let i=0;i<s.length;i++)
                 if(s[i]!=''){
                     qobj.push({"title":s[i]});    
                     qstr = qstr + ' title:'+s[i];
@@ -416,7 +416,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         //by ids of recently selected
         if(this.element.find('#cb_selected').is(':checked')){
-            var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
+            let previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
             if (previously_selected_ids && 
                 window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids.split(',')))
             {
@@ -428,15 +428,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //exclude already children
         if(this.options.parententity>0){
             //filter out records with parent entiy (247) field
-            var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
-            var pred = {}; pred["f:"+DT_PARENT_ENTITY]="NULL";
+            let DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+            let pred = {}; pred["f:"+DT_PARENT_ENTITY]="NULL";
             qobj.push(pred);
             
             this.element.find('#parententity_helper').css({'display':'table-row'});
         }
         
-        var limit = 100000;
-        var needall = 1
+        let limit = 100000;
+        let needall = 1
         
         if(this.element.find('#rb_modified').is(':checked')){
             qstr = qstr + ' sortby:-m after:"1 week ago"';
@@ -484,7 +484,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 id: window.hWin.HEURIST4.util.random()}
             //source: this.element.attr('id') };
 
-            var that = this;                                                
+            let that = this;                                                
             //that.loadanimation(true);
 
             window.hWin.HAPI4.RecordMgr.search(request, function( response ){

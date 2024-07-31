@@ -52,7 +52,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this.recordList.css('top',0);  
         }        
         
-        var that = this;
+        let that = this;
 
         //refresh list        
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
@@ -83,7 +83,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             return false;
         }
 
-        var that = this;
+        let that = this;
         
         this.recordList.resultList({
             show_toolbar:false,
@@ -101,18 +101,18 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                         hoverClass: 'ui-drag-drop',
                         drop: function( event, ui ){
 
-                            var trg = $(event.target).hasClass('recordDiv')
+                            let trg = $(event.target).hasClass('recordDiv')
                                         ?$(event.target)
                                         :$(event.target).parents('.recordDiv');
                                         
-                            var rty_ID = $(ui.draggable).parent().attr('recid');
-                            var rtg_ID = trg.attr('recid');
+                            let rty_ID = $(ui.draggable).parent().attr('recid');
+                            let rtg_ID = trg.attr('recid');
                             
                             if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
 
-                                var params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
+                                let params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
                                 
-                                var trash_id = $Db.getTrashGroupId('rtg');
+                                let trash_id = $Db.getTrashGroupId('rtg');
                                 //if source group is trash - change "show in list" to true
                                 if($Db.rty(rty_ID,'rty_RecTypeGroupID') == trash_id){
                                     //from target
@@ -134,7 +134,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
-            var btn_array = [
+            let btn_array = [
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
                       css:{'margin':'5px','float':'left',padding:'3px'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
@@ -214,10 +214,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _recordListItemRenderer: function(recordset, record){
         
-        var recID   = recordset.fld(record, 'rtg_ID');
-        var recName = recordset.fld(record, 'rtg_Name');
+        let recID   = recordset.fld(record, 'rtg_ID');
+        let recName = recordset.fld(record, 'rtg_Name');
         
-        var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
+        let html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{
@@ -307,7 +307,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this._super(); 
             
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this record type group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
@@ -320,14 +320,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _onActionListener: function(event, action){
 
-        var isresolved = this._super(event, action);
+        let isresolved = this._super(event, action);
 
         if(!isresolved){
             
             if(action=='save-order'){
 
-                var recordset = this.getRecordSet();
-                var that = this;
+                let recordset = this.getRecordSet();
+                let that = this;
                 window.hWin.HEURIST4.dbs.applyOrder(recordset, 'rtg', function(res){
                     that._toolbar.find('#btnApplyOrder').hide();
                     that._triggerRefresh('rtg');
@@ -335,7 +335,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 
             }else if(action=='trash'){
                 if($.isFunction(this.options.onSelect)){
-                    var id = $Db.getTrashGroupId('rtg');
+                    let id = $Db.getTrashGroupId('rtg');
                     this.options.onSelect.call( this, [id] );
                 }
             }

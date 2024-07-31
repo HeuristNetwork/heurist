@@ -534,7 +534,7 @@ class DbUtils {
             
             //$mysqli->close();
             
-            chmod($database_dumpfile, 0777);    
+            chmod($database_dumpfile, 0750);    
 
             // Echo output
             if($verbose) {
