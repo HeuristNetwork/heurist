@@ -1,29 +1,32 @@
 <fieldset id="div_fieldset">
 
             <legend style="padding:5px" class="heurist-helper3">
-                This function processes the current query looking for records in another (or the same) entity type based on matching the values of a field in each entity type.<br>
-                Fields to be matched may be text or numeric.<br>
+                This function processes the current query looking for records in another (or the same) entity type,<br>
+                based on matching the values of a field in each entity type. Fields to be matched may be text or numeric.<br><br>
                 The current query must contain only a single record type (this is enforced to avoid accidental errors).<br><br>
                 Where a match is found it will insert the ID of the matched record into a record pointer field in the source record.
             </legend>
             
+            <!-- Ian 31/7/24: this is not really needed here, since it will always be the query result 
             <div>
                 <div class="header" style="width:200px">Source records scope:</div>
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
+            -->
                 
+             <div>
+                <div class="header">Field to be matched (in current query result):</div>
+                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="max-width:30em;min-height: 24px;"></select>
+                <span id="count_source_unique" style="padding-left:5px;font-weight:bold"></span>
+            </div>
+
             <!-- link field selector -->
             <div>
-                <div class="header">Field in which to insert record pointers:</div>
+                <div class="header">Record pointer field to update with ID of matched records:</div>
                 <select id="sel_pointer_field" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                 <!-- <div id="source_field"  style="margin-bottom:15px;max-height: 40%;overflow: auto;border:none;"></div> -->
             </div>
                 
-            <div>
-                <div class="header">Field to be matched:</div>
-                <select id="sel_fieldtype_source" class="ui-widget-content ui-corner-all" style="max-width:30em;min-height: 24px;"></select>
-                <span id="count_source_unique" style="padding-left:5px;font-weight:bold"></span>
-            </div>
 
             <div>
             </div>
