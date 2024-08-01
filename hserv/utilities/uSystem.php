@@ -225,10 +225,10 @@ class USystem {
         }
 
         switch($last) {
-            case 'g':
-                $val *= 1024;
+            case 'g':  
+                $val *= 1073741824; break;
             case 'm':
-                $val *= 1024;
+                $val *= 1048576; break;
             case 'k':
                 $val *= 1024;
         }
