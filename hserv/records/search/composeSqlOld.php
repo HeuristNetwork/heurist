@@ -553,20 +553,21 @@ class Query {
         
         $where_clauses = array();
 
-        if(is_array($this->top_limbs))
-        for ($i=0; $i < count($this->top_limbs);++$i) {
+        if(is_array($this->top_limbs)){
+            for ($i=0; $i < count($this->top_limbs);++$i) {
 
-            $or_clauses = array();
-            $or_limbs = $this->top_limbs[$i];
-            for ($j=0; $j < count($or_limbs);++$j) {
-                $new_json = $or_limbs[$j]->makeJSON();
-                array_push($or_clauses, $new_json);
-            }
-            
-            if(count($or_clauses)>1){
-                array_push($this->where_json, array('any'=>$or_clauses));
-            }else if(count($or_clauses)>0){
-                array_push($this->where_json, $or_clauses);
+                $or_clauses = array();
+                $or_limbs = $this->top_limbs[$i];
+                for ($j=0; $j < count($or_limbs);++$j) {
+                    $new_json = $or_limbs[$j]->makeJSON();
+                    array_push($or_clauses, $new_json);
+                }
+                
+                if(count($or_clauses)>1){
+                    array_push($this->where_json, array('any'=>$or_clauses));
+                }else if(count($or_clauses)>0){
+                    array_push($this->where_json, $or_clauses);
+                }
             }
         }
     }   
@@ -576,8 +577,8 @@ class Query {
         //WHERE
         $where_clause = '';
         $and_clauses = array();
-        if(is_array($this->top_limbs))
-        for ($i=0; $i < count($this->top_limbs);++$i) {
+        if(is_array($this->top_limbs)){
+            for ($i=0; $i < count($this->top_limbs);++$i) {
 
 
             $or_clauses = array();
@@ -590,6 +591,7 @@ class Query {
             $where_clause = join(' or ', $or_clauses);
             if(count($or_clauses)>1) {$where_clause = '(' . $where_clause . ')';}
             array_push($and_clauses, $where_clause);
+        }
         }
         sort($and_clauses);
         $this->where_clause = join(' and ', $and_clauses);

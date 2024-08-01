@@ -302,11 +302,11 @@
                             $crn++;
                         }//while simplify
 
-                        if(count($points2)<=1000)
-                        foreach ($points2 as $point) {
-                            array_push($points_to_encode, array($point['y'], $point['x']) );
+                        if(count($points2)<=1000){
+                            foreach ($points2 as $point) {
+                                array_push($points_to_encode, array($point['y'], $point['x']) );
+                            }
                         }
-                        
                     }else{
                         
                         foreach ($points2 as $point) {
@@ -358,14 +358,14 @@
                             $crn++;
                         }//while simplify
 
-                        if($verties_cnt+count($points2)<=100)
-                        foreach ($points2 as $point) {
-                            $points_to_encode[] = $point['x'];
-                            $points_to_encode[] = $point['y'];
-                            $shapes_cnt++;
-                            $verties_cnt = $verties_cnt + count($points2);
+                        if($verties_cnt+count($points2)<=100){
+                            foreach ($points2 as $point) {
+                                $points_to_encode[] = $point['x'];
+                                $points_to_encode[] = $point['y'];
+                                $shapes_cnt++;
+                                $verties_cnt = $verties_cnt + count($points2);
+                            }
                         }
-                        
                     }else{
                         $shapes_cnt++;
                         if(is_array($points2) && count($points2)>0){

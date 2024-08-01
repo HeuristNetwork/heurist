@@ -317,16 +317,18 @@ class DbAnnotations extends DbEntityBase
                                     //"@context": "http://iiif.io/api/presentation/2/context.json"    
                                     //sequences->canvases->images->resource->service->@id
                                     if(@$iiif_manifest['@context']=='http://iiif.io/api/presentation/2/context.json'){
-                                        if(is_array(@$iiif_manifest['sequences']))
-                                        foreach($iiif_manifest['sequences'] as $seq){
-                                            if(is_array(@$seq['canvases']))
-                                            foreach($seq['canvases'] as $canvas){
-                                                if($canvas['@id']==$url && is_array(@$canvas['images'])){
-                                                    foreach($canvas['images'] as $image){
-                                                        $url2 = @$image['resource']['service']['@id'];
-                                                        if($url2!=null) {
-                                                            $url = $url2;
-                                                            break 3;
+                                        if(is_array(@$iiif_manifest['sequences'])){
+                                            foreach($iiif_manifest['sequences'] as $seq){
+                                                if(is_array(@$seq['canvases'])){
+                                                    foreach($seq['canvases'] as $canvas){
+                                                        if($canvas['@id']==$url && is_array(@$canvas['images'])){
+                                                            foreach($canvas['images'] as $image){
+                                                                $url2 = @$image['resource']['service']['@id'];
+                                                                if($url2!=null) {
+                                                                    $url = $url2;
+                                                                    break 3;
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -337,18 +339,22 @@ class DbAnnotations extends DbEntityBase
                                     //"@context": "http://iiif.io/api/presentation/3/context.json" 
                                     //items(type:Canvas)->items[AnnotationPage]->items[Annotation]->body->service[0]->id
                                         
-                                        if(is_array(@$iiif_manifest['items']))
-                                        foreach($iiif_manifest['items'] as $canvas){
-                                            if(@$canvas['type']=='Canvas' && $canvas['id']==$url && is_array(@$canvas['items'])){
-                                                foreach($canvas['items'] as $annot_page){
-                                                    if(@$annot_page['type']=='AnnotationPage' && is_array(@$annot_page['items']))
-                                                    foreach($annot_page['items'] as $annot){
-                                                        if(@$annot['type']=='Annotation')
-                                                        if(@$annot['body']['type']=='Image'){
-                                                            $url2 = @$annot['body']['service']['id'];
-                                                            if($url2!=null) {
-                                                                $url = $url2;
-                                                                break 3;
+                                        if(is_array(@$iiif_manifest['items'])){
+                                            foreach($iiif_manifest['items'] as $canvas){
+                                                if(@$canvas['type']=='Canvas' && $canvas['id']==$url && is_array(@$canvas['items'])){
+                                                    foreach($canvas['items'] as $annot_page){
+                                                        if(@$annot_page['type']=='AnnotationPage' && is_array(@$annot_page['items']))
+                                                        {
+                                                            foreach($annot_page['items'] as $annot){
+                                                                if(@$annot['type']=='Annotation'
+                                                                    && @$annot['body']['type']=='Image')
+                                                                {
+                                                                    $url2 = @$annot['body']['service']['id'];
+                                                                    if($url2!=null) {
+                                                                        $url = $url2;
+                                                                        break 3;
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }

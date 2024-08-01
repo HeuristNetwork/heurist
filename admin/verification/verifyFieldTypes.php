@@ -101,9 +101,10 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 
 
     $res = $mysqli->query($query);
-    if($res)
-    while ($row = $res->fetch_assoc()) {
-        $DTT[$row['dty_ID']] = $row;
+    if($res){
+        while ($row = $res->fetch_assoc()) {
+            $DTT[$row['dty_ID']] = $row;
+        }
     }
 
     $dtysWithInvalidTerms = array();

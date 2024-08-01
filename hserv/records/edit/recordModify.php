@@ -3316,13 +3316,15 @@ function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
             //add group record permissions
             $values = array();
             foreach($recIDs as $recID){
-                if(is_array($owner_grps))
-                foreach ($owner_grps as $grp_id){
-                    array_push($values,'('.$grp_id.','.$recID.',"edit")');
+                if(is_array($owner_grps)){
+                    foreach ($owner_grps as $grp_id){
+                        array_push($values,'('.$grp_id.','.$recID.',"edit")');
+                    }
                 }
-                if(is_array($access_grps))
-                foreach ($access_grps as $grp_id){
-                    array_push($values,'('.$grp_id.','.$recID.',"view")');
+                if(is_array($access_grps)){
+                    foreach ($access_grps as $grp_id){
+                        array_push($values,'('.$grp_id.','.$recID.',"view")');
+                    }
                 }
             }
             $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',',$values);

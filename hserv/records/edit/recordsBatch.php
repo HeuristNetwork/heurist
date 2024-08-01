@@ -1361,8 +1361,8 @@ class RecordsBatch
             $record = recordSearchByID($this->system, $recID, array('file'));
             foreach ($record['details'] as $dtl_ID => $detailValue){
     // 2. find assosiated pdf files 
-                if(is_array($detailValue))
-                foreach ($detailValue as $id => $fileValue){
+                if(is_array($detailValue)){
+                    foreach ($detailValue as $id => $fileValue){
                     if($fileValue['file']['fxm_MimeType']=='application/pdf'){
                         
                         $hasPDFs = true;
@@ -1447,6 +1447,7 @@ class RecordsBatch
                             $skippedNoPDF[$recID] = 'PDF file not found';
                         }
                     }
+                }
                 }
             }//details
             

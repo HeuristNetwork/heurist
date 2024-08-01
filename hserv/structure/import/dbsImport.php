@@ -1449,21 +1449,22 @@ $mysqli->commit();
 
         //array of valid ids
         $terms_ids =  $this->sourceTerms->getTermsFromFormat($terms_ids, $domain);
-        if(is_array($terms_ids))
-        foreach ($terms_ids as $term_id){
-            $topmost = $this->sourceTerms->getTopMostTermParent($term_id, $domain);
-            
-            if($topmost && !in_array($topmost, $this->imp_terms[$domain])){
+        if(is_array($terms_ids)){
+            foreach ($terms_ids as $term_id){
+                $topmost = $this->sourceTerms->getTopMostTermParent($term_id, $domain);
                 
-                //because of HEURIST_UNITED_TERMS=true  enum domain can have relation vocabularies 
-                //ignore them for enum to avoid import duplications
-                if($domain=='enum' && $this->sourceTerms->getTermField($topmost,'trm_Domain')=='relation'){
-                    continue;
+                if($topmost && !in_array($topmost, $this->imp_terms[$domain])){
+                    
+                    //because of HEURIST_UNITED_TERMS=true  enum domain can have relation vocabularies 
+                    //ignore them for enum to avoid import duplications
+                    if($domain=='enum' && $this->sourceTerms->getTermField($topmost,'trm_Domain')=='relation'){
+                        continue;
+                    }
+                    
+                    array_push($this->imp_terms[$domain], $topmost);
                 }
-                
-                array_push($this->imp_terms[$domain], $topmost);
             }
-        }
+        }    
     }
 
     private function _getInverseTerms($vocab_ids = null){
@@ -1612,28 +1613,28 @@ $mysqli->commit();
 
         $fields = $def_rts[$rectype_id]['dtFields'];
 
-        if(is_array($fields))
-        //loop all fields check constraint for pointers and relmarkers
-        foreach ($fields as $ftId => $field){
-            
-                if($field[$idx_type] == "resource" || $field[$idx_type] == "relmarker"){
+        if(is_array($fields)){
+            //loop all fields check constraint for pointers and relmarkers
+            foreach ($fields as $ftId => $field){
+                
+                    if($field[$idx_type] == "resource" || $field[$idx_type] == "relmarker"){
 
-                    $constraints = $def_dts[$ftId]['commonFields'][$idx_constraints];
+                        $constraints = $def_dts[$ftId]['commonFields'][$idx_constraints];
 
-                    $rty_ids = explode(",", $constraints);
-                    foreach ($rty_ids as $rty_id){
-                        if(@$this->source_defs['rectypes']['names'][$rty_id]!=null){
+                        $rty_ids = explode(",", $constraints);
+                        foreach ($rty_ids as $rty_id){
+                            if(@$this->source_defs['rectypes']['names'][$rty_id]!=null){
 
-                            $dep = $this->_findDependentRecordTypes($rty_id, $depth+1);
-                            if($dep){
-                                $res['dependence'][$rty_id] = $dep;
+                                $dep = $this->_findDependentRecordTypes($rty_id, $depth+1);
+                                if($dep){
+                                    $res['dependence'][$rty_id] = $dep;
+                                }
+
                             }
-
                         }
                     }
-                }
+            }
         }
-
         return $res;        
         
     }

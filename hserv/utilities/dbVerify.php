@@ -460,16 +460,18 @@ class DbVerify {
                     $k = 0;
                     $err = null;
                     if(is_array($dtysWithInvalidTerms))
-                    foreach ($dtysWithInvalidTerms as $row) {
-                        $query='UPDATE defDetailTypes SET dty_JsonTermIDTree=? WHERE dty_ID='.intval($row['dty_ID']);
-                        $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validTermsString']), true );
-                        if(is_string($res)){
-                            $err = $row['dty_ID'].'. Error: '.$res;
-                            break;
+                    {                    
+                        foreach ($dtysWithInvalidTerms as $row) {
+                            $query='UPDATE defDetailTypes SET dty_JsonTermIDTree=? WHERE dty_ID='.intval($row['dty_ID']);
+                            $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validTermsString']), true );
+                            if(is_string($res)){
+                                $err = $row['dty_ID'].'. Error: '.$res;
+                                break;
+                            }
+                            $k++;
                         }
-                        $k++;
                     }
-                    if($err==null && is_array($dtysWithInvalidNonSelectableTerms))
+                    if($err==null && is_array($dtysWithInvalidNonSelectableTerms)){
                     foreach ($dtysWithInvalidNonSelectableTerms as $row) {
                         $query='UPDATE defDetailTypes SET dty_TermIDTreeNonSelectableIDs=? WHERE dty_ID='.intval($row['dty_ID']);
                         $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validNonSelTermsString']), true );
@@ -478,8 +480,8 @@ class DbVerify {
                             break;
                         }
                         $k++;
-                    }
-                    if($err==null && is_array($dtysWithInvalidRectypeConstraint))
+                    }}
+                    if($err==null && is_array($dtysWithInvalidRectypeConstraint)){
                     foreach ($dtysWithInvalidRectypeConstraint as $row) {
                         $query='UPDATE defDetailTypes SET dty_PtrTargetRectypeIDs=? WHERE dty_ID='.intval($row['dty_ID']);
                         $res = mysql__exec_param_query($this->mysqli, $query, array('s',$row['validRectypeConstraint']), true );
@@ -488,7 +490,7 @@ class DbVerify {
                             break;
                         }
                         $k++;
-                    }
+                    }}
                     
                     if($err!=null){
                         $resMsg = '<div class="error">SQL error updating field type '.$err.'</div>';

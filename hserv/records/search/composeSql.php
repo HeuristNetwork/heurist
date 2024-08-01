@@ -897,8 +897,8 @@ class HLimb {
         $this->parent = &$parent;
         $this->conjunction = $conjunction;
 
-        if(is_array($query_json))
-        foreach ($query_json as $key => $value){
+        if(is_array($query_json)){
+            foreach ($query_json as $key => $value){
 
             if(is_numeric($key) && is_array($value)){  //this is sequental array
                 $key = array_keys($value);
@@ -920,6 +920,7 @@ class HLimb {
                     array_push( $this->limbs,  $predicate);
                 }
             }
+        }
         }
     }
 

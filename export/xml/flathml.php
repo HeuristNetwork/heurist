@@ -1284,8 +1284,9 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     foreach ($record['details'] as $dt => $details) {
         foreach ($details as $value) {
-            if(!$outputStub)
-            outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
+            if(!$outputStub){
+                outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
+            }
             //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
         }
     }

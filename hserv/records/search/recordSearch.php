@@ -2169,8 +2169,8 @@ function recordSearch($system, $params, $relation_query=null)
 
             //split by 3000 - search based on parent ids (max 3000)
             $k = 0;
-            if(is_array($parent_ids))
-            while ($k < count($parent_ids)) {
+            if(is_array($parent_ids)){
+                while ($k < count($parent_ids)) {
 
                 //$need_details2 = $need_details && ($is_get_relation_records || $is_last);
 
@@ -2318,7 +2318,7 @@ function recordSearch($system, $params, $relation_query=null)
 
                 $k = $k + 3000;
             }//while chunks
-
+            }
         } //for rules
 
 

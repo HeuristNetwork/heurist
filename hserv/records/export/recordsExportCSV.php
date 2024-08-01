@@ -469,7 +469,8 @@ public static function output($data, $params){
 
     $idx = 0;
     if(is_array($records))
-    while ($idx<count($records)){ //replace to WHILE
+    {
+        while ($idx<count($records)){ 
 
         $recID = $records[$idx];
         $record = recordSearchByID(self::$system, $recID, false);
@@ -820,7 +821,7 @@ public static function output($data, $params){
         }
 
     }//for records
-
+    }
     // Join csv tables.
     if ($isJoinTable && !empty($mainRecordTypeIDs)) {
         $mainRecordTypeID = $mainRecordTypeIDs[0];

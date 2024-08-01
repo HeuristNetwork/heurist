@@ -657,7 +657,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
         }
 */   
-        if($ret!==false)
+        if($ret!==false){
         foreach($this->records as $rec_idx => $record){
           
             if(!@$record['ulf_ObfuscatedFileID']){ //define obfuscation
@@ -825,6 +825,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 }
             }
         }//after save loop
+        }
         return $ret;
     } 
     

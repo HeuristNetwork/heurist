@@ -234,7 +234,7 @@ class DbUtils {
                     return false;
             }
 
-            if(self::setSessionVal(2)) return false; //database dumped            
+            if(self::setSessionVal(2)) {return false;} //database dumped            
         
             // Zip $source to $destination
             $datetime1 = date_create('now');
@@ -281,7 +281,7 @@ class DbUtils {
                 return false;
             }
             
-            if(self::setSessionVal(3)) return false; //database dump archived
+            if(self::setSessionVal(3)) {return false;} //database dump archived
         }
             
         if($archOK){
@@ -305,7 +305,7 @@ class DbUtils {
                     return false;
                 }
 
-                if(self::setSessionVal(4)) return false; //database dropped
+                if(self::setSessionVal(4)) {return false;} //database dropped
 
                 if($verbose) {
                     echo "<br>Database ".htmlspecialchars($database_name)." has been dropped";
@@ -318,7 +318,7 @@ class DbUtils {
                 if($verbose) {
                     echo "<br>Folder ".htmlspecialchars($source)." has been deleted";
                 }
-                if(self::setSessionVal(5)) return false; //database folder deleted
+                if(self::setSessionVal(5)) {return false;} //database folder deleted
 
                 //add to log file
                 $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
@@ -590,7 +590,7 @@ class DbUtils {
                 return false;
             }
             
-            if(self::setSessionVal(1)) return false;
+            if(self::setSessionVal(1)) {return false;}
             
             //create folders 
             $upload_root = self::$system->getFileStoreRootFolder();
@@ -605,7 +605,7 @@ class DbUtils {
                 return false;
             }
 
-            if(self::setSessionVal(2)) return false;
+            if(self::setSessionVal(2)) {return false;}
             
             //create empty database
             if(!self::databaseCreate($database_name_full)){ //with structure and triggers from default dump file 
@@ -613,7 +613,7 @@ class DbUtils {
                 return false;
             }
             
-            if(self::setSessionVal(3)) return false;
+            if(self::setSessionVal(3)) {return false;}
             
             //switch to new database            
             mysql__usedatabase( $mysqli, $database_name_full );
@@ -639,7 +639,7 @@ class DbUtils {
                 
             }
 
-            if(self::setSessionVal(4)) return false; //import core defs
+            if(self::setSessionVal(4)) {return false;} //import core defs
             
             //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
             //not used 
@@ -658,7 +658,7 @@ class DbUtils {
             
             $warnings2 = self::_databaseInitForNew($user_record);
 
-            if(self::setSessionVal(5)) return false;
+            if(self::setSessionVal(5)) {return false;}
             
             $warnings = array_merge($warnings, $warnings2);
 
@@ -1496,7 +1496,7 @@ class DbUtils {
                 return false;
         } 
         
-        if(self::setSessionVal(1)) return false; //validation
+        if(self::setSessionVal(1)) {return false;} //validation
         
         //create folders 
         $upload_root = self::$system->getFileStoreRootFolder();
@@ -1528,7 +1528,7 @@ class DbUtils {
                     'Sorry, we were not able to copy file directories for cloning  database.');
                 return false;
         }
-        if(self::setSessionVal(2)) return false; //copy folders
+        if(self::setSessionVal(2)) {return false;} //copy folders
 
         //3. create target database  
         $res = DbUtils::databaseCreate($db_target, 1);
@@ -1538,7 +1538,7 @@ class DbUtils {
             return false;
         }
         
-        if(self::setSessionVal(3)) return false; //database creation
+        if(self::setSessionVal(3)) {return false;} //database creation
 
         //4. copy tables  - it switches to target db
         $res = DbUtils::databaseClone($db_source_full, $db_target_full, false, $nodata, $isCloneTemplate);
@@ -1548,7 +1548,7 @@ class DbUtils {
             return false;
         }
 
-        if(self::setSessionVal(4)) return false; //copy data
+        if(self::setSessionVal(4)) {return false;} //copy data
         
         if($isCloneTemplate){
         //5. add current user from current database as owner to target cloned db
@@ -1569,12 +1569,12 @@ class DbUtils {
             return false;
         }
 
-        if(self::setSessionVal(5)) return false; //triggers and constraints
+        if(self::setSessionVal(5)) {return false;} //triggers and constraints
         
         // 7. Update file path in target database  with absolute paths
         self::databaseUpdateFilePaths($db_source, $db_target);
 
-        if(self::setSessionVal(6)) return false; //triggers and constraints
+        if(self::setSessionVal(6)) {return false;} //triggers and constraints
         
         return true;
     }

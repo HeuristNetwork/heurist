@@ -340,16 +340,18 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0)
-            foreach($affectedUserIds as $usrID)  //affected users
-            if($usrID!=$this->system->get_user_id()){
-                    $usrID = intval($usrID);
-                    $fname = $this->getEntityImagePath($usrID);
-                    if(file_exists($fname)){
-                        unlink($fname);
+            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0){
+                foreach($affectedUserIds as $usrID)  //affected users
+                {
+                    if($usrID!=$this->system->get_user_id()){
+                            $usrID = intval($usrID);
+                            $fname = $this->getEntityImagePath($usrID);
+                            if(file_exists($fname)){
+                                unlink($fname);
+                            }
                     }
+                }
             }
-            
             //update user groups for current user
             //$this->system->updateSessionForUser( $this->system->get_user_id() );
             //@todo   $groups = reloadUserGroups(get_user_id());

@@ -1471,14 +1471,15 @@
                         $prefs = json_decode($prefs, true);
                         if($prefs && count($prefs)>0 && array_key_exists('externalRepositories',$prefs)){
                                 $prefs = $prefs['externalRepositories'];
-                                if(is_array($prefs))                                
-                                foreach($prefs as $service_id=>$service){
-                                    if(!$writeOnly || @$service['params']['writeApiKey'] || @$service['params']['writeUser'])
-                                    {
-                                         //$service['service'].'_'.$usr_ID, 
-                                         $usr_ID = intval($row[0]);
-                                         $result[] = array($service_id, $service['label'], $usr_ID, $row[1]);
-                                         //$usr_ID, $row[1], $service['service'], $service['label']);
+                                if(is_array($prefs)){
+                                    foreach($prefs as $service_id=>$service){
+                                        if(!$writeOnly || @$service['params']['writeApiKey'] || @$service['params']['writeUser'])
+                                        {
+                                             //$service['service'].'_'.$usr_ID, 
+                                             $usr_ID = intval($row[0]);
+                                             $result[] = array($service_id, $service['label'], $usr_ID, $row[1]);
+                                             //$usr_ID, $row[1], $service['service'], $service['label']);
+                                        }
                                     }
                                 }
                         }

@@ -183,7 +183,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 
 define('IS_INDEX_PAGE',true);
-if(!defined('PDIR')) {define('PDIR','')};
+if(!defined('PDIR')) {define('PDIR','');}
 
 require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
@@ -343,7 +343,7 @@ if($isLocalHost){
 
     function onPageInit(success){
 
-        if(!success) return;
+        if(!success) {return;}
 
 
         $(document).on('focusin', function(e) {

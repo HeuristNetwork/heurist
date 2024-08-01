@@ -411,41 +411,42 @@ class DbDefRecStructure extends DbEntityBase
         
         
         $records = array();
-        foreach($fields as $dty_ID)
-        if(@$dt_fields[$dty_ID])
-        {
-        
-            $dt = $dt_fields[$dty_ID]['commonFields'];
+        foreach($fields as $dty_ID){
+            if(@$dt_fields[$dty_ID])
+            {
             
-            $recvalues = array(
-            'rst_ID'=> $dty_ID,
-            'rst_RecTypeID'=> $rty_ID,
-            'rst_DisplayOrder'=> $order,
-            'rst_DetailTypeID'=> $dty_ID,
-            'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
-                                     ?$newfields_values[$dty_ID]['dty_Name'] 
-                                     :$dt[$di['dty_Name']],
-            'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
-                                     ?$newfields_values[$dty_ID]['dty_HelpText'] 
-                                     :$dt[$di['dty_HelpText']],
-            'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
-            'rst_MaxValues'=> 1,
-            'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
+                $dt = $dt_fields[$dty_ID]['commonFields'];
+                
+                $recvalues = array(
+                'rst_ID'=> $dty_ID,
+                'rst_RecTypeID'=> $rty_ID,
+                'rst_DisplayOrder'=> $order,
+                'rst_DetailTypeID'=> $dty_ID,
+                'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
+                                         ?$newfields_values[$dty_ID]['dty_Name'] 
+                                         :$dt[$di['dty_Name']],
+                'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
+                                         ?$newfields_values[$dty_ID]['dty_HelpText'] 
+                                         :$dt[$di['dty_HelpText']],
+                'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
+                'rst_MaxValues'=> 1,
+                'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
 
 
-            if(@$dt[$di['dty_SemanticReferenceURL']]){
-                $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+                if(@$dt[$di['dty_SemanticReferenceURL']]){
+                    $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+                }
+                if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
+                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
+                }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
+                }
+                
+                $records[] = $recvalues;
+                
+                if(isset($this->data['order'])){ $order = $this->data['order'];}
+                else { $order = $order+10; }
             }
-            if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
-                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
-            }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
-                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
-            }
-            
-            $records[] = $recvalues;
-            
-            if(isset($this->data['order'])){ $order = $this->data['order'];}
-            else { $order = $order+10; }
         }
         
         if(count($records)>0){

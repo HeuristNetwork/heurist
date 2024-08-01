@@ -221,11 +221,12 @@
                 $dbname = $system->dbname_full();
                 if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
                     $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);
-                    if(is_array($keys))
-                    foreach ($keys as $key) {
-                        if(strpos($key,'datatable')===0){
-                            $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
-                            unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
+                    if(is_array($keys)){
+                        foreach ($keys as $key) {
+                            if(strpos($key,'datatable')===0){
+                                $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
+                                unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
+                            }
                         }
                     }
                 }

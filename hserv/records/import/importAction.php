@@ -145,15 +145,17 @@ private static function findRecordIds($imp_session, $params){
 
     //get arrays of  field_XXX => field type, field_XXX=>index in mapping
     if(is_array($mapping))
-    foreach ($mapping as $index => $field_type) {
-        if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
-                $field_name = "field_".$index;
-                $mapping_fieldname_to_index[$field_name] = $index;
-                                
-                $mapped_fields[$field_name] = $field_type;
-                $sel_fields[] = $field_name;
-        }
-    }    
+    {
+        foreach ($mapping as $index => $field_type) {
+            if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
+                    $field_name = "field_".$index;
+                    $mapping_fieldname_to_index[$field_name] = $index;
+                                    
+                    $mapped_fields[$field_name] = $field_type;
+                    $sel_fields[] = $field_name;
+            }
+        }    
+    }
     
     if(count($mapped_fields)==0){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import CSV. Matching step failed. No mapping defined');
@@ -2383,28 +2385,30 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                             'SELECT imp_id, '.$id_field.' FROM '.$import_table
                                 ." WHERE imp_id in ($imp_ids)");
                 if(is_array($oldvals))
-                foreach($oldvals as $idx=>$row){
-                    $ids = explode($csv_mvsep, $row[1]);
-                    $new_ids = array();
-                    foreach($ids as $i=>$id){
-                        if($id==$old_id_in_idfield){
-                             $new_ids[] = intval($new_recordID);
-                        }else{
-                             $new_ids[] = intval($id);
+                {
+                    foreach($oldvals as $idx=>$row){
+                        $ids = explode($csv_mvsep, $row[1]);
+                        $new_ids = array();
+                        foreach($ids as $i=>$id){
+                            if($id==$old_id_in_idfield){
+                                 $new_ids[] = intval($new_recordID);
+                            }else{
+                                 $new_ids[] = intval($id);
+                            }
                         }
-                    }
-                    /*array_map(function ($v) use ($old_id_in_idfield, $new_id) {
-                        return $v == $old_id_in_idfield ? $new_id : $v;
-                    }, $ids);*/                    
-                    
-                    $new_ids = implode($csv_mvsep, $new_ids);
-                    
-                    $updquery = 'UPDATE '.$import_table
-                        .' SET '.$id_field.'="'.$new_ids
-                        .'" WHERE imp_id='.intval($row[0]);
+                        /*array_map(function ($v) use ($old_id_in_idfield, $new_id) {
+                            return $v == $old_id_in_idfield ? $new_id : $v;
+                        }, $ids);*/                    
                         
-                    self::$mysqli->query($updquery);
-                }//foreach
+                        $new_ids = implode($csv_mvsep, $new_ids);
+                        
+                        $updquery = 'UPDATE '.$import_table
+                            .' SET '.$id_field.'="'.$new_ids
+                            .'" WHERE imp_id='.intval($row[0]);
+                            
+                        self::$mysqli->query($updquery);
+                    }//foreach
+                }
             }        
         
         }

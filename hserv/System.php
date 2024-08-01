@@ -202,23 +202,26 @@ class System {
 
         // Record type constants
         global $rtDefines;
-        foreach ($rtDefines as $str => $id)
-        if(!defined($str)){
-            $this->defineRTLocalMagic($str, $id[1], $id[0], $reset);
+        foreach ($rtDefines as $str => $id){
+            if(!defined($str)){
+                $this->defineRTLocalMagic($str, $id[1], $id[0], $reset);
+            }
         }
 
         // Data type constants
         global $dtDefines;
-        foreach ($dtDefines as $str => $id)
-        if(!defined($str)){
-            $this->defineDTLocalMagic($str, $id[1], $id[0], $reset);
+        foreach ($dtDefines as $str => $id){
+            if(!defined($str)){
+                $this->defineDTLocalMagic($str, $id[1], $id[0], $reset);
+            }
         }
         
         // Term constants
         global $trmDefines;
-        foreach ($trmDefines as $str => $id)
-        if(!defined($str)){
-            $this->defineTermLocalMagic($str, $id[1], $id[0], $reset);
+        foreach ($trmDefines as $str => $id){
+            if(!defined($str)){
+                $this->defineTermLocalMagic($str, $id[1], $id[0], $reset);
+            }
         }
         
     }
