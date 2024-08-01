@@ -35,7 +35,7 @@ require_once dirname(__FILE__).'/../../entity/dbDefRecStructure.php';
 * 
 */
 class RecordsExportCSV {
-    private function __construct() {}    
+
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;

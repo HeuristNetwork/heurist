@@ -133,5 +133,7 @@ function str_get_secure($tpl_name, &$smarty_obj)
 
 function str_get_trusted($tpl_name, &$smarty_obj)
 {
+    // assume all templates are trusted
+    return true;
 }
 ?>

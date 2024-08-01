@@ -183,8 +183,6 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                     $res = DbUtils::databaseRestoreFromArchive($database_name, $archive_file, $archive_folder);
 
                     if($res!==false){
-                        sendEmail_Database($usr_owner, $database_name, $locale, 'restore');
-                        
                         //add url to new database
                         $res = array(
                             'newdbname'  => $database_name, 

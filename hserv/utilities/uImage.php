@@ -42,8 +42,6 @@
 //use Screen\Capture; //for micorweber
 
 class UImage {
-  
-    private function __construct() {}    
     
     /**
     * Creates image with given text

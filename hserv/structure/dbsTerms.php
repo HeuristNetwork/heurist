@@ -56,12 +56,6 @@ class DbsTerms
        $this->system = $system;
        $this->data = $data;
     }
-    //
-    // config getter
-    //
-    public function init(){
-        
-    }
 
     //
     // assign terms

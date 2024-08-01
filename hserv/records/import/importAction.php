@@ -39,7 +39,6 @@ require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 */
 class ImportAction {
     
-    private function __construct() {}    
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;

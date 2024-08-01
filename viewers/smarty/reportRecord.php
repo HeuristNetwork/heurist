@@ -746,10 +746,6 @@ class ReportRecord {
         return $res;
     }
     
-    public function getRecordTags($recID){
-        
-    }
-    
     //
     // returns record ids for given query 
     //

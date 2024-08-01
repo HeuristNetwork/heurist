@@ -160,12 +160,6 @@ function doHarvestInDir($dir) {
     
 }
 */
-//
-// remove all files from given array
-//
-function cleanFiles($files) {
-    
-}
 
 function getRegInfoResult(){
     global $reg_info;

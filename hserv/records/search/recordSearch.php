@@ -3767,11 +3767,4 @@ function recordSearchPersonalTags($system, $rec_ID) {
         'SELECT tag_Text FROM usrRecTagLinks, usrTags WHERE '
         ."tag_ID = rtl_TagID and tag_UGrpID= ".$system->get_user_id()." and rtl_RecID = $rec_ID order by rtl_Order");
 }  
-
-//
-// load personal tags (current user) for given record ID
-//
-function recordIsVisible($system, $rec_ID) {
-    
-}
 ?>

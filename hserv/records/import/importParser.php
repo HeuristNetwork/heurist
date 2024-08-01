@@ -28,7 +28,7 @@
 * 
 */
 class ImportParser {
-    private function __construct() {}    
+
     private static $system = null;
     private static $initialized = false;
     

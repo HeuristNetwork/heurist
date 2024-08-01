@@ -44,7 +44,6 @@ Special case - import from unregistered dastabase
 */
 class ImportHeurist {
 
-    private function __construct() {}    
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;

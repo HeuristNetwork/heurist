@@ -98,8 +98,10 @@ class DbSysDatabases extends DbEntityBase
     // deletion and not allowed
     //
     public function delete($disable_foreign_checks = false){
+        //virtual method
     }
     public function save(){
+        //virtual method
     }
     
 }

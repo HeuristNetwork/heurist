@@ -34,8 +34,6 @@
 */
 class USanitize {
   
-    private function __construct() {}    
-    
     private static $purifier = null;
 
     //
