@@ -235,7 +235,7 @@
 
         // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
         $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", $columns);
-        $query = preg_replace("/rty_ConceptID/", "", $query);
+        $query = str_replace('rty_ConceptID', '', $query);
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
         } else {
@@ -617,16 +617,16 @@ function dbs_GetRectypeConstraint($system) {
         }
         }*/
         $query = "select " . join(",", __getTermColNames());
-        $query = preg_replace("/trm_ConceptID/", "", $query);
+        $query = str_replace('trm_ConceptID', '', $query);
         
         //in case database v1.2 there is not field trm_VocabularyGroupID
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         if($dbVer==1 && $dbVerSub<3){
-            $query = preg_replace("/trm_VocabularyGroupID/", "1 as trm_VocabularyGroupID", $query);
+            $query = str_replace('trm_VocabularyGroupID', '1 as trm_VocabularyGroupID', $query);
         }
         if($dbVer==1 && $dbVerSub<4 && $system->get_system('sys_dbSubSubVersion')<6){
-            $query = preg_replace("/trm_OrderInBranch/", "0 as trm_OrderInBranch", $query);
+            $query = str_replace('trm_OrderInBranch', '0 as trm_OrderInBranch', $query);
         }
         
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
@@ -1402,7 +1402,7 @@ function dbs_GetRectypeConstraint($system) {
         }else{
 
             $query = "select dtg_ID, dtg_Name, " . join(",", getDetailTypeColNames());
-            $query = preg_replace("/dty_ConceptID/", "", $query);
+            $query = str_replace('dty_ConceptID', '', $query);
     
             if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
                 $query.= " if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(dty_ID as char(5)))) as dty_ConceptID";

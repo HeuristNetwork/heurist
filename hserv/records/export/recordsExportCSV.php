@@ -698,7 +698,8 @@ public static function output($data, $params){
                                 $enum_code[] = '';
                             }
                             $vals = $values;
-                        }else if($dt_type == 'freetext' && $dt_type == 'blocktext'){ // escape all line feed (\n) within text values, to avoid confusing the import
+                        }else if($dt_type == 'freetext' && $dt_type == 'blocktext'){ 
+                            // escape all line feed (\n) within text values, to avoid confusing the import
                             // freetext shouldn't have any, but just in case
                             foreach($values as $val){ 
                                 //$val = preg_replace("/\\r/", "\\r", $val);

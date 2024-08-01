@@ -149,8 +149,8 @@ class USanitize {
             
             $message = htmlspecialchars($message, ENT_NOQUOTES);
             if($allowed_tags!==false){
-                $message = preg_replace("/&lt;/", '<', $message);
-                $message = preg_replace("/&gt;/", '>', $message);
+                $message = str_replace('&lt;', '<', $message);
+                $message = str_replace('&gt;', '>', $message);
             }
         }
         return $message;

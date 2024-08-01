@@ -351,6 +351,7 @@ class UImage {
                         break;
                     case 'gif':
                         $mimeExt = 'gif';
+                        break;
                     case 'png':
                         $mimeExt = 'png';
                         break;
