@@ -247,9 +247,9 @@ function _getRt_Ft($resource)
 //
 function recordSearchFacets($system, $params){
 
-    define('_FT_SELECT', 1);
-    define('_FT_LIST', 2);
-    define('_FT_COLUMN', 3);
+    $ft_Select = 1;
+    $ft_List = 2;
+    $ft_Column = 3;
 
     $mysqli = $system->get_mysqli();
 
@@ -427,7 +427,7 @@ function recordSearchFacets($system, $params){
 
                 $select_clause = "SELECT min(dt0.rdi_estMinDate) as min, max(dt0.rdi_estMaxDate) as max, count(distinct r0.rec_ID) as cnt ";
 
-                if($facet_type==_FT_SELECT){
+                if($facet_type==$ft_Select){
                     $rec_query = "SELECT r0.rec_ID ";
                 }
             }
@@ -505,7 +505,7 @@ function recordSearchFacets($system, $params){
 
         }
         //SLIDER
-        else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==_FT_SELECT) || $dt_type=="year"){
+        else if((($dt_type=="integer" || $dt_type=="float") && $facet_type==$ft_Select) || $dt_type=="year"){
 
             //if ranges are not defined there are two steps 1) find min and max values 2) create select case
             $select_field = "cast($select_field as DECIMAL)";
@@ -580,7 +580,7 @@ function recordSearchFacets($system, $params){
 
             while ( $row = $res->fetch_row() ) {
 
-                if((($dt_type=='integer' || $dt_type=='float') && $facet_type==_FT_SELECT)  || 
+                if((($dt_type=='integer' || $dt_type=='float') && $facet_type==$ft_Select)  || 
                 (($dt_type=='year' || $dt_type=='date') && $facet_groupby==null)  ){
                     $third_element = $row[2];// slider - third parameter is COUNT for range
 					

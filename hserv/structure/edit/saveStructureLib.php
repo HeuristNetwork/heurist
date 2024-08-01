@@ -532,7 +532,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
                 //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
                 if($colName == "rty_TitleMask"){
                     //array_push($parameters, "");//empty title mask - store only canonical!
-                    $val = TitleMask::execute($val, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
+                    $val = TitleMask::execute($val, $rtyID, 1, null, ERROR_REP_SILENT);//make coded
                 }else if($colName == "rty_Status"){
                     if($val==null || $val=='') {$val = 'open';}
                 }
@@ -590,7 +590,7 @@ function updateTitleMask($rtyID, $mask) {
     $ret = 0;
     if($mask){
         $parameters = array("");
-        $val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
+        $val = TitleMask::execute($mask, $rtyID, 1, null, ERROR_REP_SILENT);//convert from human to coded
         $parameters = addParam($parameters, "s", $val);
 
         $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rtyID";

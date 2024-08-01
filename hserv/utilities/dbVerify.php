@@ -1432,7 +1432,7 @@ HEADER;
                 $res[0] = "Title mask is not defined";
             }else{
                 //get human readable
-                $res = TitleMask::execute($mask, $rty_ID, 2, null, _ERR_REP_MSG);
+                $res = TitleMask::execute($mask, $rty_ID, 2, null, ERROR_REP_MSG);
             }
                         
             if(is_array($res)){ //error

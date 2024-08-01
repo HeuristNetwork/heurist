@@ -50,7 +50,7 @@ if( $system->init(@$_REQUEST['db']) ){
 
             if($check_mode==2){ //get coded mask
                 
-                $res = TitleMask::execute($mask, $rectypeID, 1, null, _ERR_REP_MSG);
+                $res = TitleMask::execute($mask, $rectypeID, 1, null, ERROR_REP_MSG);
                 if (is_array($res)) {
                     $invalid_mask =$res[0];
                 }else{
@@ -60,7 +60,7 @@ if( $system->init(@$_REQUEST['db']) ){
             }else 
             if($check_mode==3){ //to human readable
 
-                $res = TitleMask::execute($mask, $rectypeID, 2, null, _ERR_REP_MSG);
+                $res = TitleMask::execute($mask, $rectypeID, 2, null, ERROR_REP_MSG);
 
                 if (is_array($res)) {
                     $invalid_mask =$res[0];
@@ -82,7 +82,7 @@ if( $system->init(@$_REQUEST['db']) ){
             }else{
                 
                 $recID = @$_REQUEST['rec_id'];
-                $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, _ERR_REP_WARN);//convert to coded and fill values
+                $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, ERROR_REP_WARN);//convert to coded and fill values
                 $response =  $new_title;
                 
             }

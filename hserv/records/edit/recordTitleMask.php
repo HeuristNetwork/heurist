@@ -38,15 +38,15 @@
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 
-define('_ERR_REP_WARN', 0);// returns general message that titlemask is invalid - default
-define('_ERR_REP_MSG', 1);// returns detailed error message
-define('_ERR_REP_SILENT', 2);// returns empty string
+define('ERROR_REP_WARN', 0);// returns general message that titlemask is invalid - default
+define('ERROR_REP_MSG', 1);// returns detailed error message
+define('ERROR_REP_SILENT', 2);// returns empty string
 
-define('_ERROR_MSG', 'Invalid title mask: please define the title mask in record structure editor');
-define('_ERROR_MSG2', 'Error in title mask. Please look for syntax errors or special characters. ' 
+define('TITLEMASK_ERROR_MSG', 'Invalid title mask: please define the title mask in record structure editor');
+define('TITLEMASK_ERROR_MSG2', 'Error in title mask. Please look for syntax errors or special characters. ' 
 .'If the problem is not clear, please rebuild the mask one field at a time and let the Heurist team know which field causes the problem so we can fix it');
 
-define('_EMPTY_MSG', '**** No data in title fields for this record ****');
+define('TITLEMASK_EMPTY_MSG', '**** No data in title fields for this record ****');
 
 //
 // static class
@@ -114,7 +114,7 @@ class TitleMask {
 
     self::$provided_mask = $mask;
 
-    $res = self::execute($mask, $rt, 1, null, _ERR_REP_MSG);
+    $res = self::execute($mask, $rt, 1, null, ERROR_REP_MSG);
     if(is_array($res)){
         return $res[0];// mask is invalid - this is error message
     }else{
@@ -139,7 +139,7 @@ public static function fill($rec_id, $mask=null){
             $mask = $rec_value['rty_TitleMask'];
         }
         $rt = $rec_value['rec_RecTypeID'];
-        return self::execute($mask, $rt, 0, $rec_id, _ERR_REP_WARN);
+        return self::execute($mask, $rt, 0, $rec_id, ERROR_REP_WARN);
     }else{
         return "Title mask not generated. Record ".$rec_id." not found";
     }
@@ -153,10 +153,10 @@ public static function fill($rec_id, $mask=null){
 * @param mixed $rt - record type
 * @param mixed $mode - 0 get value from coded, 1 to coded, 2 - to human readable, 3 get value from human readable
 * @param mixed $rec_id - record id for value mode
-* @param mixed $rep_mode - output in case failure: 0 - general message(_ERR_REP_WARN), 1- detailed message, 2 - empty string (_ERR_REP_SILENT)
+* @param mixed $rep_mode - output in case failure: 0 - general message(ERROR_REP_WARN), 1- detailed message, 2 - empty string (ERROR_REP_SILENT)
 * @return string
 */
-public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN) {
+public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_REP_WARN) {
 
     self::initialize();
 
@@ -169,18 +169,18 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
     }
 
     if (!$mask) {
-        $ret = ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
+        $ret = ($rep_mode!=ERROR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
         return $ret;
     }
 
     if($mode==3){
         //get value from human readable
-        //execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_REP_WARN)
-        $res = self::execute($mask, $rt, 1, $rec_id, _ERR_REP_MSG);
+        //execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_REP_WARN)
+        $res = self::execute($mask, $rt, 1, $rec_id, ERROR_REP_MSG);
         if (is_array($res)) {
             return $res[0];
         }else{
-            return self::execute($res, $rt, 0, $rec_id, _ERR_REP_MSG);
+            return self::execute($res, $rt, 0, $rec_id, ERROR_REP_MSG);
         }
     }
     
@@ -207,9 +207,9 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
         if(is_array($value)){
             //ERROR
-            if($rep_mode==_ERR_REP_WARN){
-                return _ERROR_MSG;
-            }else if($rep_mode==_ERR_REP_MSG){
+            if($rep_mode==ERROR_REP_WARN){
+                return TITLEMASK_ERROR_MSG;
+            }else if($rep_mode==ERROR_REP_MSG){
                 return $value;
             }else{
                 $replacements[$matches[1][$i]] = "";
@@ -343,12 +343,12 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
         if($title==""){
 
-            if($rep_mode==_ERR_REP_SILENT){
+            if($rep_mode==ERROR_REP_SILENT){
                 $title = self::__get_forempty($rec_id, $rt);
-            }else if($rep_mode==_ERR_REP_MSG){
-                return array(_EMPTY_MSG);
+            }else if($rep_mode==ERROR_REP_MSG){
+                return array(TITLEMASK_EMPTY_MSG);
             }else{
-                return _EMPTY_MSG;
+                return TITLEMASK_EMPTY_MSG;
             }
         }
     }

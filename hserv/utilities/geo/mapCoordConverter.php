@@ -387,7 +387,7 @@ class GpointConverter
         else if((-72 > $this->lat) && ($this->lat >= -80)) {$LetterDesignator = 'C';}
         else {$LetterDesignator = 'Z';}//This is here as an error flag to show that the Latitude is outside the UTM limits
 
-        return($LetterDesignator);
+        return $LetterDesignator;
     }
 
     /**

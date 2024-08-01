@@ -127,7 +127,7 @@ class DbDefRecTypes extends DbEntityBase
                         $mask_concept_codes = $row[$idx];
                         array_push($row, $mask_concept_codes);//keep
                         //convert to human readable
-                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, _ERR_REP_SILENT);
+                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, ERROR_REP_SILENT);
                     }else{
                         array_push($row, '');
                     }
@@ -447,7 +447,7 @@ class DbDefRecTypes extends DbEntityBase
                     $mask = @$record['rty_TitleMask'];
                     if($mask){
                             $parameters = array("");
-                            $val = TitleMask::execute($mask, $rty_ID, 1, null, _ERR_REP_SILENT);//convert from human to coded
+                            $val = TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);//convert from human to coded
                             $parameters = array('s', $val);
 
                             $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";

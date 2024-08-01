@@ -41,7 +41,7 @@ define('SORT_ID', 'id');
 
 $mysqli = null;
 $currUserID = 0;
-
+$sort_type = 0;
 
 /**
 * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
@@ -121,13 +121,13 @@ sortby:
 */
 function get_sql_query_clauses($db, $params, $currentUser=null) {
 
-    global $mysqli, $currUserID;
+    global $mysqli, $currUserID, $sort_type;
 
     $mysqli = $db;
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
     if (! $params) {$params = array();}//$_REQUEST;
-    if(!defined('stype') && @$params['stype'])  define('stype', @$params['stype']);
+    if(@$params['stype']) {$sort_type = @$params['stype'];}
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
     $wg_ids = array();//may be better use $system->get_user_group_ids() ???
@@ -732,6 +732,7 @@ class AndLimb {
 
 
     private function createPredicate($text) {
+        global $sort_type;
 
         $colon_pos = strpos($text, ':');
         if ($equals_pos = strpos($text, '=')) {
@@ -759,12 +760,13 @@ class AndLimb {
         if ($this->absoluteStrQuery || ! $colon_pos) {    // a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
             $pred_val = $this->cleanQuotedValue($text);
 
-            if (defined('stype')  &&  stype == 'key')
+            if ($sort_type == 'key'){
                 return new TagPredicate($this, $pred_val);
-            else if (defined('stype')  &&  stype == 'all')
+            }else if ($sort_type == 'all'){
                 return new AnyPredicate($this, $pred_val);
-            else    // title search is default search
+            }else{    // title search is default search
                 return new TitlePredicate($this, $pred_val);
+            }
         }
 
         $pred_type = substr($text, 0, $colon_pos);
@@ -948,9 +950,9 @@ class AndLimb {
         }
 
         // no predicate-type specified ... look at search type specification
-        if (defined('stype')  &&  stype == 'key') {    // "default" search should be on tag
+        if ($sort_type == 'key') {    // "default" search should be on tag
             return new TagPredicate($this, $pred_val);
-        } else if (defined('stype')  &&  stype == 'all') {
+        } else if ($sort_type == 'all') {
             return new AnyPredicate($this, $pred_val);
         } else {
             return new TitlePredicate($this, $pred_val);

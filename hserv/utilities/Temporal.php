@@ -1365,9 +1365,10 @@ class Temporal {
             try{
                 $i = new DateInterval($value);
                 if($i){
-                    return ($i->y ? ("$prefix{$i->y} years") :
+                    $ret = ($i->y ? ("$prefix{$i->y} years") :
                         ($i->m ? ("$prefix{$i->m} months") :
                             ($i->d ? ("$prefix{$i->d} days") :'' )));
+                    return $ret;
                 }
             } catch (Exception  $e){
             }

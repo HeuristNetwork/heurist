@@ -28,7 +28,7 @@ require_once dirname(__FILE__).'/../dbsTerms.php';
 //require_once dirname(__FILE__).'/../../utilities/dbRegis.php';
 require_once dirname(__FILE__).'/../../utilities/uFile.php';
 
-define('_DBG', false);//debug log output
+define('IS_DBG', false);//debug log output
 
 class DbsImport {
 

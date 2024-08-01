@@ -247,7 +247,7 @@ $param_totalqueries = 0;
 /* DISABLED snyk SSRF
 if (!$error && isset($_REQUEST["fn"])) 
 {
-    //    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
+    //    echo "<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n";
     $param_start = $_REQUEST["start"];
     $param_fn = $_REQUEST["fn"];
     $param_foffset = $_REQUEST["foffset"];
@@ -412,7 +412,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
       $dumpline=str_replace("\r", "\n", $dumpline);
 
 // DIAGNOSTIC
-// echo ("<p>Line $linenumber: $dumpline</p>\n");
+// echo "<p>Line $linenumber: $dumpline</p>\n";
 
 // Recognize delimiter statement
 
@@ -428,7 +428,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         {
 
 // DIAGNOSTIC
-//          echo ($comment_value);
+//          echo $comment_value;
           if (trim($dumpline)=="" || strpos (trim($dumpline), $comment_value) === 0)
           { $skipline=true;
             break;
@@ -438,7 +438,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         { $linenumber++;
 
 // DIAGNOSTIC
-// echo ("<p>Comment line skipped</p>\n");
+// echo "<p>Comment line skipped</p>\n";
 
           continue;
         }
@@ -477,9 +477,9 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Execute query if end of query detected ($delimiter as last character) AND NOT in parents
 
 // DIAGNOSTIC
-// echo ("<p>Regex: ".'/'.preg_quote($delimiter).'$/'."</p>\n");
-// echo ("<p>In Parents: ".($inparents?"true":"false")."</p>\n");
-// echo ("<p>Line: $dumpline</p>\n");
+// echo "<p>Regex: ".'/'.preg_quote($delimiter).'$/'."</p>\n";
+// echo "<p>In Parents: ".($inparents?"true":"false")."</p>\n";
+// echo "<p>Line: $dumpline</p>\n";
 
       if ((preg_match('/'.preg_quote($delimiter,'/').'$/',trim($dumpline)) || $delimiter=='') && !$inparents)
       {
@@ -532,7 +532,7 @@ if (TESTMODE){
 
 skin_open();
 
-// echo ("<p class=\"centr\"><b>Statistics</b></p>\n");
+// echo "<p class=\"centr\"><b>Statistics</b></p>\n";
 
   if (!$error)
   {
@@ -594,7 +594,7 @@ skin_open();
       $pct_bar     = str_replace(' ','&nbsp;','<tt>[         Not available for gzipped files          ]</tt>');
     }
 
-    echo ("
+    echo "
     <center>
     <table width=\"520\" border=\"0\" cellpadding=\"3\" cellspacing=\"1\">
     <tr><th class=\"bg4\"> </th><th class=\"bg4\">Session</th><th class=\"bg4\">Done</th><th class=\"bg4\">To go</th><th class=\"bg4\">Total</th></tr>
@@ -607,13 +607,13 @@ skin_open();
     <tr><th class=\"bg4\">% bar</th><td class=\"bgpctbar\" colspan=\"4\">$pct_bar</td></tr>
     </table>
     </center>
-    \n");
+    \n";
 
 // Finish message and restart the script
 $script_name = urlencode($_SERVER["PHP_SELF"]);
 
     if ($linenumber<$param_start+$linespersession)
-    { echo ("<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n");
+    { echo "<p class=\"successcentr\">Congratulations: End of file reached, assuming OK</p>\n";
 
       do_action('script_finished');
       $error=true; // This is a semi-error telling the script is finished
@@ -690,12 +690,12 @@ function add_action($tag, $function)
 
 function skin_open()
 {
-  echo ('<div class="skin1">');
+  echo '<div class="skin1">';
 }
 
 function skin_close()
 {
-  echo ('</div>');
+  echo '</div>';
 }
 
 function error_echo($msg){

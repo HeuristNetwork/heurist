@@ -239,7 +239,7 @@ if(!($max_size>0)) {$max_size = 0;}
         <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
         
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
-            <input type="hidden" name="upload_thumb_url" value="<?php echo (defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:'');?>"/>
+            <input type="hidden" name="upload_thumb_url" value="<?php echo defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:'';?>"/>
             <input type="hidden" name="unique_filename" value="0"/>
             
             <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
