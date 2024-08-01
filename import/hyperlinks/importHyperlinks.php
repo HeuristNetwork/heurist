@@ -84,8 +84,9 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 	if (@$src) {
 		$base_url = @$_REQUEST['url'];
-		if (preg_match('!<base[^>]*href=["\']?([^"\'>\s]+)["\']?!is', $src, $url_match))
+		if (preg_match('!<base[^>]*href=["\']?([^"\'>\s]+)["\']?!is', $src, $url_match)){
 			$base_url = $url_match[1];
+        }
 		$base_url_root = preg_replace('!([^:/])/.*!', '$1', $base_url);
 		$base_url_base = preg_replace('!([^:/]/.*/)[^/]*$!', '$1', $base_url);
 		if (substr($base_url_base, -1, 1) != '/') {$base_url_base = $base_url_base . '/';}
@@ -97,10 +98,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 
 		// find the page title
 		preg_match('!<title>([^><]*)</title>!is', $src, $title_matches);
-		if (@$title_matches[1])
+		if (@$title_matches[1]){
 			$notes_src_str = " [source: '".$title_matches[1]."' (".$srcname.")]";
-		else
+        }else{
 			$notes_src_str = " [source: ".$srcname."]";
+        }
 
 
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
@@ -134,10 +136,11 @@ if (@$_REQUEST['mode'] == 'Analyse') {
             }
 
 			if (! preg_match('!^[-+.a-z]+:!i', @$matches[2][$i])) {	/* doesn't start with protocol -- a relative URL */
-				if (substr($matches[2][$i], 0, 1) == '/')	/* starts with a slash -- relative to root */
+				if (substr($matches[2][$i], 0, 1) == '/'){	/* starts with a slash -- relative to root */
 					$matches[2][$i] = $base_url_root . $matches[2][$i];
-				else
+				}else{
 					$matches[2][$i] = $base_url_base . $matches[2][$i];
+                }
 
 				//while (preg_match('!/\\.\\.(?:/|$)!', $matches[2][$i]))	/* remove ..s */
 					//$matches[2][$i] = preg_replace('!(http://.+)(?:/[^/]*)/\\.\\.(/|$)!', '\\1\\2', $matches[2][$i]);
@@ -651,10 +654,11 @@ function print_link($url, $title) {
       </div>
       <small class="words">
 <?php
-	if (@$_REQUEST['notes'][$linkno])
+	if (@$_REQUEST['notes'][$linkno]){
 		$word_count = intval(str_word_count($_REQUEST['notes'][$linkno]));
-	else
+	}else{
 		$word_count = str_word_count($notes[$url]);
+    }
         
 	if ($word_count == 1) {
 		print '1 word';
@@ -688,10 +692,11 @@ function print_link($url, $title) {
 			<?php echo htmlspecialchars($row[0]);//'rec_Title' ?>
 		</span>&nbsp;&nbsp;
 		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?php echo  htmlspecialchars($row[1]) ?>"><?php
-				if (strlen($row[1]) < 100) //'rec_URL'
+				if (strlen($row[1]) < 100){ //'rec_URL'
 					print htmlspecialchars(common_substring($row[1], $url));
-				else
+				}else{
 					print htmlspecialchars(common_substring(substr($row[1], 0, 90) . '...', $url));
+                }
 		?></a><br>
 	</div>
 

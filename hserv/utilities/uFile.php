@@ -254,8 +254,9 @@
                 }
             }
             reset($objects);
-            if($rmdir)
+            if($rmdir){
                 rmdir($dir);//delete folder itself
+            }
         }
 
         return $verbos ? $msgs : null;
@@ -738,7 +739,7 @@
         $targetPath = str_replace("\0", '', $targetPath);
         $targetPath = str_replace('\\', '/', $targetPath);
         
-        if( substr($targetPath, -1, 1) != '/' )  $targetPath = $targetPath.'/';
+        if( substr($targetPath, -1, 1) != '/' )  {$targetPath = $targetPath.'/';}
         
         if ($basePath === $targetPath){
             return '';
@@ -1282,10 +1283,11 @@ function getScriptOutput($path, $print = FALSE)
         return FALSE;
     }
 
-    if( $print == FALSE )
+    if( $print == FALSE ){
         return ob_get_clean();
-    else
+    }else{
         echo ob_get_clean();
+    }
 }
  
  
@@ -1797,6 +1799,6 @@ function flush_buffers($start=true){
     //ob_end_flush();
     @ob_flush();
     @flush();
-    if($start) @ob_start();
+    if($start) {@ob_start();}
 }
 ?>

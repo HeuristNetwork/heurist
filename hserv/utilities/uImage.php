@@ -957,7 +957,7 @@ class UImage {
         }
         
         imagedestroy($src_img);
-        if($new_img) imagedestroy($new_img);
+        if($new_img) {imagedestroy($new_img);}
         
         return $success;
     }

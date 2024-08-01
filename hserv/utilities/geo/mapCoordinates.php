@@ -58,9 +58,10 @@
                 }
             } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
-                for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
                         geo_SimplifyAndConvert($json['coordinates'][$idx][$idx2], $need_simplify, $gPoint);
+                }}
             }
 
             return $json;
@@ -152,9 +153,10 @@
                 }
             } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
-                for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
                         geo_CorrectLng($json['coordinates'][$idx][$idx2]);
+                }}
             }
 
             return $json;

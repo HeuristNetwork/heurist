@@ -2040,8 +2040,9 @@ $mysqli->commit();
             $recids = explode(",", $constraints);
             $recids_new = array();
             foreach($recids as $recid){
-                if(@$this->rectypes_correspondence[$recid])
+                if(@$this->rectypes_correspondence[$recid]){
                     array_push($recids_new, $this->rectypes_correspondence[$recid]);
+                }
             }
             $constraints = implode(",",$recids_new);
         }

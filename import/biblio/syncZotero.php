@@ -229,9 +229,9 @@ $user_ID = @$vals[1];
 $group_ID = @$vals[2];
 $api_Key  = @$vals[3];
 
-if($user_ID!=null)$user_ID = trim($user_ID);
-if($group_ID!=null)$group_ID = trim($group_ID);
-if($api_Key!=null)$api_Key = trim($api_Key);
+if($user_ID!=null) {$user_ID = trim($user_ID);}
+if($group_ID!=null) {$group_ID = trim($group_ID);}
+if($api_Key!=null) {$api_Key = trim($api_Key);}
 
 global $rectypes, $is_verbose;
 $is_verbose = true;

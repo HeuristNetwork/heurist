@@ -238,12 +238,13 @@ use Shapefile\ShapefileReader;
                                 }
                             } else if ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
                             {
-                                for($idx=0; $idx<count($geo['coordinates']); $idx++) //shapes
+                                for($idx=0; $idx<count($geo['coordinates']); $idx++){ //shapes
                                     for($idx2=0; $idx2<count($geo['coordinates'][$idx]); $idx2++) //points
                                     {
                                         checkWGS($system, $geo['coordinates'][$idx][$idx2]);
                                         if($need_simplify) {simplifyCoordinates($geo['coordinates'][$idx][$idx2]);}
                                     }
+                                }
                                         
                             }
                         }    

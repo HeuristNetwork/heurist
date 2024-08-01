@@ -490,8 +490,9 @@ class Query {
                 }
             }
         }
-        if($offset<strlen($text))
+        if($offset<strlen($text)){
             array_push($q_bits, substr($text, $offset));
+        }
 
         foreach ($q_bits as $q_bit) {
             $this->addTopLimb($q_bit);
@@ -962,10 +963,11 @@ class AndLimb {
 
     private function cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
-            if ($val[strlen($val)-1] == '"')
+            if ($val[strlen($val)-1] == '"'){
                 $val = substr($val, 1, -1);
-            else
+            }else{
                 $val = substr($val, 1);
+            }
             return preg_replace('/ +/', ' ', trim($val));
         }
 
@@ -995,7 +997,7 @@ class SortPhrase {
 
         $colon_pos = strpos($text, ':');
         if ($colon_pos === FALSE) {$subtext = $text;}
-        else $subtext = substr($text, 0, $colon_pos);
+        else {$subtext = substr($text, 0, $colon_pos);}
 
         // if sortby: is followed by a -, we sort DESCENDING; if it's a + or nothing, it's ASCENDING
         $scending = '';
@@ -1301,13 +1303,13 @@ class TitlePredicate extends Predicate {
             $not = ($this->parent->negate)? '-' : '';
             
             $compare = '';
-            if ($this->parent->exact)
+            if ($this->parent->exact){
                 $compare = '=';
-            else if ($this->parent->lessthan)
+            }else if ($this->parent->lessthan){
                 $compare = '<';
-            else if ($this->parent->greaterthan)
+            }else if ($this->parent->greaterthan){
                 $compare = '>';
-            
+            }
             return array('f:title'=> $not.$compare.$this->value);
     }
 
@@ -1325,17 +1327,16 @@ class TitlePredicate extends Predicate {
             $topbiblio = "";
         }
 
-        if ($this->parent->exact)
+        if ($this->parent->exact){
             return $not . $topbiblio.'rec_Title = "'.$evalue.'"';
-        else if ($this->parent->lessthan)
+        }else if ($this->parent->lessthan){
             return $not . $topbiblio.'rec_Title < "'.$evalue.'"';
-        else if ($this->parent->greaterthan)
+        }else if ($this->parent->greaterthan){
                 return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
-        else
-                    if(strpos($this->value,"%")===false){
-                        return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
-                    }else{
-                        return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';
+        }else if(strpos($this->value,"%")===false){
+                return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
+        }else{
+                return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';
         }
 
     }
@@ -1404,10 +1405,11 @@ class NotesPredicate extends Predicate {
         $not = ($this->parent->negate)? 'not ' : '';
 
         $query = &$this->getQuery();
-        if ($query->search_domain == BOOKMARK)    // saw TODO change this to check for woot match or full text search
+        if ($query->search_domain == BOOKMARK){    // saw TODO change this to check for woot match or full text search
             return '';
-        else
+        }else{
             return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
+        }
     }
 }
 
@@ -1479,21 +1481,22 @@ class AnyPredicate extends Predicate {
             
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
             
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }    
             }
             
             return array('f'=> $compare.$this->value);
@@ -1591,21 +1594,22 @@ class FieldPredicate extends Predicate {
             
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
             
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }   
             }
             
             $res = array();
@@ -1683,11 +1687,12 @@ class FieldPredicate extends Predicate {
 
                         $nest_joins .= ' left join Records link'.$i.' on link'.$i.'.'.$type_clause;
                         if($i==0){
-                            if(!$isrelmarker_0)
+                            if(!$isrelmarker_0){
                                 $nest_joins .= ' and rd.dtl_Value=link0.rec_ID ';
-                        }else{
-                            if(!$isrelmarker_1)
+                            }    
+                        }else if(!$isrelmarker_1){
                                 $nest_joins .= ' and linkdt0.dtl_Value=link1.rec_ID ';
+                                
                         }
 
                         //$nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID ';//STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
@@ -2072,21 +2077,22 @@ class FieldCountPredicate extends Predicate {
 
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }
             }
             
             $res = array();
@@ -2282,13 +2288,13 @@ class BibIDPredicate extends Predicate {
         $not = ($this->parent->negate)? '-' : '';
         
         $compare = '';
-        if ($this->parent->exact)
+        if ($this->parent->exact){
             $compare = '=';
-        else if ($this->parent->lessthan)
+        }else if ($this->parent->lessthan){
             $compare = '<';
-        else if ($this->parent->greaterthan)
+        }else if ($this->parent->greaterthan){
             $compare = '>';
-        
+        }
         return array('ids'=> $not.$compare.$this->value);
     }
     
@@ -2995,7 +3001,9 @@ class RelationsForPredicate extends Predicate {
         $ids = $ids[0];
         
         if (! $ids) {return "0";}
-        else return "TOPBIBLIO.rec_ID in ($ids)";
+        else{ 
+            return "TOPBIBLIO.rec_ID in ($ids)";
+        }
     }
 }
 

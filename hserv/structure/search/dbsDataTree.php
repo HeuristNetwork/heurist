@@ -54,7 +54,7 @@
         
         $system->defineConstant('DT_PARENT_ENTITY');
 
-        if($mode>=4) set_time_limit(0);//no limit
+        if($mode>=4) {set_time_limit(0);}//no limit
         
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
@@ -413,10 +413,11 @@
             case 'relmarker':
             
                 $max_depth = 2;
-                if ($mode==6 || $mode==4)
+                if ($mode==6 || $mode==4){
                    $max_depth = 3;
-                else if ($mode==5) //make it 1 for lazy load
+                }else if ($mode==5){ //make it 1 for lazy load
                    $max_depth = 1; 
+                }
                                                                 
                 if($recursion_depth<$max_depth){
                     

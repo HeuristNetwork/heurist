@@ -96,8 +96,7 @@ class UArchive {
                     $file = str_replace('\\', '/', $file);
 
                     // Ignore "." and ".." folders
-                    if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-                        continue;
+                    if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) ) {continue;}
 
                     if( is_dir($file) && substr($file,-1)!='/' ){
                         $file = $file.'/';
@@ -296,8 +295,9 @@ class UArchive {
                     }else{                
                         $filename = $destination.USanitize::sanitizeFileName(basename($entry));//snyk SSRF
                         $ofp = fopen($filename, 'w' );
-                        while ( ! feof( $fp ) ) 
+                        while ( ! feof( $fp ) ) {
                             fwrite( $ofp, fread($fp, 8192) );
+                        }
 
                         fclose($fp);
                         fclose($ofp);
@@ -327,9 +327,9 @@ class UArchive {
         }
         if (!file_exists($source)) {
             return $verbose?(htmlspecialchars($source).' was not found'):false;
-        }else 
-
+        }else {
             $numFiles = 0;
+        }
 
         $phar = new PharData($destination);
 
@@ -377,8 +377,7 @@ class UArchive {
                     $file = str_replace('\\', '/', $file);
 
                     // Ignore "." and ".." folders
-                    if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
-                        continue;
+                    if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) ) {continue;}
 
                     if( is_dir($file) && substr($file,-1)!='/' ){
                         $file = $file.'/';

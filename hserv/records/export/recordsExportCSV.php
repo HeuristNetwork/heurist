@@ -156,8 +156,9 @@ public static function output($data, $params){
         }
     }
 
-    if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
-    
+    if(self::$defRecTypes==null) {
+        self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+    }
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
@@ -503,8 +504,9 @@ public static function output($data, $params){
                 $streams[$rty_ID] = $fd;
                 
                 //write header
-                if($csv_header)
+                if($csv_header){
                     fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
+                }
                 
                 $rt_counts[$rty_ID] = 1;
             }else{
@@ -920,8 +922,9 @@ public static function output_header($data, $params)
     $fld_type_names = dbs_GetDtLookups();
     $base_fld_names = dbs_GetDetailTypes(self::$system, null, 0);
     
-    if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
-
+    if(self::$defRecTypes==null) {
+        self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+    }
     $idx_cid = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_ConceptID'];
     $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
@@ -1189,8 +1192,9 @@ public static function output_header($data, $params)
             
             }
 
-            if($temp_name==null)
+            if($temp_name==null){
                 $temp_name = 'Heurist_'.self::$system->dbname();//.'_t'.$rty_ID.'_'.self::$defRecTypes['names'][$rty_ID];
+            }
         }
     }
     self::writeResults( $streams, $temp_name, $headers, null );

@@ -221,8 +221,9 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         $sel_fields = array($order_field);
         
         foreach($field_idx as $idx){
-            if('field_'.$idx!=$id_field)
+            if('field_'.$idx!=$id_field){
                 array_push($sel_fields, 'field_'.$idx);
+            }
         }
         if($mode=='insert' && count($sel_fields)>1){
             $order_field = $sel_fields[1];

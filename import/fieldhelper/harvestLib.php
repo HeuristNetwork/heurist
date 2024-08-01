@@ -142,7 +142,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
                 if(count($subdirs)>0){
  
                     doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
-                    if($is_report) flush();
+                    if($is_report) {flush();}
                 }
             }
         }else if ($dir) {

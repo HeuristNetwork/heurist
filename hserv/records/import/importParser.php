@@ -540,7 +540,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 
                 if($len>200){
                     fclose($handle);
-                    if($handle_wr) fclose($handle_wr);
+                    if($handle_wr) {fclose($handle_wr);}
                     
                     self::$system->addError(HEURIST_ACTION_BLOCKED, 
                         "Too many columns ".$len."  This probably indicates that you have selected the wrong separator or end-of-line type.");
@@ -655,7 +655,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
     
 
-    if($handle_wr) fclose($handle_wr);
+    if($handle_wr) {fclose($handle_wr);}
 
     //???? unlink($encoded_filename);
     $empty75 = array();
@@ -849,7 +849,7 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
     
     $values = explode('|', $field);
     foreach($values as $value){
-        if($value=='')continue;
+        if($value=='') {continue;}
 
         if(!ctype_digit(strval($value))){ //is_integer
             //not integer

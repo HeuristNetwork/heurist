@@ -763,8 +763,9 @@ class ReportRecord {
             if(is_array($query)){
                 $query = json_encode($query);
             }
-            if(strpos($query,'[ID]')!==false)
+            if(strpos($query,'[ID]')!==false){
                 $query = str_replace('[ID]', strval($rec_ID), $query);
+            }
         }else{
             if(strpos($query,'[ID]')!==false){
                 return null;

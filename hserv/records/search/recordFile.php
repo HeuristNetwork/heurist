@@ -575,7 +575,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
                 $handle = fopen($filename, "rb");
                 if($handle!==false){
                     if($range_max>0){
-                        if($range_min>0) fseek($handle,$range_min);
+                        if($range_min>0) {fseek($handle,$range_min);}
                         $chunk = fread($handle, $range_max-$range_min+1);
                         //echo unpack("c2/n",$chunk);
                         echo $chunk; 

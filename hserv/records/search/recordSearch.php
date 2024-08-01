@@ -3172,7 +3172,7 @@ function recordTemplateByRecTypeID($system, $id){
 
         $dty_Type = $fieldDetails['dty_Type'];
 
-        if($dty_Type=='separator')continue;
+        if($dty_Type=='separator') {continue;}
 
 
         if($dty_Type=='file'){

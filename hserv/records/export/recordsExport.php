@@ -882,10 +882,12 @@ XML;
             
             $links = recordSearchRelated(self::$system, $recID, 0, false);
             if($links['status']==HEURIST_OK){
-                if(@$links['data']['direct'])
+                if(@$links['data']['direct']){
                     fwrite($fd_links, self::_composeGephiLinks($records, $links['data']['direct'], $links_cnt, 'direct'));
-                if(@$links['data']['reverse'])
+                }
+                if(@$links['data']['reverse']){
                     fwrite($fd_links, self::_composeGephiLinks($records, $links['data']['reverse'], $links_cnt, 'reverse'));
+                }
             }else{
                 return false;
             }
@@ -1248,7 +1250,9 @@ private static function get_file_size($file_path, $clear_stat_cache = false) {
 */
 private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
 
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
+    if(self::$defDetailtypes==null) {
+        self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
+    }
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms(self::$system);
         self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
@@ -1449,7 +1453,9 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     }
                     
     if($extended){
-        if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+        if(self::$defRecTypes==null) {
+            self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
+        }
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
         if(self::$defTerms==null) {
@@ -1460,7 +1466,9 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         $idx_name = -1;
     }    
     
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
+    if(self::$defDetailtypes==null){ 
+        self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
+    }
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $idx_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
@@ -1726,11 +1734,11 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                 
                 if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
-                if(count($points)>0)
+                if(count($points)>0){
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }                
-                
+                }
                 if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
             
             }
@@ -1836,9 +1844,10 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
                         }
                     } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                     {
-                        for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                        for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
                                 simplifyCoordinates($json['coordinates'][$idx][$idx2]);
+                            }}
                     }
                 }
 
@@ -1888,7 +1897,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         }else if($column=='typeid'){
             $res[$col_name] = $record['rec_RecTypeID'];
         }else if($column=='typename'){
-            if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 0);
+            if(self::$defRecTypes==null) {self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 0);}
             $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];
         }else if($column=='added'){
             $res[$col_name] = $record['rec_Added'];

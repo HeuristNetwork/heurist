@@ -269,8 +269,9 @@ private static function findRecordIds($imp_session, $params){
                                 $keys_values_all[] = $fieldvalue;
                                 $values_tobind[0] = $values_tobind[0].'s';
                                 
-                                if(@$mapping_fieldname_to_index[$fieldname]>=0)
+                                if(@$mapping_fieldname_to_index[$fieldname]>=0){
                                     $keys_values[$mapping_fieldname_to_index[$fieldname]] = $fieldvalue;
+                                }
                             }
                             
                         }
@@ -315,8 +316,9 @@ private static function findRecordIds($imp_session, $params){
                         
                       $row[$multivalue_field_name] = $value;  
                       
-                      if(@$mapping_fieldname_to_index[$multivalue_field_name]>=0)
+                      if(@$mapping_fieldname_to_index[$multivalue_field_name]>=0){
                                 $keys_values[$mapping_fieldname_to_index[$multivalue_field_name]] = $value;
+                      }
                     } 
                     
                     if(super_trim($value)!=''){ //if multivalue field has values use $values_tobind
@@ -652,7 +654,7 @@ public static function assignRecordIds($params){
                     self::$system->addError(HEURIST_ERROR, 'Cannot update import table: set ID field. '
                     .'Too many key values. The size of list of keys oversize key field length');
                     self::$mysqli->rollback();
-                    if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
                     return;
                 }
                 
@@ -678,11 +680,11 @@ public static function assignRecordIds($params){
             mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
             self::$system->addError(HEURIST_DB_ERROR, 'Cannot update import table: set ID field', $mysqli->error.' QUERY:'.$is_error);
             self::$mysqli->rollback();
-            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
             return;
         }else{
             self::$mysqli->commit();
-            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
         }
         
         
@@ -2787,12 +2789,13 @@ public static function performImport($params, $mode_output){
                 foreach ($field_types as $index => $field_type) {  //for import data
 
                     if($field_type=="url"){
-                        if($row[$index])
+                        if($row[$index]){
                             $details['URL'] = super_trim($row[$index]);
+                        }
                     }else if($field_type=="scratchpad"){
-                        if($row[$index])
+                        if($row[$index]){
                             $details['ScratchPad'] = super_trim($row[$index]);
-                        
+                        }
                     }else{
 
                         if(substr($field_type, -strlen("_lat")) === "_lat"){ // || $field_type=="latitude"
@@ -3211,7 +3214,7 @@ public static function performImport($params, $mode_output){
         
         if($use_transaction){
             self::$mysqli->commit();
-            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
         }
         mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
         self::$mysqli->query('set @suppress_update_trigger=NULL');
@@ -3219,7 +3222,7 @@ public static function performImport($params, $mode_output){
         /*
                 if($use_transaction){
                     self::$mysqli->rollback();
-                    if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {self::$mysqli->autocommit(TRUE);}
                 }
         */
         

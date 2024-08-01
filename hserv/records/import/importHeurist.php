@@ -107,9 +107,10 @@ private static function _readDataFile($filename, $type=null, $validate=true){
                 $imp_rectypes = @$data['heurist']['database']['rectypes'];
                 if($data==null || !$imp_rectypes)
                 {
-                    if(!(count(self::$system->getError())>0))
+                    if(!(count(self::$system->getError())>0)){
                         self::$system->addError(HEURIST_ACTION_BLOCKED, 
                             'The data file contains data which does not correspond with expectations.<br> "Record type" section not found. You might be trying to load a data template file.');
+                    }        
                 }
                 
                 
@@ -394,8 +395,9 @@ public static function getDefintions($filename){
         );
             
     }else{
-        if(!(count(self::$system->getError())>0))
+        if(!(count(self::$system->getError())>0)){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data not recognized');
+        }
     }
 
     return $res;

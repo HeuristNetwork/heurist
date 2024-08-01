@@ -292,9 +292,9 @@ class ElasticSearch {
     */
     public static function buildAllIndices ($dbName, $print=true) {
         if(isElasticUp()) {
-            if ($print)
+            if ($print){
                 print "Building all Elasticsearch indices for: $dbName<br>";
-
+            }
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = self::$mysqli->query($query);
             $count = 0;
@@ -310,9 +310,9 @@ class ElasticSearch {
                     }
                 }
 
-                if ($print)
+                if ($print){
                     print "ElasticSearch indices have successfully been built for $count record types.";
-
+                }
                 $res->close();
                 return true;
             }else{

@@ -152,8 +152,8 @@ public static function findDupes( $params ){
     $in_memory_limit = 10000;
     
     self::$distance = @$params['distance'];
-    if(!(self::$distance>0)) self::$distance = 0;
-    if(self::$distance>20) self::$distance = 20; //percentage
+    if(!(self::$distance>0)) {self::$distance = 0;}
+    if(self::$distance>20) {self::$distance = 20;} //percentage
     
     $startgroup = @$params['startgroup'];
     if(!($startgroup>0)){ $startgroup = 0;}
@@ -363,8 +363,8 @@ public static function findDupes( $params ){
     //max allowed similar records
     // total and pecentage 
     self::$limit_cnt = @$params['limit_cnt'];
-    if(!(self::$limit_cnt>0)) self::$limit_cnt = 1000;
-    else if(self::$limit_cnt>3000) self::$limit_cnt = 3000;
+    if(!(self::$limit_cnt>0)) {self::$limit_cnt = 1000;}
+    else if(self::$limit_cnt>3000) {self::$limit_cnt = 3000;}
     
     $limit_pc = @$params['limit_cnt'];
     if(!($limit_pc>0)) {$limit_pc = 30;}
@@ -441,7 +441,7 @@ public static function findDupes( $params ){
 
                     self::$cache_id[] = $row[0];//array($row[0]=>$row[1]); rec_ID
                     self::$cache_str[] = $row[1];//array($row[0]=>$row[1]); C1
-                    if($compare_mode==2) self::$cache_str_exact[] = $row[2];
+                    if($compare_mode==2) {self::$cache_str_exact[] = $row[2];}
                     $cache_cnt++;
                 }
             
