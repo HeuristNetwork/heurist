@@ -453,6 +453,7 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             */
             }
             break;
+        default;
     }
 }
 ?>

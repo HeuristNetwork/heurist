@@ -365,6 +365,7 @@ $system->defineConstants();
                             case "RT_TLCMAP_DATASET":
                                 $msg = "Heurist Map Layer";
                                 break;
+                            default;
                         }
 
                         return "(".$msg.", Concept ".$rtDefines[$rt][0]."-".$rtDefines[$rt][1].")";

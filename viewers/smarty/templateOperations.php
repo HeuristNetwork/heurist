@@ -119,6 +119,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
                         throw new Exception("Template file does not exist");
                     }
                     break;
+                default;
             }
 
         }

@@ -948,6 +948,8 @@ class AndLimb {
 
             case 'hhash':
                 return new HHashPredicate($this, $pred_val);
+                
+            default;
         }
 
         // no predicate-type specified ... look at search type specification
@@ -1116,6 +1118,7 @@ class SortPhrase {
                 return array('rec_ID'.$scending, NULL);
             case 'rt': case 'type':
                 return array('rec_RecTypeID'.$scending, NULL);
+            default;
         }
     }
 }

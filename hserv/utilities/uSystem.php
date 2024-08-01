@@ -231,6 +231,7 @@ class USystem {
                 $val *= 1048576; break;
             case 'k':
                 $val *= 1024;
+            default;
         }
         //_fix_integer_overflow
         if ($val < 0) {

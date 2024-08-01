@@ -499,6 +499,7 @@ class Temporal {
                         if(@$tDate['PRF']) {$timespan['profile'] = $tDate['PRF'];}
 
                         break;
+                    default;
                 }//end case
 
 

@@ -525,6 +525,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $val *= 1048576; break;
             case 'k':
                 $val *= 1024;
+            ddefault;
         }
         return $this->fix_integer_overflow($val);
     }
@@ -720,6 +721,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 case IMAGETYPE_GIF:
                     $extensions = array('gif');
                     break;
+                default;
             }
             // Adjust incorrect image file extensions:
             if (!empty($extensions)) {
@@ -1078,6 +1080,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 imagealphablending($new_img, false);
                 imagesavealpha($new_img, true);
                 break;
+            default;
         }
         $success = imagecopyresampled(
             $new_img,
@@ -1259,6 +1262,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     $image->setImageCompressionQuality($options['jpeg_quality']);
                 }
                 break;
+            default;                
         }
         if (!empty($options['strip'])) {
             $image->stripImage();

@@ -103,6 +103,7 @@ function fetch_relation_details($recID, $i_am_primary) {
             case $endDT:
                 $bd['EndDate'] = $row['dtl_Value'];
                 break;
+            default;
         }
     }
         $res->close();

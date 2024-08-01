@@ -858,7 +858,7 @@ class HQuery {
                             $sort_fields[] = $dty_ID;
                         }
                     }
-                    
+                default;                    
             }//switch
         
         }//foreach
@@ -1396,6 +1396,8 @@ class HPredicate {
             case 'links':
 
                 return $this->predicateLinks();
+                
+            default;
         }
 
         return null;

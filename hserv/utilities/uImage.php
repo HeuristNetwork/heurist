@@ -337,6 +337,7 @@ class UImage {
                     case IMAGETYPE_GIF:
                         $mimeExt = 'gif';
                         break;
+                    default;
                 }
             }else{
                 $path_parts = pathinfo($filename);
@@ -353,6 +354,7 @@ class UImage {
                     case 'png':
                         $mimeExt = 'png';
                         break;
+                    default;
                 }
             }
         }
