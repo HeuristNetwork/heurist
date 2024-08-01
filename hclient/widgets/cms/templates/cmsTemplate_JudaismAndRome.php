@@ -242,11 +242,11 @@ default content consists of
                 <div id="main-content" data-homepageid="<?php print $home_page_record_id; ?>" <?php print ($open_page_or_record_on_init > 0) ? 'data-initid="' . $open_page_or_record_on_init . '"' : '';?> data-viewonly="<?php print ($hasAccess) ? 0 : 1; ?>" style="<?php echo !$is_page_footer_fixed ? 'padding-bottom:' . $page_footer_height . 'px;position:relative' : '';?>">
                 </div>
                 <?php
-                if (!$is_page_footer_fixed) print $page_footer;
+                if (!$is_page_footer_fixed) {print $page_footer;}
                 ?>
             </div>
             <?php
-            if ($is_page_footer_fixed && $page_footer) print $page_footer;
+            if ($is_page_footer_fixed && $page_footer) {print $page_footer;}
             ?>
         </div>
     <?php

@@ -248,11 +248,11 @@ if($isWebPage){ //set in websiteRecord.php
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
-        if(!$is_page_footer_fixed && $page_footer) print $page_footer;
+        if(!$is_page_footer_fixed && $page_footer) {print $page_footer;}
 ?>        
     </div>
 <?php
-        if($is_page_footer_fixed && $page_footer) print $page_footer;
+        if($is_page_footer_fixed && $page_footer) {print $page_footer;}
 ?>        
     </div>
 <?php

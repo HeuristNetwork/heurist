@@ -143,7 +143,7 @@ foreach ($servers as $srv) {
                     $cnt = $cnt + count($matches);
                 }
                 
-                foreach ($matches as $fnd) print $fnd.' &nbsp;&nbsp;&nbsp; ';
+                foreach ($matches as $fnd) {print $fnd.' &nbsp;&nbsp;&nbsp; ';}
             }
         }
     }

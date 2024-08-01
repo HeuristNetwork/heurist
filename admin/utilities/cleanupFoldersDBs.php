@@ -370,7 +370,7 @@ if($arg_need_action){
 
 echo $tabs0.'finished'.$eol;
 
-if(!$is_command_line) print '</body></html>';
+if(!$is_command_line) {print '</body></html>';}
 
 /*
 if(is_array($email_list) && count($email_list)>0){

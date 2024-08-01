@@ -180,7 +180,7 @@ class DbUtils {
         if($database_name==null){
             $msg = 'Database parameter not defined';
             self::$system->addError(HEURIST_INVALID_REQUEST, $msg);
-            if($verbose) echo '<br>'.$msg;
+            if($verbose) {echo '<br>'.$msg;}
             return false;
         }
 
@@ -209,7 +209,7 @@ class DbUtils {
             $msg = $msg_prefix.' Failed to connect to database '
                     .($database_name).'  '.($createArchive);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br>'.htmlspecialchars($msg);
+            if($verbose) {echo '<br>'.htmlspecialchars($msg);}
             self::$db_del_in_progress = null;
             return false;
         }else 
@@ -229,7 +229,7 @@ class DbUtils {
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
                     self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);
-                    if($verbose) echo '<br>'.htmlspecialchars($msg);
+                    if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                     self::$db_del_in_progress = null;
                     return false;
             }
@@ -276,7 +276,7 @@ class DbUtils {
                 $msg = $msg_prefix.' Cannot create archive with database folder. Failed to archive '
                         .($source).' to '.($destination);
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
-                if($verbose) echo '<br>'.htmlspecialchars($msg);
+                if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                 self::$db_del_in_progress = null;
                 return false;
             }
@@ -301,7 +301,7 @@ class DbUtils {
 
                     $msg = $msg_prefix.' Database error on sql drop operation. '.$mysqli->error;
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-                    if($verbose) echo '<br>'.htmlspecialchars($msg);
+                    if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                     return false;
                 }
 
@@ -393,7 +393,7 @@ class DbUtils {
                 $directory = HEURIST_FILESTORE_ROOT.$database_name;
                 /*if(!folderCreate($directory, true)){
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');
-                    if($verbose) echo 'Unable to create folder '.$directory;
+                    if($verbose) {echo 'Unable to create folder '.$directory;}
                     return false;
                 }*/
                 
@@ -432,7 +432,7 @@ class DbUtils {
                     .'(note the settings required for a single server vs mysql running on a separate server)';
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
-                    if($verbose) echo '<br>'.$msg;
+                    if($verbose) {echo '<br>'.$msg;}
                     return false;
                 }
             }else{ //use php library
@@ -498,7 +498,7 @@ class DbUtils {
                             .' failed with a return status: '.($res2!=null?intval($res2):'unknown')
                             .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
 
-                    if($verbose) echo '<br>'.$msg;
+                    if($verbose) {echo '<br>'.$msg;}
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
@@ -549,7 +549,7 @@ class DbUtils {
         }else{
             $msg = 'Failed to connect to database '.htmlspecialchars($database_name_full);
             self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br>'.$msg;
+            if($verbose) {echo '<br>'.$msg;}
             return false;
         }
     }
@@ -1199,7 +1199,7 @@ class DbUtils {
         if(!$connected){
             $msg = 'Failed to connect to database '.htmlspecialchars($database_name);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br><p>'.$msg.'</p>';
+            if($verbose) {echo '<br><p>'.$msg.'</p>';}
             return false;
         }
         
@@ -1444,7 +1444,7 @@ class DbUtils {
 
         if(!$res){
             if($verbose) {
-                if($message) echo htmlspecialchars($message);
+                if($message) {echo htmlspecialchars($message);}
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }

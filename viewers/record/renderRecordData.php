@@ -1495,7 +1495,7 @@ function print_private_details($bib) {
                             for ($i=0; $i < count($kwds);++$i) {
                                 $grp = $kwds[$i][0];
                                 $kwd = $kwds[$i][1];
-                                if ($i > 0) print '&nbsp; ';
+                                if ($i > 0) print {'&nbsp; ';}
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
@@ -1533,7 +1533,7 @@ function print_personal_details($bkmk) {
             <?php
             if ($tags) {
                 for ($i=0; $i < count($tags);++$i) {
-                    if ($i > 0) print '&nbsp; ';
+                    if ($i > 0) {print '&nbsp; ';}
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
                     if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
@@ -2146,7 +2146,7 @@ function print_public_details($bib) {
     $webIcon = mysql__select_value($system->get_mysqli(),
                     'select dtl_Value from recDetails where dtl_RecID='
                     .$bib['rec_ID'].' and dtl_DetailTypeID=347');//DT_WEBSITE_ICON);
-    if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>";
+    if ($webIcon) {print "<img id=website-icon src='" . $webIcon . "'>";}
    */                 
     if (@$url) {
         print '<div class="detailRow" style="border:none 1px #00ff00;">' //width:100%;

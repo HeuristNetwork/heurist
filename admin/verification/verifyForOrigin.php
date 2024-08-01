@@ -463,7 +463,7 @@
         
         if($has_issues){
             
-            if($smsg) print $smsg; //main error message
+            if($smsg) {print $smsg;} //main error message
             
             if(count($fileds_differ_terms)>0){
                 print implode('',$fileds_differ_terms);

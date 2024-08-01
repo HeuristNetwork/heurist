@@ -1122,7 +1122,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
             }
         }        
 
-if($cnt>0) echo $db_name.'   terms:'.$cnt.'<br>';
+if($cnt>0) {echo $db_name.'   terms:'.$cnt.'<br>';}
         
         //remove old folder
         //folderDelete($old_path, true);

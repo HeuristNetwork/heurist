@@ -301,18 +301,22 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $checkKeep =  $is_master? "checked" : "";
                                 $checkDup = !$is_master && count($records) < 5 ? "checked" : "";
                                 $disableDup = $is_master? "none" : "block";
-                                if (!$finished_merge) print '<td><input type="checkbox" name="duplicate[]" '.$checkDup.
+                                if (!$finished_merge) {
+                                    print '<td><input type="checkbox" name="duplicate[]" '.$checkDup.
                                     ' value="'.$rec_ID.
                                     '" title="Check to mark this as a duplicate record for deletion"'.
                                     '  id="duplicate'.$rec_ID.'" style="display:'.$disableDup.
                                     '" onclick="if (this.checked) delete_bib('.$rec_ID.'); else undelete_bib('.$rec_ID.
                                     ');"><div style="font-size: 70%; display:'.$disableDup.';">DUPLICATE</div></td>';
+                                }
                                 print '<td style="width: 500px;">';
-                                if (!$finished_merge) print '<input type="radio" name="keep" '.$checkKeep.
+                                if (!$finished_merge) {
+                                    print '<input type="radio" name="keep" '.$checkKeep.
                                     ' value="'.$rec_ID.
                                     '" title="Click to select this record as the Master record"'.
                                     ' id="keep'.$rec_ID.
                                     '" onclick="keep_bib('.$rec_ID.');">';
+                                }
                                 print '<span style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_ID.'">'.$rec_ID . ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></span>';
                                 print '<table>';
                                 foreach ($record['details'] as $rd_type => $detail) {
@@ -391,13 +395,13 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $bkmk_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct bkm_ID) from usrBookmarks where bkm_RecID='.$record['rec_ID']));
                                     
-                                if ($bkmk_count>0) print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';
+                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';}
                                 
                                 $kwd_count = intval(mysql__select_value($mysqli,
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
                                     .'on rtl_RecID=bkm_recID where bkm_RecID='.$rec_ID.' and rtl_ID is not null'));
                                     
-                                if ($kwd_count>0) print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';
+                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';}
 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '
                                 .'rem_Freq, rem_StartDate from usrReminders left join sysUGrps on ugr_ID=rem_OwnerUGrpID '
@@ -438,8 +442,8 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 $rec_ID = intval($record['rec_ID']);
                                 $is_master = ($rec_ID== $master_rec_id);
                                 print '<tr id="row'.intval($record['rec_ID']).'">';
-                                if ($is_master) print '<td><div><b>MASTER</b></div></td>';
-                                else print '<td><div><b>Duplicate</b></div></td>';
+                                if ($is_master) {print '<td><div><b>MASTER</b></div></td>';}
+                                else {print '<td><div><b>Duplicate</b></div></td>';}
                                 print '<td style="width: 500px;">';
                                 print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.intval($rec_ID).'">'.intval($rec_ID). ' ' . '<b>'.htmlspecialchars($record['rec_Title']).'</b></a> - <span style="background-color: #EEE;">'. htmlspecialchars($rtyNameLookup[$record['rec_RecTypeID']]).'</span></div>';
                                 print '<table>';
@@ -537,12 +541,12 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
                                 $bkmk_count = intval(mysql__select_value($mysqli, 
                                     'select count(distinct bkm_ID) from usrBookmarks where bkm_recID='.$record['rec_ID']));
-                                if ($bkmk_count>0) print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';
+                                if ($bkmk_count>0) {print '<tr><td>Bookmarks</td><td>'.$bkmk_count.'</td></tr>';}
                                 
                                 $kwd_count = intval(mysql__select_value($mysqli, 
                                     'select count(distinct rtl_ID) from usrBookmarks left join usrRecTagLinks '
                                     .'on rtl_RecID=bkm_recID where bkm_RecID='.$record['rec_ID'].' and rtl_ID is not null'));
-                                if ($kwd_count>0) print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';
+                                if ($kwd_count>0) {print '<tr><td>Tags</td><td>'.$kwd_count.'</td></tr>';}
 
                                 
                                 $res2 = $mysqli->query('select concat(ugr_FirstName," ",ugr_LastName) as name, '

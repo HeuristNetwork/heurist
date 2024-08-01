@@ -68,7 +68,7 @@ print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
 print "-- Database Version: ".$db_version; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
-if($isHTML) print "<br><br>\n";
+if($isHTML) {print "<br><br>\n";}
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers
 // This could perhaps be done more elegantly as JSON structures, but SQL inserts help to point up errors in fields
@@ -215,7 +215,7 @@ function do_print_table($desc, $tname, $where=null)
     global $mysqli, $isHTML, $startToken, $endToken;
     
     print "\n\n\n-- $desc \n";
-    if($isHTML) print "<p>";
+    if($isHTML) {print "<p>";}
 
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     if($tname=='defTermsLinks'){
@@ -233,7 +233,7 @@ function do_print_table($desc, $tname, $where=null)
     $res = $mysqli->query($query);
     if($res){
 
-        if($isHTML) print "<p>";
+        if($isHTML) {print "<p>";}
         print "\n$startToken\n";
 
         //get table prefix             
@@ -274,6 +274,6 @@ function do_print_table($desc, $tname, $where=null)
     }
    
 
-    if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+    if($isHTML) {print "<p>&nbsp;<p>&nbsp;<p>";}
 }
 ?>
