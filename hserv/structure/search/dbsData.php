@@ -285,7 +285,7 @@
                     //convert concept code title mask to human readable
                     $mask_concept_codes = $commonFields[$ind_TitleMask];
                     $commonFields[$ind_CanonicalTitleMask] = $mask_concept_codes; //keep
-                    $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, _ERR_REP_SILENT);
+                    $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, ERROR_REP_SILENT);
 
                     $rtStructs['typedefs'][$rtyID]['commonFields'] = $commonFields;
                 }

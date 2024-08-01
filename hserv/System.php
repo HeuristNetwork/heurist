@@ -604,9 +604,9 @@ class System {
 
         //special case - these folders can be defined in sysIdentification and be outisde database folder            
         if(!$is_for_backup){
-            if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
-            if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-            if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+            if(defined('HEURIST_XSL_TEMPLATES_DIR')) {array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);}
+            if(defined('HEURIST_HTML_DIR')) {array_push($system_folders, HEURIST_HTML_DIR);}
+            if(defined('HEURIST_HML_DIR')) {array_push($system_folders, HEURIST_HML_DIR);}
         }
         
         return $system_folders;

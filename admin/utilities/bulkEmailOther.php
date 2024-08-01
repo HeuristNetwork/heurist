@@ -185,6 +185,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
             case 'DAY':  $lastmod_unit = 'DAY'; break;
             case 'MONTH':  $lastmod_unit = 'MONTH'; break;
             case 'YEAR':  $lastmod_unit = 'YEAR';
+            default;
         }
 
 		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic 

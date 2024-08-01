@@ -519,7 +519,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $val = substr($val,0,strlen($val)-1);
         }
         switch($last) {
-            case 'g':
+            case 'g':  
                 $val *= 1073741824; break;
             case 'm':
                 $val *= 1048576; break;
