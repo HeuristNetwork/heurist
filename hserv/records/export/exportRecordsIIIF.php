@@ -140,7 +140,8 @@ protected function _outputRecord($record){
     }
     //not more than 1000 records per manifest
     //or the only image if it is specified
-    return (!($this->cnt>1000 || $this->ulf_ObfuscatedFileID!=null));
+    $ret = (!($this->cnt>1000 || $this->ulf_ObfuscatedFileID!=null));
+    return $ret;
     
 }
   

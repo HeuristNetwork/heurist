@@ -1239,7 +1239,8 @@ $mysqli->commit();
             $defs = @$database_defs['detailtypes']['typedefs'][$localID];
         }
         
-        return ($defs!=null)?$localID:false;
+        $ret = ($defs!=null)?$localID:false;
+        return $ret;
     }
 
     // 
@@ -1399,7 +1400,8 @@ $mysqli->commit();
             
         }
         
-        return ($sall)?$res:null;
+        $ret = ($sall)?$res:null;
+        return $ret;
         
     }
 

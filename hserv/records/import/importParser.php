@@ -943,7 +943,8 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
 
         }
     
-        return (@$properties['geometry'])?$properties:null;
+        $ret = (@$properties['geometry'])?$properties:null;
+        return $ret;
 }
 
 //

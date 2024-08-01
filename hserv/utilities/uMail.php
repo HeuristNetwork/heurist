@@ -93,7 +93,7 @@ use PHPMailer\PHPMailer\Exception;
             $responce = curl_exec($ch);
             curl_close($ch);
             
-            return ($responce==1);
+            return $responce==1;
         }
         
         

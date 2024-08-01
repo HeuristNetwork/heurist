@@ -1179,7 +1179,7 @@ class Predicate {
              } catch (Exception  $e){
              }                            
         }
-        return ($timestamp0  &&  $timestamp1);
+        return $timestamp0  &&  $timestamp1;
     }
 
     public function makeDateClause_old() {

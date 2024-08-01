@@ -2791,19 +2791,19 @@ function __sortResourcesByDate($a, $b)
         if($a['dty_ID'] == $b['dty_ID']){
             
             if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
-                 return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
+                 $ret = ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
             }else{
-                 return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
+                 $ret = ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
             }
             
-            
         }else{
-            return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
+            $ret = ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
         }
         
     }else {
-        return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
+        $ret = (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
     }
+    return $ret;
 } 
 
 function linkifyValue($value){

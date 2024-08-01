@@ -1527,7 +1527,7 @@
             return $res;
             /*
             $ids = array_filter($ids, function ($v) {
-                 return (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) );
+                 return is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) ;
             });
             */
         }else{
@@ -1933,7 +1933,7 @@
             
             $res->close();
         }
-        return ($row_cnt>0);
+        return $row_cnt>0;
     }
 
     

@@ -169,7 +169,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
     }
 
     if (!$mask) {
-        return ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
+        $ret = ($rep_mode!=_ERR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
+        return $ret;
     }
 
     if($mode==3){

@@ -383,7 +383,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
             //return "";
         }
     }
-    return ($res=='')?'': substr($res,0,-1);
+    return $res==''?'': substr($res,0,-1);
 }
 
 //

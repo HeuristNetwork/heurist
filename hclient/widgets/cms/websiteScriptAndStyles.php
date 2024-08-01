@@ -1534,7 +1534,8 @@ $mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';
 
 function _getFld($record,$dty_ID){
     $res = @$record['details'][$dty_ID];
-    return (is_array($res)&&count($res)>0)?array_shift($res):null;
+    $ret = (is_array($res)&&count($res)>0)?array_shift($res):null;
+    return $ret;
 }
 
 function _getMenuContent($parent_id, $menuitems, $lvl){

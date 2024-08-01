@@ -546,6 +546,6 @@ function __getTemplate($template){
 //
 //
 function _isPositiveInt($val){
-    return (is_numeric($val) && (int)$val>0);
+    return is_numeric($val) && (int)$val>0;
 }
 ?>

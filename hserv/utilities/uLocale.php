@@ -195,7 +195,8 @@
         // this is record detail field;
         $res = getCurrentTranslation($input, $lang);
         
-        return ($res==null)?$input:$res;
+        $ret = ($res==null)?$input:$res;
+        return $ret;
     }
     
     //

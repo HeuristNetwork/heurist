@@ -407,7 +407,7 @@ class System {
             }
             //print_r(@$RTIDs);
         }
-        return (@$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null);
+        return @$RTIDs[$dbID][$rtID] ? $RTIDs[$dbID][$rtID] : null;
     }
 
 
@@ -468,7 +468,7 @@ class System {
                 $DTIDs[$row['dbID']][$row['id']] = $row['localID'];
             }
         }
-        return (@$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null);
+        return @$DTIDs[$dbID][$dtID] ? $DTIDs[$dbID][$dtID] : null;
     }
 
     /**
@@ -1057,7 +1057,8 @@ class System {
     }
     
     public function getErrorMsg(){
-        return ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+        $ret = ($this->errors && @$this->errors['message'])?$this->errors['message']:'';
+        return $ret;
     }
 
     public function clearError(){
@@ -1366,7 +1367,7 @@ class System {
             }
         }
         return false;        
-        //return ( $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) );
+        //return  $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) ;
     }
 
     /**
@@ -1375,7 +1376,7 @@ class System {
     * otherwise only direct owners can modify them or members of workgroup tags
     */
     public function is_dbowner(){
-        return ($this->get_user_id()==2);
+        return $this->get_user_id()==2;
     }
     
     /**
@@ -1385,9 +1386,10 @@ class System {
     * @return mixed
     */
     public function is_admin(){
-        return ($this->get_user_id()>0 && 
+        $ret = ($this->get_user_id()>0 && 
                    ($this->get_user_id()==2 ||
                     $this->has_access( $this->get_system('sys_OwnerGroupID') ) ));
+        return $ret;
     }
     
     public function is_guest_user(){
@@ -1402,7 +1404,7 @@ class System {
     public function is_system_admin(){
         if ($this->get_user_id()>0){
             $user = user_getById($this->mysqli, $this->get_user_id());
-            return (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN));
+            return defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN);
         }else{
             return false;
         }
@@ -1422,7 +1424,7 @@ class System {
         $ugrID = $this->get_user_id();
         
         if(!$requiredLevel || $requiredLevel<1){
-            return ($ugrID>0);//just logged in
+            return $ugrID>0;//just logged in
         }
         
         if ($requiredLevel==$ugrID ||   //iself 
@@ -1432,7 +1434,7 @@ class System {
         }else{
             //@$this->current_User['ugr_Groups'][$requiredLevel]=='admin');//admin of given group
             $current_user_grps = $this->get_user_group_ids('admin');
-            return (is_array($current_user_grps) && in_array($requiredLevel, $current_user_grps));
+            return is_array($current_user_grps) && in_array($requiredLevel, $current_user_grps);
         }
     }    
 
@@ -1916,7 +1918,8 @@ class System {
             // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
         }
-        return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
+        $ret = ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
+        return $ret;
     }
 
     //

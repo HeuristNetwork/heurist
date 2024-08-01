@@ -206,7 +206,7 @@ class Temporal {
     //
     //
     public function isValid(){
-        return ($this->tDate!=null);
+        return $this->tDate!=null;
     }
 
     //
@@ -1173,7 +1173,8 @@ class Temporal {
             }
         }
 
-        return ($check_ambiguation)?$is_ambiguation :$value;    
+        $ret = ($check_ambiguation)?$is_ambiguation :$value;
+        return $ret;
     }
 
     //

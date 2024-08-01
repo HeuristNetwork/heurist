@@ -2558,7 +2558,7 @@ class HPredicate {
              } catch (Exception  $e){
              }                            
         }
-        return ($timestamp0  &&  $timestamp1);
+        return $timestamp0 && $timestamp1;
     }
 
     //
@@ -2577,7 +2577,8 @@ class HPredicate {
             $datestamp0 = Temporal::dateToISO($vals[0]);
             $datestamp1 = Temporal::dateToISO($vals[1]);
 
-            return ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
+            $ret = ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
+            return $ret;
 
         }else if($this->isEmptyValue()){ // {"f:10":"NULL"}
             return 'NULL';
@@ -2589,7 +2590,8 @@ class HPredicate {
                 return null;
             }else
             if ($this->exact) {
-                return ($this->negate?'!':'')."= '$datestamp'";
+                $ret = ($this->negate?'!':'')."= '$datestamp'";
+                return $ret;
             }
             else if ($this->lessthan) {
                 return $this->lessthan." '$datestamp'";
@@ -2613,7 +2615,8 @@ class HPredicate {
                 else {
                     $date = $datestamp; //date('Y-m-d', $datestamp);
                 }
-                return ($this->negate?'not ':'')."LIKE '$date%'";
+                $ret = ($this->negate?'not ':'')."LIKE '$date%'";
+                return $ret;
             }
         }
     }

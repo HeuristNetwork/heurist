@@ -41,7 +41,7 @@ function exist_similar($mysqli, $url) {
         .' where rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%" '
         .' or rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%"');//http://www.
 	
-	return ($res>0);
+	return $res>0;
 }
 
 //

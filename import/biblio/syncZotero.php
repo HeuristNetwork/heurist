@@ -1419,7 +1419,8 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
 //isNullOrEmptyString
 function is_empty($question){
-    return (!isset($question) || trim($question)==='');
+    $ret = (!isset($question) || trim($question)==='');
+    return $ret;
 }
 
 ?>

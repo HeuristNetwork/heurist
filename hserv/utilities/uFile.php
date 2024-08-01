@@ -600,7 +600,8 @@
         if ($a['title'] == $b['title']) {
             return 0;
         }
-        return ( strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+        $ret = ( strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+        return $ret;
     }  
       
     //

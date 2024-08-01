@@ -348,11 +348,11 @@ if($is_csv){
                 { title: "File MBytes", sortable:true, searching:false, className:'right'}, //data: "cnt_vals", 
                 { title: "Data updated", searchable:false, sortable:true,    //data: "date_mod", 
                     render: function(data, type) {
-                        return (type === 'display')?__format_date(data):data;
+                        return type === 'display'?__format_date(data):data;
                     }},
                 { title: "Structure modified", searchable:false, sortable:true,   //data: "date_struct_mod", 
                     render: function(data, type) {
-                        return (type === 'display')?__format_date(data):data;
+                        return type === 'display'?__format_date(data):data;
                     }},
                 { title: "Reg ID", sortable:true, searchable:true, className:'right'}, //data: "db_regid", 
                 { title: "DB Vsn", sortable:true, searchable:false, className:'right'},  //data: "db_version", 

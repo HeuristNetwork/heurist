@@ -1044,7 +1044,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if ($scale >= 1) {
             
             if ($image_oriented) {
-                return ($write_func!=null)?$write_func($src_img, $new_file_path, $image_quality):false;
+                $ret = ($write_func!=null)?$write_func($src_img, $new_file_path, $image_quality):false;
+                return $ret;
             }
             if ($file_path !== $new_file_path) { //no resize
                 return $this->safe_copy($file_path, $new_file_path);
