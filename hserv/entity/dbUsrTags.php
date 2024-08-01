@@ -62,13 +62,13 @@ class DbUsrTags extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('tag_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('tag_Text');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('tag_Modified');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('tag_UGrpID', true);
         if($pred!=null) {
@@ -118,7 +118,7 @@ class DbUsrTags extends DbEntityBase
         $order = array();
         
         //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) array_push($order, $pred);
+        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:tag_Modified'];
         if($value!=null){
             array_push($order, 'tag_Modified '.($value>1?'ASC':'DESC'));

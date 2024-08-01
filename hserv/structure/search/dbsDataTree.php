@@ -199,7 +199,7 @@
         
         //add default fields
         if($mode<5 || ($mode==5 && $recursion_depth==0)){
-            if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
+            if($mode==3) {array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));}
             
             array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
                 'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 

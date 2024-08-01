@@ -609,7 +609,7 @@ class Query {
                     if ($sort_clause) {$sort_clause .= ', ';}
 
                     $sort_clause .= $new_sql;
-                    if ($new_tables) array_push($this->sort_tables, $new_tables);
+                    if ($new_tables) {array_push($this->sort_tables, $new_tables);}
 
                     $sort_clauses[$new_sig] = 1;
                 }

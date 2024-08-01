@@ -1117,7 +1117,7 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
                 }
 
                 $id = intval($row[0]);
-                if(!in_array($id, $ids)) array_push($res1, $id);
+                if(!in_array($id, $ids)) {array_push($res1, $id);}
             }
             $res->close();
         }
@@ -1147,7 +1147,7 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
                 }
 
                 $id = intval($row[0]);
-                if(!in_array($id, $ids)) array_push($res2, $id);
+                if(!in_array($id, $ids)) {array_push($res2, $id);}
             }
             $res->close();
         }
@@ -2637,11 +2637,11 @@ function recordSearch($system, $params, $relation_query=null)
                 $date_add_index = array_search('rec_Added', $fields);
                 $date_mod_index = array_search('rec_Modified', $fields);
 
-                if($needThumbField) array_push($fields, 'rec_ThumbnailURL');
-                if($needThumbBackground) array_push($fields, 'rec_ThumbnailBg');
+                if($needThumbField) {array_push($fields, 'rec_ThumbnailURL');}
+                if($needThumbBackground) {array_push($fields, 'rec_ThumbnailBg');}
 
                 //array_push($fields, 'rec_Icon');//last one -icon ID
-                if($needTags>0) array_push($fields, 'rec_Tags');
+                if($needTags>0) {array_push($fields, 'rec_Tags');}
 
                 // load all records
                 while ($row = $res->fetch_row()) {
@@ -2649,7 +2649,7 @@ function recordSearch($system, $params, $relation_query=null)
                     if($needThumbField) {
                         $tres = fileGetThumbnailURL($system, $row[$rec_ID_index], $needThumbBackground);
                         array_push( $row, $tres['url'] );
-                        if($needThumbBackground) array_push( $row, $tres['bg_color'] );
+                        if($needThumbBackground) {array_push( $row, $tres['bg_color'] );}
                     }
                     if($needTags>0){ //get record tags for given user/group
                         /*var dbUsrTags = new DbUsrTags($system, array('details'=>'label', 

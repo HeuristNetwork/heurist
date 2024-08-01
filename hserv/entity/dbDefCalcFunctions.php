@@ -58,10 +58,10 @@ class DbDefCalcFunctions extends DbEntityBase
         $where = array();
         
         $pred = $this->searchMgr->getPredicate('cfn_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('cfn_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
                

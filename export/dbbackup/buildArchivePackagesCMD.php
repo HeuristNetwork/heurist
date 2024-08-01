@@ -128,7 +128,7 @@ if(!isActionInProgress($action, 30)){
 $progress_flag = $backup_root.'inprogress.info';
 //flag that backup in progress
 if(file_exists($progress_flag)){
-    //if(file_exists($progress_flag)) unlink($progress_flag);
+    //if(file_exists($progress_flag)) {unlink($progress_flag);}
     exit("It appears that backup operation has been started already. Please try this function later $progress_flag \n");
 }
 $fp = fopen($progress_flag,'w');
@@ -171,7 +171,7 @@ foreach ($arg_database as $idx=>$db_name){
     if(file_exists($folder)){
         $res = folderDelete2($folder, true);//remove previous backup
         if(!$res){
-            if(file_exists($progress_flag)) unlink($progress_flag);
+            if(file_exists($progress_flag)) {unlink($progress_flag);}
             exit("Cannot clear existing backup folder $folder \n");
         }
     }
@@ -183,7 +183,7 @@ foreach ($arg_database as $idx=>$db_name){
 
     
     if (!folderCreate($folder, true)) {
-        if(file_exists($progress_flag)) unlink($progress_flag);
+        if(file_exists($progress_flag)) {unlink($progress_flag);}
         exit("Failed to create folder $folder in which to create the backup \n");
     }
     
@@ -277,7 +277,7 @@ foreach ($arg_database as $idx=>$db_name){
     
     $res = DbUtils::databaseDump($db_name, $dumpfile, $dump_options);
     if($res===false){
-        if(file_exists($progress_flag)) unlink($progress_flag);
+        if(file_exists($progress_flag)) {unlink($progress_flag);}
         
         $err = $system->getError();
         error_log('buildArchivePackagesCMD Error: '.@$err['message']);
@@ -290,7 +290,7 @@ foreach ($arg_database as $idx=>$db_name){
         $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
         $dump->start($dumpfile);
     } catch (Exception $e) {
-        if(file_exists($progress_flag)) unlink($progress_flag);
+        if(file_exists($progress_flag)) {unlink($progress_flag);}
         exit("Sorry, unable to generate MySQL database dump for $db_name.".$e->getMessage()."\n");
     }
 */
@@ -298,20 +298,20 @@ foreach ($arg_database as $idx=>$db_name){
      
     // Create a zipfile of the definitions and data which have been dumped to disk
     $destination = $backup_zip; //$folder.'.zip';
-    if(file_exists($destination)) unlink($destination);
+    if(file_exists($destination)) {unlink($destination);}
     $res = UArchive::zip($folder, null, $destination, false);
 
     folderDelete2($folder, true);
 
     if(!$res){
-        if(file_exists($progress_flag)) unlink($progress_flag);
+        if(file_exists($progress_flag)) {unlink($progress_flag);}
         exit("Database: $db_name Failed to create zip file at $destination \n");
     }
 
     echo "   ".$db_name." OK \n";//.'  in '.$folder
 }//for
 
-if(file_exists($progress_flag)) unlink($progress_flag);
+if(file_exists($progress_flag)) {unlink($progress_flag);}
 
 exit("\nfinished all requested databases, results in HEURIST_FILESTORE/_BATCH_PROCESS_ARCHIVE_PACKAGE/
 \n\n");

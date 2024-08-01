@@ -1942,7 +1942,7 @@ class HPredicate {
                     foreach ($values as $val){
                         $this->value = $val;    
                         $val = $this->getFieldValue();
-                        if($val) array_push($pred,'tag_Text '.$val);
+                        if($val) {array_push($pred,'tag_Text '.$val);}
                     }
                     
                     $cnt = count($pred);

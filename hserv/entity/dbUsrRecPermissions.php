@@ -94,10 +94,10 @@ class DbUsrRecPermissions extends DbEntityBase
         $where = array();
         
         $pred = $this->searchMgr->getPredicate('rcp_RecID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rcp_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $needCheck = false;
         

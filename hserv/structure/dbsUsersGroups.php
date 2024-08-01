@@ -708,7 +708,7 @@
                         if (fwrite($handle_wr, $recid.','.$curr_user_id."\n") === FALSE) {
                             $system->addError(HEURIST_ERROR, 'Cannot write workset data to file '.$filename);
                             fclose($handle_wr);
-                            if(file_exists($filename)) unlink($filename);
+                            if(file_exists($filename)) {unlink($filename);}
                             return false;
                         }
                     }
@@ -734,7 +734,7 @@
                         $res = count($recids);
                     }
                     
-                    if(file_exists($filename)) unlink($filename);
+                    if(file_exists($filename)) {unlink($filename);}
                 
                 }else{
                     $system->addError(HEURIST_INVALID_REQUEST, 'Set of records to be added to user workset is not defined');

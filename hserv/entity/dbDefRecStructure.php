@@ -61,16 +61,16 @@ class DbDefRecStructure extends DbEntityBase
         $from_table = array($this->config['tableName']);
 
         $pred = $this->searchMgr->getPredicate('rst_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rst_RecTypeID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rst_DetailTypeID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('rst_CalcFunctionID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $needCheck = false;
         $is_structure = false;

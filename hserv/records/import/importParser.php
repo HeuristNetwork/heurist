@@ -692,7 +692,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
       
         if( count($err_colnums)>0 || count($err_encoding)>0 || count($err_keyfields)>0){
             //we have errors - delete temporary prepared file
-            if(file_exists($prepared_filename)) unlink($prepared_filename);
+            if(file_exists($prepared_filename)) {unlink($prepared_filename);}
             
             return array( 'step'=>2, 'col_count'=>$len, 
                 'err_colnums'=>$err_colnums, 
@@ -724,14 +724,14 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
            
             $res = self::saveToDatabase($preproc, $prepared_filename);
             //delete prepare
-            if(file_exists($prepared_filename)) unlink($prepared_filename);
+            if(file_exists($prepared_filename)) {unlink($prepared_filename);}
             if($res!==false){
                 //delete encoded
                 ImportParser::_deleteEncodedFilename($encoded_filename_id);
-                if(file_exists($encoded_filename)) unlink($encoded_filename);
+                if(file_exists($encoded_filename)) {unlink($encoded_filename);}
                 //delete original
                 $upload_file_name = HEURIST_SCRATCH_DIR.basename($original_filename);
-                if(file_exists($upload_file_name)) unlink($upload_file_name);
+                if(file_exists($upload_file_name)) {unlink($upload_file_name);}
             }
             return $res;
         }

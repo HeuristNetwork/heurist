@@ -1273,8 +1273,8 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     if (!$rectype_templates){
         makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
         makeTag('title', null, $record['rec_Title']);
-        if(@$record['rec_Added']) makeTag('added', null, $record['rec_Added']);
-        if(@$record['rec_Modified']) makeTag('modified', null, $record['rec_Modified']);
+        if(@$record['rec_Added']) {makeTag('added', null, $record['rec_Added']);}
+        if(@$record['rec_Modified']) {makeTag('modified', null, $record['rec_Modified']);}
 
         // saw FIXME  - need to output groups only
         if (array_key_exists($record['rec_OwnerUGrpID'], $WGN) || array_key_exists($record['rec_OwnerUGrpID'], $UGN)) {
@@ -1585,7 +1585,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         } else if (array_key_exists('geo', $value)) {
             openTag('detail', $attrs);
             openTag('geo');
-            if(!$rectype_templates) makeTag('type', null, $GEO_TYPES[$value['geo']['type']]);
+            if(!$rectype_templates) {makeTag('type', null, $GEO_TYPES[$value['geo']['type']]);}
             makeTag('wkt', null, $value['geo']['wkt']);
             closeTag('geo');
             closeTag('detail');
@@ -1780,16 +1780,16 @@ function outputTDateDetail($attrs, $value) {
         }
         if ($date) {
             preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/', $date, $matches);
-            if (@$matches[1]) makeTag('year', null, $matches[1]);
-            if (@$matches[2]) makeTag('month', null, $matches[2]);
-            if (@$matches[3]) makeTag('day', null, $matches[3]);
+            if (@$matches[1]) {makeTag('year', null, $matches[1]);}
+            if (@$matches[2]) {makeTag('month', null, $matches[2]);}
+            if (@$matches[3]) {makeTag('day', null, $matches[3]);}
         }
         if ($time) {
                          // hours                                 minutes                   seconds             
             preg_match('/(?:(1\d|0?[1-9]|2[0-3]))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?(?:[:\.](?:(0[0-9]|[0-5]\d)))?/', $time, $matches);
-            if (@$matches[1]) makeTag('hour', null, $matches[1]);
-            if (@$matches[2]) makeTag('minutes', null, $matches[2]);
-            if (@$matches[3]) makeTag('seconds', null, $matches[3]);
+            if (@$matches[1]) {makeTag('hour', null, $matches[1]);}
+            if (@$matches[2]) {makeTag('minutes', null, $matches[2]);}
+            if (@$matches[3]) {makeTag('seconds', null, $matches[3]);}
         }
     }
 }
@@ -1807,9 +1807,9 @@ function outputDurationDetail($attrs, $value) {
             } else { //delimited version  0004-12-06
                 preg_match('/^(?:(\d\d\d\d)[-\/]?)?(?:(1[012]|0[23]|[23](?!\d)|0?1(?!\d)|0?[4-9](?!\d))[-\/]?)?(?:([12]\d|3[01]|0?[1-9]))?\s*$/', $date, $matches);
             }
-            if (@$matches[1]) makeTag('year', null, intval($matches[1]));
-            if (@$matches[2]) makeTag('month', null, intval($matches[2]));
-            if (@$matches[3]) makeTag('day', null, intval($matches[3]));
+            if (@$matches[1]) {makeTag('year', null, intval($matches[1]));}
+            if (@$matches[2]) {makeTag('month', null, intval($matches[2]));}
+            if (@$matches[3]) {makeTag('day', null, intval($matches[3]));}
         }
         if ($time) {
             if (preg_match('/[HMS]/', $time)) { //char separated version 6H5M8S
@@ -1817,9 +1817,9 @@ function outputDurationDetail($attrs, $value) {
             } else { //delimited version  23:59:59
                 preg_match('/(?:(0?[1-9]|1\d|2[0-3])[:\.])?(?:(0?[1-9]|[0-5]\d)[:\.])?(?:(0?[1-9]|[0-5]\d))?/', $time, $matches);
             }
-            if (@$matches[1]) makeTag('hour', null, intval($matches[1]));
-            if (@$matches[2]) makeTag('minutes', null, intval($matches[2]));
-            if (@$matches[3]) makeTag('seconds', null, intval($matches[3]));
+            if (@$matches[1]) {makeTag('hour', null, intval($matches[1]));}
+            if (@$matches[2]) {makeTag('minutes', null, intval($matches[2]));}
+            if (@$matches[3]) {makeTag('seconds', null, intval($matches[3]));}
         }
     }
 }
@@ -2134,11 +2134,11 @@ else{ // single output stream
     if (array_key_exists('error', $result)) {
         makeTag('error', null, xmlspecialchars($result['error']));
     } else {
-        if(!$rectype_templates) makeTag('resultCount', null, @$result['reccount']>0 ? intval($result['reccount']) : " 0 ");
+        if(!$rectype_templates) {makeTag('resultCount', null, @$result['reccount']>0 ? intval($result['reccount']) : " 0 ");}
         // Output all the records as XML blocks
         if (@$result['reccount'] > 0){
             $resout = outputRecords($result);
-            if(!$rectype_templates) makeTag('recordCount', null, count($resout));
+            if(!$rectype_templates) {makeTag('recordCount', null, count($resout));}
         } 
     }
     closeTag('hml');

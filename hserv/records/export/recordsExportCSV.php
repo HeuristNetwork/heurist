@@ -1209,7 +1209,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
         $rty_ID = 0;
         
         if(count($streams)==0){
-            if($error_log) array_push($error_log, "Streams are not defined");
+            if($error_log) {array_push($error_log, "Streams are not defined");}
         }else{
             $rty_ID = array_keys($streams);
             $rty_ID = intval($rty_ID[0]);
@@ -1229,7 +1229,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
             $fd = $streams[$rty_ID];
 
             if($fd==null){
-                if($error_log) array_push($error_log, "Stream for record type $rty_ID is not defined");
+                if($error_log) {array_push($error_log, "Stream for record type $rty_ID is not defined");}
             }else{
                 rewind($fd);
                 $out = stream_get_contents($fd);

@@ -95,10 +95,10 @@ class DbSysImportFiles extends DbEntityBase
         $where = array();
         
         $pred = $this->searchMgr->getPredicate('sif_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('sif_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $needCheck = false;
         

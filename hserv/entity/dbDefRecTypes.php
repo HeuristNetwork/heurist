@@ -57,14 +57,14 @@ class DbDefRecTypes extends DbEntityBase
         $from_table = array($this->config['tableName']);
 
         $pred = $this->searchMgr->getPredicate('rty_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rty_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         //find rectype belong to group
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 

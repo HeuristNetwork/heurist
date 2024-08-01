@@ -79,31 +79,31 @@ class DbRecUploadedFiles extends DbEntityBase
         $from_table = array($this->config['tableName']);//'recUploadedFiles'
         
         $pred = $this->searchMgr->getPredicate('ulf_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('ulf_OrigFileName');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('ulf_Caption');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('ulf_Copyright');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('ulf_Copyowner');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('ulf_ExternalFileReference');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('ulf_FilePath');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('ulf_Modified');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('ulf_UploaderUGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
 
         $value = @$this->data['fxm_MimeType'];
@@ -121,7 +121,7 @@ class DbRecUploadedFiles extends DbEntityBase
         $order = array();
         
         //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) array_push($order, $pred);
+        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:ulf_Added'];
         if($value!=null){
             array_push($order, 'ulf_Added '.($value>0?'ASC':'DESC'));

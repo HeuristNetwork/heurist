@@ -1467,7 +1467,7 @@ class System {
                         $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Session folder access', 
                                             'The sessions folder has become inaccessible');
                         if($rv){
-                            if (file_exists($fname)) unlink($fname);
+                            if (file_exists($fname)) {unlink($fname);}
                             file_put_contents($fname, date_create('now')->format('Y-m-d H:i:s'));
                         }
                     }

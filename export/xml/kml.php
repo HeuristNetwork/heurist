@@ -174,8 +174,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         $kml_reccount = 0;
         if($isSearchKml){
             $res2 = $mysqli->query($squery2);
-            if($res2!==false)
+            if($res2!==false){
                 $kml_reccount = $res2->num_rows;
+            }
         }
 
     }
