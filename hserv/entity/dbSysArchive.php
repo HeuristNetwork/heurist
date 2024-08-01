@@ -209,8 +209,9 @@ class DbSysArchive extends DbEntityBase
                     $records[$arc_ID] = $rec;
                 }
                 
-                if(!in_array($rec_RecTypeID, $rectypes))
+                if(!in_array($rec_RecTypeID, $rectypes)){
                     array_push($rectypes, $rec_RecTypeID);
+                }
             }
             
 /*            

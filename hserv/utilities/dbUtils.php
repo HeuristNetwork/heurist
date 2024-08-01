@@ -73,8 +73,7 @@ class DbUtils {
 
     public static function initialize($mysqli=null)
     {
-        if (self::$initialized)
-            return;
+        if (self::$initialized) {return;}
 
         global $system;
         self::$system = $system;

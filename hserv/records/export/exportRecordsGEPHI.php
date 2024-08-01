@@ -193,10 +193,12 @@ XML;
     
     $links = recordSearchRelated($this->system, $recID, 0, false);
     if($links['status']==HEURIST_OK){
-        if(@$links['data']['direct'])
+        if(@$links['data']['direct']){
             fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
-        if(@$links['data']['reverse'])
+        }
+        if(@$links['data']['reverse']){
             fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['reverse'], $this->links_cnt, 'reverse'));
+        }
     }else{
         return false;
     }
@@ -230,7 +232,9 @@ protected function _outputFooter(){
 */
 private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
 
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
+    if(self::$defDetailtypes==null){
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);  
+    } 
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
         self::$defTerms = new DbsTerms($this->system, self::$defTerms);

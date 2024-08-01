@@ -54,8 +54,7 @@ class RecordsExport {
 //    
 private static function initialize()  
 {
-    if (self::$initialized)
-        return;
+    if (self::$initialized) {return;}
 
     global $system;
     self::$system  = $system;
@@ -551,8 +550,8 @@ IIIF;
                     $retrieve_header_fields = null;
                 }else{
                     //always include rec_ID and rec_RecTypeID
-                    if(!in_array('rec_RecTypeID',$retrieve_header_fields)) array_unshift($retrieve_header_fields, 'rec_RecTypeID');
-                    if(!in_array('rec_ID',$retrieve_header_fields)) array_unshift($retrieve_header_fields, 'rec_ID');
+                    if(!in_array('rec_RecTypeID',$retrieve_header_fields)) {array_unshift($retrieve_header_fields, 'rec_RecTypeID');}
+                    if(!in_array('rec_ID',$retrieve_header_fields)) {array_unshift($retrieve_header_fields, 'rec_ID');}
                     $retrieve_header_fields = implode(',', $retrieve_header_fields);
                 }
         

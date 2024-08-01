@@ -184,10 +184,11 @@ class DbEntitySearch
     //
     private function _cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
-            if ($val[strlen($val)-1] == '"')
+            if ($val[strlen($val)-1] == '"'){
                 $val = substr($val, 1, -1);
-            else
+            }else{
                 $val = substr($val, 1);
+            }
             return preg_replace('/ +/', ' ', trim($val));
         }
 

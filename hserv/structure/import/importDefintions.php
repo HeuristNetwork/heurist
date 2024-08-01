@@ -29,8 +29,7 @@ class ImportDefinitions {
 
     public function initialize($mysqli=null)
     {
-        if ($this->initialized)
-            return;
+        if ($this->initialized) {return;}
 
         global $system;
         $this->system = $system;

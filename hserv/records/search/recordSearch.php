@@ -1988,8 +1988,8 @@ function recordSearch($system, $params, $relation_query=null)
                     $header_fields = null;
                 }else{
                     //always include rec_ID and rec_RecTypeID
-                    if(!in_array('rec_RecTypeID',$header_fields)) array_unshift($header_fields, 'rec_RecTypeID');
-                    if(!in_array('rec_ID',$header_fields)) array_unshift($header_fields, 'rec_ID');
+                    if(!in_array('rec_RecTypeID',$header_fields)) {array_unshift($header_fields, 'rec_RecTypeID');}
+                    if(!in_array('rec_ID',$header_fields)) {array_unshift($header_fields, 'rec_ID');}
                 }
 
             }else{

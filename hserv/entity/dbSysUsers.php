@@ -667,8 +667,9 @@ class DbSysUsers extends DbEntityBase
                 'It appears that all users selected to import exist in current database.');
             return false;
         }
-        if(count($userIDs_already_exists)>0)
+        if(count($userIDs_already_exists)>0){
             $userIDs = array_diff($userIDs, array_keys($userIDs_already_exists));
+        }
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
 

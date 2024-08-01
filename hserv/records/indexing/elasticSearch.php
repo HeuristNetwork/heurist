@@ -77,8 +77,7 @@ class ElasticSearch {
 
     private static function initialize()
     {
-        if (self::$initialized)
-            return;
+        if (self::$initialized)  {return;}
 
         global $system;
         self::$mysqli = $system->get_mysqli();

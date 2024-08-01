@@ -58,8 +58,7 @@ class ImportAction {
     
 private static function initialize($fields_correspondence=null)
 {
-    if (self::$initialized)
-        return;
+    if (self::$initialized) {return;}
 
     global $system;
     self::$system  = $system;

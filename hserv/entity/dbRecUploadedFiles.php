@@ -2076,7 +2076,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         
        $this->records = null; //reset 
        
-       if($fields==null)$fields = array();
+       if($fields==null) {$fields = array();}
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
        $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';//or _iiif
        $fields['ulf_ExternalFileReference'] = $url;

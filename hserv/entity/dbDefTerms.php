@@ -276,8 +276,9 @@ class DbDefTerms extends DbEntityBase
                 if($ret===false){
                     return false;
                 }
-                if(is_array($ret))
+                if(is_array($ret)){
                     $terms_added = array_merge($terms_added, $ret);
+                }
             }
         }
         return $terms_added;
@@ -393,8 +394,9 @@ class DbDefTerms extends DbEntityBase
                     if($ret===false){
                         return false;
                     }
-                    if(is_array($ret))
+                    if(is_array($ret)){
                         $terms_added = array_merge($terms_added, $ret);
+                    }
                 }
             }            
             return $terms_added;

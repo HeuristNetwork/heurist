@@ -350,7 +350,9 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         }else if($column=='typeid'){
             $res[$col_name] = $record['rec_RecTypeID'];
         }else if($column=='typename'){
-            if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 0);
+            if(self::$defRecTypes==null){
+                self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 0);  
+            } 
             $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];
         }else if($column=='added'){
             $res[$col_name] = $record['rec_Added'];

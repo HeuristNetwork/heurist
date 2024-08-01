@@ -77,8 +77,7 @@ class TitleMask {
     public static function initialize()
     {
         
-        if (self::$initialized)
-            return;
+        if (self::$initialized) {return;}
 
         global $system;
         self::$system = $system;
@@ -186,8 +185,9 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
     
     
     //find inside brackets
-    if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches))
+    if (! preg_match_all('/\s*\\[\\[|\s*\\]\\]|(\\s*(\\[\\s*([^]]+)\\s*\\]))/s', $mask, $matches)){
         return $mask;    // nothing to do -- no substitutions
+    }
 
     $replacements = array();
     $len = count($matches[1]);

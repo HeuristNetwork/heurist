@@ -358,11 +358,12 @@ exit;
                                 
                 $recs = mysql__select_all($mysqli, $query);
                 
-                foreach ($recs as $row)
+                foreach ($recs as $row){
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
                         "e"        => null,
                         "u"        => $row[3]));
+                }
             }
             
             //

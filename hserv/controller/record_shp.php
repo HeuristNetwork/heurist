@@ -229,12 +229,12 @@ use Shapefile\ShapefileReader;
                             if($geo['type']=='LineString'){
                                 
                                 checkWGS($system, $geo['coordinates']);
-                                if($need_simplify) simplifyCoordinates($geo['coordinates']);
+                                if($need_simplify) {simplifyCoordinates($geo['coordinates']);}
 
                             } else if($geo['type']=='Polygon'){
                                 for($idx=0; $idx<count($geo['coordinates']); $idx++){
                                     checkWGS($system, $geo['coordinates'][$idx]);
-                                    if($need_simplify) simplifyCoordinates($geo['coordinates'][$idx]);
+                                    if($need_simplify) {simplifyCoordinates($geo['coordinates'][$idx]);}
                                 }
                             } else if ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
                             {
@@ -242,7 +242,7 @@ use Shapefile\ShapefileReader;
                                     for($idx2=0; $idx2<count($geo['coordinates'][$idx]); $idx2++) //points
                                     {
                                         checkWGS($system, $geo['coordinates'][$idx][$idx2]);
-                                        if($need_simplify) simplifyCoordinates($geo['coordinates'][$idx][$idx2]);
+                                        if($need_simplify) {simplifyCoordinates($geo['coordinates'][$idx][$idx2]);}
                                     }
                                         
                             }
@@ -251,7 +251,7 @@ use Shapefile\ShapefileReader;
                         
                         //$json[] = $feature;
                         
-                        if($rec_cnt>0) fwrite($fd, ',');
+                        if($rec_cnt>0) {fwrite($fd, ',');}
                         fwrite($fd, json_encode($feature));
                         $rec_cnt++;
                         if(memory_get_usage()>104857600){//100M //$rec_cnt>20 || 

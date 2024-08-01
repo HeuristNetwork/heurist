@@ -74,8 +74,7 @@ public function __construct( $system ) {
 //    
 private function initialize()  
 {
-    if ($this->initialized)
-        return;
+    if ($this->initialized) {return;}
 
     global $system;
     $this->system  = $system;
@@ -246,8 +245,8 @@ protected function _outputPrepareFields($params){
             $this->retrieve_header_fields = null; //retrieve all header fields
         }else{
             //always include rec_ID and rec_RecTypeID
-            if(!in_array('rec_RecTypeID',$this->retrieve_header_fields)) array_unshift($this->retrieve_header_fields, 'rec_RecTypeID');
-            if(!in_array('rec_ID',$this->retrieve_header_fields)) array_unshift($this->retrieve_header_fields, 'rec_ID');
+            if(!in_array('rec_RecTypeID',$this->retrieve_header_fields)) {array_unshift($this->retrieve_header_fields, 'rec_RecTypeID');}
+            if(!in_array('rec_ID',$this->retrieve_header_fields)) {array_unshift($this->retrieve_header_fields, 'rec_ID');}
             $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);
         }
         
@@ -308,7 +307,7 @@ public function output($data, $params){
     $this->_outputFooter();
     
     $format = @$params['format'];
-    if($format==null) $format = 'xml';
+    if($format==null) {$format = 'xml';}
     if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
         $mimeType = 'Content-Type: application/json';
     }else if(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
@@ -347,7 +346,7 @@ public function output($data, $params){
             $originalFileName = null;
             if(@$params['metadata']){
                 list($db_meta,$rec_ID) = explode('-',$params['metadata']);
-                if(!$db_meta && $rec_ID) $db_meta = $this->system->dbname();
+                if(!$db_meta && $rec_ID) {$db_meta = $this->system->dbname();}
                 
                 $record = array("rec_ID"=>$rec_ID);
                 if($db_meta!=$this->system->dbname()){
@@ -368,7 +367,7 @@ public function output($data, $params){
                         $originalFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
                     }
                 }
-                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                if(!$originalFileName) {$originalFileName = 'Dataset_'.$record['rec_ID'];}
                 
             }else{
                 $originalFileName = $params['filename'];

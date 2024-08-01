@@ -322,7 +322,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
     }
                     
     if($extended){
-        if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
+        if(self::$defRecTypes==null) {self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);}
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
         if(self::$defTerms==null) {
@@ -333,7 +333,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         $idx_name = -1;
     }    
     
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
+    if(self::$defDetailtypes==null) {self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);}
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $idx_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
@@ -596,11 +596,11 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 
                 if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
-                if(count($points)>0)
+                if(count($points)>0){
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }                
-                
+                }
                 if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
             
             }
@@ -706,9 +706,9 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
                         }
                     } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                     {
-                        for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
-                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);
+                        for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
+                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);}}
                     }
                 }
 

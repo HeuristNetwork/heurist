@@ -249,7 +249,7 @@ if($filename){ //download from scratch (for csv import)
 function _download_file($filename, $content_type){
     
         ob_start();
-        if($content_type) header('Content-type: '.$content_type);
+        if($content_type) {header('Content-type: '.$content_type);}
         header('Pragma: public');
         header('Content-Length: ' . filesize($filename));
         @ob_clean();

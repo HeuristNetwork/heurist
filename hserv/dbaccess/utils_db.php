@@ -462,7 +462,7 @@
                 $result = array();
                 while ($row = $res->fetch_row()){
                     
-                    if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
+                    if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
                     
                     if($mode==1){
                         $rec_id = array_shift($row);
@@ -1720,7 +1720,7 @@
             }
             //$mysqli->commit();
         }
-        if($need_close)  $mysqli->close();
+        if($need_close) {$mysqli->close();}
    
         return $res;
     }    
@@ -1743,7 +1743,7 @@
         $is_exist = file_exists($session_file);
 
         if($value==='REMOVE'){
-            if($is_exist) fileDelete($session_file);
+            if($is_exist) {fileDelete($session_file);}
             $res = 'terminate';
         }else{
             //get    

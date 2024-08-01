@@ -1694,7 +1694,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
                         $detailTypeId = $dt_ID;
                         break;                        
                     }
-            }
+            }}
         }
 
         if(!($detailTypeId>0)){
@@ -2876,10 +2876,11 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))
                     $isValid = preg_match("/^(?:yes|true|no|false|1|0|T|F|Y|N)$/", $dtl_Value);
                     if($isValid){
                         if ($dtl_Value==1 || $dtl_Value == 'T' || $dtl_Value == 'Y' 
-                            || $dtl_Value == "yes"  ||  $dtl_Value == "true")
+                            || $dtl_Value == "yes"  ||  $dtl_Value == "true"){
                             $dtl_Value = "true";
-                        else
+                        }else{
                             $dtl_Value = "false";
+                        }
                     }else{
                         $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid boolean';
                     }

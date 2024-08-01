@@ -820,10 +820,12 @@ abstract class DbEntityBase
                 
                 $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
                 if($fld_loc && @$fld_loc['dtFields']){
-                    if(@$fld_loc['dtFields']['rst_DisplayName'])
+                    if(@$fld_loc['dtFields']['rst_DisplayName']){
                         $fields[$idx]['dtFields']['rst_DisplayName'] = $fld_loc['dtFields']['rst_DisplayName'];
-                    if(@$fld_loc['dtFields']['rst_DisplayHelpText'])
+                    }
+                    if(@$fld_loc['dtFields']['rst_DisplayHelpText']){
                         $fields[$idx]['dtFields']['rst_DisplayHelpText'] = $fld_loc['dtFields']['rst_DisplayHelpText'];
+                    }
                 }
                 
                 

@@ -50,8 +50,7 @@ class RecordsExportCSV {
 //    
 private static function initialize()
 {
-    if (self::$initialized)
-        return;
+    if (self::$initialized) {return;}
 
     global $system;
     self::$system  = $system;
@@ -234,7 +233,7 @@ public static function output($data, $params){
             }
 
             //always include ID field into output
-            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            if($flds[0]!='rec_ID') {array_unshift($flds, 'rec_ID');}
             $fields[$rt] = $flds;
 
             $details[$rt] = array();
@@ -949,7 +948,7 @@ public static function output_header($data, $params)
             }
 
             //always include ID field into output
-            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            if($flds[0]!='rec_ID') {array_unshift($flds, 'rec_ID');}
             $fields[$rt] = $flds;
             
             $details[$rt] = array();
