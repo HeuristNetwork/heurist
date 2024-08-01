@@ -1495,7 +1495,7 @@ function print_private_details($bib) {
                             for ($i=0; $i < count($kwds);++$i) {
                                 $grp = $kwds[$i][0];
                                 $kwd = $kwds[$i][1];
-                                if ($i > 0) print {'&nbsp; ';}
+                                if ($i > 0) {print '&nbsp; ';}
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}

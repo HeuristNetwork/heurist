@@ -229,6 +229,6 @@ function HRecordSearch() {
         
     }
 
-    _init( );
+    //_init();
     return that;  //returns object
 }

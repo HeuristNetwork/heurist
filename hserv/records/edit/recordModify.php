@@ -1687,7 +1687,7 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
             .'AND rst_DetailTypeID=dty_ID';
 
             $pointers = mysql__select_assoc2($mysqli, $query);
-            if(is_array($pointers) && count($pointers)>0)
+            if(is_array($pointers) && count($pointers)>0){
                 foreach($pointers as $dt_ID=>$ptr){
                     if($ptr) {$ptr = explode(',',$ptr);}
                     if(count($ptr)>0 && in_array($child_rectype, $ptr)){

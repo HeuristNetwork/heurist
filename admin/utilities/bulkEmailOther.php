@@ -184,7 +184,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
         switch (strtoupper(@$db_request['lastmod_unit'])) {
             case 'DAY':  $lastmod_unit = 'DAY'; break;
             case 'MONTH':  $lastmod_unit = 'MONTH'; break;
-            case 'YEAR':  $lastmod_unit = 'YEAR';
+            case 'YEAR':  $lastmod_unit = 'YEAR'; break;
             default;
         }
 
