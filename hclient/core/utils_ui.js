@@ -593,7 +593,7 @@ window.hWin.HEURIST4.ui = {
             }
             
             if(useCounts && isEmpty){
-                window.hWin.HEURIST4.ui.addoption(selObj, 0, 'No records in the database')
+                window.hWin.HEURIST4.ui.addoption(selObj, 0, 'No appropriate records in the database')
             }
             
         }else{  //show rectypes separated by groups
