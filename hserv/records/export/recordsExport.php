@@ -1872,7 +1872,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
     }
 
-    if(!array_key_exists($rt_id, $columns)) return null;
+    if(!array_key_exists($rt_id, $columns)) {return null;}
 
     foreach($columns[$rt_id] as $column){
 

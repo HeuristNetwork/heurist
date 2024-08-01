@@ -126,7 +126,7 @@
         
         global $dbs_rtStructs;
         
-        if(!(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0)) return;
+        if(!(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0)) {return;}
         
         $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
         $parent_Rts = array();

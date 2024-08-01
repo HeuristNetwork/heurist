@@ -32,7 +32,7 @@ require_once dirname(__FILE__).'/../consts.php';
 header('Content-type: text/javascript');
 
 $db = @$_REQUEST['db'];
-if(!$db) exit;
+if(!$db) {exit;}
 
 if(strpos($db, HEURIST_DB_PREFIX)===0){
     $dbname_full = $db;

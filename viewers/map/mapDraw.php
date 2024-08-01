@@ -82,7 +82,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
             // Callback function on map initialization
             function onPageInit(success){
                 
-                if(!success) return;
+                if(!success) {return;}
 
                 /* init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 

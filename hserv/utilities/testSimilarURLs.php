@@ -57,7 +57,7 @@ function similar_urls($mysqli, $url) {
 	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
                 'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
 	            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
-	if (count($new_matches) >= 10) return $new_matches;
+	if (count($new_matches) >= 10) {return $new_matches;}
 
 	$matches = array();
 	foreach ($new_matches as $match) {$matches[$match] = $match;}
@@ -68,12 +68,12 @@ function similar_urls($mysqli, $url) {
 		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
 		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
-		if (count($new_matches) >= 20) return $matches;
+		if (count($new_matches) >= 20) {return $matches;}
 
 		foreach ($new_matches as $match)
 			$matches[$match] = $match;
 
-		if (count($matches) >= 10) return $matches;
+		if (count($matches) >= 10) {return $matches;}
 	}
 	while (($spos = strrpos($noproto_url, '/'))) {
 		$noproto_url = substr($noproto_url, 0, $spos);
@@ -81,7 +81,7 @@ function similar_urls($mysqli, $url) {
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'/%" '
 		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'/%"');
 		if (count($new_matches) >= 20) {
-			if ($matches) return $matches;
+			if ($matches) {return $matches;}
 
 			foreach ($new_matches as $match) {
 				$matches[$match] = $match;
@@ -92,14 +92,14 @@ function similar_urls($mysqli, $url) {
 		foreach ($new_matches as $match)
 			$matches[$match] = $match;
 
-		if (count($matches) >= 10) return $matches;
+		if (count($matches) >= 10) {return $matches;}
 	}
 
 	/* try it without the trailing slash */
 	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
                     .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
-	if (count($new_matches) >= 20) return $matches;
+	if (count($new_matches) >= 20) {return $matches;}
 
 	foreach ($new_matches as $match)
 		$matches[$match] = $match;

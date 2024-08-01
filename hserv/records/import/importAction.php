@@ -1381,7 +1381,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         $k++;
 
-        //if($wrong_records) return $wrong_records;
+        //if($wrong_records) {return $wrong_records;}
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }else if($wrong_records) {

@@ -149,7 +149,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             }
            
            function onPageInit(success){
-                   if(!success) return;
+                   if(!success) {return;}
                    $("#expand").click();
             }
             

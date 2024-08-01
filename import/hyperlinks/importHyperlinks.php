@@ -565,7 +565,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 	} else if (! $user_rec_id) {
 
 		$rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
-		if ($rec_ids) return $rec_ids;
+		if ($rec_ids) {return $rec_ids;}
 /*
 		$par_url = preg_replace('/[?].*'.'/', '', $url);
 		if (substr($par_url, strlen($par_url)-1) == '/')	// ends in a slash; remove it

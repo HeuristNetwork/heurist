@@ -113,7 +113,7 @@ function fileRegister($system, $fullname, $description=null){
 */
 function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 
-    if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) return null;
+    if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) {return null;}
 
     $res = mysql__select_value($system->get_mysqli(), 'select ulf_ID from recUploadedFiles where ulf_ObfuscatedFileID="'.
         $system->get_mysqli()->real_escape_string($ulf_ObfuscatedFileID).'"');

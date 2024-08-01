@@ -124,7 +124,7 @@ function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id
     
     $mysqli = $system->get_mysqli();
 
-    if (!$relTermID) return;
+    if (!$relTermID) {return;}
     if (!$inverses) {
         $inverses = mysql__select_assoc2($mysqli, 
                 "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"

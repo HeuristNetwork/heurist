@@ -31,7 +31,7 @@
 */
 header("Content-type: text/javascript");
 
-if (! @$_REQUEST["url"]) return;
+if (! @$_REQUEST["url"]) {return;}
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 $system = new System();

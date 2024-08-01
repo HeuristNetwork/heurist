@@ -575,7 +575,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 */
 function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
     global $system, $mysqli, $REVERSE, $ACCESSABLE_OWNER_IDS, $relRT, $PUBONLY;
-    //if (!$REVERSE) return array();
+    //if (!$REVERSE) {return array();}
     $nlrIDs = array();// new linked record IDs
     $query = 'SELECT dtl_Value as srcRecID, src.rec_RecTypeID as srcType, ' .
     'dtl_RecID as trgRecID, dty_ID as ptrDetailTypeID ' . ', trg.* ' . ', trg.rec_NonOwnerVisibility ' .

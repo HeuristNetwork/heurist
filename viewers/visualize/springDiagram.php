@@ -53,7 +53,7 @@ var isStandAlone = false;
 // Callback function on page initialization - see initPage.php
 function onPageInit(success){
 
-    if(!success) return;
+    if(!success) {return;}
                 
         var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
         

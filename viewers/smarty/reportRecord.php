@@ -79,7 +79,7 @@ class ReportRecord {
             return constant($name);
         }else{
             if(strpos($name,'RT_')===0 || strpos($name,'DT_')===0){
-                if($this->system->defineConstant($name)) return constant($name);
+                if($this->system->defineConstant($name)) {return constant($name);}
             }
             
             return null;  
@@ -184,7 +184,7 @@ class ReportRecord {
     public function recordIsVisible($rec)
     {
         
-        if(@$rec['rec_FlagTemporary']==1) return false;
+        if(@$rec['rec_FlagTemporary']==1) {return false;}
         
         $currentUser = $this->system->getCurrentUser();
         

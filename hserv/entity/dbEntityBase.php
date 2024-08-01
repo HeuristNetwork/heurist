@@ -1120,7 +1120,7 @@ abstract class DbEntityBase
             if(!is_bool($res)){
                 $this->data = $res;
             }else{
-                if(!$res) return false;        
+                if(!$res) {return false;}        
             }        
 
             return true;        

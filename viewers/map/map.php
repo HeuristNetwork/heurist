@@ -261,7 +261,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     // Callback function on page initialization - see initPage.php
     function onPageInit(success){
         
-        if(!success) return;
+        if(!success) {return;}
         
         //since 2022-06-09 layout_params as passed via option on map init   
         

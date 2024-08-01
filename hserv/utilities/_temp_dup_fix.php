@@ -59,7 +59,7 @@ while ( $row = $res->fetch_row() ) {
         removeDuplicates($ids);
         $name   = $row[1];
         $gov_id = $row[2];
-        //if(count($ids)>1) exit;
+        //if(count($ids)>1) {exit;}
         $ids = array();
     }
     array_push($ids, $row[0]);

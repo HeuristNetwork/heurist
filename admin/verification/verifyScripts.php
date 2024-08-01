@@ -1017,7 +1017,7 @@ function __copy_RecType_And_Term_Icons_To_EntityFolder(){
     echo '__copy_RecType_And_Term_Icons_To_EntityFolder<br>';
     
     
-    if(!defined('HEURIST_FILESTORE_ROOT')) return;
+    if(!defined('HEURIST_FILESTORE_ROOT')) {return;}
 
         /* DISABLED
     foreach ($databases as $idx=>$db_name){

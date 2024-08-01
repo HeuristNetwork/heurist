@@ -227,7 +227,7 @@ protected function _outputRecord($record){
             array_push($this->layers_record_ids, $recID);
         }
 
-        if(!@$feature['geometry']) return true;
+        if(!@$feature['geometry']) {return true;}
 
         $this->geojson_ids[] = $recID;
         /* simplify

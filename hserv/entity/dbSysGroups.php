@@ -305,7 +305,7 @@ class DbSysGroups extends DbEntityBase
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
         if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
-            if(@$res['status']!=HEURIST_OK) return false;
+            if(@$res['status']!=HEURIST_OK) {return false;}
         }
 
         $ret = true;

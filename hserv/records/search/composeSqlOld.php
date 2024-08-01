@@ -1032,12 +1032,12 @@ class SortPhrase {
                 return array('rec_URL'.$scending, 'rec_URL', NULL);
 
             case 'm': case 'modified':
-                if ($this->parent->search_domain == BOOKMARK) return array('bkm_Modified'.$scending, NULL);
-                else return array('rec_Modified'.$scending, 'rec_Modified', NULL);
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Modified'.$scending, NULL);}
+                else {return array('rec_Modified'.$scending, 'rec_Modified', NULL);}
 
             case 'a': case 'added':
-                if ($this->parent->search_domain == BOOKMARK) return array('bkm_Added'.$scending, NULL);
-                else return array('rec_Added'.$scending, 'rec_Added', NULL);
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Added'.$scending, NULL);}
+                else {return array('rec_Added'.$scending, 'rec_Added', NULL);}
 
             case 'f': case 'field':
                 /* Sort by field is complicated.
@@ -2804,7 +2804,7 @@ class RelatedPredicate extends Predicate {
             }
         }
         
-        if(!($related_rty_ID>0)) return false;
+        if(!($related_rty_ID>0)) {return false;}
 
         //NEW  ---------------------------
         $add_from  = 'recLinks rl ';
@@ -2990,7 +2990,7 @@ class RelationsForPredicate extends Predicate {
         $ids = $res->fetch_row();
         $ids = $ids[0];
         
-        if (! $ids) return "0";
+        if (! $ids) {return "0";}
         else return "TOPBIBLIO.rec_ID in ($ids)";
     }
 }

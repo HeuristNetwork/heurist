@@ -253,7 +253,7 @@ if($isLocalHost){
 
             function roll_open() {
                 var wfe = window.frameElement;
-                if (! wfe) return;
+                if (! wfe) {return;}
                 var current_height = parseInt(wfe.style.height);
 
                 var final_height = document.getElementById('bottom').offsetTop + 2;
@@ -2552,7 +2552,7 @@ function print_linked_details($bib, $link_cnt)
     
     $res = $mysqli->query($query);
 
-    if ($res==false || $res->num_rows <= 0) return $link_cnt;
+    if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
     
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
@@ -2608,7 +2608,7 @@ function print_linked_details($bib, $link_cnt)
 function print_text_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
-        if (! $result["success"] && count($cmts) == 0) return;
+        if (! $result["success"] && count($cmts) == 0) {return;}
         
         $content = "";
         $woot = @$result["woot"];
@@ -2616,7 +2616,7 @@ function print_text_details($bib) {
         foreach ($woot["chunks"] as $chunk) {
             $content .= $chunk["text"] . " ";
         }
-        if (strlen($content) == 0 && count($cmts) == 0) return;
+        if (strlen($content) == 0 && count($cmts) == 0) {return;}
 
         
         print '<div class=detailRowHeader>Text';
@@ -2693,7 +2693,7 @@ function output_chunker($val, $return_lang = false) {
     [groupName] => ) ) ) ) )
     */
 function print_woot_precis($content,$bib) {
-        if (strlen($content) == 0) return;
+        if (strlen($content) == 0) {return;}
         ?>
         <div class=detailRow>
             <div class=detailType>WYSIWYG Text</div>
@@ -2715,7 +2715,7 @@ function print_woot_precis($content,$bib) {
 
 
 function print_threaded_comments($cmts) {
-        if (count($cmts) == 0) return;
+        if (count($cmts) == 0) {return;}
         ?>
         <div class=detailRow>
             <div class=detailType>Thread Comments</div>

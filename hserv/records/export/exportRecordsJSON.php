@@ -333,7 +333,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         self::$defTerms = new DbsTerms($this->system, self::$defTerms);
     }
 
-    if(!array_key_exists($rt_id, $columns)) return null;
+    if(!array_key_exists($rt_id, $columns)) {return null;}
 
     foreach($columns[$rt_id] as $column){
 

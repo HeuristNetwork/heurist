@@ -242,7 +242,7 @@ class UImage {
             // load icon
             $img_icon = @imagecreatefrompng($filename);
 
-            if($img_icon===false) return;
+            if($img_icon===false) {return;}
             
             $color_old = array(0,0,0);//???? 54,100,139);
             $color_new = (!$color_new)?array(255, 0, 0):$color_new;  //array(54,64,80);

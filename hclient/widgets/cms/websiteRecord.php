@@ -535,7 +535,7 @@ function __getTemplate($template){
         }
         if($template!='cmsTemplate.php'){
             $template = HEURIST_DIR.'hclient/widgets/cms/templates/'.$template;
-            if(!file_exists($template)) return false;
+            if(!file_exists($template)) {return false;}
         }
         return $template;
     }

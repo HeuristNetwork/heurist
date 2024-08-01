@@ -646,7 +646,7 @@ class System {
         
         list($database_name_full, $dbname) = mysql__get_names($dbname);
         $error = System::dbname_check($dbname);
-        if($error!=null || !$dbname) return false;
+        if($error!=null || !$dbname) {return false;}
         
         $upload_root = $this->getFileStoreRootFolder();
 
@@ -1441,7 +1441,7 @@ class System {
         
         global $defaultRootFileUploadPath;
         
-        if(headers_sent()) return true;
+        if(headers_sent()) {return true;}
         
         //verify that session folder is writable
         if($check_session_folder && ini_get('session.save_handler')=='files'){

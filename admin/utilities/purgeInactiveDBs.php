@@ -181,7 +181,7 @@ define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list();
 
-if($exclusion_list===false) exit;
+if($exclusion_list===false) {exit;}
 
 if(!$arg_no_action){
     if (!folderCreate($backup_root, true)) {

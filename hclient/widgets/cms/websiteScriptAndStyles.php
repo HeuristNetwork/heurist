@@ -310,7 +310,7 @@ function onPageInit(success)
     TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'],
     TRM_NO_OLD = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO_OLD'];
 
-    if(!success) return;
+    if(!success) {return;}
     
     $('#main-menu').hide();
     
@@ -780,7 +780,7 @@ function afterPageLoad(document, pageid, eventdata){
     
     assignPageTitle(pageid);
     
-    if(typeof pageid==='undefined' || pageid==null ) return;
+    if(typeof pageid==='undefined' || pageid==null ) {return;}
     
     //remove old style and custom style per page ===========================
     if(DT_CMS_CSS>0){ 

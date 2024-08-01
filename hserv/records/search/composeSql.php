@@ -1321,7 +1321,7 @@ class HPredicate {
             case 'cnt':
             case 'fc':
             
-                if(!$this->field_id) return null;
+                if(!$this->field_id) {return null;}
                 $this->pred_type = strtolower($this->pred_type);
                 
             case 'field':
@@ -1513,7 +1513,7 @@ class HPredicate {
         //
         
         $val = $this->getFieldValue();
-        if(!$val) return null;
+        if(!$val) {return null;}
         
         $ignoreApostrophe = false;
         
@@ -1718,7 +1718,7 @@ class HPredicate {
         $val_wo_prefixes = $this->value;
         $this->value = $keep_val;
         $val = $this->getFieldValue();
-        if(!$val) return null;
+        if(!$val) {return null;}
         
         $field_name1 =  $p.'dtl_Value ';
         $field_name2 =  'link.rec_Title ';
@@ -2540,7 +2540,7 @@ class HPredicate {
         if (strpos($this->value,"<>")>0) {
             $vals = explode("<>", $this->value);
 
-            if(is_numeric($vals[0]) || is_numeric($vals[1])) return false;
+            if(is_numeric($vals[0]) || is_numeric($vals[1])) {return false;}
 
              try{   
                 $timestamp0 = new DateTime($vals[0]);
@@ -2549,7 +2549,7 @@ class HPredicate {
              }                            
         }else{
 
-            if(is_numeric($this->value)) return false;
+            if(is_numeric($this->value)) {return false;}
 
              try{   
                 $timestamp0 = new DateTime($this->value);
@@ -2814,7 +2814,7 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if(is_string($this->value) && trim($this->value)=='') return "!=''";//find any non empty value
+        if(is_string($this->value) && trim($this->value)=='') {return "!=''";}//find any non empty value
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? $this->lessthan : (($this->greaterthan) ? $this->greaterthan : '='));
         

@@ -484,7 +484,7 @@
     function mysql__get_table_columns($mysqli, $table){
 
         $res = $mysqli->query('DESCRIBE '.$table);
-        if (!$res) return NULL;
+        if (!$res) {return null;}
         $matches = array();
         if($res){
             while (($row = $res->fetch_row())) array_push($matches, $row[0]);
@@ -1675,7 +1675,7 @@
     //
     function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
         
-        if($session_id==null) return;
+        if($session_id==null) {return;}
         
         $res = null;
         $need_close = false;
@@ -1733,9 +1733,9 @@
         
         $session_id = intval($session_id);
         
-        if($session_id==null || $session_id==0) return null;
+        if($session_id==null || $session_id==0) {return null;}
         
-        if(!defined('HEURIST_SCRATCH_DIR')) return null;
+        if(!defined('HEURIST_SCRATCH_DIR')) {return null;}
         
         $res = null;
         

@@ -809,7 +809,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                     }
                     else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
                         copy($src.$file,  $dst . '/' . $file_prefix . $file);
-                        if($file_to_copy!=null) return false;
+                        if($file_to_copy!=null) {return false;}
                     }
                 }
             }
@@ -871,7 +871,7 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $r_path = realpath($path);
     
-    if($check_existance && !$r_path) return false; //does not exist
+    if($check_existance && !$r_path) {return false;} //does not exist
     
     if($r_path){
         $r_path = str_replace('\\','/',$r_path);

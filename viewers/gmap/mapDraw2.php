@@ -43,7 +43,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             // Callback function on map initialization
             function onPageInit(success){
                 
-                if(!success) return;
+                if(!success) {return;}
 
                 // init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'), 

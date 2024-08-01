@@ -1862,7 +1862,7 @@ public methods
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
         }
-        if(!$ugrID) return null;
+        if(!$ugrID) {return null;}
 
         if(is_string($tag_names)){
             $tag_names = explode(",", $tag_names);

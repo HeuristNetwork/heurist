@@ -1666,7 +1666,7 @@ $mysqli->commit();
 
                 $all_terms_in_vocab = array();//reset
                 $res = $this->_importVocabulary($term_id, $domain, $all_terms_in_vocab, $children, null, null);
-                if(!$res) return false;
+                if(!$res) {return false;}
             }
             
             return true;
@@ -1995,7 +1995,7 @@ $mysqli->commit();
     //
     private function doDisambiguate($newvalue, $entities){
 
-        if(!$newvalue || $newvalue=="") return $newvalue;
+        if(!$newvalue || $newvalue=="") {return $newvalue;}
 
         $found = 0;
         $name = removeLastNum($newvalue);
@@ -2051,7 +2051,7 @@ $mysqli->commit();
     //
     public function replaceTermIds( $sterms, $domain ) {
 
-        if($sterms==null || $sterms=="") return $sterms;
+        if($sterms==null || $sterms=="") {return $sterms;}
 
         if($domain=="relationtype") {$domain = "relation";}
 
@@ -2228,7 +2228,7 @@ $mysqli->commit();
     //
     private function _createTrmLinks(){
     
-        if(@$this->source_defs['terms']['trm_Links']) return;
+        if(@$this->source_defs['terms']['trm_Links']) {return;}
         
         //links for individual selections        
         //loop for details

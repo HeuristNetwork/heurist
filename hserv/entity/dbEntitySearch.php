@@ -170,7 +170,7 @@ class DbEntitySearch
                 if(!is_bool($res)){
                     $this->data[$fieldname] = $res;
                 }else{
-                    if(!$res) return false;        
+                    if(!$res) {return false;}        
                 }        
             }
         }
@@ -200,10 +200,10 @@ class DbEntitySearch
     public function getPredicate($fieldname, $is_ids=false) {
         
         $value = @$this->data[$fieldname];
-        if($value==null) return null;
+        if($value==null) {return null;}
         
         $field_config = @$this->fields[$fieldname];
-        if($field_config==null) return null;
+        if($field_config==null) {return null;}
         $data_type = $field_config['dty_Type'];
         $is_ids = ($is_ids || @$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
         
@@ -219,7 +219,7 @@ class DbEntitySearch
             if(!is_array($value) && is_string($value) && strpos($value, '-')===0){
                 $negate = true;
                 $value = substr($value, 1);
-                if($value=='') return null;
+                if($value=='') {return null;}
             }else{
                 $negate = false;
             }
@@ -230,7 +230,7 @@ class DbEntitySearch
                 $value = prepareIds($value);
             }
             
-            if(count($value)==0) return null;
+            if(count($value)==0) {return null;}
             
             if(count($value)>1){
                 // comma-separated list of ids

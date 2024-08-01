@@ -263,7 +263,7 @@ class DbRegis {
     */
     public static function registrationDelete($params){
         
-        if(!self::initialize()) return false; //can not connect to index database
+        if(!self::initialize()) {return false;} //can not connect to index database
         
         if(self::$isOutSideRequest){
             return self::_registrationRemoteCall($params);
@@ -318,7 +318,7 @@ class DbRegis {
     */
     public static function registrationUpdate($params){
 
-        if(!self::initialize()) return false; //can not connect to index database
+        if(!self::initialize()) {return false;} //can not connect to index database
         
         if(self::$isOutSideRequest){
             return self::_registrationRemoteCall($params);
@@ -403,7 +403,7 @@ class DbRegis {
     */
     public static function registrationGet($params){
         
-        if(!self::initialize()) return false; //can not connect to index database
+        if(!self::initialize()) {return false;} //can not connect to index database
 
         //if(@$params['fields']==null){
         //    $params['fields'] = 'rec_URL';
@@ -469,7 +469,7 @@ class DbRegis {
     */
     public static function registrationAdd($params){
         
-        if(!self::initialize()) return false; //can not connect to index database
+        if(!self::initialize()) {return false;} //can not connect to index database
         
         if(self::$isOutSideRequest){
             $dbname = @$params['db'];//keep

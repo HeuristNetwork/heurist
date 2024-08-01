@@ -443,7 +443,7 @@ class DbsTerms
             }else if(is_array($children) && count($children)>0 ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
-                if($res) return $res;
+                if($res) {return $res;}
             }
         }
         return null; //not found
@@ -460,7 +460,7 @@ class DbsTerms
     //
     public function doDisambiguateTerms($term_import, $idx){
 
-        if(!$term_import || $term_import=="") return $term_import;
+        if(!$term_import || $term_import=="") {return $term_import;}
 
         $lvl_values = array();
         
@@ -496,7 +496,7 @@ class DbsTerms
     */
     public function doDisambiguateTerms2($term_value, $same_level_values){
         
-        if(!$term_value || $term_value=="") return $term_value;
+        if(!$term_value || $term_value=="") {return $term_value;}
 /*        
         $name = removeLastNum(trim($term_value));
         $found = 0;

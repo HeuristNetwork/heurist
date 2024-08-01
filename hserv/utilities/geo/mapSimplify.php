@@ -18,7 +18,7 @@ class Simplify {
      * @return array
      */
     public static function run(array $points, $tolerance = 1, $highestQuality = false) {
-        if (count($points) <= 1) return $points;
+        if (count($points) <= 1) {return $points;}
 
         $sqTolerance = $tolerance*$tolerance;
 

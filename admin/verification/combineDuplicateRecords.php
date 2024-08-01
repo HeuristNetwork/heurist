@@ -106,7 +106,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
             <!--
             function keep_bib(rec_id) {
                 e = document.getElementById('tb');
-                if (!e) return;
+                if (!e) {return;}
                 for (var i = 0; i < e.childNodes.length; ++i) {
                     row = e.childNodes[i];
                     if (row.nodeName == "TR" && row.id){

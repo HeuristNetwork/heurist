@@ -772,7 +772,7 @@ class Temporal {
     //
     private static function _datePrepare($value, $month_day_order=2){
 
-        if($value==null) return null;
+        if($value==null) {return null;}
 
         //1. Preparation of sting value - trim, remove "?", remove padding zeroes for year, 
         $origHasDays = false;

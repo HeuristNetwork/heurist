@@ -335,7 +335,7 @@ if($isLocalHost){
     //
     function onHapiInit(success)
     {
-        //if(isHapiInited) return;
+        //if(isHapiInited) {return;}
 
         isHapiInited = true;
 

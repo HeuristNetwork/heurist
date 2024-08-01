@@ -145,7 +145,7 @@ $system->defineConstants();
     function onPageInit(success){
         
         is_page_loaded = success;
-        if(!success || !is_googlemap_loaded) return;
+        if(!success || !is_googlemap_loaded) {return;}
         
         // Layout options
         var layout_opts =  {

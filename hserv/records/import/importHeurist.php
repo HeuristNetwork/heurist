@@ -1519,7 +1519,7 @@ private static function validateEnumeration($recTypeID, $dt_id, $term_value, $db
             
             if($dtyStruc){
                 $dt_def = @$dtyStruc[$dt_id];
-                if($dt_def==null) return false;
+                if($dt_def==null) {return false;}
                 
                 $idx_fieldtype = $dtyStruc['commonNamesToIndex']['dty_Type'];
                 $idx_term_tree = $dtyStruc['commonNamesToIndex']['dty_JsonTermIDTree'];

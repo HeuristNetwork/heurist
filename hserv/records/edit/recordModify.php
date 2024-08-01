@@ -2229,11 +2229,11 @@ function executeSmarty($system, $params, $mode=null, $heuristRec=null){
 
   $content = (array_key_exists('template',$params)?$params['template']:null);
   
-  if($content==null || $content=='') return array('error', 'Formula not defined');
+  if($content==null || $content=='') {return array('error', 'Formula not defined');}
   
   $record_ids = @$params['records'];
   
-  if(!is_array($record_ids) || count($record_ids)<1) return '';
+  if(!is_array($record_ids) || count($record_ids)<1) {return '';}
   
   $mode = $mode ?$mode:'eval:';//string: - use complied or eval: - compile every time
 

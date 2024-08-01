@@ -1071,7 +1071,7 @@ function getRecordIds($system, $ptr_record_ids, $search_values){
 function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=false, 
         $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
 
-    if($depth>=$max_depth) return;
+    if($depth>=$max_depth) {return;}
 
     if($new_level_ids==null) {$new_level_ids = $ids;}
 
@@ -1195,7 +1195,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     
     $ids = prepareIds($ids);
     
-    if(count($ids)==0) return array("status"=>HEURIST_OK, 'data'=>array());//returns empty array
+    if(count($ids)==0) {return array("status"=>HEURIST_OK, 'data'=>array());}//returns empty array
     
     if(!($direction==1||$direction==-1)){
         $direction = 0;
