@@ -121,13 +121,17 @@ use PHPMailer\PHPMailer\Exception;
             $email->addReplyTo($replyTo, $replyToName);
         }
         $email->SetFrom($email_from, $email_from_name);
-        
-        
+
+
         $email->Subject   = $email_title; //'=?UTF-8?B?'.base64_encode($email_title).'?=';
         $email->Body      = $email_text;
-        
+
+        $email_cc = array_key_exists('cc', $email_to) ? $email_to['cc'] : [];
+        $email_bcc = array_key_exists('bcc', $email_to) ? $email_to['bcc'] : [];
+        $email_to = array_key_exists('to', $email_to) ? $email_to['to'] : $email_to;
+
         foreach($email_to as $email_address){
-            
+
             $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
             if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
 
@@ -139,10 +143,28 @@ use PHPMailer\PHPMailer\Exception;
                 }
                 return false;
             }
-            
+
             $email->AddAddress( $email_address );
         }
-        
+        foreach($email_cc as $email_address){
+
+            $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
+            if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                continue;
+            }
+
+            $email->AddCC($email_address);
+        }
+        foreach($email_bcc as $email_address){
+
+            $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
+            if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                continue;
+            }
+
+            $email->AddBCC($email_address);
+        }
+
         if($email_attachment!=null){
             if(is_array($email_attachment)){
                 foreach($email_attachment as $attach_file){
