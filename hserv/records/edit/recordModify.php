@@ -913,9 +913,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $user = $system->getCurrentUser();
         $user = @$user['ugr_FullName'];
         
-        $title = 'Workflow Stage change';
+        $title = HEURIST_DBNAME . ", ID: $recID >> workflow: $stage_name";
         $msg = '<b>'.$title.'</b> '
-        .'<a href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&recID='.$recID.'&fmt=html">Record #'.$recID
+        .'<a href="'.HEURIST_BASE_URL.'hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$recID.'">Record #'.$recID
         .'  "'.USanitize::sanitizeString($newTitle, false).'"</a><br>'
         .' has been changed to "'.$stage_name
         .'"<br><br> by user: '.($user?$user:$system->get_user_id());
