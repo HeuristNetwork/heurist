@@ -184,7 +184,7 @@ function HPublishDialog( _options )
         let url     = base_url + params_search;
         let url_enc = base_url + params_search_encoded;
         for(let key in layout_params) {
-            if(layout_params.hasOwnProperty(key) && layout_params[key]!==false){
+            if(Object.hasOwn(layout_params,key) && layout_params[key]!==false){
                 url = url + '&'+key+'='+(layout_params[key]===true?1:layout_params[key]);
                 url_enc = url_enc + '&'+key+'='+(layout_params[key]===true?1:encodeURIComponent(layout_params[key]));
             }

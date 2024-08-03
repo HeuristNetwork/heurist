@@ -84,18 +84,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _fillSelectRecordScope();
         
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
-
-        
-        //global listener - it does not work
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
-                +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
-                    
-              if(!data || data.origin!='recordAction'){
-                  _fillOwnership();
-              }
-        });
-        //if(!data || data.origin!='recordAction'){
-        //}
     }
 
     //
@@ -277,7 +265,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
             let rtyIDs = [], dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
             let rtys = {};
-            var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
 
             //get record types
             if(scope_type=="All"){
@@ -288,12 +275,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = [];
 
                 //loop all selected records
-                for(i in window.hWin.HAPI4.currentRecordsetSelection){
+                for(let i in window.hWin.HAPI4.currentRecordsetSelection){
 
                     let rty_total_count = window.hWin.HAPI4.currentRecordset.getRectypes().length;
-                    var recID = window.hWin.HAPI4.currentRecordsetSelection[i];
-                    let record  = window.hWin.HAPI4.currentRecordset.getById(recID) ;
-                    rty = window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+                    const recID = window.hWin.HAPI4.currentRecordsetSelection[i];
+                    const record  = window.hWin.HAPI4.currentRecordset.getById(recID) ;
+                    let rty = window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
 
                     if (!rtys[rty]){
                         rtys[rty] = 1;
@@ -675,7 +662,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 			// check that the select is supposed to be a hSelect/selectmenu
             if(ele.find('select').hSelect('instance') != undefined){ 
 
-                var selObj = ele.find('select');
+                const selObj = ele.find('select');
                 widget_ele = selObj.hSelect('widget');
                 menu_parent = selObj.hSelect('menuWidget').parent();
             }else if($('#'+id+'-button').length > 0){ // widget exists in current document
@@ -688,7 +675,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
 					$('#'+id+'-button').remove();
 					
-					var selObj = window.hWin.HEURIST4.ui.initHSelect(ele.find('select')[0], false);
+					const selObj = window.hWin.HEURIST4.ui.initHSelect(ele.find('select')[0], false);
 
 					widget_ele = selObj.hSelect('widget');
 					menu_parent = selObj.hSelect('menuWidget').parent();
@@ -880,6 +867,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
 
         let scope_type = selectRecordScope.val();
+        let scope;
 
         if(scope_type=="Selected"){
             scope = window.hWin.HAPI4.currentRecordsetSelection;
@@ -971,10 +959,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 errors_list
                 */
                 let sResult = '';
-                for(key in response){
+                for(let key in response){
                     if(key && key.indexOf('_')<0 && response[key]>0){
                         //main report entry
-                        let lbl_key = 'record_action_'+key;
+                        const lbl_key = 'record_action_'+key;
                         let lbl = window.hWin.HR(lbl_key);
                         if(lbl==lbl_key){ //not translated
                             //not found - try to find specified for particular action
