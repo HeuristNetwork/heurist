@@ -41,7 +41,7 @@ define('SORT_ID', 'id');
 
 $mysqli = null;
 $currUserID = 0;
-$sort_type = 0;
+$sortType = 0;
 
 /**
 * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
@@ -121,13 +121,13 @@ sortby:
 */
 function get_sql_query_clauses($db, $params, $currentUser=null) {
 
-    global $mysqli, $currUserID, $sort_type;
+    global $mysqli, $currUserID, $sortType;
 
     $mysqli = $db;
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
     if (! $params) {$params = array();}//$_REQUEST;
-    if(@$params['stype']) {$sort_type = @$params['stype'];}
+    if(@$params['stype']) {$sortType = @$params['stype'];}
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
     $wg_ids = array();//may be better use $system->get_user_group_ids() ???
@@ -733,7 +733,7 @@ class AndLimb {
 
 
     private function createPredicate($text) {
-        global $sort_type;
+        global $sortType;
 
         $colon_pos = strpos($text, ':');
         if ($equals_pos = strpos($text, '=')) {
@@ -760,14 +760,15 @@ class AndLimb {
 
         if ($this->absoluteStrQuery || ! $colon_pos) {    // a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
             $pred_val = $this->cleanQuotedValue($text);
-
-            if ($sort_type == 'key'){
+            /* 2024-08-02 */
+            if ($sortType == 'key'){
                 return new TagPredicate($this, $pred_val);
-            }else if ($sort_type == 'all'){
+            }else if ($sortType == 'all'){
                 return new AnyPredicate($this, $pred_val);
             }else{    // title search is default search
                 return new TitlePredicate($this, $pred_val);
             }
+            //return new TitlePredicate($this, $pred_val);
         }
 
         $pred_type = substr($text, 0, $colon_pos);
@@ -948,18 +949,22 @@ class AndLimb {
 
             case 'hhash':
                 return new HHashPredicate($this, $pred_val);
-                
-            default;
+            default:
+                return new TitlePredicate($this, $pred_val);
         }
 
+        // 2024-08-02
+        /*
         // no predicate-type specified ... look at search type specification
-        if ($sort_type == 'key') {    // "default" search should be on tag
+        if ($sortType == 'key') {    // "default" search should be on tag
             return new TagPredicate($this, $pred_val);
-        } else if ($sort_type == 'all') {
+        } else if ($sortType == 'all') {
             return new AnyPredicate($this, $pred_val);
         } else {
             return new TitlePredicate($this, $pred_val);
         }
+        */
+        
     }
 
 
@@ -1118,7 +1123,6 @@ class SortPhrase {
                 return array('rec_ID'.$scending, NULL);
             case 'rt': case 'type':
                 return array('rec_RecTypeID'.$scending, NULL);
-            default;
         }
     }
 }
@@ -2215,7 +2219,7 @@ class TagPredicate extends Predicate {
                 $query .= ') and kwd.tag_UGrpID='.$pquery->currUserID.')) ';
             } else {
                 $query='('.$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+                . ' where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value);++$i) {
                     if ($i > 0) {$query .= 'or ';}
 
@@ -3003,8 +3007,9 @@ class RelationsForPredicate extends Predicate {
         $ids = $res->fetch_row();
         $ids = $ids[0];
         
-        if (! $ids) {return "0";}
-        else{ 
+        if (! $ids) {
+            return "0";
+        } else{ 
             return "TOPBIBLIO.rec_ID in ($ids)";
         }
     }
