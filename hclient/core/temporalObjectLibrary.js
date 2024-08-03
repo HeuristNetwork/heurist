@@ -32,10 +32,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-let g_version = "1";
-
-
 function Temporal (strInitTemporal) {
+    const g_version = 1;
+    
     //private members
     const _className = "Temporal";
     let _ver = g_version;				//version number for data representation
@@ -949,9 +948,8 @@ Temporal.getFieldsForString = function (type,str) {
     }
 }
 
-
 // Temporal Date object extend by date.js
-let TDate = function (strDate) {
+var TDate = function (strDate) {
     //private members
     const _className = "TemporalDate";
     let _origString = strDate && strDate.toString ? strDate.toString() : "";
@@ -1823,7 +1821,7 @@ TDate.isLeapYear = function (year) {
 
 
 // wrapper for Date object to use it as a duration
-let TDuration = function (strDuration) {
+function TDuration(strDuration) {
     //private members
     const _className = "TemporalDuration";
     let _origString = strDuration;

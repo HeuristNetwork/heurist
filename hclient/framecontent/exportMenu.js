@@ -344,13 +344,14 @@ function hexportMenu( container ) {
             
             let script; 
             let params = '';
-            if(true){
+            const showOptionsDialog = true;
+            if(showOptionsDialog){
 
                 if(isEntireDb){
                     params =  'depth=0&linkmode=none';
                 }else {
                     if(opts.format!='iiif' && opts.questionResolved!==true){
-                        var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
 //+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'

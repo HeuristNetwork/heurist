@@ -31,7 +31,7 @@ widget:
 
 */
 
-let editCMS_instance2 = null;
+var editCMS_instance2 = null;
 // global variables defined in websiteScriptAndStyles
 //  window.hWin.layoutMgr - global variable defined in hLayoutMgr
 //  page_cache

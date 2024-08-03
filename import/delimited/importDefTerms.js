@@ -29,7 +29,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     
     _isTranslation = false,
     
-    trm_ParentTermID, vcg_ID,
+    trm_ParentTermID,
     trm_ParentDomain,
     trm_VocabularyID,
     vcg_ID,

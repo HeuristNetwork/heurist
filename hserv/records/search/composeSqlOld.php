@@ -760,7 +760,7 @@ class AndLimb {
 
         if ($this->absoluteStrQuery || ! $colon_pos) {    // a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
             $pred_val = $this->cleanQuotedValue($text);
-            /* 2024-08-02 */
+            /* 2024-08-02 
             if ($sortType == 'key'){
                 return new TagPredicate($this, $pred_val);
             }else if ($sortType == 'all'){
@@ -768,7 +768,8 @@ class AndLimb {
             }else{    // title search is default search
                 return new TitlePredicate($this, $pred_val);
             }
-            //return new TitlePredicate($this, $pred_val);
+            */
+            return new TitlePredicate($this, $pred_val);
         }
 
         $pred_type = substr($text, 0, $colon_pos);

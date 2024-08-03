@@ -33,7 +33,7 @@ For translation of UI (labels, help, documentation) use 2 chars codes
 */        
 
 
-let regional = {};
+var regional = {};
 regional['ENG'] = {
     language: 'English',
     Databases: 'Databases',
