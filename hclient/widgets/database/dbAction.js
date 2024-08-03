@@ -208,7 +208,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             || this.options.actionName=='clone')
         {
 
-           var dbname = this._$('#dbname').val().trim();
+           const dbname = this._$('#dbname').val().trim();
            if(dbname==''){
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
                 return;  
@@ -223,13 +223,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 if(this._$('#nodata').is(':checked')){
                     request['nodata'] = 1;
                 }
-                var pwd = this._$('#pwd').val().trim();
+                const pwd = this._$('#pwd').val().trim();
                 if(pwd!=''){
                     request['pwd'] = pwd;
                 } 
                 
            }else if(this.options.actionName=='create' && window.hWin.HAPI4.sysinfo['pwd_DatabaseCreation']){
-                var pwd = this._$('#create_pwd').val().trim();
+                const pwd = this._$('#create_pwd').val().trim();
                 if(pwd==''){
                     window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define password'));
                     return;  
@@ -258,7 +258,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
               
         }else if(this.options.actionName=='restore'){
             
-           var dbname = this._$('#dbname').val().trim();
+           const dbname = this._$('#dbname').val().trim();
            if(dbname==''){
                 window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define name of database'));
                 return;  
@@ -293,7 +293,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                       }; 
                       
            if(window.hWin.HAPI4.user_id()!=2){
-                let pwd = this._$('#pwd').val().trim()    
+                const pwd = this._$('#pwd').val().trim()    
                 if(pwd==''){
                     window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Define password'));
                     return;  
@@ -579,7 +579,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR(this.options.title));
         $('body').css('cursor','progress');
         
-        var that = this;
+        let that = this;
        
         this._$('.ent_wrapper').hide();
         let progress_div = this._$('.progressbar_div').show();
@@ -592,7 +592,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span>  <span class="percentage">processing...</span></span>').appendTo( $(all_li[0]) );
         }
         
-        var that = this;
         let currStep = 0;
         
         if(t_interval>900){
@@ -653,8 +652,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                             let li_ele = cont.find('li:contains("'+newStep+'")');
                             if(li_ele.length==0){
                                 $('<li>'+newStep+'</li>').appendTo(cont);    
-                            }else if(percentage>0){
-                                
+                            // }else if(percentage>0){
                             }
                         }
                             

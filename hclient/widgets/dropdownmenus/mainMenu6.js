@@ -21,7 +21,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/* global hSvsEdit */
 $.widget( "heurist.mainMenu6", {
 
     // default options
@@ -246,13 +246,13 @@ $.widget( "heurist.mainMenu6", {
                 
                 let cms_record_id = urlParams.get('cms'); //window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
                 if(cms_record_id>0){
-                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                     widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
                 }else{
                     //action 
                     let cmd = urlParams.get('cmd'); //window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
                     if(cmd){
-                        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                         widget.mainMenu('menuActionById',cmd);
                     }
                 }
@@ -1424,7 +1424,7 @@ $.widget( "heurist.mainMenu6", {
             window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze3', this.containers[section] );
         }
         
-        var that = this;
+        let that = this;
         this.menues[section].load(
                 window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
                 function(){ 
@@ -1682,8 +1682,9 @@ $.widget( "heurist.mainMenu6", {
             
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
-        }else if(typeof editCMS_instance !=='undefined' && section=='publish'){
-            editCMS_instance.closeCMS();
+        // remarked since editCMS is in separate window
+        //}else if(typeof editCMS_instance !=='undefined' && section=='publish'){ 
+        //    editCMS_instance.closeCMS();
         }else{
             return;
         }
@@ -1772,7 +1773,7 @@ $.widget( "heurist.mainMenu6", {
     //
     addSavedSearch: function( mode, is_modal, left_position, top_position ){
 
-        var that = this;
+        let that = this;
 
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
@@ -1789,8 +1790,6 @@ $.widget( "heurist.mainMenu6", {
         }
 
         is_modal = (is_modal!==false);
-        
-        var that = this;
   
 /*        
         //find all saved searches for current user
@@ -2400,7 +2399,7 @@ $.widget( "heurist.mainMenu6", {
 							.css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
 
                     // Load Welcome Content
-                    $container = $('<div class="gs-box">')
+                    let $container = $('<div class="gs-box">')
 						.css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
 						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html', function(){
 							

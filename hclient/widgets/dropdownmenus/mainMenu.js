@@ -45,6 +45,8 @@
     menuGetActionLink - returns link 
 */
 
+/* global initProfilePreferences,doRegister */ 
+
 $.widget( "heurist.mainMenu", {
 
     // default options
@@ -428,12 +430,12 @@ $.widget( "heurist.mainMenu", {
                 
                 let is_visible = true;
                 
-                var item = $(item).is('li')?$(item):$(item).parent();
+                item = $(item).is('li')?$(item):$(item).parent();
+                let elink = $(item).find('a');
                 
                 if(lvl_user>=0){  //2 database owner, 1 - memeber of Database admin
                     //@todo lvl_user=1 is_admin
                     is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
-                    var elink = $(item).find('a');
 
                     if(is_visible){
                         window.hWin.HEURIST4.util.setDisabled(elink, false);
@@ -747,11 +749,11 @@ $.widget( "heurist.mainMenu", {
         
         let res = [];    
             
-        for (var key in this.menues){
+        for (let key in this.menues){
             let menu = this.menues[key];
             let links = $(menu).find('a');
             $.each(links, function(idx, link){
-                var link = $(link);
+                link = $(link);
                 if(link.attr('id').indexOf('menu-')==0){
                     res.push({key:link.attr('id'), title: ( key.substring(5)+' > '+link.text().trim() ) });
                 }
@@ -873,7 +875,7 @@ $.widget( "heurist.mainMenu", {
             
         if(action == "menu-database-browse"){
 
-                var options = $.extend(entity_dialog_options, {
+                let options = $.extend(entity_dialog_options, {
                     select_mode:'select_single',
                     onselect:function(event, data){
 
@@ -945,10 +947,12 @@ $.widget( "heurist.mainMenu", {
             window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    let RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                    let RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+                    const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+                          RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
 
                     that._getCountWebSiteRecords(function(){
+
+                        let sMsg = '';
 
                         if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
 
@@ -981,7 +985,7 @@ $.widget( "heurist.mainMenu", {
                         + '<p>Check the box if you wish to keep your website private '
                         + '<br><input type="checkbox"> hide website (can be changed later)</p>';
 
-                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
                             function(){ 
                                 let chb = $dlg.find('input[type="checkbox"]');
                                 let is_private = chb.is(':checked');
@@ -1041,7 +1045,7 @@ $.widget( "heurist.mainMenu", {
         }
         else if(action == 'menu-cms-edit'){
 
-                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 
                 if(popup_dialog_options.record_id>0){
                     
@@ -1054,7 +1058,7 @@ $.widget( "heurist.mainMenu", {
                         if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
                             
                             if(that.sMsgCmsPrivate!=''){
-                                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
+                                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
                                    {Continue:function(){ 
                                         $dlg.dialog('close'); 
                                         that._select_CMS_Home( false, popup_dialog_options ); 
@@ -1089,12 +1093,12 @@ $.widget( "heurist.mainMenu", {
         }
         else if(action == "menu-cms-view"){
 
-                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 that._getCountWebSiteRecords(function(){
                     if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
                         
                         if(that.sMsgCmsPrivate!=''){
-                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
+                            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
                                {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true, popup_dialog_options ); }},
                                'Non-public website records',
                                {default_palette_class: 'ui-heurist-publish'});
@@ -1416,14 +1420,14 @@ $.widget( "heurist.mainMenu", {
                 window.open( href, target);    
             }else{
                 
-                var options = {};
-                let size_type = item.attr('data-size');
+                let options = {};
+                const size_type = item.attr('data-size');
                 let dlg_title = item.attr('data-header');
                 if(!dlg_title) dlg_title = item.text();
                 let dlg_help = item.attr('data-help'); //name of context file from context_help folder
 
-                let size_w = item.attr('data-dialog-width');
-                let size_h = item.attr('data-dialog-height');
+                const size_w = item.attr('data-dialog-width');
+                const size_h = item.attr('data-dialog-height');
 
                 if(size_w>0 && size_h>0){
                     options = {width:size_w, height:size_h};
@@ -2812,7 +2816,7 @@ $.widget( "heurist.mainMenu", {
                 return;
             }
 
-            rectypes = !all_rectypes ? `&recTypeIDs=${selected_rectypes.join(',')}` : '';
+            const rectypes = !all_rectypes ? `&recTypeIDs=${selected_rectypes.join(',')}` : '';
 
             $dlg.dialog('close');
 
