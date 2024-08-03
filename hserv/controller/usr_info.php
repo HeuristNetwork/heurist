@@ -648,7 +648,8 @@
 
                 if($action && in_array($action, $actions) && !empty($password)){
                     $varname = 'passwordFor'.$action;
-                    $res = (@$varname==$password)?'ok':'wrong';
+                    $varvalue = @${$varname};
+                    $res = ($varvalue==$password)?'ok':'wrong';
                 }
 
             }
