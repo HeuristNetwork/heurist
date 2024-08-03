@@ -4578,23 +4578,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             $(this.element).find('.separator-helper').css({'padding-left':'52px'});
             
             //init back button - if there is opened rts editor
-            var btn = this.element.find('.btn-edit-rt-back');
-            
+            let btn_close_editor = this.element.find('.btn-edit-rt-back');
                 
-            if(btn){
+            if(btn_close_editor){
                 if(that.options.edit_structure){
-                    btn.hide();
+                    btn_close_editor.hide();
                 }else{
-                    btn.button({icon:'ui-icon-gear-crossed'}).show()
+                    btn_close_editor.button({icon:'ui-icon-gear-crossed'}).show()
                         .one('click', function(){
                             that.editFormPopup.layout().hide('west');
                             that.options.rts_editor = null;
                             that.reloadEditForm( true );
                         });
-                    if(btn_css) btn.css(btn_css);
+                    if(btn_css) btn_close_editor.css(btn_css);
 
                     // Flash button
-                    btn.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
+                    btn_close_editor.fadeIn(100).fadeOut(100).effect('highlight', {color: '#307D96'}, 1000);
                 }
             }
             if(!this.options.edit_structure){
@@ -4804,7 +4803,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 external_preview: this.element   //send this widget to use as preview
             };
             this.options.rts_editor = rts_edit_container;
-            
             window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
     },
     
@@ -5093,30 +5091,34 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         title_maxwidth = parseFloat(title_maxwidth) * 0.9 - (this.options.rts_editor ? 60 : 50);
 
         // Display record title
-        let $title_field = this._editing.getFieldByName('rec_Title').show().editing_input('setDisabled', true);
+        let $title_field = this._editing.getFieldByName('rec_Title');
+        if($title_field){
+            $title_field = $title_field.show().editing_input('setDisabled', true);
 
-        // remove opacity change and set background to lighter background
-        let cur_styling = $title_field.find('input').attr('style');
-        let cur_title = this._getField('rec_Title');
-        let empty_title = window.hWin.HEURIST4.util.isempty(cur_title);
+            // remove opacity change and set background to lighter background
+            let cur_styling = $title_field.find('input').attr('style');
+            let cur_title = this._getField('rec_Title');
+            let empty_title = window.hWin.HEURIST4.util.isempty(cur_title);
 
-        cur_title = empty_title ? '&lt;not yet set&gt;'
-                        : cur_title.replace(/[\r\n]+/g, ' ');
+            cur_title = empty_title ? '&lt;not yet set&gt;'
+                            : cur_title.replace(/[\r\n]+/g, ' ');
 
-        cur_title = empty_title ? cur_title : window.hWin.HEURIST4.util.stripTags(cur_title,'u, i, b, strong, em');
+            cur_title = empty_title ? cur_title : window.hWin.HEURIST4.util.stripTags(cur_title,'u, i, b, strong, em');
 
-        $title_field.find('input')
-                    .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`
-                        + ` class="truncate" title="${cur_title}">${cur_title}</div>`);
+            $title_field.find('input')
+                        .replaceWith(`<div style="${cur_styling}background-color:#e3f0f0!important;font-size:13px;padding:3px;max-width:${title_maxwidth}px;width:${title_maxwidth}px;cursor:default;"`
+                            + ` class="truncate" title="${cur_title}">${cur_title}</div>`);
 
-        // change label to required version, and add help icon
-        $title_field.find('div.header')
-                    .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.')
-                    .addClass('recommended')
-                    .css('vertical-align', '');
+            // change label to required version, and add help icon
+            $title_field.find('div.header')
+                        .attr('title', 'A title constructed from one or more fields, which is used to identify records when displayed in search results.')
+                        .addClass('recommended')
+                        .css('vertical-align', '');
 
-        $title_field.find('div.header > label').text('Constructed title');
+            $title_field.find('div.header > label').text('Constructed title');
 
+        }
+        
         // add gear icon that opens title mask editor
         if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false){
 
@@ -5125,10 +5127,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                               .css({'color': 'rgb(125, 154, 170)', 'min-width': '22px', 'cursor': 'pointer'})
                               .attr('title', 'Open Title Mask Editor')
                               .click(function(e) { that.editRecordTypeTitle(); });
-
-            $title_field.find('span.editint-inout-repeat-button').find('ui-icon').remove(); // remove repeat button
-            $title_field.find('span.editint-inout-repeat-button').append($gear_icon); // add gear icon (edit title mask)
-            $title_field.find('span.btn_input_clear').remove(); // remove clear button
+            if($title_field){
+                $title_field.find('span.editint-inout-repeat-button').find('ui-icon').remove(); // remove repeat button
+                $title_field.find('span.editint-inout-repeat-button').append($gear_icon); // add gear icon (edit title mask)
+                $title_field.find('span.btn_input_clear').remove(); // remove clear button
+            }
         }
 
         // move rec_title field to new fieldset
