@@ -2421,7 +2421,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             icon: 'ui-icon-plus'
         });
 
-        $btn.find('span.ui-button-icon').css({
+        $btns.find('span.ui-button-icon').css({
             'font-size': '10px',
             width: '10px',
             height: '10px'
