@@ -3007,5 +3007,4 @@ window.hWin.HEURIST4.dbs = {
 
 }
 //alias
-var $Db = window.hWin.HEURIST4.dbs;    
-
+var $Db = window.hWin.HEURIST4.dbs;

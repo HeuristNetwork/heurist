@@ -1149,7 +1149,7 @@ $.widget( "heurist.search_faceted_wiz", {
         let that = this;
 
         let url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
-        if(ele_rules && !Hul.isempty(ele_rules.val())){
+        if(ele_rules && !window.hWin.HEURIST4.util.isempty(ele_rules.val())){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }else if (this.select_main_rectype.val()>0){
             url = url + '&rty_ID=' + this.select_main_rectype.val();
@@ -1170,7 +1170,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     },
                     callback:
             function(res){
-                if(!Hul.isempty(res)) {
+                if(!window.hWin.HEURIST4.util.isempty(res)) {
                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
                 }
         }});
@@ -1990,7 +1990,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                     listdiv.find('#facet_DateGroup'+idd).css({'display':is_allowed?'inline':'none'});        
                                     listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').css({'display': cur_mode==1?'inline':'none'});
                                     if(is_allowed){
-                                        if(Hul.isempty(facets[idx].groupby)){
+                                        if(window.hWin.HEURIST4.util.isempty(facets[idx].groupby)){
                                             facets[idx].groupby = 'year';
                                         }
                                         listdiv.find('select[name="facet_Group'+idd+'"]').val(facets[idx].groupby);
@@ -2293,7 +2293,7 @@ $.widget( "heurist.search_faceted_wiz", {
             return false;
         }
 
-        if(true){ // || !Hul.isempty(svs_rules.val())
+        if(true){ // || !window.hWin.HEURIST4.util.isempty(svs_rules.val())
             this.options.params.rules = svs_rules.val();
             
             let rules_only = 0;
@@ -2306,7 +2306,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.rules = null;
             this.options.params.rulesonly = null;
         }
-        if(true){ // || !Hul.isempty(svs_filter.val())
+        if(true){ // || !window.hWin.HEURIST4.util.isempty(svs_filter.val())
             this.options.params.sup_filter = svs_filter.val();
         }
 

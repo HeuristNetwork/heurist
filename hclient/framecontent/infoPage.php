@@ -114,6 +114,7 @@ if(!isset($message)){
 
         <script>window.hWin = window;</script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
     
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>

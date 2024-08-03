@@ -583,7 +583,7 @@ function hLayoutMgr(){
                 if(opts.size){
                     layout_opts[pos+'__size'] = opts.size;
                 }
-                if(Hul.isnull(opts.resizable) || opts.resizable ){
+                if(window.hWin.HEURIST4.util.isnull(opts.resizable) || opts.resizable ){
                     if(opts.minSize){
                         layout_opts[pos+'__minSize'] = opts.minSize;
                     }

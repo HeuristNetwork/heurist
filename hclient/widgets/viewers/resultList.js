@@ -318,7 +318,7 @@ $.widget( "heurist.resultList", {
                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[data.qname])
                             {
                                 that._currentSavedFilterID = data.qname;
-                                new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._NAME];
+                                new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][0];
                             }else{
                                 if(data.qname>0 && that.div_header!=null){
                                     
