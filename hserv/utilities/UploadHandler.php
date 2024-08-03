@@ -1073,14 +1073,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $new_img = imagecreatetruecolor($max_width, $max_height);
         }
         // Handle transparency in GIF and PNG images:
-        switch ($type) {
-            case 'gif':
-            case 'png':
+        if($type=='gif' || $type=='png') {
                 imagecolortransparent($new_img, imagecolorallocate($new_img, 0, 0, 0));
                 imagealphablending($new_img, false);
                 imagesavealpha($new_img, true);
-                break;
-            default;
         }
         $success = imagecopyresampled(
             $new_img,
@@ -1252,17 +1248,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             }
         }
         $type = strtolower(substr(strrchr($file_name, '.'), 1));
-        switch ($type) {
-            case 'jpg':
-            case 'jpeg':
-            case 'jfif':
-            case 'jpe':
+        if ($type=='jpg' || $type=='jpeg' || $type=='jfif' || $type=='jpe') {
                 if (!empty($options['jpeg_quality'])) {
                     $image->setImageCompression(\imagick::COMPRESSION_JPEG);
                     $image->setImageCompressionQuality($options['jpeg_quality']);
                 }
-                break;
-            default;                
         }
         if (!empty($options['strip'])) {
             $image->stripImage();

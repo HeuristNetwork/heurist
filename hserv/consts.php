@@ -433,10 +433,7 @@ $trmDefines = array(
 //---------------------------------
 
 function boot_error_handler($errno, $errstr, $errfile, $errline){
-    switch($errno){
-        case E_WARNING:
-        //case E_PARSE:
-        //case E_NOTICE:
+    if($errno==E_WARNING){ //E_PARSE E_NOTICE
             if(strpos($errstr,'Input variables')>0){
         
                 $message = "$errstr $errfile:$errline";
@@ -452,8 +449,6 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             }
             */
             }
-            break;
-        default;
     }
 }
 ?>
