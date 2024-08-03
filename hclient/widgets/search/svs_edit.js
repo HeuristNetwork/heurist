@@ -103,16 +103,16 @@ function hSvsEdit(args) {
 
             if(isEdit && !window.hWin.HEURIST4.util.isnull(svs)){
 
-                request = window.hWin.HEURIST4.query.parseHeuristQuery(svs[_QUERY]);
+                request = window.hWin.HEURIST4.query.parseHeuristQuery(svs[Hul._QUERY]);
                 domain  = request.w;
-                svs_ugrid.val(svs[_GRPID]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[_GRPID]);
+                svs_ugrid.val(svs[Hul._GRPID]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[Hul._GRPID]);
 
                 //ART 2018-02-26 
                 //svs_ugrid.parent().hide();
                 //svs_ugrid.attr('disabled', true);
 
                 svs_id.val(svsID);
-                svs_name.val(svs[_NAME]);
+                svs_name.val(svs[Hul._NAME]);
                 svs_query.val( !window.hWin.HEURIST4.util.isempty(squery)
                                     ?squery  //overwrite (used in save fixed order)
                                     : ($.isArray(request.q)?JSON.stringify(request.q):request.q) );
@@ -129,7 +129,7 @@ function hSvsEdit(args) {
                 svs_notes.val( request.notes );
                 svs_viewmode.val( request.viewmode );
                 
-                if(!request.name) request.name = svs[_NAME];
+                if(!request.name) request.name = svs[Hul._NAME];
 
 
             }else{ //add new saved search
@@ -317,7 +317,7 @@ function hSvsEdit(args) {
                             
                             if(response.data && response.data[svsID]){
                                 window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
-                                +'It does not belong to your group.')+' Owner is user id '+response.data[svsID][_GRPID],
+                                +'It does not belong to your group.')+' Owner is user id '+response.data[svsID][Hul._GRPID],
                                  null, "Error");
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
@@ -332,14 +332,14 @@ function hSvsEdit(args) {
             /*
             mode = 'faceted';
             if(!node.data.isfaceted){
-                var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_QUERY];
+                var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][Hul._QUERY];
                 var hasrules = that._hasRules(qsearch);
                 mode = hasrules==2?'rules':'saved';
             }
             */
             
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
-            let qsearch = svs[_QUERY];
+            let qsearch = svs[Hul._QUERY];
             let r = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
             var mode = 'saved';
             if(r.type==3){
@@ -377,7 +377,7 @@ function hSvsEdit(args) {
                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
                     try {
-                        facet_params = $.parseJSON(svs[_QUERY]);
+                        facet_params = $.parseJSON(svs[Hul._QUERY]);
                     }catch (err) {
                         // TODo something about the exception here
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
@@ -501,7 +501,7 @@ function hSvsEdit(args) {
                         {
                             for (var id in window.hWin.HAPI4.currentUser.usr_SavedSearch){
                                 let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
-                                if(svs[_NAME]==svs_name.val() && svs[_GRPID]==svs_ugrid && id!=svs_id.val()){
+                                if(svs[Hul._NAME]==svs_name.val() && svs[Hul._GRPID]==svs_ugrid && id!=svs_id.val()){
                                     
                                     if(menu_locked && $.isFunction(menu_locked)){
                                         menu_locked.call( this, true, false); //unlock

@@ -1007,7 +1007,7 @@ $.widget( "heurist.svs_list", {
             {
                 let svsID = svsIDs[i];
                 
-                let params = window.hWin.HEURIST4.query.parseHeuristQuery(this.loaded_saved_searches[svsID][_QUERY]);
+                let params = window.hWin.HEURIST4.query.parseHeuristQuery(this.loaded_saved_searches[svsID][Hul._QUERY]);
 
                 let iconBtn = 'ui-icon-search';
                 if(params.type==3){
@@ -1025,7 +1025,7 @@ $.widget( "heurist.svs_list", {
 
                 let sname = window.hWin.HRJ('ui_name', params, this.options.language);
                 if(window.hWin.HEURIST4.util.isempty(sname)){
-                    sname = this.loaded_saved_searches[svsID][_NAME];
+                    sname = this.loaded_saved_searches[svsID][Hul._NAME];
                 } 
                 
                 if(sname.toLowerCase().indexOf('placeholder')===0) continue;
@@ -1039,8 +1039,8 @@ $.widget( "heurist.svs_list", {
 
                     let svs_ID = $(this).attr('data-svs-id');
                     if (svs_ID){
-                        let qsearch = that.loaded_saved_searches[svs_ID][_QUERY];
-                        let qname   = that.loaded_saved_searches[svs_ID][_NAME];
+                        let qsearch = that.loaded_saved_searches[svs_ID][Hul._QUERY];
+                        let qname   = that.loaded_saved_searches[svs_ID][Hul._NAME];
                         
                         that.showclosebutton = !($(this).attr('data-only-one')==1);
 
@@ -1091,7 +1091,7 @@ $.widget( "heurist.svs_list", {
             let empty_grp = window.hWin.HEURIST4.util.cloneJSON(this.options.allowed_UGrpID);
             
             $.each(this.loaded_saved_searches,function(i,svs){
-                let k = window.hWin.HEURIST4.util.findArrayIndex(svs[_GRPID], empty_grp);
+                let k = window.hWin.HEURIST4.util.findArrayIndex(svs[Hul._GRPID], empty_grp);
                 if(k>=0){
                     empty_grp.splice(k,1);
                     if(empty_grp.length==0) return false;
@@ -1335,9 +1335,9 @@ $.widget( "heurist.svs_list", {
                             squery = node.data.url;
                         }else{
                             if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]){
-                                squery = svs[_QUERY];
+                                squery = svs[Hul._QUERY];
                                 /*if(!node.data.isfaceted){
-                                    var qsearch = svs[_QUERY];
+                                    var qsearch = svs[Hul._QUERY];
                                     prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
                                 }*/
                             }
@@ -1350,8 +1350,8 @@ $.widget( "heurist.svs_list", {
                         
                         if(!window.hWin.HEURIST4.util.isempty(s)){
                             node.title = s;
-                        }else if(svs && svs[_NAME]){
-                            node.title = svs[_NAME];
+                        }else if(svs && svs[Hul._NAME]){
+                            node.title = svs[Hul._NAME];
                         } 
                         s_hint2 = node.key+':'+node.title
                         
@@ -1418,8 +1418,8 @@ $.widget( "heurist.svs_list", {
                             window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
                                 
                             svs_ID = data.node.key; 
-                            qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
-                            qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
+                            qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._QUERY];
+                            qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._NAME];
                         }
                     }
 
@@ -1537,7 +1537,7 @@ $.widget( "heurist.svs_list", {
 
                         if(procFavourites && ($ele.is('ul.favourite-filters-container') || $ele.parents('ul.favourite-filters-container').length > 0)){
 
-                            let name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_NAME];
+                            let name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][Hul._NAME];
                             if(window.hWin.HEURIST4.util.isempty(name)){
                                 name = node.title;
                             }
@@ -1677,7 +1677,7 @@ $.widget( "heurist.svs_list", {
 
                         case "favourite":
 
-                            var name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_NAME];
+                            var name = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][Hul._NAME];
                             if(window.hWin.HEURIST4.util.isempty(name)){
                                 name = node.title;
                             }
@@ -1791,7 +1791,7 @@ $.widget( "heurist.svs_list", {
 
                         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
                         if(svs){
-                            let qsearch = svs[_QUERY];
+                            let qsearch = svs[Hul._QUERY];
                             let prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
 
                             is_filter_rules = prms && prms.type != 3;
@@ -2089,8 +2089,8 @@ $.widget( "heurist.svs_list", {
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
             window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID]){
                                 
-            let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][_QUERY];
-            let qname   = query_name || svs_ID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][_NAME];
+            let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._QUERY];
+            let qname   = query_name || svs_ID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._NAME];
             
             this.doSearch( svs_ID, qname, qsearch, null );
         }else{
@@ -2100,7 +2100,7 @@ $.widget( "heurist.svs_list", {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         if(response.data[svs_ID]){
-                            let qsearch = response.data[svs_ID][_QUERY];
+                            let qsearch = response.data[svs_ID][Hul._QUERY];
                             that.doSearch( svs_ID, query_name || svs_ID, qsearch, null );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgFlash('Saved filter not found ( ID: '+svs_ID+' )');    
@@ -2360,7 +2360,7 @@ $.widget( "heurist.svs_list", {
         let currGroupId = 0;
         let isPrivate = false;
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
-            currGroupId = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_GRPID];
+            currGroupId = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][Hul._GRPID];
             if(currGroupId == window.hWin.HAPI4.currentUser.ugr_ID){
                  currGroupId = (node==null || that.treeviews['all']._id == node.tree._id)?'all':'bookmark';
                  isPrivate = true;
@@ -2543,7 +2543,7 @@ $.widget( "heurist.svs_list", {
         
         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(svs ){
-            let qsearch = svs[_QUERY];
+            let qsearch = svs[Hul._QUERY];
             let prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
             if(prms.type!=3){
                 let res = window.hWin.HEURIST4.query.hQueryStringify(prms); //json to string
@@ -2579,7 +2579,7 @@ $.widget( "heurist.svs_list", {
         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(!svs) return;
         
-        let qsearch = svs[_QUERY];
+        let qsearch = svs[Hul._QUERY];
         let prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
         if(prms.type!=3){
             
@@ -2735,7 +2735,7 @@ $.widget( "heurist.svs_list", {
             }else if(data.key>0){
                 if(window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key]){
                     //search exists, check that it belong to proper group
-                    return (window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key][_GRPID] == groupID)?data:null;
+                    return (window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key][Hul._GRPID] == groupID)?data:null;
                 }else{
                     return null;
                 }
@@ -2824,16 +2824,14 @@ $.widget( "heurist.svs_list", {
             res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_all}  );
         }
 
-        //_NAME = 0, _QUERY = 1, _GRPID = 2
-
         for (let svsID in ssearches)
         {
-            if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
+            if(svsID && ssearches[svsID][Hul._GRPID]==ugr_ID){
 
-                let prms = window.hWin.HEURIST4.query.parseHeuristQuery(ssearches[svsID][_QUERY]);
+                let prms = window.hWin.HEURIST4.query.parseHeuristQuery(ssearches[svsID][Hul._QUERY]);
 
                 if(!domain || domain==prms.w){
-                    let sname = ssearches[svsID][_NAME];
+                    let sname = ssearches[svsID][Hul._NAME];
                     res.push( { title:sname, folder:false, key:svsID } );
                 }
             }
@@ -2871,7 +2869,7 @@ $.widget( "heurist.svs_list", {
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     for(let i=0; i<affected.length; i++){
-                        window.hWin.HAPI4.currentUser.usr_SavedSearch[affected[i]][_GRPID] = newGroupID;    
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch[affected[i]][Hul._GRPID] = newGroupID;    
                     }
 
 

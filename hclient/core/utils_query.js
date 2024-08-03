@@ -48,6 +48,8 @@ window.hWin.HEURIST4.query = {
                 
                 if(!window.hWin.HEURIST4.util.isempty(query_request.q)){
                     
+                    let sq;
+
                     if($.isArray(query_request.q) || $.isPlainObject(query_request.q)){
                         sq = JSON.stringify(query_request.q);
                     }else{
@@ -163,9 +165,9 @@ window.hWin.HEURIST4.query = {
         
         for(let k=0; k<rules.length; k++){
             delete rules[k]['codes'];
-            var rl = null;
+            let rl = null;
             if(rules[k]['levels'] && rules[k]['levels'].length>0){
-                var rl = window.hWin.HEURIST4.query.cleanRules(rules[k]['levels']);
+                rl = window.hWin.HEURIST4.query.cleanRules(rules[k]['levels']);
             }
             if(rl==null){
                 delete rules[k]['levels'];    
@@ -204,10 +206,10 @@ window.hWin.HEURIST4.query = {
         //return object  {q:, rules:, plain:}
         function __prepareQuery(query){
             
-            var query_a, rules = false, sPlain = false;
+            let rules = false, sPlain = false;
             let isJson = false;
             
-            var query_a = window.hWin.HEURIST4.util.isJSON(query);
+            let query_a = window.hWin.HEURIST4.util.isJSON(query);
             if( query_a ){
                 query = query_a; //converted to json    
                 
@@ -288,7 +290,8 @@ window.hWin.HEURIST4.query = {
         {
             return q1['plain']+' '+q2['plain'];
         }else{
-            var query1 = q1['q'], query2 = q2['q'];
+            query1 = q1['q'];
+            query2 = q2['q'];
             
             if(window.hWin.HEURIST4.util.isnull(query1) || $.isEmptyObject(query1)){
                 return query2;
@@ -315,13 +318,12 @@ window.hWin.HEURIST4.query = {
     //
     parseHeuristQuery: function(qsearch)
     {
-        
+
+        let res = {};
         let type = -1;
         
         let query = '', domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
         if(qsearch){
-            
-            var res = {};
             
             if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is query in form of URL params 
                 domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
@@ -404,7 +406,7 @@ window.hWin.HEURIST4.query = {
         if(window.hWin.HEURIST4.util.isempty(request.q)){
             return '';
         }else {
-            var r = window.hWin.HEURIST4.util.isJSON(request.q);
+            let r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
                 res['q'] = r; //JSON.stringify(r);
@@ -419,7 +421,7 @@ window.hWin.HEURIST4.query = {
         
             if(!window.hWin.HEURIST4.util.isempty(request.rules)){
                 //cleanRules?
-                var r = window.hWin.HEURIST4.util.isJSON(request.rules);
+                let r = window.hWin.HEURIST4.util.isJSON(request.rules);
                 if(r!==false){
                     if(r.facets) return ''; //faceted search not allowed for map queries
                     res['rules'] = r; //JSON.stringify(r);

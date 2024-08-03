@@ -22,6 +22,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global ActiveXObject,Temporal,TDate */
+
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
 }
@@ -152,12 +154,11 @@ window.hWin.HEURIST4.util = {
         
         if(!ele) {
             ele = $("body");   
-            fs = ele.css('font-size')
         }
-        else {
-            fs = ele.css('font-size')
-            ele = ele.parent();
-        }
+        //else {
+            //ele = ele.parent();
+        //}
+        const fs = ele.css('font-size');
         /*
         var rele = $('<span>').html(input).css('font-size', fs).appendTo(ele);
         var res = rele.width();
@@ -533,6 +534,7 @@ window.hWin.HEURIST4.util = {
     //                    
     interpretServerError: function(jqXHR, url, request_code){
     
+        let err_message = '';
         if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
             
             //403 Forbidden
@@ -563,7 +565,7 @@ window.hWin.HEURIST4.util = {
     //
     sendRequest: function(url, request, caller, callback, dataType, timeout){
         
-        var action = '';
+        let action = '';
         
         if(request){
         
@@ -571,7 +573,7 @@ window.hWin.HEURIST4.util = {
                 request.db = window.hWin.HAPI4.database;
             }
             
-            var action = url.substring(url.lastIndexOf('/')+1);
+            action = url.substring(url.lastIndexOf('/')+1);
             if(action.indexOf('.php')>0) {
                 action = action.substring(0,action.indexOf('.php'));   
             }
@@ -590,9 +592,7 @@ window.hWin.HEURIST4.util = {
                     
                     //var UNKNOWN_ERROR = (window.hWin)
                     //        ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
-                    if(textStatus=='timeout'){
-                        
-                    }
+                    //if(textStatus=='timeout'){}
                     
                     let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
                     
@@ -668,7 +668,7 @@ window.hWin.HEURIST4.util = {
         }
         document.body.appendChild(mapForm);
 
-        map = window.open('', windowName, windowFeatures);
+        let map = window.open('', windowName, windowFeatures);
         if (map) {
             mapForm.submit();
         } else {
@@ -727,7 +727,7 @@ window.hWin.HEURIST4.util = {
                     if(start.search(/VER=/)!==-1){
                         temporal = new Temporal(start);
                         if(temporal){
-                            var dt = temporal.getTDate('TPQ');  
+                            let dt = temporal.getTDate('TPQ');  
                             if(!dt) dt = temporal.getTDate('PDB'); //probable begin
 
                             if(dt){ //this is range - find end date
@@ -753,7 +753,7 @@ window.hWin.HEURIST4.util = {
                     if(end.search(/VER=/)!==-1){
                         temporal = new Temporal(end);
                         if(temporal){
-                            var dt = temporal.getTDate('TAQ'); 
+                            let dt = temporal.getTDate('TAQ'); 
                             if(!dt) dt = temporal.getTDate('PDE');//probable end
                             if(!dt) dt = temporal.getTDate('DAT');
                             end = __forVis(dt);
@@ -860,7 +860,7 @@ window.hWin.HEURIST4.util = {
     // download given url as a file (repalcement of usage A)
     //
     downloadURL: function(url, callback) {
-        $idown = $('#idown');
+        let $idown = $('#idown');
 
         if ($idown.length==0) {
             $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
@@ -1205,9 +1205,12 @@ window.hWin.HEURIST4.util = {
           }else{
               return false;
           }
-    }    
-        
+    },
     
+    //constants for saved searches\
+    _NAME: 0, 
+    _QUERY: 1,
+    _GRPID: 2
 }//end util
 
 let Hul = window.hWin.HEURIST4.util;
@@ -1319,10 +1322,6 @@ $.getMultiScripts = function(arr, path) {
 
     return $.when.apply($, _arr);
 }
-
-//constants for saved searches\
-const _NAME = 0, _QUERY = 1, _GRPID = 2;
-
 
 function tinymceURLConverter(url, node, on_save, name)
 {

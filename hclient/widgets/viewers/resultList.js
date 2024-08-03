@@ -318,7 +318,7 @@ $.widget( "heurist.resultList", {
                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[data.qname])
                             {
                                 that._currentSavedFilterID = data.qname;
-                                new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_NAME];
+                                new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._NAME];
                             }else{
                                 if(data.qname>0 && that.div_header!=null){
                                     
@@ -470,9 +470,11 @@ $.widget( "heurist.resultList", {
                                     let rdiv = that.div_content.find('.recordDiv[recid="'+data.selection[0]+'"]');
                                     if(rdiv.length>0)
                                     {
+                                        let sLabel;
+
                                         rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('rotate');
                                         if(data.map_layer_status=='visible'){
-                                            s = 'Hide data';
+                                            sLabel = 'Hide data';
                                             
                                             //zoom to loaded data
                                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
@@ -484,17 +486,17 @@ $.widget( "heurist.resultList", {
                                             } );
                                             
                                         }else if(data.map_layer_status=='loading'){
-                                            s = 'loading';
+                                            sLabel = 'loading';
                                             rdiv.find('.rec_expand_on_map > .ui-icon').addClass('rotate');
                                         }else if(data.map_layer_status=='error'){
-                                            s = 'Error';
+                                            sLabel = 'Error';
                                             rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('ui-icon-globe').addClass('ui-icon-alert');
                                         }else{
-                                            s = 'Show data';
+                                            sLabel = 'Show data';
                                         }
                                         
                                         rdiv.find('.rec_expand_on_map').attr('data-loaded', data.map_layer_status);
-                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text( window.hWin.HR(s) );
+                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text( window.hWin.HR(sLabel) );
                                     }
                                     
                                 }
@@ -650,11 +652,10 @@ $.widget( "heurist.resultList", {
             this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'})
                 .hide().appendTo( this.div_toolbar );    
             
-            var idx = 0;
-            for(idx in this.options.action_buttons){
+            for(let idx in this.options.action_buttons){
 
-                var key = this.options.action_buttons[idx].key;
-                var title = this.options.action_buttons[idx].title;
+                const key = this.options.action_buttons[idx].key;
+                const title = this.options.action_buttons[idx].title;
 
                 let btn_icon = null;
                 if(key=='add') btn_icon = 'ui-icon-plus'
@@ -674,11 +675,10 @@ $.widget( "heurist.resultList", {
         }
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
 
-            var idx = 0;
             let smenu = "";
-            for(idx in this.options.action_select){
-                var key = this.options.action_select[idx].title
-                var title = this.options.action_select[idx].title;
+            for(let idx in this.options.action_select){
+                const key = this.options.action_select[idx].title
+                const title = this.options.action_select[idx].title;
                 smenu = smenu + '<li data-key="'+key+'"><a href="#">'+window.hWin.HR(title)+'</a></li>';
             }
 
@@ -687,7 +687,7 @@ $.widget( "heurist.resultList", {
             .appendTo( this.document.find('body') )
             .menu({
                 select: function( event, ui ) {
-                    let key =  ui.item.attr('data-key');
+                    const key =  ui.item.attr('data-key');
                     that._trigger( "onaction", null, key );
             }})
             .hide();
@@ -699,7 +699,7 @@ $.widget( "heurist.resultList", {
             this._on( this.btn_actions, {
                 click: function() {
                     $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
-                    let menu = $( this.menu_actions )
+                    const menu = $( this.menu_actions )
                     //.css('width', this.div_search_as_user.width())
                     .show()
                     .position({my: "right top", at: "right bottom", of: this.btn_actions });
@@ -1096,6 +1096,7 @@ $.widget( "heurist.resultList", {
             try{
                 this.div_content.tabs('pagingResize');
             }catch(ex){
+                console.log('pagingResize');
             }
         }
         
@@ -1569,9 +1570,9 @@ $.widget( "heurist.resultList", {
     //
     //  
     //
-    _renderStartupMessageComposedFromRecord: function(recID){
+    _renderStartupMessageComposedFromRecord: function(){
 
-        var recID = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
+        const recID = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
         if(recID>0){
 
             if(this._startupInfo){
@@ -4027,11 +4028,11 @@ $.widget( "heurist.resultList", {
                         window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
 
                         //if current saved search has sortby:set - just edit with new query
-                        var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_QUERY];
+                        var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._QUERY];
                         if(squery.indexOf('sortby:set')>=0){
                             svsID = that._currentSavedFilterID;
                         }else{
-                            let groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_GRPID];
+                            let groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._GRPID];
                             window.hWin.HAPI4.save_pref('last_savedsearch_groupid', groupID);
                         }
                     }

@@ -466,7 +466,7 @@ $.widget( "heurist.search_faceted", {
                     if (window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID])
                     {
-                         new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//_NAME];                
+                         new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//Hul._NAME];                
                     }else if(window.hWin.HAPI4.has_access()){
                         let that = this;
                         window.hWin.HAPI4.SystemMgr.ssearch_get( null,

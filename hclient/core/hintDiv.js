@@ -119,7 +119,7 @@ function HintDiv(_id, _width, _height, _initcontent) {
 
 		let posx = 0;
 		let posy = 0;
-		if (!e) var e = window.event;
+		if (!e) e = window.event;
 		if (e.pageX || e.pageY){
 			posx = e.pageX;
 			posy = e.pageY;
@@ -147,8 +147,8 @@ function HintDiv(_id, _width, _height, _initcontent) {
 			offset = 5;
 		}
 		//var lft = popup_div.css('left');
-		left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
- 		top_pos=Math.max(xy[1]-(div_height/2)+offset,0);//-scrollValue;
+		let left_pos=Math.max(0,Math.min(xy[0]+offset, border_right - div_width));
+		let top_pos=Math.max(xy[1]-(div_height/2)+offset,0);//-scrollValue;
 
 		popup_div.css( {left:left_pos+'px',
 					top:top_pos+'px',

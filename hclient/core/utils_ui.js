@@ -20,6 +20,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global showLoginDialog,editSymbology,imgFilter,editTheme,editCMS_Manager,HPublishDialog */
+
 /*
 Selectors:
 addoption - helper function to add option to select element
@@ -168,14 +170,14 @@ window.hWin.HEURIST4.ui = {
                         
             let id = $inpt_group.attr('id');
             
-            for (idx in options.values)
+            for (let idx in options.values)
             if(idx>=0){
+                let key, title, disabled = false;
                 if(window.hWin.HEURIST4.util.isnull(options.values[idx].key) && 
                    window.hWin.HEURIST4.util.isnull(options.values[idx].title))
                 {
                     key = options.values[idx];
                     title = options.values[idx];
-                    disabled = false;
                 }else{
                     key = options.values[idx].key;
                     title = options.values[idx].title;
@@ -315,7 +317,7 @@ window.hWin.HEURIST4.ui = {
                     continue;
                 }
                 
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
+                let opt = window.hWin.HEURIST4.ui.addoption(selObj, 
                                                     data[i].key, data[i].title);
                 
                 $(opt).attr('disabled', 'disabled');
@@ -334,7 +336,7 @@ window.hWin.HEURIST4.ui = {
                     termCode = " [code "+data[i].code+"]";
                 }
                 
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
+                let opt = window.hWin.HEURIST4.ui.addoption(selObj, 
                                                 data[i].key, data[i].title+termCode);
                 $(opt).attr('depth', data[i].depth);
 
@@ -563,8 +565,8 @@ window.hWin.HEURIST4.ui = {
             for (let idx in rectypeList)
             {
                 if(idx){
-                    let rectypeID = rectypeList[idx];
-                    var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rectypeID,'rty_Name'));
+                    const rectypeID = rectypeList[idx];
+                    const name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rectypeID,'rty_Name'));
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
 
@@ -576,11 +578,10 @@ window.hWin.HEURIST4.ui = {
                         
                         isEmpty = false;
                        
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        let opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         
                         if(useIcons){
-                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID;
-                            $(opt).attr('icon-url', icon);
+                            $(opt).attr('icon-url', (window.hWin.HAPI4.iconBaseURL + rectypeID));
                         }
                         if(useCounts){
                             $(opt).attr('rt-count', rty_Count);
@@ -638,7 +639,7 @@ window.hWin.HEURIST4.ui = {
                         grp.label = groups[rtgID].title;
                         selObj.appendChild(grp);
                     }else{
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, groups[rtgID].title);
+                        let opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, groups[rtgID].title);
                         $(opt).attr('disabled', 'disabled');
                         $(opt).attr('group', 1);
                     }
@@ -647,17 +648,16 @@ window.hWin.HEURIST4.ui = {
                     //add rectypes
                     for (let i=0; i<groups[rtgID].rty.length; i++){
                         
-                        let rtyID = groups[rtgID]['rty'][i];
-                        var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID, 'rty_Name'));
+                        const rtyID = groups[rtgID]['rty'][i];
+                        const name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID, 'rty_Name'));
 
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
+                        let opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
                         $(opt).attr('depth', 1);
                         $(opt).attr('title', $Db.rtg(rtyID, 'rty_Description'));
                         
                         
                         if(useIcons){
-                            var icon = window.hWin.HAPI4.iconBaseURL + rtyID;
-                            $(opt).attr('icon-url', icon);
+                            $(opt).attr('icon-url', (window.hWin.HAPI4.iconBaseURL + rtyID));
                         }
                         if(useCounts){
                             $(opt).attr('rt-count',$Db.rty(rtyID, 'rty_RecCount'));
@@ -726,7 +726,7 @@ window.hWin.HEURIST4.ui = {
         //var trash_id = $Db.getTrashGroupId('dtg');
         
         
-        var dtyID, details;
+        let dtyID, details;
      
         //show fields for specified set of record types
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
@@ -735,11 +735,11 @@ window.hWin.HEURIST4.ui = {
             // name of field as specified in detailtypes
             //       names of field as specified in record structure (disabled items)
             let dtys = {}, dtyNames = [],dtyNameToID = {},dtyNameToRty={};
-            let rtys = {};
-            var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
+            
+            let rty,rtyName,dty,dtyName,fieldName,opt;
             
             //for all rectypes find all fields as Detail names sorted
-            for (i in rtyIDs) {
+            for (let i in rtyIDs) {
                 rty = rtyIDs[i];
                 rtyName = $Db.rty(rty, 'rty_Name');
                 
@@ -778,9 +778,9 @@ window.hWin.HEURIST4.ui = {
                     return nameA.localeCompare(nameB);
                 });
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
-                for (i in dtyNames) {
+                for (let i in dtyNames) {
                   dtyName = dtyNames[i];
-                  var dtyID = dtyNameToID[dtyName];
+                  const dtyID = dtyNameToID[dtyName];
                   
                   opt = window.hWin.HEURIST4.ui.addoption(selObj, dtyID, dtyName); //dtyNameToRty[dtyID]+'-'+
                     
@@ -795,7 +795,7 @@ window.hWin.HEURIST4.ui = {
                         return nameA.localeCompare(nameB);
                     });
                   
-                  for (j in dtys[dtyName]){
+                  for (let j in dtys[dtyName]){
                     fieldName = dtys[dtyName][j];
                     
                     opt = window.hWin.HEURIST4.ui.addoption(selObj, '',  fieldName);
@@ -897,9 +897,9 @@ window.hWin.HEURIST4.ui = {
             
             
             //add to select
-            var i=0, cnt= arrterm.length;
+            let i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                let opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                 if(arrterm[i][2] && requriedHighlight){
                     opt.className = "required";
                 }
@@ -936,22 +936,22 @@ window.hWin.HEURIST4.ui = {
                         grp.label = group['dtg_Name'];
                         selObj.appendChild(grp);
                     }else{
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, group['dtg_Name']);
+                        let opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, group['dtg_Name']);
                         $(opt).attr('disabled', 'disabled');
                         $(opt).attr('group', 1);
                     }
 
                     //sort by name
                     arrterm.sort(function(a, b) {
-                        let nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
-                        let nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        const nameA = a[1].toLocaleUpperCase(); // ignore upper and lowercase
+                        const nameB = b[1].toLocaleUpperCase(); // ignore upper and lowercase
                         return nameA.localeCompare(nameB);
                     });
                     
                     //add to select
                     let i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
+                        let opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                         $(opt).attr('depth',1);
                         if(useIds){
                             $(opt).attr('entity-id', arrterm[i][0]);
@@ -993,9 +993,9 @@ window.hWin.HEURIST4.ui = {
         if(groups=='all_my_first'){ //all groups by name - my groups first
             
             if(!topOptions) topOptions = [];
-            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            for (let groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
             if(groupID>0){
-                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                const name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name)){
                         topOptions.push({key:groupID, title:name});
                 }
@@ -1066,23 +1066,22 @@ window.hWin.HEURIST4.ui = {
         if(!groups){ //not defined - use groups of current user
         
             groups = {};
-            for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
+            for (let groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
             if(groupID>0){
-                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                const name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name)){
                         groups[groupID] = name;
                 }
             }
         }
 
-        var idx;
         let addedontop = [];
         if(topOptions){  //list of options that must be on top of list
-            for (idx in topOptions)
+            for (let idx in topOptions)
             {
                 if(idx){
-                    let key = topOptions[idx].key;
-                    let title = topOptions[idx].title;
+                    const key = topOptions[idx].key;
+                    const title = topOptions[idx].title;
                     if(!window.hWin.HEURIST4.util.isnull(title))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, key, title, (topOptions[idx].disabled==true));
@@ -1093,12 +1092,12 @@ window.hWin.HEURIST4.ui = {
         }
         if(groups){   //it may 1) array of group ids 2) array of objects 3) [ids=>name] 4) [ids=>array(0,name,0)]
 
-            for (var idx in groups)
+            for (let idx in groups)
             {
                 if(idx>=0){
                     
-                    var groupID = groups[idx];
-                    var name = null;
+                    let groupID = groups[idx];
+                    let name = null;
                     if(parseInt(groupID)>0){ //case 1
                         name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                     }else if(window.hWin.HEURIST4.util.isObject(groupID) && Object.hasOwn(groupID, 'id')){ //case 2
@@ -1385,7 +1384,7 @@ window.hWin.HEURIST4.ui = {
                 +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
-        var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
+        let $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
                     label:'Set experience level for user interface', text:false})
                     .addClass('dialog-title-button')
                     .css({'right':hasContextHelp?'48px':'26px'})
@@ -1577,7 +1576,7 @@ window.hWin.HEURIST4.ui = {
                             
                                 //var div_height = Math.min(500, (document.body).height()-$help_button.top());
                                 //var div_width  = Math.min(600, (document.body).width() *0.8);
-                                divpos = null;
+                                let divpos = null;
                                 if(options.position && $.isPlainObject(options.position)){
                                     divpos = options.position;
                                     //divpos['of'] = $help_button;
@@ -1881,7 +1880,7 @@ window.hWin.HEURIST4.ui = {
                 dheight = 640;
                 dwidth = 800;
             
-                var $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {
+                let $dosframe = window.hWin.HEURIST4.msg.showDialog(url, {
                     height:dheight, 
                     width:dwidth,
                     padding:0,
@@ -2112,12 +2111,12 @@ window.hWin.HEURIST4.ui = {
                     selectOnSave:true, edit_obstacle: true, onselect:
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                            const is_inward = info['is_inward'];
                             let recordset = res.selection;
                             let record = recordset.getFirstRecord();
                             let related_ID = recordset.fld(record, 'rec_ID'); //relationship record                             
-                            let DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
-                            let DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
-                                [info['is_inward']?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
+                            const DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
+                            const DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst'][is_inward?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
 
                             // e - search for temp also
                             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+related_ID, w: "e", 
@@ -2490,8 +2489,8 @@ window.hWin.HEURIST4.ui = {
             if(!options.container){ //container not defined - add new one to body
             
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
-                    .appendTo( $('body') )
-                    [widgetName]( options );
+                    .appendTo( $('body') );
+                manage_dlg[widgetName]( options );
             }else{
                 if($(options.container)[widgetName]('instance')){
                     $(options.container)[widgetName]('destroy');
@@ -2717,8 +2716,8 @@ window.hWin.HEURIST4.ui = {
             if(!options.container){ //container not defined - add new one to body
                 
                 manage_dlg = $('<div id="heurist-dialog-'+widgetName+'-'+window.hWin.HEURIST4.util.random()+'">')
-                    .appendTo( doc_body )
-                    [widgetName]( options );
+                    .appendTo( doc_body );
+                manage_dlg[widgetName]( options );
             }else{
                 
                 if($(options.container)[widgetName]('instance')){
@@ -2794,7 +2793,7 @@ window.hWin.HEURIST4.ui = {
 
         let posx = 0;
         let posy = 0;
-        if (!e) var e = window.event;
+        if (!e) e = window.event;
         if (e.pageX || e.pageY)     {
             posx = e.pageX;
             posy = e.pageY;
@@ -2814,7 +2813,7 @@ window.hWin.HEURIST4.ui = {
       
             let swarn = "";
             let regex = /[\[\].\$]+/;
-            var name = name.toLowerCase();
+            name = name.toLowerCase();
             if( name=="id" || name=="modified" || name=="rectitle"){
                    swarn = lbl+", you defined, is a reserved word. Please try an alternative";
             //}else if (name.indexOf('.')>=0 ) {  //regex.test(name)
@@ -3355,9 +3354,7 @@ window.hWin.HEURIST4.ui = {
         
         if(!style) style = {};
         if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
-        if(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0){
-            
-        }else{
+        if(!(style.iconType=='url' && typeof style.iconSize == 'string' && style.iconSize.indexOf(',')>0)){
             style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
         }
         style.color = (style.color?style.color:def_style.color);   //light blue

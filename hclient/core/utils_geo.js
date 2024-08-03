@@ -18,6 +18,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global parseWKT, stringifyWKT */
 
 /*
 getWktBoundingBox
@@ -89,147 +90,148 @@ window.hWin.HEURIST4.geo = {
             //-----------------------------------------
             function __loadGeoJSON_primitive(geometry){
 
-                if($.isEmptyObject(geometry)){
-
-                }else if(geometry.type=="GeometryCollection"){
-                    let l;
-                    for (l=0; l<geometry.geometries.length; l++){
-                        __loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
-                    }
-                }else{
-
-                    function _isvalid_pnt(pnt){
-                            let isValid = ($.isArray(pnt) && pnt.length==2 && 
-                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
-                                //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
-                            if(isValid && resdata._extent){
-                                if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
-                                if(pnt[0]>resdata._extent.xmax) resdata._extent.xmax = pnt[0];
-                                if(pnt[1]<resdata._extent.ymin) resdata._extent.ymin = pnt[1];
-                                if(pnt[1]>resdata._extent.ymax) resdata._extent.ymax = pnt[1];
-                            }
-                            return isValid;    
-                    }
-                    //for google
-                    function __extractCoords(shapes, coords, typeCode){
-
-                        if(_isvalid_pnt(coords)){ //Marker
-                            shapes.push( {lat:coords[1], lng:coords[0]} );
-                        }else if(_isvalid_pnt(coords[0])){
-                            //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
-                            let shape = [], m;
-                            for (m=0; m<coords.length; m++){
-                                pnt = coords[m];
-                                if(_isvalid_pnt(pnt)){
-                                    shape.push({lat:pnt[1], lng:pnt[0]});    
-                                }
-                            }
-                            if(typeCode=='MultiPoint'){
-                                shapes = shape;
-                            }else{
-                                shapes.push(shape);    
-                            }
-                        }else{
-                            let n;
-                            for (n=0; n<coords.length; n++){
-                                if($.isArray(coords[n]))
-                                    shapes = __extractCoords(shapes, coords[n], typeCode);
-                            }
+                if(!$.isEmptyObject(geometry))
+                {
+                    if(geometry.type=="GeometryCollection"){
+                        let l;
+                        for (l=0; l<geometry.geometries.length; l++){
+                            __loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
                         }
-                        return shapes;
-                    }
-                    //for timemap
-                    function __extractCoords2(shapes, coords, typeCode){
+                    }else{
 
-                        if(_isvalid_pnt(coords)){ //Marker
-                        
-                            shapes.push( {point:{
-                                    lat: Math.round(coords[1] * 1000000) / 1000000,  
-                                    lon: Math.round(coords[0] * 1000000) / 1000000}} );
-                            
-                        }else if(_isvalid_pnt(coords[0])){
-                            //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
-                            let shape = [], m;
-                            for (m=0; m<coords.length; m++){
-                                pnt = coords[m];
-                                if(_isvalid_pnt(pnt)){
-                                    if(typeCode=='point'){
-                                        shape.push({point:{lat:pnt[1], lon:pnt[0]}});
-                                    }else{
-                                        shape.push({lat:pnt[1], lon:pnt[0]});
+                        function _isvalid_pnt(pnt){
+                                let isValid = ($.isArray(pnt) && pnt.length==2 && 
+                                    $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                                    //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
+                                if(isValid && resdata._extent){
+                                    if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
+                                    if(pnt[0]>resdata._extent.xmax) resdata._extent.xmax = pnt[0];
+                                    if(pnt[1]<resdata._extent.ymin) resdata._extent.ymin = pnt[1];
+                                    if(pnt[1]>resdata._extent.ymax) resdata._extent.ymax = pnt[1];
+                                }
+                                return isValid;    
+                        }
+                        //for google
+                        function __extractCoords(shapes, coords, typeCode){
+
+                            if(_isvalid_pnt(coords)){ //Marker
+                                shapes.push( {lat:coords[1], lng:coords[0]} );
+                            }else if(_isvalid_pnt(coords[0])){
+                                //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
+                                let shape = [];
+                                for (let m=0; m<coords.length; m++){
+                                    const pnt = coords[m];
+                                    if(_isvalid_pnt(pnt)){
+                                        shape.push({lat:pnt[1], lng:pnt[0]});    
                                     }
                                 }
-                            }
-                            if(typeCode=='point'){
-                                shapes = shape;
+                                if(typeCode=='MultiPoint'){
+                                    shapes = shape;
+                                }else{
+                                    shapes.push(shape);    
+                                }
                             }else{
-                                let r = {};
-                                r[typeCode] = shape;
-                                shapes.push(r);
+                                let n;
+                                for (n=0; n<coords.length; n++){
+                                    if($.isArray(coords[n]))
+                                        shapes = __extractCoords(shapes, coords[n], typeCode);
+                                }
                             }
-                        }else{
-                            //multi
-                            let n;
-                            for (n=0; n<coords.length; n++){
-                                if($.isArray(coords[n]))
-                                    shapes = __extractCoords2(shapes, coords[n], typeCode);
-                            }
+                            return shapes;
                         }
-                        return shapes;
-                    }
+                        //for timemap
+                        function __extractCoords2(shapes, coords, typeCode){
 
-                    if( _format=='google' ){
+                            if(_isvalid_pnt(coords)){ //Marker
+                            
+                                shapes.push( {point:{
+                                        lat: Math.round(coords[1] * 1000000) / 1000000,  
+                                        lon: Math.round(coords[0] * 1000000) / 1000000}} );
+                                
+                            }else if(_isvalid_pnt(coords[0])){
+                                //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
+                                let shape = [];
+                                for (let m=0; m<coords.length; m++){
+                                    const pnt = coords[m];
+                                    if(_isvalid_pnt(pnt)){
+                                        if(typeCode=='point'){
+                                            shape.push({point:{lat:pnt[1], lon:pnt[0]}});
+                                        }else{
+                                            shape.push({lat:pnt[1], lon:pnt[0]});
+                                        }
+                                    }
+                                }
+                                if(typeCode=='point'){
+                                    shapes = shape;
+                                }else{
+                                    let r = {};
+                                    r[typeCode] = shape;
+                                    shapes.push(r);
+                                }
+                            }else{
+                                //multi
+                                let n;
+                                for (n=0; n<coords.length; n++){
+                                    if($.isArray(coords[n]))
+                                        shapes = __extractCoords2(shapes, coords[n], typeCode);
+                                }
+                            }
+                            return shapes;
+                        }
+
+                        if( _format=='google' ){
+                            
+                            let shapes = __extractCoords([], geometry.coordinates, geometry.type)
+                                                
+                            if(shapes.length>0){
+
+                                let type = null;
+
+                                if( geometry.type=="Point" || 
+                                    geometry.type=="MultiPoint")
+                                {   
+                                    if($.isArray(shapes))
+                                    for (let n=0; n<shapes.length; n++){
+                                        resdata['Point'].push( [shapes[n]] );
+                                    }
+                                    //resdata['Point'] = resdata['Point'].concat( shapes );
+                                }else if(geometry.type=="LineString" ||
+                                    geometry.type=="MultiLineString")
+                                {   
+                                    resdata['Polyline'] = resdata['Polyline'].concat( shapes );
+                                }else if(geometry.type=="Polygon"||
+                                        geometry.type=="MultiPolygon")
+                                {
+                                    resdata['Polygon'] = resdata['Polygon'].concat( shapes );
+                                }       
+                                    
+                            }
                         
-                        var shapes = __extractCoords([], geometry.coordinates, geometry.type)
-                                             
-                        if(shapes.length>0){
-
-                            let type = null;
-
+                        }else{
+                        
+                            let typeCode;
                             if( geometry.type=="Point" || 
                                 geometry.type=="MultiPoint")
-                            {   
-                                if($.isArray(shapes))
-                                for (let n=0; n<shapes.length; n++){
-                                    resdata['Point'].push( [shapes[n]] );
-                                }
-                                //resdata['Point'] = resdata['Point'].concat( shapes );
+                            {
+                                typeCode = 'point';
                             }else if(geometry.type=="LineString" ||
                                 geometry.type=="MultiLineString")
-                            {   
-                                resdata['Polyline'] = resdata['Polyline'].concat( shapes );
+                            {
+                                typeCode = 'polyline';
                             }else if(geometry.type=="Polygon"||
                                     geometry.type=="MultiPolygon")
                             {
-                                resdata['Polygon'] = resdata['Polygon'].concat( shapes );
-                            }       
-                                
-                        }
-                    
-                    }else{
-                    
-                        let typeCode;
-                        if( geometry.type=="Point" || 
-                            geometry.type=="MultiPoint")
-                        {
-                            typeCode = 'point';
-                        }else if(geometry.type=="LineString" ||
-                            geometry.type=="MultiLineString")
-                        {
-                            typeCode = 'polyline';
-                        }else if(geometry.type=="Polygon"||
-                                geometry.type=="MultiPolygon")
-                        {
-                            typeCode = 'polygon';
-                        }     
+                                typeCode = 'polygon';
+                            }     
 
-                        var shapes = __extractCoords2([], geometry.coordinates, typeCode);
-                        if(shapes.length>0){
-                            resdata = resdata.concat(shapes);
+                            let shapes = __extractCoords2([], geometry.coordinates, typeCode);
+                            if(shapes.length>0){
+                                resdata = resdata.concat(shapes);
+                            }
                         }
+                        
+
                     }
-                    
-
                 }
 
             }
@@ -270,14 +272,14 @@ window.hWin.HEURIST4.geo = {
             switch (type) {
                 case "p":
                 case "point":
-                
-                    var x0 = gjson.coordinates[0];
-                    var y0 = gjson.coordinates[1];
+                {
+                    const x0 = gjson.coordinates[0],
+                          y0 = gjson.coordinates[1];
                     
                     if(format==0){
                         shape = { point:{lat: y0, lon:x0 } };
                     }else{
-                        point = new google.maps.LatLng(y0, x0);
+                        const point = new google.maps.LatLng(y0, x0);
                         points.push(point);
                         bounds = new google.maps.LatLngBounds(
                             new google.maps.LatLng(y0 - 0.5, x0 - 0.5),
@@ -287,22 +289,22 @@ window.hWin.HEURIST4.geo = {
                     
 
                     break;
-
+                }
                 case "c":  //circle
                 case "circle":  //circle
 
                     if(format==0){ //@todo use geodesy-master to calculate distance
 
-                        var x0 = gjson.coordinates[0][0];
-                        var y0 = gjson.coordinates[0][1];
+                        const x0 = gjson.coordinates[0][0],
+                              y0 = gjson.coordinates[0][1];
                         let radius = gjson.coordinates[1][0] - gjson.coordinates[0][0];
                         if(radius==0)
                           radius = gjson.coordinates[1][1] - gjson.coordinates[0][1];
 
                         shape = [];
-                        for (var i=0; i <= 40; ++i) {
-                            let x = x0 + radius * Math.cos(i * 2*Math.PI / 40);
-                            let y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
+                        for (let i=0; i <= 40; ++i) {
+                            const x = x0 + radius * Math.cos(i * 2*Math.PI / 40),
+                                  y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
                             shape.push({lat: y, lon: x});
                         }
                         shape = {polygon:shape};
@@ -328,21 +330,17 @@ window.hWin.HEURIST4.geo = {
                 case "l":  ///polyline
                 case "path":
                 case "polyline":
-
                 case "r":  //rectangle
                 case "rect":
                 case "pl": //polygon
                 case "polygon":
-
-                    var shapes = [];
-                    
-
-                    var j, i, k, ismulti = true;
-                    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-                    var len2 = gjson.coordinates.length;
-                    for (j=0; j < len2; ++j) {
+                {    
+                    let shapes = [];
+                    let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+                    let len2 = gjson.coordinates.length;
+                    for (let j=0; j < len2; ++j) {
                         let len = gjson.coordinates[j].length;
-                        for (i=0; i < len; ++i) {
+                        for (let i=0; i < len; ++i) {
                             
                             let placemark = gjson.coordinates[j][i];
                             if(!$.isArray(placemark)){
@@ -357,8 +355,8 @@ window.hWin.HEURIST4.geo = {
                             }
                             shape = [];    
                             
-                            for (k=0; k < placemark.length; ++k) {
-                                var point = {lat:placemark[k][1], 
+                            for (let k=0; k < placemark.length; ++k) {
+                                const point = {lat:placemark[k][1], 
                                              lon:placemark[k][0]};
 
                                 if(format==0){
@@ -389,8 +387,8 @@ window.hWin.HEURIST4.geo = {
                         bounds = new google.maps.LatLngBounds(southWest, northEast);
                     }
                     
-                        
-            }
+                }        
+            }//switch
 
         }
         
@@ -436,9 +434,7 @@ window.hWin.HEURIST4.geo = {
                 break;
 
             case "r":  //rectangle
-            case "rect":
-                //matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);
-                //break;
+            case "rect": //matches = wkt.match(/POLYGON\(\((\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*(\S+)\s+(\S+),\s*\S+\s+\S+\)\)/i);break;
             case "pl": //polygon
             case "polygon":
                 matches = wkt.match(/POLYGON\s?\(\((.+)\)\)/i);
@@ -459,14 +455,14 @@ window.hWin.HEURIST4.geo = {
             switch (type) {
                 case "p":
                 case "point":
-                
-                    var x0 = parseFloat(matches[1]);
-                    var y0 = parseFloat(matches[2]);
+                {                
+                    const x0 = parseFloat(matches[1]),
+                          y0 = parseFloat(matches[2]);
                     
                     if(format==0){
                         shape = { point:{lat: y0, lon:x0 } };
                     }else{
-                        point = new google.maps.LatLng(y0, x0);
+                        const point = new google.maps.LatLng(y0, x0);
                         points.push(point);
                         bounds = new google.maps.LatLngBounds(
                             new google.maps.LatLng(y0 - 0.5, x0 - 0.5),
@@ -511,19 +507,20 @@ window.hWin.HEURIST4.geo = {
 
                     break;
                 */
+                }
                 case "c":  //circle
                 case "circle":  //circle
 
                     if(format==0){
 
-                        var x0 = parseFloat(matches[1]);
-                        var y0 = parseFloat(matches[2]);
+                        const x0 = parseFloat(matches[1]),
+                              y0 = parseFloat(matches[2]);
                         let radius = parseFloat(matches[3]) - parseFloat(matches[1]);
 
                         shape = [];
                         for (let i=0; i <= 40; ++i) {
-                            let x = x0 + radius * Math.cos(i * 2*Math.PI / 40);
-                            let y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
+                            const x = x0 + radius * Math.cos(i * 2*Math.PI / 40),
+                                  y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
                             shape.push({lat: y, lon: x});
                         }
                         shape = {polygon:shape};
@@ -549,20 +546,18 @@ window.hWin.HEURIST4.geo = {
                 case "l":  ///polyline
                 case "path":
                 case "polyline":
-
                 case "r":  //rectangle
                 case "rect":
                 case "pl": //polygon
                 case "polygon":
-
+                {
                     shape = [];
 
-                    var j;
-                    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
-                    for (j=0; j < matches.length; ++j) {
+                    let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+                    for (let j=0; j < matches.length; ++j) {
                         let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
 
-                        var point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
+                        const point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
 
                         if(format==0){
                             shape.push(point);
@@ -584,8 +579,8 @@ window.hWin.HEURIST4.geo = {
                         northEast = new google.maps.LatLng(maxLat, maxLng);
                         bounds = new google.maps.LatLngBounds(southWest, northEast);
                     }
-                    
-            }
+                }   
+            }//switch
 
         }
         
@@ -781,7 +776,7 @@ window.hWin.HEURIST4.geo = {
         if (! matches) {
             return { type:'', summary:''};
         }
-        var typeCode = '', wkt;
+        let typeCode = '';
         if(matches.length>2){
             typeCode = matches[1];
             wkt = matches[2];

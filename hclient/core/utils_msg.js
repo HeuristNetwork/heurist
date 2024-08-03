@@ -181,10 +181,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     showMsgDlgUrl: function(url, buttons, title, options){
 
-        var $dlg;
+        let $dlg;
         if(url){
             let isPopupDlg = (options && (options.isPopupDlg || options.container));
-            var $dlg = isPopupDlg
+            $dlg = isPopupDlg
                             ?window.hWin.HEURIST4.msg.getPopupDlg( options.container )
                             :window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
@@ -354,18 +354,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
              options = {title:options};
         }
         
-        $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+        let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
 
-        let content;
-        if(message!=null){
-            $dlg.empty();
-            content = $('<span>'+window.hWin.HR(message)+'</span>')
-                    .css({'overflow':'hidden','font-weight':'bold','font-size':'1.2em'});
-                    
-            $dlg.append(content);
-        }else{
+        if(message==null){
             return;
         }
+
+        $dlg.empty();
+        let content = $('<span>'+window.hWin.HR(message)+'</span>')
+                    .css({'overflow':'hidden','font-weight':'bold','font-size':'1.2em'});
+                    
+        $dlg.append(content);
         
         let hideTitle = (options.title==null);
         if(options.title){
@@ -406,17 +405,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         //$dlg.dialog("option", "buttons", null);      
         
-        if(hideTitle)
+        if(hideTitle){
             $dlg.parent().find('.ui-dialog-titlebar').hide();
-    
-        if(true){
-    //ui-dialog        
-            $dlg.parent().css({background: '#7092BE', 'border-radius': "6px", 'border-color': '#7092BE !important',
-                    'outline-style':'none', outline:'hidden'})
-    //ui-dialog-content         
-            $dlg.css({color:'white', border:'none', overflow:'hidden' });
-            //addClass('ui-heurist-border').
         }
+    
+        $dlg.parent().css({background: '#7092BE', 'border-radius': "6px", 'border-color': '#7092BE !important',
+                    'outline-style':'none', outline:'hidden'})
+        $dlg.css({color:'white', border:'none', overflow:'hidden' });
         
         if(timeout!==false){
 
@@ -479,6 +474,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     checkLength2: function( input, title, min, max ) {
 
         let len = input.val().length;
+        let message_text = '';
+
         if ( (max>0 &&  len > max) || len < min ) {
             input.addClass( "ui-state-error" );
             if(max>0 && min>1){
@@ -668,11 +665,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(has_access)
                 {
                     
-                    var content = $dosframe[0].contentWindow;
+                    let content = $dosframe[0].contentWindow;
                     try{
                         //replace standard "alert" to Heurist dialog    
                         content.alert = function(txt){
-                            $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                            let $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
                             $dlg_alert.dialog('open');
                             return true;
                         }
@@ -740,6 +737,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
 
                 if(has_access){
+                    let content = $dosframe[0].contentWindow;
+
                     if($.isFunction(content.onFirstInit)) {  //see mapPreview
                         content.onFirstInit();
                     }
@@ -905,13 +904,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             if(!options.title) options.title = '&nbsp;';
             
-            $container = options['container'];
+            let $container = options['container'];
             
             let $dosframe = $container.find('iframe');
             let _innerTitle = $container.children('.ui-heurist-header');
             let frame_container = $container.children('.ent_content_full');
             let $info_button;
-            let $help_button;
                
             if($dosframe.length==0)
             {
@@ -1016,7 +1014,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 //replace native alert 
                 try{
                     content.alert = function(txt){
-                        $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                        let $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
                         $dlg_alert.dialog('open');
                         return true;
                 }
@@ -1048,7 +1046,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
             if(!window.hWin.HEURIST4.util.isempty(options['padding'])){
                 //by default 2em
-                $content.css('padding', options.padding);
+                $container.css('padding', options.padding);
             } 
                     
             //start content loading
@@ -1319,7 +1317,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if ($.isFunction(buttons)){ //}typeof buttons === "function"){
 
-            callback = buttons;
+            let callback = buttons;
 
             buttons = {};
             buttons[lblYes] = function() {
@@ -1491,7 +1489,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             pbar.progressbar( "value", val );
 
                             elapsed += t_interval;
-                            est_remaining = (elapsed / resp[0]) * (resp[1] - resp[0]);
+                            let est_remaining = (elapsed / resp[0]) * (resp[1] - resp[0]);
 
                             if(est_remaining < 10000){ // less than 10 seconds
                                 est_remaining = 'a few seconds';

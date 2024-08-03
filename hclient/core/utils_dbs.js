@@ -350,9 +350,8 @@ window.hWin.HEURIST4.dbs = {
                 $children.push({key:'rec_TypeName', title:'Record TypeName', code:'Record TypeName'});
                 $children.push({key:'rec_Modified', title:"Record Modified", code:'Record Modified'});
 
-                var s = '<span style="font-style:italic">metadata</span>';
                 $children = [
-                    {title:s, folder:true, is_generic_fields:true, children:$children}];
+                    {title:'<span style="font-style:italic">metadata</span>', folder:true, is_generic_fields:true, children:$children}];
 
                 if($recursion_depth>0){ // keep record title separate from generic fields
                     $children.unshift({key:'rec_Title', type:'freetext', title:'Constructed title', code:'Record Title'});
@@ -442,7 +441,6 @@ window.hWin.HEURIST4.dbs = {
                         let rt_id = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'];
                         let dc = window.hWin.HAPI4.sysinfo['dbconst'];
                         
-                        var s = '<span style="font-style:italic">Relationship Fields</span>';
                         let $rl_children = [];
                         $rl_children.push({type:'reltype',
                             title:'Relationship type', 
@@ -465,16 +463,15 @@ window.hWin.HEURIST4.dbs = {
                             code:(rt_id+_separator+'r.'+dc['DT_INTERPRETATION_REFERENCE']), name:'Interpretation Reference'});
                         
                         $grouped.push(
-                            {title:s, folder:true, is_generic_fields:true, children:$rl_children});
+                            {title:'<span style="font-style:italic">Relationship Fields</span>', folder:true, is_generic_fields:true, children:$rl_children});
                     }
 
                     if(recTitle_item){
                         $grouped.push( recTitle_item );
                     }
                     
-                    var s = '<span style="font-style:italic">metadata</span>';
                     $grouped.push(
-                        {title:s, folder:true, is_generic_fields:true, children:$children});
+                        {title:'<span style="font-style:italic">metadata</span>', folder:true, is_generic_fields:true, children:$children});
                     
                     $children = $grouped;
                 }
@@ -504,7 +501,7 @@ window.hWin.HEURIST4.dbs = {
                         if($parent_Rts && $parent_Rts.length>0){
                         
                             //create fake rectype structure field
-                            $ffr = {};
+                            let $ffr = {};
                             $ffr['rst_DisplayName'] = 'Parent entity';
                             $ffr['rst_PtrFilteredIDs'] = $parent_Rts.join(',');
                             //$ffr['dty_Type'] = 'resource';
@@ -629,7 +626,7 @@ window.hWin.HEURIST4.dbs = {
                         let twice_only = 0;
                         while(twice_only<2){
 
-                            for (var $dtID in reverse_fields) {
+                            for (let $dtID in reverse_fields) {
                                 if($dtID>0 && 
                                     ( $pointer_fields==null ||    // to avoid recursion
                                         ($.isArray($pointer_fields) &&   
@@ -642,10 +639,10 @@ window.hWin.HEURIST4.dbs = {
                             twice_only++;
                         }
                         
-                        for (var $dtID in rev_fields) {
+                        for (let $dtID in rev_fields) {
                                 let $rtyIDs = rev_fields[$dtID];
                                 for(let i=0; i<$rtyIDs.length; i++)  {
-                                    $res_dt = __getDetailSection($rtyIDs[i], $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId, null);
+                                    const $res_dt = __getDetailSection($rtyIDs[i], $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId, null);
                      
                                     if($res_dt){
                                         $dtl_fields.push( $res_dt );
@@ -770,7 +767,7 @@ window.hWin.HEURIST4.dbs = {
      */
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
-        $res = null;
+        let $res = null;
 
         let $dtValue = $Db.rst($recTypeId, $dtID);
 
@@ -789,13 +786,13 @@ window.hWin.HEURIST4.dbs = {
         let $pointerRecTypeId = ($dtID==DT_PARENT_ENTITY)?$dtValue['rst_PtrFilteredIDs']:$Db.dty($dtID,'dty_PtrTargetRectypeIDs');
         if(window.hWin.HEURIST4.util.isnull($pointerRecTypeId)) $pointerRecTypeId = '';
         
-        var $pref = "";
+        let $pref = "";
         
         if ($fieldtypes.indexOf('all')>=0   //($mode==3) || 
             || window.hWin.HEURIST4.util.findArrayIndex($detailType, $fieldtypes)>=0) //$fieldtypes - allowed types
         {
 
-        var $res = null;
+        let $res = null;
             
         switch ($detailType) {
             case 'separator':
@@ -846,7 +843,7 @@ window.hWin.HEURIST4.dbs = {
                 if($recursion_depth<max_allowed_depth){
                     
                     if($reverseRecTypeId!=null){
-                            var $res = __getRecordTypeTree($recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                            $res = __getRecordTypeTree($recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                             if($res){
                                 $res['rt_ids'] = $recTypeId; //list of rectype - constraint
                                 //$res['reverse'] = "yes";
@@ -869,7 +866,7 @@ window.hWin.HEURIST4.dbs = {
                             }
                     }else{
 
-                            var $pref = ($detailType=="resource")?"lt":"rt";
+                            $pref = ($detailType=="resource")?"lt":"rt";
 
                             let $is_required = ($dtValue['rst_RequirementType']=='required');
                             let $rectype_ids = $pointerRecTypeId.split(",");
@@ -911,8 +908,8 @@ window.hWin.HEURIST4.dbs = {
                                 }else{
                                 
                                     for (let k in $rectype_ids){
-                                        let $rtID = $rectype_ids[k];
-                                        $rt_res = __getRecordTypeTree($rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                        const $rtID = $rectype_ids[k];
+                                        const $rt_res = __getRecordTypeTree($rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                         if($rectype_ids.length==1){//exact one rectype constraint
                                             //avoid redundant level in tree
                                             $res = $rt_res;
@@ -997,7 +994,7 @@ window.hWin.HEURIST4.dbs = {
     function __assignCodes($def){
         
         for(let $idx in $def['children']){
-            $det = $def['children'][$idx];
+            const $det = $def['children'][$idx];
             if(!window.hWin.HEURIST4.util.isnull($def['code'])){
 
                 if(!window.hWin.HEURIST4.util.isnull($det['code'])){
@@ -1353,7 +1350,7 @@ window.hWin.HEURIST4.dbs = {
       
         let is_parent = false;
         let all_structs = $Db.rst_idx2();
-        for (var rty_ID in all_structs){
+        for (let rty_ID in all_structs){
             let recset = all_structs[rty_ID];
             recset.each2(function(dty_ID, record){
 
@@ -1446,8 +1443,6 @@ window.hWin.HEURIST4.dbs = {
                 let dty_Type = record['dty_Type'];
                 if(dty_Type=='resource' || dty_Type=='relmarker') 
                 {
-                    is_parent = false;
-                    
                     let ptr = record['dty_PtrTargetRectypeIDs'];
                     if(ptr) ptr = ptr.split(',');
                     if(ptr && ptr.length>0){
@@ -1892,7 +1887,7 @@ window.hWin.HEURIST4.dbs = {
                 if(mode=='tree'){
 
                     let child_nodes = [];  
-                    for(var i=0; i<children.length;i++){  
+                    for(let i=0; i<children.length;i++){  
                         child_nodes.push( __addChilds(children[i]) );          
                     }
                     node['children'] = child_nodes;
@@ -1900,7 +1895,7 @@ window.hWin.HEURIST4.dbs = {
 
                 }else if(mode=='select'){
 
-                    for(var i=0; i<children.length;i++){ 
+                    for(let i=0; i<children.length;i++){ 
                         recID = children[i];
                         label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
 
@@ -1913,7 +1908,7 @@ window.hWin.HEURIST4.dbs = {
 
                 }else if(mode=='set' || mode=='labels'){
                     
-                    for(var i=0; i<children.length;i++){  
+                    for(let i=0; i<children.length;i++){  
                         recID = children[i];
                         label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
 
@@ -1927,7 +1922,7 @@ window.hWin.HEURIST4.dbs = {
                     lvl_parents = lvl_parents?lvl_parents.split(','):[];
                     lvl_parents.push(recID);
 
-                    for(var i=0; i<children.length;i++){  
+                    for(let i=0; i<children.length;i++){  
                         recID = children[i];
                         trm_ids.push(recID);
 
@@ -2201,7 +2196,7 @@ window.hWin.HEURIST4.dbs = {
 
             let all_children = [];
             let is_exists = 0;
-            for(var i=0; i<term_IDs.length; i++){
+            for(let i=0; i<term_IDs.length; i++){
                 if(window.hWin.HEURIST4.util.findArrayIndex(term_IDs[i], trm_ids)>=0){
                     is_exists = term_IDs[i];
                     break;
@@ -2226,7 +2221,7 @@ window.hWin.HEURIST4.dbs = {
             }
 
             //exclude all child terms - they will be added via their parent
-            var i=0;
+            let i=0;
             while(i<term_IDs.length){
                 if(all_children.indexOf(term_IDs[i])<0){
                     i++;
@@ -2531,7 +2526,7 @@ window.hWin.HEURIST4.dbs = {
 
                         if(linktype=='lt' || linktype=='rt'){
 
-                            var sFieldName = (rtid=='any')
+                            const sFieldName = (rtid=='any')
                                             ?$Db.dty(dtid, 'dty_Name')
                                             :$Db.rst(rtid, dtid, 'rst_DisplayName');
 
@@ -2546,7 +2541,7 @@ window.hWin.HEURIST4.dbs = {
                         }else{
                             let from_rtid = codes[j+2];
 
-                            var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
+                            const sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
 
                             if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                                 //field was removed - remove facet
@@ -2561,7 +2556,7 @@ window.hWin.HEURIST4.dbs = {
 
                 }else{
 
-                    var sFieldName = (rtid=='any')
+                    const sFieldName = (rtid=='any')
                                 ?$Db.dty(dtid, 'dty_Name')
                                 :$Db.rst(rtid, dtid, 'rst_DisplayName');
 
@@ -2724,7 +2719,7 @@ window.hWin.HEURIST4.dbs = {
         let removeFacet = false;
         let harchy = [];
         let harchy_fields = []; //for facet.title
-        var codes = codes.split(':');
+        codes = codes.split(':');
         let j = 0;
         while(j<codes.length){
             let rtid = codes[j];
@@ -2782,7 +2777,7 @@ window.hWin.HEURIST4.dbs = {
                     
                 if(linktype=='lt' || linktype=='rt'){
                     
-                    var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
+                    const sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                     
                     if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                         //field was removed - remove facet
@@ -2794,9 +2789,9 @@ window.hWin.HEURIST4.dbs = {
                     harchy_fields.push(sFieldName);
                 }else{
                     //reverse link
-                    let from_rtid = codes[j+2];
+                    const from_rtid = codes[j+2];
 
-                    var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
+                    const sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
                     
                     if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                         //field was removed - remove facet
@@ -2812,7 +2807,7 @@ window.hWin.HEURIST4.dbs = {
                 
             }else{
 
-                var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
+                const sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                 
                 if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                     //field was removed - remove facet

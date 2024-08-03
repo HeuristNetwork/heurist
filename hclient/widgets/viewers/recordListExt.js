@@ -18,7 +18,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global initLinksAndImages */
 
 $.widget( "heurist.recordListExt", {
 
@@ -302,7 +302,7 @@ $.widget( "heurist.recordListExt", {
 
                                 if(response && response.ok){
 
-                                    newurl = 'viewers/smarty/showReps.php?publish=1&debug=0'
+                                    let newurl = 'viewers/smarty/showReps.php?publish=1&debug=0'
                                         + '&q=ids:' + recID
                                         + '&db=' + window.hWin.HAPI4.database
                                         + '&template=' + encodeURIComponent(smarty_template);
@@ -409,7 +409,7 @@ $.widget( "heurist.recordListExt", {
         //add custom css to iframe  besides see cssid parameter
         if(this.options.is_frame_based && this.options.custom_css_for_frame){
             
-            var fdoc = this.dosframe[0].contentWindow.document;
+            let fdoc = this.dosframe[0].contentWindow.document;
             
             let style = document.createElement('style');
             style.type = 'text/css'; 
@@ -420,7 +420,7 @@ $.widget( "heurist.recordListExt", {
         
         if(this.options.is_frame_based){                
             
-            var fdoc = this.dosframe[0].contentWindow.document;
+            let fdoc = this.dosframe[0].contentWindow.document;
             let smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
             
             if(this._is_publication && $.isFunction(initLinksAndImages))
