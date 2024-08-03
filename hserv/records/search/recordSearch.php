@@ -57,13 +57,41 @@ require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 * @param mixed $params - array  rt - record type, dt - detail type
 */
 function recordSearchDistinctValue($system, $params){
+    
+    if(@$params['rec_IDs']){
+        $rec_IDs = prepareIds($params['rec_IDs']);
+        $total_cnt = count($rec_IDs);
+        $offset = 0;
+        if($total_cnt>0 && intval(@$params['dty_ID'])>0){
+            $mysqli = $system->get_mysqli();
+            $values_unique = array();
+            while ($offset<$total_cnt){
+        
+                $rec_IDs_chunk = array_slice($rec_IDs, $offset, 1000);
 
-    if(intval(@$params['rt'])>0 && intval(@$params['dt'])>0){
+                $query = 'SELECT DISTINCT dtl_Value FROM Records, recDetails'
+            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
+            .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+            
+                $values = mysql__select_list2($mysqli, $query);            
+                
+                $values_unique = array_unique(array_merge($values_unique, $values));
+
+                $offset = $offset+1000;
+            }//while     
+            
+            $response = array('status'=>HEURIST_OK, 'data'=> count($values_unique));
+            
+        }else{
+            $response = $system->addError(HEURIST_INVALID_REQUEST, 'Count query parameters are invalid');
+        }   
+    }
+    elseif(intval(@$params['rty_ID'])>0 && intval(@$params['dty_ID'])>0){
         $mysqli = $system->get_mysqli();
 
         $query = 'SELECT COUNT(DISTINCT dtl_Value) FROM Records, recDetails'
-            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rt'])
-            .' AND dtl_DetailTypeID='.intval($params['dt']);//." AND dtl_Value is not null AND dtl_Value!=''";
+            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
+            .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
 
         $res = mysql__select_value($mysqli, $query);
         if ($res==null){

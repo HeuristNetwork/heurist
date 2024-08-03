@@ -102,6 +102,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         this._onRecordScopeChange();
         
+        this.selectRecordScope.hide();
+        
         return true;
     },
 
@@ -214,7 +216,10 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             if(fieldSelect.val()>0){
                 cnt_info.addClass('ui-icon ui-icon-loading-status-balls rotate')
             
-                window.HAPI4.RecordMgr.get_aggregations({a:'count_distinct_values',rt:this.source_RecTypeID, dt:fieldSelect.val()}, 
+                window.HAPI4.RecordMgr.get_aggregations({a:'count_distinct_values',
+                    rec_IDs: this._getRecordsScope().join(','),
+                    rty_ID:this.source_RecTypeID, 
+                    dty_ID:fieldSelect.val()}, 
                 function(response){     
                     cnt_info.removeClass('ui-icon ui-icon-loading-status-balls rotate')
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -469,6 +474,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this._showProgress( session_id, false, 1000 );
         
         let that = this;
+
+        let hWin = window.hWin;
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
             

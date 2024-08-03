@@ -146,17 +146,18 @@ $.widget( "heurist.recordAction", {
     _initControls:function(){
         
         let that = this;
+
+        this.popupDialog();
         
         this.element.find('label[for="sel_record_scope"]').text(window.hWin.HR('recordAction_select_lbl'));
         
-
         this.selectRecordScope = this.element.find('#sel_record_scope');
         if(this.selectRecordScope.length>0){
-            if(this._fillSelectRecordScope()===false) return;
+            if(this._fillSelectRecordScope()===false){
+                this.closeDialog();                
+            }   return;
         }
-        
-        this.popupDialog();
-        
+
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
         
@@ -237,7 +238,7 @@ $.widget( "heurist.recordAction", {
     //
     _initDialog: function(){
         
-            var options = this.options,
+            let options = this.options,
                 btn_array = this._getActionButtons(), 
                 that = this;
         
@@ -255,8 +256,6 @@ $.widget( "heurist.recordAction", {
             if(options['width']>maxw) options['width'] = maxw*0.95;
             let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
-            
-            var that = this;
             
             let $dlg = this.element.dialog({
                 autoOpen: false ,
@@ -396,7 +395,7 @@ $.widget( "heurist.recordAction", {
 
         let rectype_Ids = [];
         if (!is_initscope_empty){
-            for (var rty in scope_types)
+            for (let rty in scope_types)
             if(rty>=0 && scope_types[rty]>0 && $Db.rty(scope_types[rty],'rty_Name')){ 
                 rectype_Ids.push(scope_types[rty]);
             }
@@ -404,7 +403,7 @@ $.widget( "heurist.recordAction", {
             rectype_Ids = this._currentRecordset.getRectypes();
         }
         
-        for (var rty in rectype_Ids){
+        for (let rty in rectype_Ids){
             if(rty>=0){
                 rty = rectype_Ids[rty];
                 
