@@ -1994,12 +1994,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 width:500,
                 height:400,
                 close: function(){
-                    //is_edit_widget_open = false;
                     $dlg.dialog('destroy');       
                     $dlg.remove();
                 },
                 open: function(){
-                    //is_edit_widget_open = true;
                     //$('#terms-merge-popup')
                     $dlg.css({padding:0});
 

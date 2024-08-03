@@ -155,7 +155,7 @@ $.widget( "heurist.repositoryConfig", {
     //
     _initDialog: function(){
         
-        var options = this.options,
+        let options = this.options,
             btn_array = this._getActionButtons(), 
             position = null,
                 that = this;
@@ -172,7 +172,6 @@ $.widget( "heurist.repositoryConfig", {
         let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
         
-        var that = this;
         
         let $dlg = this.element.dialog({
             autoOpen: false ,
@@ -292,7 +291,7 @@ $.widget( "heurist.repositoryConfig", {
             }
         });
 
-        ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
+        let ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
         this._on(ele, {click: this._addNewService});
         
         this.btnApply = this.element.find('#btnApplyCfg').button().css("margin-right", "10px");
@@ -464,7 +463,7 @@ console.log( JSON.stringify(that.options.service_config) );
 
         let values = {};
 
-        for(idx in this._available_services){
+        for(let idx in this._available_services){
 
             values = {
                 title: this._available_services[idx].label,
@@ -729,7 +728,7 @@ console.log( JSON.stringify(that.options.service_config) );
         this._off(this.serviceList.find('span[data-service-id]'),'click');
         this.serviceList.empty(); // empty list
 
-        for(idx in this.options.service_config){ // display all assigned services
+        for(let idx in this.options.service_config){ // display all assigned services
 
             let cfg = this.options.service_config[idx];
 
@@ -739,7 +738,7 @@ console.log( JSON.stringify(that.options.service_config) );
 
             let name = cfg.label;
             
-            for(j in this._available_services){
+            for(let j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
                 }
@@ -806,16 +805,16 @@ console.log( JSON.stringify(that.options.service_config) );
 
         }else if(usr_ID>=0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
-            var that = this;
+            let that = this;
             let is_field_assigned = false;
 
             let inputs = this.element.find('input[data-field]');
             let fields = {};
-            var that = this;
+            
             $.each(inputs, function(i, ele){ // get mapped fields
         
                 let field = $(ele).attr('data-field');
-                let value = $(ele).val();
+                //let value = $(ele).val();
                 
                 fields[field] = $(ele).val();
                 if(fields[field]!=''){

@@ -16,6 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global cfg_widgets, prepareTemplateBlog */
 
 var layoutMgr;  
 
@@ -79,15 +80,11 @@ function hLayoutMgr(){
         if(layout==null){
             //take layout from container
             layout = container.text();
-            var res = window.hWin.HEURIST4.util.isJSON(layout);
-            if(res!==false){
-                layout = res;    
-            }
         }
         
         container.empty();
         
-        var res = window.hWin.HEURIST4.util.isJSON(layout);
+        const res = window.hWin.HEURIST4.util.isJSON(layout);
         
         if(res===false){
             //this is not json - HTML
@@ -236,7 +233,7 @@ function hLayoutMgr(){
                 //find map widget on this page
                 if(widget_name=='heurist_StoryMap'){
                     if(!layout.options.map_widget_id){
-                        var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_Map');
+                        let ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_Map');
 
                         if(ele && ele.dom_id){                        
                             window.hWin.HEURIST4.msg.showMsgDlg('For full fnctionality Story map has to be linked with Map/timeline element. '
@@ -256,7 +253,7 @@ function hLayoutMgr(){
                     
                     if(widget_name=='heurist_Map')
                     {
-                        var ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_StoryMap');
+                        let ele = layoutMgr.layoutContentFindWidget(_main_layout_cfg, 'heurist_StoryMap');
                         if(ele && !ele.options.map_widget_id != layout.dom_id){
 
                             need_assign = false;        
@@ -536,7 +533,7 @@ function hLayoutMgr(){
     //
     function _layoutInitCardinal(layout, container, forStorage){
         
-        var $d, $parent;
+        let $d, $parent;
         
         layout.dom_id = 'cms-tabs-'+layout.key;
         
@@ -552,7 +549,7 @@ function hLayoutMgr(){
         }
         
         //create parent div
-        var $parent = _layoutCreateDiv(layout, '', forStorage);
+        $parent = _layoutCreateDiv(layout, '', forStorage);
         
         if( layout.css && !$.isEmptyObject(layout.css) ){
             $parent.css( layout.css );
@@ -567,7 +564,7 @@ function hLayoutMgr(){
             
             _layoutInitKey(layout.children, i);
             
-            lpane = layout.children[i];
+            let lpane = layout.children[i];
             let pos = lpane.type;
             
             let opts = lpane.options;
@@ -597,6 +594,8 @@ function hLayoutMgr(){
                 }
             }
             
+            let $d2;
+
             if(forStorage){
                 
                 $d2 = _layoutCreateDiv( layout.children[i], '', forStorage )
@@ -619,7 +618,7 @@ function hLayoutMgr(){
                 //@todo additional container for children>1        
                 layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
                 
-                var $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
+                $d2 =_layoutCreateDiv(lpane, 'ui-layout-content2');  
                 $d2.appendTo($d);
             }
                     
@@ -794,7 +793,7 @@ function hLayoutMgr(){
         
         if(!$.isArray(content)){
             if(content.children && content.children.length>0){
-                var res2 =  _layoutContentFindAllWidget(content.children);    
+                let res2 =  _layoutContentFindAllWidget(content.children);    
                 if(res2) res = res.concat(res2);
             }else{
                 return null;
@@ -805,7 +804,7 @@ function hLayoutMgr(){
             if(content[i].appid){
                 res.push(content[i]);
             }else if(content[i].children && content[i].children.length>0){
-                var res2 = _layoutContentFindAllWidget(content[i].children);    
+                let res2 = _layoutContentFindAllWidget(content[i].children);    
                 if(res2) res = res.concat(res2);
             }
         }
@@ -819,7 +818,7 @@ function hLayoutMgr(){
         //find all widgets on page
         let res = {};
         let widgets = _layoutContentFindAllWidget(content);
-        for(var i=0; i<widgets.length; i++){
+        for(let i=0; i<widgets.length; i++){
             if(!widgets[i].options.search_page && widgets[i].options.search_realm){
                 if(res[widgets[i].options.search_realm]>0){
                     res[widgets[i].options.search_realm]++;
@@ -832,7 +831,7 @@ function hLayoutMgr(){
         let max_usage = 0; 
         let max_sg = ''
         widgets = Object.keys(res);
-        for(var i=0; i<widgets.length; i++){
+        for(let i=0; i<widgets.length; i++){
             if(res[widgets[i]]>max_usage){
                 max_usage = res[widgets[i]];
                 max_sg = widgets[i];
@@ -893,7 +892,7 @@ function hLayoutMgr(){
        
         if(layout.template=='default'){
         
-           callback.call(this, new_element_json.children[0]); 
+           callback.call(this, layout.children[0]); 
             
         }else if(layout.template=='blog'){
             
@@ -907,7 +906,7 @@ function hLayoutMgr(){
                 // 3. Execute template script to replace template variables, adds filters and smarty templates
                     $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
                           //function in blog.js
-                          _prepareTemplateBlog(layout, callback);
+                          prepareTemplateBlog(layout, callback);
                           
                     }).fail(function( jqxhr, settings, exception ) {
                         console.error( 'Error in template script: '+exception );
@@ -1121,14 +1120,14 @@ function hLayoutMgr(){
         let s = {};
         if (!css) return s;
         if (css instanceof CSSStyleDeclaration) {
-            for (var i in css) {
+            for (let i in css) {
                 if ((css[i]).toLowerCase) {
                     s[(css[i]).toLowerCase()] = (css[css[i]]);
                 }        
             }
         } else if (typeof css == "string") {
             css = css.split("; ");
-            for (var i in css) {
+            for (let i in css) {
                 let l = css[i].split(": ");
                 s[l[0].toLowerCase()] = (l[1]);
             }

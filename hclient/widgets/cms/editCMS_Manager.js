@@ -17,6 +17,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global layoutMgr, hLayoutMgr */
+
+
 /**
 * @param options
 
@@ -37,7 +40,7 @@ function editCMS_Manager( options ){
     webpage_title = options.webpage_title,
     webpage_private = (options.webpage_private==true);
 
-    let RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+    const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
     DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
     DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
@@ -90,8 +93,6 @@ function editCMS_Manager( options ){
     
     let edit_dialog = null;
     let web_link, tree_element = null;
-    let was_something_edited = false;
-    let remove_menu_records = false;
     let open_page_on_init = -1;
     let home_page_record_title = '';
 
@@ -131,7 +132,7 @@ function editCMS_Manager( options ){
             //create default set of records for website see importController
             function __callback( response ){
                 
-                $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
                 $dlg.dialog('close');
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -151,7 +152,7 @@ function editCMS_Manager( options ){
                                 dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
                                 rVal: webpage_title};
                             window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                                if(response.status == hWin.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     options.record_id = page_recid;
                                     editCMS_Manager( options );
                                 }else{
@@ -208,8 +209,7 @@ function editCMS_Manager( options ){
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
                     rVal: JSON.stringify( updated_json )};
                 window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                    if(response.status == hWin.ResponseStatus.OK){
-                    }else{
+                    if(response.status != window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -302,7 +302,6 @@ function editCMS_Manager( options ){
                 }
             }
         }
-        editCMS_instance = null;
     }
 
     //

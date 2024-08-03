@@ -455,10 +455,11 @@ $.widget( "heurist.emailForm", {
         this._element_form.find('#captcha').val('');
         let $dd = this._element_form.find('#captcha_img');
         let id = window.hWin.HEURIST4.util.random();
-        if(true){  //simple captcha
+        const is_simle_captcha = true;
+        if(is_simle_captcha){  //simple captcha
             let that = this;
             
-            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
+            const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
             
             //var request = {json:1,id:id};
             //window.hWin.HEURIST4.util.sendRequest(url, request, null, 
@@ -469,9 +470,9 @@ $.widget( "heurist.emailForm", {
                     });
 
         
-        }else if(false){
-            var url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
-            $dd.load(url);
+        // }else if(false){
+        //    const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id;
+        //    $dd.load(url);
         }else{ //image captcha
             $dd.empty();
             $('<img alt src="'+window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?img='+id+'"/>').appendTo($dd);

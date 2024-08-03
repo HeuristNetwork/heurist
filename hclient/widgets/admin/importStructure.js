@@ -891,7 +891,7 @@ $.widget( "heurist.importStructure", {
         //this.options.window = window.hWin;
         this.element.addClass('ui-heurist-bg-light');
 
-        var $dlg = this.element.dialog({
+        let $dlg = this.element.dialog({
             autoOpen: false ,
             //element: this.element[0],
             height: options['height'],
@@ -1121,7 +1121,7 @@ $.widget( "heurist.importStructure", {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
@@ -1148,7 +1148,7 @@ $.widget( "heurist.importStructure", {
 
             info = '<div style="border:2px solid blue;padding:10px 4px;margin-top:10px"><i>' + fld('rty_Description') + "</i><br><br>";   //description
             info += '<table style="text-align: left;font-size:0.9em; font-color:darkgray;width:100%"><tr>';
-            info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
+            info += '<th  style="padding-left:10px;" class="status"><b>Already in DB?</b></th>';
             info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
             info += '<th style="padding-left:10px;"><b>Base field name (shared across record types)</b></th>';
             info += '<th style="width:100px; padding-left:10px;"><b>Field data type</b></th></tr>';

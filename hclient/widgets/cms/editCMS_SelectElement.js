@@ -134,8 +134,6 @@ function editCMS_SelectElement( callback ){
                 $dlg.remove();
             },
             open: function(){
-                is_edit_widget_open = true;
-                
                 $dlg.find('.heurist-online-help').attr('href',
                 window.hWin.HAPI4.sysinfo.referenceServerURL+'?db=Heurist_Help_System&website&id=39&pageid=708');
 

@@ -1,6 +1,6 @@
 //this script will be executed once after addition of template
 //it adds new faceted search and new smarty template
-function _prepareTemplateBlog(new_element_json, callback){
+function prepareTemplateBlog(new_element_json, callback){
 
     let sfilter = {"facets":[{"var":84411,"code":"7:added","title":"Added","groupby":"month",
             "orderby":"desc","type":"date","order":0,"isfacet":"3","help":""},

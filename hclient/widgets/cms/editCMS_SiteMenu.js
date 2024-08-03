@@ -17,6 +17,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global page_cache */
 //
 //
 //
@@ -24,7 +26,7 @@ function editCMS_SiteMenu( $container, editCMS2 ){
 
     const _className = 'editCMS_SiteMenu';
     
-    let RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+    const RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
         DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
         DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
         DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
@@ -89,7 +91,7 @@ title: "Overview"
 */
         if(tree_element.fancytree('instance')){
             
-            var tree = tree_element.fancytree('getTree');
+            let tree = tree_element.fancytree('getTree');
 
             //keep_expanded_nodes
             let keep_expanded_nodes = [];
@@ -185,7 +187,6 @@ title: "Overview"
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                             //window.hWin.HEURIST4.msg.sendCoverallToBack();
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                was_something_edited = true;
                                 window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                 //reload main menu
                                 _refreshMainMenu( false ); //after DnD
@@ -233,7 +234,7 @@ title: "Overview"
 
             tree_element.fancytree(fancytree_options).addClass('tree-cms');
             
-            tree = tree_element.fancytree('getTree');
+            let tree = tree_element.fancytree('getTree');
             tree.visit(function(node){
                 node.setExpanded(true);
             });            
@@ -368,11 +369,9 @@ title: "Overview"
                                         $dlg.dialog( "close" );
 
                                         let to_del = [];
-                                        if(remove_menu_records){
-                                            item.visit(function(node){
+                                        item.visit(function(node){
                                                 to_del.push(node.data.page_id);
                                                 },true);
-                                        }
 
                                         if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
                                             to_del = null;
@@ -393,15 +392,8 @@ title: "Overview"
                                     
                                     let buttons = {};
                                     buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
-                                        remove_menu_records = true;
                                         __doRemove();
                                     };
-                                    /*        
-                                    buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
-                                    remove_menu_records = false;
-                                    __doRemove();
-                                    };
-                                    */
                                     buttons[window.hWin.HR('Cancel')]  = function() {
                                         let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                                         $dlg.dialog( "close" );
@@ -576,6 +568,8 @@ title: "Overview"
     //
     function _defineMenuRecordSimple(parent_id, callback){
         
+        let $dlg;
+        
         let buttons= [
             {text:window.hWin.HR('Cancel'), 
                 id:'btnCancel',
@@ -694,7 +688,7 @@ title: "Overview"
                 //refresh treeview
                 if($.isFunction(callback)) callback.call( this, menu_id );
             }else{
-                hWin.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });                                        
 
@@ -722,7 +716,7 @@ title: "Overview"
                                 //refresh treeview
                                 if($.isFunction(callback)) callback.call();
                             }else{
-                                hWin.HEURIST4.msg.showMsgErr(response);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         }      
                     );
@@ -732,7 +726,7 @@ title: "Overview"
                     if($.isFunction(callback)) callback.call();
                 }
             }else{                                                     
-                hWin.HEURIST4.msg.showMsgErr(response);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });                                        
 

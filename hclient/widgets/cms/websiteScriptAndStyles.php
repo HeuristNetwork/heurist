@@ -78,6 +78,8 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     //init js variables from REQUEST
 ?>
 <script>
+    var editCMS_instance2 = null; //editor instance
+
     var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_or_record_on_init; ?>;
@@ -549,7 +551,10 @@ if($website_custom_css!=null){
                         editCMS_instance2 = editCMS2(this.document);//editCMS_Init
                     }
 
-                    if (! editCMS_instance2.startCMS({record_id:pageid, container:'#main-content',
+                    if (! editCMS_instance2.startCMS({
+                                    record_id:pageid, 
+                                    container:'#main-content',
+                                    isCMS_NewWebsite: isCMS_NewWebsite,
                                     close: function(){
                                         isCMS_active = false;
                                         $('#btnOpenCMSeditor').html('website editor');
@@ -1436,8 +1441,10 @@ function _openCMSeditor(event){
 
             isCMS_active = true;
             if(!editCMS_instance2) editCMS_instance2 = editCMS2(this.document);//editCMS_Init
-            editCMS_instance2.startCMS({record_id: current_page_id, 
+            editCMS_instance2.startCMS({
+                record_id: current_page_id, 
                 //content: page_cache[current_page_id],  //html or json
+                isCMS_NewWebsite: isCMS_NewWebsite,
                 container:'#main-content',
                 close: function(){
                     isCMS_active = false;

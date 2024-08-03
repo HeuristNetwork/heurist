@@ -17,6 +17,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+// global variables defined in websiteScriptAndStyles
+
+/* global tinymce, isCMS_InHeuristUI, isWebPage, current_page_id, home_page_record_id, page_cache, 
+    editCMS_instance2, editCMS_SiteMenu, editCMS_ElementCfg, editCMS_SelectElement, 
+    website_languages, default_language,current_language*/
+
+//  window.hWin.layoutMgr - global variable defined in hLayoutMgr
 
 /*
 
@@ -31,15 +38,6 @@ widget:
 
 */
 
-var editCMS_instance2 = null;
-// global variables defined in websiteScriptAndStyles
-//  window.hWin.layoutMgr - global variable defined in hLayoutMgr
-//  page_cache
-//  home_page_record_id
-//  website_languages,  default_language, current_language
-//  isWebPage
-//  current_page_id
-//  isCMS_InHeuristUI, isCMS_NewWebsite
 
 //
 // options: record_id, content, container
@@ -76,7 +74,7 @@ function editCMS2(website_document){
         _ws_doc = website_document, //website document
         _ws_body = $(website_document).find('body');
     
-    let RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+    const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     
     //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
@@ -90,6 +88,8 @@ function editCMS2(website_document){
     dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
     
     let options;
+    
+    let isCMS_NewWebsiteWarning = true;
     
     function _loadTinyMCE(callback) {
        const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
@@ -125,9 +125,10 @@ function editCMS2(website_document){
                 return;
             }
             
-            if(isCMS_NewWebsite){
-                isCMS_NewWebsite = false;
+            if(_options.isCMS_NewWebsite && isCMS_NewWebsiteWarning){
 
+                isCMS_NewWebsiteWarning = false;
+                
                 let $dlg;
                 let button = {};
                 button[window.hWin.HR('OK')] = function(){
@@ -264,19 +265,15 @@ function editCMS2(website_document){
 
                     _ws_body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
 
+                    let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                    tog.addClass('prominent-cardinal-toggler togglerVertical');
 
-                    if(true){ // this.usrPreferences.structure_closed==0, only if panel is closed by default
+                    if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                        tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                    }else{
 
-                        let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
-                        tog.addClass('prominent-cardinal-toggler togglerVertical');
-
-                        if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
-                            tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
-                        }else{
-
-                            let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
-                            $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
-                        }
+                        let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                        $('<span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
                     }
                     
             _initEditControls(false);
@@ -302,27 +299,14 @@ function editCMS2(website_document){
             
         }else if (options.record_id>0 ){
             
-            current_page_id = options.record_id;
+            window.hWin.current_page_id = options.record_id;
             
             _layout_content = page_cache[options.record_id][DT_EXTENDED_DESCRIPTION];
-            
-            /*load by page_record_id
-                var surl = window.hWin.HAPI4.baseURL+'?db='
-                    +window.hWin.HAPI4.database+'&field='+DT_EXTENDED_DESCRIPTION+'&recid='+options.record_id;
-                $.get( surl,  
-                function(res){
-                    options.content = res;
-                    _layout_content = res;
-                    _initPage();
-                });
-            */
         }
         
         //swtich to page tab automatically
         _layout_container.click(function(event){
             if(current_edit_mode!='page'){
-                //if($(event.target).is('a') || 
-                //if($(event.target).parents('.mceNonEditable').length>0) return;
                 //switch to page mode                
                 _switchMode('page');
             }
@@ -549,12 +533,12 @@ function editCMS2(website_document){
         if(supress_conversion!==true && typeof _layout_content === 'string' &&
             _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
 
-                            var res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
+                            const res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
                                 page_was_modified = true;
                                 _layout_content = res;
                                 
-let sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
+const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
 +'<p>If this page uses complex formatting we cannot be sure of converting correctly through this automatic process.</p>'
 +'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
 +'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
@@ -566,7 +550,7 @@ let sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
         
         opts.keep_top_config = true;
         opts.lang = current_language;
-        var res = window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, opts);
+        const res = window.hWin.layoutMgr.layoutInit(_layout_content, _layout_container, opts);
         
         if(res===false){
             window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
@@ -1067,16 +1051,8 @@ let sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is 
             _panel_treePage[0].style.removeProperty('height'); //show();
         }
         
-        if(true){ // || current_edit_mode=='website'
-            _panel_propertyView.hide();
-            __restoreTree();
-        }else if(_panel_propertyView.is(':visible')){
-            _panel_propertyView.effect('puff',{},200, __restoreTree);
-        }else{
-            __restoreTree();
-        }
-        
-
+        _panel_propertyView.hide();
+        __restoreTree();
     }
 
     //
@@ -1642,7 +1618,7 @@ function(value){
             parent_children = oldparent.children;
         }
         let idx = -1;
-        for(var i=0; i<parent_children.length; i++){
+        for(let i=0; i<parent_children.length; i++){
           if(parent_children[i].key==ele_id){
               idx = i;
               break;
@@ -1661,7 +1637,7 @@ function(value){
         if(prevnode==null){
             idx = 0;
         }else{
-            for(var i=0; i<parent_children.length; i++){
+            for(let i=0; i<parent_children.length; i++){
               if(parent_children[i].key==prevnode.key){
                   idx = i+1;
                   break;
@@ -1747,7 +1723,7 @@ function(value){
         }
 
         //scroll tree that selected element will be visible
-        var node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
+        let node = _panel_treePage.fancytree('getTree').getNodeByKey(ele_id);
         let top1 = $(node.li).position().top;
         _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
         _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
@@ -1756,12 +1732,6 @@ function(value){
         $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
         
         _hideMenuInTree();
-        /*
-        var ele = _panel_treePage.find('.lid-actionmenu');
-        ele.hide(); //menu icon
-        ele.find('span[data-action]').hide(); //popup menu
-        */
-        
         
         _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
         _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
@@ -1779,8 +1749,8 @@ function(value){
             
         if(is_cardinal){
              //find parent
-             var node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
-             let parentnode = node.getParent();
+             const node = _panel_treePage.fancytree('getTree').getNodeByKey(''+ele_id);
+             const parentnode = node.getParent();
              ele_id = parentnode.key;
              element_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
         }
@@ -1934,7 +1904,7 @@ function(value){
                 children:[]
             };
             
-            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
+            let child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
             new_ele.children.push(child);
             
             child = window.hWin.HEURIST4.util.cloneJSON(child);
@@ -1948,7 +1918,7 @@ function(value){
                 children:[]
             };
             
-            var child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
+            let child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"<p>Lorem ipsum dolor sit amet ...</p>"};
             new_ele.children.push(child);
             child = window.hWin.HEURIST4.util.cloneJSON(child);
             child.name = 'Column 2';
@@ -1995,17 +1965,7 @@ function(value){
 
         if(parentnode.folder){
             //add child
-            /*
-            if(parentnode.parent){
-            //insert after visible element
-            var l_cfg = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
-            parent_container = body.find('div[data-lid="'+parentnode.parent.key+'"]');
-            parent_children = l_cfg.children;
-            }else{
-            parent_container = '#main-content';
-            parent_children = _layout_content;
-            }
-            */
+
             parent_element = window.hWin.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
             parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
             parent_children = parent_element.children;
@@ -2143,14 +2103,9 @@ function(value){
         }else{
             newval = JSON.stringify(newval);    
         }*/
-        //var configuration = JSON.stringify(newval);    
-        //for(var i=0;i<contents.length-1;i++){
-        //}
         
         newval = JSON.stringify(newval);
-        if(false){ //need encoding
-            newval = window.hWin.HEURIST4.util.bytesToBase64(new TextEncoder().encode(newval));    
-        }
+        
         let request = {a: 'addreplace',
                         recIDs: options.record_id,
                         dtyID: DT_EXTENDED_DESCRIPTION,
@@ -2161,7 +2116,7 @@ function(value){
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
-                if(response.status == hWin.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     if(response.data.errors==1){
                         let errs = response.data.errors_list;
                         let errMsg = errs[Object.keys(errs)[0]];
@@ -2201,7 +2156,7 @@ function(value){
     }
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

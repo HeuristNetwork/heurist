@@ -16,6 +16,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global layoutMgr */
+
 //
 // widget_cfg -json cfg for widget to be edited 
 // _layout_content- json cfg for website
@@ -167,7 +170,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         let main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
         
         if(main_menu.length>0 && widget_name!='heurist_StoryMap'){
-            pages = main_menu.navigation('getMenuContent','list');
+            let pages = main_menu.navigation('getMenuContent','list');
             if(!pages){
                 selPage.parent().hide();
             }else{
@@ -185,7 +188,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find map widget on this page
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
-                    var ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    const ele = layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
@@ -196,10 +199,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
             if(!opts.search_realm){ //not defined yet
             
-                if(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)
-                {
-                    
-                }else{
+                if(!(widget_name=='heurist_Map' && layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
                     let sg = layoutMgr.layoutContentFindMainRealm(_layout_content);    
                     if(sg=='') sg = 'search_group_1';
                     opts.search_realm = sg;
@@ -295,8 +295,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     if(opts.layout_params['popup_width']){
 
-                        var value = opts.layout_params['popup_width'];
-                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        let value = opts.layout_params['popup_width'];
+                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
                         value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
 
                         $dlg.find('input[name="popup_width"]').val(value); // first index
@@ -304,8 +304,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                     if(opts.layout_params['popup_height']){
 
-                        var value = opts.layout_params['popup_height'];
-                        var unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
+                        let value = opts.layout_params['popup_height'];
+                        const unit = (value.indexOf('px') > 0) ? value.slice(-2) : value.slice(-1);
                         value = (value.indexOf('px') > 0) ? value.slice(0, -2) : value.slice(0, -1);
 
                         $dlg.find('input[name="popup_height"]').val(value); // first index
@@ -503,11 +503,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 let rval = $dlg.find('input[name="menu_recIDs"]').val();
                 rval =  rval?rval.split(','):[];
 
-                var ele = $dlg.find('#menu_recIDs');
+                let ele = $dlg.find('#menu_recIDs');
 
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,                                                                                       
                         dtID: ele.attr('id'), //'group_selector',
                         //show_header: false,
@@ -577,13 +577,13 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }else 
             if (widget_name=='heurist_recordAddButton'){
 
-                    var ele = $dlg.find('button[name="add_record_cfg"]');
+                    let ele = $dlg.find('button[name="add_record_cfg"]');
 
                     if(!ele.button('instance')){
                         
                         function __human_readble(){
                             
-                            let rty_ID = $dlg.find('input[name="RecTypeID"]').val();
+                            const rty_ID = $dlg.find('input[name="RecTypeID"]').val();
                             if(rty_ID>0){
                                 $('#add_record_desc').html(
                                 '&nbsp;&nbsp;<i>Record type: </i>'+$Db.rty(rty_ID,'rty_Name')
@@ -670,7 +670,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 //visible for buttons and tree mode
-                var ele = $dlg.find('#allowed_UGrpID');
+                let ele = $dlg.find('#allowed_UGrpID');
                 if(!ele.editing_input('instance')){
 
                     let init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
@@ -678,7 +678,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         init_val = 5;//web search  by default
                     }
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [init_val], 
@@ -707,7 +707,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 ele = $dlg.find('#allowed_svsIDs');
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
@@ -734,7 +734,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 ele = $dlg.find('#init_svsID');
                 if(!ele.editing_input('instance')){
 
-                    var ed_options = {
+                    const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [$dlg.find('input[name="init_svsID"]').val()],
@@ -826,8 +826,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     
                 let allMapDocuments = [];
                 
-                $selectedDocuments =  $('input[name="mapdocuments"]');
-                $selectedBasemaps =  $('input[name="basemaps"]');
+                let $selectedDocuments =  $('input[name="mapdocuments"]');
+                let $selectedBasemaps =  $('input[name="basemaps"]');
                 
                 function __assignMapDocNames(newsel){
                     if(newsel){
@@ -883,7 +883,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }
                 );
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
                     .insertBefore($selectedDocuments);
                 let $select_documents_dlg = $('<div/>').hide().appendTo( $selectedDocuments.parent() );
@@ -892,7 +892,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                        $select_documents_dlg.selectMultiValues({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 $selectedDocuments.attr('data-mapdocuments', newsel);
                                 __assignMapDocNames(newsel);
                             }
@@ -915,7 +915,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     
                 let $selectBaseMap = $dlg.find('select[name="map_basemap"]');
 
-                let baseMapOptions = [
+                const baseMapOptions = [
                     {key:'OpenStreetMap', title:'OpenStreetMap'},
                     {key:'OpenTopoMap', title:'OpenTopoMap'},
                     {key:'MapBox.StreetMap', title:'MapBox.StreetMap'},
@@ -944,7 +944,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     $selectBaseMap.hSelect('widget').css('width', '200px');
                 }
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
                     .insertBefore($selectedBasemaps);
                 let $select_basemaps_dlg = $('<div/>').hide().appendTo( $selectedBasemaps.parent() );
@@ -953,7 +953,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                        $select_basemaps_dlg.selectMultiValues({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 $selectedBasemaps.val(newsel);
                             }
                         }, 
@@ -1035,9 +1035,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
                 
                 
-                var ele = $dlg.find('#storyFields');
+                let ele = $dlg.find('#storyFields');
 
-                var ed_options = {
+                const ed_options = {
                         recID: -1,
                         dtID: ele.attr('id'), 
                         values: [defValue],

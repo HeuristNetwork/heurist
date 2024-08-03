@@ -17,6 +17,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/* global editCMS_WidgetCfg, CodeMirror, default_language, current_language, website_languages */
+
 //
 //
 //
@@ -122,7 +125,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             //4a.add list of children with flex-grow and flex-basis
                 let item_ele = cont.find('div[data-flexitem]');
                 let item_last = item_ele;
-                for(var i=0; i<l_cfg.children.length; i++){
+                for(let i=0; i<l_cfg.children.length; i++){
 
                     let child = l_cfg.children[i];
 
@@ -131,7 +134,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     let lbl = item.find('.header_narrow');
                     lbl.text((i+1)+'. '+lbl.text());
 
-                    var val = (child.css)?child.css['flex']:null;
+                    let val = (child.css)?child.css['flex']:null;
                     if(val){
                         val = val.split(' '); //grow shrink basis
                     }else{
@@ -163,7 +166,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }else 
         if(etype=='cardinal'){ //assign cardinal properties
             
-            for(var i=0; i<l_cfg.children.length; i++){
+            for(let i=0; i<l_cfg.children.length; i++){
                 let lpane = l_cfg.children[i];
                 let pane = lpane.type;
 
@@ -173,7 +176,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                        let key = keys[k];
                        let ele = cont.find('[data-type="cardinal"][data-pane="'+pane+'"][name="'+key+'"]');
                        if(ele.length>0){
-                            var val = lpane.options[key];   
+                            const val = lpane.options[key];   
                             if(ele.attr('type')=='checkbox'){
                                 ele.attr('checked', (val=='true' || val===true));
                             }else {
@@ -354,7 +357,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
             //get cardinal parameters  
             if(l_cfg.type=='cardinal')
-            for(var i=0; i<l_cfg.children.length; i++){
+            for(let i=0; i<l_cfg.children.length; i++){
                     let lpane = l_cfg.children[i];
                     let pane = lpane.type;
 
@@ -400,7 +403,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         let val = cont.find('#border-style').val();
         css['border-style'] = val;
 
-        fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
+        let fieldset = cont.find('fieldset[data-section="border"] > div:not(:first)');
         if(val=='none'){
             fieldset.hide();
 
@@ -573,6 +576,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         let s = '';
         let has_border_prop = false;
         if(l_cfg.css){
+            
+            let border_styles = [];
+            $("#border-style option").each(function()
+            {
+                border_styles.push($(this).val());
+            });
 
             s = [];
             for(const [style, value] of Object.entries(l_cfg.css)){
@@ -586,8 +595,8 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
                     let parts = value.split(' ');
 
-                    let part_zero_style = (parts.length == 2 && parts[0].indexOf(border_styles) !== -1);
-                    let part_one_style = (parts.length == 2 && parts[1].indexOf(border_styles) !== -1);
+                    let part_zero_style = (parts.length == 2 && border_styles.indexOf(parts[0]) !== -1);
+                    let part_one_style = (parts.length == 2 && border_styles.indexOf(parts[1]) !== -1);
 
                     // Width
                     if(parts.length == 3 || part_one_style){
@@ -970,10 +979,10 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                         let recordset = data.selection;
                         let record = recordset.getFirstRecord();
                         
-                        var sUrl = recordset.fld(record,'ulf_ExternalFileReference');
+                        let sUrl = recordset.fld(record,'ulf_ExternalFileReference');
                         if(!sUrl){
                             //always add media as reference to production version of heurist code (not dev version)
-                            var sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                            sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
                             +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
                             $container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
                         }else{
