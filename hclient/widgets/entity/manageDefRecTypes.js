@@ -51,6 +51,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //                                                  
     //    
     _init: function() {
+
+        this.element.addClass(this._entityName); //to find all exisiting editors in application
         
         this.options.default_palette_class = 'ui-heurist-design';
         

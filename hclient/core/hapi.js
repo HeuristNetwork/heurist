@@ -249,12 +249,29 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _is_callserver_in_progress = true;
         
         if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
-            && (new Date().getTime())-_last_check_dbcache_relevance> 7000){ //7 seconds
+            && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
-            window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
-                _callserver(action, request, callback, timeout);
-            });
-            return;
+            
+            function __is_Not_Active_StrutureEditor(name){
+                let editors = $('div.'+name);
+                if(editors.length>0){
+                    return !editors.is('visible');
+                }else{
+                    return true;                    
+                }
+            }
+            
+            //ignore if record structure editor is opened
+            if(__is_Not_Active_StrutureEditor('defRecStructure')
+                //&& __checkStrutureEditors('defVocabularyGroups') 
+                //&& __checkStrutureEditors('defRecTypes')
+            )
+            {
+                window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
+                    _callserver(action, request, callback, timeout);
+                });
+                return;
+            }
         }
         
 
