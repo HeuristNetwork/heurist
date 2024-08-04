@@ -29,7 +29,7 @@
     
     Action is defined by "id" attribute (like id="menu-database-clone")
     
-    Menu Title and Hine are taken from localization files via id (dashes are replace to underscores: menu_database_clone).
+    Menu Title and Hint are taken from localization files via id (dashes are replace to underscores: menu_database_clone).
     If there is not localised version it takes title and hint from <li><a>
     
     Main menu can be visible as standard horizontal menu (as in previous layout) or can be hidden. 

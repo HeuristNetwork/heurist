@@ -58,50 +58,102 @@ require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 */
 function recordSearchDistinctValue($system, $params){
     
+    $mysqli = $system->get_mysqli();
+    $all_records_for_rty = false; //if false - search for given set of record ids
+    
+    //0 unique, 1 -both, 2 - all values
+    if(!@$params['mode']){
+        $params['mode'] = 1;
+    }
+    $search_unique = (intval($params['mode'])<=1);
+    $search_all = (intval($params['mode'])>=1);
+    
     if(@$params['rec_IDs']){
         $rec_IDs = prepareIds($params['rec_IDs']);
         $total_cnt = count($rec_IDs);
         $offset = 0;
         if($total_cnt>0 && intval(@$params['dty_ID'])>0){
-            $mysqli = $system->get_mysqli();
-            $values_unique = array();
-            while ($offset<$total_cnt){
-        
-                $rec_IDs_chunk = array_slice($rec_IDs, $offset, 1000);
 
-                $query = 'SELECT DISTINCT dtl_Value FROM Records, recDetails'
-            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
-            .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+            if(intval(@$params['rty_ID'])>0){
+                $query = 'SELECT count(rec_ID) FROM Records WHERE rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID']);
+                $res = mysql__select_value($mysqli, $query);
+                if(intval($res)==$total_cnt){
+                    $all_records_for_rty = true;
+                }
+            }
             
-                $values = mysql__select_list2($mysqli, $query);            
+            if(!$all_records_for_rty){
+            
+                $values_unique = array();
+                $detail_count = 0;
                 
-                $values_unique = array_unique(array_merge($values_unique, $values));
-
-                $offset = $offset+1000;
-            }//while     
+                while ($offset<$total_cnt){
             
-            $response = array('status'=>HEURIST_OK, 'data'=> count($values_unique));
+                    $rec_IDs_chunk = array_slice($rec_IDs, $offset, 1000);
+
+                    if($search_unique){
+
+                        $query = 'SELECT DISTINCT dtl_Value FROM Records, recDetails'
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
+                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                    
+                        $values = mysql__select_list2($mysqli, $query);            
+                        
+                        $values_unique = array_unique(array_merge($values_unique, $values));
+                    
+                    }
+                    if($search_all){
+                        $query = 'SELECT count(dtl_ID) FROM Records, recDetails'
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_ID IN ('.implode(',',$rec_IDs_chunk).')'
+                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                        $detail_count = $detail_count+mysql__select_value($mysqli, $query);
+                    }
+                    
+                    $offset = $offset+1000;
+                }//while     
+                
+                $response = array('status'=>HEURIST_OK, 'data'=> array('unique'=>count($values_unique),'total'=>$detail_count));
+            }
             
         }else{
             $response = $system->addError(HEURIST_INVALID_REQUEST, 'Count query parameters are invalid');
         }   
-    }
-    elseif(intval(@$params['rty_ID'])>0 && intval(@$params['dty_ID'])>0){
-        $mysqli = $system->get_mysqli();
-
-        $query = 'SELECT COUNT(DISTINCT dtl_Value) FROM Records, recDetails'
-            .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
-            .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
-
-        $res = mysql__select_value($mysqli, $query);
-        if ($res==null){
-            $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on unique values count. Query '.$query, $mysqli->error);
-        }else{
-            $response = array('status'=>HEURIST_OK, 'data'=> $res);
-        }
-
     }else{
-        $response = $system->addError(HEURIST_INVALID_REQUEST, 'Count query parameters are invalid');
+        $all_records_for_rty = true;
+    }
+    
+    if($all_records_for_rty){ 
+        if(intval(@$params['rty_ID'])>0 && intval(@$params['dty_ID'])>0){
+
+            $unique_count = 0;
+            $detail_count = 0;
+            
+            if($search_unique){
+                $query = 'SELECT COUNT(DISTINCT dtl_Value) FROM Records, recDetails'
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
+                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                $res = mysql__select_value($mysqli, $query);
+                if ($res==null){
+                    return $system->addError(HEURIST_DB_ERROR, 'Search query error on unique values count. Query '.$query, $mysqli->error);
+                }
+                $unique_count = intval($res);    
+            }
+            if($search_all){
+                $query = 'SELECT COUNT(dtl_ID) FROM Records, recDetails'
+                    .' WHERE rec_ID=dtl_RecID AND rec_FlagTemporary!=1 AND rec_RecTypeID='.intval($params['rty_ID'])
+                    .' AND dtl_DetailTypeID='.intval($params['dty_ID']);//." AND dtl_Value is not null AND dtl_Value!=''";
+                $res = mysql__select_value($mysqli, $query);
+                if ($res==null){
+                    return $system->addError(HEURIST_DB_ERROR, 'Search query error on details count. Query '.$query, $mysqli->error);
+                }
+                $detail_count = intval($res);    
+            }
+
+            $response = array('status'=>HEURIST_OK, 'data'=> array('unique'=>$unique_count,'total'=>$detail_count));
+
+        }else{
+            $response = $system->addError(HEURIST_INVALID_REQUEST, 'Count query parameters are invalid');
+        }
     }
 
     return $response;

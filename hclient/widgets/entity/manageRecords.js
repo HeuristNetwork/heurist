@@ -4422,7 +4422,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         //add resizing buttons to dialog title bar
-        if(this._as_dialog){
+        if(this._as_dialog && this._as_dialog.dialog('instance')){
 
             let $dlg = this._as_dialog.dialog('widget');
             $('<span>', {id: 'btn_Fullscreen'}).appendTo($dlg.find('.ui-dialog-titlebar'));

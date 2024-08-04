@@ -125,7 +125,7 @@
 
         $response = recordSearchMinMax($system, $req_params);
 
-    }else if(@$req_params['a'] == 'count_distinct_values'){
+    }else if(@$req_params['a'] == 'count_details'){
 
         $response = recordSearchDistinctValue($system, $req_params);
         
