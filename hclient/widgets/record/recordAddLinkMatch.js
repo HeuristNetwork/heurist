@@ -53,6 +53,8 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     // select option by rectypes
     //
     _fillSelectRecordScope: function (){
+        
+        this.element.find('select').css({width:'30em','max-width':'35em'});
 
         let scope_types = this.options.scope_types;
         this.selectRecordScope.empty();
@@ -102,7 +104,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         this._onRecordScopeChange();
         
-        this.selectRecordScope.hide();
+        this.selectRecordScope.parent().hide();
         
         return true;
     },
@@ -151,6 +153,9 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                 
                 //get name, contraints
                 let dtyName = detail['rst_DisplayName'];
+                if(!has_fields){
+                    window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), 0, window.hWin.HR('select'));    
+                }
                 window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), dtyID, dtyName);
                 has_fields = true;
             });//for fields
@@ -160,12 +165,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                 window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), 0, 'There are no record pointer fields');
             }
         
-            //select first to trigger creaton of target select rectype
-            if(this.element.find('input[type="radio"][name="link_field"]').length>0){
-                $(this.element.find('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').change();
-            }
-            
-            
             this._on( fieldPointerSel, { change: that._fillTargetRecordTypes} );        
             //if(fieldPointerSel.selectedIndex<0) fieldPointerSel.selectedIndex=0;
             window.hWin.HEURIST4.ui.initHSelect(fieldPointerSel, false);
@@ -173,9 +172,11 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
             
         }//for source 
         
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, ['freetext','blocktext'], null);
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, 
+                                    ['freetext','blocktext'], window.hWin.HR('select'));
                      //,{useHtmlSelect:true});
-        if(fieldSelect.find('option').length==0){
+        if(fieldSelect.find('option').length==1){
+            fieldSelect.empty();
             window.hWin.HEURIST4.ui.addoption(fieldSelect.get(0), 0, 'There are no text fields');
         }
                      
@@ -241,7 +242,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
                                 dty_src:fieldSelectSrc.val(),
                                 rty_trg:this.target_RecTypeID, 
                                 dty_trg:fieldSelectTrg.val()
-                }, 
+                                                        }, 
                 function(response){     
                     cnt_info2.removeClass('ui-icon ui-icon-loading-status-balls rotate')
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -357,7 +358,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     doAction: function(){
         
         if(this.element.find('#div_result').is(':visible')){
-            this.element.parents('.ui-dialog').find('#btnDoAction').button({label:'Create Links'});
+            this._setBtnLabels(false);
             this.element.find('#div_result').hide();
             this.element.find('#div_fieldset').show();
             return;
@@ -375,48 +376,91 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         let currentScope = this._getRecordsScope();
         
-        let session_id = Math.round((new Date()).getTime()/1000);
         
-        let request = {a: 'add_links_by_matching',
-                            session: session_id,
-                            dty_ID:  dty_ID,
-                            //trm_ID: trm_ID,
-                            rec_IDs: currentScope.join(','),
-                            rty_src:  this.source_RecTypeID,
-                            dty_src: $('#sel_fieldtype_source').val(),
-                            rty_trg: this.target_RecTypeID,
-                            dty_trg: $('#sel_fieldtype_target').val(),
-                            replace: ($('input[name="to_replace"]:checked').val()=='replace'?1:0)
-                    };
-
-        this.element.find('#div_result').empty();
-        this._showProgress( session_id, false, 1000 );
-        
+        let div_res = this.element.find('#div_result');
+        div_res.empty();
         let that = this;
-
-        let hWin = window.hWin;
         
-        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+        if ($('input[name="to_replace"]:checked').val()=='nonmatch') {
+                window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
+                                nonmatch: 1,
+                                rec_IDs: this._getRecordsScope().join(','),
+                                rty_src:this.source_RecTypeID, 
+                                dty_src:$('#sel_fieldtype_source').val(),
+                                rty_trg:this.target_RecTypeID, 
+                                dty_trg:$('#sel_fieldtype_target').val()
+                                                        }, 
+                function(response){     
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.element.find('#div_fieldset').hide();
+                        let csv_res = '<div style="padding:10px;height:100%;overflow:auto;">UNMATCHED VALUES<br><pre>H-ID&#9;Value&#9;Record title<br>';
+                        for(let idx in response.data){
+                            let row = response.data[idx];
+                            for(let idx2 in row){
+                                row[idx2] = window.hWin.HEURIST4.util.stripTags(row[idx2]).trim();
+                            }
+                            csv_res = csv_res + row.join("&#9;")+"<br>";
+                        }
+                        div_res.html(csv_res+'</pre></div>').show();
+                        that._setBtnLabels(true);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        }else{
             
-            that._hideProgress();
+            let session_id = Math.round((new Date()).getTime()/1000);
+        
+            let request = {a: 'add_links_by_matching',
+                                session: session_id,
+                                dty_ID:  dty_ID,
+                                //trm_ID: trm_ID,
+                                rec_IDs: currentScope.join(','),
+                                rty_src:  this.source_RecTypeID,
+                                dty_src: $('#sel_fieldtype_source').val(),
+                                rty_trg: this.target_RecTypeID,
+                                dty_trg: $('#sel_fieldtype_target').val(),
+                                replace: ($('input[name="to_replace"]:checked').val()=='replace'?1:0)
+                        };
+
+            this._showProgress( session_id, false, 1000 );
             
-            if(response.status == hWin.ResponseStatus.OK){
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 
-                that.element.find('#div_fieldset').hide();
-                that.element.find('#div_result').html(
-'<div style="padding:10px;display:table">'
-+`<span class="table-cell">Records passed to process</span><span class="table-cell">&nbsp;&nbsp;${currentScope.length}</span><br><br>`
-+`<span class="table-cell">Records updated</span><span class="table-cell">&nbsp;&nbsp;${response.data['records_updated']}</span><br><br>`
-+`<span class="table-cell">Links added</span><span class="table-cell">&nbsp;&nbsp;${response.data['added']}</span><br><br>`
-+`<span class="table-cell">Links already exist</span><span class="table-cell">&nbsp;&nbsp;${response.data['exist']}</span></div>`)
-                .show();
+                that._hideProgress();
                 
-                that.element.parents('.ui-dialog').find('#btnDoAction').button({label:'New Action'});
-                
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response); 
-            }
-        });
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    that.element.find('#div_fieldset').hide();
+                    div_res.html(
+    '<div style="padding:10px;display:table">'
+    +`<span class="table-cell">Records passed to process</span><span class="table-cell">&nbsp;&nbsp;${currentScope.length}</span><br><br>`
+    +`<span class="table-cell">Records updated</span><span class="table-cell">&nbsp;&nbsp;${response.data['records_updated']}</span><br><br>`
+    +`<span class="table-cell">Links added</span><span class="table-cell">&nbsp;&nbsp;${response.data['added']}</span><br><br>`
+    +`<span class="table-cell">Links already exist</span><span class="table-cell">&nbsp;&nbsp;${response.data['exist']}</span></div>`)
+                    .show();
+                    
+                    that._setBtnLabels(true);
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response); 
+                }
+            });
+            
+        }
+    },
+    
+    _setBtnLabels: function(is_done){
+        let lab1, lab2;
+        if(is_done){
+            lab1 = 'New Action';
+            lab2 = 'Done';
+        }else{
+            lab1 = 'Create links';
+            lab2 = 'Cancel';
+        }
+        this.element.parents('.ui-dialog').find('#btnDoAction').button({label:window.hWin.HR(lab1)});
+        this.element.parents('.ui-dialog').find('#btnCancel').button({label:window.hWin.HR(lab2)});
     }
     
         

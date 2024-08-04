@@ -170,7 +170,8 @@ function recordSearchMatchedValues($system, $params){
         $mysqli = $system->get_mysqli();
         
         
-        $need_ids = (@$params['pairs']==1);
+        $need_nonmatches = (@$params['nonmatch']==1); //non-match report
+        $need_ids = (@$params['pairs']==1); //return pairs - otherwise just count
         
         $rec_IDs = prepareIds($params['rec_IDs']);
         
@@ -181,7 +182,7 @@ function recordSearchMatchedValues($system, $params){
 
         //'distinct d1.dtl_RecID, d2.dtl_RecID '  
         //d1.dtl_Value, d2.dtl_Value, 
-            if($need_ids){
+            if($need_nonmatches || $need_ids){
                 $result = array();
             }else{
                 $result = 0;
@@ -191,20 +192,36 @@ function recordSearchMatchedValues($system, $params){
         
                 $rec_IDs_chunk = array_slice($rec_IDs, $offset, 500);
         
-                if($need_ids){
-                    $query = 'select distinct d1.dtl_RecID, d2.dtl_RecID ';
-                }else{
-                    $query = 'select count(distinct d1.dtl_RecID, d2.dtl_RecID) ';
+                if($need_nonmatches){
+                    
+                    $query = 'select distinct d1.dtl_RecID, r1.rec_Title, d1.dtl_Value FROM Records r1, recDetails d1 '
+                    .' LEFT JOIN recDetails d2 on d1.dtl_Value=d2.dtl_Value and d1.dtl_RecID!=d2.dtl_RecID'
+                    .' LEFT JOIN Records r2 on d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='
+                                    .intval($params['rty_trg']).' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
+                    .' WHERE r1.rec_ID IN ('
+                                    .implode(',',$rec_IDs_chunk).') and d1.dtl_DetailTypeID='
+                                    .intval($params['dty_src'])
+                                    .' and d1.dtl_RecID=r1.rec_ID and d2.dtl_Value is null';                    
+                                        
+                }else {
+                    if($need_ids){
+                        $query = 'select distinct d1.dtl_RecID, d2.dtl_RecID ';
+                    }else{
+                        $query = 'select count(distinct d1.dtl_RecID, d2.dtl_RecID) ';
+                    }
+                    $query = $query
+                    .' from recDetails d1, recDetails d2, Records r2'   //Records r1, 
+                    .' where d1.dtl_RecID IN ('.implode(',',$rec_IDs_chunk).')'      //=r1.rec_ID and r1.rec_RecTypeID='.intval($params['rty_src'])
+                        .' and d1.dtl_DetailTypeID='.intval($params['dty_src'])
+                    .' and d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='.intval($params['rty_trg'])
+                        .' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
+                    .' and d1.dtl_RecID!=d2.dtl_RecID and d1.dtl_Value=d2.dtl_Value';
                 }
-                $query = $query
-                .' from recDetails d1, recDetails d2, Records r2'   //Records r1, 
-                .' where d1.dtl_RecID IN ('.implode(',',$rec_IDs_chunk).')'      //=r1.rec_ID and r1.rec_RecTypeID='.intval($params['rty_src'])
-                    .' and d1.dtl_DetailTypeID='.intval($params['dty_src'])
-                .' and d2.dtl_RecID=r2.rec_ID and r2.rec_RecTypeID='.intval($params['rty_trg'])
-                    .' and d2.dtl_DetailTypeID='.intval($params['dty_trg'])
-                .' and d1.dtl_RecID!=d2.dtl_RecID and d1.dtl_Value=d2.dtl_Value';
 
-                if($need_ids){
+                if($need_nonmatches){
+                    $query .= ' ORDER BY d1.dtl_RecID';
+                    $res = mysql__select_all($mysqli, $query, 0, 100);
+                }elseif($need_ids){
                     $query .= ' ORDER BY d1.dtl_RecID';
                     $res = mysql__select_all($mysqli, $query);
                 }else{
@@ -214,7 +231,7 @@ function recordSearchMatchedValues($system, $params){
                     $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on matching values. Query '.$query, $mysqli->error);
                     break;    
                 }else{
-                    if($need_ids){
+                    if($need_nonmatches || $need_ids){
                         $result = array_merge($result, $res);
                     }else{
                         $result = $result + $res;    

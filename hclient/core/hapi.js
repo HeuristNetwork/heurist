@@ -252,6 +252,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             
+            /*
             function __is_Not_Active_StrutureEditor(name){
                 let editors = $('div.'+name);
                 if(editors.length>0){
@@ -260,12 +261,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return true;                    
                 }
             }
+                __is_Not_Active_StrutureEditor('defRecStructure')
+                && __checkStrutureEditors('defVocabularyGroups') 
+                && __checkStrutureEditors('defRecTypes')            
+            */
             
             //ignore if record structure editor is opened
-            if(__is_Not_Active_StrutureEditor('defRecStructure')
-                //&& __checkStrutureEditors('defVocabularyGroups') 
-                //&& __checkStrutureEditors('defRecTypes')
-            )
+            if($('div.defRecStructure').length==0)
             {
                 window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
                     _callserver(action, request, callback, timeout);

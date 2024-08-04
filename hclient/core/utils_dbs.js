@@ -311,7 +311,7 @@ window.hWin.HEURIST4.dbs = {
         }
         
         
-        let DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+        const DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
         
         let rst_links = $Db.rst_links();
         
@@ -792,8 +792,6 @@ window.hWin.HEURIST4.dbs = {
             || window.hWin.HEURIST4.util.findArrayIndex($detailType, $fieldtypes)>=0) //$fieldtypes - allowed types
         {
 
-        let $res = null;
-            
         switch ($detailType) {
             case 'separator':
                 $res = {};
