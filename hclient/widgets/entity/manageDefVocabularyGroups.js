@@ -240,11 +240,6 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //     
     _deleteAndClose: function(unconditionally){
 
-        if(false){
-            window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
-            return;                
-        }
-    
         if(unconditionally===true){
             this._super(); 
             

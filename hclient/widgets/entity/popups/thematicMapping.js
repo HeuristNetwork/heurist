@@ -223,16 +223,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             for(let i=0; i<rty_IDs.length; i++){
                                 let name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
                                 
-                                var option = document.createElement("option");
+                                let option = document.createElement("option");
                                 option.text = name;
                                 option.value = rty_IDs[i];
                                 $(option).attr('depth', 1);
                                 selScope.insertBefore(option, selScope.options[1]);
-                                //var opt = window.hWin.HEURIST4.ui.addoption(selScope, rty_IDs[i], name);
-                                //$(opt).attr('depth', 1);
                             }
                             
-                            var option = document.createElement("option");
+                            let option = document.createElement("option");
                             option.text = 'Record types in layer';
                             option.disabled = 'disabled'
                             $(option).attr('group', 1);
@@ -330,9 +328,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             this._selectedRtyID = rtyID;
 
-            //var main_area = this.element.find('#div_work_area').empty();
-            //$('<select id="selected_fields" size="5" style="min-width:400px">').appendTo(main_area);
-            
             let allowed_fieldtypes = [//'rec_Title','rec_ID',
                 'enum','year','date','integer','float','resource']; //'freetext',
             
@@ -606,7 +601,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             let len = Object.keys(this.selectedFields).length;
             for (let k=0;k<len;k++){
-                key = Object.keys(this.selectedFields)[k];
+                const key = Object.keys(this.selectedFields)[k];
                 if(this.selectedFields[key].ranges.length>0){
                     t_map.fields.push( this.selectedFields[key] );    
                 }
@@ -934,7 +929,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
             }else if(key=='btn_f_range_add'){
                 
-                var selfield = this.selectedFields[this.currentField];
+                let selfield = this.selectedFields[this.currentField];
                 let idx = selfield.ranges.length
                 selfield.ranges.push({value:'', symbol:''});
                 
@@ -943,7 +938,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }else if(key=='btn_f_range_auto'){
                 
                 //find min/max and unique values show ranges dialog
-                var selfield = this.selectedFields[this.currentField];
+                let selfield = this.selectedFields[this.currentField];
                 this._defineAutoRanges(selfield.code);
             
             }else if(key=='btn_f_range_reset'){
@@ -956,7 +951,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
             }else if(key=='btn_f_range_symb'){
 
-                var selfield = this.selectedFields[this.currentField];
+                let selfield = this.selectedFields[this.currentField];
                 let cnt = selfield.ranges.length;
                 
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog({}, 5, function(new_value){
@@ -981,9 +976,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.fillOpacity2 = __prepareInt(new_value.fillOpacity2);
 
                     if(new_value.fillOpacity1>0 || new_value.fillOpacity2>0){
-                        var step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
-                        var val = new_value.fillOpacity1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
+                        let val = new_value.fillOpacity1;
+                        for(let i=0; i<cnt; i++){
                             fillOpacity.push((i==cnt-1 || val>new_value.fillOpacity2)?new_value.fillOpacity2:val);
                             val = Math.round(val + step);
                         }
@@ -993,9 +988,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.strokeOpacity2 = __prepareInt(new_value.strokeOpacity2);
 
                     if(new_value.strokeOpacity1>0 || new_value.strokeOpacity2>0){
-                        var step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
-                        var val = new_value.strokeOpacity1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
+                        let val = new_value.strokeOpacity1;
+                        for(let i=0; i<cnt; i++){
                             strokeOpacity.push((i==cnt-1 || val>new_value.strokeOpacity2)?new_value.strokeOpacity2:val);
                             val = Math.round(val + step);
                         }
@@ -1005,9 +1000,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.iconSize2 = __prepareInt(new_value.iconSize2);
 
                     if(new_value.iconSize1>0 || new_value.iconSize2>0){
-                        var step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
-                        var val = new_value.iconSize1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
+                        let val = new_value.iconSize1;
+                        for(let i=0; i<cnt; i++){
                             iconSize.push((i==cnt-1 || val>new_value.iconSize2)?new_value.iconSize2:val);
                             val = Math.round(val + step);
                         }
@@ -1016,7 +1011,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     
                     let f_ranges = that.element.find('#f_ranges');
                     
-                    for(var i=0; i<cnt; i++){
+                    for(let i=0; i<cnt; i++){
                         
                         let symbol = window.hWin.HEURIST4.util.isJSON(selfield.ranges[i].symbol);
                         if(!symbol) symbol = {};
@@ -1078,12 +1073,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.popele.find('input').val('');
         this.popele.find('#int_count').val(10);
         
+        let that = this;
         //
         // substitute $IDS in facet query with list of ids OR current query(todo)
         // 
         if(this.options.maplayer_query){
 
-            var that = this;
             function __fillQuery(q){
                 $(q).each(function(idx, predicate){
 
@@ -1130,12 +1125,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 //request_id:this._request_id,
                 source:this.element.attr('id') }; //, facets: facets
 
-            var that = this;
             window.HAPI4.RecordMgr.get_facets(request, function(response){ 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    //var this.popele = that.element.find('#divAutoRanges');
-                    
                     that.fieldSelected = field;
 
                     if(field['type']=='enum'){
@@ -1205,7 +1197,6 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _definePreviewRanges: function(){
 
-        //var this.popele = this.element.find('#divAutoRanges');
         this.preview_ranges = [];
         let ranges = [];
         let div_preview = this.popele.find('#ranges_preview').empty();
@@ -1218,7 +1209,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             if(this.popele.find('#enum_db').is(':checked')){
                 //actual db values
-                for (var i=0; i<this.enumValues.length; i++){
+                for (let i=0; i<this.enumValues.length; i++){
                     ranges.push(this.enumValues[i][0]);
                 }
             }else{
@@ -1228,7 +1219,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 ranges = $Db.trm_TreeData(vocab_id, 'set');
             }
 
-            for (var i=0; i<ranges.length; i++){
+            for (let i=0; i<ranges.length; i++){
                 $('<div style="padding:5px" class="field-range">'
                 +'<span style="display:inline-block;width:100px;">'+ranges[i]+'</span>'
                 +'<span>'+$Db.trm(ranges[i], 'trm_Label')+'</span>'  
@@ -1253,7 +1244,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             function __rnd(original){
                 if(dty_Type=='float' && int_round<10){
-                    //var multiplier = Math.pow(10, int_round);
+                    //let multiplier = Math.pow(10, int_round);
                     //return Math.round(original*multiplier)/multiplier;   
                     return int_round==0?Math.round(original): parseFloat( original.toFixed(int_round) );
                 }else if(int_round>=10){
@@ -1287,7 +1278,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 }
             }
 
-            for (var i=0; i<ranges.length; i++){
+            for (let i=0; i<ranges.length; i++){
                 $('<div style="padding:5px" class="field-range">'
                 +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
                 +('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span>'

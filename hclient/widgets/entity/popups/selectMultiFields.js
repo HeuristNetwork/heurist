@@ -149,7 +149,7 @@ function hMultiSelect(){
 		}
 
 		if(idx == -1){ // Check for partial match
-			for(i in haystack){
+			for(let i in haystack){
 				idx = haystack[i].indexOf(needle);
 
 				if(idx >= 0){
@@ -362,7 +362,7 @@ function hMultiSelect(){
 
 					if(!isInArray(id, assigned_fields, false) && (name.toLowerCase().indexOf(searched) >= 0 || in_other_array) && $Db.getConceptID('dty', id) != '2-247') {
 
-						var main_ele;
+						let main_ele;
 
 						if(name.toLowerCase == searched || in_other_array == true){
 							main_ele = first_entry;
@@ -453,7 +453,7 @@ function hMultiSelect(){
 
 	function setupVariables() {
 
-		rectypes = $Db.rty().getIds();
+		let rectypes = $Db.rty().getIds();
 		let idx = rectypes.indexOf(rtyID);
 
 		if(idx >= 0) { rectypes.splice(idx, 1); }

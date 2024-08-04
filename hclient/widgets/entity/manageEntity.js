@@ -16,6 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global hEditing */
 
 //
 // METHODS
@@ -276,7 +277,7 @@ $.widget( "heurist.manageEntity", {
                         .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter(fele);
                     fele.css('bottom','40px');
                     
-                    var that = this;
+                    let that = this;
                     this._defineActionButton2({text:window.hWin.HR( this.options['selectbutton_label'] ),
                             css:{'float':'right',margin:'.5em .4em .5em 0'},  
                             class: 'ui-button-action',
@@ -303,6 +304,7 @@ $.widget( "heurist.manageEntity", {
             };
         }
 
+        let smsg;
         if(this.options.edit_mode=='inline'){
             smsg = 'Select an entity in the list to edit';
         }else{
@@ -327,7 +329,7 @@ $.widget( "heurist.manageEntity", {
         
         }
         
-        var that = this;
+        let that = this;
         if(!window.hWin.HEURIST4.util.isempty(this._entityName)){
             //entity should be loaded from server
             window.hWin.HAPI4.EntityMgr.getEntityConfig(this._entityName, 
@@ -447,7 +449,7 @@ $.widget( "heurist.manageEntity", {
         //if actions allowed - add div for edit form exists - it may be shown as right-hand panel or in modal popup
         //--------------------------------------------------------------------    
 
-        //var ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
+        //let ishelp_on = window.hWin.HAPI4.get_prefs('help_on')==1;
         //$('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
         
@@ -855,7 +857,7 @@ $.widget( "heurist.manageEntity", {
             }
         });
         //description above edit form        
-        var ele = $dlg.find('.entity-description')
+        let ele = $dlg.find('.entity-description')
         if(ele.length>0 && ele.is(':visible')){
             sh = sh + ele.height();
         }
@@ -872,7 +874,7 @@ $.widget( "heurist.manageEntity", {
             
             $dlg.dialog('option','height', sh);
             
-            var ele = $dlg.parents('.ui-dialog');
+            let ele = $dlg.parents('.ui-dialog');
             if(is_oversize || ele.offset().top+sh>wh){
                 ele.css({top:is_oversize?0:(wh-sh)});
             }
@@ -985,7 +987,7 @@ $.widget( "heurist.manageEntity", {
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
             //this.options.window = window.hWin;
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -998,28 +1000,12 @@ $.widget( "heurist.manageEntity", {
                     that._onDialogResize();
                 },
                 close:function(){
-/*
-                    if(that.options.selectOnSave==true){
-                        
-                        //var res = that._currentEditRecordset;
-                        var res = that.selectedRecords();
-                        
-                        if(window.hWin.HEURIST4.util.isRecordSet(res)){
-                            that._trigger( "onselect", null, 
-                                {selection:  
-                                    (this.options.select_return_mode=='recordset') ?res :res.getIds()});
-                        }else{        
-                            that._trigger( "onselect", null, null );
-                        }
-                    }
-*/              
                     
                     if($.isFunction(that.options.onClose)){
                         //that.options.onClose(that._currentEditRecordset);  
                         that.options.onClose.call(that, that.contextOnClose());
                     } 
                     $dlg.remove();    
-                    //???? $dlg.parent().remove();    
                         
                 },
                 buttons: this.options.no_bottom_button_bar?null:btn_array
@@ -1047,12 +1033,6 @@ $.widget( "heurist.manageEntity", {
     _onDialogResize: function(){
             //that.element.parent()
             let pele = this.element.parents('div[role="dialog"]');
-            /*
-            var ptop = pele.find('.ui-dialog-titlebar');
-            var hr = ptop.is(':visible')?ptop.height():0;
-            var pbtm = pele.find('.ui-dialog-buttonpane');
-            hr = hr + ((pbtm.length>0 && pbtm.is(':visible'))?pbtm.height():0);
-            */
             this.element.css({overflow: 'none !important',
             //border: '1px red solid !important',
             'width':pele.width()-24 });
@@ -1117,10 +1097,11 @@ $.widget( "heurist.manageEntity", {
                         window.hWin.HEURIST4.msg.closeMsgFlash();
                 }
             }
-            
-            if(false){
+
+            const use_entity_helpContent = false;
+            if(use_entity_helpContent){
                 if(this.options.entity.helpContent){
-                    let helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
+                    const helpURL = window.hWin.HRes( this.options.entity.helpContent )+' #content';
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                         null, //'prefs_'+this._entityName,
                         helpURL, false);
@@ -1182,13 +1163,6 @@ $.widget( "heurist.manageEntity", {
             let dlg = $('div.ui-dialog[posid="edit'+this._entityName+'-'+tm+'"]');
             
             if(dlg.length>0){
-                
-                /* it does not work properly
-                var offset = $(dlg).offset();
-                var stop = offset.top+h> $(document).height()?'0':offset.top+20; 
-                var sleft = offset.left+w> $(document).width()?'0':offset.left+20; 
-                position = { my: "left top", at: sleft+' '+stop, within:window};
-                */
                 position = { my: "left top", at:'left+20 top+60', of:dlg};
             }else{
                 
@@ -1254,8 +1228,6 @@ $.widget( "heurist.manageEntity", {
                 if(this._cachedRecordset){
                     value = this._cachedRecordset.getSubSetByIds(value);
                 }else{
-                    //var recset = this.recordList.resultList('getRecordSet', value);
-                    //value = recset.getSubSetByIds(value);
                     value = null;               
                 }
                 //this.recordList.resultList('setSelected', value); //highlight
@@ -1592,7 +1564,7 @@ $.widget( "heurist.manageEntity", {
                 //hide popup edit form 
                 if(this._edit_dialog){
                     try{
-                        isOpenAready = this._edit_dialog.dialog('isOpen');
+                        const isOpenAready = this._edit_dialog.dialog('isOpen');
                         if(isOpenAready){
                             this._edit_dialog.dialog('close');
                         }

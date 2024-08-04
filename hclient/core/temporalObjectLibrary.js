@@ -815,6 +815,7 @@ Temporal.checkValidity = function ( temporal ) {
     headers = headers.replace("TYP=","");
     for (let i=0; i < map.req.length; i++) { // for each required fields pattern
         let temp = headers;
+        is_valid = true;
 
         for (let j=0; j < map.req[i].length; j++) { // must have all require fields
             if (temp.search(map.req[i][j] + "=") !== -1) {
@@ -919,6 +920,7 @@ Temporal.getFieldsForString = function (type,str) {
 
         for (let i=0; i < map.req.length; i++) {  //for each required fields combination/pattern
             temp = headers;
+            is_valid = true;
             
             for (let j=0; j < map.req[i].length; j++) { //check that all required fields for this pattern are present
                 if (temp.search(new RegExp(map.req[i][j] + "=","i")) !== -1) {

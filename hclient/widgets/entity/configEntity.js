@@ -133,7 +133,7 @@ $.widget( "heurist.configEntity", {
             let ele = this.element.find('.btn-rename');
             if(this.options.buttons['rename']!==false){
                 
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-pencil', 
                         label:this.options.buttons['rename'],
                         showLabel:showLabel}).show();
@@ -198,7 +198,7 @@ $.widget( "heurist.configEntity", {
             ele = this.element.find('.btn-openedit');
             if(this.options.buttons['openedit']!==false && $.isFunction(this.options.openEditAction)){
                 
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
                 ele = ele.button({icon:null, //showLabel?null:'ui-icon-pencil', 
                         label:this.options.buttons['openedit'],
                         showLabel:showLabel}).css({'margin-left':10}).show();
@@ -217,7 +217,7 @@ $.widget( "heurist.configEntity", {
             //        
             ele = this.element.find('.btn-remove');
             if(this.options.buttons['remove']!==false){
-                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
+                const showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-delete', 
                         label:this.options.buttons['remove'],
                         showLabel:showLabel}).css({'margin-left':10}).show();
@@ -228,7 +228,7 @@ $.widget( "heurist.configEntity", {
 
 
                     //show confirmation dialog
-                    var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    let $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                         'Delete selected settings?',
                         {'Yes, delete' :function(){ 
                             
@@ -443,9 +443,7 @@ $.widget( "heurist.configEntity", {
                     that.inpt_save_setting_name.val('');
                     let filename = response.data;
                     let ele = that.sel_saved_settings.find('option[value="'+filename+'"]');
-                    if(ele.length>0){
-                        
-                    }else{
+                    if(ele.length==0){
                         window.hWin.HEURIST4.ui.addoption(that.sel_saved_settings[0], 
                             entity_ID+'/'+filename, 
                             filename.substring(0,filename.indexOf('.cfg')) );    

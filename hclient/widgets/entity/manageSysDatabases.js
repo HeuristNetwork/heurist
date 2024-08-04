@@ -54,7 +54,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         this.recordList.resultList('option','rendererHeader',
                     function(){
-        sHeader = '<div style="width:60px"></div><div style="border-right:none">Db Name</div>';
+       let sHeader = '<div style="width:60px"></div><div style="border-right:none">Db Name</div>';
         /*
                 //+'<div style="width:3em">Ver</div>'
                 +'<div style="width:3em">Reg#</div>'
@@ -138,7 +138,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function frm(value, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }

@@ -199,7 +199,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
         //IE support
         if (document.selection) {
             myField.focus();
-            sel = document.selection.createRange();
+            let sel = document.selection.createRange();
             sel.text = myValue;
         }
         //MOZILLA/NETSCAPE support
@@ -310,7 +310,7 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
             let newvalue = this.element.find('#rty_TitleMask').val();
             if(newvalue != this.options.rty_TitleMask){
                 
-                var that = this;
+                let that = this;
 
                 window.hWin.HEURIST4.dbs.rty(this.options.rty_ID, 'rty_TitleMask', newvalue); //update in cache
                 
@@ -325,7 +325,6 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                     'isfull'     : false
                     };
                 
-                var that = this;                                                
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK ){
@@ -543,9 +542,9 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
                     
                 }else{
                     if(mode==2){
-                        that.element.find('#rty_CanonincalMask').val(obj);
+                        that.element.find('#rty_CanonincalMask').val(response.data);
                     }else{
-                        that.element.find('#rty_TitleMask').val(obj);
+                        that.element.find('#rty_TitleMask').val(response.data);
                     }
                 }                                        
             }

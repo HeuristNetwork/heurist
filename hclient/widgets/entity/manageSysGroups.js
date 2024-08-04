@@ -61,6 +61,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         //update dialog title
         let title = null;
         let usr_ID = 0;
+        let that = this;
         
         if(this.options.title){
             title = this.options.title;
@@ -87,7 +88,6 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         if(usr_ID>0 && title){
-            var that = this;
             function __set_dlg_title(res){
                 if(res && res.status==window.hWin.ResponseStatus.OK){
                     that.setTitle( title+res.data[usr_ID] );    
@@ -112,7 +112,6 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em',padding:'10px','min-width': '580px'});
         this.recordList.css({'top':iheight+0.4+'em'});
         //init viewer 
-        var that = this;
 
         if(this.options.select_mode=='manager' || that.options.select_mode=='select_roles'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -123,7 +122,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     let select_roles = that.options.ugl_UserID>0 || that.options.select_mode=='select_roles';
 
-                    sHeader = '<div style="display:flex;">'
+                    let sHeader = '<div style="display:flex;">'
                         +`<div style="flex:0 0 33px;border-right:none;"></div>`
                         +`<div style="flex:0 1 ${select_roles?'3.5':'4'}em;border-left:1px solid gray;padding-left:5px;">ID</div>`
                         +`<div style="flex:0 2 11em;border-left:1px solid gray;padding-left:5px;">Name</div>`;
@@ -459,8 +458,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             edit = edit.replace('margin: 0px 15px;', 'margin: 0px 10px;');
 
             html += edit;
-            html += window.hWin.HAPI4.has_access(recID) && recID != 1 || true ? btn_delete : 
-                        '<div style="height:16px;margin: 0px 25px;"></div>';
+            html += btn_delete;
+            //(window.hWin.HAPI4.has_access(recID) && recID != 1 || true) ? btn_delete : 
+            //            '<div style="height:16px;margin: 0px 25px;"></div>';
         }
 
         html = html 
@@ -558,6 +558,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     let recID = response.data[0];
+                    let fields = {};
                     fields[ that.options.entity.keyField ] = (''+recID);
 
                     //update record in cache

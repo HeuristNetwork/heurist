@@ -242,7 +242,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                         let recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
                                             let recID = recs[recs.length-1];
-                                            //var isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+                                            //const isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
                                             //if(isTrash) return;
                                             this._onActionListener(event, {action:'edit',recID:recID}); 
                                         }
@@ -475,7 +475,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
                 /*
                 //longer but safer - since it reloads data if it is missed locally
-                var that = this;
+                let that = this;
                 window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
                     function(response){
                         that.updateRecordList(null, {recordset:response});
@@ -673,7 +673,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         return html;
         
         /*
-        var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
+        let s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
                     +'<div style="width:13em">Name</div>'
                     +'<div style="width:20em;border:none;">Description</div>';
             
@@ -705,26 +705,26 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
-        let recID   = fld('rty_ID');
+        const recID   = fld('rty_ID');
         if(this.options.import_structure){
 
-            var recTitle = recTitle + fld2('rty_Name','15em')
+            const recTitle = fld2('rty_Name','15em')
                 + ' : <div class="item" style="font-style:italic;width:45em">'
                 + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
 
             
             //IJ dwi
-            var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', 2, this.options.import_structure.database);
+            let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', 2, this.options.import_structure.database);
             rtIcon = '';
             
             
-            var html_icon = '<div class="recordIcons" style="min-width:16px;text-align:center;">'
+            let html_icon = '<div class="recordIcons" style="min-width:16px;text-align:center;">'
             +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
             +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
             + '</div>';
             
             
-            var html = '<div class="recordDiv" recid="'+recID+'">'
+            let html = '<div class="recordDiv" recid="'+recID+'">'
             + '<div class="recordSelector"><input type="checkbox" /></div>'
             + html_icon
             + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
@@ -736,12 +736,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
 
         // Skip items in the Trash group, unless in manager mode
-        let isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+        const isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
         if(isTrash && this.options.select_mode!='manager'){
             return '';
         }
         
-        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
+        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
         let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
         if(this.is_new_icons){
             rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
@@ -754,12 +754,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         +'</div>';
         
         //recordIcons 
-        var html_icon = '<div class="item" style="vertical-align: middle;max-width:40px;min-width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        let html_icon = '<div class="item" style="vertical-align: middle;max-width:40px;min-width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&'+random_id+'&quot;);">'       //opacity:'+recOpacity+'
         + '</div>';        
 
-        var html = '';
+        let html = '';
         
         let fields = this.options.ui_params?this.options.ui_params.fields:['rtyid'];
 
@@ -843,9 +843,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         if(recordset.fld(record,'rty_RecCount')>0){
                             html += __action_btn('delete_hasrecs','ui-icon-trash-b',window.hWin.HR('manageDefRectypes_hasrecs'), 'darkgray');
                         }else{
-                            //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
-                            //var is_referenced = (links['refs'] && links['refs'][recID]);
-                            let is_referenced = !window.hWin.HEURIST4.util.isnull(this.rst_links[recID]);
+                            //let links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+                            //const is_referenced = (links['refs'] && links['refs'][recID]);
+                            const is_referenced = !window.hWin.HEURIST4.util.isnull(this.rst_links[recID]);
                                         //(this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
                             if(is_referenced){
                                 html += __action_btn('delete','ui-icon-trash-b', window.hWin.HR('manageDefRectypes_referenced'));    
@@ -882,9 +882,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     + html+'</div>';
         
 /*        
-        var has_buttons = (this.options.select_mode=='manager' && this.options.edit_mode=='popup');
+        const has_buttons = (this.options.select_mode=='manager' && this.options.edit_mode=='popup');
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + html_icon
@@ -934,13 +934,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
 			if(action.action == 'delete_hasrecs'){
 
-                let rectype_id = action.recID;
+                const rectype_id = action.recID;
                 let $ele = $(event.target);
 
-                var sMsg = 'The record type <b>'+ $Db.rty(rectype_id, 'rty_Name') +'</b> has existing records.<br>These records must be deleted in order to delete this record type.<br><br>'
+                const sMsg = 'The record type <b>'+ $Db.rty(rectype_id, 'rty_Name') +'</b> has existing records.<br>These records must be deleted in order to delete this record type.<br><br>'
                     + 'Click the <a href="#" data-rty_ID="'+ rectype_id +'">Filter</a> button or use Explore > Entities to find and delete all records.';
 
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title: 'Warning'}, {default_palette_class:this.options.default_palette_class});
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title: 'Warning'}, {default_palette_class:this.options.default_palette_class});
 
                 this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
 
@@ -965,12 +965,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a><br>');
                 }
                 
-                var sMsg = window.hWin.HR('manageDefRectypes_delete_stop');
+                let sMsg = window.hWin.HR('manageDefRectypes_delete_stop');
                 
                 sMsg = sMsg.replaceAll( '[rtyName]', $Db.rty(action.recID,'rty_Name'));
                 sMsg = sMsg.replaceAll( '[FieldList]', sList);
                 
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg
                 , null, {title: 'Warning'},
                 {default_palette_class:this.options.default_palette_class});        
                 
@@ -1011,7 +1011,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
  
                 if(action=='addrec'){
                     
-                    var new_record_params = {RecTypeID: recID};
+                    let new_record_params = {RecTypeID: recID};
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:new_record_params,
                         onClose:function(){
@@ -1033,11 +1033,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     }
                     //this.closeDialog(true);
                     
-                }else if(action=='group'){
+                //}else if(action=='group'){
                     
                 }else if(action=='editstr'){
                     //edit structure (it opens fake record and switches to edit structure mode)
-                    var new_record_params = {RecTypeID: recID};
+                    let new_record_params = {RecTypeID: recID};
                     let opts = {new_record_params:new_record_params, edit_structure:true};
 
                     if(this.it_was_insert && this.options.parent_dialog !== null){
@@ -1155,7 +1155,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 rty_RecTypeGroupID = $Db.rtg().getOrder()[0];                
             }
         
-            var ele = this._editing.getFieldByName('rty_RecTypeGroupID');
+            let ele = this._editing.getFieldByName('rty_RecTypeGroupID');
             if(rty_RecTypeGroupID>0) ele.editing_input('setValue', rty_RecTypeGroupID);
             
             //open select icon
@@ -1174,7 +1174,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
         }else{
             
-            var ele = this._editing.getFieldByName('rty_ID');
+            let ele = this._editing.getFieldByName('rty_ID');
             if(ele && ele.length>0){
                 ele.find('div.input-div').html(this._currentEditID
                         +'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
@@ -1183,10 +1183,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             
             //hide after edit init btnRecRemove for status locked 
-            if(false){ //@todo
-                var ele = this._toolbar;
-                ele.find('#btnRecRemove').hide();
-            }
+            //if(false){ //@todo
+            //    ele = this._toolbar;
+            //    ele.find('#btnRecRemove').hide();
+            //}
             
             let that = this;
 
@@ -1243,7 +1243,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             +'</span>'
             +'</div></div>');
             
-            var edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
+            let edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
             $s.insertAfter(edit_ele);
         
             let btn = $s.find('button');
@@ -1271,14 +1271,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             });
             }
             
-            edit_ele = this._editing.getFieldByName('rty_ID');
+            let edit_ele = this._editing.getFieldByName('rty_ID');
             $('<div style="display:block"><span style="margin-top: 15px;display: inline-block;font-size: 12px;">'
             + window.hWin.HR('Define')+': </span><h1 style="display: inline-block;margin:10px;">'
             +$Db.rty(this._currentEditID,'rty_Name')+'</h1></div>').insertBefore(edit_ele);            
         }
         
         let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true' || this._currentEditID == -1);
-        ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
+        let ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
                         + (ishelp_on?'checked':'')+'/>'
                         + window.hWin.HR('explanations')
                         + '</label></div>').prependTo(this.editForm);
@@ -1447,6 +1447,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // @todo
     //
+    /*
     testTitleMask: function()
     {
         if(!rectypeID || rectypeID < 0){
@@ -1481,6 +1482,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         }
     },
+    */
 
     _saveEditAndClose: function(fields, afterAction, onErrorAction){
 
@@ -1533,7 +1535,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
 
             this._addInitialTabs(recID);
-        }else{
         }
         this._triggerRefresh('rty');
         
@@ -1732,8 +1733,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     updateGroupCount:function(rtg_ID,  delta){
     /*
         if(rtg_ID>0){
-            var cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
-            var cnt = (isNaN(cnt)?0:cnt)+delta;
+            let cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
+            cnt = (isNaN(cnt)?0:cnt)+delta;
             if(cnt<0) cnt = 0;
             $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
             this._triggerRefresh('rtg');
