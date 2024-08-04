@@ -12,8 +12,10 @@
 * the License.
 */
 
+/* global Temporal,TDate, formatGregJulian, fixCalendarPickerCMDs */
+
 /**
-* brief description of file
+* Dialog to define complex date (range, approximate)
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -25,7 +27,7 @@
 * @version     3.1.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  edining
 */
 
 function switchDev (toAsym) {
@@ -46,7 +48,7 @@ function switchDev (toAsym) {
 
 //
 // show alternative calendar
-//
+/*
 function calendarPopup(buttonElt) {
 
 	let callback =	function(date)
@@ -64,11 +66,11 @@ function calendarPopup(buttonElt) {
     }
 
     calendarViewer.showAt(getOffset(buttonElt), date, callback);
-}
+}*/
 
 function getOffset(obj) {
 
-        let x = y = 0;
+        let x = 0, y = 0;
         let sleft = 0;//obj.ownerDocument.body.scrollLeft;
         let stop = 0; //obj.ownerDocument.body.scrollTop;
         while (obj) {
@@ -129,60 +131,6 @@ function c14DateClick(id) {
 		$("#BCE").attr("tabindex","-1");
 	}
 }
-
-//
-// not used - replaced to image
-/*
-function dRangeDraw() {
-
-	var canvas = document.getElementById("dRangeCanvas");
-	if (canvas.getContext) {
-		var ctx = canvas.getContext("2d");
-
-		ctx.fillStyle = "rgb(150,150,150)";
-		ctx.fillRect (135, 0, 260, 60);
-		var lingrad = ctx.createLinearGradient(75,0,135,0);
-		lingrad.addColorStop(0, 'rgba(0,0,150,0)');
-		lingrad.addColorStop(0.5, 'rgba(75,75,150,0.5)');
-		lingrad.addColorStop(1, 'rgba(150,150,150,0.9)');
-		var lingrad2 = ctx.createLinearGradient(455,0,395,0);
-		lingrad2.addColorStop(0, 'rgba(0,0,150,0)');
-		lingrad2.addColorStop(0.5, 'rgba(75,75,150,0.5)');
-		lingrad2.addColorStop(1, 'rgba(150,150,150,0.9)');
-
-		ctx.fillStyle = lingrad;
-		ctx.fillRect (75, 0, 60, 60);
-		ctx.fillStyle = lingrad2;
-		ctx.fillRect (395, 0, 60, 60);
-		ctx.beginPath();
-		ctx.fillStyle = "rgba(0, 0, 200, 0.2)";
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = "#808080";
-		ctx.moveTo(0,62.5);
-		ctx.lineTo(530,62.5);
-		ctx.moveTo(75.5,0);
-		ctx.lineTo(75.5,62.5);
-		ctx.moveTo(135.5,0);
-		ctx.lineTo(135.5,62.5);
-		ctx.moveTo(395.5,0);
-		ctx.lineTo(395.5,62.5);
-		ctx.moveTo(455.5,0);
-		ctx.lineTo(455.5,62.5);
-		ctx.stroke();
-		ctx.beginPath();
-		ctx.fillStyle = "rgb(50,50,50)";
-		ctx.font = "8pt Arial";
-		drawLabel(ctx,"TPQ",75,80,20);
-		drawLabel(ctx,"PB",135,80,20);
-		drawLabel(ctx,"PE",395,80,20);
-		drawLabel(ctx,"TAQ",455,80,20);
-		ctx.fillStyle = "rgb(250,250,250)";
-		ctx.font = "12pt Arial Bold";
-		drawLabel(ctx,"likely range",265,40,60);
-		ctx.stroke();
-	}
-}
-*/
 
 function drawLabel ( ctx, label, xPos, yPos, maxX) {
 	let pxLen = ctx.measureText(label).width;
@@ -427,7 +375,7 @@ let TemporalPopup = (function () {
             
 		if (type === "s") {
             
-			var tDate = temporal.getTDate("DAT");
+			let tDate = temporal.getTDate("DAT");
 			// if DAT then separate Date, Time and TimeZone
 			if (tDate) {
                 if(changedates){
@@ -439,7 +387,7 @@ let TemporalPopup = (function () {
 			}
             
             $( 'input[name="CIR"]').prop('checked', false);
-            var val = temporal.getStringForCode('CIR');
+            let val = temporal.getStringForCode('CIR');
             if(!(val>0)) val = 0;
             $( "#CIR" + val).prop('checked', true);
             
@@ -448,7 +396,7 @@ let TemporalPopup = (function () {
 		let fields = Temporal.getFieldsForType(type);
 		for(let i =0; i< fields.length; i++) {
 			let code = fields[i];
-			var val = temporal.getStringForCode(code);
+			let val = temporal.getStringForCode(code);
 			let elem = $( "#" + type + code);
 			if (elem.length == 0) {
 				elem = $("#" + code);
@@ -457,11 +405,11 @@ let TemporalPopup = (function () {
 				elem = $("input[name=" + type + code + "]:checked");
 			}
 			if (type === "c" && val && (code == "DEV" || code == "DVP" ||code == "DVN" )) {
-				var v = val.match(/P(\d+)Y/);
+				const v = val.match(/P(\d+)Y/);
 				val = v[1] ? v[1] : val;
 			}
 			if (type === "f" && val && code == "RNG" ) {
-				var v = val.match(/P(\d+)(Y|M|D)/);
+				const v = val.match(/P(\d+)(Y|M|D)/);
 				val = v[1] ? v[1] : val;
 				if (v[2]) $("#level").val(v[2]);
 			}
@@ -487,7 +435,7 @@ let TemporalPopup = (function () {
 					default :
                         if(!elem.hasClass('withCalendarsPicker') ||  changedates){
                             
-                                var tDate = temporal.getTDate(code);
+                                let tDate = temporal.getTDate(code);
                                 // if DAT then separate Date, Time and TimeZone
                                 if (tDate) {
                                     let dateValue = tDate.toString("yy-MM-dd");
@@ -540,7 +488,7 @@ let TemporalPopup = (function () {
 		let fields = Temporal.getFieldsForType(type);
 		for(let i =0; i< fields.length; i++) {
 			let code = fields[i];
-			var elem = $( "#" + type + code);
+			let elem = $( "#" + type + code);
 			if (elem.length == 0) {
 				elem = $("#" + code);
 			}
@@ -586,7 +534,7 @@ let TemporalPopup = (function () {
 					strDate += " " + zone;
 				}
 			}
-            var elem = $("#simpleDate");
+            let elem = $("#simpleDate");
             let dt = elem.val();
             if(togregorian){
                 /*if(calendar && calendar.name!='gregorian'){
@@ -642,7 +590,7 @@ let TemporalPopup = (function () {
 
 	};
 
-    var calendar = null;
+    let calendar = null;
 	let $eras_sel = null;
 
     function _initJqCalendar(temporal){
@@ -810,7 +758,7 @@ let TemporalPopup = (function () {
     //
     // Convert date from Gregorian to Native and assign to input
     //
-    var convertAndAssign = function($input, dateValue, calendar_type){
+    let convertAndAssign = function($input, dateValue, calendar_type){
                     
             if(calendar_type.toLowerCase()!='gregorian'){
                 let newvalue = convertCLD(dateValue, 'gregorian', calendar_type);
@@ -824,7 +772,7 @@ let TemporalPopup = (function () {
     //
     //
     //
-    var convertCLD = function(value, fromcal, tocal) {
+    let convertCLD = function(value, fromcal, tocal) {
         
         let newval = '';
         
@@ -928,7 +876,7 @@ let TemporalPopup = (function () {
     
     // mode 0 - to gregorian (no assign), 1 - to
 /*    
-    var convert = function($inpt, togregorian) {
+    let convert = function($inpt, togregorian) {
 
 		//current value
 		let fromcal = $inpt.calendarsPicker('option', 'calendar');
@@ -1025,7 +973,7 @@ let TemporalPopup = (function () {
     };
 */    
 	//public members
-	var that = {
+	let that = {
 			originalInputString : "",
 			origTemporal : null,
 			curTemporal : null,
@@ -1041,14 +989,14 @@ let TemporalPopup = (function () {
 				let validity = Temporal.checkValidity(that.curTemporal);
 				if (validity[0]) {  // valid temporal
 					if (validity[2]) { //some extra code fields, so remove them
-						for (var i=0; i<validity[2].length; i++) {
+						for (let i=0; i<validity[2].length; i++) {
 							that.curTemporal.removeObjForCode(validity[2][i]);
 						}
 					}
 					window.close( that.curTemporal.toString());
 				}else{
 					let msg = "";
-					for (var i = 0; i < validity[1].length; i++) {
+					for (let i = 0; i < validity[1].length; i++) {
 					 if (!msg){
 						msg = Temporal.getStringForCode(validity[1][i]);
 					 }else{

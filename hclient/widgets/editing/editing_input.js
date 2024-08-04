@@ -17,6 +17,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinymce, EditorCodeMirror, 
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
+
 $.widget( "heurist.editing_input", {
 
     // default options
@@ -176,7 +179,8 @@ $.widget( "heurist.editing_input", {
         let lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
 
         //header
-        if(true){ // || this.options.show_header
+        const is_show_header = true; // this.options.show_header
+        if(is_show_header){ 
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
@@ -935,10 +939,10 @@ $.widget( "heurist.editing_input", {
             this.newvalues = {};
         }
 
-        var that = this;
+        let that = this;
 
         let $input = null;
-        //@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
+        //@todo check faceted search!!!!! inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         //repalce to uniqueId() if need
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
 
@@ -993,7 +997,7 @@ $.widget( "heurist.editing_input", {
             
             if(this.configMode && this.configMode['thematicmap']){ //-----------------------------------------------
 
-                    var $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
+                    let $btn_edit_switcher = $( '<span>themes editor</span>', {title: 'Open thematic maps editor'})
                         //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                         .addClass('smallbutton btn_add_term')
                         .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
@@ -1026,7 +1030,7 @@ $.widget( "heurist.editing_input", {
                 let eid = $input.attr('id')+'_editor';
                 
                 //hidden textarea for tinymce editor
-                $editor = $( "<textarea>")
+                let $editor = $( "<textarea>")
                 .attr("id", eid)
                 //.addClass('text ui-widget-content ui-corner-all')
                 .css({'overflow':'auto',display:'flex',resize:'both'})
@@ -1039,11 +1043,11 @@ $.widget( "heurist.editing_input", {
                     codeEditor = new EditorCodeMirror($input);
                 }
                 
-                var $btn_edit_switcher;
+                let $btn_edit_switcher;
 
                 if(this.options.recordset && this.options.recordset.entityName == 'Records'){
 
-                    var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+                    let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
 
                     $btn_edit_switcher = $('<div class="editor_switcher">').appendTo( $inputdiv );
 
@@ -1068,7 +1072,7 @@ $.widget( "heurist.editing_input", {
                             
 
                         /*DEBUG  
-                        var btn_debug = $('<span>debug</span>')
+                        let btn_debug = $('<span>debug</span>')
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
@@ -1077,7 +1081,7 @@ $.widget( "heurist.editing_input", {
                             click:function(event){
                             
                             if(!window.hWin.layoutMgr){
-                                hLayoutMgr(); //init global var layoutMgr
+                                hLayoutMgr(); //init global variable layoutMgr
                             }
                                     
                             //cfg_widgets is from layout_defaults.js
@@ -1462,7 +1466,7 @@ $.widget( "heurist.editing_input", {
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
 
-                var cur_action = 'text', cms_div_prompt = null, cms_label_edit_prompt = null;
+                let cur_action = 'text', cms_div_prompt = null, cms_label_edit_prompt = null;
 
                 if( isCMS_content ){
                     
@@ -1597,7 +1601,7 @@ $.widget( "heurist.editing_input", {
         else 
         if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
-            var dwidth;
+            let dwidth;
             if(this.configMode && this.configMode.entity!='records'){
                 dwidth = this.f('rst_DisplayWidth');
                 if(parseFloat(dwidth)>0){
@@ -1612,7 +1616,7 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv );
             
             if(this.options.dtID=='access'){
-                var sel_options = [
+                const sel_options = [
                     {key: '', title: ''}, 
                     {key: 'viewable', title: 'viewable'}, 
                     {key: 'hidden', title: 'hidden'}, 
@@ -1647,7 +1651,7 @@ $.widget( "heurist.editing_input", {
                     }
                 );
 
-                var sel_options = [];
+                let sel_options = [];
                 let u_id = window.hWin.HAPI4.currentUser['ugr_ID'];
 
                 req = {};
@@ -1664,23 +1668,24 @@ $.widget( "heurist.editing_input", {
                             let gIDs = [];
                             let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
-                                records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
+                                let records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
                                 
-                                u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
+                                let u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
                                 u_tags.each2(function(id, val){ // Get User Tags first
-                                    let tag_name = filter_val = val['tag_Text'];
-                                    let tag_group = val['tag_UGrpID'];
+                                    const tag_name = val['tag_Text'];
+                                    //let tag_group = val['tag_UGrpID'];
 
                                     let values = {};
-                                    values['key'] = filter_val;
+                                    values['key'] = tag_name;
                                     values['title'] = tag_name;
 
                                     sel_options.push(values);
                                 });  
 
-                                w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
+                                let w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
                                 w_tags.each2(function(id, val){ // Get Workgroup Tags second
-                                    let tag_name = filter_val = val['tag_Text'];
+                                    let tag_name = val['tag_Text'];
+                                    const filter_val = val['tag_Text'];
                                     let tag_group = val['tag_UGrpID'];
 
                                     for(let i=0; i<groups.length; i++){
@@ -1763,7 +1768,7 @@ $.widget( "heurist.editing_input", {
                     
                     if(that.child_terms==null){
                         
-                        var vocab_id = that.f('rst_FilteredJsonTermIDTree');    
+                        const vocab_id = that.f('rst_FilteredJsonTermIDTree');    
                         that.child_terms = $Db.trm_TreeData(vocab_id, 'set');
                         
                         that._checkTermsWithImages(); //show hide $btn_termsel
@@ -1803,7 +1808,7 @@ $.widget( "heurist.editing_input", {
                                                                     
                     }});
 
-                    var vocab_id = Number(allTerms);
+                    let vocab_id = Number(allTerms);
 
                     if(window.hWin.HAPI4.is_admin()){            
                         
@@ -1939,6 +1944,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
             let mode = null;
             
+            let topOptions;
             if(this.configMode && (this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups')){
                 topOptions = this.configMode.topOptions;
                 mode = this.configMode.mode;
@@ -1998,11 +2004,11 @@ $.widget( "heurist.editing_input", {
                     
                     let isOpened = false;
                     
-                    var rts = [];
-                    var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+                    let rts = [];
+                    const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                     
-                    for (var k=0; k<ptrset.length; k++) {
-                        var sname = $Db.rty(ptrset[k],'rty_Name');
+                    for (let k=0; k<ptrset.length; k++) {
+                        const sname = $Db.rty(ptrset[k],'rty_Name');
                         if(!window.hWin.HEURIST4.util.isempty(sname)){
                             rts.push(sname);
                         }
@@ -2090,9 +2096,9 @@ $.widget( "heurist.editing_input", {
                   
                     if(relations && (relations.direct || relations.reverse)){
                         
-                        var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+                        const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                         
-                        var vocab_id = this.f('rst_FilteredJsonTermIDTree');        
+                        let vocab_id = this.f('rst_FilteredJsonTermIDTree');        
 
                         let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         let headers = relations.headers;
@@ -2103,7 +2109,7 @@ $.widget( "heurist.editing_input", {
                             let direct = relations.direct; //outward
                             
                         //take only those that satisify to allowed terms and pointer constraints
-                        for(var k in direct){
+                        for(let k in direct){
                             //direct[k]['dtID']==this.options.dtID && 
                             if(direct[k]['trmID']>0){ //relation   
                             
@@ -2112,20 +2118,20 @@ $.widget( "heurist.editing_input", {
                                 { //it satisfies to allowed relationship types
 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
-                                        var targetID = direct[k].targetID;
+                                        let targetID = direct[k].targetID;
                                         
                                         if(!headers[targetID]){
                                             //there is not such record in database
                                             continue;                                            
                                         }
                                         
-                                        var targetRectypeID = headers[targetID][1];
+                                        let targetRectypeID = headers[targetID][1];
                                         if( headers[targetID]['used_in_reverse'+dtID]!=1 &&
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
                                             
-                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                            let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: headers[targetID][1], 
@@ -2153,7 +2159,7 @@ $.widget( "heurist.editing_input", {
                         //now scan all indirect /inward relations
                         let reverse = relations.reverse; //outward
                         //take only those that satisify to allowed terms and pointer constraints
-                        for(var k in reverse){
+                        for(let k in reverse){
                             //direct[k]['dtID']==this.options.dtID && 
                             if(reverse[k]['trmID']>0){ //relation   
                                 
@@ -2161,14 +2167,14 @@ $.widget( "heurist.editing_input", {
                                 { //it satisfies to allowed relationship types
                                 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
-                                        var targetID = reverse[k].sourceID;
+                                        let targetID = reverse[k].sourceID;
                                         
                                         if(!headers[targetID]){
                                             //there is not such record in database
                                             continue;                                            
                                         }
                                         
-                                        var targetRectypeID = headers[targetID][1];
+                                        let targetRectypeID = headers[targetID][1];
                                         
                                         if (headers[targetID]['used_in_direct'+dtID]!=1 && (ptrset.length==0) ||
                                                 (window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
@@ -2181,9 +2187,7 @@ $.widget( "heurist.editing_input", {
 //                                                        .appendTo($inputdiv);
                                             }
                                             
-                                            //var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
-                                            
-                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                            let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: targetRectypeID, 
@@ -2221,13 +2225,11 @@ $.widget( "heurist.editing_input", {
                         .uniqueId();
                    $input = $inputdiv;
 
+                   let rty_names = '';
                    if(rts.length>0){
                         rty_names = '<div class="truncate" style="max-width:200px;display:inline-block;vertical-align:top">&nbsp;to '
                                 +rts.join(', ') +'</div>';
-                   }else{
-                        rty_names = '';
                    }
-                   
                    
                    //define explicit add relationship button
                    let $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
@@ -2289,11 +2291,11 @@ $.widget( "heurist.editing_input", {
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
                             
-            var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+            const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
             
-            var rts = [];
-            for (var k=0; k<ptrset.length; k++) {
-                var sname = $Db.rty(ptrset[k],'rty_Name');
+            let rts = [];
+            for (let k=0; k<ptrset.length; k++) {
+                const sname = $Db.rty(ptrset[k],'rty_Name');
                 if(!window.hWin.HEURIST4.util.isempty(sname)){
                     rts.push(sname);
                 }
@@ -2316,7 +2318,7 @@ $.widget( "heurist.editing_input", {
                         .addClass(classes).css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            __show_select_function = null;
+            let __show_select_function = null;
             if(typeof browseRecords!=='undefined' && $.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
@@ -2332,7 +2334,7 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='resource' && 
                 (this.configMode.entity=='DefRecTypes' || this.configMode.entity=='DefDetailTypes')){ //-----------
             //it defines slightly different select dialog for defRecTypes
-            __show_select_dialog = function(event){
+            let __show_select_dialog = function(event){
         
                 if(that.is_disabled) return;
                 event.preventDefault();
@@ -2376,16 +2378,15 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').hide()
                         .appendTo( $inputdiv );
             
-            var $input_img, $gicon;
-            var select_return_mode = 'ids';
+            let $input_img;
+            let select_return_mode = 'ids';
             
-            var icon_for_button = 'ui-icon-pencil'; //was -link
             if(this.configMode.select_return_mode &&
                this.configMode.select_return_mode!='ids'){
                  select_return_mode = 'recordset'
             }
                 
-            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            let $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
             +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
@@ -2421,16 +2422,15 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').hide()
                         .appendTo( $inputdiv );
             
-            var $input_img, $gicon;
-            var select_return_mode = 'ids';
+            let $input_img;
+            let select_return_mode = 'ids';
             
-            var icon_for_button = 'ui-icon-pencil'; //was -link
             if(this.configMode.select_return_mode &&
                this.configMode.select_return_mode!='ids'){
                  select_return_mode = 'recordset'
             }
                 
-            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            let $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
             +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
@@ -2438,17 +2438,9 @@ $.widget( "heurist.editing_input", {
 
             $input.css({'min-wdith':'22ex'});
 
-            var ptrset = that.f('rst_PtrFilteredIDs');
+            const ptrset = that.f('rst_PtrFilteredIDs');
 
-            var __show_select_dialog = null;
-            /* 2017-11-08 no more buttons
-            var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
-            .addClass('smallicon ui-icon '+icon_for_button)
-            .appendTo( $inputdiv );
-            */
-            //.button({icons:{primary: icon_for_button},text:false});
-
-            var popup_options = {
+            let popup_options = {
                 isdialog: true,
                 select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                 select_return_mode:select_return_mode, //ids or recordset(for files)
@@ -2484,7 +2476,7 @@ $.widget( "heurist.editing_input", {
             $input.hide();
             that._findAndAssignTitle($input, value);
 
-            __show_select_dialog = function(event){
+            let __show_select_dialog = function(event){
                 
                     if(that.is_disabled) return;
 
@@ -2562,7 +2554,7 @@ $.widget( "heurist.editing_input", {
             
             if(this.options.dtID=='rec_URL' || this.detailType=='url'){//----------------------------------
                 
-                    var $btn_extlink = null, $btn_editlink = null;
+                    let $btn_extlink = null, $btn_editlink = null;
                 
                     function __url_input_state(force_edit){
                     
@@ -2740,19 +2732,19 @@ $.widget( "heurist.editing_input", {
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
-				var $input_img, $gicon;
+				let $input_img;
                 
-                var select_return_mode = 'recordset';
+                let select_return_mode = 'recordset';
 
                 /* File IDs, needed for processes below */
                 let f_id = value.ulf_ID;
                 let f_nonce = value.ulf_ObfuscatedFileID;
 
-                var $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
+                let $clear_container = $('<span id="btn_clear_container"></span>').appendTo( $inputdiv );
                 
                 $input.css({'padding-left':'30px', cursor:'hand'});
                 //folder icon in the begining of field
-                $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+                let $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
                     .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
                 
                 /* Image and Player (enalrged image) container */
@@ -2764,7 +2756,7 @@ $.widget( "heurist.editing_input", {
                 .hide();
 
 				/* Record Type help text for Record Editor */
-				$small_text = $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
+				$('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
                 .insertAfter( $clear_container )
@@ -2775,7 +2767,7 @@ $.widget( "heurist.editing_input", {
                 let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview'; 
 
                 /* Anchors (download and show thumbnail) container */
-                $dwnld_anchor = $('<br><div class="download_link" style="font-size: smaller;">'
+                let $dwnld_anchor = $('<br><div class="download_link" style="font-size: smaller;">'
                     + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:5px;text-decoration:underline;color:blue"'
                     + '>show thumbnail</a>'
                     + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
@@ -2786,10 +2778,10 @@ $.widget( "heurist.editing_input", {
                 .hide();
                 
                 // Edit file's metadata
-                $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
+                let $edit_details = $('<span class="ui-icon ui-icon-pencil edit_metadata" title="Edit image metadata" style="cursor: pointer;padding-left:5px;">')
                 .insertBefore($clear_container);
                 this._on($edit_details, {
-                    click: (event) => {
+                    click: function(event){
 
                         let popup_opts = {
                             isdialog: true, 
@@ -2798,7 +2790,7 @@ $.widget( "heurist.editing_input", {
                             rec_ID: f_id,
                             default_palette_class: 'ui-heurist-populate',
                             width: 950,
-                            onClose: (recset) => {
+                            onClose: function(recset){
 
                                 // update external reference, if necessary
                                 if(window.hWin.HEURIST4.util.isRecordSet(recset)){
@@ -2821,7 +2813,7 @@ $.widget( "heurist.editing_input", {
 
                         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
                     }
-                });
+                });//edit details click
                 if(!f_id || f_id < 0){
                     $edit_details.hide();
                 }
@@ -2842,13 +2834,13 @@ $.widget( "heurist.editing_input", {
                     
                         if(f_id != n_id){// If the image has been changed from original/or has been newly added
 
-                            $container = $(event.target.parentNode);
+                            let $container = $(event.target.parentNode);
 
-                            $show = $($container.find('a#lnk'+f_id)[0]);
-                            $dwnld = $($container.find('a#dwn'+f_id)[0]);
-                            $player = $($container.find('div#player'+f_id)[0]);
-                            $thumbnail = $($container.find('img#img'+f_id)[0]);
-                            $edit_metadata = $($container.find('.edit_metadata')[0]);
+                            let $show = $($container.find('a#lnk'+f_id)[0]);
+                            let $dwnld = $($container.find('a#dwn'+f_id)[0]);
+                            let $player = $($container.find('div#player'+f_id)[0]);
+                            let $thumbnail = $($container.find('img#img'+f_id)[0]);
+                            let $edit_metadata = $($container.find('.edit_metadata')[0]);
 
                             $show.attr({'id':'lnk'+n_id});
 
@@ -2878,11 +2870,11 @@ $.widget( "heurist.editing_input", {
                     }
 
                     that.onChange(); 
-                });
+                });//input change
                 
                 /* Handler Variables */
                 let hideTimer = 0, showTimer = 0;  //  Time for hiding thumbnail
-                var isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
+                let isClicked = 0;  // Number of image clicks, one = freeze image inline, two = enlarge/srink
 
                 /* Input element's hover handler */
                 function __showImagePreview(event){
@@ -2921,7 +2913,6 @@ $.widget( "heurist.editing_input", {
 
                     if($input_img.is(':visible')){
                         
-                        //var ele = $(event.target);
                         let ele = event.toElement || event.relatedTarget;
                         ele = $(ele);
                         if(ele.hasClass('image_input') || ele.parent().hasClass('image_input')){
@@ -2966,7 +2957,7 @@ $.widget( "heurist.editing_input", {
 
                         $inputdiv.find('div.smallText').hide(); // Hide image help text
 
-                        $dwnld_anchor = $($(elem.parentNode.parentNode).find('div.download_link')); // Find the download anchors
+                        let $dwnld_anchor = $($(elem.parentNode.parentNode).find('div.download_link')); // Find the download anchors
                         
                         $dwnld_anchor.show();
                         $inputdiv.find('.ui-icon-window-close').show();
@@ -3024,7 +3015,7 @@ $.widget( "heurist.editing_input", {
                             $dwnld_anchor.hide();
                             $inputdiv.find('.ui-icon-window-close').hide();
 
-                            if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
+                        if($inputdiv.find('div.smallText').find('div.smallText').hasClass('invalidImg')){
                             $input_img.hide().css('cursor', '');
                         }else{
                             $input_img.hide().css('cursor', 'pointer');
@@ -3045,13 +3036,12 @@ $.widget( "heurist.editing_input", {
                     +'"></span>&nbsp;Mirador</a>').appendTo( $dwnld_anchor ).hide();
                     
                 this._on($mirador_link, {click:function(event){
-                    var obf_recID;
                     let ele = $(event.target)
 
                     if(!ele.attr('data-id')){
                         ele = ele.parents('[data-id]');
                     }
-                    var obf_recID = ele.attr('data-id');
+                    let obf_recID = ele.attr('data-id');
                     let is_manifest = (ele.attr('data-manifest')==1);
 
                     let url =  window.hWin.HAPI4.baseURL
@@ -3060,7 +3050,8 @@ $.widget( "heurist.editing_input", {
                     + '&recID=' + that.options.recID
                     + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
 
-                    if(true){
+                    const show_mirador_in_popup = true;
+                    if(show_mirador_in_popup){
                         //borderless:true, 
                         window.hWin.HEURIST4.msg.showDialog(url, 
                             {dialogid:'mirador-viewer',
@@ -3070,7 +3061,7 @@ $.widget( "heurist.editing_input", {
                                 width:'90%',height:'95%',
                                 allowfullscreen:true,'padding-content':'0px'});   
 
-                        $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+                        let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
 
                         $dlg.parent().css('top','50px');
                     }else{
@@ -3101,12 +3092,10 @@ $.widget( "heurist.editing_input", {
                     isClicked=1;
                 }
 
-                var __show_select_dialog = null;
-                 
-                var isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
+                const isTiledImage = this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
                     && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'];
                  
-                var popup_options = {
+                let popup_options = {
                     isdialog: true,
                     select_mode: 'select_single',
                     additionMode: isTiledImage?'tiled':'any',  //AAAA
@@ -3140,7 +3129,7 @@ $.widget( "heurist.editing_input", {
 
                 that._findAndAssignTitle($input, value);
 
-                __show_select_dialog = function(event){
+                let __show_select_dialog = function(event){
                     
                         if(that.is_disabled) return;
 
@@ -3184,7 +3173,7 @@ $.widget( "heurist.editing_input", {
                 
                 $input.css({'padding-left':'30px'});
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
                 let $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv );
@@ -3195,7 +3184,7 @@ $.widget( "heurist.editing_input", {
                        $select_folder_dlg.selectFolders({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 that.newvalues[$input.attr('id')] = newsel;
                                 $input.val(newsel);
                                 that.onChange();
@@ -3232,7 +3221,7 @@ $.widget( "heurist.editing_input", {
                         }
                         
                         //container for image
-                        var $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
+                        let $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
                             + '<img src="'+urlThumb+'" class="image_input" style="'+(sz>0?('width:'+sz+'px;'):'')+'">'
                             + '</div>').appendTo( $inputdiv );                
                         if(this.configMode.entity=='recUploadedFiles'){
@@ -3260,7 +3249,7 @@ $.widget( "heurist.editing_input", {
                                 that.newvalues[$input.attr('id')] = value; 
                             }
                             
-                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
+                            let ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px" class="file-options-container" />')
                                 .appendTo( $inputdiv );                            
 
                             $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
@@ -3272,14 +3261,6 @@ $.widget( "heurist.editing_input", {
                                 .click(function(){ $input.click() }).appendTo( ele );
                         }
                             
-                /* 2017-11-08 no more buttons 
-                        //browse button    
-                        var $btn_fileselect_dialog = $( "<span>", {title: "Click to select file for upload"})
-                        .addClass('smallicon fileupload ui-icon ui-icon-folder-open')
-                        .css('vertical-align','top')
-                        .appendTo( $inputdiv );
-                        //.button({icons:{primary: "ui-icon-folder-open"},text:false});
-                  */                      
                         //set input as file and hide
                         $input.prop('type','file').hide();
                         
@@ -3406,8 +3387,6 @@ $.widget( "heurist.editing_input", {
                             }
                         }else{
                             
-                            //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
-                            //            newfilename+'.png', 'thumb', 1);
                             let urlThumb =
                             (that.configMode.entity=='recUploadedFiles'
                                 ?file.url
@@ -3481,7 +3460,7 @@ $.widget( "heurist.editing_input", {
         fileupload_opts['maxChunkSize'] = 10485760; //10M
     }
         
-    var isTiledImage = that.configMode.tiledImageStack ||
+    const isTiledImage = that.configMode.tiledImageStack ||
                         (that.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']     
                         && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
     if(isTiledImage){
@@ -3505,7 +3484,7 @@ $.widget( "heurist.editing_input", {
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                    
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
             
@@ -3517,7 +3496,7 @@ $.widget( "heurist.editing_input", {
                 $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).css('cursor','hand');
                 
                       
-                __show_action_dialog = function (event){
+                let __show_action_dialog = function (event){
                         event.preventDefault();
                         
                         if(that.is_disabled) return;
@@ -3549,7 +3528,7 @@ $.widget( "heurist.editing_input", {
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'4px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
 
@@ -3579,7 +3558,7 @@ $.widget( "heurist.editing_input", {
                     }
                 }
                       
-                __show_mapdigit_dialog = function (event){
+                let __show_mapdigit_dialog = function (event){
                         event.preventDefault();
                         
                         if(that.is_disabled) return;
@@ -3675,7 +3654,7 @@ $.widget( "heurist.editing_input", {
 
                 $input.css({cursor:'hand'});
 
-                __show_geoBookmark_dialog = function(event) {
+                let __show_geoBookmark_dialog = function(event) {
                     event.preventDefault();
 
                     if(that.is_disabled) return;
@@ -3859,7 +3838,7 @@ $.widget( "heurist.editing_input", {
                     
                 }else{
                 
-                    var $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
+                    let $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
                         //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                         .addClass('smallbutton btn_add_term')
                         .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
@@ -3962,7 +3941,7 @@ $.widget( "heurist.editing_input", {
                             && this.options.dtID.indexOf('ReferenceURL') !== -1;
         if(freetext_url || semantic_uri){
 
-            $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
+            let $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
                 .addClass('smallicon ui-icon ui-icon-extlink')
                 .appendTo( $inputdiv );
 
@@ -3991,15 +3970,13 @@ $.widget( "heurist.editing_input", {
             .css({'margin-top':'2px',cursor:'pointer'})
             .appendTo( $inputdiv );
             
-            var that = this;
-            
             this._on( $btn_calcfield,{ click: function(){ 
                 window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'], 
                     function(){
                         //refresh value
                         if(!(that.options.recID>0)) return;
 
-                        var request = request = {q: 'ids:'+that.options.recID, w: 'all', detail:[that.options.dtID] };
+                        const request = {q: 'ids:'+that.options.recID, w: 'all', detail:[that.options.dtID] };
 
                         window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
                             {
@@ -4019,7 +3996,7 @@ $.widget( "heurist.editing_input", {
         
         this.inputs.push($input);
         
-        var dwidth = this.f('rst_DisplayWidth');
+        const dwidth = this.f('rst_DisplayWidth');
         
         if( typeof dwidth==='string' && dwidth.indexOf('%')== dwidth.length-1){ //set in percents
             
@@ -4062,7 +4039,6 @@ $.widget( "heurist.editing_input", {
 
         
         //clear button
-        //var $btn_clear = $( "<div>")
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
         {
             if(!(this.detailType == 'enum' && this.inputs.length > 1 && this.enum_buttons == 'checkbox')){
@@ -4115,7 +4091,7 @@ $.widget( "heurist.editing_input", {
                         
     					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
                         {
-                            $parentNode = $(e.target.parentNode);
+                            let $parentNode = $(e.target.parentNode);
                             $parentNode.find('.thumb_image').hide();
                             $parentNode.find('.fullSize').hide();
                             $parentNode.find('.download_link').hide();
@@ -4128,10 +4104,9 @@ $.widget( "heurist.editing_input", {
                                 "bottom": ""
                             });						
     						
-                            that._on($input, {mouseout:__hideImagePreview});
-                            that._on($input_img, {mouseout:__hideImagePreview});
-                            
-                            isClicked = 0;
+//!!!!                            that._on($input, {mouseout:__hideImagePreview});
+//!!!!                            that._on($input_img, {mouseout:__hideImagePreview});
+//!!!!                            isClicked = 0;
                         }
     					
                         if(that.detailType=="resource" && that.configMode.entity=='records' 
@@ -4764,7 +4739,7 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value,
                    function( display_value ){
                        ele.empty();
-                       hasValues = false;
+                       let hasValues = false;
                        if(display_value && display_value.length>0){
                            for(let i=0; i<display_value.length; i++){
                                if(display_value[i]){
@@ -4783,8 +4758,6 @@ $.widget( "heurist.editing_input", {
                            ele.parent().find('.sel_link2').show();
                        }
                        
-                        ///var rec_Title  = display_value.join(',');           
-                        //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
                    });
             }
         }
@@ -4802,8 +4775,8 @@ $.widget( "heurist.editing_input", {
                 
                     if($input.hSelect("instance")!=undefined){
                         
-                        var opt = $input.find('option[value="'+$input.val()+'"]');
-                        var parentTerms = opt.attr('parents');
+                        let opt = $input.find('option[value="'+$input.val()+'"]');
+                        let parentTerms = opt.attr('parents');
                         if(parentTerms){
                             $input.hSelect("widget").find('.ui-selectmenu-text').html( parentTerms+'.'+opt.text() );    
                         }    
@@ -4815,8 +4788,8 @@ $.widget( "heurist.editing_input", {
                         });
                         
                         //assign for selected term value in format: parent.child 
-                        var opt = $input.find( "option:selected" );
-                        var parentTerms = opt.attr('parents');
+                        let opt = $input.find( "option:selected" );
+                        let parentTerms = opt.attr('parents');
                         if(parentTerms){
                              opt.text(parentTerms+'.'+opt.attr('term-orig'));
                         }
@@ -4884,13 +4857,11 @@ $.widget( "heurist.editing_input", {
                     //this.configMode.filter_group
                     //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
-                    var selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
+                    let selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
                     
                     //add add/browse buttons
-                    if(this.configMode.button_browse){
-
-                    }
+                    //if(this.configMode.button_browse){}
                 
                 }else{
                     //type: select, radio, checkbox
@@ -4923,7 +4894,7 @@ $.widget( "heurist.editing_input", {
                     
                     //array of key:title objects
                     //if($input==null) $input = $('<select>').uniqueId();
-                    var selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
+                    let selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
 
                     // move menuWidget to current dialog/document 
@@ -5353,11 +5324,9 @@ $.widget( "heurist.editing_input", {
         let visibility_mode = this.f('rst_NonOwnerVisibility');
         if(visibility_mode=='public' || visibility_mode=='pending')
         {
-            let idx;
             let ress = {};
             
-            
-            for (idx in this.inputs) {
+            for (let idx in this.inputs) {
                 let $input = this.inputs[idx];
                 
                 let val = this._getValue($input);
@@ -5365,17 +5334,17 @@ $.widget( "heurist.editing_input", {
                 
                     let res = 0;
                     
-                    var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                    let ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                     res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
                                         
-                    var ele = $input.parents('.input-div');
+                    ele = $input.parents('.input-div');
                     let k = ele.index();
                     ress[k] = res;
                 }
             }
             
             ress2 = [];
-            for(idx in ress){
+            for(let idx in ress){
                 ress2.push(ress[idx]);
             }
         }
@@ -5453,7 +5422,7 @@ $.widget( "heurist.editing_input", {
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
 
                     if(this.options.is_between_mode){
-                        var res2;
+                        let res2;
                         if(this.detailType=='date'){
                             res2 = this.newvalues[$input.attr('id')+'-2'];    
                         }else{
@@ -5644,9 +5613,8 @@ $.widget( "heurist.editing_input", {
         if(max_length>0 &&
             (data_type=='freetext' || data_type=='url' || data_type=='blocktext')){
 
-            var idx;
-            for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
+            for (let idx in this.inputs) {
+                let res = this._getValue(this.inputs[idx]);
                 if(!window.hWin.HEURIST4.util.isempty( res ) && res.length>max_length){
                     //error highlight
                     $(this.inputs[idx]).addClass( "ui-state-error" );
@@ -5655,26 +5623,27 @@ $.widget( "heurist.editing_input", {
                 }
             }
         }
-        if(data_type=='integer' || this.detailType=='year'){
+        /*if(data_type=='integer' || this.detailType=='year'){
             //@todo validate 
             
         }else if(data_type=='float'){
+            //@todo validate 
             
+        }else */
+        if(data_type=='resource'){
             
-        }else if(data_type=='resource'){
+            const ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
             
-            let ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
-            
-            var idx, snames = [];
+            let snames = [];
             if(ptrset.length>0){
-                for (idx in ptrset) {
+                for (let idx in ptrset) {
                     snames.push($Db.rty(ptrset[idx],'rty_Name'));
                 }
             }
             snames = snames.join(', ');
             
-            for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
+            for (let idx in this.inputs) {
+                let res = this._getValue(this.inputs[idx]);
                 //check record type
                 let rty_ID = $(this.inputs[idx]).find('.related_record_title').attr('data-rectypeid')
                 
@@ -6025,7 +5994,7 @@ $.widget( "heurist.editing_input", {
 
             // change calendar to current type
             let calendar = $.calendars.instance(cal_name);
-            var g_calendar = $.calendars.instance('gregorian');
+            let g_calendar = $.calendars.instance('gregorian');
 
             if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate){
 
@@ -6162,7 +6131,7 @@ $.widget( "heurist.editing_input", {
                         let g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
                         g_value = g_calendar.formatDate('yyyy-mm-dd', g_value);
 
-                        if(g_value != ''){
+                        if(g_value != ''){//translated value
                             try {
 
                                 let new_tdate = TDate.parse(g_value);
@@ -6211,16 +6180,13 @@ $.widget( "heurist.editing_input", {
             });
         }else{ // we use jquery datepicker for general use
 
-                /*var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
-                        .val($input.val()).insertAfter( $input );*/
-
                 let $btn_datepicker = $( '<span>', {title: 'Show calendar'})
                     .attr('data-picker',$input.attr('id'))
                     .addClass('smallicon ui-icon ui-icon-calendar')
                     .insertAfter( $tinpt );
                     
                 
-                var $datepicker = $tinpt.datepicker({
+                let $datepicker = $tinpt.datepicker({
                     /*showOn: "button",
                     buttonImage: "ui-icon-calendar",
                     buttonImageOnly: true,*/
@@ -6363,6 +6329,8 @@ $.widget( "heurist.editing_input", {
                                     let month = hasMonth ? new_date.getMonth() : 1;
                                     let day = hasDay ? new_date.getDay() : 1;
 
+                                    let g_calendar = $.calendars.instance('gregorian');
+
                                     new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
                                     new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
                                 }
@@ -6433,7 +6401,6 @@ $.widget( "heurist.editing_input", {
                 if(that.detailType=='date') {
                     
                     
-                    //var dpicker = that.element.find('input[data-picker="'+$input.attr('id')+'"]');
                     let dpicker_btn = that.element.find('span[data-picker="'+$input.attr('id')+'"]');
                     
                     edash.insertAfter(dpicker_btn);
@@ -6449,13 +6416,6 @@ $.widget( "heurist.editing_input", {
                             
                     that._createDateInput(inpt2, $inputdiv);
             
-                    /*
-                    var opts = window.hWin.HEURIST4.util.cloneJSON(that.options);
-                    opts.showclear_button = false;
-                    opts.is_between_mode = false;
-                    opts.suppress_repeat = false;
-                    $('<div>').attr('id',$input.attr('id')+'-2').editing_input(that.options).insertAfter(edash);    
-                    */
                 }else{
                     edash.insertAfter($input);
                     
@@ -6544,6 +6504,8 @@ $.widget( "heurist.editing_input", {
                         $inputdiv.find('label.enum_input, br').remove();
                         $inputdiv.find('.smallicon').css({'top': '', 'margin-top': '2px'});
                     }
+
+                    let inpt_id = $input.attr('id');
                     $input.remove();
 
                     $input = $('<select>')
@@ -6674,10 +6636,6 @@ $.widget( "heurist.editing_input", {
         // input div's width
         let f_width = parseInt(this.f('rst_DisplayWidth'));
         f_width = (window.hWin.HEURIST4.util.isempty(f_width) || f_width < 100) ? 110 : f_width + 10; // +10 for extra room
-
-		//var labelWidth = 25; // label+input width
-        //var taken_width = this.input_cell.parent().find('span.editint-inout-repeat-button').width() + this.input_cell.parent().find('div.header').width() + 20;
-        //var row_limit = Math.floor(f_width / labelWidth);
 
         $inputdiv.css({'max-width': (f_width + 20) + 'ex', 'min-width': f_width + 'ex'});
 

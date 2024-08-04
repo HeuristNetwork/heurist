@@ -24,6 +24,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global hEditing */
+
 //
 //  mode_edit 2 - symbology for general map draw style
 //            1 - symbology editor from map legend
@@ -57,7 +59,7 @@ function editSymbology(current_value, mode_edit, callback){
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    var _editing_symbology = new hEditing({container:editForm, 
+    let _editing_symbology = new hEditing({container:editForm, 
         onchange:
         function(){
             let isChanged = _editing_symbology.isModified();
@@ -89,7 +91,7 @@ function editSymbology(current_value, mode_edit, callback){
                 if($.isArray(current_value)){
                     let thematicMap = [];
                     let baseSymb = {};
-                    for(var i=0; i<current_value.length; i++){
+                    for(let i=0; i<current_value.length; i++){
                         if(current_value[i].fields){
                             //thematic map
                             thematicMap.push(current_value[i]);
@@ -284,8 +286,6 @@ function editSymbology(current_value, mode_edit, callback){
                     let dty_Type = record['dty_Type'];
                     if(record['dty_Type']=='resource') 
                     {
-                        is_parent = false;
-                        
                         let ptr = record['dty_PtrTargetRectypeIDs'];
                         if(ptr){
                             ptr = ptr.split(',');  
@@ -627,7 +627,7 @@ function editSymbology(current_value, mode_edit, callback){
             let titles = [];
             if(current_value['geofield']){
                 let codes = current_value['geofield'].split(',');
-                for(var i=0; i<codes.length; i++){
+                for(let i=0; i<codes.length; i++){
                     let code = codes[i];
                     if(code && code.indexOf(':')>0){
                         let harchy = $Db.getHierarchyTitles(code);
@@ -647,18 +647,20 @@ function editSymbology(current_value, mode_edit, callback){
 
             $(geofield_lbls).on({click: function(e){
                 
-                if(!maplayer_rty || maplayer_rty.length==0) return;
+                if(!maplayer_rty || maplayer_rty.length==0) {return;}
                 
-                maplayer_rty_treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, maplayer_rty, ['geo','resource'] );                 
+                let maplayer_rty_treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, maplayer_rty, ['geo','resource'] );                 
                 
-            let popele = edit_symb_dialog.find('#divFieldSelector');
-            if(popele.length==0){
+                let popele = edit_symb_dialog.find('#divFieldSelector');
+                if(popele.length==0){
                    popele = $('<div id="divFieldSelector"><div class="rtt-tree"/></div>').appendTo(edit_symb_dialog);
-            }
+                }
             
-            maplayer_rty_treedata[0].expanded = true;
+                if(maplayer_rty_treedata && maplayer_rty_treedata.length>0){
+                    maplayer_rty_treedata[0].expanded = true;
+                } 
                 
-            let treediv = popele.find('.rtt-tree');
+                let treediv = popele.find('.rtt-tree');
             
                 treediv.fancytree({
             checkbox: true,
@@ -725,7 +727,7 @@ function editSymbology(current_value, mode_edit, callback){
             }
         });
                 
-                let dlg2, btns = [
+                let $dlg2, btns = [
                     {text:window.hWin.HR('Apply'),
                         click: function(){
                             
@@ -799,7 +801,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
     let ele = _editing.getFieldByName( dtId_File );
     if(ele && !ulf_ID){
 
-        var val = ele.editing_input('getValues');
+        let val = ele.editing_input('getValues');
         if(val && val.length>0){
 
             ulf_ID = val[0]['ulf_ObfuscatedFileID'];
@@ -836,7 +838,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
     let dtId_WorldFile = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'];
     ele = _editing.getFieldByName( dtId_WorldFile );
     if(ele){
-        var val = ele.editing_input('getValues');
+        let val = ele.editing_input('getValues');
         if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
             worldFile = val[0];    
         }
@@ -959,7 +961,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                     $.each($mnu.find('.ui-menu-item-wrapper'), function(i,item){
 
                         let title = $(item).text().toLowerCase();
-                        if($select.attr('rectype-select') == 1 && window.hWin.HEURIST4.browseRecordCache.hasOwnProperty(key)){
+                        if($select.attr('rectype-select') == 1 && Object.hasOwn(window.hWin.HEURIST4.browseRecordCache,key)){
                             title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
                             title = title.replace(/[\r\n]+/g, ' ');
                         }
@@ -1349,16 +1351,15 @@ function browseRecords(_editing_input, $input){
                                 let recordset = data.selection;
                                 let record = recordset.getFirstRecord();
                                 
-                                var rec_Title = recordset.fld(record,'rec_Title');
+                                const rec_Title = recordset.fld(record,'rec_Title');
                                 if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                                     // no proper selection 
                                     // consider that record was not saved - it returns FlagTemporary=1 
                                     return;
                                 }
                                
-                                let targetID = recordset.fld(record,'rec_ID');
-                                var rec_Title = recordset.fld(record,'rec_Title');
-                                let rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                const targetID = recordset.fld(record,'rec_ID');
+                                const rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                 
                                 that.newvalues[$input.attr('id')] = targetID;
                                 $input.attr('data-value', targetID); //that's more reliable
@@ -1379,7 +1380,7 @@ function browseRecords(_editing_input, $input){
                                 that.onChange();
                                 ele.css({margin:'4px', 'border':'2px red solid !important'});
                                 
-                                var $inputdiv = $input.parent();
+                                let $inputdiv = $input.parent();
                                 $inputdiv.css('border','4px green solid !important');
                                 $input.css('border','1px blue solid');
 
@@ -1399,7 +1400,7 @@ function browseRecords(_editing_input, $input){
     //
     // event is false for confirmation of select mode for parent entity
     // 
-    var __show_select_dialog = function(event){
+    let __show_select_dialog = function(event){
         
             if(that.is_disabled) return;
         
@@ -1556,7 +1557,7 @@ function browseRecords(_editing_input, $input){
                                    if(!rectype_set) rectype_set = 'any';
                                    rectype_set = rectype_set.split(',');
                                    $.each(rectype_set, function(i,rty_id){
-                                       var rty_id = ''+rty_id;
+                                       rty_id = ''+rty_id;
                                        if(!window.hWin.HEURIST4.browseRecordTargets[rty_id]){
                                            window.hWin.HEURIST4.browseRecordTargets[rty_id] = [];
                                        }
@@ -1795,21 +1796,16 @@ function browseTerms(_editing_input, $input, value){
             let trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
             let trm_info = $Db.trm(trm_ID);
 
-            if(trm_info && trm_info.trm_ParentTermID != 0){
-                
-                while(1){
+            while(trm_info && trm_info.trm_ParentTermID > 0){
 
-                    let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
-                    trm_info = $Db.trm(trm_info.trm_ParentTermID);
+                let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
+                trm_info = $Db.trm(trm_info.trm_ParentTermID);
 
-                    if(trm_info.trm_ParentTermID == 0){
-                        break;
-                    }else{
-                        trm_Label = label + '.' +  trm_Label;
-                    }
+                if(trm_info && trm_info.trm_ParentTermID > 0){
+                    trm_Label = label + '.' +  trm_Label;
                 }
             }
-
+        
             window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
             $input.css('min-width', '');
         }else{
@@ -2282,9 +2278,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
     
     //3. add new hidden lang elements
     $(Object.keys(params)).each(function(i, key){
-        if(key==keyname){
-            
-        }else if(keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
+        if(key!=keyname && keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
             let lang = key.substring(key.length-3);
             
             let ele = $('<'+ele_type+'>')
@@ -2294,8 +2288,6 @@ function translationToUI(params, $container, keyname, name, is_text_area){
                 
             if(is_text_area){
                 ele.css('display','none');
-            }else{
-                //ele.attr('type','hidden');
             }
                 
             sTitle += (lang+':'+params[key]+'\n');

@@ -24,35 +24,14 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
     const _className = 'imgFilter';
     let _default_values = {};
+    let $dlg;
     
     function _init(){
 
-        let buttons= [
-            {text:window.hWin.HR('Cancel'), 
-                id:'btnCancel',
-                css:{'float':'right','margin-left':'10px','margin-right':'20px'}, 
-                click: function() { 
-                    $dlg.dialog( "close" );
-            }},
-            {text:window.hWin.HR('Reset'), 
-                id:'btnReset',
-                css:{'float':'right','margin-left':'10px'}, 
-                click: function() { 
-                    _resetValues();
-            }},
-            {text:window.hWin.HR('Apply'), 
-                id:'btnDoAction',
-                class:'ui-button-action',
-                //disabled:'disabled',
-                css:{'float':'right'}, 
-                click: function() { 
-                        let config = _getValues();
-                        main_callback.call(this, config);
-                        $dlg.dialog( "close" );    
-        }}];
 
         if($container && $container.length>0){
             //container provided
+            $dlg = $container;
 
             $container.empty().load(window.hWin.HAPI4.baseURL
                 +'hclient/widgets/editing/imgFilter.html',
@@ -61,7 +40,30 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
         }else{
             //open as popup
-
+            let buttons= [
+                {text:window.hWin.HR('Cancel'), 
+                    id:'btnCancel',
+                    css:{'float':'right','margin-left':'10px','margin-right':'20px'}, 
+                    click: function() { 
+                        $dlg.dialog( "close" );
+                }},
+                {text:window.hWin.HR('Reset'), 
+                    id:'btnReset',
+                    css:{'float':'right','margin-left':'10px'}, 
+                    click: function() { 
+                        _resetValues();
+                }},
+                {text:window.hWin.HR('Apply'), 
+                    id:'btnDoAction',
+                    class:'ui-button-action',
+                    //disabled:'disabled',
+                    css:{'float':'right'}, 
+                    click: function() { 
+                            let config = _getValues();
+                            main_callback.call(this, config);
+                            $dlg.dialog( "close" );    
+            }}];
+    
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/editing/imgFilter.html?t="+(new Date().getTime()), 
                 buttons, 'Define Filters', 

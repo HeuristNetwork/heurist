@@ -209,8 +209,6 @@ $.widget( "heurist.editTranslations", {
             
             ch = ch + 80;
 
-            //var dh =  this._dialog.dialog('option', 'height');
-
             let ht = Math.min(ch, window.innerHeight-topPos);
 
             this._as_dialog.dialog('option', 'height', ht);    
@@ -246,7 +244,7 @@ $.widget( "heurist.editTranslations", {
             .appendTo( cont );
             
         
-        var _is_default = false;    
+        let _is_default = false;    
         let lang = '';
         
         if(check_default){
@@ -264,7 +262,7 @@ $.widget( "heurist.editTranslations", {
                 lang = lang.toUpperCase();
             }
             
-            var _is_default = window.hWin.HEURIST4.util.isempty(lang);
+            _is_default = window.hWin.HEURIST4.util.isempty(lang);
         }
         
         if(this.options.fieldtype=='blocktext')

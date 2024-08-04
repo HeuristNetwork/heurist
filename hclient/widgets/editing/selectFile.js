@@ -45,6 +45,7 @@ $.widget( "heurist.selectFile", {
     _cachedRecordset: null,
     _is_archive_folder: false,
     _is_source_changed: false,
+    _emptyMessage: '',
 
     // the constructor
     _init: function() {
@@ -83,7 +84,7 @@ $.widget( "heurist.selectFile", {
         
         this._is_archive_folder = parseInt(this.options.source)>0;
 
-        let emptyMessage = `Specified files (${this.options.extensions}) are not found in `
+        this._emptyMessage = `Specified files (${this.options.extensions}) are not found in `
             +(this._is_archive_folder?'given folder':this.options.source);
         
         //resultList with images
@@ -105,7 +106,7 @@ $.widget( "heurist.selectFile", {
                        
                        pagesize: 500,
                        
-                       empty_remark: emptyMessage,
+                       empty_remark: this._emptyMessage,
                        renderer: function(recordset, record){ 
                            
                            let recID   = recordset.fld(record, 'file_id');
@@ -276,7 +277,7 @@ $.widget( "heurist.selectFile", {
                             that.recordList.resultList('updateResultSet', recset);
                         }else{
                             if(that._as_dialog) that._as_dialog.dialog('close');
-                            window.hWin.HEURIST4.msg.showMsgFlash(emptyMessage);    
+                            window.hWin.HEURIST4.msg.showMsgFlash(that._emptyMessage);    
                         }
 
                     }else{

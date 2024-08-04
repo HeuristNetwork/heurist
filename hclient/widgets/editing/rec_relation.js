@@ -40,7 +40,7 @@ $.widget( "heurist.rec_relation", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.wcontainer = $("<div>");
 
@@ -94,8 +94,6 @@ $.widget( "heurist.rec_relation", {
         .addClass("smallbutton")
         .appendTo( this.wcontainer )
         .button({icons:{primary: "ui-icon-link"},text:false});
-
-        var that = this;
 
         function __show_select_dialog(event){
             event.preventDefault();
