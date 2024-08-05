@@ -751,96 +751,108 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(this._currentEditID<=0){ // Check that a new field is being defined
 
                 if(!this.options.newFieldType){
-                if(this.options.create_sub_record){
-                    this._setupSubRecordField();
-                    this.options.newFieldType = 'resource';
-                }else
-                if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
-                    let flavour_text = $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br>'
-                        + 'However, please read the following notes carefully.</div>'
-                        + '<span id="btn-basefields-list" style="margin:1em 0 1em 3em"></span>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">The base fields chosen should have a <span style="text-decoration:underline">similar sense of meaning</span>, '
-                        + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br>'
-                        + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br>'
-                        + 'to the current record type only (the base field retains its name).<br><br>'
+                    if(this.options.create_sub_record){
+                        this._setupSubRecordField();
+                        this.options.newFieldType = 'resource';
+                    }else
+                    if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
+                        $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br>'
+                            + 'However, please read the following notes carefully.</div>'
+                            + '<span id="btn-basefields-list" style="margin:1em 0 1em 3em"></span>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">The base fields chosen should have a <span style="text-decoration:underline">similar sense of meaning</span>, '
+                            + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br>'
+                            + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br>'
+                            + 'to the current record type only (the base field retains its name).<br><br>'
 
-                        + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br>'
-                        + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br>'
-                        + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br>'
-                        + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br>'
-                        + 'for all the others.</div><hr style="width:80%;margin:1em 10em 1em 0;"/>'
+                            + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br>'
+                            + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br>'
+                            + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br>'
+                            + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br>'
+                            + 'for all the others.</div><hr style="width:80%;margin:1em 10em 1em 0;"/>'
 
-                        + '<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br>'
-                        + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br>'
-                        + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
+                            + '<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br>'
+                            + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br>'
+                            + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
 
-                    let btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
-                    let rty_ID = this.options.newFieldForRtyID;
-                    let that = this;
+                        let btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
+                        let rty_ID = this.options.newFieldForRtyID;
+                        let that = this;
 
-                    function multiFieldPopup(){ // load multi-field popup
+                        function multiFieldPopup(){ // load multi-field popup
 
-                        that._editing.setModified(0);
+                            that._editing.setModified(0);
 
-                        let sURL = window.hWin.HAPI4.baseURL + "hclient/widgets/entity/popups/selectMultiFields.html?&rtyID="+rty_ID;
-                                
-                        window.hWin.HEURIST4.msg.showDialog(sURL, {
-                            "close-on-blur": false,
-                            title: 'Insert Base Fields',
-                            window: window.hWin,
-                            height: '735px',
-                            width: '1020px',
-							padding: 0,
-                            default_palette_class: 'ui-heurist-design',
-                            callback: function(context) {
-                                if(!window.hWin.HEURIST4.util.isempty(context)) {
+                            let sURL = window.hWin.HAPI4.baseURL + "hclient/widgets/entity/popups/selectMultiFields.html?&rtyID="+rty_ID;
+                                    
+                            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                                "close-on-blur": false,
+                                title: 'Insert Base Fields',
+                                window: window.hWin,
+                                height: '735px',
+                                width: '1020px',
+                                padding: 0,
+                                default_palette_class: 'ui-heurist-design',
+                                callback: function(context) {
+                                    if(!window.hWin.HEURIST4.util.isempty(context)) {
 
-                                    let rst_fields = {
-                                        rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
-                                        rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
-                                        rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                        let rst_fields = {
+                                            rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                                            rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
+                                            rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                        };
+
+                                        that._trigger("multiselect", null, {selection:context.reverse(), rst_fields:rst_fields}); // handler in manageDefRecStructure
+
+                                        that.closeDialog( true ); // close base field definition popup
+                                    }
+                                }
+                            });
+                        }
+
+                        this._on(btnBasefieldsList, 
+                            {'click': function(){ // warn the user about the loss of popup data
+                                let isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
+                                                    || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
+                                                    && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
+                                                ); // Check if values have been placed/selected in required fields
+
+                                if(isChanged){
+
+                                    let $dlg, buttons = {};
+                                    buttons['Yes'] = function(){ // close message, open multi-field popup
+                                        $dlg.dialog('close'); 
+                                        multiFieldPopup();
+                                    }; 
+                                    buttons['No'] = function(){
+                                        $dlg.dialog('close'); 
                                     };
 
-                                    that._trigger("multiselect", null, {selection:context.reverse(), rst_fields:rst_fields}); // handler in manageDefRecStructure
+                                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'Items entered into this form may be lost upon completing this process, would you still like to proceed?',
+                                        buttons,
+                                        {title:'Confirm',yes:'Yes',no:'No'}
+                                    );
 
-                                    that.closeDialog( true ); // close base field definition popup
+                                }else{ // in the odd chance that isChanged is false, I don't think it can be in this case
+                                    multiFieldPopup();
                                 }
                             }
                         });
                     }
-
-                    this._on(btnBasefieldsList, 
-                        {'click': function(){ // warn the user about the loss of popup data
-                            let isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
-                                                || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
-                                                && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
-                                            ); // Check if values have been placed/selected in required fields
-
-                            if(isChanged){
-
-                                let $dlg, buttons = {};
-                                buttons['Yes'] = function(){ // close message, open multi-field popup
-                                    $dlg.dialog('close'); 
-                                    multiFieldPopup();
-                                }; 
-                                buttons['No'] = function(){
-                                    $dlg.dialog('close'); 
-                                };
-
-                                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'Items entered into this form may be lost upon completing this process, would you still like to proceed?',
-                                    buttons,
-                                    {title:'Confirm',yes:'Yes',no:'No'}
-                                );
-
-                            }else{ // in the odd chance that isChanged is false, I don't think it can be in this case
-                                multiFieldPopup();
-                            }
-                        }
-                    });
                 }
+
+                if(!window.hWin.HEURIST4.util.isempty(this.options.newFieldName)){
+
+                    name_field[0].val(this.options.newFieldName);
+
+                    let desc_field = this._editing.getInputs('dty_HelpText');
+                    if(desc_field.length > 0){
+                        desc_field[0].val(this.options.newFieldName);
+                    }
+
+                    name_field[0].change();
                 }
             }
         }
