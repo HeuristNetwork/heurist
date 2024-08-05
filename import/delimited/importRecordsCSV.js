@@ -1665,8 +1665,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 if(all_mapped.indexOf(fid)<0) all_mapped.push(Number(fid));
             }
         }
-        
-            
+
+        // Scale 'Column' column up to 50 characters long
+        let column_width = 15;
+        for(const i in imp_session['columns']){
+
+            if(column_width >= 50){
+                column_width = 50;
+                break;
+            }
+
+            column_width = imp_session['columns'][i].length > column_width 
+                            ? imp_session['columns'][i].length : column_width;
+        }
+        column_width += 5;
+        $($('.tbmain')[0]).find('th:nth-child(3)').css({
+            width: `${column_width}ch`,
+            'max-width': `${column_width}ch`
+        })
+
         var idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
         
         if (idx_id_fieldname<0) { //id field is not created
@@ -1675,11 +1692,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //+ '<input type="checkbox" checked="checked" disabled="disabled"/>'
                     + '</td>'
                     + '<td  width="75px" align="center">0</td>' // count of unique values
-                    + '<td style="width:300px;class="truncate">'+imp_session['sequence'][currentSeqIndex]['field']+'</td>' // column name
+                    + `<td style="width:${column_width}ch;max-width:${column_width}ch;class="truncate">${imp_session['sequence'][currentSeqIndex]['field']}</td>` // column name
                     + '<td style="width:300px;">&nbsp;New column to hold Heurist record IDs</td><td>&nbsp;</td></tr>';
-        }
-        
-        
+        }        
+
         for (i=0; i < len; i++) {
 
             var isIDfield = (i==idx_id_fieldname);
@@ -1694,8 +1710,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             // count of unique values
             s = s + '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
 
-            // column names                 padding-left:15px;  <span style="max-width:290px"></span>
-            s = s + '<td style="width:300px;'+(isIndex?'color:#b36ae2;"':'')+'" class="truncate">'+imp_session['columns'][i]+'</td>';
+            // column names
+            s += `<td style="width:${column_width}ch;max-width:${column_width}ch;${(isIndex?'color:#b36ae2;"':'')}" class="truncate">${imp_session['columns'][i]}</td>`;
 
             // mapping selector
             s = s + '<td style="width:300px;">'
@@ -2431,7 +2447,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
             let $btn = $(event.target);
             if($btn.is('span')){
-                $btn.closest('button');
+                $btn = $btn.closest('button');
             }
 
             let fld_id = $btn.attr('id');
@@ -2442,6 +2458,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 return;
             }
 
+            let fld_idx = fld_id.split('_').pop();
+
             let rty_ID = imp_session['sequence'][currentSeqIndex]['rectype'];
 
             let options = {
@@ -2451,6 +2469,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 title: `Define new field for ${$Db.rty(rty_ID,'rty_Name')}`,
                 newFieldForRtyID: rty_ID,
                 selectOnSave: true,
+                newFieldName: imp_session['columns'][fld_idx],
                 onselect: (event, res) => {
 
                     if(!res || (!res.selection && !res.updatedRstField)){
