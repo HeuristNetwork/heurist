@@ -97,7 +97,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         if(this.options.list_mode!='compact'){
             /*
             this._on(this.element, {'competency': function(event, level){
-                var top = 3.3;
+                let top = 3.3;
                 if(level>0 && this.options.select_mode!='manager'){
                     top = top + 7;
                 }
@@ -278,24 +278,21 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         //add content
         let records = recordset.getRecords();
         let order = recordset.getOrder();
-        var recID, label, groupid, record;
         
         let maxlen = {};
 
-        for (idx=0;idx<order.length;idx++){
+        for (let idx=0;idx<order.length;idx++){
 
-            recID = order[idx];
+            const recID = order[idx];
             if(recID && records[recID]){
                 
-                record = records[recID];
-                label = recordset.fld(record,'tag_Text');
-                groupid = recordset.fld(record,'tag_UGrpID');
-                usage = recordset.fld(record,'tag_Usage');
+                let record = records[recID];
+                const label = recordset.fld(record,'tag_Text');
+                const groupid = recordset.fld(record,'tag_UGrpID');
+                const usage = recordset.fld(record,'tag_Usage');
 
                 
                 let content = this.recordList.find('div[data-id="'+groupid+'"]');
-                
-                //var label = label + (usage>0?(' ('+usage+')'):'');
                 
                 let item = '<div  recid="'+recID+'" groupid="'+groupid+'" usage="'+usage
                             +'" class="recordDiv tagDiv tagDiv-fixed-width"'
@@ -332,9 +329,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }//for
 
         //set min widht by max label width        
-        for (var groupid in maxlen)
+        for (let groupid in maxlen)
         if(groupid>0){
-            let wd = (maxlen[groupid]<10?10:maxlen[groupid])+8;
+            const wd = (maxlen[groupid]<10?10:maxlen[groupid])+8;
 
             this.recordList.find('div.recordDiv[groupid="'+groupid+'"]')
                 .attr('data-wd',wd)
@@ -353,7 +350,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             this._on(inputs, {'keypress': function(event){
                 
-                    let code = (event.keyCode ? event.keyCode : event.which);
+                    const code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
                         this.onAddTag( event );
                         window.hWin.HEURIST4.util.stopEvent(event);
@@ -445,7 +442,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     onDeleteTag: function(event){
         
         let recid = $(event.target).parents('.recordDiv').attr('recid');
-        //var key = $(event.target).parents('.rec_action_link').attr('data-key');
         let action = {action:'delete', recID:recid}
         this._onActionListener(null, action);
         
@@ -538,12 +534,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 let item = this.recordList.find('div[recid='+recID+']');
                 
                 item.find('label').text(fields['tag_Text']); //set new tagname
+
+                const usage = fields['tag_Usage'];
                 
                 item.find('span.user-list-edit')
                     .css('display',usage>0?'inline-block':'none').text(usage);
                     
-                let oldwd = item.attr('data-wd');
-                let wd = fields['tag_Text'].length+9;
+                const oldwd = item.attr('data-wd');
+                const wd = fields['tag_Text'].length+9;
                 if(wd>oldwd){ //reset tag width for all items in group
                     this.recordList.find('div.recordDiv[groupid="'+fields['tag_UGrpID']+'"]')
                         .attr('data-wd', wd)
@@ -551,9 +549,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
                     
 
-                //reload
-                //var recordset = this.getRecordSet([recID]);
-                //this._initEditForm_step4(recordset);
             }
     },
     
@@ -616,7 +611,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){ 
             //1. selected tags by group
             if(that.options.show_top_n_recent){
-                var dele = $('<div>').css({display:'table-row','line-height':'20px'})
+                let dele = $('<div>').css({display:'table-row','line-height':'20px'})
                     .appendTo(pnl_picked).hide();
                 $('<div class="header header-label">Personal</div>')
                     .css({display:'table-cell', 'vertical-align': 'top', 'padding-right': '16px',
@@ -647,7 +642,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
                     if(that.options.show_top_n_recent){
-                        var dele = $('<div>').css({'display':'table-row','line-height':'20px'})
+                        let dele = $('<div>').css({'display':'table-row','line-height':'20px'})
                                 .appendTo(pnl_picked).hide();         
                         $('<div class="header header-label">'+name+'</div>')
                             .css({display:'table-cell', 'vertical-align': 'top', 'padding-right': '16px',
@@ -669,21 +664,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
             }
         }
-        /* OLD WAY        
-        for (idx in groups)
-        {
-            if(idx){
-                var groupID = idx;
-                var name = groups[idx][1];
-                if(!window.hWin.HEURIST4.util.isnull(name))
-                {
-                    $('<div><i style="display:inline-block;width:110px;text-align:right;">'+name+':&nbsp;</i></div>')
-                        .css({'padding':'3px 4px'})
-                        .attr('data-id', groupID).hide().appendTo(panel);
-                }
-            }
-        }
-        */
         //add content - selected tags
         let recordset = this._cachedRecordset;
         let records = recordset.getRecords();
@@ -782,8 +762,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         },
         'keyup': function(event){
             
-            //var input_tag = $(event.target);
-            
             if(input_tag.val().length>1){
                 
                 let request = {tag_Text:input_tag.val(), tag_UGrpID:sel_group.val() };    
@@ -877,21 +855,21 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         let records = recordset.getRecords();
         let order = recordset.getOrder();
-        let recID, label, record;
+        
         let list_div = $('<div><span">'+top.HR(sort_mode)+': </span></div>')   // style="font-weight:bold
             .css({'padding':'4px'}); //,'line-height':'22px'
         let that = this;
         
         if(order.length>0){
             
-            var limit = (limit>0)?Math.min(order.length,limit):order.length;
+            limit = (limit>0)?Math.min(order.length,limit):order.length;
             let iadded = 0;
-            let ISO_8601 = /^(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))$/i
+            const ISO_8601 = /^(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))$/i
             
-            for (idx=0;idx<order.length;idx++){
+            for (let idx=0;idx<order.length;idx++){
 
-                recID = order[idx];
-                label = recordset.fld(records[recID], 'tag_Text');
+                const recID = order[idx];
+                const label = recordset.fld(records[recID], 'tag_Text');
                 
                 if(!that._showAutoTags){
                     let is_auto_tag = false;
@@ -1005,21 +983,20 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         //add content
         let records = recordset.getRecords();
         let order = recordset.getOrder();
-        let recID, label, groupid, record;
 
-        for (idx=0;idx<order.length;idx++){
+        for (let idx=0;idx<order.length;idx++){
 
-            recID = order[idx];
+            const recID = order[idx];
             if(recID && records[recID]){
                 
-                record = records[recID];
-                label = recordset.fld(record,'tag_Text');
-                groupid = recordset.fld(record,'tag_UGrpID');
+                let record = records[recID];
+                const label = recordset.fld(record,'tag_Text');
+                const groupid = recordset.fld(record,'tag_UGrpID');
                 
                 if(window.hWin.HAPI4.user_id()==groupid){
                     res.push(label);    
                 }else{
-                    let grpName = window.hWin.HAPI4.sysinfo.db_usergroups[groupid];
+                    const grpName = window.hWin.HAPI4.sysinfo.db_usergroups[groupid];
                     res.push(grpName+'\\'+label);
                 }
             }
@@ -1057,28 +1034,27 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             if(that.edit_replace_input.val().length>1){
                 
-                let groupid = this.edit_replace_input.parent().attr('groupid');
+                const groupid = this.edit_replace_input.parent().attr('groupid');
                 
                 let request = {tag_Text:that.edit_replace_input.val(), tag_UGrpID:groupid };
                 let recordset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
                 
                 let records = recordset.getRecords();
                 let order = recordset.getOrder();
-                let recID, label, record;
                 
                 if(order.length>0){
                     that.list_div.empty();  
                     
-                    for (idx=0;idx<order.length;idx++){
+                    for (let idx=0;idx<order.length;idx++){
 
-                        recID = order[idx];
+                        const recID = order[idx];
                         if(recID && window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids)<0 && records[recID]){
-                            label = recordset.fld(records[recID],'tag_Text');
+                            const label = recordset.fld(records[recID],'tag_Text');
                             $('<div recid="'+recID+'" class="truncate">'
                             +label+'</div>').appendTo(that.list_div)
                             .click( function(event){
                                 $(event.target).hide();
-                                let newTagID = $(event.target).attr('recid');
+                                const newTagID = $(event.target).attr('recid');
                                 
                                 that._replaceTag(newTagID);
                             } );

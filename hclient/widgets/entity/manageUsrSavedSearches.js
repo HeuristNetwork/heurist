@@ -84,6 +84,8 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             this._initEditorOnly();
             return;
         }
+
+        let that = this;
         
         //update dialog title
         if(this.options.isdialog){ // &&  !this.options.title
@@ -118,7 +120,6 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             }
             
             if(usr_ID>0 && title){
-                var that = this;
                 function __set_dlg_title(res){
                     if(res && res.status==window.hWin.ResponseStatus.OK){
                         that._as_dialog.dialog('option','title', title+res.data[usr_ID]);    
@@ -145,7 +146,6 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
         this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
-        var that = this;
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -170,7 +170,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }

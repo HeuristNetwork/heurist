@@ -73,6 +73,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         //update dialog title
         let title = null;
         let usr_ID = 0;
+        let that = this;
         
         
         if(this.options.title){
@@ -107,7 +108,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         if(usr_ID>0 && title){
-            var that = this;
             function __set_dlg_title(res){
                 if(res && res.status==window.hWin.ResponseStatus.OK){
                     that.setTitle( title+res.data[usr_ID] );    
@@ -132,7 +132,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
         this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
-        var that = this;
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -226,7 +225,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     if(!(ugl_GroupID>0)) return;
                     /*if(!(ugl_GroupID>0)) {
                         
-                        var that = this;
                         this.recordList.find('.user-list-edit')
                         .each(function(idx,item){
                             $(item).attr('title','Edit user membership');
@@ -354,7 +352,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, sstyle){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(sstyle)){
                 swidth = ` style="${sstyle}"`;
             }
@@ -489,7 +487,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         let ugl_GroupID = this.searchForm.find('#input_search_group').val();
         if(ugl_GroupID>0 && !this._currentEditRecordset){ //insert       
 
-            var ele = this._editing.getFieldByName('ugl_GroupID');
+            let ele = this._editing.getFieldByName('ugl_GroupID');
             ele.editing_input('setValue', ugl_GroupID);
             //hide save button
             if(this._toolbar){
@@ -498,7 +496,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else
         //hide after edit init btnRecRemove for dbowner (user #2)
         if(this._currentEditID==2 || !window.hWin.HAPI4.is_admin()){
-            var ele = this._toolbar;
+            let ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
         }
         
@@ -669,8 +667,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(this._currentEditID==null || this._currentEditID<1) return;
 
-        let isEnabled = this._editing.getValue('ugr_Enabled')[0];
-        let isModified = this._editing.isModified();
+        const isEnabled = this._editing.getValue('ugr_Enabled')[0];
+        const isModified = this._editing.isModified();
+        let that = this;
 
         if(isModified){
 
@@ -684,15 +683,13 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(unconditionally===true){
             
-            let request = {
+            const request = {
                 'a': 'action',
                 'transferOwner': true,
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'recID'      : this._currentEditID 
             };
-
-            var that = this;
 
             window.hWin.HAPI4.EntityMgr.doRequest(request,
                 function(response){
@@ -708,7 +705,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             );
             
         }else{
-            var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to transfer the ownership of this database to the selected user? This action can only be undone by the new owner.<br>'
                 +' <p style="font-size: 1.1em; font-weight: bold;">'

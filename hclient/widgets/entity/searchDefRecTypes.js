@@ -243,7 +243,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     flist.find('input[name="name"]').prop('checked', 'checked');
                     flist.find('input[name="edit"]').prop('checked', 'checked');
                     flist.children().each(function(idx,item){
-                        var item = $(item).find('input');
+                        item = $(item).find('input');
                         if(item.is(':checked')){
                             fields.push(item.attr('name'));    
                         }                        

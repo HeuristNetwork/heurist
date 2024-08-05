@@ -1125,7 +1125,7 @@ $.widget( "heurist.importStructure", {
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+fld(fldname)+'</div>';
         }
 
         let dbs = window.hWin.HEURIST4.remote;

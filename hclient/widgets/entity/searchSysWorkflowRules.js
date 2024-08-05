@@ -23,7 +23,7 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         this.element.find('#inner_title').text( this.options.entity.entityTitlePlural );
         
@@ -58,7 +58,6 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
 
             //get all users
             let request = {a:'search', entity:'sysUsers', details:'fullname', 'sort:ugr_LastName': '1'};
-            var that = this;
             //Note: it searches for all users - including disabled
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){

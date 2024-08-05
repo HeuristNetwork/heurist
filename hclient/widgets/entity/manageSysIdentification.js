@@ -120,7 +120,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         let that = this;
 
         if(!this.options.isdialog){
-            var fele = this.element.find('.ent_wrapper:first');
+            let fele = this.element.find('.ent_wrapper:first');
             $(fele).off("mouseleave");
         }
 
@@ -151,6 +151,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                     $dlg.dialog('close');
 
                     if(!that.options.isdialog){
+                        let fele = this.element.find('.ent_wrapper:first');
                         $(fele).on("mouseleave", function(){ that.defaultBeforeClose(); });
                     }
                 };

@@ -244,8 +244,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
-            return '<div class="truncate" style="display:inline-block;'+swidth+'">'
-                    +fld(fldname)+'</div>';
+            return '<div class="truncate" style="display:inline-block;'+swidth+'">'+fld(fldname)+'</div>';
         }
         
         let recID   = fld('cfn_ID');

@@ -1049,9 +1049,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         let that = this;
         
-        ignoreCheck = true; //ARTEM 2021-07-27 - always ignore check for rendereability
+        const ignoreCheck2 = true; //ARTEM 2021-07-27 - always ignore check for rendereability
 
-        if(this._previousURL && !ignoreCheck){
+        if(this._previousURL && !ignoreCheck2){
 
             let ele = this._editing.getFieldByName('ulf_MimeExt');
             let extension = ele.editing_input("getValues");

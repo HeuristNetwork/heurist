@@ -750,9 +750,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             if(this._currentEditID<=0){ // Check that a new field is being defined
 
-                if(this.options.newFieldType){
-
-                }else
+                if(!this.options.newFieldType){
                 if(this.options.create_sub_record){
                     this._setupSubRecordField();
                     this.options.newFieldType = 'resource';
@@ -842,6 +840,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             }
                         }
                     });
+                }
                 }
             }
         }

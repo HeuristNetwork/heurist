@@ -227,7 +227,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
 
             if(that.btn_add_record.is(':visible')){
-
+                let lbl;
                 if(sel.val()>0){
                     lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
@@ -378,8 +378,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         this._super();
 
-        var request = {}
-
         let qstr = '', domain = 'a', qobj = [];
         
         let links_count = null;
@@ -484,7 +482,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }else{
             this._trigger( "onstart" );
 
-            var request = { 
+            let request = { 
                 //q: qstr, 
                 q: qobj,
                 w: domain,
