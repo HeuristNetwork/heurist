@@ -35,8 +35,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _external_repositories: {}, // list of external repositories
     _last_upload_details: [], // last uploaded file details
 
-    _selectAllFiles: false, // checked when perform certain operations
-    _downloadAllFiles: false, // download selected files, or all files
+    _selectAllFiles: false, // to keep all files (across all tabs) selected
+    _downloadAllFiles: true, // download selected files, or all files
 
     _lastFileDetails: null, // holds the saved final details for the current file, to be returned
 
@@ -169,13 +169,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 "searchrecuploadedfilesonrefreshindex": this._refreshIndex,
                 "searchrecuploadedfilesonfilerecs": this._createMediaRecords,
                 "searchrecuploadedfilesonselectall": function(event){ 
-                    this._selectAllFiles = true;
-                    if($(event.target).find('#select_all').length > 0){
+                    if($(event.target).find('#select_all').length>0){
                         this._selectAllFiles = $(event.target).find('#select_all').prop('checked') ? true : false;
+                        this.recordList.resultList('setSelected', this._selectAllFiles ? 'all' : '');
                     }
-                    this.recordList.resultList('setSelected', this._selectAllFiles ? 'all' : '');
                 },
-                "onselectedonly": function(event){
+                "searchrecuploadedfilesonselectedonly": function(event){
                     this._downloadAllFiles = false;
                     if($(event.target).find('#selected_only').length > 0){
                         this._downloadAllFiles = $(event.target).find('#selected_only').prop('checked') ? false : true;
@@ -1199,15 +1198,20 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _downloadFileRefs: function(){
 
-        let ids = this.recordList && !this._downloadAllFiles && !this._selectAllFiles ? 
-                    this.recordList.resultList('getSelected', true) : 'all';
+        let ids = this.recordList && !this._downloadAllFiles //&& !this._selectAllFiles ? 
+                    ?this.recordList.resultList('getSelected', true) : 'all';
 
-        if(ids.length == 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('No files in current search', 2000);
-            return;
+        if(Array.isArray(ids)){
+            if(ids.length == 0){
+                window.hWin.HEURIST4.msg.showMsgFlash('No files selected', 2000);
+                return;
+            }
+            if(ids.length > 5000){
+                window.hWin.HEURIST4.msg.showMsgFlash('The number of selected files exceeds the limit', 2000);
+                return;
+            }
+            ids = ids.join(',');
         }
-
-        ids = Array.isArray(ids) ? ids.join(',') : ids;
 
         let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&file_refs=1&ids=${ids}`;
         window.open(url, '_blank');

@@ -356,13 +356,24 @@ function downloadFileReferences($system, $ids){
                    FROM recUploadedFiles 
                    LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID' . $where_clause;
 
-    $file_refs = mysql__select_all($mysqli, $file_query, 1);
-    if(!$file_refs){
-
+    $res_files = $mysqli->query($file_query);
+    
+    $err_message = null;
+    if (!$res_files) {
+        $err_message = 'File record details could not be retrieved from database.<br><br>'
+                        .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
+    }else{
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');    
+        if($total_count_rows==0){
+            $err_message = 'Empty result set';     
+        }
+    }
+                   
+    if($err_message!=null){
         fclose($fd);
 
         header('Content-type: text/html');
-        echo 'File record details could not be retrieved from database.<br><br>' (!empty($mysqli->error) ? $mysqli->error : 'Unknown error');
+        echo $err_message;
         exit;
     }
 
@@ -392,7 +403,9 @@ function downloadFileReferences($system, $ids){
         [12] => Copyright
         [13] => Copyowner
     */
-    foreach ($file_refs as $id => $details) {
+    while ($details = $res_files->fetch_row()){
+        
+        $id = array_shift($details);
 
         $name = !empty($details[0]) ? $details[0] : $details[1];
         $path = !empty($details[3]) ? $details[3] . $name : 'External Source';
@@ -409,6 +422,7 @@ function downloadFileReferences($system, $ids){
         }
         fputcsv($fd, array($id, implode('|', $recs), "", $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10]), $sep);
     }
+    $res_files->close();
 
     rewind($fd);
     $output = stream_get_contents($fd);
