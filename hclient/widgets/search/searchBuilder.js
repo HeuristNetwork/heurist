@@ -67,15 +67,13 @@ $.widget( "heurist.searchBuilder", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
-
         // prevent double click to select text
         //this.element.disableSelection();
 
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);
 
-        var that = this;
+        let that = this;
 
         this.element.css({overflow: 'hidden !important'}).addClass('ui-heurist-bg-light');
 
@@ -222,7 +220,6 @@ $.widget( "heurist.searchBuilder", {
         }
             
 
-        //var ch = this.pnl_Items[0].scrollHeight;
         let ch = this.btnAddSortItem.position().top + 24;   
             
         ch = this.pnl_Rectype.height() + ch + 115; 
@@ -235,8 +232,6 @@ $.widget( "heurist.searchBuilder", {
                 let offset = $(pos.of).offset();
                 topPos = (offset?offset.top:0)+40;
             }
-
-            //var dh =  this._dialog.dialog('option', 'height');
 
             let ht = Math.min(ch, window.innerHeight-topPos);
 
@@ -391,7 +386,7 @@ $.widget( "heurist.searchBuilder", {
         
         if(ele_id){
             
-            var ele = this.pnl_Items.find('#'+ele_id)
+            let ele = this.pnl_Items.find('#'+ele_id)
             ele.searchBuilderItem('changeOptions',{
                     code: code,
                     top_rty_ID: top_rty_ID, 
@@ -402,7 +397,7 @@ $.widget( "heurist.searchBuilder", {
                 });
 
         }else{
-            var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
+            let ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
             this.field_array.push(ele);
         
             let that = this;
@@ -660,38 +655,12 @@ $.widget( "heurist.searchBuilder", {
                     + 'Default is the default language used in construction of the database.');
             }
             
-            /*                    
-                var rectypeIds = [this.select_main_rectype.val()];
-                if(this.select_additional_rectypes && this.select_additional_rectypes.editing_input('instance')){
-                    var val = this.select_additional_rectypes.editing_input('getValues');
-                    if(val){
-                        val = val[0].split(',');
-                        var is_reduced = false, vals=[];
-                        for (var i=0; i<val.length; i++){
-                            if(val[i] && window.hWin.HEURIST4.util.findArrayIndex(val[i], rectypeIds)<0){
-                                rectypeIds.push(val[i]);
-                                vals.push(val[i]);
-                            }else{
-                                is_reduced = true;
-                            }
-                        }
-                        if(is_reduced){
-                            this.select_additional_rectypes.editing_input('setValue',vals.join(','));    
-                        }
-                        //rectypeIds = rectypeIds.concat(val);
-                    }
-                }
-                 */
-                
-                
-            
             if(!this.options.is_dialog){
                 //add header and button set for inline mode
                 let h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
 
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
-                //var itop = 36+this.pnl_Rectype.height()+1;
                 this.pnl_Tree.css({top:35}); //, bottom:h
                 this.pnl_Items.css({bottom:h});
                 this.pnl_CoverAll.css({top:'85px', bottom:h});
@@ -750,19 +719,9 @@ $.widget( "heurist.searchBuilder", {
             }
                 
                 
-            //this.adjustTreePanel();
+        //this.adjustTreePanel();
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
-        
-        //add first field item
-        /*
-        if(!this.is_advanced && $.isEmptyObject(this.field_array)){
-            
-            this.btnAddFieldItem.click();
-            //var rty_ID = this.select_main_rectype.val();
-            //this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
-            //this.addSortItem();
-        }
-        */
+
         this.adjustDimension();
         
         
@@ -780,10 +739,6 @@ $.widget( "heurist.searchBuilder", {
         this.field_array = [];
         this.sort_array = [];
         this.adjustDimension();
-        
-        //var rty_ID = this.select_main_rectype.val();
-        //this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
-        //this.addSortItem();
         
     },
     
@@ -992,8 +947,6 @@ $.widget( "heurist.searchBuilder", {
                     let rectypes = node.data.rt_ids;
 
                     let node_order = that.element.find('[name="tree_order"]:checked').val();
-                    //var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, 
-                    //                                                        allowed_fieldtypes, parentcode, node_order );
                                                                             
                     let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                     {
@@ -1031,23 +984,9 @@ $.widget( "heurist.searchBuilder", {
                         //that._assignSelectedFacets();
                     },500);
                 },
-                select: function(e, data) {
-                    /* Get a list of all selected nodes, and convert to a key array:
-                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                    return node.key;
-                    });
-                    $("#echoSelection3").text(selKeys.join(", "));
-
-                    // Get a list of all selected TOP nodes
-                    var selRootNodes = data.tree.getSelectedNodes(true);
-                    // ... and convert to a key array:
-                    var selRootKeys = $.map(selRootNodes, function(node){
-                    return node.key;
-                    });
-                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                    */
-                },
+                /* select: function(e, data) {
+                   // Get a list of all selected nodes, and convert to a key array: 
+                },*/
                 click: function(e, data){
 
                     if(data.node.data.type == 'separator'){
@@ -1230,7 +1169,7 @@ $.widget( "heurist.searchBuilder", {
                     //remove main t: and sortby:
                     let filter = window.hWin.HEURIST4.util.isJSON(query);
                     let res = [];
-                    //var keys = Object.keys(filter);
+
                     for (let i=1; i<filter.length; i++){
                         if(!filter[i]['sortby']){
                             res.push(filter[i])    
@@ -1293,13 +1232,6 @@ $.widget( "heurist.searchBuilder", {
             return (a.searchBuilderItem('getCodes')<b.searchBuilderItem('getCodes'))?-1:1;            
         });
         
-        /*
-        var aCodes = Object.keys(this.field_items);
-        aCodes.sort(function(a,b){
-            return (a<b)?-1:1;            
-        });
-        */
-        
 /*
 0: "10:20"
 1: "10:lt134:12:1147"
@@ -1346,7 +1278,6 @@ $.widget( "heurist.searchBuilder", {
         
         $.each(this.field_array, function(i, ele){
             
-            //var ele = that.field_array[i]; // that.field_items[code];
             let code = ele.searchBuilderItem('getCodes');
             
             let value = ele.searchBuilderItem('getValues');
@@ -1373,16 +1304,15 @@ $.widget( "heurist.searchBuilder", {
                 if(codes.length>2){
 
                     //add new ones if not found
-                    var key;
-                    for(var k=1; k<codes.length-1; k++){
+                    for(let k=1; k<codes.length-1; k++){
                         if(k%2 == 0){ //even element in codes is rectype
-                            //key = 't:'+codes[k];    
+                            
                             if(codes[k]!=''){ //constrainded
                             
                                 if(codes[k]==window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION']
                                          && is_relationship) continue; //ignore t:1 for relationships
                             
-                                var not_found = true;
+                                let not_found = true;
                                 if($.isArray(branch)){
                                 
                                     $.each(branch,function(m,item){
@@ -1414,7 +1344,7 @@ $.widget( "heurist.searchBuilder", {
                         }else{
                             //odd element is field
                             
-                            key = __convertLink(codes[k]);
+                            let key = __convertLink(codes[k]);
 
                             is_relationship = key.indexOf('related_to:')==0
                                               || key.indexOf('relatedfrom:')==0;
@@ -1432,7 +1362,7 @@ $.widget( "heurist.searchBuilder", {
                             }
                         
                             //find
-                            var not_found = true;
+                            let not_found = true;
                             $.each(branch, function(i,item){
                                 if(item[key]){
                                     //is_relationship = (linktype=='rt')||(linktype=='rf');
@@ -1456,16 +1386,7 @@ $.widget( "heurist.searchBuilder", {
                                 branch = newbranch[key];
                             }   
                         }   
-                        /*                    
-                        if(!branch[key]){
-                            var newbranch = {};
-                            newbranch[key] = [];
-                            branch.push(newbranch);
-                            branch = newbranch;
-                        }else{
-                            branch = branch[key]; //step down
-                        }
-                        */
+
                     }//for
                     
                     
@@ -1479,7 +1400,7 @@ $.widget( "heurist.searchBuilder", {
                             let nkey = 'r';
                             if(dtid!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']) nkey = 'r:'+dtid;
                             
-                            var newvalue = {}
+                            let newvalue = {}
                             newvalue[nkey] = value[Object.keys(value)[0]];
                             value = newvalue;
                         }
@@ -1491,10 +1412,10 @@ $.widget( "heurist.searchBuilder", {
                 }
                 
                 let old_key = Object.keys(value)[0];
-                var key = __convertLink(old_key); 
+                let key = __convertLink(old_key); 
                 let idx = key.indexOf('fc:')==0 ? 3 : 0;
                 if(key.indexOf('linked_to')==idx || key.indexOf('linkedfrom')==idx){
-                   var newvalue = {};
+                   let newvalue = {};
                    newvalue[key] = value[old_key]; 
                    value = newvalue;
                 }

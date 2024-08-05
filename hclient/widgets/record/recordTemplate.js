@@ -213,11 +213,11 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     //
     // show treeview with record type structure as popup
     //
-    _loadRecordTypesTreeView: function(rtyID){
+    _loadRecordTypesTreeView: function(){
         
         let that = this;
         
-        rtyID = this.options.recordType;
+        const rtyID = this.options.recordType;
 
             
             //generate treedata from rectype structure

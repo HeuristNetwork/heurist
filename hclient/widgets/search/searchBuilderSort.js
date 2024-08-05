@@ -58,7 +58,7 @@ $.widget( "heurist.searchBuilderSort", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         //create elements for predicate
         // 1. field selector for field or links tokens
@@ -107,7 +107,6 @@ $.widget( "heurist.searchBuilderSort", {
             }    
         } });
         
-        var that = this;
         this.sel_container.hover(function(){
                    that.remove_token.css({visibility:'visible'});  },
         function(){

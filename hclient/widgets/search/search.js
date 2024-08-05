@@ -20,7 +20,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global showSearchBuilder */
 
 $.widget( "heurist.search", {
 
@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){
 
@@ -275,6 +275,7 @@ $.widget( "heurist.search", {
                     //aaa  that.div_search.css('padding-top','1.8em');
                     $this.height(23);
                 }else{
+                    let pt;
                     if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
                         $this.height(that.element.height()-menu_h-10);
                         pt = '2px';
@@ -515,7 +516,6 @@ $.widget( "heurist.search", {
 
             }});
 
-            var that = this;
             this._on( this.btn_select_owner, {
                 click:  function(){
 
@@ -869,7 +869,7 @@ $.widget( "heurist.search", {
 
                     //request is from some other widget (outside)
                     if(data.source!=that.element.attr('id')){
-                        var qs;
+                        let qs;
                         if($.isArray(data.q)){
                             qs = JSON.stringify(data.q);
                         }else{
@@ -894,7 +894,7 @@ $.widget( "heurist.search", {
                     is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
 
                     if(is_keep && !this.options.search_realm){
-                        var qs = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(data, true);
+                        let qs = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(data, true);
                         if(qs && qs.length<2000){
                             let s = location.pathname;
                             while (s.substring(0, 2) === '//') s = s.substring(1);
@@ -963,7 +963,7 @@ $.widget( "heurist.search", {
 
     /*
     _handleKeyPress: function(e){
-    var code = (e.keyCode ? e.keyCode : e.which);
+    let code = (e.keyCode ? e.keyCode : e.which);
     if (code == 13) {
     this._doSearch();
     }
@@ -984,7 +984,7 @@ $.widget( "heurist.search", {
     //
     _doSearch: function(fl_btn){
 
-        var qsearch = qsearch = this.input_search.val();
+        let qsearch = qsearch = this.input_search.val();
 
         qsearch = qsearch.replace(/,\s*$/, "");
 

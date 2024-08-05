@@ -19,6 +19,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global translationToUI, translationFromUI, showSearchFacetedWizard */
+
 function hSvsEdit(args) {
     const _className = "SvsEdit",
     _version   = "0.4";
@@ -104,7 +106,7 @@ function hSvsEdit(args) {
             if(isEdit && !window.hWin.HEURIST4.util.isnull(svs)){
 
                 request = window.hWin.HEURIST4.query.parseHeuristQuery(svs[1]); //Hul._QUERY
-                domain  = request.w;
+                let domain  = request.w;
                 svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?domain:svs[2]); //Hul._GRPID
 
                 //ART 2018-02-26 
@@ -117,7 +119,7 @@ function hSvsEdit(args) {
                                     ?squery  //overwrite (used in save fixed order)
                                     : ($.isArray(request.q)?JSON.stringify(request.q):request.q) );
                                     
-                var crules = window.hWin.HEURIST4.query.cleanRules( request.rules );                                                        
+                let crules = window.hWin.HEURIST4.query.cleanRules( request.rules );                                                        
                 svs_rules.val( crules==null?'':JSON.stringify(crules) );
                 svs_rules_full.val( crules==null?'':request.rules );
                 
@@ -146,8 +148,6 @@ function hSvsEdit(args) {
                 svs_viewmode.val('');
                 svs_ugrid.parent().show();
 
-                //var domain = 'all';
-
                 if(window.hWin.HEURIST4.util.isArray(squery)) { //this is RULES!!!
                     svs_rules.val(JSON.stringify(window.hWin.HEURIST4.query.cleanRules(squery)));
                     svs_rules_full.val(JSON.stringify(squery))
@@ -157,7 +157,7 @@ function hSvsEdit(args) {
 
                     svs_query.val( window.hWin.HEURIST4.util.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
                     
-                    var crules = window.hWin.HEURIST4.query.cleanRules( squery.rules );                                                        
+                    let crules = window.hWin.HEURIST4.query.cleanRules( squery.rules );                                                        
                     svs_rules.val( crules==null?'':JSON.stringify(crules) );
                     let rules = window.hWin.HEURIST4.util.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules;
                     svs_rules_full.val( rules==null?'':rules );
@@ -168,17 +168,6 @@ function hSvsEdit(args) {
                     svs_query.val( '' );
                 }
 
-                // TODO: remove this code if no longer needed
-                //svs_ugrid.val('all');
-                //fill with list of Workgroups in case non bookmark search
-                /*var selObj = svs_ugrid.get(0);
-                if(domain=="bookmark"){
-                    svs_ugrid.empty();
-                    window.hWin.HEURIST4.ui.addoption(selObj, 'bookmark', window.hWin.HR('My Bookmarks'));
-                }else{
-                    svs_ugrid.val(domain);
-                }*/
-                //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
             }
             
@@ -304,10 +293,8 @@ function hSvsEdit(args) {
         reset_svs_edit = (reset_svs_edit!==false);
         _menu_locked = menu_locked;
         
-        //var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
-
         if(parseInt(svsID)>0){
-            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+            let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             if(window.hWin.HEURIST4.util.isnull(svs)){
                 //verify that svsID is still in database
                 window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: [svsID],
@@ -329,34 +316,15 @@ function hSvsEdit(args) {
                 return;
             }
             
-            /*
-            mode = 'faceted';
-            if(!node.data.isfaceted){
-                var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][1]; //Hul._QUERY
-                var hasrules = that._hasRules(qsearch);
-                mode = hasrules==2?'rules':'saved';
-            }
-            */
-            
-            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+            svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             let qsearch = svs[1]; //Hul._QUERY
             let r = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
-            var mode = 'saved';
+            let mode = 'saved';
             if(r.type==3){
                 mode = 'faceted';
             }else if(window.hWin.HEURIST4.util.isempty(r.q)){
                 mode = 'rules';
             }
-            /*  OLD WAY           
-            var mode = 'faceted';
-            try {
-                facet_params = $.parseJSON(qsearch);
-            }
-            catch (err) {
-                var hasrules = _hasRules(qsearch);
-                mode = hasrules==2?'rules':'saved';
-            }
-            */
         }
         
         //if not defined get last used
@@ -374,7 +342,7 @@ function hSvsEdit(args) {
 
             let facet_params = null;
             if(svsID>0){
-                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+                let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
                     try {
                         facet_params = $.parseJSON(svs[1]); //Hul._QUERY
@@ -499,7 +467,7 @@ function hSvsEdit(args) {
                         //validate that name is unique within group
                         if(need_check_same_name!==false)
                         {
-                            for (var id in window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                            for (let id in window.hWin.HAPI4.currentUser.usr_SavedSearch){
                                 let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
                                 if(svs[0]==svs_name.val() && svs[2]==svs_ugrid && id!=svs_id.val()){ //Hul._NAME  _GRPID
                                     
@@ -507,7 +475,7 @@ function hSvsEdit(args) {
                                         menu_locked.call( this, true, false); //unlock
                                     }
                                     
-                                    var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg('Filter with such name already exists in group',
+                                    let $mdlg = window.hWin.HEURIST4.msg.showMsgDlg('Filter with such name already exists in group',
                                     [
                                       {text:'Replace existing', click: function(){ 
                                             svs_id.val(id);
@@ -549,17 +517,10 @@ function hSvsEdit(args) {
                         if(_save_in_porgress===true) return;
                         _save_in_porgress = true;
                         
-
-                        /*if(window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
-                            domain = 'rules';
-                            svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
-                        }*/
-                        
+                        let rules = null;
                         let rules_c = window.hWin.HEURIST4.query.cleanRules(svs_rules_full.val());  
                         if(rules_c!=null){ 
                             rules = svs_rules_full.val();
-                        }else{
-                            rules = null;
                         }
                         
                         let rules_only = 0;
@@ -579,14 +540,6 @@ function hSvsEdit(args) {
                         let request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
                             svs_Query: JSON.stringify(params),
-                            
-                            /*window.hWin.HEURIST4.query.composeHeuristQuery2({q:svs_query.val(), 
-                                    w:domain, 
-                                    rules:rules, 
-                                    rulesonly:rules_only, 
-                                    notes:svs_notes.val(),
-                                    viewmode:svs_viewmode.val()  }, false),*/
-                                    
                             svs_UGrpID: svs_ugrid,
                             domain:domain};
 
@@ -754,7 +707,7 @@ function hSvsEdit(args) {
 
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

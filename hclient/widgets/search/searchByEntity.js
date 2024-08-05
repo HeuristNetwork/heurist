@@ -172,12 +172,6 @@ $.widget( "heurist.searchByEntity", {
                     this._redraw_buttons_by_entity();
                 },
                 onselect: function __onSelectRectypeFilter(event, data){
-                               /* 
-                               var selval = data.item.value;
-                               if(selval>0){
-                                   that._doSearch(selval);
-                               }
-                               */
                                return false;
                            }};            
         
@@ -235,6 +229,7 @@ $.widget( "heurist.searchByEntity", {
     _redraw_buttons_by_entity: function(is_init){
         
         let needs_saving = false;
+        let that = this;
 
         if(is_init===true){
             //get selected from preferences
@@ -243,10 +238,7 @@ $.widget( "heurist.searchByEntity", {
             if(window.hWin.HEURIST4.util.isempty(this.selected_rty_ids)){
                 this.selected_rty_ids = [];
                 
-                if(true){
-                   
                     //get 5 from first group
-                    var that = this;
                     let rtgID = $Db.rtg().getOrder()[0];
                     $Db.rty().each2(function(rtyID,rectype){
                         if(rectype['rty_RecTypeGroupID']==rtgID){
@@ -254,7 +246,7 @@ $.widget( "heurist.searchByEntity", {
                             if(that.selected_rty_ids.length>4) return false;
                         }
                     });
-                }else{
+                   /*
                     //get 5 top most used rectypes
                     let sorted = [];
                     $Db.rty().each2(function(rtyID,rectype){
@@ -263,10 +255,10 @@ $.widget( "heurist.searchByEntity", {
                     sorted.sort(function(a,b){
                          return Number(a['cnt'])<Number(b['cnt'])?1:-1;
                     });
-                    for(var idx=0; idx<sorted.length && idx<5; idx++){
+                    for(let idx=0; idx<sorted.length && idx<5; idx++){
                         this.selected_rty_ids.push(sorted[idx]['id']);    
                     }
-                }
+                    */
             }else{
                 this.selected_rty_ids = this.selected_rty_ids.split(',');    
 
@@ -282,13 +274,13 @@ $.widget( "heurist.searchByEntity", {
         }
         
 
-        var cont;
+        let container;
         if(this.options.use_combined_select){
 
 
                 this._off(this.combined_select.find('li[data-id]'), 'click');
-                var cont = this.combined_select.find('.by-usage');
-                cont.empty();
+                container = this.combined_select.find('.by-usage');
+                container.empty();
                 
                 $.each(this.usage_select.find('option'),function(i, item){
                     item = $(item);
@@ -299,11 +291,11 @@ $.widget( "heurist.searchByEntity", {
                         +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
                         +item.text()+'</div>'
                         +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
-                       +'</li>').appendTo(cont);    
+                       +'</li>').appendTo(container);    
                 });
             
-            cont = this.combined_select.find('.by-selected');
-            cont.empty();
+                container = this.combined_select.find('.by-selected');
+                container.empty();
         }else{ 
             this._off( this.div_entity_btns.find('.entity-filter-button'), 'click');
             this.div_entity_btns.find('.entity-filter-button').remove();
@@ -311,10 +303,10 @@ $.widget( "heurist.searchByEntity", {
         
         
         
-        var idx=this.selected_rty_ids.length-1;
+        let idx=this.selected_rty_ids.length-1;
         while(idx>=0){
             
-            var rty_ID = this.selected_rty_ids[idx];
+            const rty_ID = this.selected_rty_ids[idx];
             
             if(rty_ID>0) {           
 
@@ -331,7 +323,7 @@ $.widget( "heurist.searchByEntity", {
                         + $Db.rty(rty_ID,'rty_Name')+'</div>'
                         +'<span style="float:right;">'
                         +(cnt>=0?cnt:'')+'</span>'
-                       +'</li>').appendTo(cont);
+                       +'</li>').appendTo(container);
                     
                 }else{
             
@@ -387,7 +379,6 @@ $.widget( "heurist.searchByEntity", {
                    }
             } });
             
-            var that = this;
             this.div_entity_btns.sortable({
                 //containment: 'parent',
                 items: '.entity-filter-button',
@@ -531,9 +522,6 @@ $.widget( "heurist.searchByEntity", {
     // search from input - query is defined manually
     //
     _doSearch: function(rty_ID){
-
-            //window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
-            //var request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             let request = {};
             request.q = 't:'+rty_ID; //'{"t":"'+rty_ID+'"}';

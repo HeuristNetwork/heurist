@@ -18,6 +18,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global TDate, temporalSimplifyDate */
+
 /*
 main methods
     _initFacetQueries - creates facet searches (counts and values for particular facets) and main query
@@ -640,7 +642,7 @@ $.widget( "heurist.search_faceted", {
 
                 let code = field['code'];
                 code = code.split(':')
-                var linktype = code[code.length-1].substr(0,2);
+                const linktype = code[code.length-1].substr(0,2);
                 if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
                     //unconstrained link
                     code.push('0');         //!!!!!!!!
@@ -662,7 +664,7 @@ $.widget( "heurist.search_faceted", {
                             curr_level = __checkEntry(curr_level,"t",rtid);
                         }
                     }
-                    var linktype = dtid.substr(0,2);
+                    const linktype = dtid.substr(0,2);
                     let slink = null;
 
                     if(linktype=='rt'){
@@ -677,10 +679,10 @@ $.widget( "heurist.search_faceted", {
                         slink = null;
                     }
 
-                    var key, val;                         
+                    let key, val;                         
                     if(slink!=null){
 
-                        let rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
+                        const rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
                         key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
                         val = [];
                     }else{
@@ -726,7 +728,7 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        var that= this; 
+        let that= this; 
         
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
         if(!window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ 
@@ -819,9 +821,7 @@ $.widget( "heurist.search_faceted", {
                     .addClass('fieldset_search').appendTo(this.facets_list);
 
        //hide submit button will be displayed in case all fields are input fields (not facets)
-       if(true){ 
-            this.btn_submit.hide();
-       }
+       this.btn_submit.hide();
        
         if(this.options.ispreview || !this.options.showclosebutton){
             this.btn_close.hide(); 
@@ -835,7 +835,6 @@ $.widget( "heurist.search_faceted", {
         this.btn_save.hide(); 
        
        
-       var that = this;
        that._input_fields = {};
        
        //this._use_sup_filter = true;
@@ -847,10 +846,10 @@ $.widget( "heurist.search_faceted", {
                     this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
                }
                
-               var lbl = window.hWin.HRJ('ui_prelim_filter_toggle_label', this.options.params, this.options.language);
+               let lbl = window.hWin.HRJ('ui_prelim_filter_toggle_label', this.options.params, this.options.language);
                if(!lbl) lbl = window.hWin.HR('filter_facet_apply_preliminary');
                
-               var ele = $("<div>").html(
+               let ele = $("<div>").html(
                             '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
                                 +'<input type="checkbox" '+(((this.options.params.ui_prelim_filter_toggle_mode==0 && this._use_sup_filter)
                                 || (this.options.params.ui_prelim_filter_toggle_mode!=0 && !this._use_sup_filter))
@@ -876,10 +875,10 @@ $.widget( "heurist.search_faceted", {
        
        if(this.options.params.ui_spatial_filter){
            
-           var lbl = window.hWin.HRJ('ui_spatial_filter_label', this.options.params, this.options.language);
+           let lbl = window.hWin.HRJ('ui_spatial_filter_label', this.options.params, this.options.language);
            if(!lbl) lbl = window.hWin.HR('filter_facet_mapsearch');
                         
-           var ele = $("<div>").html(
+           let ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style="padding-left:21px;display:inline-block;width:100%" class="spatial_filter">'  //padding:5px 0 20px 21px;
@@ -992,13 +991,13 @@ $.widget( "heurist.search_faceted", {
 
        if(this.options.params.ui_additional_filter){
            
-           var lbl = window.hWin.HRJ('ui_additional_filter_label', this.options.params, this.options.language);
+           let lbl = window.hWin.HRJ('ui_additional_filter_label', this.options.params, this.options.language);
            if(!lbl) lbl = window.hWin.HR('filter_facet_general_search'); 
                         
                         
            //w = {'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'};
            
-           var ele = $("<div>").html(
+           let ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style=" padding:5px 0 20px 21px;display: block;">'
@@ -1092,11 +1091,11 @@ $.widget( "heurist.search_faceted", {
                             if(ui.newHeader && ui.newHeader[0]){
                                 let _facet_index = $(ui.newHeader[0]).attr('data-index');
                                 
-                                var field = that.options.params.facets[_facet_index];
+                                let field = that.options.params.facets[_facet_index];
                                 if(field['last_count_query']){
-                                    var hashQuery = field['last_count_query'];
+                                    let hashQuery = field['last_count_query'];
                                     field['last_count_query'] = null;
-                                    var stored_counts = that._getCachedCounts( hashQuery, _facet_index );
+                                    let stored_counts = that._getCachedCounts( hashQuery, _facet_index );
                                     if(stored_counts){
                                         that._redrawFacets(stored_counts, false);
                                     }
@@ -1148,7 +1147,7 @@ $.widget( "heurist.search_faceted", {
                                     }
 
                                     //let $field = that._input_fields['$X'+field['var']];
-                                    if(!that._input_fields.hasOwnProperty('$X'+field['var'])){ //  $field == null || $field.length == 0
+                                    if(!Object.hasOwn(that._input_fields,'$X'+field['var'])){ //  $field == null || $field.length == 0
                                         return;
                                     }
 
@@ -1489,10 +1488,10 @@ $.widget( "heurist.search_faceted", {
         // [{"f:1":$X680},....]
         
         //loop through all predicates of main query 
-        var  idx = 0
+        let idx = 0
         while (idx<q.length){
             
-            var predicate = q[idx];
+            let predicate = q[idx];
         
             $.each(predicate, function(key,val)
             {
@@ -1682,7 +1681,7 @@ $.widget( "heurist.search_faceted", {
             q.push(...predicates_to_add);
         }
 
-        var  idx = 0
+        idx = 0
         while (idx<q.length){
             if(Object.keys(q[idx]).length==0){
                 q.splice(idx, 1);
@@ -1707,13 +1706,10 @@ $.widget( "heurist.search_faceted", {
             window.hWin.HEURIST4.util.isempty(this.options.params.spatial_filter) &&
             !this.options.params.search_on_reset){
             
-            if(true){
-                //clear main result set
-                
-                this.doReset();
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
-            }
+            //clear main result set
+            this.doReset();
+            //window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
+        
             return; 
         }else if(!this.options.ispreview && this.options.showresetbutton && !this.options.params.ui_spatial_filter){
             //this.div_title.css('width','45%');
@@ -1732,7 +1728,7 @@ $.widget( "heurist.search_faceted", {
                 let s = this.options.params.add_filter;
                 let colon_pos = s.indexOf(':');
                 if(colon_pos>0){
-                    //var pred_type = s.substring(0,colon_pos).toLowerCase();
+                    //let pred_type = s.substring(0,colon_pos).toLowerCase();
                     //if([].indexOf(pred_type)>=0){
                         search_any_filter = s;
                 }
@@ -1857,7 +1853,7 @@ $.widget( "heurist.search_faceted", {
                         break;
                 }
                 
-                var subs_value = null; //either initial query OR rectype+current result set
+                let subs_value = null; //either initial query OR rectype+current result set
                 
                 if(this.options.params.ui_temporal_filter_initial || this._isInited || (field.multisel && field.selectedvalue!=null)){ 
                     //replace with current query   - @todo check for empty 
@@ -1923,7 +1919,7 @@ $.widget( "heurist.search_faceted", {
                     
                 }
      
-                var query, needcount = 2;
+                let query, needcount = 2;
                 if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 
                     if(this.options.params.ui_temporal_filter_initial || this._isInited){
@@ -1954,15 +1950,6 @@ $.widget( "heurist.search_faceted", {
                     //change $IDS for current set of target record type
                     __fillQuery(query);                
                     
-                    //add other parameters for rectype of this facet
-                    if(this._current_query && false){ //2018-01-09 Do not use other parameters since we use IDS
-                        let copyquery = window.hWin.HEURIST4.util.cloneJSON(this._current_query); 
-                        let otherparams = __getOtherParameters(copyquery, field['rtid']);
-                        if(null!=otherparams){
-                             query = query.concat(otherparams);
-                        }
-                    }
-                    
                 }
 
                 let count_query = window.hWin.HEURIST4.util.cloneJSON(this.options.params.q);
@@ -1974,14 +1961,14 @@ $.widget( "heurist.search_faceted", {
                 count_query = window.hWin.HEURIST4.query.mergeHeuristQuery(subs_value, count_query)
 
                 
-                //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
+                //let count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
                 this._fillQueryWithValues( count_query, field['multisel']?-1:i );
                         
                 /* alas, ian want to get count on every step
                 if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
                     && (field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year")){  //run only once to get min/max values
                 
-                       var response = {status:window.hWin.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
+                       let response = {status:window.hWin.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
                        that._redrawFacets(response)
                        break;
                 }
@@ -2159,7 +2146,6 @@ $.widget( "heurist.search_faceted", {
 
                     let field = this.options.params.facets[facet_index];
                     
-                    var j,i;
                     let $input_div = $(this.element).find("#fv_"+field['var']);
                     let needsDropdown = false;
                     //$facet_values.css('background','none');
@@ -2203,6 +2189,7 @@ $.widget( "heurist.search_faceted", {
                                 }
                                 let ele = $(event.target).parents('div.bor-toggler');
                                 let mode = ele.attr('data-mode');
+                                let d_mode;
                                 if(mode=='on'){
                                     ele.find('.bor-toggle-show-on').hide();
                                     ele.find('.bor-toggle-show-off').show();
@@ -2262,7 +2249,7 @@ $.widget( "heurist.search_faceted", {
                                     
                                 }else{
                                     let user_ids = [];
-                                    for (var j=0; j<response.data.length; j++){
+                                    for (let j=0; j<response.data.length; j++){
                                         user_ids.push(response.data[j][0]);
                                     }
                                     window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:user_ids},function(res){
@@ -2347,7 +2334,7 @@ $.widget( "heurist.search_faceted", {
                                 //
                                 //old way
                                 /*
-                                var term_value = null;
+                                let term_value = null;
                                 if(res_count>0){ 
                                     
                                     if(term.termssearch){
@@ -2455,8 +2442,8 @@ $.widget( "heurist.search_faceted", {
 //this feature is remarked on 2017-01-26 || (field['isfacet']==2 && tot_cnt > that._MIN_DROPDOWN_CONTENT)); 
 
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                            var $span = $('<span>').css({'display':'inline-block','vertical-align':'middle'});
-                            var f_link = this._createFacetLink(facet_index, term, 'inline-block');
+                            let $span = $('<span>').css({'display':'inline-block','vertical-align':'middle'});
+                            let f_link = this._createFacetLink(facet_index, term, 'inline-block');
                             $span.append(f_link).appendTo($facet_values);
                         }                        
 
@@ -2469,7 +2456,7 @@ $.widget( "heurist.search_faceted", {
                                 
                                 //show viewport collapse/exand control
                                 if(this.options.params.viewport < this.terms_drawn){
-                                    var d_mode = field['isfacet']==this._FT_COLUMN ? 'block':'inline-block'; 
+                                    let d_mode = field['isfacet']==this._FT_COLUMN ? 'block':'inline-block'; 
                                     __drawToggler($facet_values, d_mode);
 
                                     needsDropdown = field['isfacet'];
@@ -2483,10 +2470,10 @@ $.widget( "heurist.search_faceted", {
                         if(needsDropdown){
                             
                             let need_small_dropdown = false;
-                            var w = that.element.width();
+                            let w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
 
-                            var $sel = $('<select>') // style="font-size: 0.6em !important;"
+                            let $sel = $('<select>') // style="font-size: 0.6em !important;"
                                     .css({'width':(w-65)+'px',
                                           'max-width':(w-65)+'px'}); // was 30
 
@@ -2508,7 +2495,7 @@ $.widget( "heurist.search_faceted", {
                                 need_small_dropdown = false; //!(field.selectedvalue && field.selectedvalue.value);
                             }
 
-                            if(term && term.hasOwnProperty('count') && term.count == 0){
+                            if(term && Object.hasOwn(term, 'count') && term.count == 0){
                                 this._createOption( facet_index, 0, {title:window.hWin.HR('facet_search_no_values'), value:null, count:0} ).appendTo($sel);
                                 this.no_value_facets.push(facet_index);
                             }else{
@@ -2517,22 +2504,22 @@ $.widget( "heurist.search_faceted", {
                             this.__drawData(term, 0, $sel, facet_index, field);
 
                             if(field.selectedvalue && field.selectedvalue.value){
-                                var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                let $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
                                 $opt.attr('selected',true);
                             }
 
                             //convert to jquery selectmenu
-                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
                             selObj.hSelect( "widget" ).css({'background':'none',
                                                                 'width':'auto',
                                                                 'min-width':'100px',
                                                                 'max-width':(w-65)+'px'});
-                            var ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
+                            let ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
                             ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
                             
                             //change appearance for dropdown button
-                            var btn_dropdown = selObj.hSelect( "widget" );//.css({"font-size": "0.9em", "min-width": "8em"});
+                            let btn_dropdown = selObj.hSelect( "widget" );//.css({"font-size": "0.9em", "min-width": "8em"});
                             if(need_small_dropdown || this.options.params.viewport < this.terms_drawn){
                                 btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
                                     'min-width':'', background: 'none'});
@@ -2550,12 +2537,12 @@ $.widget( "heurist.search_faceted", {
                     }else 
                     if(field['type']=="rectype"){  //@todo
 
-                        for (i=0;i<response.data.length;i++){
-                            var cterm = response.data[i];
+                        for (let i=0;i<response.data.length;i++){
+                            let cterm = response.data[i];
 
                             if(facet_index>=0){
                                 let rtID = cterm[0];
-                                var f_link = this._createFacetLink(facet_index, 
+                                let f_link = this._createFacetLink(facet_index, 
                                     {title:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]}, 'inline-block');
                                 $("<div>").css({"display":"inline-block","padding":"0px"})
                                   .addClass('facet-item')
@@ -2574,10 +2561,10 @@ $.widget( "heurist.search_faceted", {
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
 
-                        var cterm = response.data[0];
+                        let cterm = response.data[0];
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    var f_link = this._createFacetLink(facet_index, {title:'', value:null, step:0}, 'inline-block');
+                            let f_link = this._createFacetLink(facet_index, {title:'', value:null, step:0}, 'inline-block');
                                     $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'0px'}) //-15px
                                         .append(f_link).appendTo($facet_values);
                         }
@@ -2602,11 +2589,12 @@ $.widget( "heurist.search_faceted", {
                         const w = that.element.width();
                         const tiny_ui = w <= 100;
                         const small_ui = !tiny_ui && w < 200;
+                        let date_format = '';
 
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=='date'){
-                                
+
                                 function __toDt(val, is_max){ //from decimal to datetime
                                     
                                     if(Math.round(val) == val){ //years
@@ -2617,7 +2605,7 @@ $.widget( "heurist.search_faceted", {
                                         val = val+(is_max?'-12-31':'-01-01');
                                     }else{
                                         //
-                                        //var parts = val.split('.');
+                                        //let parts = val.split('.');
                                         let parts = val.split('.');
                                         let year = parts[0];
                                         let month = parts[1]?parts[1].substr(0,2):0;
@@ -2630,8 +2618,6 @@ $.widget( "heurist.search_faceted", {
                                     
                                     return val;
                                 }
-                                
-                                
 
                                 if(field.date_type=='years_only'){
                                     if(typeof mmin==='string' && mmin.indexOf('-12-31')>0){
@@ -2702,8 +2688,8 @@ $.widget( "heurist.search_faceted", {
                                         }
 
                                         //find date interval for proper formating
-                                        var delta = mmax-mmin;
-                                        var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
+                                        let delta = mmax-mmin;
+                                        date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
                                         
                                         if(delta>3*365*daymsec){ //3 years
                                             date_format = "yyyy";
@@ -2724,7 +2710,7 @@ $.widget( "heurist.search_faceted", {
                                 mmax = Number(mmax);
                             }
                             
-                            var delta = window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0; //not used
+                            let delta = window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)?(mmax-mmin)/2:0; //not used
                             
                             if(field['type']=='date' && mmax-mmin<daymsec){
                                 delta = daymsec;
@@ -2737,7 +2723,7 @@ $.widget( "heurist.search_faceted", {
                         }else */
                         if(isNaN(mmin) || isNaN(mmax)){
                             
-                            var s = "Server returns invalid "+field['type'];
+                            let s = "Server returns invalid "+field['type'];
                             if(isNaN(mmin)&&isNaN(mmax)){
                                 s = s + " min and max values: "+cterm[0]+" and "+cterm[1];
                             }else{
@@ -2751,15 +2737,15 @@ $.widget( "heurist.search_faceted", {
                         }else if(!field.selectedvalue && cterm[0]==cterm[1]){ //range was not set and initial
                             
                             //show the only date without slider
-                            s = temporalSimplifyDate(cterm[0]);
+                            let s_date = temporalSimplifyDate(cterm[0]);
                             
-                            if(s.match(/^-\d+/)){
-                                s = Math.abs(parseInt(s))+' bce';
+                            if(s_date.match(/^-\d+/)){
+                                s_date = Math.abs(parseInt(s_date))+' bce';
                             }
                             
                             let s_counts = this._getCountSpan(sl_count); //for slider
                             
-                            $("<span>").html(s + s_counts).appendTo($facet_values); 
+                            $("<span>").html(s_date + s_counts).appendTo($facet_values); 
 
                             if(sl_count == '1'){
                                 this._addFacetToExpandedCount(facet_index, $facet_values, $input_div, $(s_counts));
@@ -3034,13 +3020,13 @@ $.widget( "heurist.search_faceted", {
 
                                             let max_height = 0, max_value = 0;
 
-                                            for(var i = 0; i < data.length; i++){
-                                                var count = data[i][2];
+                                            for(let i = 0; i < data.length; i++){
+                                                const count = data[i][2];
                                                 if(max_value < count) max_value = count;
                                             }
                                             // Adding individual columns
-                                            for(var i = 0; i < data.length; i++){
-                                                var count = data[i][2];
+                                            for(let i = 0; i < data.length; i++){
+                                                const count = data[i][2];
                                                 let height = 0;
 
                                                 if(count > 0){
@@ -3062,7 +3048,7 @@ $.widget( "heurist.search_faceted", {
                                                 }).appendTo($diagram);
                                             }
 
-                                            //var $slide_handles = $slide_range.parent().find('.ui-slider-handle');
+                                            //let $slide_handles = $slide_range.parent().find('.ui-slider-handle');
                                             if(small_ui){
 
                                                 let $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
@@ -3083,8 +3069,8 @@ $.widget( "heurist.search_faceted", {
                             
                             function __updateSliderLabel() {
                                       
+                                let min, max, cnt;      
                                 if(arguments && arguments.length>1){
-                                    var min, max, cnt;      
                                     if(isNaN(arguments[0])){
                                         min = arguments[1].values[ 0 ];
                                         max = arguments[1].values[ 1 ];
@@ -3301,7 +3287,7 @@ $.widget( "heurist.search_faceted", {
                                 {
                                    element: that._date_range_dialog[0], 
                                    close: function(){
-                                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
+                                        //let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
                                    },
                                    buttons: buttons,
                                    title:'Define selection range',
@@ -3376,7 +3362,7 @@ $.widget( "heurist.search_faceted", {
                                 range_max = mmax + ten_percent;
                             }
 
-                            var slider = ele2.find('div')
+                            let slider = ele2.find('div')
                                 .attr('facet_index',facet_index)
                                 .slider({
                                     range: true,
@@ -3445,8 +3431,8 @@ $.widget( "heurist.search_faceted", {
                     else if( (field['type']=='enum' || field['type']=='reltype') && field['groupby']=='firstlevel' 
                                 && !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
                         
-                        var cterm = field.selectedvalue;
-                        var f_link = this._createFacetLink(facet_index, {title:cterm.title, value:cterm.value, count:'reset'}, 'block');
+                                    let cterm = field.selectedvalue;
+                                    let f_link = this._createFacetLink(facet_index, {title:cterm.title, value:cterm.value, count:'reset'}, 'block');
                         
                         let ditem = $("<div>").css({'display':'block',"padding":"0px"})
                                                 .addClass('facet-item')
@@ -3459,21 +3445,21 @@ $.widget( "heurist.search_faceted", {
                         //draw history
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
 
-                            let k, len = field.history.length;
-                            for (k=0;k<1;k++){
+                            const len = field.history.length;
+                            for (let k=0;k<1;k++){
                                 if(len>2){
                                     k=len-2; //instead of reset show last one    
                                 }
                                 
                                 let cvalue = field.history[k];
                                 
-                                var $span = $('<span>').css('display','block'); //was inline
+                                let $span = $('<span>').css('display','block'); //was inline
                                 if(k==len-1){ //last one
                                     $span.text(cvalue.title).appendTo($facet_values);
                                     //$span.append($('<br>'));
                                 }else{
                                     cvalue.reset_link = true;
-                                    var f_link = this._createFacetLink(facet_index, cvalue, 'inline-block');
+                                    let f_link = this._createFacetLink(facet_index, cvalue, 'inline-block');
                                     $span.css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                                     //$span.append($('<span class="ui-icon ui-icon-carat-1-e" />').css({'display':'inline-block','height':'13px'}));
                                 }
@@ -3494,13 +3480,13 @@ $.widget( "heurist.search_faceted", {
                             }
                         }
                         
-                        var display_mode = (field['isfacet']==this._FT_LIST || field['isfacet']==this._FT_SELECT || (field['groupby']=='firstchar' && field['isfacet']==this._FT_LIST))
+                        let display_mode = (field['isfacet']==this._FT_LIST || field['isfacet']==this._FT_SELECT || (field['groupby']=='firstchar' && field['isfacet']==this._FT_LIST))
                                                         ?'inline-block':'block';
                         
                         needsDropdown = false;
                         if(field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST){ // Listed/Wrapped
                             
-                            var display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
+                            display_mode = (field['isfacet'] == this._FT_COLUMN) ? 'block' : 'inline-block';
 
                             this.__drawData(response.data, 0, $facet_values, facet_index, field);
 
@@ -3519,10 +3505,10 @@ $.widget( "heurist.search_faceted", {
                         // Add dropdown 
                         if(needsDropdown){
 
-                            var w = that.element.width();
+                            let w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
 
-                            var $sel = $('<select>').css('width', (w-65)+'px'); // was 30  style="font-size: 0.6em !important;"
+                            let $sel = $('<select>').css('width', (w-65)+'px'); // was 30  style="font-size: 0.6em !important;"
 
                             needsDropdown = (field['isfacet'] != this._FT_SELECT);
 
@@ -3547,21 +3533,21 @@ $.widget( "heurist.search_faceted", {
                             this.__drawData(response.data, 0, $sel, facet_index, field);
 
                             if(field.selectedvalue && field.selectedvalue.value){
-                                var $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
+                                let $opt = $sel.find('option[facet_value="'+field.selectedvalue.value+'"]');
                                 $opt.attr('selected',true);
                             }
 
                             //needsDropdown = true;
-                            selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
                             selObj.hSelect( "widget" ).css({'background':'none',
                                                                 'width':'auto',
                                                                 'min-width':'100px',
                                                                 'max-width':(w-65)+'px'});
-                            var ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
+                            let ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
                             ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
 
-                            var btn_dropdown = selObj.hSelect( "widget" );
+                            let btn_dropdown = selObj.hSelect( "widget" );
                             //change appearance for dropdown button
                             if(needsDropdown){
                                 btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
@@ -3623,7 +3609,7 @@ $.widget( "heurist.search_faceted", {
             if(isListOrColumn && $container.not('select').length > 0){ // LIST
 
                 data.level = level;
-                var f_link = this._createFacetLink( f_index, 
+                let f_link = this._createFacetLink( f_index, 
                     $.extend(data, {level: level}),
                     display_mode );
                 
@@ -3631,7 +3617,7 @@ $.widget( "heurist.search_faceted", {
                     this.terms_drawn++;  //global
                 }
                 
-                var ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
+                let ditem = $("<div>").css({'display':(this.terms_drawn>this.options.params.viewport?'none':display_mode),
                                 'padding':"0 0px 0 "+((level-1)*10)+"px"})
                         .addClass('facet-item')        
                         .append(f_link)
@@ -3676,13 +3662,13 @@ $.widget( "heurist.search_faceted", {
 
                 if(isListOrColumn && $container.not('select').length > 0){ // LIST
                     
-                    var f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1], 'level': level}, display_mode);
+                    let f_link = this._createFacetLink(f_index, {title:title, value:value[2], count:value[1], 'level': level}, display_mode);
                     
                     //@todo draw first level for groupby firs tchar always inline
                     let step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
                                         ?field['selectedvalue'].step:0;
                                                                                               
-                    var ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0px"})
+                    let ditem = $("<div>").css({'display':(i>this.options.params.viewport-1?'none':display_mode),"padding":"0px"})
                                         .addClass('facet-item')
                                         .append(f_link).appendTo($container);
                                         
@@ -3836,7 +3822,7 @@ $.widget( "heurist.search_faceted", {
 
     ,_createOption : function(facet_index, indent, cterm){
         
-        //var step = cterm.step;
+        //let step = cterm.step;
         let hist = this.options.params.facets[facet_index].history;
         if(!hist) hist = [];
         let step = hist.length+1;
@@ -3898,7 +3884,7 @@ $.widget( "heurist.search_faceted", {
         } 
 
         let field = this.options.params.facets[facet_index];
-        //var step = cterm.step;
+        //let step = cterm.step;
         let hist = field.history;
         if(!hist) hist = [];
         let step = (cterm && cterm.reset_link)?cterm.step:(hist.length+1);
@@ -4070,7 +4056,8 @@ $.widget( "heurist.search_faceted", {
     
     //
     // instead of list of links it is possible to allow enter search value directly into input field
-    //
+    // NOT USED
+    /*
     _createInputField :function(field_index){
 
         let field = this.options.params.facets[field_index];
@@ -4122,7 +4109,7 @@ $.widget( "heurist.search_faceted", {
 
 
     },
-    
+    */
     //
     // if main record type has linked or related place rectype search by location
     // if main field has geo field search by this field
@@ -4200,7 +4187,7 @@ $.widget( "heurist.search_faceted", {
                       .appendTo(this.div_header);
             }
             container.find('span').remove();
-            //var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
+            //let s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
          
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
                 
