@@ -1207,7 +1207,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             return;
         }
 
-        let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php?db=' + window.hWin.HAPI4.database + '&file_refs=1&ids=' + ids.join(',');
+        ids = Array.isArray(ids) ? ids.join(',') : ids;
+
+        let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&file_refs=1&ids=${ids}`;
         window.open(url, '_blank');
     },
 
