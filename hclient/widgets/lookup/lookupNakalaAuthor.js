@@ -29,7 +29,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
         width:  550,
         modal:  true,
         
-        title:  "Search Nakala\'s author records",
+        title:  "Search Nakala's author records",
         
         htmlContent: 'lookupNakalaAuthor.html',
         helpContent: null, //in context_help folder
@@ -168,7 +168,7 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.recordAction, {
             	s = Object.values(s).join('; ');
             }
 
-            title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            let title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
 
             if(fldname == 'orcid' && s != ''){ // create anchor tag for link to external record
                 s = '<a href="' + s + '" target="_blank"> view ORCID record </a>';

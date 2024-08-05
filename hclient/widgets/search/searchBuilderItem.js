@@ -867,9 +867,6 @@ Whole value = EQUAL
         this.select_conjunction.parent().find('.conj').remove(); //previous
         let ft = this._current_field_type;
 
-        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
-        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getInputs');
-        
         let eles = !this._predicate_input_ele?[]:this._predicate_input_ele.find('.input-cell > .input-div');
         let cnt = eles.length;
         

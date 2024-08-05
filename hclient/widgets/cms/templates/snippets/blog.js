@@ -1,3 +1,4 @@
+/* global layoutMgr */
 //this script will be executed once after addition of template
 //it adds new faceted search and new smarty template
 function prepareTemplateBlog(new_element_json, callback){

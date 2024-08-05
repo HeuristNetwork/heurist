@@ -280,12 +280,12 @@ $.widget( "heurist.resultListCollection", {
                 dialogid: 'map_preview_dialog',
                 params: init_params,
                 title: window.hWin.HR('Preview mapspace'),
-                class:'ui-heurist-bg-light',
-                callback: function(location){
-                    if( !window.hWin.HEURIST4.util.isempty(location) ){
-                        
-                    }
-                }
+                class:'ui-heurist-bg-light'
+                //callback: function(location){
+                //    if( !window.hWin.HEURIST4.util.isempty(location) ){
+                //        
+                //    }
+                //}
             } );
         
         }else{

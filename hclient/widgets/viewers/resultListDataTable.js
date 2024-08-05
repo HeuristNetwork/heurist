@@ -383,7 +383,7 @@ this._dout('reload datatable '+this.options.serverSide);
         this.div_content.find('.dt-button').css('padding','2px');
         this.selConfigs = null;
 
-        var that = this;
+        const that = this;
 		
         // Ensure that columns set to hidden are hidden
         if(this.hidden_cols.length > 0){
@@ -443,8 +443,6 @@ this._dout('reload datatable '+this.options.serverSide);
                 
                 if($.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
                     this.selConfigs = $('<div>').appendTo(sel_container);
-                    
-                    var that = this;
                     
                     this.selConfigs.configEntity({
                         entityName: 'defRecTypes',

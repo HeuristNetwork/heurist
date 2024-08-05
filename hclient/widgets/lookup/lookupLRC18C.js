@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-mapDict = {}
+let mapDict = {}
 $.widget("heurist.lookupLRC18C", $.heurist.recordAction, {
 
     //defintions mapping
@@ -337,19 +337,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 //avoid sync on every request
                 this.mapping_defs['import_vocabularies'] = window.hWin.HEURIST4.dbs.vocabs_already_synched?0:1;
 
-/* Artem old            
-                var request = { action: 'import_records',
-                    source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
-                    q: 'ids:'+sels.join(','), 
-                    rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
-                    mapping: this.mapping_defs,
-                    //session: session_id,
-                    id: window.hWin.HEURIST4.util.random()
-                };
-                window.hWin.HAPI4.doImportAction(request, function( response ){
-                
-*/            
-            
+           
                 let request = { 
                     serviceType: 'ESTC',
                     action: 'import_records',
@@ -401,18 +389,18 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                                     let recordset = new HRecordSet(response.data);
                                     
                                     if(cnt>0){
-                                        for(var i=0; i<ids.length; i++)
+                                        for(let i=0; i<ids.length; i++)
                                         if(ids_ex.indexOf(ids[i])<0)
                                         {
-                                            var rec = recordset.getById(ids[i])  
+                                            let rec = recordset.getById(ids[i])  
                                             sImported += ('<li>' + ids[i]+': '+recordset.fld(rec,'rec_Title') + '</li>');
                                         }         
                                         sImported = '<ul>' + sImported + '</ul>';                                             
                                     }
                                     if(cnt_ex>0){
-                                        for(var i=0; i<ids_ex.length; i++)
+                                        for(let i=0; i<ids_ex.length; i++)
                                         {
-                                            var rec = recordset.getById(ids_ex[i])  
+                                            let rec = recordset.getById(ids_ex[i])  
                                             sExisted += ('<li>' + ids_ex[i]+': '+recordset.fld(rec,'rec_Title') + '</li>');
                                         }         
                                         sExisted = '<ul>' + sExisted + '</ul>';                                             
@@ -464,18 +452,23 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
 
         let that = this;
 
-        edition_name = "";
-        edition_date = "";
-        edition_author = "";
-        edition_work = "";
-        edition_place = "";
-        estc_no = "";
-        vol_count = "";
-        vol_parts = "";
+        let edition_name = "",
+        edition_date = "",
+        edition_author = "",
+        edition_work = "",
+        edition_place = "",
+        estc_no = "",
+        vol_count = "",
+        vol_parts = "",
+        book_format = '';
 
-        if(true){ //use json format and fulltext search
+        let query_string;
+        let query;
 
-            var query = {"t":"30"}; //search for Books
+        const use_json_for_fulltext_search = true;
+        if(use_json_for_fulltext_search){ //use json format and fulltext search
+
+            query = {"t":"30"}; //search for Books
 
             if (this.element.find('#edition_name').val() != '') {
                 query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
@@ -511,7 +504,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             }
 
             if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
-                sort_by_key = "'sortby'"
+                let sort_by_key = "'sortby'"
                 query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
             }
 
@@ -541,7 +534,7 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 vol_parts = ' f:290: ' + '"' + this.element.find('#vol_parts').val() + '"'
             }
 
-            selectedBF = this.element.find('#select_bf option:selected').text()
+            let selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
                 book_format = 'all: ' + selectedBF
             } else {

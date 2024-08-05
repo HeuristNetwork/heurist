@@ -354,19 +354,19 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                 let creator_val = '';
 
-                for(var idx in s){
+                for(let idx in s){
 
-                    var cur_string = '';
-                    var cur_obj = s[idx];
+                    let cur_string = '';
+                    let cur_obj = s[idx];
 
                     if($.isPlainObject(cur_obj)){
-                        if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                        if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
                             cur_string = cur_obj['firstname'];
                         }
-                        if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                        if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
                             cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
                         }
-                        if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                        if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
                             cur_string += ' (' + cur_obj['active'] + ')';
                         }
 
@@ -393,16 +393,16 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                 let pub_val = '';
 
-                for(var idx in s){
+                for(let idx in s){
 
-                    var cur_string = '';
-                    var cur_obj = s[idx];
+                    let cur_string = '';
+                    let cur_obj = s[idx];
 
                     if($.isPlainObject(cur_obj)){
-                        if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                        if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
                             cur_string = cur_obj['name'];
                         }
-                        if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != '' && cur_string == ''){
+                        if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
                             cur_string = cur_obj['location'];
                         }
 
@@ -429,7 +429,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
             }
 
-            title = s;
+            let title = s;
 
             if(fldname == 'biburl'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -537,7 +537,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                     // Convert to array
                     if(window.hWin.HEURIST4.util.isObject(val)){
-                        obj_keys = Object.keys(val);
+                        //obj_keys = Object.keys(val);
                         val = Object.values(val);
                     }else if(!window.hWin.HEURIST4.util.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
@@ -546,12 +546,12 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
                     if(field_name == 'author' || field_name == 'contributor'){ // special treatment for author field
 
-                        for(var i = 0; i < val.length; i++){
+                        for(let i = 0; i < val.length; i++){
 
                             let value = '';
                             let search = '';
                             let role = '';
-                            var cur_val = val[i];
+                            let cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['firstname']){
@@ -594,11 +594,11 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         continue;
                     }else if(field_name == 'publisher'){
 
-                        for(var i = 0; i < val.length; i++){
+                        for(let i = 0; i < val.length; i++){
 
                             let value = '';
                             let search = '';
-                            var cur_val = val[i];
+                            let cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['name']){
@@ -610,7 +610,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                                     search = (search != '') ? search : value;
                                 }
                             }else{
-                                completed_val = cur_val;
+                                let completed_val = cur_val; //????
                             }
 
                             if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
@@ -633,7 +633,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         continue;
                     }else if(field_name == 'language'){ // handle if language equals '###'
 
-                        for(var i = 0; i < val.length; i++){
+                        for(let i = 0; i < val.length; i++){
                             if(val[i] == '###' || val[i] == 'und'){
                                 val[i] = 'unknown';
                             }
@@ -651,7 +651,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        for(var i=0; i<val.length; i++){
+                        for(let i=0; i<val.length; i++){
 
                             if(!Number.isInteger(+val[i])){
                                 continue;
@@ -728,7 +728,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
          * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
          */
 
-        //var recordType = $('#inpt_doctype').val(); // which record type is requested
+        //let recordType = $('#inpt_doctype').val(); // which record type is requested
         let maxRecords = this.element.find('#rec_limit').val(); // limit number of returned records
         maxRecords = (!maxRecords || maxRecords <= 0) ? 20 : maxRecords;
 

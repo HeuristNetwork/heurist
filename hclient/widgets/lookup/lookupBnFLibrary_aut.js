@@ -308,7 +308,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
 
-            title = s;
+            let title = s;
 
             if(fldname == 'auturl'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -435,7 +435,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
 
                         if(val_isObject){
 
-                            for(var key in val){
+                            for(let key in val){
 
                                 if(search_val != ''){
                                     search_val += ', ';
@@ -443,7 +443,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                                 search_val += val[key];
                             }
                         }else if(val_isArray){
-                            search_val = val[key].join(', ');
+                            search_val = val.join(', ');
                         }else{
                             search_val = val;
                         }
@@ -462,7 +462,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.recordAction, {
                     if(window.hWin.HEURIST4.util.isObject(val)){
 
                         let complete_val = '';
-                        for(var key in val){
+                        for(let key in val){
 
                             if(complete_val != ''){
                                 complete_val += ', ';

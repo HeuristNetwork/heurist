@@ -34,6 +34,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
     _init: function() {
 
         this._super();
+        const that = this;
 
         let ent_header = this.element.find('.ent_header');        
 

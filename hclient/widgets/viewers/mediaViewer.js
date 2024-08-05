@@ -134,9 +134,10 @@ $.widget( "heurist.mediaViewer", {
 
             for (let idx in this.options.rec_Files){
                 if(idx>=0){ 
+
+                    let obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, mode_3d_viewer = '';
+
                     let file = this.options.rec_Files[idx];
-                    
-                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, mode_3d_viewer = '';
                     
                     if($.isPlainObject(file)){
                         rec_ID = file.rec_ID;
@@ -153,7 +154,7 @@ $.widget( "heurist.mediaViewer", {
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
 
-                    var fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
+                    let fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
 
                     let thumbURL =  this.options.baseURL+'?db=' +  this.options.database 
@@ -169,7 +170,6 @@ $.widget( "heurist.mediaViewer", {
                     $('<img>', {src: thumbURL, title:filetitle})
                             .css({border: '2px solid #FFF', margin:'5px', 'box-shadow': '0 2px 4px #bbb', width:'200px'})
                             .appendTo($alink);
-                }
                 
                 if(this.options.showLink){
                     $('<br>').appendTo(this.mediacontent);
@@ -221,17 +221,17 @@ $.widget( "heurist.mediaViewer", {
                         }
                     }
                     $('<br>').appendTo(this.mediacontent);
-                }
+                }//showLink
 
-                
-            }
+                }
+            }//for
 
             this.mediacontent.show();
             
             this._initThumbnails('a[data-id]');
 
             /*
-            var fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
+            let fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
                                 selector : 'a[data-myfancybox="fb-images"]', 
                                 loop:true};
             
@@ -261,17 +261,17 @@ $.widget( "heurist.mediaViewer", {
             let recid = $alink.attr('data-id');
 
             if(recid)
-            for (var idx in that.options.rec_Files){
+            for (let idx in that.options.rec_Files){
                 if(idx>=0){  //skip first
                     let file = that.options.rec_Files[idx];
                     if(recid && recid==file.rec_ID || recid==file.id){ 
                         //found
-                        var rec_ID = file.rec_ID,
+                        let rec_ID = file.rec_ID,
                         obf_recID = file.id,
                         mimeType = file.mimeType,
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
-                        external_url = that._htmlUnescape(file.external);
+                        external_url = that._htmlUnescape(file.external),
                         mode_3d_viewer = file.mode_3d_viewer;
                     
                         if(!mimeType) mimeType = '';
@@ -358,7 +358,7 @@ $.widget( "heurist.mediaViewer", {
                                             width:'90%',height:'95%',
                                             allowfullscreen:true,'padding-content':'0px'});   
 
-                                    $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+                                    let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
 
                                     $dlg.parent().css('top','50px');
                                 }else{

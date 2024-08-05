@@ -26,6 +26,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global stringifyMultiWKT */
 
 $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
 
@@ -268,7 +269,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             let map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);
             
-            for(var k=0; k<map_flds.length; k++){
+            for(let k=0; k<map_flds.length; k++){
                 map_flds[k] = map_flds[k].split('.'); 
             }
             
@@ -283,7 +284,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                 
                 let hasGeo = false;
                 let values = [recID, this.options.mapping.rty_ID];
-                for(var k=0; k<map_flds.length; k++){
+                for(let k=0; k<map_flds.length; k++){
 
                     let val = feature[map_flds[k][0]];
 

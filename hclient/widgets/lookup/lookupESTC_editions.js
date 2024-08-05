@@ -207,7 +207,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
 
             if(!details){
                 let sel_Rec_ID = sels.fld(record, 'rec_ID'); 
-                var query_request = { 
+                const query_request = { 
                     serviceType: 'ESTC',
                     org_db: window.hWin.HAPI4.database,
                     db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -319,7 +319,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                 term_id = details[256][0];
             }
 
-            var query_request = { 
+            const query_request = { 
                 serviceType: 'ESTC',
                 org_db: window.hWin.HAPI4.database,
                 db: 'ESTC_Helsinki_Bibliographic_Metadata',
@@ -440,7 +440,7 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
         }
 
         if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
-            sort_by_key = "'sortby'"
+            let sort_by_key = "'sortby'"
             query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
         }
 

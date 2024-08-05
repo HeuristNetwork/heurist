@@ -179,7 +179,7 @@ $.widget( "heurist.app_timemap", {
                             
                         }else if(data.map_layer_action == 'trigger_visibility'){
                             
-                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            let sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                         
                             // data.selection is dataset id - show/hide visibility of dataset
                             // new_visiblity - true, false to show/hide entire layer or array of ids to filter out on map
@@ -187,12 +187,12 @@ $.widget( "heurist.app_timemap", {
                             
                         }else if(data.map_layer_action == 'download'){
                             //download layer data
-                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            let sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             that._downloadLayerData( sel );
                             
                         }else if(data.map_layer_action == 'zoom'){
 
-                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            let sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             that._zoomToLayer(sel);
                             
                         }else{
@@ -591,8 +591,8 @@ $.widget( "heurist.app_timemap", {
                 mapManager.setLayersVisibility(mapdoc_ID, selection, new_visiblity);
                 /*
                 //if layer is visible - select and zoom to record in search results
-                var recID = selection[0];
-                var layer_rec = mapManager.getLayer( mapdoc_ID, recID );
+                let recID = selection[0];
+                let layer_rec = mapManager.getLayer( mapdoc_ID, recID );
                 if(layer_rec && (layer_rec['layer']).isVisible()){
                     this._doVisualizeSelection( selection );
                 }
@@ -706,15 +706,5 @@ $.widget( "heurist.app_timemap", {
     , isMapInited: function(){
         return this.is_map_inited;
     }
-    /*
-    , getNativeMap: function(){
-        if(this.mapframe[0].contentWindow){
-            var map = this.mapframe[0].contentWindow.mapping;
-            map = map.mapping('instance');
-            return (map)?map.nativemap:null;
-        }else{
-            return null;
-        }
-    }*/
 
 });

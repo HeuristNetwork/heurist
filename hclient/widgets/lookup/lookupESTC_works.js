@@ -223,7 +223,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
             }
             
             let recpointers = [];
-            var term_id = '';
+            let term_id = '';
 
             for(let i = 0; i < fields.length; i++){
 
@@ -262,7 +262,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                 }
             }
 
-            var term_id = '';
+            term_id = '';
 
             if(details[298]){
                 term_id = details[298][0];
@@ -341,7 +341,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
         }
 
         if (this.element.find('#sort_by_field').val() > 0) { // Sort by field
-            sort_by_key = "'sortby'"
+            let sort_by_key = "'sortby'"
             query[sort_by_key.slice(1, -1)] = 'f:' + this.element.find('#sort_by_field').val();
         }
 

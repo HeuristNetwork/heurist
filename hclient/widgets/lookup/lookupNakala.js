@@ -122,7 +122,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             }
 
             let $select = that.element.find('#inpt_type');
-            if(data.hasOwnProperty('types')){
+            if(Object.hasOwn(data,'types')){
                 $.each(data['types'], (idx, type) => {
                     window.hWin.HEURIST4.ui.addoption($select[0], type[1], type[0]);
                 });
@@ -133,7 +133,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             }
 
             $select = that.element.find('#inpt_license');
-            if(data.hasOwnProperty('licenses')){
+            if(Object.hasOwn(data,'licenses')){
                 $.each(data['licenses'], (idx, license) => {
                     window.hWin.HEURIST4.ui.addoption($select[0], license, license);
                 });
@@ -144,7 +144,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             }
 
             $select = that.element.find('#inpt_year');
-            if(data.hasOwnProperty('years')){
+            if(Object.hasOwn(data,'years')){
                 $.each(data['years'], (idx, year) => {
                     window.hWin.HEURIST4.ui.addoption($select[0], year, year);
                 });
@@ -209,7 +209,7 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             	s = Object.values(s).join('; ');
             }
 
-            title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
+            let title = window.hWin.HEURIST4.util.htmlEscape(s ? s : '');
 
             if(fldname == 'rec_url'){ // create anchor tag for link to external record
                 s = '<a href="' + s + '" target="_blank"> view record </a>';

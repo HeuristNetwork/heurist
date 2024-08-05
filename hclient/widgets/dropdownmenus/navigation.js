@@ -17,6 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global layoutMgr */
 
 $.widget( "heurist.navigation", {
 
@@ -135,7 +136,7 @@ $.widget( "heurist.navigation", {
         }
 
         //retrieve menu content from server side
-        /*var request = { q: 'ids:'+ids,
+        /*let request = { q: 'ids:'+ids,
             detail: //'detail'
                [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'], 
@@ -509,13 +510,13 @@ $.widget( "heurist.navigation", {
                             
                    if(!$(ui.item).parent().hasClass('horizontalmenu')){
                         //indent for submenu
-                        var ele = $(ui.item).children('ul.ui-menu');
+                        let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
                             setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 300);      
                         }
                    }else {
                         //show below
-                        var ele = $(ui.item).children('ul.ui-menu');
+                        let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
                             setTimeout(function() { ele.css({top:'29px',  left:'0px'}); }, 500);      
                         }
@@ -535,7 +536,7 @@ $.widget( "heurist.navigation", {
                 clearTimeout(myTimeoutId);
                 /*
                 $('.menu-or-popup').hide(); //hide other
-                var menu = $( ele )
+                let menu = $( ele )
                 //.css('width', this.btn_user.width())
                 .show()
                 .position({my: "left-2 top", at: "left bottom", of: parent });
@@ -549,7 +550,7 @@ $.widget( "heurist.navigation", {
             this.divMainMenuItems.menu( opts );
 
 /*            
-            var all_menues = this.divMainMenuItems.find('ul.ui-menu');
+            let all_menues = this.divMainMenuItems.find('ul.ui-menu');
             this._on( all_menues, {
                 mouseenter : function(){ _show(); },
                 mouseleave : function(){ 
@@ -755,7 +756,7 @@ $.widget( "heurist.navigation", {
                 }                                
 
 
-                var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
                     'Heurist', opts, dlg_css);
 
                 if(dlg_css){
@@ -794,7 +795,10 @@ $.widget( "heurist.navigation", {
                     let page_footer = $(page_target).find('#page-footer');
                     if(page_footer.length>0) page_footer.detach();
                 
-                    let server_request = {
+                    const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        
+                    const server_request = {
                         q: 'ids:'+data.page_id,
                         restapi: 1,
                         columns: 

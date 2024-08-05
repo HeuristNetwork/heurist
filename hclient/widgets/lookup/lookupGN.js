@@ -22,6 +22,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global accessToken_GeonamesAPI */
+
 $.widget( "heurist.lookupGN", $.heurist.recordAction, {
 
     // default options
@@ -374,7 +376,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
                 
                 let recID = i+1;
                 
-                var val;
+                let val;
                 let values = [recID, this.options.mapping.rty_ID];
                 
                 for(let k=0; k<map_flds.length; k++){

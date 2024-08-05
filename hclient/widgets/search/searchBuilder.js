@@ -1330,7 +1330,7 @@ $.widget( "heurist.searchBuilder", {
                                 
                                 }else{
                                     /*@todo test
-                                    var newbranch = [{t:codes[k]},{ids:branch}];
+                                    let newbranch = [{t:codes[k]},{ids:branch}];
                                     branch = newbranch;   
                                     fields_query = newbranch;   
                                     not_found = false;                                  

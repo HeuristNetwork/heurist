@@ -21,6 +21,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global accessToken_GeonamesAPI */
 
 $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
 
@@ -377,7 +378,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
                 
                 let recID = i+1;
                 
-                var val;
+                let val;
                 let values = [recID, this.options.mapping.rty_ID];
                 
                 for(let k=0; k<map_flds.length; k++){

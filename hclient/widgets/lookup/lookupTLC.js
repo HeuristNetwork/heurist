@@ -22,6 +22,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global stringifyMultiWKT */
+
 $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
 
     // dialog options, the default values and other available options can be found in hclient/widget/record/recordAction.js
@@ -298,7 +300,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
             fields = fields.concat(map_flds);
             fields = fields.concat('recordLink');
             
-            for(var k=0; k<map_flds.length; k++){
+            for(let k=0; k<map_flds.length; k++){
                 map_flds[k] = map_flds[k].split('.'); 
             }
             
@@ -313,7 +315,7 @@ $.widget( "heurist.lookupTLC", $.heurist.recordAction, {
                 
                 let hasGeo = false;
                 let values = [recID, this.options.mapping.rty_ID];
-                for(var k=0; k<map_flds.length; k++){
+                for(let k=0; k<map_flds.length; k++){
                     
                     let val = feature[ map_flds[k][0] ];
                     

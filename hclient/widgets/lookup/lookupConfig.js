@@ -17,6 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global stringifyMultiWKT, accessToken_GeonamesAPI */
 
 $.widget( "heurist.lookupConfig", {
 
@@ -217,10 +218,10 @@ $.widget( "heurist.lookupConfig", {
     //
     _initDialog: function(){
         
-        var options = this.options,
+        let options = this.options,
             btn_array = this._getActionButtons(), 
-            position = null,
-                that = this;
+            position = null;
+        const that = this;
     
         if(!options.beforeClose){
                 options.beforeClose = function(){
@@ -233,8 +234,6 @@ $.widget( "heurist.lookupConfig", {
         if(options['width']>maxw) options['width'] = maxw*0.95;
         let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
-        
-        var that = this;
         
         let $dlg = this.element.dialog({
             autoOpen: false ,
@@ -654,7 +653,7 @@ $.widget( "heurist.lookupConfig", {
 
         let values = {};
 
-        for(idx in this._available_services){
+        for(let idx in this._available_services){
 
             values = {
                 title: this._available_services[idx].label,
@@ -1034,19 +1033,19 @@ $.widget( "heurist.lookupConfig", {
 
                             let creator_val = '';
             
-                            for(var idx in value){
+                            for(let idx in value){
             
-                                var cur_string = '';
-                                var cur_obj = value[idx];
+                                let cur_string = '';
+                                let cur_obj = value[idx];
             
                                 if($.isPlainObject(cur_obj)){
-                                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                                    if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
                                         cur_string = cur_obj['firstname'];
                                     }
-                                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                                    if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
                                         cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
                                     }
-                                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                                    if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
                                         cur_string += ' (' + cur_obj['active'] + ')';
                                     }
             
@@ -1069,16 +1068,16 @@ $.widget( "heurist.lookupConfig", {
 
                             let pub_val = '';
             
-                            for(var idx in value){
+                            for(let idx in value){
             
-                                var cur_string = '';
-                                var cur_obj = value[idx];
+                                let cur_string = '';
+                                let cur_obj = value[idx];
             
                                 if($.isPlainObject(cur_obj)){
-                                    if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                                    if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
                                         cur_string = cur_obj['name'];
                                     }
-                                    if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != '' && cur_string == ''){
+                                    if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
                                         cur_string = cur_obj['location'];
                                     }
             
@@ -1159,12 +1158,12 @@ $.widget( "heurist.lookupConfig", {
         let service_name = 'nomisma';
         const nomismaServices = ['getMints', 'getHoards', 'getFindspots'];
 
-        if(type == '' && this.example_results.hasOwnProperty(service_name)){
+        if(type == '' && Object.hasOwn(this.example_results, service_name)){
             this._displayTestResults(service_name);
             return;
         }
 
-        if(!this.example_results.hasOwnProperty(service_name)){
+        if(! Object.hasOwn(this.example_results, service_name)){
             this.example_results[service_name] = [];
         }
 
@@ -1234,7 +1233,7 @@ $.widget( "heurist.lookupConfig", {
                     
                 }else if(!window.hWin.HEURIST4.util.isempty(that.selectServiceType.val())){
                     
-                    for(idx in that._available_services){
+                    for(let idx in that._available_services){
 
                         if(that._available_services[idx] == that.selectServiceType.val()){
                             dty_ID = that._available_services[idx].fields[field];
@@ -1295,7 +1294,7 @@ $.widget( "heurist.lookupConfig", {
         this._off(this.serviceList.find('span[data-service-id]'),'click');
         this.serviceList.empty(); // empty list
 
-        for(idx in this.options.service_config){ // display all assigned services
+        for(let idx in this.options.service_config){ // display all assigned services
 
             let cfg = this.options.service_config[idx];
 
@@ -1305,7 +1304,7 @@ $.widget( "heurist.lookupConfig", {
 
             let name = cfg.label;
             
-            for(j in this._available_services){
+            for(let j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
                     break;

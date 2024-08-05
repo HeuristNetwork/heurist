@@ -444,7 +444,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
             s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
 
-            title = s;
+            let title = s;
 
             if(fldname == 'uri'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';

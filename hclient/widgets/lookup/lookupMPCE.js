@@ -331,7 +331,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         let that = this;
 
         let popup_options = {
-            select_mode: (false)?'select_multi':'select_single',    // enable multi select or not, current set to single select
+            select_mode: 'select_single',    //(false)?'select_multi': enable multi select or not, current set to single select
             select_return_mode: 'recordset', //or 'ids' (default)
             edit_mode: 'popup',
             selectOnSave: true, // true = select popup will be closed after add/edit is completed
@@ -503,7 +503,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                         let recordset = new HRecordSet(response.data);
                         let records = recordset.getRecords();
 
-                        for(i in records) {
+                        for(let i in records) {
 
                             let record = records[i];
                             let details = record.d;
@@ -573,7 +573,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                                 for(let i = 0; i < that.project_keywords.length; i++){
                                     let id = that.project_keywords[i];
 
-                                    var title = 'Record ID - ' + id;
+                                    let title = 'Record ID - ' + id;
                                     if(that.full_keywords_list[id] !== undefined){
                                         title = that.full_keywords_list[id];
                                     }
@@ -603,7 +603,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
                             if(extra_ids != null){
 
-                                var title = 'Record ID - ' + extra_ids;
+                                let title = 'Record ID - ' + extra_ids;
                                 if(that.full_keywords_list[extra_ids] !== undefined){
                                     title = that.full_keywords_list[extra_ids];
                                 }
@@ -739,7 +739,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                     that.assoc_work_count = Object.keys(records).length;
 
                     /* Travel through results to retrieve the each work's list of keywords */
-                    for (i in records) {
+                    for (let i in records) {
 
                         let record = records[i];
 
@@ -914,7 +914,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
         this.assoc_endindex = i;
 
-        jump = this.assoc_endindex - this.assoc_startindex;
+        let jump = this.assoc_endindex - this.assoc_startindex;
 
         if(this.assoc_startindex-jump < 0 && this.assoc_endindex+13 > keywords.length && this.assoc_endindex <= keywords.length ) {
             $('#assoc_prev').hide();

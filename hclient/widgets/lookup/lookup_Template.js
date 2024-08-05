@@ -172,13 +172,13 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                     let cur_string = '';
                     let cur_obj = s[idx];
 
-                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                    if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
                         cur_string = cur_obj['firstname'];
                     }
-                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                    if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
                         cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
                     }
-                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                    if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
                         cur_string += ' (' + cur_obj['active'] + ')';
                     }
                     if(!cur_string){
@@ -208,7 +208,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                 s = window.hWin.HEURIST4.util.htmlEscape(s?s:'');
             }
 
-            title = s;
+            let title = s;
 
             if(fldname == 'biburl'){ // create anchor tag for link to external record
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -305,16 +305,16 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
             // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
             for(let k=0; k<map_flds.length; k++){
 
-                field_name = map_flds[k];
+                let field_name = map_flds[k];
                 let dty_ID = this.options.mapping.fields[field_name];
-                val = recset.fld(rec, field_name);
+                let val = recset.fld(rec, field_name);
                 let field_type = $Db.dty(dty_ID, 'dty_Type');
 
                 if(val != null && dty_ID != ''){
 
                     // Convert to array
                     if(window.hWin.HEURIST4.util.isObject(val)){
-                        obj_keys = Object.keys(val);
+                        //obj_keys = Object.keys(val);
                         val = Object.values(val);
                     }else if(!window.hWin.HEURIST4.util.isArray(val)){
                         val = window.hWin.HEURIST4.util.isnull(val) ? '' : val;
@@ -323,12 +323,12 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
 
                     if(field_name == 'author' || field_name == 'contributor'){ // special treatment for author field
 
-                        for(var i = 0; i < val.length; i++){
+                        for(let i = 0; i < val.length; i++){
 
                             let value = '';
                             let search = '';
                             let role = '';
-                            var cur_val = val[i];
+                            let cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['firstname']){
@@ -371,11 +371,11 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                         continue;
                     }else if(field_name == 'publisher'){
 
-                        for(var i = 0; i < val.length; i++){
+                        for(let i = 0; i < val.length; i++){
 
                             let value = '';
                             let search = '';
-                            var cur_val = val[i];
+                            let cur_val = val[i];
 
                             if($.isPlainObject(cur_val)){
                                 if(cur_val['name']){
@@ -387,7 +387,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                                     search = (search != '') ? search : value;
                                 }
                             }else{
-                                completed_val = cur_val;
+                                let completed_val = cur_val; //????
                             }
 
                             if(value != '' && !$.isArray(value) && !$.isPlainObject(value)){
@@ -423,7 +423,7 @@ $.widget( "heurist.lookup_Template", $.heurist.recordAction, {
                         let vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
                         let term_Ids = $Db.trm_TreeData(vocab_ID, 'set');
 
-                        for(var i=0; i<val.length; i++){
+                        for(let i=0; i<val.length; i++){
 
                             if(!Number.isInteger(+val[i])){
                                 continue;

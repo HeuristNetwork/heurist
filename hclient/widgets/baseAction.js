@@ -244,9 +244,9 @@ $.widget( "heurist.baseAction", {
     //
     _initDialog: function(){
         
-            var options = this.options,
-                btn_array = this._getActionButtons(), 
-                that = this;
+            let options = this.options,
+                btn_array = this._getActionButtons();
+            const that = this;
         
             if(!options.beforeClose){
                     options.beforeClose = function(){
@@ -262,8 +262,6 @@ $.widget( "heurist.baseAction", {
             if(options['width']>maxw) options['width'] = maxw*0.95;
             let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
-            
-            var that = this;
             
             let $dlg = this.element.dialog({
                 autoOpen: false ,
