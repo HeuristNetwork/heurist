@@ -264,7 +264,7 @@ regional['FRE'] = {
     'Build': 'Créer',
     'Filter builder': 'Créer un filtre',
     'Facets builder': 'Créer filtre par facettes',
-    'Save filter': 'Enregistrer le filtre',
+    'Save filter for re-use': 'Enregistrer le filtre',
     'Advanced': 'Avancé',
     'Rules': 'Règles d\'expansion',
     'Favourites': '',

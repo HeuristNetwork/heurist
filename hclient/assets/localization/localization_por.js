@@ -83,7 +83,7 @@ regional['POR'] = {
     'Build': 'Construir',
     'Filter builder': 'Construtor de filtros',
     'Facets builder': 'Construtor de facetas',
-    'Save filter': 'Gardar o filtro',
+    'Save filter for re-use': 'Gardar o filtro',
     'Advanced': 'Avançado',
     'Rules': 'Regras',
     'Favourites': 'Favoritos',

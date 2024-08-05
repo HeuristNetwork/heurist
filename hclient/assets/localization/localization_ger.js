@@ -84,7 +84,7 @@ regional['GER'] = {
     'Build': 'Erstellen',
     'Filter builder': 'Filterbearbeitung',
     'Facets builder': 'Facettenbearbeitung',
-    'Save filter': 'Filter speichern',
+    'Save filter for re-use': 'Filter speichern',
     'Advanced': 'Erweitert',
     'Rules': 'Regeln',
     'Set as subset': 'Als Teilmenge definieren',

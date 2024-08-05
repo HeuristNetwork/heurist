@@ -104,7 +104,7 @@ regional['ENG'] = {
     'Build': '',
     'Filter builder': '',
     'Facets builder': '',
-    'Save filter': '',
+    'Save filter for re-use': '',
     'Advanced': '',
     'Rules': '',
     'Favourites': '',

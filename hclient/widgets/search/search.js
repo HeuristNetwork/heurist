@@ -359,7 +359,7 @@ $.widget( "heurist.search", {
             .css({display:'inline-block'})  //width:'70px',
             .append('<span class="ui-icon ui-icon-save" />')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
-            + window.hWin.HR('Save filter') +'</span>')
+            + window.hWin.HR('Save filter for re-use') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
             this._on(this.btn_save_filter, {click: function(){
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');

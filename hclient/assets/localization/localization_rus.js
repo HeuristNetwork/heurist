@@ -225,7 +225,7 @@ regional['RUS'] = {
     'Saved Filters': 'Каталог фильтров',
     'Build': 'Создать',
     'Facets builder': 'Многогранный поиск',
-    'Save filter': 'Сохранить фильтр',
+    'Save filter for re-use': 'Сохранить фильтр',
     'Advanced': 'Дополнительно',
     'Rules': 'Каскадный поиск',
     'Favourites': '',
