@@ -41,12 +41,12 @@ function hImportRecords(_max_upload_size) {
     source_db,
     source_db_url;
 
-    var targetMissed = 0;
-    var targetDtMissed = 0;
+    let targetMissed = 0;
+    let targetDtMissed = 0;
     
     function _init( _max_upload_size){
     
-        var uploadWidget = $('#uploadFile');
+        let uploadWidget = $('#uploadFile');
        
         //init STEP 1  - upload
         $('button').button();
@@ -86,10 +86,10 @@ function hImportRecords(_max_upload_size) {
 
         //upload file to server and store intemp file
         
-        var uploadData = null;
-        var pbar_div = $('#progressbar_div');
-        var pbar = $('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
+        let uploadData = null;
+        let pbar_div = $('#progressbar_div');
+        let pbar = $('#progressbar');
+        let progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
                 
         $('#progress_stop').button().on({click: function() {
@@ -135,7 +135,7 @@ function hImportRecords(_max_upload_size) {
 
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){  //after upload
-                    var data = response.data;
+                    let data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
                             _hideProgress(0);                
@@ -146,7 +146,7 @@ function hImportRecords(_max_upload_size) {
                             upload_file_name = file.name;
                             
                             //save session - new primary rectype and sequence
-                            var request = { action: 'import_preview',
+                            let request = { action: 'import_preview',
                                 filename: upload_file_name,
                                 id: window.hWin.HEURIST4.util.random()
                             };
@@ -159,7 +159,7 @@ function hImportRecords(_max_upload_size) {
                                         //render list of rectypes to be imported
                                         source_db = response.data.database;
                                         source_db_url = response.data.database_url;
-                                        var source_db_name = response.data.database_name;
+                                        let source_db_name = response.data.database_name;
                                         
                                         $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
                                         +(source_db>0?source_db:'0 <span style="color:red">(not registered)</span>')
@@ -189,7 +189,7 @@ function hImportRecords(_max_upload_size) {
                 }
                 
                 //need to reassign  event handler since widget creates temp input
-                var inpt = this;
+                let inpt = this;
                 btnUploadData.off('click');
                 btnUploadData.on({click: function(){
                             $(inpt).click();
@@ -199,7 +199,7 @@ function hImportRecords(_max_upload_size) {
         progressall: function (e, data) { 
                     //$('#divStep0').hide();
                     
-                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    let progress = parseInt(data.loaded / data.total * 100, 10);
                     progressLabel = pbar.find('.progress-label').text(
                                     Math.ceil(data.loaded/1024)+'Kb / '+Math.ceil(data.total/1024)) + 'Kb ';
                     pbar.progressbar({value: progress});
@@ -229,19 +229,19 @@ function hImportRecords(_max_upload_size) {
     //
     function _showListOfEntityTypes(afterSync){  
 
-        var rectypes = rectypesInSource;
-        var detailtypes = detailtypesInSource;
+        let rectypes = rectypesInSource;
+        let detailtypes = detailtypesInSource;
 
-        var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
-        var sel_options = '<option value="">select...</option><option value="rec_ID">record ID</option>';
-        var sel_dty_ids = []; 
-        var recCount = 0;
+        let s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
+        let sel_options = '<option value="">select...</option><option value="rec_ID">record ID</option>';
+        let sel_dty_ids = []; 
+        let recCount = 0;
 
-        var isAllRecognized = true;
-        var sourceMissed = 0;
-        var sourceDtMissed = 0;
-        var cnt_local_rt = 0;
-        var cnt_local_dt = 0;
+        let isAllRecognized = true;
+        let sourceMissed = 0;
+        let sourceDtMissed = 0;
+        let cnt_local_rt = 0;
+        let cnt_local_dt = 0;
         targetMissed = 0;
         targetDtMissed = 0;
         
@@ -253,11 +253,11 @@ function hImportRecords(_max_upload_size) {
         }
         
 
-        for(var rtyID in rectypes){
+        for(let rtyID in rectypes){
 
-            var rectype = rectypes[rtyID];
+            let rectype = rectypes[rtyID];
 
-            var rectype_source = rectype['code'];
+            let rectype_source = rectype['code'];
             if(!rectype_source){
                 rectype_source = '<span style="color:red">missing</span>';
                 sourceMissed++;
@@ -278,7 +278,7 @@ function hImportRecords(_max_upload_size) {
                 + rectype['target_RecTypeID']
                 +'</td></tr>';
             
-            var target_id;
+            let target_id;
             if(rectype['target_RecTypeID']>0){
                 target_id = rectype['target_RecTypeID']+'\t'+
                 $Db.rty( rectype['target_RecTypeID'], 'rty_Name')+'\n';
@@ -305,10 +305,10 @@ function hImportRecords(_max_upload_size) {
 
         // show missed fields
         if(detailtypes)
-            for(var dtyID in detailtypes){
-                var detailtype = detailtypes[dtyID];
+            for(let dtyID in detailtypes){
+                let detailtype = detailtypes[dtyID];
 
-                var dt_source = detailtype['code'];
+                let dt_source = detailtype['code'];
                 if(!dt_source){
                     dt_source = '<span style="color:red">missing</span>';
                     sourceDtMissed++;
@@ -331,13 +331,13 @@ function hImportRecords(_max_upload_size) {
                     detailtype['target_dtyID'] = $Db.getLocalID( 'dty', detailtype['code'] );
                 }
 
-                var target_id;
+                let target_id;
                 if(detailtype['target_dtyID']>0){
                     target_id = detailtype['target_dtyID']+'\t'+
                         $Db.dty(detailtype['target_dtyID'], 'dty_Name' )+'\n';
                 }else{
                     
-                    var is_issue = (detailtype['code'] && (afterSync || !(source_db>0)));
+                    let is_issue = (detailtype['code'] && (afterSync || !(source_db>0)));
 
                     if(targetDtMissed==0){
                         s = s + '<tr><td colspan="4"><b>field types '+(is_issue?'issues':'')+':</b></td></tr>';    
@@ -466,8 +466,7 @@ function hImportRecords(_max_upload_size) {
         $('#sel_UniqueIdField').html(sel_options);
 
         //no missing defintions
-        if(s!=''){
-        }else{
+        if(s==''){
             //all record types are already in target database
             //goto import records step
             _showStep(2);
@@ -485,7 +484,7 @@ function hImportRecords(_max_upload_size) {
             _showProgress( 0, 1 );
             //$('#divStep1').hide();
             
-            var request = { action: 'import_definitions',
+            let request = { action: 'import_definitions',
                 filename: upload_file_name,
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
@@ -542,7 +541,7 @@ function hImportRecords(_max_upload_size) {
             //$('#divStep2').hide();
             session_id = Math.round((new Date()).getTime()/1000);  //for progress
         
-            var request = { action: 'import_records',
+            let request = { action: 'import_records',
                 filename: upload_file_name,
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
@@ -559,7 +558,7 @@ function hImportRecords(_max_upload_size) {
                 
                 if($('#sa_update').is(':checked')){
                 
-                    var update_mode = $("input[name='sa_upd']:checked"). val();
+                    let update_mode = $("input[name='sa_upd']:checked"). val();
    /*             
     *   - 1 owerwrite current record completely  (Load new values, replacing all existing values for these records/fields)
     *   - 2 Add new values without deletion of existing values (duplicates are ignored) 
@@ -588,7 +587,7 @@ function hImportRecords(_max_upload_size) {
                     if(response.status == window.hWin.ResponseStatus.OK){
                         _hideProgress(3);
                         
-                        var sMsg = response.data.count_imported+'  records have been processed in total.<br>'
+                        let sMsg = response.data.count_imported+'  records have been processed in total.<br>'
                             +response.data.count_inserted+'  records have been inserted.<br>'
                             +response.data.count_updated+'  records have been updated.<br>'
                             +(response.data.count_ignored>0
@@ -597,12 +596,12 @@ function hImportRecords(_max_upload_size) {
                               
                         if(response.data.resource_notfound && response.data.resource_notfound.length>0){
 
-                            var mdata = response.data.resource_notfound;
-                            var sList = '';
-                            var rec_ids = [];
+                            let mdata = response.data.resource_notfound;
+                            let sList = '';
+                            let rec_ids = [];
                             
                             sList = sList + '<tr><td>ID in source</td><td>Record ID</td><td>Field</td><td>Value</td></tr>'
-                            for(var i=0; i<mdata.length; i++){
+                            for(let i=0; i<mdata.length; i++){
                                 sList = sList + '<tr><td>'+mdata[i][1]+'</td><td>'+mdata[i][0]
                                      +'</td><td>'+mdata[i][2]+'</td><td>'+mdata[i][3]+'</td></tr>';
                                 if(rec_ids.indexOf(mdata[i][0])<0) rec_ids.push(mdata[i][0]);
@@ -627,11 +626,8 @@ function hImportRecords(_max_upload_size) {
                         $('#spanRecCount2').html(sMsg);
                         
                         //refresh local defintions
-                        if(true){
-                            window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);    
-                        }else{
-                            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');    
-                        }
+                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);    
+                        //window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');    
                         
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
@@ -648,23 +644,23 @@ function hImportRecords(_max_upload_size) {
     //
     function _showProgress( session_id, currentStep ){
 
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progressCounter = 0;        
+        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
         $('body > div:not(.loading)').hide();//hide all except loading
         $('.loading').show();
         
         $('body').css('cursor', 'progress');
 
-        var pbar = $('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
+        let pbar = $('#progressbar');
+        let progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
         
         if(session_id>0){
         
             $('#progress_stop').button().on({click: function() {
                 
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     _hideProgress( currentStep );
@@ -676,7 +672,7 @@ function hImportRecords(_max_upload_size) {
             
             progressInterval = setInterval(function(){ 
                 
-                var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+                let request = {t:(new Date()).getMilliseconds(), session:session_id};            
                 
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
@@ -684,12 +680,12 @@ function hImportRecords(_max_upload_size) {
                         console.error(response, session_id);                   
                     }else{
                         
-                        var resp = response?response.split(','):[0,0];
+                        let resp = response?response.split(','):[0,0];
                         
                         if(resp && resp[0]){
                             if(progressCounter>0){
                                 if(resp[1]>0){
-                                    var val = resp[0]*100/resp[1];
+                                    let val = resp[0]*100/resp[1];
                                     pbar.progressbar( "value", val );
                                     progressLabel.text(resp[0]+' of '+resp[1]);
                                 }else{
@@ -751,8 +747,6 @@ function hImportRecords(_max_upload_size) {
     5 - import
     */
     function _showStep(page){
-        currentStep = page;
-        
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>3?3:page)).show();
     }
@@ -777,7 +771,7 @@ function hImportRecords(_max_upload_size) {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
