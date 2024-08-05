@@ -145,15 +145,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 node.setSelected(false); //reset
                 node.setExpanded(true);
             });            
-            
-            /*
-            var timerId = setInterval(function(){
-                if(tree.isLoading()){
-                    clearInterval(timerId);
-                    that._assignSelectedFields();
-                }
-            } ,200); */
-            setTimeout(function(){
+                        setTimeout(function(){
                 that._assignSelectedFields();
             },1000);
             
@@ -301,8 +293,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        var opt, selScope = this.selectRecordScope.get(0);
-
+        let  selScope = this.selectRecordScope.get(0);
         
         let scope_types = [];   
         
@@ -319,7 +310,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             window.hWin.HEURIST4.ui.createRectypeSelect(selScope,null,'select record type …',true);
         }else{
             if(rectype_Ids.length>1){
-                var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+                let opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
                 $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
             }
             for (let rty in rectype_Ids){

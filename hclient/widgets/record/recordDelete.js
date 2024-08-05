@@ -184,16 +184,16 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     _onLinkedCount:function(){
         
-            var cnt_selected = this._currentRecordsetSelIds.length;
-            var cnt_target = 0;
-            var cnt_source = 0;
-            var merged_ids = this._currentRecordsetSelIds;
+            let cnt_selected = this._currentRecordsetSelIds.length;
+            let cnt_target = 0;
+            let cnt_source = 0;
+            let merged_ids = this._currentRecordsetSelIds;
             
         //$merged_ids = array_unique(array_merge($res['reverse']['target'], $res['reverse']['source']), SORT_NUMERIC);
         
         if(cnt_source>0){
 
-            var ele = this.element.find('#div_4').show();
+            let ele = this.element.find('#div_4').show();
             
             if(cnt_selected==1){
                 msg = 'This record is';
@@ -237,7 +237,6 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     doAction: function( isconfirm, check_source ){
 
-        //var scope_val = 'current';
         let scope_val = this.selectRecordScope.val();
         if (scope_val=='') return;
         
@@ -343,7 +342,7 @@ function(){
 {title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
     
   let btn = $dlg.parent().find('button:contains("Delete records")');
-  var chb = $dlg.find('input[type="checkbox"]').change(function(){
+  let chb = $dlg.find('input[type="checkbox"]').change(function(){
       window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
   })
   window.hWin.HEURIST4.util.setDisabled(btn, true);

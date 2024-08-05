@@ -193,7 +193,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             });
 
 
-            var that = this;
+            let that = this;
             //
             //$(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             //window.hWin.HAPI4.addEventListener(this, 
@@ -257,7 +257,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         if(!this._toolbar) return;
         
         let $dlg = this.element.children('fieldset');
-        //var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
         
         if(is_expand){ //show preferences dialog
             
@@ -334,7 +333,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     //
     //
     //
-    doAction: function(){
+    doAction: function(event){
         
         if (!this.getSelectedParameters(true))  return;
         

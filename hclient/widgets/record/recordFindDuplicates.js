@@ -253,10 +253,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             }
             
             //get selected fields from treeview
-            var selectedFields = mode_action?{}:[];
+            let selectedFields = mode_action?{}:[];
             let tree = this.element.find('.rtt-tree').fancytree("getTree");
             let fieldIds = tree.getSelectedNodes(false);
-            let k, len = fieldIds.length;
+            const len = fieldIds.length;
             
             if(len<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -265,7 +265,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             }
             
             
-            for (k=0;k<len;k++){
+            for (let k=0;k<len;k++){
                 let node =  fieldIds[k];
                 
                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;

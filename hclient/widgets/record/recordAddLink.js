@@ -201,7 +201,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             return;    
         }
 
-        var opt, selScope = this.selectRecordScope.get(0); //selector
+        let selScope = this.selectRecordScope.get(0); //selector
 
         let rectype_Ids = this._currentRecordset.getRectypes();
         
@@ -211,21 +211,21 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
         if(hasSelection){            
                 if(useHtmlSelect){
-                    new_optgroup = document.createElement("optgroup");//
+                    let new_optgroup = document.createElement("optgroup");//
                     new_optgroup.label = 'All records';
                     new_optgroup.depth = 0;
                     selScope.appendChild(new_optgroup);
                 }else{
-                    var opt = window.hWin.HEURIST4.ui.addoption(selScope, 0, 'All records');
+                    let opt = window.hWin.HEURIST4.ui.addoption(selScope, 0, 'All records');
                     $(opt).attr('disabled', 'disabled');
                     $(opt).attr('group', 1);
                 }
         }
         
-        for (var rty in rectype_Ids){
+        for (let rty in rectype_Ids){
             if(rty>=0){
                 rty = rectype_Ids[rty];
-                opt = new Option($Db.rty(rty,'rty_Plural'), rty);
+                let opt = new Option($Db.rty(rty,'rty_Plural'), rty);
                 if(hasSelection){
                     opt.className = 'depth1';
                     $(opt).attr('depth', 1);
@@ -250,22 +250,22 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             
             if(rectype_Ids.length>0){
                 if(useHtmlSelect){
-                    new_optgroup = document.createElement("optgroup");//
+                    let new_optgroup = document.createElement("optgroup");//
                     new_optgroup.label = 'Selected';
                     new_optgroup.depth = 0;
                     selScope.appendChild(new_optgroup);
                 }else{
-                    var opt = window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Selected');
+                    let opt = window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Selected');
                     $(opt).attr('disabled', 'disabled');
                     $(opt).attr('group', 1);
                 }
             }
             
-            for (var rty in rectype_Ids){
+            for (let rty in rectype_Ids){
                 if(rty>=0){
                     rty = rectype_Ids[rty];
                     //need unique value - otherwise jquery selectmenu fails to recognize
-                    opt = new Option($Db.rty(rty,'rty_Plural'), 's'+rty); 
+                    let opt = new Option($Db.rty(rty,'rty_Plural'), 's'+rty); 
                     $(opt).attr('data-select', 1);
                     if(hasSelection){
                         $(opt).attr('depth', 1);
@@ -311,7 +311,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         this.element.find('#'+party+'_field').empty();
         
-        //var $fieldset = $('#target_field').empty(); //@todo clear target selection only in case constraints were changed
+        //let $fieldset = $('#target_field').empty(); //@todo clear target selection only in case constraints were changed
             
         let details = $Db.rst(recRecTypeID);
             
@@ -395,7 +395,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
         if(this.options.relmarker_dty_ID>0){
             //hide radio and field name - since it is the only one field in list
-            var ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
+            let ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
             this.element.find('#source_field').find('.field_item > div').css('padding-left',0);
             this.element.find('#source_field').find('.field_item > label').hide();
             this.element.find('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
@@ -410,7 +410,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
             if(window.hWin.HEURIST4.util.isempty(this.options.target_ID)){
                 //add reverse link option
-                var ele = $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cbsource_cb_0" '
+                let ele = $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cbsource_cb_0" '
                     + ' data-party="source" value="0"'
                     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
                     +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
@@ -420,7 +420,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             }
         }
         
-        var ele = this.element.find('#source_field').find('input[type=radio]');
+        let ele = this.element.find('#source_field').find('input[type=radio]');
         if(ele.length==1){
             ele.click();
         }
@@ -471,7 +471,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         this.element.find('#div_'+party+'1').hide();
         let $fieldset = this.element.find('#div_'+party+'2').empty();
         
-        dtFields = {};
+        let dtFields = {};
         dtFields['dt_ID'] = 9999999;    
         dtFields['rst_PtrFilteredIDs'] = rt_constraints;    
         dtFields['rst_DisplayName'] = '';//input_label;
@@ -533,7 +533,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         let ptr_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
-        dtFields = {};
+        let dtFields = {};
         dtFields['dt_ID'] = 9999999;    
         dtFields['rst_PtrFilteredIDs'] = ptr_constraints;
         dtFields['rst_DisplayName'] = '';
@@ -601,7 +601,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             trm_id = $Db.rst(rectypeID, dtID, 'rst_DefaultValue');
         }
         
-        //var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
+        //let dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
         let dtFields = {};
         dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
         dtFields['rst_RequirementType'] = 'optional';
@@ -806,8 +806,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 
         }else{ //relmarker
                 /*
-                var rl_ele = $('#rec'+(isReverce?'target':'source')+'_sel_'+dtyID);
-                var termID = rl_ele.val(),
+                let rl_ele = $('#rec'+(isReverce?'target':'source')+'_sel_'+dtyID);
+                let termID = rl_ele.val(),
                     sRelation = rl_ele.find('option:selected').text();
                 */
                 let termID = this.getFieldValue('rt_'+(isReverce?'target':'source')+'_sel_'+dtyID);
@@ -821,12 +821,12 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     
                     
                     if(window.hWin.HEURIST4.util.isempty(this.sSourceName)){
-                       var record = this._currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
+                       let record = this._currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
                        this.sSourceName =  this._currentRecordset.fld(record, 'rec_Title');
                        this.source_RecTypeID = this._currentRecordset.fld(record, 'rec_RecTypeID');
                     }
                     if(window.hWin.HEURIST4.util.isempty(this.sTargetName)){
-                       var record = this._currentRecordset.getById( isReverce?targetIDs[idx]:targetIDs[0] );
+                       let record = this._currentRecordset.getById( isReverce?targetIDs[idx]:targetIDs[0] );
                        this.sTargetName =  this._currentRecordset.fld(record, 'rec_Title');
                     }
                     

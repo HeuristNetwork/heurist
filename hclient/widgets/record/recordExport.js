@@ -108,6 +108,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
             
             scope_val = 'current';
            
+            let q;
             let isEntireDb = false;
             let scope = [], //ids to be exported
             rec_RecTypeID = 0;
@@ -166,8 +167,9 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
                 request['defs'] = 0; //don't include defintions
                 url += 'hserv/controller/record_output.php';
             }
-            
-            if(false){
+
+            const open_in_popup  = false;
+            if(open_in_popup){
                 request['ids'] = scope;
                 
                 //posting via form allows send large list of ids

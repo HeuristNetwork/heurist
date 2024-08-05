@@ -151,7 +151,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that._assignSelectedFields(null);
 
             // Set advanced options.
-            if (settings.hasOwnProperty('advanced_options') && settings.advanced_options) {
+            if (Object.hasOwn(settings,'advanced_options') && settings.advanced_options) {
                 that._setFieldAdvancedOptions(settings.advanced_options);
             }
             
@@ -237,8 +237,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         this.selectRecordScope.empty();
 
-        var opt, selScope = this.selectRecordScope.get(0);
-
+        let selScope = this.selectRecordScope.get(0);
         
         let scope_types = [];   
         
@@ -246,7 +245,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         if(rectype_Ids.length>1){
             
-            var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+            let opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
             $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
         
             for (let rty in rectype_Ids){
@@ -453,10 +452,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }
         
         //get selected fields from treeview
-        var selectedFields = mode_action?{}:[];
+        let selectedFields = mode_action?{}:[];
         let tree = this.element.find('.rtt-tree').fancytree("getTree");
         let fieldIds = tree.getSelectedNodes(false);
-        let k, len = fieldIds.length;
+        const len = fieldIds.length;
         
         if(len<1){
             window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -464,7 +463,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             return false;
         }
 
-        for (k=0;k<len;k++){
+        for (let k=0;k<len;k++){
 
             let node =  fieldIds[k];
             
@@ -784,7 +783,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         let content = this.element.find('#' + templateName).html();
         if (typeof variables === 'object' && variables !== null) {
             for (let name in variables) {
-                if (variables.hasOwnProperty(name)) {
+                if (Object.hasOwn(variables,name)) {
                     content = content.replaceAll('{' + name + '}', variables[name]);
                 }
             }
@@ -1034,18 +1033,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             this.element.find('.export-advanced-list-item').each(function () {
                 let fieldCode = $(this).data('field-code');
                 let option;
-                if (options.hasOwnProperty(fieldCode)) {
+                if (Object.hasOwn(options,fieldCode)) {
                     option = options[fieldCode];
-                    if (option.hasOwnProperty('total')) {
+                    if (Object.hasOwn(option,'total')) {
                         $(this).find('.export-advanced-list-item-total-select').val(option.total);
                         if (option.total === 'sum' || option.total === 'count') {
                             $(this).find('.export-advanced-list-item-percentage').show();
                         }
                     }
-                    if (option.hasOwnProperty('sort')) {
+                    if (Object.hasOwn(option,'sort')) {
                         that._handleSortByField($(this).attr('data-code'), false, option.sort);
                     }
-                    if (option.hasOwnProperty('use_percentage') && option.use_percentage) {
+                    if (Object.hasOwn(option,'use_percentage') && option.use_percentage) {
                         $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked', true);
                     }
                 }

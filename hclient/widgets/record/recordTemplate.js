@@ -99,10 +99,10 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             }
             
             //get selected fields from treeview
-            var selectedFields = {};
+            let selectedFields = {};
             let tree = this.element.find('.rtt-tree').fancytree("getTree");
             let fieldIds = tree.getSelectedNodes(false);
-            let k, len = fieldIds.length;
+            const len = fieldIds.length;
             
             if(len<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
@@ -111,7 +111,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
             }
             
             
-            for (k=0;k<len;k++){
+            for (let k=0;k<len;k++){
                 let node =  fieldIds[k];
                 
                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
@@ -217,7 +217,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         let that = this;
         
-        var rtyID = this.options.recordType;
+        rtyID = this.options.recordType;
 
             
             //generate treedata from rectype structure

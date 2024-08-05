@@ -208,7 +208,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
             
             if(sel && sel.length() == 1){
                 
-                showMsgDlg('Are you sure?');
+                window.hWin.HEURIST4.msg.showMsgDlg('Are you sure?');
                 
                 /*
                 if(this.options.add_new_record){

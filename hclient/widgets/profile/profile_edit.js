@@ -235,7 +235,7 @@ $.widget( "heurist.profile_edit", {
             this.edit_form.find(".mode-admin").hide();
         }
 
-        for(id in this.options.edit_data){
+        for(let id in this.options.edit_data){
             if(!window.hWin.HEURIST4.util.isnull(id)){
                 let inpt = this.edit_form.find("#"+id).val(this.options.edit_data[id]);
                 //if(inpt){                    inpt.val(this.options.edit_data[id]);                  }
@@ -272,7 +272,8 @@ $.widget( "heurist.profile_edit", {
         that.edit_form.find('#ugr_Captcha').val('');
         let $dd = that.edit_form.find('#imgdiv');
         let id = window.hWin.HEURIST4.util.random();
-        if(true){  //simple captcha
+        const is_simple_captcha = true;
+        if(is_simple_captcha){  //simple captcha
             $dd.load(window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty(); //find("#img").remove();
@@ -301,7 +302,7 @@ $.widget( "heurist.profile_edit", {
         	let ele = this.edit_form.find("#ugr_Captcha");
         	let val = ele.val().trim().replace(/\s+/g,'');
         	
-            var ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
+            const ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
                 err_text = err_text + ', Humanity check';
             }else{
@@ -324,7 +325,7 @@ $.widget( "heurist.profile_edit", {
                 err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
-                var ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
+                const ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -340,7 +341,7 @@ $.widget( "heurist.profile_edit", {
                 if(!parentWin.HEURIST4.util.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+window.hWin.HR('Wrong password format');
                 }else{*/
-                var ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
+                const ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -415,7 +416,7 @@ $.widget( "heurist.profile_edit", {
 
         }else{
             parentWin.HEURIST4.msg.showMsgErr(err_text);
-            /*var message = $dlg.find('.messages');
+            /*let message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
             setTimeout(function() {
             message.removeClass( "ui-state-highlight", 1500 );

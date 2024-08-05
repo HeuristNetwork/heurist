@@ -16,6 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global prepared_params */
 
 let login_dialog = null;
 
@@ -58,13 +59,13 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         $dlg.dialog('option','close',function(){ 
                 $dlg.remove(); 
         });;
-        var sel = $dlg.find('#saml_sp');
+        let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             $dlg.dialog('close');
             doSamlLogin(callback, parentwin, sel.val());
         }
 */
-
+        let $dlg = login_dialog;
         let sel = $dlg.find('#saml_sp');
         if(sel.val()){
             
@@ -72,7 +73,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         
         let surl = window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database;
         
-//console.log(surl); 
         let isFrameAllowed = false;
         if(!isFrameAllowed){
             surl = surl + '&noframe=1';
@@ -185,7 +185,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             .addClass('ui-heurist-bg-light')
             .appendTo( $(parentwin.document['body']) );
 
-        var $dlg = login_dialog;
+        let $dlg = login_dialog;
 
         //load login dialogue
         $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="
@@ -295,7 +295,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 }
 
                 allFields.removeClass( "ui-state-error" );
-                //var message = login_dialog.find('.messages');
+                //let message = login_dialog.find('.messages');
 
                 let mode = $dlg.attr('data-mode');
 
@@ -388,8 +388,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             /*if(isforsed){
-            var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
-            var btn_db = $( "<button>" ).appendTo( left_pane )
+            let left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );
+            let btn_db = $( "<button>" ).appendTo( left_pane )
             .button( {title: window.hWin.HR("Change database")} ).click( function() { $dlg.dialog( "close" ); } );
             }*/
             
@@ -762,7 +762,7 @@ function doImport(){
             }
         };
 
-        usr_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
+        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options);
     }
 
     function _showDatabases(){
@@ -788,7 +788,7 @@ function doImport(){
             }
         };    
     
-        db_dialog = window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     }
 
     _showDatabases();
