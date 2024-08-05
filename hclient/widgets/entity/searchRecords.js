@@ -260,12 +260,23 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         this._on( this.element.find('input[type=radio], input[type=checkbox]'), {
             change: function(event){
                 this.startSearch();
-        }});
+
+                if(event.target.id == 'cb_selected'){
+                    window.hWin.HAPI4.save_pref('rSearch_Recent', event.target.checked);
+                }
+            }
+        });
 		
         // User Preference for filter buttons
         let filter_pref = window.hWin.HAPI4.get_prefs_def('rSearch_filter', 'rb_alphabet');
         if (filter_pref != 'rb_alphabet'){
             this.element.find('#'+filter_pref).prop('checked', true);
+        }
+
+        let show_recent = !window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.get_prefs('recent_Records')) 
+                            && window.hWin.HAPI4.get_prefs_def('rSearch_Recent', true);
+        if(show_recent){
+            this.element.find('#cb_selected').prop('checked', true);
         }
 
         if(is_addonly){

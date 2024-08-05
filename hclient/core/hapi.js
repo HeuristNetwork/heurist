@@ -2403,7 +2403,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 return that.currentUser['ugr_Preferences']; //returns all preferences
             } else {
                 let res = '';
-                if(that.currentUser['ugr_Preferences'] && that.currentUser['ugr_Preferences'][name]){
+                if(that.currentUser['ugr_Preferences'] && Object.hasOwn(that.currentUser['ugr_Preferences'], name)){
                     res = that.currentUser['ugr_Preferences'][name];
                 }
 
