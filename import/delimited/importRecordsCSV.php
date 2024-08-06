@@ -129,6 +129,14 @@ if(!$format){ $format='csv';}
             .ui-heurist-title{
                 font-size: 12px !important;
             }
+
+            .link_styling{
+                font-size: smaller;
+                text-decoration: underline;
+
+                cursor: pointer;
+                color: #0070E0;
+            }
         </style>
     </head>
 
@@ -590,7 +598,7 @@ if(!$format){ $format='csv';}
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
             <caption></caption>
             <thead><tr> 
-                <th style="width:75px;">Use&nbsp;<br>value</th>
+                <th style="width:75px;">Use value<br><a href="#" class="lnk_SelectAll link_styling">Select all</a></th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
                 <th style="width:300px;" id="mapping_column_header">Column to Field Mapping</th>

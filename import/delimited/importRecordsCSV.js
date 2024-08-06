@@ -504,44 +504,48 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(imp_ID>0){
         
             let request = {
-                    'a'          : 'search',
-                    'entity'     : 'sysImportFiles',
-                    'details'    : 'list',
-                    'sif_ID'     : imp_ID
+                'a'          : 'search',
+                'entity'     : 'sysImportFiles',
+                'details'    : 'list',
+                'sif_ID'     : imp_ID
             };
-            
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront($(document.body), null, 'Retrieving and loading previous session...');
+
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
+                function(response){
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                        //clear selectors
+                        $('#dependencies_preview').empty();
+                        $('#lblPrimaryRecordType').empty();
+                        $('#sa_rectype_sequence').empty();
                         
-                        if(response.status == window.hWin.ResponseStatus.OK){
+                        $('#dependencies_preview').css('background',$('#sa_primary_rectype').css('background'));
                         
-                            //clear selectors
-                            $('#dependencies_preview').empty();
-                            $('#lblPrimaryRecordType').empty();
-                            $('#sa_rectype_sequence').empty();
-                            
-                            $('#dependencies_preview').css('background',$('#sa_primary_rectype').css('background'));
-                            
-                            let resp = new HRecordSet( response.data );
-                            let record = resp.getFirstRecord();
-                            let ses = resp.fld(record, 'sif_ProcessingInfo');
-                            
-                            imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
-                            
-                            //init field mapping table
-                            if(imp_session){
-                                let sequence = imp_session['sequence'];
-                                if(!sequence || $.isEmptyObject(sequence)){
-                                    _doSetPrimaryRecType(true);
-                                }else{
-                                    _renderRectypeSequence();
-                                }
+                        let resp = new HRecordSet( response.data );
+                        let record = resp.getFirstRecord();
+                        let ses = resp.fld(record, 'sif_ProcessingInfo');
+                        
+                        imp_session = (typeof ses == "string") ? $.parseJSON(ses) : null;
+                        
+                        //init field mapping table
+                        if(imp_session){
+                            let sequence = imp_session['sequence'];
+                            if(!sequence || $.isEmptyObject(sequence)){
+                                _doSetPrimaryRecType(true);
+                            }else{
+                                _renderRectypeSequence();
                             }
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
+                }
             );        
         
         
@@ -719,124 +723,107 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // render sequence ribbon
     //
     function _renderRectypeSequence(){
-        
+
         let i, sequence = imp_session['sequence'];
 
         $('#sa_rectype_sequence').empty();
-        
+
         //sequence is not defined - select primary record type and define index field names
         if(!sequence || $.isEmptyObject(sequence)){
             _doSetPrimaryRecType(true);
             return false;
         }
-        
+
         _showStep(3);
-        
-         $('img[id*="img_arrow"]').hide();
-         let ele1 = $('#sa_rectype_sequence').empty();
-         let s = '';
-         
-         let initial_selection = 0;
-         
-         for (i=0;i<sequence.length;i++){
-                let recTypeID = sequence[i].rectype;
-                let fieldname = sequence[i].field;
-                let hierarchy = sequence[i].hierarchy;
 
-                let title = $Db.rty(recTypeID, 'rty_Name');
-                
-                let counts = _getInsertUpdateCounts( i );
-                if(!(counts[2]==0 && counts[0]>0)){ //not completely matching
-                    initial_selection = i;
-                }
-                let s_count = _getInsertUpdateCountsForSequence( i ); //todo change to field                                    
-                
-                let sArr = '';
-                if(i<sequence.length-1){
-                    sArr = '<div style="display:inline-block;min-height:2em"><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>';
-                }       
-                
-                
+        $('img[id*="img_arrow"]').hide();
+        let ele1 = $('#sa_rectype_sequence').empty();
+        let s = '';
 
-                let sid_fields =  sArr 
-                          + '<div style="border:1px solid black;-size:0.9em" '
-                          + 'class="select_rectype_seq" data-seq-order="' + i + '">';
-                
-                let fields = hierarchy;
-                if(!$.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
-                    fields = hierarchy.split(',');
-                }
+        let initial_selection = 0;
 
-                if($.isArray(fields) && fields.length>0){
-                    
-                    let prev_rt = fields[fields.length-1];
-                    
-                    for(let j=fields.length-1;j>=0;j--){
-                        let field = fields[j], k = field.indexOf('.');
-                        if(k>0){
-                               let field_id = field.substr(0,k);
-                               let rt_id = field.substr(k+1);
-                               
-                               let field_title = $Db.rst(prev_rt, field_id, 'rst_DisplayName');
-                               let rt_title = $Db.rty(rt_id,'rty_Name');
-                               prev_rt = rt_id;
-                               
-                                sid_fields =  sid_fields + ((j<fields.length-2)?'<br class="hid_temp">':'')   // class="hid_temp"
-                                        + '<span class="hid_temp"><i>' + field_title + '</i></span>'
-                                        + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow'                                                                      + '" style="padding:0"></span>'
-                                        + '<b'+(j>0?' class="hid_temp"':'') +'>' + rt_title + '</b>';
-                        }else if(fields.length==1){
-                            sid_fields = sid_fields + '<b>' + title + '</b>'; 
-                            
-                        }
+        for (i=0;i<sequence.length;i++){
+            let recTypeID = sequence[i].rectype;
+            let fieldname = sequence[i].field;
+            let hierarchy = sequence[i].hierarchy;
+
+            let title = $Db.rty(recTypeID, 'rty_Name');
+
+            let counts = _getInsertUpdateCounts( i );
+            if(!(counts[2]==0 && counts[0]>0)){ //not completely matching
+                initial_selection = i;
+            }
+            let s_count = _getInsertUpdateCountsForSequence( i ); //todo change to field
+
+            let sArr = '';
+            if(i<sequence.length-1){
+                sArr = '<div style="display:inline-block;min-height:2em"><span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="vertical-align:super"></span>';
+            }
+
+            let sid_fields =  sArr 
+                        + '<div style="border:1px solid black;-size:0.9em" '
+                        + 'class="select_rectype_seq" data-seq-order="' + i + '">';
+
+            let fields = hierarchy;
+            if(!$.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
+                fields = hierarchy.split(',');
+            }
+
+            if($.isArray(fields) && fields.length>0){
+
+                let prev_rt = fields[fields.length-1];
+
+                for(let j=fields.length-1;j>=0;j--){
+                    let field = fields[j], k = field.indexOf('.');
+                    if(k>0){
+                        let field_id = field.substr(0,k);
+                        let rt_id = field.substr(k+1);
+
+                        let field_title = $Db.rst(prev_rt, field_id, 'rst_DisplayName');
+                        let rt_title = $Db.rty(rt_id,'rty_Name');
+                        prev_rt = rt_id;
+
+                        sid_fields = sid_fields + ((j<fields.length-2)?'<br class="hid_temp">':'')
+                                + '<span class="hid_temp"><i>' + field_title + '</i></span>'
+                                + '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow" style="padding:0"></span>'
+                                + '<b'+(j>0?' class="hid_temp"':'') +'>' + rt_title + '</b>';
+                    }else if(fields.length==1){
+                        sid_fields = sid_fields + '<b>' + title + '</b>'; 
                     }
-                }else{
-                    //sid_fields = sid_fields + title; 
                 }
-                
-                s =  sid_fields +  '<span data-cnt="1" id="rt_count_'
-                        + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" data-mode="0" style="padding-left:0em">'
-                        +fieldname+'</span></div>'+(sArr!=''?'</div>':'')+s;
-                
-                
-                /*
-                s = '<h2 class="select_rectype_seq" data-seq-order="'
-                        + i + '">' + title + '<span data-cnt="1" id="rt_count_'
-                        + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" style="padding-left:0em">'
-                        +fieldname+'</h2>'+s;
-               */         
-                 
-                if(i==0){
-                     $('#lblPrimaryRecordType').text(title);
-                }
-         } //for              
-                         
-         $(s).appendTo(ele1);
-         
-         $('.select_rectype_seq').click(function(event){
+            }
 
-                let sp = $(event.target)
-                /*if($(event.target).attr('data-cnt')>0){
-                    sp = $(event.target).parent();
-                }*/
-             
-                //get next id field
-                if(!sp.hasClass('select_rectype_seq')){
-                    sp = sp.parents('.select_rectype_seq');
-                }
-                
-                let idx = sp.attr('data-seq-order');
-                
-                _skipToNextRecordType(idx);
+            s =  sid_fields +  '<span data-cnt="1" id="rt_count_'
+                    + i + '">' + s_count + '</span><br><span data-cnt="1" class="id_fieldname" data-mode="0" style="padding-left:0em">'
+                    +fieldname+'</span></div>'+(sArr!=''?'</div>':'')+s;
 
-         });
-         
-         //select first in sequence
-         $('.select_rectype_seq[data-seq-order="'+initial_selection+'"]').click();    
-         
-         _adjustTablePosition();
-        
-         //_initFieldMapppingTable();    
+            if(i==0){
+                $('#lblPrimaryRecordType').text(title);
+            }
+        } //for
+
+        $(s).appendTo(ele1);
+
+        $('.select_rectype_seq').click(function(event){
+
+            let sp = $(event.target)
+
+            //get next id field
+            if(!sp.hasClass('select_rectype_seq')){
+                sp = sp.parents('.select_rectype_seq');
+            }
+
+            let idx = sp.attr('data-seq-order');
+
+            _skipToNextRecordType(idx);
+        });
+
+        //select first in sequence
+        $('.select_rectype_seq[data-seq-order="'+initial_selection+'"]').click();    
+
+        _adjustTablePosition();
+
+        //_initFieldMapppingTable();    
         return true;
     }
 
@@ -1885,32 +1872,30 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });
         
         }
-        
-            let is_all_checked = true;
+
+        let is_all_checked = true;
+        $("input[id^='cbsa_dt_']").each(function(i,item){
+            let dt = $(item).attr('data-type');
+            if(!$(item).is(':checked') && (dt=='remain' || dt=='processed')){
+                is_all_checked = false;
+                return false
+            }
+        });
+
+        $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
+            .text( is_all_checked?'Select none':'Select all');
+
+        $('.lnk_SelectAll').click(function(e){
+            let cb = $(e.target);
+            let was_checked = (cb.attr('data-checked')==1);
             $("input[id^='cbsa_dt_']").each(function(i,item){
-               let dt = $(item).attr('data-type');
-               if(!$(item).is(':checked') && (dt=='remain' || dt=='processed')){
-                   is_all_checked = false;
-                   return false
-               }
+                let dt = $(item).attr('data-type');
+                if(dt=='remain' || dt=='processed')
+                    $(item).prop('checked',was_checked?0:1).change(); 
             });
-            
-            $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
-                .text( is_all_checked?'Select none':'Select all');
-        
-            $('.lnk_SelectAll').click(function(e){
-                let cb = $(e.target);
-                let was_checked = (cb.attr('data-checked')==1);
-                $("input[id^='cbsa_dt_']").each(function(i,item){
-                    let dt = $(item).attr('data-type');
-                    if(dt=='remain' || dt=='processed')
-                        $(item).prop('checked',was_checked?0:1).change(); 
-                });
-                cb.attr('data-checked',(was_checked?0:1) );
-                cb.text(was_checked?'Select all':'Select none');
-            });
-        
-        
+            $('.lnk_SelectAll').attr('data-checked',(was_checked?0:1) );
+            $('.lnk_SelectAll').text(was_checked?'Select all':'Select none');
+        });
     }
 
     //
