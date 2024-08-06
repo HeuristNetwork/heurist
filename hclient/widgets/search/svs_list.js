@@ -2740,10 +2740,10 @@ $.widget( "heurist.svs_list", {
 
         let res = [];
 
+        domain = (domain && (domain=='b' || domain=='bookmark'))?'bookmark':'all';
+        
         //add predefined searches
         if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user - it adds 2 special searches: all or bookmark
-
-            let domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
             let s_recent = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
             let s_all = "?w="+domain+"&q=sortby:-m&label=All records";

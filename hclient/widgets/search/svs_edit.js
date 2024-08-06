@@ -319,7 +319,7 @@ function hSvsEdit(args) {
             svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
             let qsearch = svs[1]; //Hul._QUERY
             let r = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
-            let mode = 'saved';
+            mode = 'saved';
             if(r.type==3){
                 mode = 'faceted';
             }else if(window.hWin.HEURIST4.util.isempty(r.q)){

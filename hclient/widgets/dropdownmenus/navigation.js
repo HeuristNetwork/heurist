@@ -230,6 +230,9 @@ $.widget( "heurist.navigation", {
         {
             
             let record = resdata.getById(menuitems[i]);
+            
+            if(!record) continue; //record may be non-public or deleted
+            
             let page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
 
             if(Object.hasOwn(this.ids_menu_entries, page_id) && this.ids_menu_entries[page_id].length > 0){ // check recursive references

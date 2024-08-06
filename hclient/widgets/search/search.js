@@ -978,7 +978,7 @@ $.widget( "heurist.search", {
     //
     _doSearch: function(fl_btn){
 
-        let qsearch = qsearch = this.input_search.val();
+        let qsearch = this.input_search.val();
 
         qsearch = qsearch.replace(/,\s*$/, "");
 
