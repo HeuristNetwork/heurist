@@ -2225,7 +2225,7 @@ function recordSearch($system, $params, $relation_query=null)
         $params['needall'] = 1; //return all records, otherwise dependent records could not be found
 
         $resSearch = recordSearch($system, $params);//search for main set
-
+        //rulesonly 3 - keep original+last rule,  2 - returns only last extension, 1- returns all exts, 0 keep original+all rules
         $keepMainSet = (@$params['rulesonly']!=1 && @$params['rulesonly']!=2);
         $keepLastSetOnly = (@$params['rulesonly']==2 || @$params['rulesonly']==3);
 

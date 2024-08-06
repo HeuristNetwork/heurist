@@ -2747,7 +2747,7 @@ $.widget( "heurist.search_faceted", {
                             
                             $("<span>").html(s_date + s_counts).appendTo($facet_values); 
 
-                            if(sl_count == '1'){
+                            if(sl_count > 0){ //was =='1'
                                 this._addFacetToExpandedCount(facet_index, $facet_values, $input_div, $(s_counts));
                             }
                             
@@ -3634,7 +3634,7 @@ $.widget( "heurist.search_faceted", {
                     count:data.count} );
                 $f_link.appendTo($container);
 
-                if(data.count == '1'){
+                if(data.count > 0){ //was =='1'
                     this._addFacetToExpandedCount(f_index, data.value, $container, $f_link);
                 }
             }
@@ -3687,7 +3687,7 @@ $.widget( "heurist.search_faceted", {
                     let $f_link = this._createOption(f_index, level, {title: title, value: value[2], count: value[1]});
                     $f_link.appendTo($container);
 
-                    if(value[1] == '1'){
+                    if(value[1] > 0){ //was =='1'
                         this._addFacetToExpandedCount(f_index, value[2], $container, $f_link);
                     }
                 }
@@ -3733,7 +3733,7 @@ $.widget( "heurist.search_faceted", {
 
             sl_count = sl_count.replace('style="', 'style="padding-left:10px;');
 
-            if(cur_data['count'] == '1'){
+            if(cur_data['count'] > 0){ //was =='1'
                 this._addFacetToExpandedCount(facet_index, key, $facet_container, null)
             }
 
@@ -3975,7 +3975,7 @@ $.widget( "heurist.search_faceted", {
                     dcount.appendTo(f_link);    
                 }
 
-                if(txt == '1'){
+                if(txt > 0){ //was =='1'
                     this._addFacetToExpandedCount(facet_index, cterm.value, f_link_content, dcount);
                 }
 
@@ -4235,6 +4235,7 @@ $.widget( "heurist.search_faceted", {
         const that = this;
 
         if(!this.options.params.rules || this._expanded_count_order.length == 0){
+            //rules not defined
             return;
         }
 
@@ -4257,7 +4258,7 @@ $.widget( "heurist.search_faceted", {
 
             field = Object.keys(q_facet)[0];
 
-            if(field.startsWith('f:') && q_facet[field] == facet_placeholder){
+            if((field.startsWith('f:')||field=='title') && q_facet[field] == facet_placeholder){
                 break;
             }
 
@@ -4282,12 +4283,19 @@ $.widget( "heurist.search_faceted", {
             let sortby = query.pop();
             query.push(facet_query, sortby);
         }
+        
+        let rulesonly = 1; //all exts
+        if(this.options.params.rulesonly==3){ //original+last rules
+            rulesonly = 2; //last only
+        }else if(this.options.params.rulesonly>0){
+            rulesonly = this.options.params.rulesonly; //2 or 1 - last or all rules
+        }
 
         let request = {
             q: query,
             detail: 'ids',
             rules: this.options.params.rules,
-            rulesonly: this.options.params.rulesonly
+            rulesonly: rulesonly 
         };
 
         window.hWin.HAPI4.RecordMgr.search(request, (response) => {
@@ -4296,14 +4304,14 @@ $.widget( "heurist.search_faceted", {
                 that._expanded_count_cancel = false;
                 return;
             }
-            if(response.status != window.hWin.ResponseStatus.OK || response.data.count < 2){
-                that._getExpandedFacetCount();
+            if(response.status != window.hWin.ResponseStatus.OK || response.data.count < 1){
+                that._getExpandedFacetCount(); //no extension - next 
                 return;
             }
 
             // Update label
             let $count_lbl = current_facet[1];
-            let count = `+${response.data.count}`;
+            let ext_count = `+${response.data.count}`;
 
             if(!$count_lbl && 
                 $parent_container.find('.tree.facet-item').length > 0 && $parent_container.find('.tree.facet-item').fancytree('getTree')){ // tree
@@ -4315,29 +4323,71 @@ $.widget( "heurist.search_faceted", {
                 let $title = $($(node.title)[0]);
                 let $count_lbl = $($(node.title)[1]);
 
-                if($count_lbl.text().startsWith('(')){
-                    count = `(${count})`;
+                $count_lbl.removeClass('badge');
+                
+                if(that.options.params.rulesonly==1 || that.options.params.rulesonly==2){
+                    //remove original 
+                    if($count_lbl.text().startsWith('(')){
+                        ext_count = `(${ext_count})`;
+                    }
+                    $count_lbl.text(ext_count);
+                }else{
+                    //keep original
+                    let orig_count = $count_lbl.find('.badge');
+                    orig_count = (orig_count.length==0)?$count_lbl.text():orig_count.text();
+                    $count_lbl.html(`<span class="badge">${orig_count}</span>${ext_count}`);
                 }
-                $count_lbl.removeClass('badge').text(count);
 
                 node.setTitle($title[0].outerHTML + $count_lbl[0].outerHTML);
 
             }else if($count_lbl.hasClass('facet-count') || $count_lbl.find('.facet-count').length > 0){ // separate span
 
                 $count_lbl = $count_lbl.hasClass('facet-count') ? $count_lbl : $count_lbl.find('.facet-count');
-                $count_lbl.removeClass('badge');
+                
+                
+                if(that.options.params.rulesonly==1 || that.options.params.rulesonly==2){
+                    //remove original 
+                    $count_lbl.text(ext_count);
+                }else{
+                    //keep original
+                    let txt = $count_lbl.text();
+                    if( /\+\d+$/.test(txt) ) {
+                        txt = txt.replace(/\+\d+$/, ext_count);    
+                    }else{
+                        txt = txt+ext_count;
+                    }
 
-                if($count_lbl.text().startsWith('(')){
-                    count = `(${count})`;
+                    $count_lbl.text(txt);
+                    
+                    //let orig_count = $count_lbl.find('.badge');
+                    //orig_count = (orig_count.length==0)?$count_lbl.text():orig_count.text();
+                    //$count_lbl.html(`<span class="badge">${orig_count}</span>${ext_count}`);
                 }
 
-                $count_lbl.text(count).attr('title', `Expands to ${response.data.count} records`);
+                $count_lbl.attr('title', `Expands to ${response.data.count} records`);
 
             }else if($count_lbl.is('option')){ // dropdown option
+                //repalce (n) or (n+e)  
+                
+                let txt = $count_lbl.text();
 
-                count = $count_lbl.text().replace('(1)', `(${count})`); ///\([0-9]+\)/
-
-                $count_lbl.text(count);
+                if(that.options.params.rulesonly==1 || that.options.params.rulesonly==2){
+                    //remove original 
+                    if( /\(\d+\)$/.test(txt) ) {
+                        txt = txt.replace(/\(\d+\)$/, `(${ext_count})`);    
+                    }else{
+                        txt = `(${ext_count})`;
+                    }
+                }else{                
+                    if(/\(\d+\+\d+\)$/.test(txt)){
+                        txt = txt.replace(/\+\d+\)$/, `${ext_count})`);    
+                    }else if( /\(\d+\)$/.test(txt) ) {
+                        txt = txt.replace(/\)$/, `${ext_count})`);    
+                    }else{
+                        txt = `(${ext_count})`;
+                    }
+                }
+                $count_lbl.text(txt);
 
                 if($count_lbl.closest('select').hSelect('instance') !== undefined){
                     $count_lbl.closest('select').hSelect('refresh');
