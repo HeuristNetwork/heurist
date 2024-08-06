@@ -817,7 +817,7 @@ $.widget( "heurist.resultList", {
                     search_button_label: window.hWin.HR('Filter'),
                     btn_entity_filter: false})
                 .css({  //display:'block','max-height':'55px','height':'55px',
-                        padding:'15px 10px 25px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
+                        padding:'15px 10px 35px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
                 .appendTo(this.div_header);
         
         }

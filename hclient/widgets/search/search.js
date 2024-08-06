@@ -326,7 +326,7 @@ $.widget( "heurist.search", {
             // Filter builder button
             this.btn_filter_wiz = $('<a>',{href:'#',
                 title:window.hWin.HR('filter_builder_hint')})
-            .css({display:'inline-block','padding-right':'5px'}) //,top:'-3px'
+            .css({display:'inline-block'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" />')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -338,7 +338,7 @@ $.widget( "heurist.search", {
             // Facet builder button
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('filter_facetbuilder_hint')})
-            .css({display:'inline-block','padding-right':'5px'}) //width:90,,top:'-3px'
+            .css({display:'inline-block',padding:'0px 15px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" />')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -373,7 +373,7 @@ $.widget( "heurist.search", {
             }});
 
             this.div_search_input.find('#search_help_link')
-            .css({'margin-left':'-10px'})
+            .css({'margin-left':'10px'})
             .appendTo(this.div_buttons);
         }
 
@@ -815,15 +815,9 @@ $.widget( "heurist.search", {
                 }
 
                 this.div_buttons.position({
-                    my: 'left+10 top+5',
+                    my: 'left+10 top+10',
                     at: 'left bottom',
                     of: this.div_search_input
-                });
-
-                this.btn_save_filter.position({
-                    my: 'left top+10',
-                    at: 'left bottom',
-                    of: this.btn_search_as_user
                 });
 
             // Move 'saved filters' dropdown
