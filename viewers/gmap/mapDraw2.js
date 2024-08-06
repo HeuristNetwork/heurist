@@ -17,27 +17,28 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global google, Utm, hMapLayer, stringifyWKT */
 
 
 function hMappingDraw(_mapdiv_id, _initial_wkt) {
     const _className = "MappingDraw",
     _version   = "0.4";
 
-    var mapdiv_id = null;
+    let mapdiv_id = null;
 
-    var drawingManager;
-    var selectedShape;
-    var colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
-    var selectedColor;
-    var colorButtons = {};
-    var gmap;
-    var initial_wkt = null;
-    var deleteMenu;
-    var overlays = []; //all objects on map
-    var geocoder = null;
-    var map_viewpoints = []; //saved in user preferences (session) map viewpoints (bounds)
-    var map_overlays = [];   //array of kml, tiled and images layers (from db)
-    var _current_overlay = null;
+    let drawingManager;
+    let selectedShape;
+    let colors = ['#1E90FF', '#FF1493', '#32CD32', '#FF8C00', '#4B0082'];
+    let selectedColor;
+    let colorButtons = {};
+    let gmap;
+    let initial_wkt = null;
+    let deleteMenu;
+    let overlays = []; //all objects on map
+    let geocoder = null;
+    let map_viewpoints = []; //saved in user preferences (session) map viewpoints (bounds)
+    let map_overlays = [];   //array of kml, tiled and images layers (from db)
+    let _current_overlay = null;
 
     function clearSelection() {
         if (selectedShape) {
@@ -49,11 +50,11 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     
     function showCoordsHint(){
         
-        var type = drawingManager.getDrawingMode();
+        let type = drawingManager.getDrawingMode();
         if (selectedShape!=null) {
             type = selectedShape.type;
         }
-        var sPrompt = '';
+        let sPrompt = '';
         if(type==google.maps.drawing.OverlayType.MARKER){
             sPrompt = 'Marker: enter coordinates as: lat long';
         }else if(type==google.maps.drawing.OverlayType.CIRCLE){
@@ -78,7 +79,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
     function _deleteSelectedShape() {
         if (selectedShape) {
-            for(i in overlays){
+            for(let i in overlays){
                 if(overlays[i]==selectedShape){
                     overlays.splice(i,1);
                     break;
@@ -105,26 +106,26 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function selectColor(color) {
         selectedColor = color;
-        for (var i = 0; i < colors.length; ++i) {
-            var currColor = colors[i];
+        for (let i = 0; i < colors.length; ++i) {
+            let currColor = colors[i];
             colorButtons[currColor].style.border = currColor == color ? '2px solid #789' : '2px solid #fff';
         }
 
         // Retrieves the current options from the drawing manager and replaces the
         // stroke or fill color as appropriate.
-        var polylineOptions = drawingManager.get('polylineOptions');
+        let polylineOptions = drawingManager.get('polylineOptions');
         polylineOptions.strokeColor = color;
         drawingManager.set('polylineOptions', polylineOptions);
 
-        var rectangleOptions = drawingManager.get('rectangleOptions');
+        let rectangleOptions = drawingManager.get('rectangleOptions');
         rectangleOptions.fillColor = color;
         drawingManager.set('rectangleOptions', rectangleOptions);
 
-        var circleOptions = drawingManager.get('circleOptions');
+        let circleOptions = drawingManager.get('circleOptions');
         circleOptions.fillColor = color;
         drawingManager.set('circleOptions', circleOptions);
 
-        var polygonOptions = drawingManager.get('polygonOptions');
+        let polygonOptions = drawingManager.get('polygonOptions');
         polygonOptions.fillColor = color;
         drawingManager.set('polygonOptions', polygonOptions);
     }
@@ -141,7 +142,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     }
 
     function makeColorButton(color) {
-        var button = document.createElement('span');
+        let button = document.createElement('span');
         button.className = 'color-button';
         button.style.backgroundColor = color;
         google.maps.event.addDomListener(button, 'click', function() {
@@ -153,10 +154,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     }
 
     function buildColorPalette() {
-        var colorPalette = document.getElementById('color-palette');
-        for (var i = 0; i < colors.length; ++i) {
-            var currColor = colors[i];
-            var colorButton = makeColorButton(currColor);
+        let colorPalette = document.getElementById('color-palette');
+        for (let i = 0; i < colors.length; ++i) {
+            let currColor = colors[i];
+            let colorButton = makeColorButton(currColor);
             colorPalette.appendChild(colorButton);
             colorButtons[currColor] = colorButton;
         }
@@ -180,12 +181,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     }, shape);
             }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE){
 
-                var bnd = shape.getBounds();
+                let bnd = shape.getBounds();
                 sCoords = formatPnt(bnd.getSouthWest()) + '\n' + formatPnt(bnd.getNorthEast());  
 
             }else if(shape.type==google.maps.drawing.OverlayType.CIRCLE){
 
-                var radius = shape.getRadius();
+                let radius = shape.getRadius();
                 if(radius>0)
                     sCoords = formatPnt(shape.getCenter())+'\nr='+radius.toFixed(2);
 
@@ -202,7 +203,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _getWKT(shape){
 
-        var res = {type:null, wkt:null};
+        let res = {type:null, wkt:null};
 
         if(shape!=null){
 
@@ -232,8 +233,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                 var bnd = shape.getBounds();
                 var aCoords = [];
-                var sw = bnd.getSouthWest();
-                var nw = bnd.getNorthEast();
+                let sw = bnd.getSouthWest();
+                let nw = bnd.getNorthEast();
 
                 aCoords.push(formatPntWKT(sw));  
                 aCoords.push(formatPntWKT( new google.maps.LatLng(nw.lat(), sw.lng()) ));  
@@ -292,7 +293,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     function _onPathComplete(shape) {
 
         // complete functions
-        var thePath = shape.getPath();
+        let thePath = shape.getPath();
 
         google.maps.event.addListener(shape, 'rightclick', function(e) {
             // Check if click was on a vertex control point
@@ -374,7 +375,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         _init_DeleteMenu();
  
-        var map = new google.maps.Map(document.getElementById(mapdiv_id), {
+        let map = new google.maps.Map(document.getElementById(mapdiv_id), {
             mapId: "cb51443861458fd0", // Map ID is required for advanced markers.
             zoom: 2,
             center: new google.maps.LatLng(31.2890625, 5), //22.344, 114.048),
@@ -407,17 +408,17 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function formatPnt(pnt, d){
         if(isNaN(d)) d = 7;
-        var lat = pnt.lat();
+        let lat = pnt.lat();
         lat = lat.toFixed(d);
-        var lng = pnt.lng();
+        let lng = pnt.lng();
         lng = lng.toFixed(d);
         return lat + ' ' + lng;               
     }
     function formatPntWKT(pnt, d){
         if(isNaN(d)) d = 7;
-        var lat = pnt.lat();
+        let lat = pnt.lat();
         lat = lat.toFixed(d);
-        var lng = pnt.lng();
+        let lng = pnt.lng();
         lng = lng.toFixed(d);
         return lng + ' ' + lat;               
     }
@@ -430,7 +431,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             geocoder = new google.maps.Geocoder();
         }
 
-        var address = document.getElementById("input_search").value;
+        let address = document.getElementById("input_search").value;
 
         geocoder.geocode( { 'address': address}, function(results, status) {
 
@@ -457,8 +458,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _zoomToSelection() {
 
-        var bounds = null;
-        var shape = selectedShape;
+        let bounds = null;
+        let shape = selectedShape;
         if(shape!=null){
             if(shape.type==google.maps.drawing.OverlayType.POLYGON || 
                 shape.type==google.maps.drawing.OverlayType.POLYLINE) {
@@ -494,7 +495,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _applyCoordsForSelectedShape(){
 
-        var type = drawingManager.getDrawingMode();
+        let type = drawingManager.getDrawingMode();
 
         if (selectedShape!=null) {
             type = selectedShape.type;
@@ -504,7 +505,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             return;
         }
 
-        var sCoords = $("#coords1").val();
+        let sCoords = $("#coords1").val();
         _parseManualEntry(sCoords, type);
     }
 
@@ -521,13 +522,13 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         dist = dist / 6371000;
         brng = brng.toRad();
 
-        var lat1 = latLong.lat.toRad();
-        var lon1 = latLong.lng.toRad();
+        let lat1 = latLong.lat.toRad();
+        let lon1 = latLong.lng.toRad();
 
-        var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
+        let lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
             Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
 
-        var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
+        let lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
             Math.cos(lat1),
             Math.cos(dist) - Math.sin(lat1) *
             Math.sin(lat2));
@@ -541,14 +542,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     //
     function _getDistance(latLong1, latLong2) {
-        var R = 6371000; // earth's radius in meters
-        var dLat = (latLong2.lat-latLong1.lat).toRad(); //* Math.PI / 180;
-        var dLon = (latLong2.lng-latLong1.lng).toRad(); //* Math.PI / 180;
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        let R = 6371000; // earth's radius in meters
+        let dLat = (latLong2.lat-latLong1.lat).toRad(); //* Math.PI / 180;
+        let dLon = (latLong2.lng-latLong1.lng).toRad(); //* Math.PI / 180;
+        let a = Math.sin(dLat/2) * Math.sin(dLat/2) +
         Math.cos(latLong1.lat.toRad() ) * Math.cos(latLong2.lat.toRad() ) *
         Math.sin(dLon/2) * Math.sin(dLon/2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        var d = R * c;
+        let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        let d = R * c;
         return d;
     }    
 
@@ -557,17 +558,17 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //        
     function _parseManualEntry(sCoords, type, UTMzone){
 
-        var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //remove invisible service chars
+        let s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //remove invisible service chars
         s = s.replace("  "," ").trim();
-        var arc = s.split(" ");  
-        var coords = []; //Array of LatLngLiteral
+        let arc = s.split(" ");  
+        let coords = []; //Array of LatLngLiteral
         
-        var islat = false, k;
-        var hemisphere = 'N';        
+        let islat = false, k;
+        let hemisphere = 'N';        
         
         if(window.hWin.HEURIST4.util.isnull(UTMzone)){
             
-            var allInteger = true, allOutWGS = true;
+            let allInteger = true, allOutWGS = true;
             //check for UTM - assume they are integer and at least several are more than 180
             for (k=0; k<arc.length; k++){
                 
@@ -586,13 +587,13 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
             if(allInteger || allOutWGS){ //offer to convert UTM to LatLong
 
-                var $ddlg, buttons = {};
+                let $ddlg, buttons = {};
                 buttons['Yes, UTM'] = function(){ 
                     
-                    var UTMzone = $ddlg.find('#dlg-prompt-value').val();
+                    let UTMzone = $ddlg.find('#dlg-prompt-value').val();
                     if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
-                            var re = /s|n/gi;
-                            var zone = parseInt(UTMzone.replace(re,''));
+                            let re = /s|n/gi;
+                            let zone = parseInt(UTMzone.replace(re,''));
                             if(isNaN(zone) || zone<1 || zone>60){
                                 setTimeout('alert("UTM zone must be within range 1-60");',500);
                                 return false;
@@ -626,7 +627,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             if(UTMzone.toLowerCase().indexOf('s')>=0){
                 hemisphere = 'S';
             }
-            var re = /s|n/gi;
+            let re = /s|n/gi;
             UTMzone = parseInt(UTMzone.replace(re,''));
             if(isNaN(UTMzone) || UTMzone<1 || UTMzone>60){
                 setTimeout("alert('UTM zone must be within range 1-60')",500);
@@ -641,13 +642,13 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
             //special case for circle
             if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE && arc[k].indexOf("r=")==0){
-                var d = Number(arc[k].substr(2));
+                let d = Number(arc[k].substr(2));
                 if(isNaN(d)){
                     alert(arc[k]+" is wrong radius value");
                     return null;
                 }
 
-                var resc = _destinationPoint(coords[0], 90, d);
+                let resc = _destinationPoint(coords[0], 90, d);
                 if(resc!=null){
                     coords.push({radius:d});
                 }else{
@@ -674,8 +675,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     easting = Number(arc[k-1]);
                     northing = crd;
                     
-                    var utm = new Utm( UTMzone, hemisphere, easting, northing );
-                    var latlon = utm.toLatLonE();
+                    let utm = new Utm( UTMzone, hemisphere, easting, northing );
+                    let latlon = utm.toLatLonE();
                     coords.push({lat:latlon.lat, lng:latlon.lon});    
                 }else{
                     coords.push({lat:Number(arc[k-1]), lng:crd});    
@@ -684,7 +685,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 
         }//for
 
-        var res = _loadShape(coords, type);
+        let res = _loadShape(coords, type);
         if(res && selectedShape!=null){
             _zoomToSelection();
         }
@@ -695,7 +696,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //coords  Array of LatLngLiteral
     function _loadShape(coords, type){
 
-        var res = false;  
+        let res = false;  
 
         if (coords && coords.length>0){
             if(type==google.maps.drawing.OverlayType.POLYGON){
@@ -761,7 +762,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     alert("Not enough coordinates for rectangle. Need at least 2 pairs");
                 }else{
 
-                    var bounds = {south:coords[0].lat, west:coords[0].lng,  north:coords[1].lat, east:coords[1].lng };
+                    let bounds = {south:coords[0].lat, west:coords[0].lng,  north:coords[1].lat, east:coords[1].lng };
 
                     if (selectedShape) {
                         selectedShape.setBounds( bounds );
@@ -784,7 +785,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     alert("Not enough coordinates for circle. Need at least 2 pairs or center and radius");
                 }else{
 
-                    var radius = (coords[1].radius>0)
+                    let radius = (coords[1].radius>0)
                     ?coords[1].radius
                     :_getDistance(coords[0], coords[1]) ;
 
@@ -835,10 +836,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         //GeometryCollection.geometries[{type: ,coordinates: },...]
 
         
-        var ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon'];
+        let ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon'];
         
         if(mdata.type == 'FeatureCollection'){
-            var k = 0;
+            let k = 0;
             for (k=0; k<mdata.features.length; k++){
                 _loadGeoJSON(mdata.features[k]); //another collection or feature
             }
@@ -849,7 +850,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 if($.isEmptyObject(geometry)){
 
                 }else if(geometry.type=="GeometryCollection"){
-                    var l;
+                    let l;
                     for (l=0; l<geometry.geometries.length; l++){
                         _loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
                     }
@@ -867,7 +868,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                             shapes.push([{lat:coords[1], lng:coords[0]}]);
                         }else if(_isvalid_pnt(coords[0])){
                             //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
-                            var shape = [], m;
+                            let shape = [], m;
                             for (m=0; m<coords.length; m++){
                                 pnt = coords[m];
                                 if(_isvalid_pnt(pnt)){
@@ -876,7 +877,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                             }
                             shapes.push(shape);
                         }else{
-                            var n;
+                            let n;
                             for (n=0; n<coords.length; n++){
                                 if($.isArray(coords[n]))
                                     _extractCoords(shapes, coords[n]);
@@ -884,12 +885,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         }
                     }
 
-                    var shapes = [];
+                    let shapes = [];
                     _extractCoords(shapes, geometry.coordinates);
 
                     if(shapes.length>0){
 
-                        var type = null;
+                        let type = null;
 
                         if( geometry.type=="Point" || 
                             geometry.type=="MultiPoint"){
@@ -902,7 +903,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                                     type = google.maps.drawing.OverlayType.POLYGON;
                                 }       
                         if(type!=null){
-                            var i;
+                            let i;
                             for (i=0; i<shapes.length; i++){
                                 clearSelection();          
                                 _loadShape(shapes[i], type);   
@@ -928,10 +929,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _getGeoJSON(){
 
-        var k, points=[], polylines=[], polygones=[];
+        let k, points=[], polylines=[], polygones=[];
         for (k=0; k<overlays.length; k++){
 
-            var shape = overlays[k];
+            let shape = overlays[k];
 
             if(shape!=null){
                 coords = [];
@@ -955,8 +956,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                 }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE){
 
-                    var bnd = shape.getBounds();
-                    var pnt1 = bnd.getSouthWest(),
+                    let bnd = shape.getBounds();
+                    let pnt1 = bnd.getSouthWest(),
                     pnt2 = bnd.getNorthEast();  
 
                     coords = [[pnt1.lng(), pnt1.lat()],[pnt1.lng(), pnt2.lat()],
@@ -967,12 +968,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 }else if(shape.type==google.maps.drawing.OverlayType.CIRCLE){
 
                     var latLng = shape.getCenter()
-                    var radius = shape.getRadius();
+                    let radius = shape.getRadius();
 
-                    var degreeStep = 360 / 40;
+                    let degreeStep = 360 / 40;
 
-                    for(var i = 0; i < 40; i++){
-                        var gpos = google.maps.geometry.spherical.computeOffset(latLng, radius, degreeStep * i);
+                    for(let i = 0; i < 40; i++){
+                        let gpos = google.maps.geometry.spherical.computeOffset(latLng, radius, degreeStep * i);
                         coords.push([gpos.lng(), gpos.lat()]);
                     };    
                     coords.push(coords[0])                    
@@ -995,7 +996,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
         }//for overlays
 
-        var geometries = [];    
+        let geometries = [];    
 
         if(points.length==1){
             geometries.push({type: "Point", coordinates: points[0]});
@@ -1013,7 +1014,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             geometries.push({type: "MultiPolygon", coordinates: polygones});   
         }
         
-        var res = {};
+        let res = {};
         if(geometries.length>0){
 
             //avoid FeatureCollection - stringifyWKT does not support it
@@ -1054,7 +1055,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         $('#input_search')
         .on('keypress',
             function(e){
-                var code = (e.keyCode ? e.keyCode : e.which);
+                let code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
@@ -1068,16 +1069,16 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         
         //get overlay layers (image,tiled,kml) ------------------------------------
-        var $sel_overlays = $('#sel_overlays');
+        let $sel_overlays = $('#sel_overlays');
 
         $sel_overlays.change(function(){
-            var rec_ID = $sel_overlays.val();
+            let rec_ID = $sel_overlays.val();
             _addOverlay(rec_ID);
             window.hWin.HAPI4.save_pref('map_overlay_sel', rec_ID);                
         });
         
         //get save bounds (viewpoints) ------------------------------------
-        var $sel_viepoints = $('#sel_viewpoints');
+        let $sel_viepoints = $('#sel_viewpoints');
 
         map_viewpoints = window.hWin.HAPI4.get_prefs('map_viewpoints');
 
@@ -1095,7 +1096,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         window.hWin.HEURIST4.ui.createSelector( $sel_viepoints.get(0), map_viewpoints);
 
         $sel_viepoints.click(function(){
-            var bounds = $(this).val();
+            let bounds = $(this).val();
             if(bounds!=''){
                 //get LatLngBounds from urlvalue lat_lo,lng_lo,lat_hi,lng_hi
                 bounds = bounds.split(',');
@@ -1113,7 +1114,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         .button({label: window.hWin.HR("Delete selected extent"), showLabel:false, icon:"ui-icon-close"})
         .css({'font-size':'0.9em'})
         .click(function(){
-            var selval = $sel_viepoints.val();
+            let selval = $sel_viepoints.val();
             if(selval!=''){
                 // remove from preferences
                 $.each(map_viewpoints, function(index, item){
@@ -1143,7 +1144,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     if($.isEmptyObject(map_viewpoints) || map_viewpoints.length<2){
                         map_viewpoints = [{key:'',title:'select...'}];   
                     }
-                    var not_found = true;
+                    let not_found = true;
                     $.each(map_viewpoints, function(idx, item){
                         if(item.title == location_name){ //we already have such name
                             map_viewpoints[idx].key = gmap.getBounds().toUrlValue();
@@ -1172,11 +1173,11 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         $('#load-geometry-button').button().click(function(){
 
-            var titleYes = window.hWin.HR('Yes'),
+            let titleYes = window.hWin.HR('Yes'),
             titleNo = window.hWin.HR('No'),
             buttons = {};
             
-            var $dlg;
+            let $dlg;
 
             buttons[titleYes] = function() {
                 _loadGeoJSON( $dlg.find('#geodata_textarea').val() );
@@ -1200,7 +1201,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
             $('#geodata_textarea').val(JSON.stringify(_getGeoJSON()));    
 
-            var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
+            let $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                 element: document.getElementById( "get-set-coordinates" ),
                 resizable: false,
                 width:690, height:400,
@@ -1219,7 +1220,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             
             if(!$('#cbAllowMulti').is(':checked') && overlays.length>1){
                 
-                var $ddlg, buttons = {};
+                let $ddlg, buttons = {};
                 buttons['Continue'] = function(){ 
                     _deleteAllShapes( true );  
                     $ddlg.dialog('close'); 
@@ -1234,15 +1235,15 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 return;
             } 
             
-            var gjson = _getGeoJSON();
+            let gjson = _getGeoJSON();
             if($.isEmptyObject(gjson)){
                 window.hWin.HEURIST4.msg.showMsgDlg('You have to draw a shape');    
             }else{
-                var res = stringifyWKT(gjson);
+                let res = stringifyWKT(gjson);
                 _saveExtentOnExit();
                 
                 //type code is not required for new code. this is for backward capability
-                var typeCode = 'm';
+                let typeCode = 'm';
                 if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
                     if(res.indexOf('LINESTRING')>=0){
                         typeCode = 'l';
@@ -1277,7 +1278,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     //
     function _loadSavedExtentOnInit(){
-        var bounds = window.hWin.HAPI4.get_prefs('map_viewpoint_last');
+        let bounds = window.hWin.HAPI4.get_prefs('map_viewpoint_last');
         if(!window.hWin.HEURIST4.util.isempty(bounds)){          
                 bounds = bounds.split(',');
                 gmap.fitBounds({south:Number(bounds[0]), west:Number(bounds[1]),
@@ -1294,7 +1295,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
     function _onMapInited(){
 
-        var polyOptions = {
+        let polyOptions = {
             strokeWeight: 0,
             fillOpacity: 0.45,
             editable: true
@@ -1327,7 +1328,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         google.maps.event.addListener(drawingManager, 'rectanglecomplete', _onRectangleComplete);        
 
         google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
-            var newShape = e.overlay;
+            let newShape = e.overlay;
             newShape.type = e.type;
 
             if (e.type != google.maps.drawing.OverlayType.MARKER) {
@@ -1348,7 +1349,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }); 
         google.maps.event.addListener(gmap, 'click', clearSelection);
         google.maps.event.addListener(gmap, 'mousemove', function (event) {
-            var pnt = event.latLng;
+            let pnt = event.latLng;
             $('#coords2').text(formatPnt(pnt,5));
         });        
 
@@ -1388,18 +1389,18 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         
         
         //load overlays from server        
-        var rts2 = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
+        let rts2 = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
                    //window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE'],
                    window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']];
-        var rts = [];
-        for(var k=0; k<rts2.length-1; k++)
+        let rts = [];
+        for(let k=0; k<rts2.length-1; k++)
         if(rts2[k]>0){
             rts.push(rts2[k]);
         }
         
         if(rts.length>0){
         
-            var request = { q: {"t":rts.join(',')},
+            let request = { q: {"t":rts.join(',')},
                 w: 'a',
                 detail: 'header',
                 source: 'sel_overlays'};
@@ -1408,7 +1409,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             window.hWin.HAPI4.RecordMgr.search(request, function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var resdata = new HRecordSet(response.data);
+                    let resdata = new HRecordSet(response.data);
 
                         map_overlays = [];
 
@@ -1416,12 +1417,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                            map_overlays.push({key:0, title:'select...'}); 
                         }
                         
-                        var idx, records = resdata.getRecords();
+                        let idx, records = resdata.getRecords();
                         for(idx in records){
                             if(idx)
                             {
-                                var record = records[idx];
-                                var recID  = resdata.fld(record, 'rec_ID'),
+                                let record = records[idx];
+                                let recID  = resdata.fld(record, 'rec_ID'),
                                 recName = resdata.fld(record, 'rec_Title');
 
                                 map_overlays.push({key:recID, title:recName});
@@ -1429,11 +1430,11 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         }//for
                         
                        
-                        var $sel_overlays = $('#sel_overlays');
+                        let $sel_overlays = $('#sel_overlays');
                         window.hWin.HEURIST4.ui.createSelector( $sel_overlays.get(0),
                             $.isEmptyObject(map_overlays)?window.hWin.HR('none defined'): map_overlays);
 
-                       var map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
+                       let map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
                        if(map_overlay_sel>0) {
                            $sel_overlays.val(map_overlay_sel);   
                            $sel_overlays.change();
@@ -1464,10 +1465,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         var type = matches[1];
         var value = matches[2];*/
         
-        var resdata = window.hWin.HEURIST4.geo.wktValueToShapes( wkt, null, 'google' );
+        let resdata = window.hWin.HEURIST4.geo.wktValueToShapes( wkt, null, 'google' );
                   
         type = google.maps.drawing.OverlayType.MARKER;
-        var i;
+        let i;
         for (i=0; i<resdata.Point.length; i++){
             shape = resdata.Point[i];
             selectedShape = null;//to avoid clear
@@ -1487,9 +1488,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
         
         //zoom to full extent
-        var sw = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
-        var ne = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
-        var bounds = new google.maps.LatLngBounds(sw, ne);
+        let sw = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
+        let ne = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
+        let bounds = new google.maps.LatLngBounds(sw, ne);
         if( Math.abs(ne.lat()-sw.lat())<0.06 && Math.abs(ne.lng()-sw.lng())<0.06 ){
             gmap.setCenter(bounds.getCenter()); 
             gmap.setZoom(14);      
@@ -1514,14 +1515,14 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             val = decodeURIComponent(document.location.search);
         }
 
-        var matches = val.match(/\??(\S+)\s+(.*)/);
+        let matches = val.match(/\??(\S+)\s+(.*)/);
         if (! matches) {
             return;
         }
-        var type = matches[1];
-        var value = matches[2];
-        var mode = null;
-        var sCoords = '';
+        let type = matches[1];
+        let value = matches[2];
+        let mode = null;
+        let sCoords = '';
 
         switch (type) {
             case "p":
@@ -1599,7 +1600,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         
         if(!(rec_ID>0)) return;
         
-        var that = this;
+        let that = this;
         
         /*
         var request = {'a': 'search',
@@ -1610,7 +1611,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         */
-        var request = { q: {"ids":rec_ID},
+        let request = { q: {"ids":rec_ID},
             w: 'a',
             detail: 'detail',
             source: 'sel_overlays'};
@@ -1618,8 +1619,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         //perform search
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var recordset = new HRecordSet(response.data);
-                    var record = recordset.getFirstRecord();
+                    let recordset = new HRecordSet(response.data);
+                    let record = recordset.getFirstRecord();
                     _current_overlay = new hMapLayer({gmap:gmap, recordset:recordset});
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1646,7 +1647,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -1674,7 +1675,7 @@ function DeleteMenu() {
     this.div_.className = 'delete-menu';
     this.div_.innerHTML = 'Delete';
 
-    var menu = this;
+    let menu = this;
     google.maps.event.addDomListener(this.div_, 'click', function() {
         menu.removeVertex();
     });
@@ -1688,8 +1689,8 @@ function _init_DeleteMenu(){
 DeleteMenu.prototype = new google.maps.OverlayView();
 
 DeleteMenu.prototype.onAdd = function() {
-    var deleteMenu = this;
-    var map = this.getMap();
+    let deleteMenu = this;
+    let map = this.getMap();
     this.getPanes().floatPane.appendChild(this.div_);
 
     // mousedown anywhere on the map except on the menu div will close the
@@ -1716,14 +1717,14 @@ DeleteMenu.prototype.close = function() {
 };
 
 DeleteMenu.prototype.draw = function() {
-    var position = this.get('position');
-    var projection = this.getProjection();
+    let position = this.get('position');
+    let projection = this.getProjection();
 
     if (!position || !projection) {
         return;
     }
 
-    var point = projection.fromLatLngToDivPixel(position);
+    let point = projection.fromLatLngToDivPixel(position);
     this.div_.style.top = point.y + 'px';
     this.div_.style.left = point.x + 'px';
 };
@@ -1747,8 +1748,8 @@ DeleteMenu.prototype.open = function(map, path, vertex) {
 * Deletes the vertex from the path.
 */
 DeleteMenu.prototype.removeVertex = function() {
-    var path = this.get('path');
-    var vertex = this.get('vertex');
+    let path = this.get('path');
+    let vertex = this.get('vertex');
 
     if (!path || vertex == undefined) {
         this.close();
