@@ -2635,10 +2635,10 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                         $allowed = array('src','class','style','href');
                         $allowed2 = implode('=|',$allowed).'=';
                         $allowed = implode('|',$allowed);
-$dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)\s*(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
+$dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
                      .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
                      .')=[\'"][^\'"]*[\'"]\s*)?)(?:(?:(?:(?!'.$allowed2.')[^>]))*((?:'.$allowed
-                     .')=[\'"][^\'"]*[\'"]\s*)?)[^>]*>#si','<$1 $2$3$4>',$dtl_Value);
+                     .')=[\'"][^\'"]*[\'"]\s*)?)[^>]*>#si','<$1$2$3$4$5>',$dtl_Value);
                         }
                         
                     }
