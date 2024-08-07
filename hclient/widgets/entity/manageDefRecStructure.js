@@ -95,8 +95,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'<button id="download_structure">Export fields as CSV</button>'
                         +'<button id="field_usage">Calculate usage</button>'
                     +'</div>'
-                    +'<span id="field_ttl_usage" title="Count of values in each field for this record type (n = '+ $Db.rty(this.options.rty_ID, 'rty_RecCount') +')"'
-                        +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;cursor:default;font-weight:bold;cursor:pointer;">Count'
+                    +`<span id="field_ttl_usage" title="Count of values in each field for this record type (n = ${$Db.rty(this.options.rty_ID, 'rty_RecCount')})"`
+                        +'style="display: inline-block;position:absolute;right:8px;padding-top:5px;font-weight:bold;cursor:pointer;text-decoration:underline;">Count'
                     +'</span>'
                     +'<div class="treeView" style="margin:12px -10px 0 -10px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="display:none;padding:5px;">EDITOR</div>'
@@ -608,7 +608,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 that.__defineActionIcons(item);
             });
 
-            if(that._calculated_usages || $Db.rty(that.options.rty_ID, 'rty_RecCount') < 2000){ // trigger usage calculations
+            if(that._calculated_usages || $Db.rty(that.options.rty_ID, 'rty_RecCount') <= 50000){ // trigger usage calculations
                 that.element.find('#field_usage').click();
             }
         }, delay);
@@ -1009,12 +1009,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 rst_ID = rst_ID.split('.')[1];
             }
 
-            let display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' && $Db.dty(rst_ID, 'dty_Type') != 'relmarker' ? 'inline-block' : 'none'; // relmarkers cannot be batch deleted
+            let display = window.hWin.HAPI4.is_admin() && $Db.dty(rst_ID, 'dty_Type') != 'separator' && $Db.dty(rst_ID, 'dty_Type') != 'relmarker' && this._calculated_usages[rst_ID] > 0
+                            ? 'inline-block' : 'none'; // relmarkers cannot be batch deleted
 
             let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete field "<b>'
-                + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
-                +'"</b> from this record type?<br><br><span style="display:'+display+';">Permanently delete the data from this field (applies to this record type only)? <input type="checkbox" id="delData" /></span>', 
+                'Are you sure you wish to delete field "'
+                +`<strong>${window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))}</strong>`
+                +'"</b> from this record type?<br><br>'
+                +`<span style="display:${display};">`
+                    +`<div>Permanently delete the data (${this._calculated_usages[rst_ID]} values) from this field<br>(applies to this record type only)?<div> <input type="checkbox" id="delData" />`
+                +'</span>',
                 {
                     'Proceed': function(){ 
                         let delData = display != 'none' && $dlg.find('#delData').is(':checked') ? 1 : 0; 
@@ -3196,8 +3200,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let count = dtyid && that._calculated_usages[dtyid] 
                 && parseInt(that._calculated_usages[dtyid]) > 0 ? parseInt(that._calculated_usages[dtyid]) : 0;
 
+            that._calculated_usages[dtyid] = count;
+
             if(count > 0){
-                let count = that._calculated_usages[dtyid];
                 $div.find('span:first-child').text(count);
 
                 if($div.find('.ui-icon').length == 0){
