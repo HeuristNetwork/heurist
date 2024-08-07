@@ -1969,6 +1969,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // see initialLoadDatabaseDefintions 
             //
             relevanceEntityData: function (callback) {
+                
                 if(entity_timestamp>0){
                     window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
                 }else if (window.hWin.HEURIST4.util.isFunction(callback)) {
@@ -1995,9 +1996,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }*/
                 
                 let s_time = new Date().getTime() / 1000;
-                //'multi':1,  
-//[domain]/h6-alpha/hserv/controller/entityScrud.php?db=[database]&a=structure&entity=all                
-
                 if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
                 _msgOnRefreshEntityData = setTimeout(function(){
                     window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false);
@@ -2012,8 +2010,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         window.hWin.HEURIST4.msg.closeMsgFlash();
                         
                         if (response && response['uptodate']) { //relevance db definitions
-                            
-                            //console.log('definitions are up to date');
+                            //definitions are up to date
                             if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
                         }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
@@ -2096,9 +2093,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             setEntityData: function (entityName, data) {
                 
                 if(entityName=='timestamp'){ 
-                    
                     entity_timestamp = Number(data[entityName]); //db structure cache file last update time
-                    //console.log('entity_timestamp: ', entity_timestamp)
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;

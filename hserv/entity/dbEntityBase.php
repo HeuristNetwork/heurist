@@ -425,8 +425,11 @@ abstract class DbEntityBase
             }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
                 //special and batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
-                if($res){
-                    $this->_cleanDbDefCache();
+                if($res &&
+                    !(@$this->data['get_translations'] ||
+                    in_array($this->config['entityName'],'defRecTypes','defDetailTypes','defTerms','defRecTypes')))
+                {
+                        $this->_cleanDbDefCache();    
                 }
             }else {
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

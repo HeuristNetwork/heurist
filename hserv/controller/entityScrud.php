@@ -120,8 +120,6 @@ if (@$argv) {
                     }else{
                         $system_init_failed = true;
                     }
-                    
-                    
                 }
                     
                 if($dbdef_cache_is_uptodate){    
