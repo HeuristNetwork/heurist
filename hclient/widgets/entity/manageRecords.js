@@ -126,8 +126,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         this.options.editClassName = 'recordEditor';
-
-        this.getUiPreferences();
         
         this._super();
         
@@ -661,6 +659,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _initControls: function() {
 
+        this.getUiPreferences();
 
         let reset_to_defs = !this.options.resultList || !this.options.resultList.searchfull;
         
@@ -1172,7 +1171,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                this.editFormSummary = null;
             }else
             //summary tab - specific for records only    
-            if(this.editFormSummary && this.editFormSummary.length>0){    
+            if(this.editFormSummary && this.editFormSummary.length>0){
                 let layout_opts =  {
                     applyDefaultStyles: true,
                     //togglerContent_open:    '&nbsp;',
@@ -2984,6 +2983,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let cur_record = that._currentEditRecordset.getFirstRecord();
             let rty_ConceptCode = $Db.getConceptID('rty', this._currentEditRecTypeID);
 
+            let $temp = $('<div>').appendTo(this.editForm);
+            $temp.css({
+                'display': 'inline-block',
+                'width': '1ch',
+                'visibility': 'hidden'
+            });
+            let px_width = $temp.width();
+            let px_max = px_width * 50 + 50;// Max of 50 characters
+            let new_struct_width = this.usrPreferences.structure_width;
+            let char_count = 0;
+            $temp.remove();
+
             for(let k=0; k<s_fields.length; k++){
 
                 let dtFields = that._prepareFieldForEditor( s_fields[k] );
@@ -3060,7 +3071,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                         check_for_errors.push(dtFields['dt_ID']);
                     }
                 }
+
+                if(new_struct_width < px_max && char_count < dtFields['rst_DisplayName'].length){
+                    new_struct_width = (dtFields['rst_DisplayName'].length > 50 ? 50 : dtFields['rst_DisplayName'].length) * px_width + 50;
+                    char_count = dtFields['rst_DisplayName'].length;
+                }
             }//for s_fields
+
+            //adjust west panel size
+            if(this.usrPreferences.structure_width <= new_struct_width && Object.hasOwn(this.editFormPopup.layout(), 'west')){
+                this.editFormPopup.layout().sizePane('west', new_struct_width);
+                this.usrPreferences.structure_width = new_struct_width;
+            }
 
             //add children to last group
             if(group_fields!=null){
@@ -3340,6 +3362,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 $input.css('min-width', '');
                             }
                         });
+                    }else if(ui.newPanel && that.options.rts_editor != undefined && ui.newPanel.find('div[data-dtid]:first').length > 0){
+                        let dty_id = ui.newPanel.find('div[data-dtid]:first').attr('data-dtid');
+                        that.options.rts_editor.manageDefRecStructure('highlightNode', dty_id);
                     }
                 });
             }
@@ -6834,7 +6859,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 let concept_code = that._source_def.typedefs[source_rty_id].dtFields[dty_ID][dty_cc_idx];
                 let local_code = $Db.getLocalID('dty', concept_code);
 
-                if(local_code == 0 || !Object.hasOwn(current_fields, local_code)){ //DEBUG console.log(that._source_def.typedefs[source_rty_id].dtFields[dty_ID]);
+                if(local_code == 0 || !Object.hasOwn(current_fields, local_code)){
                     missing_field = true;
                     break;
                 }
