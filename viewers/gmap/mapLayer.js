@@ -18,6 +18,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global google */
+
 /**
 *  Represents the layer on map
 */
@@ -197,11 +199,12 @@ function hMapLayer( _options ) {
         
         let fileID = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
         let kmlSnippet = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_KML']);
+        let fileURL = null;
 
         // KML file
         if(!window.hWin.HEURIST4.util.isnull(fileID)) {
 
-            var fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
+            fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
             
             // note google refuses kml from localhost
             // Display on Google Maps

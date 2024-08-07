@@ -20,11 +20,12 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global L, hMapDocument */
 
 L.Control.Manager = L.Control.extend({
     onAdd: function(map) {
         
-        var container = this._container = L.DomUtil.create('div','leaflet-bar');
+        let container = this._container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)
@@ -72,7 +73,7 @@ L.Control.Addmapdoc = L.Control.extend({
         
         //if ( !$.isFunction($('body').hMapPublish) ) return;
         
-        var container = L.DomUtil.create('div','leaflet-bar');
+        let container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)
@@ -119,7 +120,14 @@ L.control.addmapdoc = function(opts) {
 function hMapManager( _options )
 {    
     const _className = "MapManager",
-    _version   = "0.4";
+    _version   = "0.4",
+
+    DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
+    DT_LEGEND_OUT_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_LEGEND_OUT_ZOOM'],
+    TRM_LEGEND_OUT_ZOOM_HIDDEN =  window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_HIDDEN'],
+    TRM_LEGEND_OUT_ZOOM_DISABLED = window.hWin.HAPI4.sysinfo['dbconst']['TRM_LEGEND_OUT_ZOOM_DISABLED'];
+    
+
 
     let options = {
         container: null,  
@@ -203,7 +211,7 @@ function hMapManager( _options )
                 
         
         //restore expand/collapse status
-        var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
+        let keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
         if(keep_status){
             keep_status = window.hWin.HEURIST4.util.isJSON(keep_status);   
         }
@@ -212,11 +220,11 @@ function hMapManager( _options )
         }
         
         //init list of accordions
-        var cdivs = options.container.find('.svs-acordeon');
+        let cdivs = options.container.find('.svs-acordeon');
         $.each(cdivs, function(i, cdiv){
 
             cdiv = $(cdiv);
-            var groupid = cdiv.attr('grpid');
+            let groupid = cdiv.attr('grpid');
             cdiv.accordion({
                 active: ( ( keep_status && keep_status[ groupid ] )?0:false),
                 header: "> h3",
@@ -265,23 +273,17 @@ function hMapManager( _options )
     //    
     function _defineHeader(name, domain){
 
-        var sIcon = '';
+        let sIcon = '';
         //<span class="ui-icon ui-icon-'+sIcon+'" ' + 'style="display:inline-block;padding:0 4px"></span>
         
-        var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span>'
+        let $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span>'
             + window.hWin.HR(name) + '</span></h3>')
             .addClass('tree-accordeon-header outline_suppress svs-header');
 
-        /*    
-        if('dbs'!=domain){
-            var context_opts = this._getAddContextMenu(domain);
-            $header.contextmenu(context_opts);
-        }
-        */
-         var isPublished = options.mapwidget.mapping('option','isPublished');
+         let isPublished = options.mapwidget.mapping('option','isPublished');
          if(domain=='mapdocs' && !isPublished){
 
-            var append_link = $('<a title="create new map document">',{href:'#'})
+            let append_link = $('<a title="create new map document">',{href:'#'})
                 .html('Add <span class="ui-icon ui-map-document" style="width:22px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
                 +'</span>')
@@ -326,20 +328,20 @@ function hMapManager( _options )
     //
     function _defineContent(groupID, data, container){
 
-        var content = null;
+        let content = null;
         
         if(groupID=='search' || groupID=='tempmap'){
             
             content = $('<div>');
             
-            var resdata = mapDocuments.getTreeData((groupID=='search')?0:'temp');
+            let resdata = mapDocuments.getTreeData((groupID=='search')?0:'temp');
             
             _refreshMapDocumentTree( resdata, content, groupID);
     
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
             // see extensive list in leaflet-providers.js
-            var map_providers = options.mapwidget.mapping('getBaseMapProviders');
+            let map_providers = options.mapwidget.mapping('getBaseMapProviders');
 
             if(typeof options.visible_basemaps === 'string'){
                 options.visible_basemaps = options.visible_basemaps.split(';');
@@ -349,7 +351,7 @@ function hMapManager( _options )
             }
 
             content = '';
-            for (var k=0; k<map_providers.length; k++){
+            for (let k=0; k<map_providers.length; k++){
                 if(options.visible_basemaps.length==0 || options.visible_basemaps.indexOf(map_providers[k]['name'])>=0){
                     content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k
                                   + '" data-mapid="'+map_providers[k]['name']+'">'
@@ -374,7 +376,7 @@ function hMapManager( _options )
                 .button()
                 .css({'font-size': '0.8em', 'padding': '0em 1em'})
                 .on( { click: function(){
-                        var cfg = options.mapwidget.mapping('getBaseMapFilter');
+                        let cfg = options.mapwidget.mapping('getBaseMapFilter');
                         window.hWin.HEURIST4.ui.showImgFilterDialog(cfg, function(filter){
                             options.mapwidget.mapping('setBaseMapFilter', filter);
                         });   
@@ -416,7 +418,7 @@ function hMapManager( _options )
     //
     function _refreshSearchContent(){
         
-            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
+            let grp_div = options.container.find('.svs-acordeon[grpid="search"]');
             _defineContent('search', null, grp_div.find('.ui-accordion-content'));
             //defineContent( 'search' );
             
@@ -429,10 +431,10 @@ function hMapManager( _options )
     // adds new mapdoc entry in mapdoc tree
     //
     function _addToMapDocumentTree( resdata ){
-        
+        let $res = {};
+
         if(resdata==null){
 
-            var $res = {};  
             $res['key'] = 99999999;
             $res['title'] = 'temp';
             $res['type'] = 'mapdocument';
@@ -440,9 +442,8 @@ function hMapManager( _options )
                 
         }else{
 
-            var rec = resdata.getFirstRecord();
+            let rec = resdata.getFirstRecord();
         
-            var $res = {};  
             $res['key'] = resdata.fld(rec, 'rec_ID');
             $res['title'] = resdata.fld(rec, 'rec_Title');
             $res['type'] = 'mapdocument';
@@ -455,7 +456,7 @@ function hMapManager( _options )
 
         //mapdoc_treeview.find('.ui-fancytree').show();
         mapdoc_treeview.find('.empty_msg').remove();
-        var tree = mapdoc_treeview.fancytree("getTree");
+        let tree = mapdoc_treeview.fancytree("getTree");
         tree.getRootNode().addChildren( [$res] ).setSelected(true);
     }
     
@@ -466,20 +467,20 @@ function hMapManager( _options )
     function _refreshMapDocumentTree( resdata, tree_container, groupid ){
 
         //create treeview data
-        var treedata = [];
+        let treedata = [];
         
         if( (typeof resdata.isA == "function") && resdata.isA("HRecordSet") ){
         
-            var idx, records = resdata.getRecords();
+            let idx, records = resdata.getRecords();
             for(idx in records){
                 if(idx)
                 {
-                    var record = records[idx];
-                    var recID  = resdata.fld(record, 'rec_ID'),
+                    let record = records[idx];
+                    let recID  = resdata.fld(record, 'rec_ID'),
                     recName = resdata.fld(record, 'rec_Title'),
                     extent = resdata.fld(record, DT_GEO_OBJECT); //initial extent
                     
-                    var $res = {};  
+                    let $res = {};  
                     $res['key'] = recID;
                     $res['title'] = recName;
                     $res['type'] = 'mapdocument';
@@ -511,8 +512,8 @@ function hMapManager( _options )
                 lazyLoad: function(event, data){
                 //load: function(forceReload){
                     //load content of mapdocument
-                    var node = data.node;
-                    var dfd = new $.Deferred();
+                    let node = data.node;
+                    let dfd = new $.Deferred();
                     data.result = dfd.promise();
                     mapDocuments.zoomToMapDocument(node.key);
                     mapDocuments.openMapDocument(node.key, dfd);
@@ -530,7 +531,7 @@ function hMapManager( _options )
                         if(data.node.data.type=='mapdocument'){
                             data.node.setSelected(true, {noEvents:true} );
                             //enable buttons
-                            var btns = $(data.node.li).find('.svs-contextmenu3');
+                            let btns = $(data.node.li).find('.svs-contextmenu3');
                             btns.find('span.ui-icon-arrow-4-diag').css({color:'black'});    
                             btns.find('span.ui-icon-refresh').css({color:'black'});
                         }
@@ -539,7 +540,7 @@ function hMapManager( _options )
                 },
                 select: function(e, data) {  //show/hide   checkbox event listener
 
-                    var node = data.node;
+                    let node = data.node;
                     let is_selected = node.isSelected();
                     if(node.data.type=='mapdocument'){
 
@@ -580,7 +581,7 @@ function hMapManager( _options )
                             mapDocuments.setMapDocumentVisibility(mapdoc_id, is_selected);
                         
                             if(node.hasChildren()){
-                                var mapdoc_vis = is_selected;
+                                let mapdoc_vis = is_selected;
                                 //set selection in legend for child layers
                                 _suppress_select_event = true;
                                 $.each(node.getChildren(), function(i, layer_node){
@@ -607,7 +608,7 @@ function hMapManager( _options )
 
                         if(mapdoc_select !== null){
 
-                            var selected_opts = Object.values(mapdoc_visible);
+                            let selected_opts = Object.values(mapdoc_visible);
                             selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
                             if(!mapdoc_select.hSelect('instance')){
                                 mapdoc_select.hSelect();
@@ -628,11 +629,11 @@ function hMapManager( _options )
                         
                         if(_suppress_select_event) return;
                         
-                        var mapdoc_id = node.data.mapdoc_id;
-                        var not_visible = true;
+                        let mapdoc_id = node.data.mapdoc_id;
+                        let not_visible = true;
                         if((mapdoc_id>0 && mapdoc_visible[mapdoc_id]) || mapdoc_id==0 || mapdoc_id=='temp'){
                             //node.key - heurist layer record id
-                            var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
+                            let layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
                             if(layer_rec){
                                 //set layer visibility on map
                                 (layer_rec['layer']).setVisibility( is_selected );  
@@ -661,17 +662,17 @@ function hMapManager( _options )
                             node.setSelected(false);
                         }else if(mapdoc_id==0 || mapdoc_id=='temp'){
                             //need to make all themes visible if none of them marked
-                            var themes = node.children;
+                            let themes = node.children;
                             if(themes && themes.length>0){
-                                var all_hidden = true;
-                                for(var i=0; i<themes.length; i++){
+                                let all_hidden = true;
+                                for(let i=0; i<themes.length; i++){
                                     if(themes[i].isSelected()){
                                         all_hidden = false;
                                         break;
                                     }
                                 }
                                 if(all_hidden)
-                                for(var i=0; i<themes.length; i++){
+                                for(let i=0; i<themes.length; i++){
                                     themes[i].setSelected(true);
                                 }
                             }
@@ -683,18 +684,18 @@ function hMapManager( _options )
 
 
                         //if(node.parent.isSelected()){
-                        var mapdoc_id = node.data.mapdoc_id;
-                        var layer_id = node.data.layer_id;
-                        var not_visible = true; 
+                        let mapdoc_id = node.data.mapdoc_id;
+                        let layer_id = node.data.layer_id;
+                        let not_visible = true; 
                         if( layer_id>0 && 
                             ((mapdoc_id>0 && mapdoc_visible[mapdoc_id])|| mapdoc_id==0 || mapdoc_id=='temp')){
                         
-                            var active_themes = [];
-                            var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                            let active_themes = [];
+                            let layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
                             if(layer_rec){
-                                var siblings = node.parent.children;
+                                let siblings = node.parent.children;
                                 
-                                for(var i=0; i<siblings.length; i++){
+                                for(let i=0; i<siblings.length; i++){
                                         if(siblings[i].isSelected()){
                                             active_themes.push(siblings[i].data.theme);
                                             not_visible = false;
@@ -732,16 +733,16 @@ function hMapManager( _options )
                 },
                 renderNode: function(event, data) {
                     // Optionally tweak data.node.span
-                    var item = data.node;
+                    let item = data.node;
                     let $span = $(item.span);
                     if(item.data.type=='layer'){
-                        var rec_id = item.key;
-                        var mapdoc_id = item.data.mapdoc_id;
+                        let rec_id = item.key;
+                        let mapdoc_id = item.data.mapdoc_id;
                         
                         //get symbology for layer (rec_id)
-                        var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
+                        let style = mapDocuments.getSymbology( mapdoc_id, rec_id );
                         //convert json to css
-                        var dcss = _prepareSymbologyForLegendItem(style);
+                        let dcss = _prepareSymbologyForLegendItem(style);
 
                         $span.find("> span.fancytree-icon")
                         .css(dcss);
@@ -780,7 +781,7 @@ function hMapManager( _options )
     //
     function _prepareSymbologyForLegendItem(style){
         
-        var dcss = '';
+        let dcss = '';
         if(style['rectypeIconUrl']){
             dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
         }else{
@@ -788,8 +789,8 @@ function hMapManager( _options )
             dcss = {'display':'inline-block', 'background-image':'none'};
             if(style['stroke']!==false){
                 
-                var opacity = style['opacity']>0?style['opacity']:1;
-                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
+                let opacity = style['opacity']>0?style['opacity']:1;
+                let weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
                 dcss['width']  = 16-weight*2; 
                 dcss['height'] = 16-weight*2;
                 
@@ -805,10 +806,10 @@ function hMapManager( _options )
                 dcss['border'] = 'none';
             }
 
-            var fillColor = null;
+            let fillColor = null;
             if(style['fill']!==false){
                 fillColor = style['fillColor']?style['fillColor']:style['color'];
-                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                let fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
                 fillColor = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
             }
             if (fillColor != null){
@@ -826,7 +827,7 @@ function hMapManager( _options )
     //
     function _defineActionIcons(item)
     { 
-        var item_li = $(item.li), 
+        let item_li = $(item.li), 
             recid = item.key, 
             mapdoc_id = 0;
             
@@ -839,13 +840,13 @@ function hMapManager( _options )
                 recid = -1;
             }
             
-            var parent_span = item_li.children('span.fancytree-node');
+            let parent_span = item_li.children('span.fancytree-node');
             
-            var isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
+            let isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
             let is_image_layer = recid > 0 && recid < 9000000 ? mapDocuments.isImageLayer(mapdoc_id, recid) : false;
             let is_logged_in = window.hWin.HAPI4.has_access();
 
-            var actionspan = '<div class="svs-contextmenu3" '
+            let actionspan = '<div class="svs-contextmenu3" '
                     +((mapdoc_id>=0 || mapdoc_id=='temp')?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +(is_image_layer || recid > 0 ? '<span class="ui-icon ui-icon-opacity" title="Change layer\'s opacity"></span>' : '')
@@ -894,8 +895,8 @@ function hMapManager( _options )
                 
                 
             actionspan.find('.ui-icon').click(function(event){
-                var ele = $(event.target);
-                var parent_span = ele.parents('span.fancytree-node');
+                let ele = $(event.target);
+                let parent_span = ele.parents('span.fancytree-node');
                 
                 function __in_progress(){
                     if(parent_span.find('.svs-contextmenu4').is(':visible')) {
@@ -908,8 +909,8 @@ function hMapManager( _options )
 
                 //timeout need to activate current node    
                 setTimeout(function(){                         
-                    var recid = ele.parents('.svs-contextmenu3').attr('data-recid');
-                    var mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
+                    let recid = ele.parents('.svs-contextmenu3').attr('data-recid');
+                    let mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
 
                     let is_logged_in = !window.hWin.HAPI4.has_access();
                     let is_image_layer = recid > 0 ? mapDocuments.isImageLayer(mapdoc_id, recid) : false;
@@ -920,7 +921,7 @@ function hMapManager( _options )
                         if(recid>0){
                             
                             if(mapdoc_id>=0 || mapdoc_id=='temp'){
-                                var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
                                 if(layer_rec) (layer_rec['layer']).zoomToLayer();
                             } 
                             
@@ -934,7 +935,7 @@ function hMapManager( _options )
 
                     }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                     
-                        var in_progress = __in_progress();
+                        let in_progress = __in_progress();
                         if(mapdoc_id>0 && !in_progress){
 
                             mapDocuments.selectLayerRecord(mapdoc_id, function(data){
@@ -949,7 +950,7 @@ function hMapManager( _options )
                                     }
                                 });
                             /*
-                            var dfd = new $.Deferred();
+                            let dfd = new $.Deferred();
                             mapDocuments.selectLayerRecord(mapdoc_id, dfd);
                             $.when( dfd.promise() ).done(
                                 function(data){
@@ -982,16 +983,16 @@ function hMapManager( _options )
                                 },
                                 onselect:function(event, data){
                                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                    var recset = data.selection;
-                                    var rec = recset.getFirstRecord();
+                                    let recset = data.selection;
+                                    let rec = recset.getFirstRecord();
                                     item.title = recset.fld(rec, 'rec_Title');
                                     parent_span.find('span.fancytree-title').text( item.title );
                                     
-                                    var symbology = recset.fld(rec
+                                    let symbology = recset.fld(rec
                                                     , window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
                                     if(recid>0 && symbology){
                                         //apply symbolgy on map
-                                        var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                        let layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
                                         if(layer_rec) (layer_rec['layer']).applyStyle( symbology );
                                         //render new symbology in legend
                                         item.render(true);
@@ -1193,7 +1194,7 @@ function hMapManager( _options )
 
             //hide icons on mouse exit
             function _onmouseexit(event){
-                var node;
+                let node;
                 if($(event.target).is('li')){
                     node = $(event.target).find('.fancytree-node');
                 }else if($(event.target).hasClass('fancytree-node')){
@@ -1203,13 +1204,13 @@ function hMapManager( _options )
                     node = $(event.target).parents('.fancytree-node');
                     if(node) node = $(node[0]);
                 }
-                var ele = node.find('.svs-contextmenu3');
+                let ele = node.find('.svs-contextmenu3');
                 ele.hide();
             }               
 
             $(parent_span).hover(
                 function(event){
-                    var node;
+                    let node;
                     if($(event.target).hasClass('fancytree-node')){
                         node =  $(event.target);
                     }else{
@@ -1297,7 +1298,7 @@ function hMapManager( _options )
     
 
     //public members
-    var that = {
+    let that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
@@ -1307,7 +1308,7 @@ function hMapManager( _options )
         // 
         defineContent: function(groupID, data){
             //find group div
-            var grp_div = options.container.find('.svs-acordeon[grpid="'+groupID+'"]');
+            let grp_div = options.container.find('.svs-acordeon[grpid="'+groupID+'"]');
             //define new
             _defineContent(groupID, data, grp_div.find('.ui-accordion-content'));
         },
@@ -1318,8 +1319,8 @@ function hMapManager( _options )
 
                 if(val>0) maxHeight  = val;
 
-                var ele = options.container.find('.svs-acordeon:visible');
-                var h = 20;
+                let ele = options.container.find('.svs-acordeon:visible');
+                let h = 20;
                 $(ele).each(function(idx,item){h=h+$(item).height()});
 
                 options.container.height( Math.min(h, maxHeight) );
@@ -1347,7 +1348,7 @@ function hMapManager( _options )
                     if(params.indexOf('all')>=0){ //default
                         params = {basemaps:0,mapdocs:0,search:1};
                     }else{
-                        var defWidth = 250;
+                        let defWidth = 250;
                         $.each(params,function(i,item){
                            if(window.hWin.HEURIST4.util.isNumber(item) && item>0){
                                defWidth = item;
@@ -1381,8 +1382,9 @@ function hMapManager( _options )
             if(!options.visible_panels) options.visible_panels = {basemaps:0,mapdocs:0,search:1};//['all'];
             
             function __set(val){
-                var is_visible = true;//(options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
-                var ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
+                let is_visible = true;//(options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
+                let ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
+                let is_collapsed;
                 if(val=='tempmap'){
                     is_visible = options.hasTempMap;
                     is_collapsed = !window.hWin.HEURIST4.util.istrue(options.visible_panels[val], true);
@@ -1441,11 +1443,11 @@ function hMapManager( _options )
                 mapdoc_select.hSelect({
                     'open': function(event, ui){ // get active mapdoc(s), highlight visible map doc(s)
 
-                        var selected_opts = Object.values(mapdoc_visible);
-                        var $menu_items = mapdoc_select.hSelect('menuWidget').find('li');
-                        for(var i = 0; i < $menu_items.length; i++){
+                        let selected_opts = Object.values(mapdoc_visible);
+                        let $menu_items = mapdoc_select.hSelect('menuWidget').find('li');
+                        for(let i = 0; i < $menu_items.length; i++){
 
-                            var title = $($menu_items[i]).find('div').text();
+                            let title = $($menu_items[i]).find('div').text();
 
                             if(selected_opts.indexOf(title) > -1){
                                 $($menu_items[i]).addClass('activated-mapdoc');
@@ -1468,7 +1470,7 @@ function hMapManager( _options )
                     },*/
                     'close': function(event, ui){ // check if we need to keep it open, only if multi-select
 
-                        var $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
+                        let $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
 
                         if(mapdoc_select.hasClass('multi-select') && $selected_opt.hasClass('ui-menu-item')){
                             mapdoc_select.hSelect('open');
@@ -1476,7 +1478,7 @@ function hMapManager( _options )
                     },
                     'select': function(event, ui){
 
-                        var $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
+                        let $selected_opt = $(event.currentTarget).is('li') ? $(event.currentTarget) : $(event.currentTarget).parent();
 
                         if(ui.item.value == ''){ //current result set - all mapdocs are off
 
@@ -1509,7 +1511,7 @@ function hMapManager( _options )
                             }
                         }
 
-                        var selected_opts = Object.values(mapdoc_visible);
+                        let selected_opts = Object.values(mapdoc_visible);
                         selected_opts = selected_opts.length == 0 ? ['Current result set'] : selected_opts;
                         mapdoc_select.hSelect('widget').attr('title', selected_opts.join(', '));
 
@@ -1536,8 +1538,8 @@ function hMapManager( _options )
             
             if($.isFunction($('body').fancytree)){
             
-                var tree = mapdoc_treeview.fancytree("getTree");
-                var selected = 0;
+                let tree = mapdoc_treeview.fancytree("getTree");
+                let selected = 0;
 
                 tree.visit(function(node){
                     if( window.hWin.HEURIST4.util.findArrayIndex(node.key, mapdoc_id)>=0){
@@ -1562,14 +1564,14 @@ function hMapManager( _options )
         createVirtualMapDocument: function(layer_ids, dfd_top){
             
             options.hasTempMap = false;
-            var dfd = new $.Deferred();
+            let dfd = new $.Deferred();
             mapDocuments.createVirtualMapDocument(layer_ids, dfd);
             
             $.when( dfd.promise() ).done(
                 function(data){
                     options.hasTempMap = true;
                     //refresh list of tempmap
-                    var grp_div = options.container.find('.svs-acordeon[grpid="tempmap"]');
+                    let grp_div = options.container.find('.svs-acordeon[grpid="tempmap"]');
                     _defineContent('tempmap', null, grp_div.find('.ui-accordion-content'));
                     that.updatePanelVisibility();
                     that.setHeight();
@@ -1610,8 +1612,8 @@ function hMapManager( _options )
         // mode - all|loaded|visible
         // 
         getMapDocumentsIds: function( mode ) {
-            var res = [];
-            var tree = mapdoc_treeview.fancytree("getTree");
+            let res = [];
+            let tree = mapdoc_treeview.fancytree("getTree");
             tree.visit(function(node){
                 if(node.data.type=='mapdocument'){
                     if((mode=='visible'&& node.isSelected()) ||
@@ -1631,7 +1633,7 @@ function hMapManager( _options )
         //
         addSearchResult: function( data, dataset_options )
         {
-            var record = mapDocuments.addSearchResult( 0, data, dataset_options );
+            let record = mapDocuments.addSearchResult( 0, data, dataset_options );
             
             //refresh search results
             _refreshSearchContent(); 
@@ -1644,7 +1646,7 @@ function hMapManager( _options )
         //
         addRecordSet: function(recset, dataset_name) {
             
-            var record = mapDocuments.addRecordSet( 0, recset, dataset_name );
+            let record = mapDocuments.addRecordSet( 0, recset, dataset_name );
             
             //refresh search results 
             _refreshSearchContent(); 
@@ -1675,9 +1677,9 @@ function hMapManager( _options )
             
             function __setVis(recID, record){
                 
-                    var layer_rec = mapDocuments.getLayer(mapdoc_ID, recID);
+                    let layer_rec = mapDocuments.getLayer(mapdoc_ID, recID);
                     if(layer_rec){
-                        var curr_visible = (layer_rec['layer']).isVisible();
+                        let curr_visible = (layer_rec['layer']).isVisible();
                         if(visibility_set!==curr_visible){
                             (layer_rec['layer']).setVisibility( visibility_set );  
                         }
@@ -1686,7 +1688,7 @@ function hMapManager( _options )
             }
             
             if($.isArray(_selection)){
-                for(var i=0; i<_selection.length; i++){
+                for(let i=0; i<_selection.length; i++){
                      __setVis(_selection[i]);
                 }
             }else{
@@ -1707,7 +1709,7 @@ function hMapManager( _options )
                     return dataset.native_id;
                 
                 }else if(dataset.mapdoc_id>=0){
-                    var layer = mapDocuments.getLayerByName(dataset.mapdoc_id, dataset.dataset_name, dataset.dataset_id);
+                    let layer = mapDocuments.getLayerByName(dataset.mapdoc_id, dataset.dataset_name, dataset.dataset_id);
                     if(layer){
                         return layer.getNativeId();
                     }
@@ -1731,7 +1733,7 @@ function hMapManager( _options )
         filterListBaseMap: function (visible_basemaps){
             if(options.visible_basemaps != visible_basemaps){
                 options.visible_basemaps = visible_basemaps;
-                var grp_div = options.container.find('.svs-acordeon[grpid="basemaps"]');
+                let grp_div = options.container.find('.svs-acordeon[grpid="basemaps"]');
                 _defineContent('basemaps', null, grp_div.find('.ui-accordion-content'));
                 that.setHeight();
             }
@@ -1752,9 +1754,9 @@ function hMapManager( _options )
                     }
                         
         
-                var mapdoc_ids = visible_mapdocuments?visible_mapdocuments.split(';'):[];
+                let mapdoc_ids = visible_mapdocuments?visible_mapdocuments.split(';'):[];
                 
-                var tree = mapdoc_treeview.fancytree("getTree");
+                let tree = mapdoc_treeview.fancytree("getTree");
                 if(mapdoc_ids && mapdoc_ids.length>0){
                     tree.filterBranches(function(node){  //filterNodes
                         let res = mapdoc_ids.indexOf(node.key)>=0;
@@ -1778,7 +1780,7 @@ function hMapManager( _options )
         //
         loadBaseMap: function( e ){
 
-            var idx = 0;
+            let idx = 0;
 
             if(window.hWin.HEURIST4.util.isNumber(e) && e>=0){
                 idx = e;
@@ -1819,9 +1821,9 @@ function hMapManager( _options )
         //
         getActiveMapDocumentLegend(){
         
-            var tree = mapdoc_treeview.fancytree("getTree");
+            let tree = mapdoc_treeview.fancytree("getTree");
             
-            var res = null;
+            let res = null;
 
             tree.visit(function(node){
                     if(node.data.type=='mapdocument' && node.isSelected()){
@@ -1831,7 +1833,6 @@ function hMapManager( _options )
                 });
             return res;
         },
-        
         //
         // update layer status for mapdocument
         //
@@ -1839,22 +1840,22 @@ function hMapManager( _options )
 
             if(DT_LEGEND_OUT_ZOOM>0){
 
-                var res = that.getMapDocumentsIds('visible');
+                let res = that.getMapDocumentsIds('visible');
                 if(res && res.length>0){
-                    var mapdoc_id = res[0];
+                    let mapdoc_id = res[0];
                     
-                    var layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
+                    let layer_rec = mapDocuments.getLayer(mapdoc_id, layer_id);
                     if(!layer_rec || !layer_rec['d']) return;
-                    var val = layer_rec['d'][DT_LEGEND_OUT_ZOOM];
+                    let val = layer_rec['d'][DT_LEGEND_OUT_ZOOM];
                     
                     if(val==TRM_LEGEND_OUT_ZOOM_HIDDEN || val==TRM_LEGEND_OUT_ZOOM_DISABLED){
 
                         //find node
-                        var tree = mapdoc_treeview.fancytree("getTree");
+                        let tree = mapdoc_treeview.fancytree("getTree");
                         tree.visit(function(node){
                                 if(node.data.type=='layer' && node.key==layer_id && node.data.mapdoc_id===mapdoc_id){
         
-                                    var ele = $(node.li).find('.fancytree-title');
+                                    let ele = $(node.li).find('.fancytree-title');
                                     
                                     if(val==TRM_LEGEND_OUT_ZOOM_DISABLED){
                                         if(status=='out'){

@@ -18,6 +18,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global google, _adjustLegendHeight, Shapefile */
+
 //ARTEM:   @todo JJ calls server side directly - need to fix - use hapi!!!!!
 //
 // move all these methods into hMapping class or create new one
@@ -25,25 +27,23 @@
 
 /**
 *  This class responsible for all interaction with UI and map object 
+*   mapping - parent container
 */
 function hMappingControls( mapping, startup_mapdocument_id ) {
     const _className = "MappingControls",
     _version   = "0.4";
 
-    var mapping; //parent container
-
-
-    var map; //google map
-    var current_map_document_id = 0;
-    var map_data;                  // all map documents/layer/dataset related info
-    var overlays = {};             // layers in current map document
-    var map_bookmarks = [];        // geo and time extents
-    var overlays_not_in_doc = {};  // main layers(current query) and layers added by user/manually
-    var loadingbar = null;         // progress bar - overlay on map 
-    var $dlg_edit_layer = null;
+    let map; //google map
+    let current_map_document_id = 0;
+    let map_data;                  // all map documents/layer/dataset related info
+    let overlays = {};             // layers in current map document
+    let map_bookmarks = [];        // geo and time extents
+    let overlays_not_in_doc = {};  // main layers(current query) and layers added by user/manually
+    let loadingbar = null;         // progress bar - overlay on map 
+    let $dlg_edit_layer = null;
     
-    var loading_mapdoc_list = false;    // flag to prevent repeated request
-    var menu_mapdocuments = null;
+    let loading_mapdoc_list = false;    // flag to prevent repeated request
+    let menu_mapdocuments = null;
 
     /**
     * Performs an API call which contains data - all map documents/layer/dataset related info.
@@ -64,13 +64,13 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         
         // Load Map Documents & Map Layers       
         // @TODO - change it to HAPI method!!!!
-        var request = { q: {"t":window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']},
+        let request = { q: {"t":window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']},
             w: 'a',
             detail: 'header',
             source: 'mapSelectorBtn'};
 
-            var btnMapRefresh = $("#btnMapRefresh");
-            var btnMapEdit = $("#btnMapEdit");
+            let btnMapRefresh = $("#btnMapRefresh");
+            let btnMapEdit = $("#btnMapEdit");
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, true);
             window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, true);
 
@@ -81,18 +81,18 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 loading_mapdoc_list = false;
                     
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var resdata = new HRecordSet(response.data);
+                    let resdata = new HRecordSet(response.data);
 
-                    var mapdocs = '';
+                    let mapdocs = '';
                     //ele.append("<option value='-1'>"+(resdata.length()>0?'select...':'none available')+"</option>");
                     mapdocs = mapdocs + "<li mapdoc_id='-1'><a>"+(resdata.length()>0?'None':'none available')+"</a></li>";
 
-                    var idx, records = resdata.getRecords();
+                    let idx, records = resdata.getRecords();
                     for(idx in records){
                         if(idx)
                         {
-                            var record = records[idx];
-                            var recID  = resdata.fld(record, 'rec_ID'),
+                            let record = records[idx];
+                            let recID  = resdata.fld(record, 'rec_ID'),
                                 recName = resdata.fld(record, 'rec_Title');
 
                             //ele.append("<option value='"+recID+"'>"+recName+"</option>");
@@ -122,7 +122,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         onload_callback.call();
                     }
                     
-                    var w = $(window).width();
+                    let w = $(window).width();
                     if (w < 400) {
                         $("#mapSelectorBtn").button({showLabel:false}).width(20);
                     }else{
@@ -134,8 +134,6 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         if(startup_mapdocument>0){
                             _loadMapDocumentById_init(startup_mapdocument);
                         }
-                    }else{
-                        
                     }
 
                 }else{
@@ -155,10 +153,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // Clean old data
         $('#map_extents').css('visibility','hidden');
         _removeMapDocumentOverlays();
-        var selBookmakrs = document.getElementById('selMapBookmarks');
-        $(selBookmakrs).empty();
-        var btnMapRefresh = $("#btnMapRefresh");
-        var btnMapEdit = $("#btnMapEdit");
+        let selBookmarks = document.getElementById('selMapBookmarks');
+        $(selBookmarks).empty();
+        let btnMapRefresh = $("#btnMapRefresh");
+        let btnMapEdit = $("#btnMapEdit");
         window.hWin.HEURIST4.util.setDisabled(btnMapEdit, true);
         window.hWin.HEURIST4.util.setDisabled(btnMapRefresh, true);
         btnMapEdit.attr('title','');
@@ -166,8 +164,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(current_map_document_id>0)
         {
 
-            var baseurl = window.hWin.HAPI4.baseURL + 'hserv/controller/map_data.php';
-            var request = {db:window.hWin.HAPI4.database, id:current_map_document_id};
+            let baseurl = window.hWin.HAPI4.baseURL + 'hserv/controller/map_data.php';
+            let request = {db:window.hWin.HAPI4.database, id:current_map_document_id};
             
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response) {
                 
@@ -211,7 +209,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         
         //find mapdoc data
         if(mapdocument_id>0 && map_data)
-            for(var i=0;i<map_data.length;i++){
+            for(let i=0;i<map_data.length;i++){
                 if(mapdocument_id==map_data[i].id){
                     return map_data[i];
                 }
@@ -225,33 +223,34 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _loadMapDocumentById_continue() {    
 
-        var mapdocument_id =  current_map_document_id;
+        let mapdocument_id =  current_map_document_id;
 
         //find mapdoc data
-        var doc = _getMapDocumentDataById(mapdocument_id);
-        var lt = window.hWin.HAPI4.sysinfo['layout'];   
+        let doc = _getMapDocumentDataById(mapdocument_id);
+        let lt = window.hWin.HAPI4.sysinfo['layout'];   
 
-        var selBookmakrs = document.getElementById('selMapBookmarks');
-        var btnMapRefresh = $("#btnMapRefresh");
-        var btnMapEdit = $("#btnMapEdit");
+        let selBookmarks = document.getElementById('selMapBookmarks');
+        let btnMapRefresh = $("#btnMapRefresh");
+        let btnMapEdit = $("#btnMapEdit");
         if( !window.hWin.HEURIST4.util.isnull(doc) ) {
             
-            var bounds = null, err_msg_all = '';
+            let bounds = null, err_msg_all = '';
 
             map_bookmarks = [];
-            window.hWin.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
+            window.hWin.HEURIST4.ui.addoption(selBookmarks, -1, 'bookmarks...');
 
             // Longitude,Latitude centrepoint, Initial minor span
             // add initial bookmarks based on long lat  minorSpan
-            var cp_long = _validateCoord(doc.long,false);
-            var cp_lat = _validateCoord(doc.lat,true);
+            let cp_long = _validateCoord(doc.long,false);
+            let cp_lat = _validateCoord(doc.lat,true);
             if(!isNaN(cp_long) && !isNaN(cp_lat) && doc.minorSpan>0){
                 
-                var body = $(this.document).find('body');
-                var prop = body.innerWidth()/body.innerHeight();
+                let body = $(this.document).find('body');
+                let prop = body.innerWidth()/body.innerHeight();
 
                 if(isNaN(prop) || prop==0) prop = 1;
                 
+                let span_x,span_y;
                 if(body.innerWidth()<body.innerHeight()){
                     span_x = doc.minorSpan;
                     span_y = doc.minorSpan/prop;
@@ -259,30 +258,34 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     span_x = doc.minorSpan*prop;
                     span_y = doc.minorSpan;
                 }
-                var init_extent = ['Initial extent', cp_long-span_x/2,cp_long+span_x/2, cp_lat-span_y/2,cp_lat+span_y/2 ];
+                let init_extent = ['Initial extent', cp_long-span_x/2,cp_long+span_x/2, cp_lat-span_y/2,cp_lat+span_y/2 ];
                 doc.bookmarks.unshift(init_extent);
             }
             
 
-            for(var i=0;i<doc.bookmarks.length;i++){
+            for(let i=0;i<doc.bookmarks.length;i++){
 
-                var bookmark = doc.bookmarks[i];
-                var err_msg = '';
+                let bookmark = doc.bookmarks[i];
+                let err_msg = '';
+
+                let x1,x2,y1,y2,tmin,tmax;
 
                 if(bookmark.length<5){
                     err_msg = 'not enough parameters';
                 }else{
 
-                    var x1 = _validateCoord(bookmark[1],false); 
+                    x1 = _validateCoord(bookmark[1],false); 
                     if(isNaN(x1)) err_msg = err_msg + ' bad value for xmin:' + x1;
-                    var x2 = _validateCoord(bookmark[2],false);
+                    x2 = _validateCoord(bookmark[2],false);
                     if(isNaN(x2)) err_msg = err_msg + ' bad value for xmax:' + x2;
-                    var y1 = _validateCoord(bookmark[3],true);
+                    y1 = _validateCoord(bookmark[3],true);
                     if(isNaN(y1)) err_msg = err_msg + ' bad value for ymin:' + y1;
-                    var y2 = _validateCoord(bookmark[4],true);
+                    y2 = _validateCoord(bookmark[4],true);
                     if(isNaN(y2)) err_msg = err_msg + ' bad value for ymax:' + y2;
 
-                    var tmin = null, tmax = null, dres = null;
+                    tmin = null;
+                    tmax = null;
+                    let dres = null;
 
                     if(err_msg==''){
 
@@ -305,11 +308,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     continue;
                 }
 
-                var swBound = new google.maps.LatLng(y1, x1);
-                var neBound = new google.maps.LatLng(y2, x2);
+                let swBound = new google.maps.LatLng(y1, x1);
+                let neBound = new google.maps.LatLng(y2, x2);
                 bounds = new google.maps.LatLngBounds(swBound, neBound);
 
-                window.hWin.HEURIST4.ui.addoption(selBookmakrs, map_bookmarks.length, bookmark[0]?bookmark[0]:'Extent '+(map_bookmarks.length+1));
+                window.hWin.HEURIST4.ui.addoption(selBookmarks, map_bookmarks.length, bookmark[0]?bookmark[0]:'Extent '+(map_bookmarks.length+1));
 
                 map_bookmarks.push({extent:bounds, tmin:tmin, tmax:tmax});
 
@@ -327,10 +330,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
 
 
-            var selBookmakrs = document.getElementById('selMapBookmarks')                  
-            selBookmakrs.onmousedown = function(){ selBookmakrs.selectedIndex = 0; }
-            selBookmakrs.onchange = function(){
-                var val = $(selBookmakrs).val();
+            let selBookmarks = document.getElementById('selMapBookmarks')                  
+            selBookmarks.onmousedown = function(){ selBookmarks.selectedIndex = 0; }
+            selBookmarks.onchange = function(){
+                let val = $(selBookmarks).val();
                 if(val>=0){
                     map.fitBounds(map_bookmarks[val]['extent']);    
                     if(map_bookmarks[val]['tmin']!=null)
@@ -339,17 +342,17 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }
             
             $('#map_extents').css('visibility','visible');
-            selBookmakrs.selectedIndex = 1;
-            $(selBookmakrs).change();
+            selBookmarks.selectedIndex = 1;
+            $(selBookmarks).change();
 
             mapping.setTimeMapProperty('centerOnItems', false);    
             
-            var dataset_id = 0;
+            let dataset_id = 0;
             
             // Map document layers
-            var overlay_index = 1;
+            let overlay_index = 1;
             if(doc.layers.length > 0) {
-                for(var i = 0; i < doc.layers.length; i++) {
+                for(let i = 0; i < doc.layers.length; i++) {
                     if(doc.layers[i].name) doc.layers[i].title = doc.layers[i].name; //use name istead of rec_Title
                     
                     if(doc.layers[i].iconMarker && doc.layers[i].iconMarker.indexOf('http')!==0){
@@ -364,14 +367,14 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }
 
 
-            var map_container = mapping.getMapContainerDiv();
+            let map_container = mapping.getMapContainerDiv();
             if(!map_container.is(':visible')){
-                var checkVisible = setInterval(function(){
+                let checkVisible = setInterval(function(){
 
                     if(!map_container.is(':visible')) return;
                     clearInterval(checkVisible); //stop listener
 
-                    $(selBookmakrs).change();
+                    $(selBookmarks).change();
                     //mapping.autoCenterAndZoom();
                     //mapping.zoomDataset()
                     //zoom to map document extent
@@ -407,7 +410,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     //
     function _validateCoord(value, islat){
-        var crd = Number(value);
+        let crd = Number(value);
         if(isNaN(crd)){
             return value+" is not a numeric value.";
         }else if(!islat && Math.abs(crd)>180){
@@ -424,9 +427,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     */
     function _removeMapDocumentOverlays() {
 
-        var legend_content = $("#map_legend .content");
+        let legend_content = $("#map_legend .content");
 
-        for(var idx in overlays) {
+        for(let idx in overlays) {
             _removeOverlayById(idx);
         }
         overlays = {};
@@ -439,15 +442,15 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _addLegendEntryForLayer(overlay_idx, layer_options, dependent_layers, ontop){
 
-        var overlay = null,
+        let overlay = null,
         legendid,
         ismapdoc = (overlay_idx>0);
         
-        var icon_bg = null;
+        let icon_bg = null;
         
-        var title = layer_options.title;
-        var bg_color = layer_options.color;
-        var rectypeID = layer_options.rectypeID;
+        let title = layer_options.title;
+        let bg_color = layer_options.color;
+        let rectypeID = layer_options.rectypeID;
 
 
         if (ismapdoc) {
@@ -474,7 +477,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         }
         
         if(icon_bg==null && Number.isInteger(rectypeID)){
-                var suffix = '.png';
+                let suffix = '.png';
                 if(bg_color){
                     suffix = '&color='+encodeURIComponent(bg_color.replace(/ /g,''));            
                 }
@@ -488,14 +491,14 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         
         if(!overlay) return;
 
-        var warning = '';
+        let warning = '';
         if($.isPlainObject(title)){
             warning = title.warning;
             title = title.title;
         }
 
 
-        var legenditem = '<div style="display:block;padding:2px;" id="'
+        let legenditem = '<div style="display:block;padding:2px;" id="'
         + legendid+'"><input type="checkbox" style="margin-right:5px" value="'
         + overlay_idx+'" id="chbox-'+legendid+'" class="overlay-legend" '
         + (overlay.visible?'checked="checked">':'>')
@@ -514,7 +517,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         legenditem = $(legenditem);
 
-        var legend_content = $("#map_legend .content");    
+        let legend_content = $("#map_legend .content");    
 
         if(ontop){
             legend_content.prepend(legenditem);
@@ -522,7 +525,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
 
             if( legend_content.children().each(function () { 
-                var did = Number( $(this).attr('id').substring(3) );
+                let did = Number( $(this).attr('id').substring(3) );
                 if(overlay_idx<did){
                     $(this).before( legenditem );      
                     return false;
@@ -537,12 +540,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         legenditem.find(".overlay-legend").change(_showHideOverlay);
 
-        if(true){// || !ismapdoc it is possible to edit mapdoc layers since 2017/07/01
-
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
             .click(function(event){ 
                 //delete layer from map  
-                var overlay_id = $(this).attr("layerid");
+                let overlay_id = $(this).attr("layerid");
                 _removeOverlayById( overlay_id );
 
                 window.hWin.HEURIST4.util.stopEvent(event); return false;})
@@ -551,8 +552,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
             .click(function(event){ 
 
-                var overlayid = $(this).attr("layerid");
-                var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
+                let overlayid = $(this).attr("layerid");
+                let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
                 
                 if(overlay['editProperties']){
                     overlay.editProperties();
@@ -565,23 +566,20 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             $('<div class="svs-contextmenu ui-icon ui-icon-circle-zoomin" layerid="'+overlay_idx+'"></div>')
             .click(function(event){ 
 
-                var overlayid = $(this).attr("layerid");
-                var overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
+                let overlayid = $(this).attr("layerid");
+                let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
 
                 overlay.zoomToOverlay();
                 
                 window.hWin.HEURIST4.util.stopEvent(event); return false;})
             .appendTo(legenditem);
             
-
-        }
         //add linked layers
-
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(dependent_layers)){     
-            var idx;
+            let idx;
             for (idx in dependent_layers){
-                var mapdata_id = dependent_layers[idx].key;
-                var mapdata_title = dependent_layers[idx].title;
+                let mapdata_id = dependent_layers[idx].key;
+                let mapdata_title = dependent_layers[idx].title;
                 $('<div style="font-size:smaller;padding-left:16px"><label><input type="checkbox" '
                     + ' data-mapdataid="'+mapdata_id+'" class="overlay-legend-depend" '+(overlay.visible?'checked="checked">':'>')
                     + mapdata_title + '</label></div>').appendTo(legenditem);        
@@ -597,12 +595,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     function _showHideOverlay(event){
         // Hide or display the layer
-        var ele_cbox = $(this);
-        var overlay_idx = ele_cbox.prop("value");
-        var checked = ele_cbox.prop("checked");
+        let ele_cbox = $(this);
+        let overlay_idx = ele_cbox.prop("value");
+        let checked = ele_cbox.prop("checked");
         
         // Update overlay
-        var overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
+        let overlay = overlays[overlay_idx] ?overlays[overlay_idx] :overlays_not_in_doc[overlay_idx];  //overlays[index]
         if(overlay){
             ele_cbox.hide();
             $('#loading-'+overlay_idx).show();
@@ -623,8 +621,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     ///
     function _showHideLayer(event){
-        var mapdata_id = $(this).attr('data-mapdataid');
-        var checked = $(this).prop("checked");
+        let mapdata_id = $(this).attr('data-mapdataid');
+        let checked = $(this).prop("checked");
 
         mapping.showDataset(mapdata_id, checked);
     }
@@ -649,18 +647,18 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     function _addLayerOverlay(bounds, layer, index, is_mapdoc) {
         // Determine way of displaying
         if(layer !== undefined && layer.dataSource !== undefined) {
-            var source = layer.dataSource;
+            let source = layer.dataSource;
             source.title = layer.title;
             
             source.color = layer.color;
             source.iconMarker = layer.iconMarker;
             
             if(source.bounds){
-                var resdata = window.hWin.HEURIST4.geo.wktValueToShapes( source.bounds, 'p', 'google' );
+                let resdata = window.hWin.HEURIST4.geo.wktValueToShapes( source.bounds, 'p', 'google' );
                 if(resdata && resdata._extent){
                 
-                    var swBound = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
-                    var neBound = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
+                    let swBound = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
+                    let neBound = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
                     bounds = new google.maps.LatLngBounds(swBound, neBound);
                 }
             }            
@@ -716,16 +714,16 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
         if(source.sourceURL !== undefined) {
 
-            var tileUrlFunc = null; 
+            let tileUrlFunc = null; 
             
-            var schema = source.tilingSchema.label.toLowerCase();
+            let schema = source.tilingSchema.label.toLowerCase();
 
             if(schema=='virtual earth'){
 
                 tileUrlFunc = function (a,b) {
 
                     function __tileToQuadKey(x, y, zoom) {
-                        var i, mask, cell, quad = "";
+                        let i, mask, cell, quad = "";
                         for (i = zoom; i > 0; i--) {
                             mask = 1 << (i - 1);
                             cell = 0;
@@ -737,7 +735,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     }
 
 
-                    var res = source.sourceURL + __tileToQuadKey(a.x,a.y,b) 
+                    let res = source.sourceURL + __tileToQuadKey(a.x,a.y,b) 
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
                     return res;
                 };
@@ -745,7 +743,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }else if(schema=='osm' || schema=='gmapimage'){
 
                 tileUrlFunc = function(coord, zoom) {
-                    var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + coord.y
+                    let tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + coord.y
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
                     return tile_url;
                 };
@@ -756,8 +754,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
  function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }                
 */                
                 tileUrlFunc = function(coord, zoom) {
-                    var bound = Math.pow(2, zoom);
-                    var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
+                    let bound = Math.pow(2, zoom);
+                    let tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (source.mimeType.label == "image/png" ? ".png" : ".gif");
                     return tile_url;
                 };
@@ -766,7 +764,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
 
             // Tile type
-            var tileType = new google.maps.ImageMapType({
+            let tileType = new google.maps.ImageMapType({
                 getTileUrl: tileUrlFunc,
                 tileSize: new google.maps.Size(256, 256),
                 minZoom: 1,
@@ -776,9 +774,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             });
 
             // Set map options
-            var overlay_index = map.overlayMapTypes.push( tileType )-1;
+            let overlay_index = map.overlayMapTypes.push( tileType )-1;
 
-            var overlay = {
+            let overlay = {
                 visible:true,
                 // Set visibility
                 setVisibility: function(checked) {
@@ -808,7 +806,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     */
     function addUntiledMapImageLayer(source, bounds, index) {
         // Image
-        var msg = '';                   
+        let msg = '';                   
         if(window.hWin.HEURIST4.util.isempty(source.files) || window.hWin.HEURIST4.util.isempty(source.files[0])){
             msg = 'Image file is not defined';
         }else if(!source.bounds){        
@@ -818,11 +816,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         }
 
         if(msg=='') {
-            var imageURL = source.files[0];
+            let imageURL = source.files[0];
 
-            var image_bounds = window.hWin.HEURIST4.geo.parseCoordinates('rect', source.bounds, 1, google);
+            let image_bounds = window.hWin.HEURIST4.geo.parseCoordinates('rect', source.bounds, 1, google);
 
-            var overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
+            let overlay = new HeuristOverlay(image_bounds.bounds, imageURL, map);
 
             overlays[index] = overlay;
         }else{
@@ -840,7 +838,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     * @param source Source object
     */
     function addKMLLayer(source, index, is_mapdoc) {
-        var kmlLayer = {};
+        let kmlLayer = {};
 
         if(is_mapdoc!==true){
             is_mapdoc = false;
@@ -848,7 +846,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
         // KML file
         if(source.files !== undefined) {
-            var fileURL = source.files[0];
+            const fileURL = source.files[0];
 
             // note google refuses kml from localhost
             if(fileURL.indexOf('://localhost')>0)
@@ -867,7 +865,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // KML snippet
         if(source.kmlSnippet !== undefined) {
             /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
-            var fileURL = window.hWin.HAPI4.baseURL + 'hserv/controller/record_map_source.php?db='
+            const fileURL = window.hWin.HAPI4.baseURL + 'hserv/controller/record_map_source.php?db='
                     +window.hWin.HAPI4.database+'&recID='+source.id;
             
             // Display on Google Maps
@@ -919,10 +917,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 // .shp & .dbf
 
                 function __getShapeData(index){
-                    var deferred = $.Deferred();
+                    let deferred = $.Deferred();
                     setTimeout(function () { 
 
-                        var sf = new Shapefile({
+                        let sf = new Shapefile({
                             shp: source.shpFile,
                             dbf: source.dbfFile
                             }, function (data) {
@@ -944,7 +942,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     */
     function addGeoJsonToMap(source, data, index) {
         // Add GeoJson to map
-        var overlay = {
+        let overlay = {
             visible:false,
             features: null,
             data: data,
@@ -958,7 +956,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     this.features = map.data.addGeoJson(data.geojson);
                     
                     if(this.source.color){
-                        for (var i = 0; i < this.features.length; i++) {
+                        for (let i = 0; i < this.features.length; i++) {
                             map.data.overrideStyle(this.features[i], 
                                 {fillColor: this.source.color, strokeColor: this.source.color});
                         }
@@ -969,7 +967,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     //map.data.setStyle({visible: false});
                     //Call the revertStyles() method to remove all style overrides.
                     
-                    for (var i = 0; i < this.features.length; i++) {
+                    for (let i = 0; i < this.features.length; i++) {
                         map.data.remove(this.features[i]);
                     }
                     this.features = null;
@@ -987,18 +985,18 @@ map.data.addListener('mouseover', function(event) {
             },
             zoomToOverlay: function(){
                 if(data && data.geojson && data.geojson.bbox){
-                    var swBound = new google.maps.LatLng(data.geojson.bbox[1], data.geojson.bbox[0]);
-                    var neBound = new google.maps.LatLng(data.geojson.bbox[3], data.geojson.bbox[2]);
-                    var bounds = new google.maps.LatLngBounds(swBound, neBound);
+                    let swBound = new google.maps.LatLng(data.geojson.bbox[1], data.geojson.bbox[0]);
+                    let neBound = new google.maps.LatLng(data.geojson.bbox[3], data.geojson.bbox[2]);
+                    let bounds = new google.maps.LatLngBounds(swBound, neBound);
                     map.fitBounds( bounds );
                 }
                     
             },
             editProperties: function(){
-                var that = this;
+                let that = this;
                 _editLayerOverlayProperties( index, function(wasChanged){
                     if(wasChanged){
-                        for (var i = 0; i < that.features.length; i++) {
+                        for (let i = 0; i < that.features.length; i++) {
                             map.data.overrideStyle(that.features[i], 
                                 {fillColor: that.source.color, strokeColor: that.source.color});
                                 //icon: that.source.iconMarker
@@ -1013,7 +1011,7 @@ map.data.addListener('mouseover', function(event) {
         overlays[index] = overlay;
         overlay.setVisibility(true);
 
-        var $img = $('#map_legend').find('#md-'+index+' > img.rt-icon');
+        let $img = $('#map_legend').find('#md-'+index+' > img.rt-icon');
         $img.css('background-image','url('+$img.attr('data-icon')+')');
 
     }
@@ -1028,7 +1026,7 @@ map.data.addListener('mouseover', function(event) {
     function _addQueryLayer(source, index) {
         // Query
         if(source && !window.hWin.HEURIST4.util.isempty(source.query)) {
-            var request = window.hWin.HEURIST4.query.parseHeuristQuery(source.query);
+            let request = window.hWin.HEURIST4.query.parseHeuristQuery(source.query);
             
             if(window.hWin.HEURIST4.util.isempty(request.q)){
                 $('#mapping').css('cursor','auto');
@@ -1096,8 +1094,8 @@ map.data.addListener('mouseover', function(event) {
     }
 
     //set of color for Digital Harlem dynamically added layers (or if color is not defined for layer in map document )
-    var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)','rgb(255,127,39)'];
-    var colors_idx = -1;
+    let myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)','rgb(255,127,39)'];
+    let colors_idx = -1;
 
     //
     //
@@ -1122,15 +1120,15 @@ map.data.addListener('mouseover', function(event) {
     function _addRecordsetLayer(source, index) {
 
         // Show info on map
-        var mapdata = source.mapdata;
+        let mapdata = source.mapdata;
         if( window.hWin.HEURIST4.util.isnull(mapdata) ) {
-            var recset = source.recordset;
+            let recset = source.recordset;
 
             if( !window.hWin.HEURIST4.util.isnull(recset) ){
 
                 if(!recset.isMapEnabled()){
 
-                    var request = {w: 'all', 
+                    let request = {w: 'all', 
                         detail: 'timemap'
                     };
                     
@@ -1141,7 +1139,7 @@ map.data.addListener('mouseover', function(event) {
                     if(recset.length()<2001){ //limit query by id otherwise use current query
                         source.query = { q:'ids:'+recset.getIds().join(',') };
                     }else{
-                        var curr_request = recset.getRequest();
+                        let curr_request = recset.getRequest();
 
                         source.query = { 
                             q: curr_request.q,
@@ -1172,7 +1170,7 @@ map.data.addListener('mouseover', function(event) {
                     return;               
                 }
 
-                    var symbology = {iconColor:source.color, iconMarker:source.iconMarker};
+                    let symbology = {iconColor:source.color, iconMarker:source.iconMarker};
                     
                         symbology.iconColor = source.color;
                         symbology.fill = source.color;
@@ -1190,7 +1188,7 @@ map.data.addListener('mouseover', function(event) {
                     if(source.iconMarker) {
                         mapdata.iconMarker = source.iconMarker;    
                     }else{
-                        var rts =recset.getRectypes();
+                        let rts =recset.getRectypes();
                         if(rts && rts.length==1){
                             mapdata.rectypeID = rts[0];    
                         }
@@ -1205,8 +1203,8 @@ map.data.addListener('mouseover', function(event) {
                     
                     if(recset['limit_warning']){
                         /* @todo - show individual warning per layer
-                        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
-                        var s = '<p>The map and timeline are limited to display a maximum of <b>'+MAXITEMS+'</b> results to avoid overloading your browser.</p>'
+                        const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+                        let s = '<p>The map and timeline are limited to display a maximum of <b>'+MAXITEMS+'</b> results to avoid overloading your browser.</p>'
                         +'<br><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br>'
                         +'<p>The map/timeline limit can be reset in Design > Preferences.</p>';                        
 
@@ -1214,7 +1212,6 @@ map.data.addListener('mouseover', function(event) {
                             warning:'<div class="ui-icon ui-icon-alert" style="display:inline-block;width:20px" onclick="{window.hWin.HEURIST4.msg.showMsgDlg(\''+s+'\')}">&nbsp;</div>'};
                         */    
                     }
-                }
             }
         }    
 
@@ -1223,18 +1220,18 @@ map.data.addListener('mouseover', function(event) {
         if (mapping.addDataset(mapdata)){ //see map.js
 
             //add depends
-            var dependent_layers = [];
+            let dependent_layers = [];
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(mapdata.depends)){
-                var idx;
+                let idx;
                 for (idx in mapdata.depends){
-                    var dep_mapdata = mapdata.depends[idx];
+                    let dep_mapdata = mapdata.depends[idx];
                     mapping.addDataset(dep_mapdata);
                     dependent_layers.push({key:dep_mapdata.id, title:dep_mapdata.title});
                 }
             }
 
 
-            var overlay = {
+            let overlay = {
                 id: mapdata.id,
                 title: mapdata.title,
                 dependent_layers: dependent_layers,
@@ -1242,11 +1239,11 @@ map.data.addListener('mouseover', function(event) {
                 setVisibility: function(checked) {
                     this.visible = checked;
                     mapping.showDataset(this.id, checked); //mapdata.id
-                    var idx;
+                    let idx;
                     for (idx in this.dependent_layers){
-                        var mapdata_id = this.dependent_layers[idx].key;
+                        let mapdata_id = this.dependent_layers[idx].key;
                         mapping.showDataset(mapdata_id, checked);
-                        var cb = $("#map_legend .content").find('input[data-mapdataid="'+mapdata_id+'"]');
+                        let cb = $("#map_legend .content").find('input[data-mapdataid="'+mapdata_id+'"]');
                         if(cb.length>0){
                             cb.prop('checked',checked);
                         }
@@ -1261,7 +1258,7 @@ map.data.addListener('mouseover', function(event) {
                 },
                 removeDependentLayers: function(){
                     if(this.dependent_layers){
-                        var idx;
+                        let idx;
                         for (idx in this.dependent_layers){
                             mapping.deleteDataset( this.dependent_layers[idx].key );
                         }
@@ -1285,7 +1282,7 @@ map.data.addListener('mouseover', function(event) {
                 }
 
                 overlays_not_in_doc[source.id] = overlay;
-                var legenditem = $("#map_legend .content").find('#'+source.id);
+                let legenditem = $("#map_legend .content").find('#'+source.id);
                 if(legenditem.length>0) legenditem.remove();
 
                 //show custom query on top
@@ -1305,7 +1302,7 @@ map.data.addListener('mouseover', function(event) {
         
 /* NOT USED             
     function _zoomToMapdata( _mapdataid ) {
-        var overlay = _getOverlayByMapdataId( _mapdataid );
+        let overlay = _getOverlayByMapdataId( _mapdataid );
         if(overlay!=null){
             mapping.zoomDataset( _mapdataid );
         }
@@ -1316,12 +1313,12 @@ map.data.addListener('mouseover', function(event) {
     //
     //
     function _getOverlayByMapdataId( _mapdataid ){
-        for(var idx in overlays) {
+        for(let idx in overlays) {
             if(overlays.hasOwnProperty(idx) && overlays[idx].id==_mapdataid){
                 return overlays[idx];
             }
         }
-        for(var mapdataid in overlays_not_in_doc) {
+        for(let mapdataid in overlays_not_in_doc) {
             if(overlays_not_in_doc.hasOwnProperty(mapdataid) && mapdataid==_mapdataid){
                 return overlays_not_in_doc[mapdataid];
             }
@@ -1334,8 +1331,8 @@ map.data.addListener('mouseover', function(event) {
     //
     function _removeOverlayById( overlay_id ){
 
-        var ismapdoc = (overlay_id>0);
-        var overlay = ismapdoc ?overlays[overlay_id] :overlays_not_in_doc[overlay_id];
+        let ismapdoc = (overlay_id>0);
+        let overlay = ismapdoc ?overlays[overlay_id] :overlays_not_in_doc[overlay_id];
         if(!window.hWin.HEURIST4.util.isnull(overlay)){
             try {
                 $("#map_legend .content").find('#'+((ismapdoc)?'md-':'')+overlay_id).remove();
@@ -1358,7 +1355,7 @@ map.data.addListener('mouseover', function(event) {
         }
     }
 
-    var edit_mapdata, edit_callback, overlay_legend_id;
+    let edit_mapdata, edit_callback, overlay_legend_id;
 
     
     //
@@ -1379,10 +1376,10 @@ map.data.addListener('mouseover', function(event) {
 
         _openDialogLayerProperties( function(){   //apply color and title
 
-            var layer_name = $dlg_edit_layer.find("#layer_name");
-            var message = $dlg_edit_layer.find('.messages');
+            let layer_name = $dlg_edit_layer.find("#layer_name");
+            let message = $dlg_edit_layer.find('.messages');
 
-            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
+            let bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
 
             if(bValid){
 
@@ -1392,21 +1389,21 @@ map.data.addListener('mouseover', function(event) {
                 // else 
                 //      change titles in overlay, legend, timeline
                 //      if required loop mapdata.options.items to change color and reload dataset
-                var new_title = layer_name.val();
-                var new_color = $dlg_edit_layer.find('#layer_color').colorpicker('val');
-                var mapdata = edit_mapdata;
+                let new_title = layer_name.val();
+                let new_color = $dlg_edit_layer.find('#layer_color').colorpicker('val');
+                let mapdata = edit_mapdata;
 
                 if(window.hWin.HEURIST4.util.isnull(mapdata) &&
                  !window.hWin.HEURIST4.util.isnull(window.hWin.HAPI4.currentRecordset)){  //add current record set
 
                     /* load with current result set and new rules
                     _currentRequest??
-                    var request = { q: 'ids:'+ window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
+                    let request = { q: 'ids:'+ window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
                     rules: that._currentRequest.rules,
                     w: 'all'};
 
                     //add new layer with given name
-                    var source = {id:"dhs"+window.hWin.HEURIST4.util.random(),
+                    let source = {id:"dhs"+window.hWin.HEURIST4.util.random(),
                     title: new_title,
                     query: request,
                     color: new_color,
@@ -1418,7 +1415,7 @@ map.data.addListener('mouseover', function(event) {
                     */
 
                     //load new recordset 
-                    var source = {id:"dhs"+window.hWin.HEURIST4.util.random(),
+                    let source = {id:"dhs"+window.hWin.HEURIST4.util.random(),
                         title: new_title,
                         recordset:  window.hWin.HAPI4.currentRecordset,
                         color: new_color
@@ -1433,8 +1430,8 @@ map.data.addListener('mouseover', function(event) {
                     mapping.changeDatasetColor( 'main', new_color, false );
                     //rename dataset for timeline items
                     /*
-                    var uniqids = {};
-                    for (var i=0; i<mapdata.timeline.items.length; i++){
+                    let uniqids = {};
+                    for (let i=0; i<mapdata.timeline.items.length; i++){
                         if(uniqids[mapdata.timeline.items[i].recID]==undefined){
                             uniqids[mapdata.timeline.items[i].recID] = 0;
                         }else{
@@ -1446,15 +1443,14 @@ map.data.addListener('mouseover', function(event) {
                         mapdata.timeline.items[i].group = mapdata.id 
                     }
                     */
-                    for (var i=0; i<mapdata.timeline.items.length; i++){
+                    for (let i=0; i<mapdata.timeline.items.length; i++){
                         mapdata.timeline.items[i].id = mapdata.timeline.items[i].id.replace('main-',(mapdata.id+'-'));
                         mapdata.timeline.items[i].group = mapdata.id;
                     }
                     
                     //change color for dependent
-                    var idx;
-                    for (idx in mapdata.depends){
-                        var dep_mapdata = mapdata.depends[idx];
+                    for (let idx in mapdata.depends){
+                        let dep_mapdata = mapdata.depends[idx];
                         mapping.changeDatasetColor( dep_mapdata.id, new_color, false);
                     }
 
@@ -1463,15 +1459,15 @@ map.data.addListener('mouseover', function(event) {
                     //add new    
                     _addRecordsetLayer({id:mapdata.id, title:new_title, mapdata:mapdata}, -1);
 
-                    /*var idx;
-                    for (idx in mapdata.depends){
-                    var dep_mapdata = mapdata.depends[idx];
+                    /*
+                    for (let idx in mapdata.depends){
+                    let dep_mapdata = mapdata.depends[idx];
                     mapping.addDataset(dep_mapdata);
                     }*/
 
                 }else{
                     
-                    var overlay_id = mapdata.id;
+                    let overlay_id = mapdata.id;
                     if(overlay_legend_id){
                         overlay_id = overlay_legend_id;
                     }
@@ -1486,9 +1482,8 @@ map.data.addListener('mouseover', function(event) {
                         $("#map_legend .content").find('#'+overlay_id+'>div').css('border-color',new_color);
                     }
 
-                    var idx;
-                    for (idx in mapdata.depends){
-                        var dep_mapdata = mapdata.depends[idx];
+                    for (let idx in mapdata.depends){
+                        let dep_mapdata = mapdata.depends[idx];
                         mapping.changeDatasetColor( dep_mapdata.id, new_color, true);
                     }
                     mapping.changeDatasetColor( mapdata.id, new_color, true );
@@ -1516,15 +1511,15 @@ map.data.addListener('mouseover', function(event) {
         
         _openDialogLayerProperties( function(){
             
-            var layer_name = $dlg_edit_layer.find("#layer_name");
-            var message = $dlg_edit_layer.find('.messages');
+            let layer_name = $dlg_edit_layer.find("#layer_name");
+            let message = $dlg_edit_layer.find('.messages');
 
-            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
+            let bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
 
             if(bValid){
-                var new_title =  layer_name.val();
-                var new_color = $dlg_edit_layer.find('#layer_color').colorpicker('val');
-                var colorChanged = false;
+                let new_title =  layer_name.val();
+                let new_color = $dlg_edit_layer.find('#layer_color').colorpicker('val');
+                let colorChanged = false;
                 if(overlays[overlay_idx].source.title!=new_title){
                     overlays[overlay_idx].source.title = new_title;
                     $("#map_legend .content").find('#md-'+overlay_idx+' label').html(new_title);
@@ -1547,14 +1542,14 @@ map.data.addListener('mouseover', function(event) {
     function _openDialogLayerProperties( onSaveCallback ){
 
         function __onOpen(){
-            var mapdata = edit_mapdata;
+            let mapdata = edit_mapdata;
 
             if( mapdata && mapdata.id!='main' ){
                 $dlg_edit_layer.find("#layer_name").val(mapdata.title).removeClass( "ui-state-error" );
             }else{
                 $dlg_edit_layer.find("#layer_name").val('').removeClass( "ui-state-error" );
             }
-            var colorPicker = $dlg_edit_layer.find("#layer_color");
+            let colorPicker = $dlg_edit_layer.find("#layer_color");
 
             colorPicker.colorpicker('val', mapdata.color);
             //colorPicker.
@@ -1605,12 +1600,12 @@ map.data.addListener('mouseover', function(event) {
     // 
     // Data types
     //
-    var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
-    var RT_TILED_IMAGE_SOURCE = localIds['RT_TILED_IMAGE_SOURCE']; //2-11
-    var RT_GEOTIFF_SOURCE = localIds['RT_GEOTIFF_SOURCE']; //3-1018;
-    var RT_KML_SOURCE = localIds['RT_KML_SOURCE']; //3-1014;
-    var RT_SHP_SOURCE = localIds['RT_SHP_SOURCE']; //3-1017;
-    var RT_MAPABLE_QUERY = localIds['RT_QUERY_SOURCE']; //3-1021;
+    let localIds = window.hWin.HAPI4.sysinfo['dbconst'];
+    const RT_TILED_IMAGE_SOURCE = localIds['RT_TILED_IMAGE_SOURCE']; //2-11
+    const RT_GEOTIFF_SOURCE = localIds['RT_GEOTIFF_SOURCE']; //3-1018;
+    const RT_KML_SOURCE = localIds['RT_KML_SOURCE']; //3-1014;
+    const RT_SHP_SOURCE = localIds['RT_SHP_SOURCE']; //3-1017;
+    const RT_MAPABLE_QUERY = localIds['RT_QUERY_SOURCE']; //3-1021;
 
 
     //
@@ -1654,20 +1649,20 @@ map.data.addListener('mouseover', function(event) {
     */
     HeuristOverlay.prototype.onAdd = function() {
         // Image div
-        var div = document.createElement('div');
+        let div = document.createElement('div');
         div.style.borderStyle = 'none';
         div.style.borderWidth = '0px';
         div.style.position = 'absolute';
 
         // Title
         /*
-        var span = document.createElement('span');
+        let span = document.createElement('span');
         span.innerHTML = "Title";
         div.appendChild(span);
         */
 
         // Create the img element and attach it to the div.
-        var img = document.createElement('img');
+        let img = document.createElement('img');
         img.src = this.image_;
         img.style.width = '100%';
         img.style.height = '100%';
@@ -1677,7 +1672,7 @@ map.data.addListener('mouseover', function(event) {
         this.div_ = div;
 
         // Add the element to the "overlayLayer" pane.
-        var panes = this.getPanes();
+        let panes = this.getPanes();
         panes.overlayLayer.appendChild(div);
     };
 
@@ -1688,16 +1683,16 @@ map.data.addListener('mouseover', function(event) {
         // We use the south-west and north-east
         // coordinates of the overlay to peg it to the correct position and size.
         // To do this, we need to retrieve the projection from the overlay.
-        var overlayProjection = this.getProjection();
+        let overlayProjection = this.getProjection();
 
         // Retrieve the south-west and north-east coordinates of this overlay
         // in LatLngs and convert them to pixel coordinates.
         // We'll use these coordinates to resize the div.
-        var sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
-        var ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
+        let sw = overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());
+        let ne = overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());
 
         // Resize the image's div to fit the indicated dimensions.
-        var div = this.div_;
+        let div = this.div_;
         div.style.left = sw.x + 'px';
         div.style.top = ne.y + 'px';
         div.style.width = (ne.x - sw.x) + 'px';
@@ -1724,17 +1719,17 @@ map.data.addListener('mouseover', function(event) {
 
         mapping = _mapping;
         map = _mapping.getNativeMap();
-        var legend = document.getElementById('map_legend');
+        let legend = document.getElementById('map_legend');
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend); //LEFT_BOTTOM
         
-        var warning = document.getElementById('map_limit_warning');
+        let warning = document.getElementById('map_limit_warning');
         map.controls[google.maps.ControlPosition.RIGHT_TOP].push(warning);
         
         //$(legend).css('top','60px');
         
         // Legend collapse listener
         $("#collapse").click(function(e) {
-            var tocollapse = ($(this).text() == "-");
+            let tocollapse = ($(this).text() == "-");
             tocollapse ? $(this).text("+") : $(this).text("-");  // Update text to + or -
             
             $("#map_legend .content").toggle();//(400);
@@ -1749,7 +1744,7 @@ map.data.addListener('mouseover', function(event) {
         
         menu_mapdocuments = $('<ul>').appendTo( $('body') ).hide();
 
-        var btn_mapdocs = $("#mapSelectorBtn").button({showLabel:true, label:'Select...',
+        let btn_mapdocs = $("#mapSelectorBtn").button({showLabel:true, label:'Select...',
                 icon:"ui-icon-triangle-1-s", iconPosition:'end'}).css('max-height',22)
                 .click( function(e) {
                 $('.menu-or-popup').hide(); //hide other
@@ -1782,7 +1777,7 @@ map.data.addListener('mouseover', function(event) {
     }
 
     //public members
-    var that = {
+    let that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},

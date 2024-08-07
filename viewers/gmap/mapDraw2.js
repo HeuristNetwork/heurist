@@ -172,7 +172,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _fillCoordinates(shape){
         if(shape!=null){
-            sCoords = '';
+            let sCoords = '';
             if(shape.type==google.maps.drawing.OverlayType.POLYGON || 
                 shape.type==google.maps.drawing.OverlayType.POLYLINE) {
 
@@ -209,7 +209,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
             if(shape.type==google.maps.drawing.OverlayType.POLYGON) {
 
-                var aCoords = [];
+                let aCoords = [];
                 processPoints(shape.getPath(), function(latLng){
                     aCoords.push(formatPntWKT(latLng));
                     }, shape);
@@ -221,7 +221,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
             }else if(shape.type==google.maps.drawing.OverlayType.POLYLINE){
 
-                var aCoords = [];
+                let aCoords = [];
                 processPoints(shape.getPath(), function(latLng){
                     aCoords.push(formatPntWKT(latLng));
                     }, shape);
@@ -231,8 +231,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
             }else if(shape.type==google.maps.drawing.OverlayType.RECTANGLE){
 
-                var bnd = shape.getBounds();
-                var aCoords = [];
+                let bnd = shape.getBounds();
+                let aCoords = [];
                 let sw = bnd.getSouthWest();
                 let nw = bnd.getNorthEast();
 
@@ -253,10 +253,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 r(bounds.getSouthWest().lng())+" "+r(bounds.getNorthEast().lat())+
                 ")";*/
 
-                var bnd = shape.getBounds();
+                let bnd = shape.getBounds();
 
                 // Actualy we need ony 2 points to detect center and radius - however we add 2 more points for correct bounds
-                var aCoords = [];
+                let aCoords = [];
                 aCoords.push(formatPntWKT(shape.getCenter()));
                 aCoords.push(formatPntWKT( new google.maps.LatLng( shape.getCenter().lat(), bnd.getNorthEast().lng()  ) ));
                 aCoords.push(formatPntWKT( bnd.getSouthWest() ));
@@ -394,7 +394,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         });
 
         // deal with initial tile loading
-        var loadListener = google.maps.event.addListener(map, 'tilesloaded', function(){
+        let loadListener = google.maps.event.addListener(map, 'tilesloaded', function(){
             google.maps.event.removeListener( loadListener );
             _onMapInited();
         });
@@ -442,7 +442,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 }else{
                     gmap.setCenter(results[0].geometry.location);
                 }  
-                /*var marker = new google.maps.Marker({
+                /*let marker = new google.maps.Marker({
                 map: map,
                 position: results[0].geometry.location
                 });*/
@@ -570,11 +570,11 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             
             let allInteger = true, allOutWGS = true;
             //check for UTM - assume they are integer and at least several are more than 180
-            for (k=0; k<arc.length; k++){
+            for (let k=0; k<arc.length; k++){
                 
                 if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE) continue;
             
-                var crd = Number(arc[k]);
+                let crd = Number(arc[k]);
                 if(isNaN(crd)){
                     alert(arc[k]+" is not number value");
                     return null;
@@ -658,7 +658,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 break;
             }
 
-            var crd = Number(arc[k]);
+            let crd = Number(arc[k]);
             if(isNaN(crd)){
                 alert(arc[k]+" is not number value");
                 return null;
@@ -672,8 +672,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             islat = !islat;
             if(islat){
                 if(UTMzone>0){
-                    easting = Number(arc[k-1]);
-                    northing = crd;
+                    let easting = Number(arc[k-1]);
+                    let northing = crd;
                     
                     let utm = new Utm( UTMzone, hemisphere, easting, northing );
                     let latlon = utm.toLatLonE();
@@ -706,10 +706,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     if (selectedShape) {
                         selectedShape.setPath(coords);
                     }else{
-                        var opts = drawingManager.get('polygonOptions');
+                        let opts = drawingManager.get('polygonOptions');
                         opts.paths = coords;
 
-                        var newShape = new google.maps.Polygon(opts);
+                        let newShape = new google.maps.Polygon(opts);
                         newShape.setMap(gmap);   
                         newShape.type = google.maps.drawing.OverlayType.POLYGON;
 
@@ -725,10 +725,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     if (selectedShape) {
                         selectedShape.setPath(coords);
                     }else{
-                        var opts = drawingManager.get('polylineOptions');
+                        let opts = drawingManager.get('polylineOptions');
                         opts.path = coords;
 
-                        var newShape = new google.maps.Polyline(opts);
+                        let newShape = new google.maps.Polyline(opts);
                         newShape.setMap(gmap);   
                         newShape.type = google.maps.drawing.OverlayType.POLYLINE;
 
@@ -744,9 +744,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 if (selectedShape) {
                     selectedShape.setPosition(coords[0]);
                 }else{
-                    var k, newShape;
-                    for(k=0; k<coords.length; k++){
-                        var opts = drawingManager.get('markerOptions');
+                    let newShape;
+                    for(let k=0; k<coords.length; k++){
+                        let opts = drawingManager.get('markerOptions');
                         opts.position = coords[k];
                         newShape = new google.maps.Marker(opts);
                         newShape.setMap(gmap);   
@@ -767,9 +767,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     if (selectedShape) {
                         selectedShape.setBounds( bounds );
                     }else{
-                        var opts = drawingManager.get('rectangleOptions');
+                        let opts = drawingManager.get('rectangleOptions');
                         opts.bounds = bounds;
-                        var newShape = new google.maps.Rectangle(opts);
+                        let newShape = new google.maps.Rectangle(opts);
                         newShape.setMap(gmap);   
                         newShape.type = google.maps.drawing.OverlayType.RECTANGLE;
 
@@ -793,10 +793,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                         selectedShape.setCenter( coords[0] );
                         selectedShape.setRadius( radius );
                     }else{
-                        var opts = drawingManager.get('circleOptions');
+                        let opts = drawingManager.get('circleOptions');
                         opts.center = coords[0];
                         opts.radius = radius;
-                        var newShape = new google.maps.Circle(opts);
+                        let newShape = new google.maps.Circle(opts);
                         newShape.setMap(gmap);   
                         newShape.type = google.maps.drawing.OverlayType.CIRCLE;
 
@@ -839,20 +839,18 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         let ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon'];
         
         if(mdata.type == 'FeatureCollection'){
-            let k = 0;
-            for (k=0; k<mdata.features.length; k++){
+            for (let k=0; k<mdata.features.length; k++){
                 _loadGeoJSON(mdata.features[k]); //another collection or feature
             }
         }else{
             
             function __loadGeoJSON_primitive(geometry){
 
-                if($.isEmptyObject(geometry)){
+                if($.isEmptyObject(geometry)) return;
 
-                }else if(geometry.type=="GeometryCollection"){
-                    let l;
-                    for (l=0; l<geometry.geometries.length; l++){
-                        _loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
+                if(geometry.type=="GeometryCollection"){
+                    for (let l=0; l<geometry.geometries.length; l++){
+                        __loadGeoJSON_primitive(geometry.geometries[l]); //another collection or feature
                     }
                 }else{
 
@@ -868,17 +866,16 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                             shapes.push([{lat:coords[1], lng:coords[0]}]);
                         }else if(_isvalid_pnt(coords[0])){
                             //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
-                            let shape = [], m;
-                            for (m=0; m<coords.length; m++){
-                                pnt = coords[m];
+                            let shape = [];
+                            for (let m=0; m<coords.length; m++){
+                                let pnt = coords[m];
                                 if(_isvalid_pnt(pnt)){
                                     shape.push({lat:pnt[1], lng:pnt[0]});
                                 }
                             }
                             shapes.push(shape);
                         }else{
-                            let n;
-                            for (n=0; n<coords.length; n++){
+                            for (let n=0; n<coords.length; n++){
                                 if($.isArray(coords[n]))
                                     _extractCoords(shapes, coords[n]);
                             }
@@ -929,13 +926,13 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     function _getGeoJSON(){
 
-        let k, points=[], polylines=[], polygones=[];
-        for (k=0; k<overlays.length; k++){
+        let points=[], polylines=[], polygones=[];
+        for (let k=0; k<overlays.length; k++){
 
             let shape = overlays[k];
 
             if(shape!=null){
-                coords = [];
+                let coords = [];
                 if(shape.type==google.maps.drawing.OverlayType.POLYGON){
 
                     processPoints(shape.getPath(), function(latLng){
@@ -967,7 +964,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                 }else if(shape.type==google.maps.drawing.OverlayType.CIRCLE){
 
-                    var latLng = shape.getCenter()
+                    let latLng = shape.getCenter()
                     let radius = shape.getRadius();
 
                     let degreeStep = 360 / 40;
@@ -978,9 +975,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     };    
                     coords.push(coords[0])                    
                     /*
-                    for (var i=0; i <= 40; ++i) {
-                    var x = latLng.lng() + radius * Math.cos(i * 2*Math.PI / 40);
-                    var y = latLng.lat() + radius * Math.sin(i * 2*Math.PI / 40);
+                    for (let i=0; i <= 40; ++i) {
+                    let x = latLng.lng() + radius * Math.cos(i * 2*Math.PI / 40);
+                    let y = latLng.lat() + radius * Math.sin(i * 2*Math.PI / 40);
                     coords.push([x, y]);
                     }                        
                     */                       
@@ -988,7 +985,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
                 }else if(shape.type==google.maps.drawing.OverlayType.MARKER){
 
-                    var latLng = shape.getPosition();
+                    let latLng = shape.getPosition();
                     coords.push([latLng.lng(), latLng.lat()]);
                     points.push(coords);
 
@@ -1261,7 +1258,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             if(selectedShape==null){
                 window.hWin.HEURIST4.msg.showMsgDlg('You have to select a shape');
             }else{
-                var res = _getWKT(selectedShape);
+                let res = _getWKT(selectedShape);
                 _saveExtentOnExit();
                 window.close(res);    
             }
@@ -1366,10 +1363,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         if(!$.isEmptyObject(map_viewpoints)){
 
             /* now we always keep last extent 
-            var map_viewpoints_sel = window.hWin.HAPI4.get_prefs('map_viewpoints_sel');
+            let map_viewpoints_sel = window.hWin.HAPI4.get_prefs('map_viewpoints_sel');
 
-            var $sel_viepoints = $('#sel_viewpoints');
-            var not_found = true;
+            let $sel_viepoints = $('#sel_viewpoints');
+            let not_found = true;
             if(map_viewpoints_sel){
                 $.each(map_viewpoints, function(idx, item){
                     if(item.title == map_viewpoints_sel){
@@ -1458,31 +1455,30 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             wkt = decodeURIComponent(document.location.search);
         }
         
-        /*var matches = wkt.match(/\??(\S+)\s+(.*)/);
+        /*let matches = wkt.match(/\??(\S+)\s+(.*)/);
         if (! matches) {
             return;
         }
-        var type = matches[1];
-        var value = matches[2];*/
+        let type = matches[1];
+        let value = matches[2];*/
         
         let resdata = window.hWin.HEURIST4.geo.wktValueToShapes( wkt, null, 'google' );
                   
-        type = google.maps.drawing.OverlayType.MARKER;
-        let i;
-        for (i=0; i<resdata.Point.length; i++){
-            shape = resdata.Point[i];
+        let type = google.maps.drawing.OverlayType.MARKER;
+        for (let i=0; i<resdata.Point.length; i++){
+            let shape = resdata.Point[i];
             selectedShape = null;//to avoid clear
             _loadShape(shape, type);   
         }
         type = google.maps.drawing.OverlayType.POLYLINE;
-        for (i=0; i<resdata.Polyline.length; i++){
-            shape = resdata.Polyline[i];
+        for (let i=0; i<resdata.Polyline.length; i++){
+            let shape = resdata.Polyline[i];
             selectedShape = null; //to avoid clear
             _loadShape(shape, type);   
         }
         type = google.maps.drawing.OverlayType.POLYGON;
-        for (i=0; i<resdata.Polygon.length; i++){
-            shape = resdata.Polygon[i];
+        for (let i=0; i<resdata.Polygon.length; i++){
+            let shape = resdata.Polygon[i];
             selectedShape = null; //to avoid clear
             _loadShape(shape, type);   
         }
@@ -1498,7 +1494,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             gmap.fitBounds(bounds);
         }
         /*
-        var gjson =  parseWKT(value);    //wkt to json
+        let gjson =  parseWKT(value);    //wkt to json
         
         _loadGeoJSON( gjson );  ///!!!!!
         
@@ -1543,25 +1539,26 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 break;
 
             case "c":  //circle
+            {
                 mode = google.maps.drawing.OverlayType.CIRCLE
                 matches = value.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
 
-                var radius = _getDistance({lat:parseFloat(matches[2]), lng:parseFloat(matches[1])}, 
+                let radius = _getDistance({lat:parseFloat(matches[2]), lng:parseFloat(matches[1])}, 
                     {lat:parseFloat(matches[2]), lng:parseFloat(matches[3])}) ;
 
                 sCoords = parseFloat(matches[2])+'  '+parseFloat(matches[1])+'\nr='+radius.toFixed(2);
 
 
                 break;
-
+            }
             case "l":  ///polyline
                 mode = google.maps.drawing.OverlayType.POLYLINE
                 matches = value.match(/LINESTRING\s?\((.+)\)/i);
                 if (matches){
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
 
-                    for (var j=0; j < matches.length; ++j) {
-                        var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+                    for (let j=0; j < matches.length; ++j) {
+                        let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
 
@@ -1574,8 +1571,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 if (matches) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
 
-                    for (var j=0; j < matches.length; ++j) {
-                        var match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+                    for (let j=0; j < matches.length; ++j) {
+                        let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
                 }
@@ -1603,7 +1600,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         let that = this;
         
         /*
-        var request = {'a': 'search',
+        let request = {'a': 'search',
             'entity': 'Records',
             'details': 'full',
             'rec_ID': rec_ID,

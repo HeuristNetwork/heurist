@@ -33,6 +33,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/Map  
 */
+/* global HintDiv */
+
 let mapStaticURL = '';
 if(window.hWin && window.hWin.HAPI4){
     mapStaticURL = window.hWin.HAPI4.baseURL+"viewers/gmap/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
@@ -46,11 +48,11 @@ function MapViewer() {
 	let hintDiv = new HintDiv('mapPopup', 300, 300, '<div id="map_viewer" style="width:100%;height:100%;"></div>');
 
 
-	function _showAt(event, geovalue)
+	function _showAt(event, geovalue) //not used
 	{
 			hintDiv.showAt(event);
 
-			initmap_viewer('map_viewer', geovalue); //from digitizer.js
+			//initmap_viewer('map_viewer', geovalue); //from digitizer.js
 	}
 
 	function _showAtStatic(event, recid, value)
@@ -80,7 +82,7 @@ function MapViewer() {
 	//public members
 	let that = {
 
-		showAt: function(event, geovalue){
+		showAt: function(event, geovalue){//not used
 			_showAt(event, geovalue);
 		},
 		showAtStatic: function(event, recid, value){

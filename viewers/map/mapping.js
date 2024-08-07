@@ -110,6 +110,8 @@ Thematic mapping
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global L, hMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter */
+
 $.widget( "heurist.mapping", {
 
     // default options
@@ -294,7 +296,7 @@ $.widget( "heurist.mapping", {
     //
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.element
         // prevent double click to select text
@@ -311,11 +313,11 @@ $.widget( "heurist.mapping", {
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
     
-        var that = this;    
+        let that = this;    
         //1. INIT LAYOUT
         
         // Layout options
-        var layout_opts =  {
+        let layout_opts =  {
             applyDefaultStyles: true,
             togglerContent_open:    '<div class="ui-icon"></div>',
             togglerContent_closed:  '<div class="ui-icon"></div>',
@@ -329,7 +331,7 @@ $.widget( "heurist.mapping", {
         };
 
         
-        is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
+        let is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
 
         // Setting layout
         if(this.options.element_layout)
@@ -338,12 +340,7 @@ $.widget( "heurist.mapping", {
             layout_opts.center__minWidth = 200;
             layout_opts.north__size = 0;//30;
             layout_opts.north__spacing_open = 0;
-            /*
-            var th = Math.floor($(this.options.element_layout).height*0.2);
-            layout_opts.south__size = th>200?200:th;
-            layout_opts.south__spacing_open = 7;
-            layout_opts.south__spacing_closed = 12;
-            */
+
             layout_opts.south__onresize_end = function() {
                 //if(mapping) mapping.setTimelineMinheight();
                 that._adjustLegendHeight();
@@ -362,23 +359,23 @@ $.widget( "heurist.mapping", {
 
         
         //2. INIT MAP
-        map_element_id = 'map';
+        let map_element_id = 'map';
         if(this.options.element_map && this.options.element_map.indexOf('#')==0){
             map_element_id = this.options.element_map.substr(1);
         }
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        var map_options = {zoomControl:false, tb_del:true, worldCopyJump: false};
+        let map_options = {zoomControl:false, tb_del:true, worldCopyJump: false};
         
         this.nativemap = L.map( map_element_id,  map_options)
             .on('load', function(){ } );
 
         this.nativemap.on('zoomend', function (e) {
             if(that.mapManager){
-                var md = that.mapManager.getMapDocuments();
+                let md = that.mapManager.getMapDocuments();
                 if(md) {
-                    var currZoom = that.nativemap.getZoom();
+                    let currZoom = that.nativemap.getZoom();
                     md.updateLayerVisibility(currZoom);   
                 }
                 
@@ -470,13 +467,13 @@ $.widget( "heurist.mapping", {
     adjustToolbarHeight: function(){
         
         
-        var is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
-        var toolbar = $('#mapToolbarContentDiv');
+        let is_ui_main = this.options.layout_params && this.options.layout_params['ui_main'];
+        let toolbar = $('#mapToolbarContentDiv');
         
         if(is_ui_main && toolbar.length>0){
         
             
-            var h = toolbar.height() + 5;
+            let h = toolbar.height() + 5;
 
             if($('#mapToolbarDiv').height()!=h){
                 this.mylayout.sizePane('north', h);
@@ -487,7 +484,7 @@ $.widget( "heurist.mapping", {
     },
     //-------
     _adjustLegendHeight: function(){
-        var ele = $('#'+map_element_id);
+        let ele = $('#map');
         if(this.mapManager) this.mapManager.setHeight(ele.height()-50); //adjust legend height    
     //invalidateSize
     },
@@ -551,7 +548,7 @@ $.widget( "heurist.mapping", {
     //
     applyImageMapFilter: function(layerClassName, image_filter=null)
     {
-        var filter = '';
+        let filter = '';
         if(image_filter==null){
             image_filter = this.basemaplayer_filter;
         }
@@ -732,7 +729,7 @@ $.widget( "heurist.mapping", {
     //
     loadBaseMap: function(basemap_id){
 
-        var provider = this.basemap_providers[0]; //first by default
+        let provider = this.basemap_providers[0]; //first by default
         if(window.hWin.HEURIST4.util.isNumber(basemap_id)){
             if(basemap_id>=0){
                 provider = this.basemap_providers[basemap_id];    
@@ -767,7 +764,7 @@ $.widget( "heurist.mapping", {
             
             if(provider['name']!=='None'){
 
-                var bm_opts = provider['options'] || {};
+                let bm_opts = provider['options'] || {};
                 
                 //it prevents continous/repeatative world
                 let is_no_wrap = window.hWin.HAPI4.get_prefs('map_no_wrap');         
@@ -809,9 +806,9 @@ $.widget( "heurist.mapping", {
                 
                 //to avoid pan out of extent
                 if(is_no_wrap){
-                    var sw = L.latLng(-100, -190),
+                    let sw = L.latLng(-100, -190),
                         ne = L.latLng(100, 190);
-                    var bbox2 = L.latLngBounds(sw, ne);             
+                    let bbox2 = L.latLngBounds(sw, ne);             
                     
                     this.nativemap.options.maxBounds = bbox2;
                     this.nativemap.options.maxBoundsViscosity = 1;
@@ -823,11 +820,10 @@ $.widget( "heurist.mapping", {
                     this.applyImageMapFilter('heurist-imageoverlay-basemap', this.basemaplayer_filter);
                 }
 
-                //var layer_maxZoom = (provider['options'] && provider['options']['maxZoom']) ? provider['options']['maxZoom'] : 18;
-                var layer_maxZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['maxZoom']) ? 
+                let layer_maxZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['maxZoom']) ? 
                                         this.basemaplayer['options']['maxZoom'] : 19;
                 
-                var layer_minZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['minZoom']) ? 
+                let layer_minZoom = (this.basemaplayer['options'] && this.basemaplayer['options']['minZoom']) ? 
                                         this.basemaplayer['options']['minZoom'] : 0;
 
                 this.defineMaxZoom('basemap', layer_maxZoom);
@@ -862,9 +858,9 @@ $.widget( "heurist.mapping", {
     //
     addTileLayer: function(layer_url, layer_options, dataset_name){
     
-        var new_layer;
+        let new_layer;
         
-        var HeuristTilerLayer = L.TileLayer.extend({
+        let HeuristTilerLayer = L.TileLayer.extend({
                         getBounds: function(){
                             return this.options._extent;  
                         }});
@@ -884,7 +880,7 @@ $.widget( "heurist.mapping", {
         }else
         if(layer_options['BingLayer'])
         {
-                var BingLayer = HeuristTilerLayer.extend({
+                let BingLayer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
                         return L.Util.template(this._url, {
@@ -893,10 +889,10 @@ $.widget( "heurist.mapping", {
                         });
                     },
                     _quadKey: function (x, y, z) {
-                        var quadKey = [];
-                        for (var i = z; i > 0; i--) {
-                            var digit = '0';
-                            var mask = 1 << (i - 1);
+                        let quadKey = [];
+                        for (let i = z; i > 0; i--) {
+                            let digit = '0';
+                            let mask = 1 << (i - 1);
                             if ((x & mask) != 0) {
                                 digit++;
                             }
@@ -925,10 +921,10 @@ $.widget( "heurist.mapping", {
                 // Tile Map Service: an early standard supported by OpenLayers. 
                 // One difference is the y axis is positive southwards in TMS
             
-                var TMS_Layer = HeuristTilerLayer.extend({
+                let TMS_Layer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
-                        var zoom = this._getZoomForUrl();
+                        let zoom = this._getZoomForUrl();
                         return L.Util.template(this._url, {
                             s: this._getSubdomain(tilePoint),
                             q: this._maptiler(tilePoint.x, tilePoint.y, zoom),
@@ -939,8 +935,8 @@ $.widget( "heurist.mapping", {
                     },
                     _maptiler: function (x, y, z) { //invert Y
                         
-                        var bound = Math.pow(2, z);
-                        var s = ''+z+'/'+x+'/'+(bound - y - 1); 
+                        let bound = Math.pow(2, z);
+                        let s = ''+z+'/'+x+'/'+(bound - y - 1); 
                      
                         return s;
                     }
@@ -998,7 +994,7 @@ $.widget( "heurist.mapping", {
     //
     addImageOverlay: function(image_url, image_extent, dataset_name, className=''){
     
-        var new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
+        let new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
         
         if(!window.hWin.HEURIST4.util.isempty(className)){
             new_layer.getElement().classList.add(className);
@@ -1024,30 +1020,28 @@ $.widget( "heurist.mapping", {
     //
     projectGeoJson:function(gjson, to_pixels){
         
-        var that = this;
+        let that = this;
         
         
         
         if(gjson.type == 'FeatureCollection'){
-            var k = 0;
-            for (k=0; k<gjson.features.length; k++){
+            for (let k=0; k<gjson.features.length; k++){
                 this.projectGeoJson(gjson.features[k], to_pixels); //another collection or feature
             }
         }else if($.isArray(gjson)){
-            var k = 0;
-            for (k=0; k<gjson.length; k++){
+            for (let k=0; k<gjson.length; k++){
                 this.projectGeoJson(gjson[k], to_pixels); //another collection or feature
             }
         }else{
             
-            var ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon','GeometryCollection'];
+            let ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon','GeometryCollection'];
         
             function __convert_primitive(geometry){
 
-                if($.isEmptyObject(geometry)){
+                if(!$.isEmptyObject(geometry)) return;
 
-                }else if(geometry.type=="GeometryCollection"){
-                    var l;
+                if(geometry.type=="GeometryCollection"){
+                    let l;
                     for (l=0; l<geometry.geometries.length; l++){
                         __convert_primitive(geometry.geometries[l]); //another collection or feature
                     }
@@ -1055,7 +1049,7 @@ $.widget( "heurist.mapping", {
 
                     
                     function _is_point(pnt){
-                            var isValid = ($.isArray(pnt) && pnt.length==2 && 
+                            let isValid = ($.isArray(pnt) && pnt.length==2 && 
                                 $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
                             return isValid;
                     }                    
@@ -1067,7 +1061,7 @@ $.widget( "heurist.mapping", {
                         
                         if(to_pixels){
                             //from lat long to pixels
-                            var pix = that.nativemap.project(pnt, that.basemap_layer_maxzoom);
+                            let pix = that.nativemap.project(pnt, that.basemap_layer_maxzoom);
 
                             return [Math.round(-pix.y), Math.round(-pix.x)];
 
@@ -1076,7 +1070,7 @@ $.widget( "heurist.mapping", {
                             pnt[1] = -pnt[1];
                             pnt[0] = -pnt[0];
                             
-                            var latlong = that.nativemap.unproject([pnt[1],pnt[0]], that.basemap_layer_maxzoom);
+                            let latlong = that.nativemap.unproject([pnt[1],pnt[0]], that.basemap_layer_maxzoom);
                             
                             return [latlong.lat, latlong.lng];
                         }
@@ -1085,7 +1079,7 @@ $.widget( "heurist.mapping", {
                     //for timemap
                     function __convertCoords(coords){
                         
-                        var res = [];
+                        let res = [];
 
                         if(_is_point(coords)){ 
                         
@@ -1093,10 +1087,10 @@ $.widget( "heurist.mapping", {
                         
                         }else {
                             
-                            for (var m=0; m<coords.length; m++){
+                            for (let m=0; m<coords.length; m++){
                                 
                                 if(_is_point(coords[m])){
-                                    pnt = _convertXY(coords[m]);
+                                    const pnt = _convertXY(coords[m]);
                                     res.push(pnt);
                                 }else{
                                     res.push(__convertCoords(coords[m]));   
@@ -1106,7 +1100,7 @@ $.widget( "heurist.mapping", {
                         return res;
                     }
 
-                    var res_coords = __convertCoords(geometry.coordinates);
+                    let res_coords = __convertCoords(geometry.coordinates);
                     if(res_coords.length>0){
                             geometry.coordinates = res_coords;
                     }
@@ -1141,7 +1135,7 @@ $.widget( "heurist.mapping", {
     //
     addGeoJson: function(options){
             
-            var geojson_data = options.geojson_data,
+            let geojson_data = options.geojson_data,
                 timeline_data = options.timeline_data,
                 layer_style = options.layer_style,
                 popup_template = options.popup_template,
@@ -1156,9 +1150,9 @@ $.widget( "heurist.mapping", {
                 this.projectGeoJson( geojson_data, false ); //from pixels to latlong
             }
                 
-            var that = this;
+            let that = this;
             
-            var new_layer = L.geoJSON(geojson_data, {
+            let new_layer = L.geoJSON(geojson_data, {
                     default_style: null
                     , layer_name: dataset_name
                     , popup_template: popup_template
@@ -1270,7 +1264,7 @@ $.widget( "heurist.mapping", {
 
         if(this.notimeline) return;
         
-        var group_idx = this.getTimelineGroup(layer_id);
+        let group_idx = this.getTimelineGroup(layer_id);
         if(group_idx>=0){
             this.timeline_groups[group_idx].content = new_dataset_name;
             
@@ -1289,17 +1283,17 @@ $.widget( "heurist.mapping", {
         
             if(this.notimeline) return;
       
-            var titem, k, ts, iconImg;
+            let titem, k, ts, iconImg;
 
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layer_data) ){
 
                 
                 //list of fields - filter by date field
                 if(timeline_dty_ids && timeline_dty_ids.length>1){
-                    sfields = '<span style="font-size:0.9em">'
-                    for(var i=0;i<timeline_dty_ids.length;i++){  
-                        var id = timeline_dty_ids[i];
-                        var lbl = (id==10)?'Start/end dates':$Db.dty(id,'dty_Name');
+                    let sfields = '<span style="font-size:0.9em">'
+                    for(let i=0;i<timeline_dty_ids.length;i++){  
+                        let id = timeline_dty_ids[i];
+                        let lbl = (id==10)?'Start/end dates':$Db.dty(id,'dty_Name');
                         
                         sfields = sfields
                         + '<br><label><input type="checkbox" data-layer_id="'+layer_id+'" data-dty_id="'+id+'" checked/>'     
@@ -1309,7 +1303,7 @@ $.widget( "heurist.mapping", {
                     dataset_name = dataset_name + sfields;
                 }
                 
-                var group_idx = this.getTimelineGroup(layer_id);
+                let group_idx = this.getTimelineGroup(layer_id);
                 if(group_idx<0){
                     this.timeline_groups.push({ id:layer_id, content:dataset_name });        
                     group_idx = this.timeline_groups.length-1;
@@ -1325,7 +1319,7 @@ $.widget( "heurist.mapping", {
                 
                 this.timeline_items[layer_id] = []; //remove/reset previous data
                 
-                var that = this;
+                let that = this;
 
                 $.each(layer_data, function(idx, tdata){
 
@@ -1388,7 +1382,7 @@ $.widget( "heurist.mapping", {
     //
     getTimelineGroup:function(layer_id){
         
-        for (var k=0; k<this.timeline_groups.length; k++){
+        for (let k=0; k<this.timeline_groups.length; k++){
             if(this.timeline_groups[k].id==layer_id){
                 return k;
             }
@@ -1400,7 +1394,7 @@ $.widget( "heurist.mapping", {
     //
     //
     removeTimelineGroup:function(layer_id){
-        var idx = this.getTimelineGroup(layer_id);
+        let idx = this.getTimelineGroup(layer_id);
         if(idx>=0){
             this.timeline_groups.splice(idx,1);
             this.timeline_items[layer_id] = null;
@@ -1416,9 +1410,9 @@ $.widget( "heurist.mapping", {
     //
     _mergeBounds: function(bounds){
 
-        var res = null;
+        let res = null;
 
-        for(var i=0; i<bounds.length; i++){
+        for(let i=0; i<bounds.length; i++){
             if(bounds[i]){
 
                 if(!(bounds[i] instanceof L.LatLngBounds)){
@@ -1454,15 +1448,15 @@ $.widget( "heurist.mapping", {
             layer_ids = [layer_ids];
         }
         
-        var bounds = [];
+        let bounds = [];
         
-        for(var i=0; i<layer_ids.length; i++){
+        for(let i=0; i<layer_ids.length; i++){
             
-            var layer_id = layer_ids[i];
+            let layer_id = layer_ids[i];
             
-            var affected_layer = this.all_layers[layer_id];
+            let affected_layer = this.all_layers[layer_id];
             if(affected_layer){
-                var bnd;
+                let bnd;
                 
                 if($.isFunction(affected_layer.getBounds)){
                     bnd = affected_layer.getBounds();
@@ -1494,7 +1488,7 @@ $.widget( "heurist.mapping", {
     //
     zoomToLayer: function(layer_ids){
         
-        var bounds = this.getBounds(layer_ids);
+        let bounds = this.getBounds(layer_ids);
         this.zoomToBounds(bounds);
         
     },
@@ -1506,16 +1500,16 @@ $.widget( "heurist.mapping", {
     getSetMapBounds: function(is_set){
         
         if(is_set){
-            var bounds = this.nativemap.getBounds();
+            let bounds = this.nativemap.getBounds();
             window.hWin.HAPI4.save_pref('map_saved_extent', bounds.toBBoxString());
         }else{
-            var bounds = window.hWin.HAPI4.get_prefs_def('map_saved_extent', null);
+            let bounds = window.hWin.HAPI4.get_prefs_def('map_saved_extent', null);
             
             if(bounds){
                 //'southwest_lng,southwest_lat,northeast_lng,northeast_lat'
                 bounds = bounds.split(',');
                 if(bounds.length==4){
-                    var corner1 = L.latLng(bounds[1], bounds[0]),
+                    let corner1 = L.latLng(bounds[1], bounds[0]),
                         corner2 = L.latLng(bounds[3], bounds[2]);
                     bounds = L.latLngBounds(corner1, corner2);            
                     this.zoomToBounds(bounds);
@@ -1542,7 +1536,7 @@ $.widget( "heurist.mapping", {
             return this.nativemap.getBoundsZoom(bounds);    
         }
         
-        var nativeZoom = -1;
+        let nativeZoom = -1;
         
         if(typeof zoomInKM == 'string'){ //in km
             zoomInKM = parseFloat(zoomInKM); 
@@ -1550,32 +1544,32 @@ $.widget( "heurist.mapping", {
         
         if(zoomInKM>0){
             
-            var ll;
+            let ll;
             if(!bounds){
                 ll = L.latLng(45, 0);
-            }else if(bounds.hasOwnProperty('lng') && bounds.hasOwnProperty('lat')){ //  instanceof L.latLng
+            }else if(Object.hasOwn(bounds, 'lng') && Object.hasOwn(bounds,'lat')){ //  instanceof L.latLng
                 ll = bounds;
             }else{
                 ll = bounds.getCenter();
             }
-            var ruler = cheapRuler(ll.lat);
-            var bbox = ruler.bufferPoint([ll.lng, ll.lat], zoomInKM/4);
+            let ruler = cheapRuler(ll.lat);
+            let bbox = ruler.bufferPoint([ll.lng, ll.lat], zoomInKM/4);
             //w, s, e, n
-            var corner1 = L.latLng(bbox[1], bbox[0]),
+            let corner1 = L.latLng(bbox[1], bbox[0]),
                 corner2 = L.latLng(bbox[3], bbox[2]);
-            var bbox2 = L.latLngBounds(corner1, corner2);            
+            let bbox2 = L.latLngBounds(corner1, corner2);            
     
 
                 
-            var sz = this.nativemap.getSize();
-            var fz = this.nativemap.getSize; //keep
+            let sz = this.nativemap.getSize();
+            let fz = this.nativemap.getSize; //keep
             
             L.Map.include({
                 getSize: function () {
                     return new L.Point(parseInt(sz.x), parseInt(sz.y));
                 }
             });             
-            var cmap = new L.Map(document.createElement('div'), {
+            let cmap = new L.Map(document.createElement('div'), {
                 'center': [0, 0],
                 'zoom': 0
             });
@@ -1613,7 +1607,7 @@ $.widget( "heurist.mapping", {
     {            
             if(this.is_crs_simple) return;
     
-            var idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+            let idx = this.available_maxzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
 
             layer_maxZoom = parseInt(layer_maxZoom);
             
@@ -1652,7 +1646,7 @@ $.widget( "heurist.mapping", {
     defineMinZoom: function(layer_name, layer_minZoom)
     {                
 
-            var idx = this.available_minzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
+            let idx = this.available_minzooms.findIndex(arr => arr[0] == layer_name); //find restrictions for basemap
             
             layer_minZoom = parseInt(layer_minZoom);
             
@@ -1704,9 +1698,9 @@ $.widget( "heurist.mapping", {
                         
             if(bounds && bounds.isValid()){
                 
-                var maxZoom = this.nativemap.getMaxZoom();
+                let maxZoom = this.nativemap.getMaxZoom();
                 
-                var nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
+                let nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
                 if(nativeZoom>=0 && nativeZoom<maxZoom){
                     maxZoom = nativeZoom;
                 } 
@@ -1718,10 +1712,10 @@ $.widget( "heurist.mapping", {
                     fly_params['maxZoom'] = maxZoom;
                 }
                 
-                var zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
+                let zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
 
                 if(fly_params){
-                    var duration = 5;
+                    let duration = 5;
                     if(fly_params===true){
                         fly_params = {animate:true, duration:duration, maxZoom: maxZoom};
                     }else{
@@ -1734,7 +1728,7 @@ $.widget( "heurist.mapping", {
                     fly_params = $.extend(fly_params, this.options.map_margins);
                     this.nativemap.flyToBounds(bounds, fly_params);
                     
-                    var that = this; //fly to bounds fits bounds wrong
+                    let that = this; //fly to bounds fits bounds wrong
                     this._zoom_timeout = setTimeout(function(){
                             that.nativemap.fitBounds(bounds, zoom_params);
                             that._zoom_timeout = 0;
@@ -1776,7 +1770,7 @@ $.widget( "heurist.mapping", {
     //
     removeLayer: function(layer_id)
     {
-        var affected_layer = this.all_layers[layer_id];
+        let affected_layer = this.all_layers[layer_id];
 
         if(affected_layer){
            
@@ -1818,7 +1812,7 @@ $.widget( "heurist.mapping", {
     //
     setLayerVisibility: function(nativelayer_id, visiblity_set)
     {
-        var affected_layer = this.all_layers[nativelayer_id];
+        let affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             
             if(visiblity_set===false){
@@ -1840,7 +1834,7 @@ $.widget( "heurist.mapping", {
     //
     //
     isLayerVisibile: function(nativelayer_id){
-        var affected_layer = this.all_layers[nativelayer_id];
+        let affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             return this.nativemap.hasLayer(affected_layer);
         }else{
@@ -1853,16 +1847,16 @@ $.widget( "heurist.mapping", {
     //
     isSomethingOnMap: function(){
         
-            var len = Object.keys(this.all_layers).length;
+            let len = Object.keys(this.all_layers).length;
             //all_layers
-            for (var layer_id in this.all_layers){
-                var layer = this.all_layers[layer_id]
+            for (let layer_id in this.all_layers){
+                let layer = this.all_layers[layer_id]
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) || this.all_clusters[layer_id]){
                     return true;   
                 }else if(layer instanceof L.ImageOverlay || layer instanceof L.TileLayer){
                     return true;   
                 }else if ( layer instanceof L.LayerGroup ) {
-                    var layers = layer.getLayers();
+                    let layers = layer.getLayers();
                     if(layers.length>0) return true;
                 }
             }
@@ -1895,7 +1889,7 @@ $.widget( "heurist.mapping", {
     //
     getStyle: function(layer_id) {
 
-        var affected_layer = this.all_layers[layer_id];
+        let affected_layer = this.all_layers[layer_id];
         if(!affected_layer) return null;
 
         if(this.isImageLayer(affected_layer)){
@@ -1903,7 +1897,7 @@ $.widget( "heurist.mapping", {
             return this.getImageMapFilter(element);
         }
 
-        var style = window.hWin.HEURIST4.util.isJSON(affected_layer.options.default_style);
+        let style = window.hWin.HEURIST4.util.isJSON(affected_layer.options.default_style);
         if(!style){ //layer style not defined - get default style
             return this.setStyleDefaultValues({});    
         }else{
@@ -1936,7 +1930,7 @@ $.widget( "heurist.mapping", {
     //
     applyStyle: function(layer_id, newStyle, newThematicMap) {
         
-        var affected_layer = this.all_layers[layer_id];
+        let affected_layer = this.all_layers[layer_id];
         
         if(this.isImageLayer(affected_layer)){
 
@@ -1964,8 +1958,8 @@ $.widget( "heurist.mapping", {
         this._clearHighlightedMarkers(layer_id);
 
         
-        var that = this;
-        var theme_has_changed = false;
+        let that = this;
+        let theme_has_changed = false;
         
         
         
@@ -1979,7 +1973,7 @@ $.widget( "heurist.mapping", {
         }*/
         
         //create icons (@todo for all themes and rec types)
-        var style = window.hWin.HEURIST4.util.isJSON(newStyle);
+        let style = window.hWin.HEURIST4.util.isJSON(newStyle);
         if(!style && affected_layer.options.default_style && !newThematicMap){
             //new style is not defined and layer already has default one - no need action
             return;
@@ -1999,12 +1993,12 @@ $.widget( "heurist.mapping", {
             style = affected_layer.options.default_style;
         }
         
-        
+        let is_new_markercluster = false;
         if(this.isMarkerClusterEnabled){
 
-            var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
+            is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
             if(is_new_markercluster){
-                var opts = {showCoverageOnHover:false, 
+                let opts = {showCoverageOnHover:false, 
                                 maxClusterRadius:this.markerClusterGridSize,
                                 spiderfyOnMaxZoom: false,
                                 zoomToBoundsOnClick: false
@@ -2017,22 +2011,22 @@ $.widget( "heurist.mapping", {
                 // a.layer is actually a cluster
                 this.all_clusters[layer_id].on('clusterclick', function (a) {
                     
-                    var maxZoom = Math.min(that.nativemap.getMaxZoom(),that.markerClusterMaxZoom);
+                    let maxZoom = Math.min(that.nativemap.getMaxZoom(),that.markerClusterMaxZoom);
                     
                     if(that.nativemap.getZoom()>=maxZoom ||
                         that.nativemap.getBoundsZoom(a.layer.getBounds())>=maxZoom ){
                         if(a.layer.getAllChildMarkers().length>that.markerClusterMaxSpider){
-                            var markers = a.layer.getAllChildMarkers();
+                            let markers = a.layer.getAllChildMarkers();
                             
-                            var latlng = a.layer.getLatLng();
-                            var selected_layers = {};
-                            var sText = '';
+                            let latlng = a.layer.getLatLng();
+                            let selected_layers = {};
+                            let sText = '';
                             
                             //scan all markers in this cluster
                             $.each(markers, function(i, top_layer){    
                                 if(top_layer.feature){
                                     selected_layers[top_layer._leaflet_id] = top_layer;
-                                    var title = top_layer.feature.properties.rec_Title;
+                                    let title = top_layer.feature.properties.rec_Title;
                                     sText = sText + '<div class="leaflet_layer_opt" title="'+ title +'" data-id="'+top_layer._leaflet_id+'">'+ title +'</div>';
                                 }
                             });
@@ -2059,20 +2053,17 @@ $.widget( "heurist.mapping", {
 
             //all markers per top layer            
             this.all_markers[layer_id] = []; //reset
-            
-            var  that = this;
 
             //get all markers (fill all_markers) within layer group and apply new style
             function __extractMarkers(layer, parent_layer, feature)
             {
                 layer.options.selectable = parent_layer.options.selectable;
                 
-                //var feature = layer.feature;    
+                //let feature = layer.feature;    
                 if(layer instanceof L.LayerGroup){
                     layer.eachLayer( function(child_layer){__extractMarkers(child_layer, layer, feature);} );
                     
                 }else if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
-                    
                     layer.feature = feature;
                     
                     if(that.isMarkerClusterEnabled){
@@ -2100,7 +2091,7 @@ $.widget( "heurist.mapping", {
                     that.all_markers[layer_id].push( layer );  
                       
                 }else if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
-                    var use_style = window.hWin.HEURIST4.util.cloneJSON( style );
+                    let use_style = window.hWin.HEURIST4.util.cloneJSON( style );
                     use_style.fill = false;
                     if(!layer.feature){
                         layer.feature = {properties:feature.properties};
@@ -2125,15 +2116,15 @@ $.widget( "heurist.mapping", {
             
         }
         
-        var myIcon = this._createMarkerIcon( style );
+        let myIcon = this._createMarkerIcon( style );
         
         //apply marker style
-        var all_visible_markers = [];
+        let all_visible_markers = [];
         $(this.all_markers[layer_id]).each(function(idx, layer){
             
-                var feature = layer.feature;
-                var markerStyle;
-                var setIcon;
+                let feature = layer.feature;
+                let markerStyle;
+                let setIcon;
                 
                 layer.feature.default_style = style; //default style for feature is parent layer style
 
@@ -2206,7 +2197,7 @@ $.widget( "heurist.mapping", {
     //
     eachLayerFeature: function(nativelayer_id, callback){
         
-        var affected_layer;
+        let affected_layer;
         if(nativelayer_id instanceof L.Layer){
             affected_layer = nativelayer_id;   
         }else{
@@ -2215,9 +2206,9 @@ $.widget( "heurist.mapping", {
         
         if(affected_layer){
             
-            var layer_id = affected_layer._leaflet_id;
+            let layer_id = affected_layer._leaflet_id;
 
-            var that = this;
+            let that = this;
             function __childLayers(layer, feature){
                 if(layer instanceof L.LayerGroup){
                     layer.eachLayer( function(child_layer){__childLayers(child_layer, feature) } );
@@ -2234,8 +2225,8 @@ $.widget( "heurist.mapping", {
                 affected_layer.eachLayer( function(child_layer){ __childLayers(child_layer, child_layer.feature) });
                 
                 //for markers
-                if(this.all_markers.hasOwnProperty(layer_id)){
-                        var markers = this.all_markers[layer_id];
+                if(Object.hasOwn(this.all_markers,layer_id)){
+                        let markers = this.all_markers[layer_id];
                         $(markers).each(function(idx, layer){
                             if (layer.feature){
                                 callback.call(that, layer);
@@ -2261,9 +2252,9 @@ $.widget( "heurist.mapping", {
     _assignDefaultStyleToFeature: function(affected_layer, style)
     {
 
-        var that = this;
+        let that = this;
         this.eachLayerFeature(affected_layer, function(layer){
-                var use_style = style;
+                let use_style = style;
                 if(layer instanceof L.Polyline && !(layer instanceof L.Polygon)){
                     use_style = window.hWin.HEURIST4.util.cloneJSON( style );
                     use_style.fill = false;
@@ -2281,7 +2272,7 @@ $.widget( "heurist.mapping", {
     //
     applyStyleForLayer: function(top_layer, layer, newStyle) {
         
-        var style = this.setStyleDefaultValues(newStyle);
+        let style = this.setStyleDefaultValues(newStyle);
         
         this._assignDefaultStyleToFeature(layer, style);
         
@@ -2289,7 +2280,7 @@ $.widget( "heurist.mapping", {
         this.applyStyleForMarker(top_layer, layer, style);
         
         //for other (polygones, polylines)
-        var that = this;
+        let that = this;
         top_layer.setStyle(function(feature){ return that._stylerForPoly(feature); });
         
     },
@@ -2300,7 +2291,7 @@ $.widget( "heurist.mapping", {
     applyStyleForMarker: function(top_layer, layer, markerStyle, setIcon) 
     {
         
-        var parent_id = 0;
+        let parent_id = 0;
 
         if(top_layer instanceof L.Layer){
             parent_id = top_layer._leaflet_id;   
@@ -2310,7 +2301,7 @@ $.widget( "heurist.mapping", {
 
         if(parent_id>0 && !this.all_markers[parent_id]) return;  //there is no markers for this parent layer
 
-        var that = this;
+        let that = this;
         
         markerStyle = this.setStyleDefaultValues(markerStyle);
         
@@ -2321,13 +2312,13 @@ $.widget( "heurist.mapping", {
         //define icon for record type                                        
         if(markerStyle.iconType=='rectype' )
         {
-            var feature = layer.feature;
+            let feature = layer.feature;
             
-            var rty_ID = feature.properties.rec_RecTypeID;
+            let rty_ID = feature.properties.rec_RecTypeID;
             if(that.myIconRectypes[rty_ID+'_'+markerStyle.iconSize+'_'+markerStyle.color]){ //cache
                 setIcon = that.myIconRectypes[rty_ID+'_'+markerStyle.iconSize+'_'+markerStyle.color];
             }else{
-                var fsize = markerStyle.iconSize;
+                let fsize = markerStyle.iconSize;
                 if(markerStyle.color){
                     setIcon = L.divIcon({  
                         html: '<img src="'
@@ -2352,7 +2343,7 @@ $.widget( "heurist.mapping", {
             }
         }
         
-        var new_layer = null;
+        let new_layer = null;
         if(layer instanceof L.Marker){
             if(markerStyle.iconType=='circle'){
                 //change to circleMarker
@@ -2394,19 +2385,19 @@ $.widget( "heurist.mapping", {
     // 
     _onLayerClick: function(event){
         
-        var layer = (event.target);
+        let layer = (event.target);
         if(layer && layer.feature){
 
             //add selected to other selected features
-            var add_to_selection = (event.originalEvent.ctrlKey);
+            let add_to_selection = (event.originalEvent.ctrlKey);
             
             if(layer.feature.properties.rec_ID>0){
                 //find all overlapped polygones under click point
                 if(layer instanceof L.Polygon || layer instanceof L.Circle || layer instanceof L.Rectangle){
                     
-                        var selected_layers = {};
-                        var sText = '';
-                        var latlng = event.latlng;
+                        let selected_layers = {};
+                        let sText = '';
+                        let latlng = event.latlng;
                         
                         //scan all visible layers
                         this.nativemap.eachLayer(function(top_layer){    
@@ -2415,14 +2406,14 @@ $.widget( "heurist.mapping", {
                                 
                                     if(top_layer.contains(latlng)){
                                         selected_layers[top_layer._leaflet_id] = top_layer;
-                                        var title = top_layer.feature.properties.rec_Title;
+                                        let title = top_layer.feature.properties.rec_Title;
                                         sText = sText + '<div class="leaflet_layer_opt" title="'+title+'" data-id="'+top_layer._leaflet_id+'">'+title+'</div>';
                                     }
                                     
                             }
                         });
                         
-                        var found_cnt = Object.keys(selected_layers).length;
+                        let found_cnt = Object.keys(selected_layers).length;
                         
                         if(found_cnt>1){
                             //show popup with selector
@@ -2444,7 +2435,7 @@ $.widget( "heurist.mapping", {
     //    
     _showMultiSelectionPopup: function(latlng, sText, selected_layers, add_to_selection){
         
-        var found_cnt = Object.keys(selected_layers).length;        
+        let found_cnt = Object.keys(selected_layers).length;        
         
         this.main_popup.setLatLng(latlng)
                         .setContent('<p style="margin:12px;font-style:italic">'
@@ -2457,9 +2448,9 @@ $.widget( "heurist.mapping", {
             width: '300px'
         })
 
-        var that = this;
+        let that = this;
             
-        var ele = $(this.main_popup._container).find('.leaflet_layer_opt');
+        let ele = $(this.main_popup._container).find('.leaflet_layer_opt');
         ele.on({'click':function(evt){
             let $ele = $(evt.target);
             if(!$ele.hasClass('leaflet_layer_opt')){
@@ -2499,8 +2490,8 @@ $.widget( "heurist.mapping", {
             return;  
         } 
         
-        var that = this;
-        var popupURL;
+        let that = this;
+        let popupURL;
 
         function __showPopup(content, latlng){
             
@@ -2510,17 +2501,17 @@ $.widget( "heurist.mapping", {
                             .setContent(content)
                             .openOn(that.nativemap);
 
-                var $popup_ele = $(that.main_popup.getElement()); // popup container
-                var $content = $popup_ele.find('.leaflet-popup-content'); // content container
+                let $popup_ele = $(that.main_popup.getElement()); // popup container
+                let $content = $popup_ele.find('.leaflet-popup-content'); // content container
 
                 // Default options
-                var width = 'auto';
+                let width = 'auto',
                     height = 'auto',
                     resizable = true,
                     maxw = '',
                     maxh = '94%';
 
-                var behaviour = that.options.layout_params['popup_behaviour'];
+                let behaviour = that.options.layout_params['popup_behaviour'];
 
                 // For CMS websites
                 if(behaviour == 'fixed'){
@@ -2567,7 +2558,7 @@ $.widget( "heurist.mapping", {
                         ghost: true,
                         stop: function(event, ui){
 
-                            var dims = ui.size;
+                            let dims = ui.size;
                             window.hWin.HEURIST4.leaflet_popup = dims; // cache width and height
 
                             $popup_ele.css(dims); // update popup's dimensions
@@ -2598,7 +2589,7 @@ $.widget( "heurist.mapping", {
             
             if(!add_to_selection){
 
-            var info = layer.feature.properties.rec_Info; //popup info may be already prepared
+            let info = layer.feature.properties.rec_Info; //popup info may be already prepared
             if(info){
                 if(info.indexOf('http://')==0 || info.indexOf('https://')==0){
                     popupURL =  info; //load content from url
@@ -2610,7 +2601,7 @@ $.widget( "heurist.mapping", {
                     return;
                 }
                 //take database from dataset origination database
-                var db = layer.options.origination_db!=null
+                let db = layer.options.origination_db!=null
                                 ?layer.options.origination_db
                                 :window.hWin.HAPI4.database;
                     
@@ -2644,7 +2635,7 @@ $.widget( "heurist.mapping", {
                 
                 if(that.options.map_popup_mode=='dialog'){
                     
-                        var opts = { 
+                        let opts = { 
                                 is_h6style: true,
                                 modal: false,
                                 dialogid: 'recordview_popup',    
@@ -2668,9 +2659,9 @@ $.widget( "heurist.mapping", {
     
         }else{
             // show multiple selection
-            var sText = '';    
-            for(var key in layer.feature.properties) {
-                if(layer.feature.properties.hasOwnProperty(key) && key!='_deleted'){
+            let sText = '';    
+            for(let key in layer.feature.properties) {
+                if(Object.hasOwn(layer.feature.properties,key) && key!='_deleted'){
                        sText = sText 
                         + '<div class="detailRow fieldRow" style="border:none 1px #00ff00;">'
                         + '<div class="detailType">'+key+'</div><div class="detail truncate">'
@@ -2690,7 +2681,7 @@ $.widget( "heurist.mapping", {
     //
     _clearHighlightedMarkers: function(affected_layer_id){
 
-        var idx = 0;
+        let idx = 0;
         if(this.highlightedMarkers){
             while(idx < this.highlightedMarkers.length){
                 if( !(affected_layer_id>0) || this.highlightedMarkers[idx].parent_layer_id == affected_layer_id){
@@ -2718,7 +2709,7 @@ $.widget( "heurist.mapping", {
     setStyleDefaultValues: function(style, suppress_prefs, is_selection_style){
         
         //take map style from user preferences
-        var def_style = null;
+        let def_style = null;
         if(suppress_prefs!==true){
             
             if(this.options.default_style){
@@ -2763,8 +2754,6 @@ $.widget( "heurist.mapping", {
             
            
         }
-        else{
-        }
         
         style = window.hWin.HEURIST4.ui.prepareMapSymbol(style, def_style);
         
@@ -2776,11 +2765,11 @@ $.widget( "heurist.mapping", {
     //
     _createMarkerIcon: function(style){
         
-        var myIcon;
+        let myIcon;
       
         if(style.iconType=='url'){
             
-            var fsize = style.iconSize;
+            let fsize = style.iconSize;
             
             if( typeof fsize == 'string' && fsize.indexOf(',')>0){
                 fsize = fsize.split(',');
@@ -2808,10 +2797,10 @@ $.widget( "heurist.mapping", {
             
             if(!style.iconFont) style.iconFont = 'location';
             
-            var cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
-            var fsize = style.iconSize;
-            var isize = 6+fsize;
-            var bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
+            let cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
+            let fsize = style.iconSize;
+            let isize = 6+fsize;
+            let bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
             
             myIcon = L.divIcon({  
                 html: '<div class="ui-icon '+cname+'" style="border:none;font-size:'    //padding:2px;;width:'+isize+'px;
@@ -2835,7 +2824,7 @@ $.widget( "heurist.mapping", {
         //feature.style - individual style (set in symbology field per record)
         //feature.default_style - style of parent heurist layer (can be changed via legend)
         
-        var use_style = feature.thematic_style || feature.style || feature.default_style;
+        let use_style = feature.thematic_style || feature.style || feature.default_style;
 
         if(feature.thematic_style===false){ //hidden
             return use_style;
@@ -2875,7 +2864,7 @@ $.widget( "heurist.mapping", {
     // is_external - true - public call (from app_timemap for example)  - perform zoom
     //    
     setFeatureSelection: function( _selection, _need_zoom, _from_timeline, add_to_selection){
-        var that = this;
+        let that = this;
         
         if(add_to_selection){
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)){
@@ -2896,18 +2885,18 @@ $.widget( "heurist.mapping", {
         });
         
         //find selected markers by id
-        var selected_markers = this._getMarkersByRecordID(_selection); //new selected markers
-        for(var idx in selected_markers){
-            var layer = selected_markers[idx];
+        let selected_markers = this._getMarkersByRecordID(_selection); //new selected markers
+        for(let idx in selected_markers){
+            let layer = selected_markers[idx];
             if(!(layer.hidden_by_filter || layer.hidden_by_theme || layer.hidden_by_zoom)){
 
                 //create special hightlight marker below this one
-                var use_style = layer.feature.style || layer.feature.default_style;
-                var iconSize = ((use_style && use_style.iconSize>0)?use_style.iconSize:16);
-                var radius = iconSize/2+3;
+                let use_style = layer.feature.style || layer.feature.default_style;
+                let iconSize = ((use_style && use_style.iconSize>0)?use_style.iconSize:16);
+                let radius = iconSize/2+3;
                 //iconSize = ((layer instanceof L.CircleMarker) ?(iconSize+2) :(iconSize/2+4));
                 
-                var new_layer = L.circleMarker(layer.getLatLng(), {color: this.selection_style.color} );//'#62A7F8'   
+                let new_layer = L.circleMarker(layer.getLatLng(), {color: this.selection_style.color} );//'#62A7F8'   
                 
                 new_layer.setRadius(radius);
                 new_layer.addTo( this.nativemap );
@@ -2939,12 +2928,12 @@ $.widget( "heurist.mapping", {
     //    
     findLayerByRecID: function(recIDs){
         
-        var that = this;
-        var res = [];
+        let that = this;
+        let res = [];
         
         function __eachLayer(layer, method) {
-            for (var i in layer._layers) {
-                var res = method.call(this, layer._layers[i]);
+            for (let i in layer._layers) {
+                let res = method.call(this, layer._layers[i]);
                 if(res===false){
                     return false;
                 }
@@ -2965,7 +2954,7 @@ $.widget( "heurist.mapping", {
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup)   //geojson only
             {
-                var r = top_layer.eachLayer(function(layer){
+                let r = top_layer.eachLayer(function(layer){
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, recIDs)>=0)) 
                     {
@@ -2984,10 +2973,10 @@ $.widget( "heurist.mapping", {
     // Testing for fadeIn and fadeOut
     //
     fadeInLayers: function( _selection){
-        var layers = this.findLayerByRecID( _selection );
+        let layers = this.findLayerByRecID( _selection );
 
-        var opacity = 0, finalOpacity=1, opacityStep=0.1, delay=200;
-        var timer = setTimeout(function changeOpacity() {
+        let opacity = 0, finalOpacity=1, opacityStep=0.1, delay=200;
+        let timer = setTimeout(function changeOpacity() {
             if (opacity < finalOpacity) {
                 $.each(layers,function(i, lyr){
                     
@@ -3021,10 +3010,9 @@ $.widget( "heurist.mapping", {
             _selection  =  this.selected_rec_ids;
         }
         
-        var that = this, bounds = [], bnd;
+        let that = this, bounds = [], bnd;
 
-        //var useRuler = false; //we use padding instead 
-        var useRuler = (_selection.length==1);
+        let useRuler = (_selection.length==1);
         
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup)   //geojson only
@@ -3049,12 +3037,12 @@ $.widget( "heurist.mapping", {
     //
     _getMarkersByRecordID: function( _selection ){
         
-        var selected_markers = [];
+        let selected_markers = [];
         
         if(_selection && _selection.length>0)
-        for(var layer_id in this.all_markers) {
-            if(this.all_markers.hasOwnProperty(layer_id)){
-                    var markers = this.all_markers[layer_id];
+        for(let layer_id in this.all_markers) {
+            if(Object.hasOwn(this.all_markers,layer_id)){
+                    let markers = this.all_markers[layer_id];
                     $(markers).each(function(idx, layer){
                         if (_selection===true || (layer.feature &&
                          window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)){
@@ -3074,12 +3062,12 @@ $.widget( "heurist.mapping", {
     //    
     _replaceMarker: function( parent_id, old_marker, new_marker ){
 
-        var is_found = false;    
-        var that = this;
-        for(var layer_id in this.all_markers) {
-            if(this.all_markers.hasOwnProperty(layer_id))
+        let is_found = false;    
+        let that = this;
+        for(let layer_id in this.all_markers) {
+            if(Object.hasOwn(this.all_markers,layer_id))
             {
-                    var markers = this.all_markers[layer_id];
+                    let markers = this.all_markers[layer_id];
                     $(markers).each(function(idx, layer){
                         if(layer._leaflet_id == old_marker._leaflet_id){
                             that.all_markers[layer_id][idx] = new_marker; 
@@ -3114,38 +3102,38 @@ $.widget( "heurist.mapping", {
     //
     getLayerBounds: function (layer, useRuler){
         
-        var that = this;
+        let that = this;
 
         function __extendBoundsForPoint(ll){
             
             if(useRuler && that.options.zoomToPointInKM>0){ //zoom to single point
             
-                var ruler = cheapRuler(ll.lat);
-                var bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM/4);   //0.01          
+                let ruler = cheapRuler(ll.lat);
+                let bbox = ruler.bufferPoint([ll.lng, ll.lat], that.options.zoomToPointInKM/4);   //0.01          
                 //w, s, e, n
-                var corner1 = L.latLng(bbox[1], bbox[0]),
+                const corner1 = L.latLng(bbox[1], bbox[0]),
                     corner2 = L.latLng(bbox[3], bbox[2]);
                     
                 return L.latLngBounds(corner1, corner2);            
             }else{
                 //for city 0.002 for country 0.02
-                var corner1 = L.latLng(ll.lat-0.02, ll.lng-0.02),
+                const corner1 = L.latLng(ll.lat-0.02, ll.lng-0.02),
                     corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
                 return L.latLngBounds(corner1, corner2);            
             }
         }
         
         if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
-            var ll = layer.getLatLng();
+            let ll = layer.getLatLng();
             
             //if field 2-925 is set (zoom to point in km) use it
             return __extendBoundsForPoint(ll);
             
         }else{
-            var bnd = layer.getBounds();
+            let bnd = layer.getBounds();
             if(bnd && bnd.isValid()){
-                var p1 = bnd.getSouthWest();
-                var p2 = bnd.getNorthEast();
+                let p1 = bnd.getSouthWest();
+                let p2 = bnd.getNorthEast();
                 if(Math.abs(p1.lat-p2.lat)<0.01 && Math.abs(p1.lng-p2.lng)<0.01){
                     return __extendBoundsForPoint(p1);
                 }
@@ -3164,7 +3152,7 @@ $.widget( "heurist.mapping", {
     //
     setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
         
-        var check_function = null;
+        let check_function = null;
 
         if(_selection=='show_all'){
             
@@ -3184,10 +3172,10 @@ $.widget( "heurist.mapping", {
     
             this._clearHighlightedMarkers();
             
-            var _leaflet_id = this.mapManager.getLayerNativeId(dataset_id); //get _leaflet_id by mapdoc and dataset name
+            let _leaflet_id = this.mapManager.getLayerNativeId(dataset_id); //get _leaflet_id by mapdoc and dataset name
             
             //use  window.hWin.HEURIST4.util.findArrayIndex(layer.properties.rec_ID, _selection)
-            var that = this, bounds = [];
+            let that = this, bounds = [];
         
             that.nativemap.eachLayer(function(top_layer){    
                 if((top_layer instanceof L.LayerGroup) && (_leaflet_id==0 || _leaflet_id==top_layer._leaflet_id)){
@@ -3248,12 +3236,12 @@ $.widget( "heurist.mapping", {
         
         if(_selection===true || window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
             
-            var vis_val = (is_visible==false)?'none':'block';
+            let vis_val = (is_visible==false)?'none':'block';
             
             this._clearHighlightedMarkers();
             
             //use  window.hWin.HEURIST4.util.findArrayIndex(layer.properties.rec_ID, _selection)
-            var that = this;
+            let that = this;
         
             that.nativemap.eachLayer(function(top_layer){    
                 if(top_layer instanceof L.LayerGroup)
@@ -3295,10 +3283,10 @@ $.widget( "heurist.mapping", {
             
             if(this.isMarkerClusterEnabled){
                 
-                var selected_markers = this._getMarkersByRecordID(_selection);
-                for(var idx in selected_markers){
+                let selected_markers = this._getMarkersByRecordID(_selection);
+                for(let idx in selected_markers){
 
-                    var layer = selected_markers[idx];
+                    let layer = selected_markers[idx];
                     if(layer.cluster_layer_id>0 && that.all_clusters[layer.cluster_layer_id]){
                         if(is_visible==false){
                             if(origin==0){
@@ -3321,9 +3309,10 @@ $.widget( "heurist.mapping", {
                         }
                     }
                 }
+                
                 /*
                 for(var layer_id in this.all_markers) {
-                    if(this.all_markers.hasOwnProperty(layer_id)){
+                    if(Object.hasOwn(this.all_markers,layer_id)){
                             var markers = this.all_markers[layer_id];
                             $(markers).each(function(idx, layer){
                                 if (_selection===true || (layer.feature &&
@@ -3361,9 +3350,9 @@ $.widget( "heurist.mapping", {
     //
     updateLayout: function(){
         
-        var params = this.options.layout_params;
+        let params = this.options.layout_params;
         
-        var that = this;
+        let that = this;
        
         function __parseval(val){
             if(val===false || val===true) return val;
@@ -3376,7 +3365,7 @@ $.widget( "heurist.mapping", {
         }
         function __splitval(val){
             
-            var res = window.hWin.HEURIST4.util.isJSON(val);
+            let res = window.hWin.HEURIST4.util.isJSON(val);
             if(res === false){
             
                 res = [];
@@ -3466,13 +3455,13 @@ $.widget( "heurist.mapping", {
         }
         
         if(this.options.zoomMaxInKM>0){
-            var zoomNative = this.convertZoomToNative(this.options.zoomMaxInKM);
+            const zoomNative = this.convertZoomToNative(this.options.zoomMaxInKM);
             if(zoomNative>0){
                 this.defineMaxZoom('widget', zoomNative); //on widget init
             }
         }
         if(this.options.zoomMinInKM>0){
-            var zoomNative = this.convertZoomToNative(this.options.zoomMinInKM);
+            const zoomNative = this.convertZoomToNative(this.options.zoomMinInKM);
             if(zoomNative>=0){
                 this.defineMinZoom('widget', zoomNative); //on widget init
             }
@@ -3502,7 +3491,7 @@ $.widget( "heurist.mapping", {
         this.nomap = __parseval(params['nomap']);
         this.notimeline = __parseval(params['notimeline']);
         
-        var layout_opts = {};
+        let layout_opts = {};
         if(this.notimeline){
             layout_opts.south__size = 200;
             layout_opts.south__spacing_open = 0;
@@ -3527,7 +3516,7 @@ $.widget( "heurist.mapping", {
             
             
             if(this.options.element_layout){
-                var th = Math.floor($(this.options.element_layout).height()*0.2);
+                let th = Math.floor($(this.options.element_layout).height()*0.2);
                 layout_opts.south__size = th>200?200:th;
                 
                 if(this.nomap){
@@ -3543,7 +3532,7 @@ $.widget( "heurist.mapping", {
             }
         }
         
-        var is_main_ui = false;
+        let is_main_ui = false;
         
         if(this.options.element_layout){
             
@@ -3555,7 +3544,7 @@ $.widget( "heurist.mapping", {
                 layout_opts.north__size = 0;
             }
             
-            var mylayout = $(this.options.element_layout).layout(layout_opts);
+            let mylayout = $(this.options.element_layout).layout(layout_opts);
             if(this.notimeline){
                 mylayout.hide('south');
             }
@@ -3568,7 +3557,7 @@ $.widget( "heurist.mapping", {
         
     
         //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
-        var controls = [];
+        let controls = [];
         if(params['controls']!='none'){
             controls = __splitval(params['controls']);
         }
@@ -3580,7 +3569,7 @@ $.widget( "heurist.mapping", {
         }
         
         function __controls(val){
-            var is_visible = (controls.indexOf('all')>=0  
+            let is_visible = (controls.indexOf('all')>=0  
                                 || controls.indexOf(val)>=0);
             
             if(is_visible){
@@ -3638,10 +3627,10 @@ $.widget( "heurist.mapping", {
                             }
                             
                             if(that.printLegend){
-                                var legend_content = that.mapManager.getActiveMapDocumentLegend();
+                                let legend_content = that.mapManager.getActiveMapDocumentLegend();
                                 if(legend_content){
-                                    var mleg = L.control.manager({ position: 'topright' }).addTo( e.printMap );
-                                    var cont = $(mleg._container);
+                                    let mleg = L.control.manager({ position: 'topright' }).addTo( e.printMap );
+                                    let cont = $(mleg._container);
                                 //cont.css({border: '2px solid rgba(0,0,0,0.2)','background-clip': 'padding-box', width:'200px', height:'400px'}); 
                                     $(legend_content).appendTo(cont);
                                 }
@@ -3764,7 +3753,7 @@ $.widget( "heurist.mapping", {
             this.mapPopUpTemplate = params['template'];
         }
         
-        $('#'+map_element_id).find('#map-loading').empty();
+        $('#map').find('#map-loading').empty();
         
         // extent: fixed extent    
     },//updateLayout
@@ -3779,10 +3768,10 @@ $.widget( "heurist.mapping", {
         
         this.ui_main_inited = true;
         
-        var that = this;    
+        let that = this;    
         //need to init only once!
 
-        var toolbar = $('#mapToolbarDiv');
+        let toolbar = $('#mapToolbarDiv');
 
         $('.leaflet-control').css({clear:'none','margin-top':'0px'});
 
@@ -3804,7 +3793,7 @@ $.widget( "heurist.mapping", {
             toolbar.find('.ui-icon-bookmark').attr('title','Manage spatial bookmarks')
             .button()
             .on({click:function(){
-                var ele = $('.bookmarks-container');
+                let ele = $('.bookmarks-container');
                 if(ele.is(':visible')){
                     that.map_bookmark.collapse();    
                 }else{
@@ -3817,7 +3806,7 @@ $.widget( "heurist.mapping", {
             }});
 
 
-            var ele2 = that.map_bookmark.getContainer();
+            let ele2 = that.map_bookmark.getContainer();
             $(ele2).css({'margin-top':'10px'});
 
             $(that.map_bookmark.getContainer()).css({border:'none',height:'1px !important', padding: '0px', background: 'none'});
@@ -3930,15 +3919,15 @@ $.widget( "heurist.mapping", {
         this.mapManager.populateMapDocuments($mapdocSel);
         */
         
-
-        if(true){ //init digitizing tool button
-            var btn = toolbar.find('#btn_digitizing')
+        const allow_digit_btn = true;
+        if(allow_digit_btn){ //init digitizing tool button
+            let btn = toolbar.find('#btn_digitizing')
                         .button()
                         .attr('title','Create map annotation');
             
             this._on(btn, {click:function(e){
                 
-                var this_btn = $(e.target);
+                let this_btn = $(e.target);
                 //add new record 
                 if(!(window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION']>0)){
                     
@@ -3963,11 +3952,11 @@ $.widget( "heurist.mapping", {
                     this.drawSetControls('full');
                     
                     this.options.ondraw_editsave = function(e){
-                        var res = that.drawGetWkt(false);
+                        let res = that.drawGetWkt(false);
 
                         if( res!==false ){    
                         
-                            var typeCode = 'm';
+                            let typeCode = 'm';
                             if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
                                 if(res.indexOf('LINESTRING')>=0){
                                     typeCode = 'l';
@@ -3978,7 +3967,7 @@ $.widget( "heurist.mapping", {
                                 }
                             }
                             
-                            var new_record_params = {};
+                            let new_record_params = {};
                             new_record_params['RecTypeID'] = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_ANNOTATION'];
                             new_record_params['details'] = {};
                             new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']] = (typeCode+' '+res);
@@ -4061,8 +4050,8 @@ $.widget( "heurist.mapping", {
     + window.hWin.HR('map_print_note')
     +'</p></div></fieldset>',
                 function(){
-                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
-                        var sTitle = $dlg.find('#dlg-prompt-title').val().trim();
+                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dialog-common-messages');      
+                        let sTitle = $dlg.find('#dlg-prompt-title').val().trim();
                         $('div.grid-map-print-title > h3').text(sTitle);
 
                         !window.hWin.HEURIST4.util.isempty(sTitle) ? // show print title if there is a title
@@ -4072,7 +4061,7 @@ $.widget( "heurist.mapping", {
                         
                         that.printLegend = $dlg.find('#dlg-prompt-legend').is(':checked');
                         
-                        var sMode = $dlg.find('#dlg-prompt-mode').val();
+                        let sMode = $dlg.find('#dlg-prompt-mode').val();
                         
                         //var opts = {pageSize:'A4'};
                         //margin:{right:150}, scale:1};
@@ -4080,7 +4069,7 @@ $.widget( "heurist.mapping", {
                         //    opts['header'] = {text:sTitle, enabled:true };
                         //}
                         
-                        var modeToUse = L.BrowserPrint.Mode[sMode](); 
+                        let modeToUse = L.BrowserPrint.Mode[sMode](); 
                        
                         that.map_print.browserPrint.print(modeToUse);
                 },
@@ -4111,10 +4100,10 @@ $.widget( "heurist.mapping", {
     */
     _updatePanels: function(){
         
-        var no_map_data = !this.isSomethingOnMap(), 
+        let no_map_data = !this.isSomethingOnMap(), 
             no_time_data = (this.timeline_groups.length==0);
         
-        var toolbar = $('#mapToolbarDiv');
+        let toolbar = $('#mapToolbarDiv');
         if(this.nomap){
             toolbar.find('#btn_layout_map').removeClass('ui-state-active');
         }else{
@@ -4126,10 +4115,10 @@ $.widget( "heurist.mapping", {
             toolbar.find('#btn_layout_timeline').addClass('ui-state-active').blur();
         }
 
-        var is_main_ui = this.options.layout_params && this.options.layout_params['ui_main'];
+        let is_main_ui = this.options.layout_params && this.options.layout_params['ui_main'];
 
-        var new_1 = this.notimeline || (!is_main_ui && no_time_data);
-        var new_2 = this.nomap || (!is_main_ui && no_map_data);
+        let new_1 = this.notimeline || (!is_main_ui && no_time_data);
+        let new_2 = this.nomap || (!is_main_ui && no_map_data);
         
         if(this.is_timeline_disabled!==new_1 || this.is_map_disabled!==new_2)        
         {
@@ -4147,8 +4136,8 @@ $.widget( "heurist.mapping", {
             
             if(this.options.element_layout){
             
-                var layout_opts = {};
-                var tha, th;
+                let layout_opts = {};
+                let tha, th;
                 if(this.is_timeline_disabled){
                     
                     //keep current timeline 
@@ -4177,7 +4166,7 @@ $.widget( "heurist.mapping", {
                         layout_opts.center__minWidth = 200;
                     }                    
                 }
-                var mylayout = $(this.options.element_layout).layout(layout_opts);
+                let mylayout = $(this.options.element_layout).layout(layout_opts);
                 
                 if(this.is_timeline_disabled){
                     mylayout.hide('south');
@@ -4213,7 +4202,7 @@ $.widget( "heurist.mapping", {
             return;   
         }
         
-        gjson = window.hWin.HEURIST4.util.isJSON(data);
+        let gjson = window.hWin.HEURIST4.util.isJSON(data);
 
         if(gjson===false){
             //wkt or simple points
@@ -4235,7 +4224,7 @@ $.widget( "heurist.mapping", {
     //
     drawLoadSimplePoints: function(sCoords, type, UTMzone){
         
-        var that = this;
+        let that = this;
         
         simplePointsToWKT(sCoords, type, UTMzone, function(wkt){ that.drawLoadWKT(wkt, false); });
     },
@@ -4253,8 +4242,8 @@ $.widget( "heurist.mapping", {
         }
         
         //remove heurist prefix with type
-        var typeCode;
-        var matches = wkt.match(/\??(\S+)\s+(.*)/);
+        let typeCode;
+        let matches = wkt.match(/\??(\S+)\s+(.*)/);
         if (! matches) {
             return;
         }
@@ -4267,7 +4256,7 @@ $.widget( "heurist.mapping", {
             wkt = matches[1];
         }        
         
-        var gjson = parseWKT(wkt); //see wellknown.js
+        let gjson = parseWKT(wkt); //see wellknown.js
         
         if(gjson && (gjson.coordinates || gjson.geometries)){
             this.drawLoadJson(gjson, force_clear);
@@ -4298,7 +4287,7 @@ $.widget( "heurist.mapping", {
                 return;
             }
 
-            var that = this;
+            let that = this;
             
             if(this.is_crs_simple){
                 this.projectGeoJson( gjson, false );
@@ -4319,11 +4308,11 @@ $.widget( "heurist.mapping", {
                     
                     if(lg instanceof L.Polygon){
                         
-                        var coords = lg.getLatLngs();
+                        let coords = lg.getLatLngs();
                         function __isRect( coords ){
                                 if(coords.length==4){
-                                     var l1 = Math.round(coords[0].distanceTo(coords[2]));
-                                     var l2 = Math.round(coords[1].distanceTo(coords[3]));
+                                     let l1 = Math.round(coords[0].distanceTo(coords[2]));
+                                     let l2 = Math.round(coords[1].distanceTo(coords[3]));
                                      return (l1==l2);
                                 }
                                 return false;
@@ -4349,7 +4338,7 @@ $.widget( "heurist.mapping", {
                                     __addDrawItem(new L.Polygon(coords));
                                 }
                             }else{
-                                for(var i=0;i<coords.length;i++){
+                                for(let i=0;i<coords.length;i++){
                                       coords[i].push(coords[i][0]);
                                       __addDrawItem(new L.Polygon(coords[i]));
                                 }
@@ -4358,11 +4347,11 @@ $.widget( "heurist.mapping", {
                         
                         
                     }else if(lg instanceof L.Polyline){
-                        var coords = lg.getLatLngs();
+                        let coords = lg.getLatLngs();
                         if(coords.length>0 && coords[0] instanceof L.LatLng ){
                             __addDrawItem(new L.Polyline(coords));
                         }else{
-                            for(var i=0;i<coords.length;i++){
+                            for(let i=0;i<coords.length;i++){
                                   __addDrawItem(new L.Polyline(coords[i]));
                             }
                         }
@@ -4378,7 +4367,7 @@ $.widget( "heurist.mapping", {
             }
             
             
-            var l2 = null
+            let l2 = null
             try{
                 l2 = L.geoJSON(gjson);
                 __addDrawItems(l2);
@@ -4394,7 +4383,7 @@ $.widget( "heurist.mapping", {
     //    
     drawZoomTo: function(callback = null){
 
-        var bounds = this.drawnItems.getBounds();
+        let bounds = this.drawnItems.getBounds();
 
         if(window.hWin.HEURIST4.util.isFunction(callback)){//$.isFunction(callback)
             this.nativemap.once('zoomend moveend', callback); // call once
@@ -4421,16 +4410,16 @@ $.widget( "heurist.mapping", {
     //
     drawGetWkt: function( show_warning ){
         
-        var res = '', msg = null;
+        let res = '', msg = null;
                     
-        var gjson = this.drawGetJson(); //mapping.mapping( 'drawGetJson');
+        let gjson = this.drawGetJson(); //mapping.mapping( 'drawGetJson');
         
         gjson = window.hWin.HEURIST4.util.isJSON(gjson);
                 
         if(gjson===false || !window.hWin.HEURIST4.util.isGeoJSON(gjson)){
             msg = 'You have to draw a shape';
         }else{
-            var res = stringifyMultiWKT(gjson);
+            res = stringifyMultiWKT(gjson);
             
             if(window.hWin.HEURIST4.util.isempty(res)){
                 msg = 'Cannot convert GeoJSON to WKT. '
@@ -4456,26 +4445,28 @@ $.widget( "heurist.mapping", {
     //
     drawGetJson: function( e ){
     
-        var res_gjson = []; //reset
-        var that = this;
+        let res_gjson = []; //reset
+        let that = this;
         
         function __to_gjson( layer ){
+
+            let lr;
             
             if(layer instanceof L.Circle){
                //L.Circle.toPolygon(layer, 40, this.nativemap)
-               var points = layer.toPolygon(40, this.nativemap);
+               let points = layer.toPolygon(40, this.nativemap);
                lr = L.polygon(points);
                
             /*}else if(layer instanceof L.Rectangle){
                
-               var points = layer.toPolygon(40, this.nativemap);
+               let points = layer.toPolygon(40, this.nativemap);
                lr = L.polygon(points);
             */    
             }else{ 
                 lr = layer;
             }
             
-            var gjson = lr.toGeoJSON(8);
+            let gjson = lr.toGeoJSON(8);
             
             if(that.is_crs_simple){
                 that.projectGeoJson( gjson, true );
@@ -4487,7 +4478,7 @@ $.widget( "heurist.mapping", {
         }
         
         if(e){
-            var layers = e.layers;
+            let layers = e.layers;
             if(layers){
                 layers.eachLayer(__to_gjson);
             }else if(e.layer) {
@@ -4519,9 +4510,9 @@ $.widget( "heurist.mapping", {
     //
     drawSetStyle: function(){
 
-         var that = this;
+         let that = this;
         
-         var current_value = this.map_draw_style;
+         let current_value = this.map_draw_style;
          window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 2, function(new_style){
             
             that.map_draw_style = new_style; 
@@ -4534,7 +4525,7 @@ $.widget( "heurist.mapping", {
                        
     drawSetStyleTransparent: function(){
         
-        var current_value = this.map_draw_style;
+        let current_value = this.map_draw_style;
         
         current_value.fillOpacity = 0;
         
@@ -4547,7 +4538,7 @@ $.widget( "heurist.mapping", {
     //
     drawSetStyle2: function(new_style){
         
-        var that = this;
+        let that = this;
         
             that.map_draw.setDrawingOptions({
                 polygon: {shapeOptions: new_style},
@@ -4555,7 +4546,7 @@ $.widget( "heurist.mapping", {
                 circle: {shapeOptions:new_style}
             });                
             
-            var new_style2 = window.hWin.HEURIST4.util.cloneJSON(new_style);
+            let new_style2 = window.hWin.HEURIST4.util.cloneJSON(new_style);
             new_style2.fill = false;
             new_style2.fillColor = null;
 
@@ -4580,7 +4571,7 @@ $.widget( "heurist.mapping", {
     //
     drawSetControls: function( mode ){
         
-        var that = this;
+        let that = this;
         
         that.drawClearAll();
         
@@ -4666,7 +4657,7 @@ $.widget( "heurist.mapping", {
             that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
             that.nativemap.tb_del.enable();
             
-            var ele = $('.leaflet-draw-edit-remove').attr('title','Save edits or clear all')
+            let ele = $('.leaflet-draw-edit-remove').attr('title','Save edits or clear all')
                 .css('background-image','none');
             ele.find('span.sr-only').html('Finalize');
             $('<span class="ui-icon ui-icon-circle-b-check"/>')
@@ -4686,7 +4677,7 @@ $.widget( "heurist.mapping", {
         
         //adds  new shape to drawnItems
         that.nativemap.on(L.Draw.Event.CREATED, function (e) {
-            var layer = e.layer;
+            let layer = e.layer;
             that.drawnItems.addLayer(layer);
             layer.editing.enable();
             if($.isFunction(that.options.ondrawend)){
@@ -4719,7 +4710,7 @@ $.widget( "heurist.mapping", {
         });     
         //on save event       
         that.nativemap.on(L.Draw.Event.DELETED, function (e) {
-            //var layers = e.layers;
+            //let layers = e.layers;
            if($.isFunction(that.options.ondraw_editsave)){
                that.options.ondraw_editsave.call(that, e);
            }
@@ -4738,14 +4729,14 @@ $.widget( "heurist.mapping", {
         if(!$.isArray(links)){
             links = links.split("\n");
         }
-        for(var i=0; i<links.length; i++){
+        for(let i=0; i<links.length; i++){
             if(links[i].indexOf('.js')>0){
-                var scr = document.createElement('script');
+                let scr = document.createElement('script');
                 scr.type = 'text/javascript';
                 scr.src = (links[i].indexOf(window.hWin.HAPI4.baseURL)==0?'':window.hWin.HAPI4.baseURL)+links[i];
                 document.getElementsByTagName('head')[0].appendChild(scr);
             }else{
-                var link = document.createElement('link');
+                let link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.type = 'text/css';
                 link.href = (links[i].indexOf(window.hWin.HAPI4.baseURL)==0?'':window.hWin.HAPI4.baseURL)+links[i];
@@ -4760,8 +4751,8 @@ $.widget( "heurist.mapping", {
     //
     setMapZoom: function(zoom_value, is_KM){
 
-        var bounds = this.drawnItems.getBounds();
-        var zoom = null;
+        let bounds = this.drawnItems.getBounds();
+        let zoom = null;
 
         if(is_KM){ // convert KM to map native value
             zoom = this.convertZoomToNative(zoom_value, bounds);

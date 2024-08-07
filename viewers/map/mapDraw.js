@@ -1,4 +1,5 @@
- // @todo: move to utils_geo
+/* global Utm */
+// @todo: move to utils_geo
  // converts coordinate pairs (points) to WKT and calls callback function with result as parameter
  //
  // Requires external/js/geodesy-master/utm.js
@@ -6,23 +7,23 @@
  function simplePointsToWKT( sCoords, type, UTMzone, callback){
      
 
-    //var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //replace invisible service chars
-    var s = sCoords.replace(/[,]/g,' ');
+    //let s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //replace invisible service chars
+    let s = sCoords.replace(/[,]/g,' ');
     s = s.replace(/\s\s+/g, ' ').trim();
     //s = s.replace(/  +/g, ' ');  //only spaces 
     
     
-    var arc = s.split(' ');  
+    let arc = s.split(' ');  
     
-    var islat = false, k;
-    var hemisphere = 'N';  
+    let islat = false, k;
+    let hemisphere = 'N';  
     
     if(window.hWin.HEURIST4.util.isnull(type) && arc.length>2){
         //define type
-            var $ddlg, buttons = {};
+            let $ddlg, buttons = {};
             buttons['Select'] = function(){ 
                 
-                var geoType = $ddlg.find('input[name="gtype"]:checked').val();
+                let geoType = $ddlg.find('input[name="gtype"]:checked').val();
                 setTimeout(function(){ simplePointsToWKT(sCoords, geoType, UTMzone, callback); },500);
                 $ddlg.dialog('close'); 
             }; 
@@ -42,13 +43,13 @@
     
     if(window.hWin.HEURIST4.util.isnull(UTMzone)){
         
-        var allInteger = true, allOutWGS = true;
+        let allInteger = true, allOutWGS = true;
         //check for UTM - assume they are integer and at least several are more than 180
-        for (k=0; k<arc.length; k++){
+        for (let k=0; k<arc.length; k++){
             
             //if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE) continue;
         
-            var crd = Number(arc[k]);
+            let crd = Number(arc[k]);
             if(isNaN(crd)){
                 alert(arc[k]+" is not number value");
                 return null;
@@ -61,13 +62,13 @@
         }
         if(allInteger || allOutWGS){ //offer to convert UTM to LatLong
 
-            var $ddlg, buttons = {};
+            let $ddlg, buttons = {};
             buttons['Yes, UTM'] = function(){ 
                 
-                var UTMzone = $ddlg.find('#dlg-prompt-value').val();
+                let UTMzone = $ddlg.find('#dlg-prompt-value').val();
                 if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
-                        var re = /s|n/gi;
-                        var zone = parseInt(UTMzone.replace(re,''));
+                        let re = /s|n/gi;
+                        let zone = parseInt(UTMzone.replace(re,''));
                         if(isNaN(zone) || zone<1 || zone>60){
                             setTimeout('alert("UTM zone must be within range 1-60");',500);
                             return false;
@@ -102,8 +103,8 @@
     else if(UTMzone!=0) {
         /*
         if( !$.isFunction(document['Utm']) ){
-            var path = window.hWin.HAPI4.baseURL + 'external/js/geodesy-master/';
-            var scripts = [path+'vector3d.js', path+'latlon-ellipsoidal.js', path+'utm.js', path+'dms.js'];
+            let path = window.hWin.HAPI4.baseURL + 'external/js/geodesy-master/';
+            let scripts = [path+'vector3d.js', path+'latlon-ellipsoidal.js', path+'utm.js', path+'dms.js'];
         
             //load missed javascripts
             $.getMultiScripts(scripts)
@@ -123,7 +124,7 @@
         if(UTMzone.toLowerCase().indexOf('s')>=0){
             hemisphere = 'S';
         }
-        var re = /s|n/gi;
+        let re = /s|n/gi;
         UTMzone = parseInt(UTMzone.replace(re,''));
         if(isNaN(UTMzone) || UTMzone<1 || UTMzone>60){
             setTimeout("alert('UTM zone must be within range 1-60')",500);
@@ -133,12 +134,12 @@
     }
     
     //verify and gather coordintes
-    var coords = []; //Array of LatLngLiteral
+    let coords = []; //Array of LatLngLiteral
     
     islat = true;
-    for (k=0; k<arc.length; k++){
+    for (let k=0; k<arc.length; k++){
 
-        var crd = Number(arc[k]);
+        let crd = Number(arc[k]);
         if(isNaN(crd)){
             alert(arc[k]+" is not number value");
             return null;
@@ -152,11 +153,11 @@
         islat = !islat;
         if(islat){
             if(UTMzone>0){
-                easting = Number(arc[k-1]);
-                northing = crd;
+                let easting = Number(arc[k-1]);
+                let northing = crd;
                 
-                var utm = new Utm( UTMzone, hemisphere, easting, northing );
-                var latlon = utm.toLatLonE();
+                let utm = new Utm( UTMzone, hemisphere, easting, northing );
+                let latlon = utm.toLatLonE();
                 coords.push(latlon.lon+' '+latlon.lat); //X Y
                 //coords.push({lat:latlon.lat, lng:latlon.lon});    
             }else{
@@ -169,7 +170,7 @@
     
     
     //create wkt -----------------------------------------
-    var wkt = '';
+    let wkt = '';
     if (coords && coords.length>0){
         if(type=='Polygon'){
             if(coords.length<3){
