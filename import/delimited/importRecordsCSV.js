@@ -92,7 +92,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     status:window.hWin.ResponseStatus.REQUEST_DENIED,
-                                    message:'Administrator permissions are required'});    
+                                    message:'Administrator permissions are required'
+                                });
                             }
                         });
                 
@@ -156,7 +157,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 }
                 
-                window.hWin.HEURIST4.msg.showMsgErr(msg);
+                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload failed', status: window.hWin.ResponseStatus.UNKNOWN_ERROR});
             }
 
             uploadData = null;
@@ -170,7 +171,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     let data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
-                            window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                            window.hWin.HEURIST4.msg.showMsgErr({message: file.error, error_title: 'File upload error'});
                         }else{
                             /*
                             $('#divParsePreview').load(file.url, function(){
@@ -207,7 +208,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 }else{
                     //$('#divFieldRolesHeader').show();
                     _showStep(1);
-                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
                 }
                 
                 //need to reassign  event handler since widget creates temp input
@@ -225,13 +226,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     pbar.progressbar({value: progress});
                     if (data.total>_max_upload_size && uploadData) {
                             uploadData.abort();
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                            'Sorry, this file exceeds the upload '
-                            //+ ((max_file_size<max_post_size)?'file':'(post data)')
-                            + ' size limit set for this server ('
-                            + Math.round(_max_upload_size/1024/1024) + ' MBytes). '
-                            +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
-                            );
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message:'Sorry, this file exceeds the upload '
+                                       +` size limit set for this server (${Math.round(_max_upload_size/1024/1024)} MBytes). `
+                                       +'Please reduce the file size, or ask your system administrator to increase the upload limit.',
+                                error_title: 'Uploaded file is too large',
+                                status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                            });
                     }else if(!pbar_div.is(':visible')){
                         //!!! $('#upload_form_div').hide();
                         _showStep(0);
@@ -2707,7 +2708,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });        
         
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Please paste comma or tab-separated data into the content area below');    
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Please paste comma or tab-separated data into the content area below',
+                error_title: 'No data to import'
+            });
         }
     }
     
@@ -3102,7 +3106,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                     }else{
                         if(step==1 && response.status=='unknown' && response.message=='Error_Connection_Reset'){
-                            window.hWin.HEURIST4.msg.showMsgErr('It appears that your file is not in UTF8. Please select correct encoding');
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: 'It appears that your file is not in UTF8. Please select correct encoding',
+                                error_title: 'Invalid file encoding',
+                                status: window.hWin.ResponseStatus.INVALID_REQUEST
+                            });
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
@@ -3286,8 +3294,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
             
             if(matchMode==0 && !haveMapping){
-                window.hWin.HEURIST4.msg.showMsgErr('Please select the fields on which you wish to match the data read '
-                        +'with records already in the database (if any)');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please select the fields on which you wish to match the data read '
+                            +'with records already in the database (if any)',
+                    error_title: 'No fields selected for matching'
+                });
                 return;
             }
 
@@ -3295,9 +3306,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //otherwise we can't search exactly
             if(multifields.length>1){
                 //imp_session['columns'][key_idx]
-                window.hWin.HEURIST4.msg.showMsgErr('It is possible to select the only field with multivalues (separated with '
-                        +imp_session['csv_mvsep']+
-                        '). You selected '+multifields.length+' multivalue fields');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'It is possible to select the only field with multivalues (separated with '
+                            +`${imp_session['csv_mvsep']}). You selected ${multifields.length}  multivalue fields`,
+                    error_title: 'Multiple multivalue fields selected'
+                });
                 return;
             }
             
@@ -3418,11 +3431,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#mr_cnt_disamb').parent().show();
                                 */
                                 
-                                window.hWin.HEURIST4.msg.showMsgErr('One or more rows in your file match multiple records in the database.<br>'+
-                        'Please click <b>Resolve ambiguous matches</b> to view and resolve these ambiguous matches.<br><br> '+
-                        'If you have many such ambiguities you may need to select adidtional key fields or edit the incoming '+
-                        'data file to add further matching information.');
-                        
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: 'One or more rows in your file match multiple records in the database.<br>'+
+                                             'Please click <b>Resolve ambiguous matches</b> to view and resolve these ambiguous matches.<br><br> '+
+                                             'If you have many such ambiguities you may need to select adidtional key fields or edit the incoming '+
+                                             'data file to add further matching information.',
+                                    error_title: 'Ambiguous record matches found'
+                                });
+
                                 $('.step3 > .normal').hide();
                                 $('.step3 > .skip_step').hide();
                                 $('.step3 > .need_resolve').show();
@@ -3509,9 +3525,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
         let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
         if(!(key_idx>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr('You must select a record identifier column for <b>'
-                + $Db.rty(rtyID,'rty_Name')
-                +'</b> in the first section below. This is used to identify the records to be created/updated');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `You must select a record identifier column for <b>${$Db.rty(rtyID,'rty_Name')}</b>`
+                        +' in the first section below. This is used to identify the records to be created/updated',
+                error_title: 'No record identifier selected'
+            });
             return;
         }
 
@@ -3545,18 +3563,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
 
         if(hasLongitude != hasLatitude){
-            window.hWin.HEURIST4.msg.showMsgErr(
-                'You must map both X/Longitude and Y/Latitude if the coordinates are in separate columns,<br>'
-                +'or else a single Geospatial field if the they are in WKT format in a single column.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'You must map both X/Longitude and Y/Latitude if the coordinates are in separate columns,<br>'
+                        +'or else a single Geospatial field if the they are in WKT format in a single column.',
+                error_title: 'Invalid geospatial field mapping'
+            });
 
             return;
         }
 
         if(!haveMapping){
-            window.hWin.HEURIST4.msg.showMsgErr(
-                'You have not mapped any columns in the incoming data to fields in the record, '
-                +'so the records created would be empty. Please select the fields which should '
-                +'be imported into "'+$Db.rty(rtyID,'rty_Name')+'" records.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'You have not mapped any columns in the incoming data to fields in the record, '
+                        +'so the records created would be empty. Please select the fields which should '
+                        +`be imported into "${$Db.rty(rtyID,'rty_Name')}" records.`,
+                error_title: 'No fields mapped'
+            });
 
             return;
         }
@@ -3671,11 +3693,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#btnShowWarnings').show();
 
                             if(res['missed_required']==true){
-                                window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
-                                +' missing or wrong values for fields. Including Required fields.<br><br> '
-                                +' You may continue to import required data with missing or invalid values.'
-                                +' After import, you can find and correct these values using Verify > Verify integrity<br><br>'
-                                + 'Click "Show" button  for a list of rows with missing values');                            
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: (res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
+                                            +' missing or contains wrong values for the fields. Including Required fields.<br><br> '
+                                            +' You may continue to import required data with missing or invalid values.'
+                                            +' After import, you can find and correct these values using Admin > Verify integrity<br><br>'
+                                            + 'Click "Show" button  for a list of rows with missing values',
+                                    error_title: 'Missing and invalid required fields'
+                                });
                             }
 
                             // auto check 'ignore errors', these errors can be picked up and fixed by verify integrity or manually
@@ -3689,16 +3714,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#mrr_error').text('Unrecognised terms: '+res['count_error']);
                             $('#prepareErrors').show();//.css('display','inline-block');
                             
-                            window.hWin.HEURIST4.msg.showMsgErr((res['count_error']==1?'There is one row':('There are '+res['count_error']+' ROWS '))
-                            +'with warnings in your input (the same error may occur in many rows).'
-                            +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
-                            +'(no record with given ID), missing required values and so forth.'
-                            + '<br><br>The data can be imported as-is and new terms can be added automatically, '
-                            + 'but if the data has too many mistakes it may be better to fix these in the source '
-                            + 'file and then process it again. Open Refine is a useful free tool for fixing errors.'
-                            + '<br><br> On the other hand, Admin > Verify Integrity can be used to find many common '
-                            + 'errors once the data is loaded. Click "Show" button for a list of errors.');                            
-                    
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: (res['count_error']==1?'There is one row':('There are '+res['count_error']+' ROWS '))
+                                        +'with warnings in your input (the same error may occur in many rows).'
+                                        +'<br><br>These could include unrecognised terms, invalid dates, unknown record pointers '
+                                        +'(no record with given ID), missing required values and so forth.'
+                                        + '<br><br>The data can be imported as-is and new terms can be added automatically, '
+                                        + 'but if the data has too many mistakes it may be better to fix these in the source '
+                                        + 'file and then process it again. Open Refine is a useful free tool for fixing errors.'
+                                        + '<br><br> On the other hand, Admin > Verify Integrity can be used to find many common '
+                                        + 'errors once the data is loaded. Click "Show" button for a list of errors.',
+                                error_title: 'Invalid values'
+                            });
+
                             $('.step3 > .normal').hide();
                             $('.step3 > .skip_step').hide();
                             $('.step3 > .need_resolve').show();
@@ -3771,10 +3799,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
             
         if(!haveMapping){
-            window.hWin.HEURIST4.msg.showMsgErr(
-'You have not mapped any columns in the incoming data to fields in the record, '
-+'so the records created would be empty. Please select the fields which should '
-+'be imported into "'+$Db.rty(rtyID,'rty_Name')+'" records.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'You have not mapped any columns in the incoming data to fields in the record, '
+                        +'so the records created would be empty. Please select the fields which should '
+                        +`be imported into "${$Db.rty(rtyID,'rty_Name')}" records.`,
+                error_title: 'No fields mapped'
+            });
             return;
         }
         
@@ -4665,7 +4695,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +((skip_long>0)?skip_long+' have too long label; ':' ')
                     +((skip_na>0)?skip_na+' label is empty':'');
             
-            setTimeout(function(){window.hWin.HEURIST4.msg.showMsgErr(s);}, 1000);    
+            setTimeout(function(){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: s,
+                    error_title: 'No terms imported',
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST
+                });
+            }, 1000);    
             return;
         }
         
@@ -4741,13 +4777,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             let s = recIDs.length+' new term'
                                     +((recIDs.length==1)?' was':'s were')+' imported. ';
                             if(cnt==1 || is_all){
+
                                 $dlg.dialog('close');
-                                window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
-                                
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: `${s}Please repeat "Prepare" action`,
+                                    error_title: 'Terms imported'
+                                });
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
-                                +'to add missing terms for other enumeration fields. '
-                                +'And finally close this dialog and repeat "Prepare" action'); 
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: `${s}Check other "error" tabs `
+                                            +'to add missing terms for other enumeration fields. '
+                                            +'And finally close this dialog and repeat "Prepare" action',
+                                    error_title: 'Terms imported'
+                                });
                             }
                         }
                     );
