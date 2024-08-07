@@ -2790,8 +2790,16 @@ class HPredicate {
             $this->negate = true;
             $this->value = substr($this->value, 1);
         }
+        
+        if($this->field_type=='freetext' || $this->field_type=='blocktext'){
+            //avoid case when text contains html tag, ie: "<b>John</b><i>Peterson</i>"
+            $stripped_value = strip_tags($this->value);
+        }else{
+            $stripped_value = $this->value;
+        }
+        
                 
-        if (strpos($this->value,'<>')===false && strpos($this->value,'><')===false) { //except "overlaps" and "between" operators
+        if (strpos($stripped_value,'<>')===false && strpos($stripped_value,'><')===false) { //except "overlaps" and "between" operators
             
             if(strpos($this->value, '==')===0){
                 $this->case_sensitive = true;
@@ -2801,13 +2809,13 @@ class HPredicate {
             if(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
-            }else if(strpos($this->value, '@')===0){
+            }else if(strpos($this->value, '@')===0){ //full text search
                 $this->fulltext = true; //for detail type "file" - search by obfuscation id
                 $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '<=')===0){
                 $this->lessthan = '<=';
                 $this->value = substr($this->value, 2);
-            }else if(strpos($this->value, '<')===0){
+            }else if(strpos($stripped_value, '<')===0){
                 $this->lessthan = '<';
                 $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '>=')===0){
