@@ -139,7 +139,7 @@ function hImportRecords(_max_upload_size) {
                     $.each(data.files, function (index, file) {
                         if(file.error){
                             _hideProgress(0);                
-                            window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                            window.hWin.HEURIST4.msg.showMsgErr({message: file.error, error_title: 'File upload error'});
                             return false;
                         }else{
                             
@@ -185,7 +185,7 @@ function hImportRecords(_max_upload_size) {
                 }else{
                     _hideProgress(0);
                     _showStep(0);
-                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
                 }
                 
                 //need to reassign  event handler since widget creates temp input
@@ -205,13 +205,13 @@ function hImportRecords(_max_upload_size) {
                     pbar.progressbar({value: progress});
                     if (data.total>_max_upload_size && uploadData) {
                             uploadData.abort();
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                            'Sorry, this file exceeds the upload '
-                            //+ ((max_file_size<max_post_size)?'file':'(post data)')
-                            + ' size limit set for this server ('
-                            + Math.round(_max_upload_size/1024/1024) + ' MBytes). '
-                            +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
-                            );
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message:'Sorry, this file exceeds the upload '
+                                       +` size limit set for this server (${Math.round(_max_upload_size/1024/1024)} MBytes). `
+                                       +'Please reduce the file size, or ask your system administrator to increase the upload limit.',
+                                error_title: 'Uploaded file is too large',
+                                status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                            });
                     }else if(!pbar_div.is(':visible')){
                         //!!! $('#upload_form_div').hide();
                         _showStep(0);

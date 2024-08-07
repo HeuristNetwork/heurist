@@ -85,7 +85,7 @@ function hImportFileData() {
                         }
                     });
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
                 }
                  
                 let inpt = this;
