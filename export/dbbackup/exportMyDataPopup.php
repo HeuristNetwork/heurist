@@ -246,8 +246,10 @@ if($mode>1){
                     data = window.hWin.HEURIST4.util.isJSON(data);
 
                     if(data.status && data.status != window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgErr('An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
-                                + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                         $sel_license.parent().parent().hide();
                         return;
                     }
@@ -260,8 +262,10 @@ if($mode>1){
                         $sel_license.attr('data-init', 'Nakala');
                         $sel_license.parent().parent().show();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
-                                + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                         $sel_license.parent().parent().hide();
                     }
                 });

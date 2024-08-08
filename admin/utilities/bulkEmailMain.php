@@ -481,7 +481,10 @@ if(!$has_emails || empty($emails)) {
                 let $db_list = $('#dbSelection');
 
                 if(!database_details || database_details.length == 0){ // TODO: attempt another retrieval
-                    window.hWin.HEURIST4.msg.showMsgErr('Unable to apply sort to database list');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Unable to apply sort order to database list, there were no databases found/provided.',
+                        error_title: 'Database sorting failed'
+                    });
                     return;
                 }
 
@@ -680,9 +683,13 @@ if(!$has_emails || empty($emails)) {
                             //fail:
                             error: function(jqXHR, textStatus, errorThrown){
 
-                                window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the filtered list of databases."
-                                        + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                        + "<br><br>Please contact the Heurist team if this problem persists");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An error has occurred with retrieving the filtered list of databases.<br>"
+                                        + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                        + "Please contact the Heurist team if this problem persists",
+                                    error_title: 'Unable to retrieve database list',
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             },
                             //done:
                             success: function(response, textStatus, jqXHR){
@@ -694,10 +701,13 @@ if(!$has_emails || empty($emails)) {
                                 } else {
 
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                        window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                        window.hWin.HEURIST4.msg.showMsgErr({
+                                            message: "An unknown error has occurred with retrieving the filtered list of databases.",
+                                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                        });
                                     } else {
                                         var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                        window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                                        window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve database list'});
                                     }
                                 }
                             },
@@ -754,9 +764,13 @@ if(!$has_emails || empty($emails)) {
                     //fail:
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the complete list of databases."
-                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                + "<br><br>Please contact the Heurist team if this problem persists");
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "An error has occurred with retrieving the complete list of databases.<br>"
+                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + "Please contact the Heurist team if this problem persists",
+                            error_title: 'Unable to retrieve database list',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     },
                     //done:
                     success: function(response, textStatus, jqXHR){
@@ -769,10 +783,13 @@ if(!$has_emails || empty($emails)) {
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An unknown error has occurred with retrieving the complete list of databases, please contact the Heurist team.",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             } else {
                                 var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve database list'});
                             }
                         }
                     },
@@ -803,9 +820,12 @@ if(!$has_emails || empty($emails)) {
                     },
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the Email record short summary field (email body)."
-                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                + "<br><br>Please contact the Heurist team if this problem persists");
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "An error has occurred with retrieving the Email record short summary field (email body).<br>"
+                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + "Please contact the Heurist team if this problem persists",
+                            error_title: 'Failed to retrieve email details'
+                        });
                     },
                     success: function(response, textStatus, jqXHR){
                         
@@ -815,10 +835,13 @@ if(!$has_emails || empty($emails)) {
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An unknown error has occurred with retrieving email record details, please contact the Heurist team.",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             } else {
                                 var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve email details'});
                             }
                         }
                     }
@@ -908,9 +931,12 @@ if(!$has_emails || empty($emails)) {
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the the user count for the selected databases and user type."
-                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                + "<br><br>Please contact the Heurist team if this problem persists");
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "An error has occurred with retrieving the the user count for the selected databases and user type.<br>"
+                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + "Please contact the Heurist team if this problem persists",
+                            error_title: 'Failed to retrieve record count'
+                        });
                     },
                     success: (response, textStatus, jqXHR) => {
 
@@ -919,10 +945,13 @@ if(!$has_emails || empty($emails)) {
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An unknown error has occurred with retrieving the record counts, please contact the Heurist team.",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             } else {
                                 var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve record count'});
                             }
                         }
                     }
@@ -973,9 +1002,12 @@ if(!$has_emails || empty($emails)) {
                     },
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with retrieving the the user count for the selected databases and user type."
-                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                + "<br><br>Please contact the Heurist team if this problem persists");
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "An error has occurred with retrieving the the user count for the selected databases and user type.<br>"
+                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + "Please contact the Heurist team if this problem persists",
+                            error_title: 'Failed to retrieve user count'
+                        });
                     },
                     success: function(response, textStatus, jqXHR){
                         
@@ -984,10 +1016,13 @@ if(!$has_emails || empty($emails)) {
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An unknown error has occurred with retrieving user counts, please contact the Heurist team.",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             } else {
                                 var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, title: "Heurist"});
+                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve user counts'});
                             }
                         }
                     }
@@ -1015,9 +1050,12 @@ if(!$has_emails || empty($emails)) {
                     },
                     error: function(jqXHR, textStatus, errorThrown){
 
-                        window.hWin.HEURIST4.msg.showMsgErr("An error has occurred with verifying the System Administrator password."
-                                + "<br>Error Details: " + jqXHR.status + " => " + textStatus
-                                + "<br><br>Please contact the Heurist team if this problem persists");
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "An error has occurred with verifying the System Administrator password.<br>"
+                                    + `Error Details: ${jqXHR.status} => ${textStatus}<br><br>`
+                                    + "Please contact the Heurist team if this problem persists",
+                            error_title: 'Failed to authenticate'
+                        });
                     },
                     success: function(response, textStatus, jqXHR){
                         
@@ -1032,9 +1070,12 @@ if(!$has_emails || empty($emails)) {
                         } else {
 
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr("An unknown error has occurred, please contact the Heurist team.");
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: "An unknown error has occurred while attempting to authenticate the system administrator password, please contact the Heurist team.",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             } else { // There is no error_msg
-                                window.hWin.HEURIST4.msg.showMsgErr({message: response.message, title: "Heurist"});
+                                window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: "Fail to authenticate"});
                             }
                         }
                     }

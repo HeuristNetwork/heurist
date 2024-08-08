@@ -83,8 +83,11 @@ var database = '<?php echo htmlspecialchars($dbname);?>';
 function onHapiInit(success){   
     
     if(!success){    
-        window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side. '
-            +'Database '+database+', please consult Heurist developers');
+        window.hWin.HEURIST4.msg.showMsgErr({
+            message: 'Cannot initialize system on client side. '
+                    +`Database${database}, please consult Heurist developers`,
+            error_title: 'Unable to initialise Heurist'
+        });
             return;
     }
     

@@ -124,8 +124,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
                 $sel_license.attr('data-init', 'Nakala');
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the licenses for Nakala records.<br>'
-                        + 'If this problem persists, please contact the Heurist team.');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records.',
+                    error_title: 'Failed to retrieve Nakala licenses',
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                });
                 window.close();
             }
         });
@@ -521,7 +524,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             }
                         });
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                        window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
                     }
                      
                     let inpt = this;
@@ -1026,7 +1029,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
             }else{
                 $('#div_result').hide();
-                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
 
