@@ -1110,7 +1110,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         $('#btn_viewpoint_delete')
         .button({label: window.hWin.HR("Delete selected extent"), showLabel:false, icon:"ui-icon-close"})
         .css({'font-size':'0.9em'})
-        .on('click',function(){
+        .on('click', function(){
             let selval = $sel_viepoints.val();
             if(selval!=''){
                 // remove from preferences
@@ -1134,7 +1134,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         $('#btn_viewpoint_save')
         .button({label: window.hWin.HR("Save extent")})
-        .on('click',function(){
+        .on('click', function(){
             window.hWin.HEURIST4.msg.showPrompt('Name for extent', function(location_name){
                 if(!window.hWin.HEURIST4.util.isempty(location_name) && location_name!='none defined'){
                     //save into preferences 
@@ -1168,7 +1168,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         // apply coordinates
         $('#apply-coords-button').button().on('click',_applyCoordsForSelectedShape);
 
-        $('#load-geometry-button').button().on('click',function(){
+        $('#load-geometry-button').button().on('click', function(){
 
             let titleYes = window.hWin.HR('Yes'),
             titleNo = window.hWin.HR('No'),
@@ -1194,7 +1194,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         });
 
-        $('#get-geometry-button').button().on('click',function(){
+        $('#get-geometry-button').button().on('click', function(){
 
             $('#geodata_textarea').val(JSON.stringify(_getGeoJSON()));    
 
@@ -1213,7 +1213,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
         */ 
         
-        $('#save-button').button().on('click',function(){
+        $('#save-button').button().on('click', function(){
             
             if(!$('#cbAllowMulti').is(':checked') && overlays.length>1){
                 
@@ -1264,7 +1264,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             }
             */
         });
-        $('#cancel-button').button().on('click',function(){
+        $('#cancel-button').button().on('click', function(){
             _saveExtentOnExit();
             window.close();
         });

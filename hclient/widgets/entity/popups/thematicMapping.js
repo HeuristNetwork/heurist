@@ -392,7 +392,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                         +'<span class="ui-icon ui-icon-circle-b-plus" title="Add field" style="font-size:0.9em"></span>'
                         +'</div>').appendTo(parent_span);
                         
-                        actionspan.find('.ui-icon-circle-b-plus').on('click',function(event){
+                        actionspan.find('.ui-icon-circle-b-plus').on('click', function(event){
                             let ele = $(event.target);
                             window.hWin.HEURIST4.util.stopEvent(event);
                             that._addThemeField( ele.parents('[data-code]').attr('data-code') );                           

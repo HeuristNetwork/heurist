@@ -390,7 +390,7 @@ $system->defineConstants();
             $("#btnMapEdit").button({showLabel:false, icon: "ui-icon-pencil"})
             .on('click', mapEdit );
             $("#btnMapLayer").button({showLabel:false, icon: "ui-map-layer"})
-            .on('click',function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
+            .on('click', function(){ addNewRecord('<?=checkRt('RT_MAP_LAYER')?>');})
             .append('<span class="ui-icon ui-icon-plus" style="margin-left:0px;margin-top:-2px" />');
 
             menu_datasets = $('<ul><?=$items?></ul>')

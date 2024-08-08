@@ -874,7 +874,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                         +"</button>"
                         + "<label class='non-selectable' style='vertical-align:middle;float:right;margin-right:5px;'> [ " + keywords[i][1] + " ] </label>");
 
-                item.find('.btn-info.ui-icon-circle-b-info').on('click',function(e){
+                item.find('.btn-info.ui-icon-circle-b-info').on('click', function(e){
                     let rec_id = $(e.target).parent().find('input').attr('value');
 
                     that.openRecordInTab(rec_id);
@@ -887,7 +887,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                     }
                 }
 
-                item.find('#'+keywords[i][0]+'_a').on('click',function(e){ 
+                item.find('#'+keywords[i][0]+'_a').on('click', function(e){ 
 
                     let id = $(e.target).val();
                     if($(e.target).is(':Checked') == true) {
@@ -1153,8 +1153,8 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
 
         item.html(html);
 
-        $(item).find('#'+id).on('click',function(e){ that.disableUpdateBtn(); });
-        $(item).find('.btn-info').on('click',function(e){ that.openRecordInTab(id); });
+        $(item).find('#'+id).on('click', function(e){ that.disableUpdateBtn(); });
+        $(item).find('.btn-info').on('click', function(e){ that.openRecordInTab(id); });
 
         list.append(item);
         return;
@@ -1208,9 +1208,9 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
         + "<button data-value='" + id + "' class='btn btn-delete ui-icon ui-icon-close'"
         + " style='float:right;margin-right:5px;font-size:1.1em;display:inline-block;width:20px;height:20px;' title='Remove keyword from list'>&nbsp;</button>");
 
-        $(item).find('.btn-info.ui-icon-circle-b-info').on('click',function(e){ that.openRecordInTab(id); });
-        $(item).find('.btn-lookup').on('click',function(e){ that.setupAssocKeywords(id); });
-        $(item).find('.btn-delete').on('click',function(e){ that.removeKeyword($(e.target), id); });
+        $(item).find('.btn-info.ui-icon-circle-b-info').on('click', function(e){ that.openRecordInTab(id); });
+        $(item).find('.btn-lookup').on('click', function(e){ that.setupAssocKeywords(id); });
+        $(item).find('.btn-delete').on('click', function(e){ that.removeKeyword($(e.target), id); });
 
         list.append(item);
     },

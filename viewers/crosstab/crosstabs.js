@@ -90,7 +90,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $recTypeSelector.hSelect('widget').css('width', '');
 
         $('.showintervals')
-        .on('click',function( event ) {
+        .on('click', function( event ) {
             let $modal = determineModalType( $(this).attr('tt') );
 
             $modal.modal('show');
@@ -696,7 +696,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $buttons = $(document.createElement('div'))
                 .addClass('col-3 p-2')
                 .append($('<button>',{html: "<i class='ui-icon ui-icon-refresh'></i> Reset",class: "btn btn-secondary"})
-                    .on('click',function( event ) {
+                    .on('click', function( event ) {
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }).css('margin-right',"1rem"));
                 
@@ -713,7 +713,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .attr('data-bs-placement', 'top')
                 .attr('title', 'Deselect all values')
                 .append('<i class="ui-icon ui-icon-arrow-l w-100"></i>')
-                .on('click',function(){
+                .on('click', function(){
                     //Remove all fields from array
                     fields3[name].intervals = [];
 
@@ -827,7 +827,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
                     //.button({icons: {primary: "ui-icon-plus"}} )
-                    .on('click',function( event ) {
+                    .on('click', function( event ) {
                         editInterval( name, -1);
                     })
                     .html('<i class="ui-icon ui-icon-plusthick"></i> Add Interval')
@@ -870,7 +870,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .attr('checked', false)
                     .attr('id','selectAll'+name)
                     .addClass('recordIcons')
-                    .on('change',function(){
+                    .on('change', function(){
                         //Unchecks selectall checkbox if a value is unchecked.
                         let checked = this.checked;
                         //selects checkbox which are not disabled in edit mode
@@ -936,7 +936,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             .attr('termid',termlist[i].id)
                             .attr('termname',termlist[i].text)
                             .attr('name', name+'Options')
-                            .on('change',function(){
+                            .on('change', function(){
                                 //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
                                 if(($('input[id=selectAll'+name+']').prop('checked') == true) && ($(this).prop('checked') == false)){
                                     $('input[id=selectAll'+name+']').prop('checked', false);
@@ -961,7 +961,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             let $removeButton = $('<button></button>')
                             .addClass('btn btn-outline-primary w-100 p-1')
                             .attr('valueid',termlist[i].id)
-                            .on('click',function(){
+                            .on('click', function(){
                                 //Get the name of the value clicked to remove from group interval
                                 let clicked = $(this).attr('valueid');
 
@@ -1041,7 +1041,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $($resetRowBody).appendTo($resetRow);
                 
                 //Add click function to apply button.
-                $($resetRow).find('#numericApply').on('click',function(event){
+                $($resetRow).find('#numericApply').on('click', function(event){
                     let isMinWithin = (parseInt($('#minOutlier'+name).val()) >= fields3[name].values[0] && parseInt($('#minOutlier'+name).val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
                     let isMaxWithin = (parseInt($('#maxOutlier'+name).val()) <= fields3[name].values[1] && parseInt($('#maxOutlier'+name).val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
                     let isMaxGreater = (parseInt($('#maxOutlier'+name).val()) < parseInt($('#minOutlier'+name).val())) ? true : false;
@@ -1282,7 +1282,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<div class="col-4">').html(lessThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMinOutlier')
                     .append('<i class="ui-icon ui-icon-trash"></i>'))
-                    .on('click',function(){
+                    .on('click', function(){
                         if(!clickedMinOutlier){
                             originalOutliers[0] = fields3[name].intervals[0];
                             fields3[name].intervals.splice(0,1);
@@ -1336,7 +1336,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<div class="col-4">').html(greaterThanPrior+outlierNumber.toFixed(decimalPlace)).appendTo($intRows);
                     $('<div class="col-4">').append($('<button>').addClass('btn btn-secondary border-dark').attr('id','removeMaxOutlier')
                     .append('<i class="ui-icon ui-icon-trash"></i>'))
-                    .on('click',function(){
+                    .on('click', function(){
                         if(!clickedMaxOutlier){
                             originalOutliers[1] = fields3[name].intervals[fields3[name].intervals.length-1];
                             fields3[name].intervals.splice(fields3[name].intervals.length-1,1);
@@ -1496,7 +1496,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .append($('<button>')
             .addClass("btn btn-outline-success w-100 p-1")
             .attr('id','applyButton')
-            .on('click',function(){
+            .on('click', function(){
                 __addeditInterval(name, idx, true);
                 $('#deselectAll').removeClass('d-none');
             }));
@@ -1615,7 +1615,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .append($('<button>')
                     .addClass('btn btn-secondary border-dark w-100 p-0 py-1')
                     .append('<i class="ui-icon ui-icon-trash"></i>')
-                    .on('click',function(){
+                    .on('click', function(){
                         //Remove interval and uncheck checkboxes
                         let interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
 
@@ -1657,7 +1657,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $intdiv.find('#'+name+idx+'ArrowPlacement')
                 .append($('<button>')
                 .addClass("btn btn-outline-success w-100 p-1 applyToGroup")
-                .on('click',function(){
+                .on('click', function(){
 
                     let isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
                     let isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
@@ -1721,7 +1721,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         let $removeButton = $('<button></button>')
                         .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',newValue[i])
-                        .on('click',function(){
+                        .on('click', function(){
                             //Get the name of the value clicked to remove from group interval
                             let clicked = $(this).attr('valueid');
 
@@ -1797,7 +1797,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     let $removeButton = $('<button></button>')
                         .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',interval.values[i])
-                        .on('click',function(){
+                        .on('click', function(){
                             //Get the name of the value clicked to remove from group interval
                             let clicked = $(this).attr('valueid');
 
@@ -1872,7 +1872,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 let $removeButton = $('<button></button>')
                     .addClass('btn btn-outline-primary w-100 p-1')
                     .attr('valueid',interval.values[0])
-                    .on('click',function(){
+                    .on('click', function(){
                         //Get the name of the value clicked to remove from group interval
                         let clicked = $(this).attr('valueid');
 
@@ -2210,7 +2210,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $divres.append('<div id="titleDisplay" style="margin-top: 10px;"><h2 class="crosstab-page" style="display: inline-block;" id="tableHeader">'+tableTitle+'</h2>'
                     + '<button class="btn btn-warning ms-2" id="titleEdit"><span class="ui-button-icon ui-icon ui-icon-pencil" ></span></button></div>');
             
-            $('#titleSubmit').on('click',function(event){
+            $('#titleSubmit').on('click', function(event){
                 let title = $('#tableTitle').val();
 
                 if($('#tableTitle').val().length <=0 || String($('#tableTitle').val()).trim() == ''){
@@ -2224,7 +2224,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('#titleDisplay').show();
             });
 
-            $('#titleEdit').on('click',function(){
+            $('#titleEdit').on('click', function(){
 
                 $('#tableTitle').val($('#tableHeader').html());
 
@@ -3194,7 +3194,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     _init(_query, _query_domain);  // initialize before returning
 
     //On click of View Analysis button, modal appears.
-    /*$("#modalButton").on('click',function(){
+    /*$("#modalButton").on('click', function(){
         window.hWin.HEURIST4.msg.showElementAsDialog(
             {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
     });

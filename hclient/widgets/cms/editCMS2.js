@@ -337,7 +337,7 @@ function editCMS2(website_document){
             _editor_panel.find('.btn-website-edit').on('click',_editHomePageRecord);
         }
         _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
-        _editor_panel.find('.btn-website-url').on('click',function(){ // save website url to clipboard
+        _editor_panel.find('.btn-website-url').on('click', function(){ // save website url to clipboard
 
             let url_part = window.hWin.HAPI4.sysinfo.use_redirect ? 
                                 `${window.hWin.HAPI4.database}/web/${home_page_record_id}` : 
@@ -358,7 +358,7 @@ function editCMS2(website_document){
         
         _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click',_showWebSiteMenu);
         
-        _editor_panel.find('.bnt-cms-hidepanel').on('click',function(){ _ws_body.layout().close(options.editor_pos); } );
+        _editor_panel.find('.bnt-cms-hidepanel').on('click', function(){ _ws_body.layout().close(options.editor_pos); } );
      
         _panel_propertyView = _editor_panel.find('.propertyView');
         _panel_treeWebSite = _editor_panel.find('.treeWebSite');
@@ -1232,7 +1232,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                 actionspan.appendTo(item);
                 
                 actionspan.find('span[data-action]').hide();
-                actionspan.find('span.ui-icon-menu').on('click',function(event){
+                actionspan.find('span.ui-icon-menu').on('click', function(event){
                     let ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
                     ele.hide();
@@ -1244,7 +1244,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                 actionspan.insertAfter(item); //in main-content
 
                 actionspan.find('span[data-action]').hide();
-                actionspan.find('span.ui-icon-gear').on('click',function(event){ // edit widget
+                actionspan.find('span.ui-icon-gear').on('click', function(event){ // edit widget
 
                     let ele = $(event.target);
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -1269,7 +1269,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
             //
             // menu for action span
             //
-            actionspan.find('span[data-action]').on('click',function(event){
+            actionspan.find('span[data-action]').on('click', function(event){
                 let ele = $(event.target);
 
                 window.hWin.HEURIST4.util.stopEvent(event);
@@ -1339,7 +1339,7 @@ function(value){
 
             /*
             $('<span class="ui-icon ui-icon-pencil"></span>')                                                                
-            .on('click',function(event){ 
+            .on('click', function(event){ 
             //tree.contextmenu("open", $(event.target) ); 
 
             ).appendTo(actionspan);

@@ -165,10 +165,10 @@ $.widget( "heurist.mainMenu", {
             let selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
             $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline:0,
                            'min-width':'150px', 'margin-left':'25px', })
-            .on('click',function(event){
+            .on('click', function(event){
                 wasCtrl = event.shiftKey;
             })
-            .on('change',function(event){
+            .on('change', function(event){
                 if(window.hWin.HAPI4.database!=$(event.target).val()){
                     let url =  window.hWin.HAPI4.baseURL+'?db='+$(event.target).val();
                     $(event.target).val(window.hWin.HAPI4.database);
@@ -1733,9 +1733,9 @@ $.widget( "heurist.mainMenu", {
             
             
             let ele = $dlg.find('#mapcluster_on');
-            $dlg.find('#mapcluster_grid').on('change',function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_count').on('change',function(){ ele.prop('checked', true)});
-            $dlg.find('#mapcluster_zoom').on('change',function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_grid').on('change', function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_count').on('change', function(){ ele.prop('checked', true)});
+            $dlg.find('#mapcluster_zoom').on('change', function(){ ele.prop('checked', true)});
 
             //save to preferences
             function __doSave(){

@@ -1510,7 +1510,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         icons:{primary:'ui-icon-extlink'}})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
-                    .on('click',function(){
+                    .on('click', function(){
                         that.editRecordTypeOnNewTab();
                     });
                     
@@ -1518,8 +1518,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         icons:{primary:'ui-icon-gear'}})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
-                    .on('click',function(){that.editRecordType();});
-                panel.find('.btn-config3').on('click',function(){that.editRecordType();});
+                    .on('click', function(){that.editRecordType();});
+                panel.find('.btn-config3').on('click', function(){that.editRecordType();});
                 */
                     
                 let btn_change_rt = panel.find('.btn-modify');                        
@@ -1527,7 +1527,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         icons:{primary:'ui-icon-triangle-1-s'}})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'left','font-size': '0.8em', height: '14px', width: '14px'})
-                    .on('click',function(){
+                    .on('click', function(){
                          let selRt = panel.find('.rectypeSelect');
                          let selHd = panel.find('.rectypeHeader');
                          if(selRt.is(':visible')){
@@ -1633,7 +1633,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         icons:{primary:'ui-icon-pencil'}})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
-                    .on('click',function(){
+                    .on('click', function(){
 
            //
            // change ownership
@@ -2013,7 +2013,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 icons:{primary:'ui-icon-pencil'}})  //ui-icon-mail
                 .css({position:'absolute',right:'13px', height: '18px'})
                 .addClass('non-owner-disable')
-                .on('click',function(){
+                .on('click', function(){
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
                                 edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
@@ -2044,7 +2044,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 icons:{primary:'ui-icon-pencil'}})  //ui-icon-bookmark
                 .addClass('non-owner-disable')
                 .css({float: 'right', height: '18px'}) //position:'absolute',right:'13px',
-                .on('click',function(){
+                .on('click', function(){
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
                                 bkm_RecID: that._currentEditID,
@@ -2151,7 +2151,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 icons:{primary:'ui-icon-tag'}})
                 .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})
-                .on('click',function(){
+                .on('click', function(){
                     
                         /*
                         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
@@ -2463,7 +2463,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             ],{  title:'Creation of relationship record' }        
                         );
 
-                        let chb = $dlg.find('input[type="checkbox"]').on('change',function(){
+                        let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
                             var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
                             params['show_warn_about_relationship'] = false;
                             window.hWin.HAPI4.save_pref('prefs_'+that._entityName, params);     
@@ -2785,7 +2785,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                      );
                      
                           let btn = $dlg.parent().find('button:contains("Create independent record")');
-                          let chb = $dlg.find('input[type="checkbox"]').on('change',function(){
+                          let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
                               window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
                           })
                           window.hWin.HEURIST4.util.setDisabled(btn, true);
@@ -3313,12 +3313,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 if(no_access){
                     ele.find('a').hide();
-                    ele.find('.edit-button').button().on('click',function(){
+                    ele.find('.edit-button').button().on('click', function(){
                         ele.remove();
                     });
                 }else{       
                     //find('a')
-                    ele.find('.edit-button').button().on('click',function(){
+                    ele.find('.edit-button').button().on('click', function(){
                         ele.remove();
                         //restore edit ability 
                         that._editing.setDisabled(false);
@@ -4236,10 +4236,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.element.find('.btns-admin-only').show();
 
                 this.element.find('.btn-edit-rt').css(btn_css)
-                        .on('click',function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
+                        .on('click', function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
 
                 this.element.find('.btn-update-struct').css(btn_css)
-                        .on('click',function(){that._updateStructureFromSource(false);}); // update record structure from source
+                        .on('click', function(){that._updateStructureFromSource(false);}); // update record structure from source
                 
                 let btn = this.element.find('.btn-edit-rt2');        
                 if(this.options.edit_structure){
@@ -4263,14 +4263,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     btn.button({icon:'ui-icon-gear',label:'<span style="display:inline-block;margin-top:5px;">Modify structure</span>'})
                             .css(btn_css)
                             .width(130)
-                            .on('click',function(){that.editRecordType(true);});
+                            .on('click', function(){that.editRecordType(true);});
                 }                        
                         
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
 
                 this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})
-                        .css(btn_css).on('click',function(){
+                        .css(btn_css).on('click', function(){
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate'
                                     ,{recordType:that._currentEditRecTypeID,
                                       default_palette_class: 'ui-heurist-design'});});
@@ -4278,7 +4278,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(this._currentEditID){
 
                     this.element.find('.btn-rec-history').button({icon:'ui-icon-clock'})
-                            .css(btn_css).on('click',function(){
+                            .css(btn_css).on('click', function(){
                                 that._getRecordHistory();
                             });
                 }else{
@@ -4294,11 +4294,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             //bug report
             this.element.find('.btn-bugreport').button({icon:'ui-icon-bug'})
-                .css(btn_css).on('click',function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
+                .css(btn_css).on('click', function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
                 
                 
             this.element.find('.chb_show_help') //.attr('checked', ishelp_on)
-                        .on('change',function( event){
+                        .on('change', function( event){
                             let ishelp_on = $(event.target).is(':checked');
                             that.usrPreferences['help_on'] = ishelp_on;
                             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(that.element));
@@ -4306,7 +4306,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             
             this.element.find('.chb_opt_fields') //.attr('checked', isfields_on)
-                        .on('change',function( event){
+                        .on('change', function( event){
                             let isfields_on = $(event.target).is(':checked');
                             that.usrPreferences['optfields'] = isfields_on;
                             //that.saveUiPreferences();
@@ -4322,12 +4322,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.element.find('.sel_workflow_stages').val(swf_rules_mode);
                             
                 this.element.find('.sel_workflow_stages')
-                .on('change',function( event ){
+                .on('change', function( event ){
                     if(!that.usrPreferences['swf_rules_mode']) that.usrPreferences['swf_rules_mode'] = {};
                     that.usrPreferences['swf_rules_mode'][that._currentEditRecTypeID] = $(event.target).val();
                 });
             
-                this.element.find('#show_workflow_stages').button().css('margin-left', '5px').on('click',function(){
+                this.element.find('#show_workflow_stages').button().css('margin-left', '5px').on('click', function(){
                     that._showSwfPopup();
                 });
             
@@ -4475,7 +4475,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
         
         if(this.element.find('.btn-modify_structure').length>0){
-            this.element.find('.btn-modify_structure').on('click',function(){that.editRecordType(true);});
+            this.element.find('.btn-modify_structure').on('click', function(){that.editRecordType(true);});
         }
 
 
@@ -4484,7 +4484,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
         
         //init cms open edit listener
-        $(this.element).find('span[data-cms-edit="1"]').on('click',function(event){
+        $(this.element).find('span[data-cms-edit="1"]').on('click', function(event){
             that._saveEditAndClose(null, function(){
                 that.closeEditDialog();
                 window.hWin.HEURIST4.ui.showEditCMSwin( {record_id:that._currentEditID,  
@@ -5065,7 +5065,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                               .addClass('ui-icon ui-icon-gear')
                               .css({'color': 'rgb(125, 154, 170)', 'min-width': '22px', 'cursor': 'pointer'})
                               .attr('title', 'Open Title Mask Editor')
-                              .on('click',function(e) { that.editRecordTypeTitle(); });
+                              .on('click', function(e) { that.editRecordTypeTitle(); });
             if($title_field){
                 $title_field.find('span.editint-inout-repeat-button').find('ui-icon').remove(); // remove repeat button
                 $title_field.find('span.editint-inout-repeat-button').append($gear_icon); // add gear icon (edit title mask)
@@ -5392,7 +5392,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
                 .css('font-size','0.9em')
-        .on('click',function(){  //select next
+        .on('click', function(){  //select next
             $dlg.find('#dlg-prompt-value')[0].selectedIndex++;    
             if($dlg.find('#dlg-prompt-value')[0].selectedIndex<0){
                 $dlg.find('#dlg-prompt-value')[0].selectedIndex=0;            

@@ -172,7 +172,7 @@ function handleSettingsInUI() {
     var radius = getSetting(setting_entityradius);
     if(radius<circleSize) radius = circleSize  //min
     else if(radius>maxEntityRadius) radius = maxEntityRadius;
-    $('#nodesRadius').val(radius).on('change',function(){
+    $('#nodesRadius').val(radius).on('change', function(){
         putSetting(setting_entityradius, $(event.target).val());
         //visualizeData();
         d3.selectAll(".node > .background").attr("r", function(d) {
@@ -240,7 +240,7 @@ function handleSettingsInUI() {
     //_syncUI();
 
     var linksLength = 200; //2022-01-01 getSetting(setting_linelength, 200);    
-    $('#linksLength').val(linksLength).on('change',function(){
+    $('#linksLength').val(linksLength).on('change', function(){
         var newval = $(event.target).val();
         putSetting(setting_linelength, newval);
         if(getSetting(setting_gravity) != "off"){
@@ -264,7 +264,7 @@ function handleSettingsInUI() {
     $("#linksPathColor")
         //.addClass('ui-icon ui-icon-loading-status-circle')
         .css({'font-size':'1.8em','font-weight':'bold','color':getSetting(setting_linecolor)})
-        .on('click',function(e){
+        .on('click', function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksPathColor_inpt").colorpicker("showPalette");
         });
@@ -288,7 +288,7 @@ function handleSettingsInUI() {
     $("#linksMarkerColor")
         .addClass('ui-icon ui-icon-triangle-1-e')
         .css({'color':getSetting(setting_markercolor)})
-        .on('click',function(e){
+        .on('click', function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksMarkerColor_inpt").colorpicker("showPalette");
         });
@@ -314,7 +314,7 @@ function handleSettingsInUI() {
     putSetting(setting_labels, 'on'); //always on
     var isLabelVisible = (getSetting(setting_labels, 'on')=='on');
     
-    $('#textOnOff').attr('checked',isLabelVisible).on('change',function(){
+    $('#textOnOff').attr('checked',isLabelVisible).on('change', function(){
         
         var newval = $(event.target).is(':checked')?'on':'off';
         putSetting(setting_labels, newval);
@@ -332,7 +332,7 @@ function handleSettingsInUI() {
     });
     
     var textLength = getSetting(setting_textlength, 200);    
-    $('#textLength').val(textLength).on('change',function(){
+    $('#textLength').val(textLength).on('change', function(){
         var newval = $(event.target).val();
         putSetting(setting_textlength, newval);
         var isLabelVisible = (currentMode!='icons' || (getSetting(setting_labels, 'on')=='on'));

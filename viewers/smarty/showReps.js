@@ -1567,7 +1567,7 @@ function ShowReps( is_snippet_editor ) {
             
         $ele_popup.find('#selInsertModifiers').attr('onchange',null)
             .off('change')
-            .on('change',function __on_add(){
+            .on('change', function __on_add(){
         
                 let $dlg2 = $(event.target).parents('.ui-dialog-content');
                 let sel = $dlg2.find("#selInsertModifiers")

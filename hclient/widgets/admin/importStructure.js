@@ -190,7 +190,7 @@ $.widget( "heurist.importStructure", {
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
         //.css({'line-height': '0.9em'})
-        .on('click',function(){
+        .on('click', function(){
             that.panel_report.hide();
             that.panel_defs.show();
             

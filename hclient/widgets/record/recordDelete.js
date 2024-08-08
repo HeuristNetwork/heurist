@@ -342,7 +342,7 @@ function(){
 {title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
     
   let btn = $dlg.parent().find('button:contains("Delete records")');
-  let chb = $dlg.find('input[type="checkbox"]').on('change',function(){
+  let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
       window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
   })
   window.hWin.HEURIST4.util.setDisabled(btn, true);

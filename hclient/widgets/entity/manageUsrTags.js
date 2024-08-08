@@ -943,7 +943,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             }});
             
             //delete button
-            ele.find('span').on('click',function(event){
+            ele.find('span').on('click', function(event){
                  const recID = Number($(event.target).attr('recid'));
                  const idx = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
                  that.options.selection_ids.splice(idx, 1);

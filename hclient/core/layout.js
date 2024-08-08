@@ -1350,7 +1350,7 @@ console.error('Cardinal layout widget does not have proper options');
                        
                        $('<span class="ui-icon ui-icon-close" title="Close this tab" '
                        +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
-                       .on('click',function(){ 
+                       .on('click', function(){ 
                             $(item).hide(); 
                             if($(tabb).tabs("option", "active")==1) $(tabb).tabs({active:0}); 
                        })

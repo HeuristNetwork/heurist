@@ -413,7 +413,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister(false);
                     }); 
 
@@ -422,7 +422,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister( true );
                     }); 
                     
@@ -520,7 +520,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-grid"
                     }})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                          that._currentEditID = null;
                          that.editFormPopup.dialog('close');
                          if(that.options.edit_addrecordfirst){
@@ -551,7 +551,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .on('click',function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_folder_dlg){
                                 that.select_folder_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
@@ -598,7 +598,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .on('click',function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_file_dlg){
                                 that.select_file_dlg = $('<div/>').hide().appendTo( that._edit_dialog );

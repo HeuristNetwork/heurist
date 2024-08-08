@@ -104,7 +104,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 //initialize buttons
                 $('.save-button').button().on({click:getWktAndClose});
                 
-                $('#view-button').button().on('click',function(){
+                $('#view-button').button().on('click', function(){
                        mapping.mapping('getSetMapBounds', true);
                 });
                 $('#style-button').button().on({click:function(){
@@ -117,7 +117,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                        window.close();
                 }});
                 // paste geojson -> map
-                $('#load-geometry-button').button().on('click',function(){
+                $('#load-geometry-button').button().on('click', function(){
 
                     var titleYes = window.hWin.HR('Yes'),
                     titleNo = window.hWin.HR('No'),
@@ -163,11 +163,11 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                 });
                 
-                $("#fix-x-coords").button().on('click',function(){
+                $("#fix-x-coords").button().on('click', function(){
                 
                 });
                 // load from map -> geojson
-                $('#get-geometry-button').button().on('click',function(){
+                $('#get-geometry-button').button().on('click', function(){
                     
                     $('#get-coordinates-helper').show();
                     $('#set-coordinates-helper').hide();

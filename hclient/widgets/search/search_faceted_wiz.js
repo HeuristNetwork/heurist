@@ -516,7 +516,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         .button({icons: {primary: "ui-icon-pencil"}, text:false})
                         .attr('title', window.hWin.HR('Edit RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
-                        .on('click',function( event ) {
+                        .on('click', function( event ) {
                             //that.
                             that._editRules( $dlg.find('#svs_Rules') );
                         });
@@ -525,7 +525,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         .button({icons: {primary: "ui-icon-close"}, text:false})
                         .attr('title', window.hWin.HR('Clear RuleSet'))
                         .css({'height':'16px', 'width':'16px'})
-                        .on('click',function( event ) {
+                        .on('click', function( event ) {
                             $dlg.find('#svs_Rules').val('');
                         });
 
@@ -539,7 +539,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         $dlg.find("#svs_getCurrentFilter")
                         .button({'label':window.hWin.HR('Get current query')}) //{icons: {primary: "ui-icon-search"}, text:false}
                         .css({'height':'16px','font-size':'0.8em',width:'45px'})
-                        .on('click',function( event ) {
+                        .on('click', function( event ) {
                             let res = window.hWin.HEURIST4.query.hQueryStringify(window.hWin.HEURIST4.current_query_request, true);
                             if($dlg.find('#svs_Query').val().trim()!=''){
                                 let that_dlg = window.hWin.HEURIST4.msg.showMsgDlg(
@@ -931,7 +931,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
                     
                     
-                    //$(opt_rectypes).on('change',function(){});
+                    //$(opt_rectypes).on('change', function(){});
                     
                     if(this.originalRectypeID==null){//init flag
                         this.originalRectypeID = this.options.params.rectypes[0];    
@@ -2055,7 +2055,7 @@ $.widget( "heurist.search_faceted_wiz", {
             listdiv.find('.ui-button-text').css({"min-width":"60px","font-size":'0.9em'});
             //move to while? listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').controlgroup();
                                       
-            $(this.step3).find('#cbShowAdvanced').attr('checked',true).on('change',function(event){
+            $(this.step3).find('#cbShowAdvanced').attr('checked',true).on('change', function(event){
                 if($(event.target).is(':checked')){
                      listdiv.find('.optional_settings').show();
                     $(that.step3).find('#cbAccordionView').parent().show();

@@ -529,7 +529,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }
 
                 $dlg.find('select[name="orientation"]')
-                .on('change',function(e){
+                .on('change', function(e){
 
                     let is_horiz = ($(e.target).val()=='horizontal');
                     let is_vertical = ($(e.target).val()=='vertical');
@@ -622,7 +622,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             if(widget_name=='heurist_SearchTree'){
 
                 let ele_rb = $dlg.find('input[name="searchTreeMode"]')
-                .on('change',function(e){
+                .on('change', function(e){
 
                     let selval = __getSearchTreeMode();
 
@@ -801,7 +801,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 ele_rb.trigger('change');
 
-                $dlg.find('input[name="simple_search_allowed"]').on('change',function(){
+                $dlg.find('input[name="simple_search_allowed"]').on('change', function(){
                     let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
                     if(is_vis){
                         $dlg.find('#simple_search_header').parent().css('display','table-row');
@@ -965,7 +965,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 //======================================================
                     
                 $dlg.find('input[name="popup_behaviour"]')
-                    .on('change',function(event){
+                    .on('change', function(event){
 
                         let val = $dlg.find('input[name="popup_behaviour"]:checked').val();
 
@@ -1080,7 +1080,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 */
                 
                 $dlg.find('select[name="reportElementMode"]')
-                .on('change',function(e){
+                .on('change', function(e){
 
                     $dlg.find('select[name="reportElementSlideEffect"]').parent().hide();
                     $dlg.find('select[name="reportElementDistinct"]').parent().hide();
@@ -1095,7 +1095,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 .val(opts['reportElementMode']).trigger('change');
 
                 $dlg.find('select[name="reportElementMapMode"]')
-                .on('change',function(e){
+                .on('change', function(e){
 
                     if($(e.target).val()=='filtered'){
                         $dlg.find('input[name="reportElementMapFilter"]').parent().show();
@@ -1116,7 +1116,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
                         ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
 
-                     $dlg.find('#is_popup_report').on('change',function(e){
+                     $dlg.find('#is_popup_report').on('change', function(e){
                         if($dlg.find('#is_popup_report').is(':checked')){
                             $dlg.find('#popup_report_position').parent().show();       
 

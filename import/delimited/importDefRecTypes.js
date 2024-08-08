@@ -37,25 +37,25 @@ function hImportDefRecTypes(_rtg_ID = null) {
         let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             uploadWidget.trigger('click');
                         });
         let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doParse();
                         });
         let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) { _doPost(); });
+                    .on('click', function(e) { _doPost(); });
                         
         $('#csv_header').on('change',_redrawPreviewTable);
 
         window.hWin.HEURIST4.ui.createRectypeGroupSelect($('#field_rtg')[0], [{key: 0, title: 'select rectype group...'}]);
-        $('#field_rtg').on('change',function(e){
+        $('#field_rtg').on('change', function(e){
             let label = $('#field_rtg').find(':selected').text();
 
             if($('#field_rtg').hSelect('instance') !== undefined){
@@ -119,7 +119,7 @@ function hImportDefRecTypes(_rtg_ID = null) {
             }
         });
 
-        $('.column_roles').on('change',function(e){ 
+        $('.column_roles').on('change', function(e){ 
 
             let ele = $(e.target);
             if(ele.val()>=0){

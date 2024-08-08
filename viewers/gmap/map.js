@@ -742,37 +742,37 @@ if(_mapdata.limit_warning){
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
             },text:false, label:window.hWin.HR("Zoom In")})
-            .on('click',function(){ __timelineZoom(-0.25); })
+            .on('click', function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
             },text:false, label:window.hWin.HR("Zoom Out")})
-            .on('click',function(){ __timelineZoom(0.5); })
+            .on('click', function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:window.hWin.HR("Zoom to All")})
-            .on('click',function(){ _timelineZoomToAll(); })
+            .on('click', function(){ _timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:window.hWin.HR("Zoom to selection")})
-            .on('click',function(){ __timelineZoomToSelection(); })
+            .on('click', function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:window.hWin.HR("Move to Start")})
-            .on('click',function(){ __timelineMoveToLeft(); })
+            .on('click', function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:window.hWin.HR("Move to End")})
-            .on('click',function(){ __timelineMoveToRight(); })
+            .on('click', function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-gear"
             },text:false, label:window.hWin.HR("Timeline options")})
-            .on('click',function(){ __timelineEditProperties(); })
+            .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
         $("<label>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);
@@ -819,7 +819,7 @@ if(_mapdata.limit_warning){
 
         //secondary: "ui-icon-triangle-1-s"
         $("<button>").button({icon:"ui-icon-tag",showLabel:false, label:window.hWin.HR("Label settings")})
-            .on('click',function(){
+            .on('click', function(){
                 $('.menu-or-popup').hide(); //hide other
 
                 let menu = $( menu_label_settings )
@@ -1986,7 +1986,7 @@ if(_mapdata.limit_warning){
                     .button({icons: {
                         primary: "ui-icon-pencil"
                         }, text:false})
-                     .on('click',function( event ) {
+                     .on('click', function( event ) {
                 event.preventDefault();
                 //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, true, null)
                 window.open(window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+item.opts.recid, "_new");

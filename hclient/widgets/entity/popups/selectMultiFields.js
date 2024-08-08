@@ -374,7 +374,7 @@ function hMultiSelect(){
 						main_ele
 						.attr({'d-id': id, 'title': name})
 						.text(name)
-						.on('click',function(e){
+						.on('click', function(e){
 
 							let id = $(e.target).attr('d-id');
 							let name = $(e.target).text();
@@ -403,7 +403,7 @@ function hMultiSelect(){
 							sub_ele
 							.attr({'d-id': id, 'title': name + '(' + rst_name + ')', 'd-name': name})
 							.html('&nbsp;' + rst_name)
-							.on('click',function(e){
+							.on('click', function(e){
 
 								let id = $(e.target).attr('d-id');
 								let name = $(e.target).attr('d-name');

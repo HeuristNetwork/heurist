@@ -319,7 +319,7 @@ function onPageInit(success)
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     //reload website by click on logo or title, opens first page with content
-    $("#main-logo,#custom-logo,#main-title").on('click',function(event){
+    $("#main-logo,#custom-logo,#main-title").on('click', function(event){
             
         var load_initially = home_page_record_id;
         <?php if($isEmptyHomePage){
@@ -700,7 +700,7 @@ function loadRecordContent(url_or_record_id, target){
                    container.height(frm.contentWindow.document.body.scrollHeight); 
                    initLinksAndImages($(frm.contentWindow.document.body));
                    
-                   container.find('button.keywords').on('click',function(){
+                   container.find('button.keywords').on('click', function(){
                         $('#main-recordview').hide();
                         $('#main-content').show();
                    });
@@ -1069,7 +1069,7 @@ function initLinksAndImages($container, search_data){
                     $(link).attr('href', href);
                 }
                             
-                $(link).on('click',function(event){
+                $(link).on('click', function(event){
                     window.hWin.HEURIST4.util.stopEvent(event);
                     window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
                     return false;
@@ -1086,7 +1086,7 @@ function initLinksAndImages($container, search_data){
             ($(link).attr('target')!='_blank' || record_view_target!='')
            )
         {
-                $(link).on('click',function(event){
+                $(link).on('click', function(event){
                     
                     var link;
                     if($(event.target).is('a')){
@@ -1144,7 +1144,7 @@ function initLinksAndImages($container, search_data){
                 //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
                 //}
                 
-                $(link).on('click',function(event){
+                $(link).on('click', function(event){
                     
                     var pageid = $(event.target).attr('data-pageid');
                     window.hWin.loadPageContent(pageid, eventdata);

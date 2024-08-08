@@ -691,7 +691,7 @@ if(!($max_size>0)) {$max_size = 0;}
                     }
                 });
                 
-                $('#btnCancel').on('click',function(e){ 
+                $('#btnCancel').on('click', function(e){ 
                     
                     if($('#btnCancel').button('option','label')=='Clear list'){
                         $('tbody.files').find('.template-download').remove();
@@ -715,7 +715,7 @@ if(!($max_size>0)) {$max_size = 0;}
                     }
                     
                 });
-                $('#btnStart').on('click',function(e){ 
+                $('#btnStart').on('click', function(e){ 
 
                     window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);
                     window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);
@@ -814,7 +814,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 });			
                 
                 /*
-                $('#upload_folder').on('change',function(){
+                $('#upload_folder').on('change', function(){
                     if($('#upload_folder').val()==''){
                         $('.fileupload-buttonbar').hide();
                         $('#presentation').hide();

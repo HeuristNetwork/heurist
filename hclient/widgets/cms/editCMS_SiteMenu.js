@@ -274,7 +274,7 @@ title: "Overview"
 
                     $('<div class="svs-contextmenu4"></div>').appendTo(parent_span); //progress icon
 
-                    actionspan.find('.ui-icon').on('click',function(event){
+                    actionspan.find('.ui-icon').on('click', function(event){
                         let ele = $(event.target);
                         window.hWin.HEURIST4.util.stopEvent(event);
                         

@@ -86,7 +86,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         let btnUploadFile = $('#btnUploadFile')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Upload File'), icons:{secondary: "ui-icon-circle-arrow-n"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             if( window.hWin.HAPI4.is_admin() ){
                                 uploadWidget.trigger('click');    
                             }else{
@@ -247,7 +247,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnBackToStart2')
                     .css({'width':'160px'})
                     .button({label: window.hWin.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             //@todo - remove temp file
                             _showStep(1);
                             session_selector.val('').hSelect("refresh"); 
@@ -256,14 +256,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnParseStep1')
                     .css({'width':'160px'})
                     .button({label: window.hWin.HR('Analyse data'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doParse(1);
                         });
 
         $('#btnParseStep2')
                     .css({'width':'180px'})
                     .button({label: window.hWin.HR('Continue'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                            _doParse(2); 
                         });
         $('#lblParseStep2').hide();
@@ -294,19 +294,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnBackToStart')
                     .css({'width':'160px'})
                     .button({label: window.hWin.HR('Back to start'), icons:{primary: "ui-icon-circle-arrow-w"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showStep(1);
                         });
         $('#btnDownloadFile')
                     .css({'width':'180px'})
                     .button({label: window.hWin.HR('Download data to file'), icons:{secondary: "ui-icon-circle-arrow-s"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showRecords2('all', true)  
                         });
         $('#btnClearFile')
                     .css({'width':'160px'})
                     .button({label: window.hWin.HR('Clear uploaded file'), icons:{secondary: "ui-icon-circle-close"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doClearSession(true);
                         });
                         
@@ -331,20 +331,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})  //Match against existing records
                     .button({icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doMatchingInit();
                         });
 /*
         $('#btnMatchingSkip')
                     .button({icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doMatching( 2, null );
                         });
 */                        
         $('#btnBackToMatching')
                     //.css({'width':'250px'})
                     .button({label: window.hWin.HR('step 1: Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
                         });
@@ -352,7 +352,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#btnBackToMatching2')
                     //.css({'width':'250px'})
                     .button({label: window.hWin.HR('Match Again'), icons:{primary: "ui-icon-circle-arrow-w"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showStep(3);
                             _initFieldMapppingTable();
                         });
@@ -361,26 +361,26 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('Resolve ambiguous matches')})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showRecords('disamb');
                         });
                         
         $('#btnShowErrors')
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showRecords('error');
                         });
         $('#btnShowWarnings')
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('Show'), icons:{primary: "ui-icon-alert"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _showRecords('warning');
                         });
         $('#btnShowUTMWarnings')
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('UTM coords?'), icons:{primary: "ui-icon-alert"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                         
                 $('#btnShowUTMWarnings').text('UTM coords?');
                         
@@ -419,7 +419,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('Prepare'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doPrepare();
                         });
 
@@ -427,20 +427,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
                     .button({label: window.hWin.HR('Start Insert/Update'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doImport();
                         });
 
 /* repalced to help text                        
         $('#btnNextRecType1')
                     .button({label: window.hWin.HR('Skip to next record type'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _skipToNextRecordType();
                         });
 */                                                
         $('#btnNextRecType2')
                     .button({label: window.hWin.HR('Skip update')}) //icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _skipToNextRecordType();
                         });
 
@@ -1800,7 +1800,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
         
         //init listeners
-        $("input[id^='cbsa_dt_']").on('change',function(e){
+        $("input[id^='cbsa_dt_']").on('change', function(e){
             let cb = $(e.target);
             let idx = cb.val();//attr('id').substr(8);
             if(cb.is(':checked')){
@@ -1836,7 +1836,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('.lnk_SelectAll_processed').attr('data-checked',is_all_checked?1:0)
                 .text( is_all_checked?'Select none':'Select all');
         
-            $('.lnk_SelectAll_processed').on('click',function(e){
+            $('.lnk_SelectAll_processed').on('click', function(e){
                 let cb = $(e.target);
                 let was_checked = (cb.attr('data-checked')==1);
                 $("input[id^='cbsa_dt_']").each(function(i,item){
@@ -1861,7 +1861,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('.lnk_SelectAll_remain').attr('data-checked',is_all_checked?1:0)
                 .text( is_all_checked?'Select none':'Select all');
         
-            $('.lnk_SelectAll_remain').on('click',function(e){
+            $('.lnk_SelectAll_remain').on('click', function(e){
                 let cb = $(e.target);
                 let was_checked = (cb.attr('data-checked')==1);
                 $("input[id^='cbsa_dt_']").each(function(i,item){
@@ -2335,7 +2335,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     });
                }
 
-               $(sel).on('change',function(){
+               $(sel).on('change', function(){
                     if(currentStep==5){
                         _showStep(4); //reset to prepare step
                     }
@@ -3062,12 +3062,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             });
 
                             
-                            $("input[id^='d_field']").on('change',function(evt){
+                            $("input[id^='d_field']").on('change', function(evt){
                                 let cb = $(evt.target); 
                                 window.hWin.HEURIST4.util.setDisabled( $('#id_field_'+cb.val()), cb.is(':checked') );
                             });
                             
-                            $("input[id^='id_field']").on('change',function(evt){
+                            $("input[id^='id_field']").on('change', function(evt){
                                 let cb = $(evt.target);
                                 cb.prop('checked',true);
 
@@ -4517,7 +4517,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             //activate add ALL terms buttons
             if(btn_ads.length>1){
-                $dlg.find('.add_all_terms').show().on('click',function(event){
+                $dlg.find('.add_all_terms').show().on('click', function(event){
                     //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
                     let prepared_data = [];
                     _importNewTermsToAllFields($dlg, 0, prepared_data);

@@ -622,7 +622,7 @@ ul#rep_list.menu li ul {
                 $("#btnRepEdit").button({text:false, icons: { primary: "ui-icon-pencil" }}).on('click',onShowEditor);
                 $("#btnRepNew").button({text:false, icons: { primary: "ui-icon-plusthick" }}).on('click',onGenerate);
                 $("#btnRepDelete").button({text:false, icons: { primary: "ui-icon-closethick" }}).on('click',onDeleteTemplate);
-                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).on('click',function(){
+                $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).on('click', function(){
                     $('#fileupload').trigger('click');return false;
                 });
                 $("#btnRepImport").find('span.ui-icon').css({'transform':'rotate(180deg)','margin-top':'-9px'});

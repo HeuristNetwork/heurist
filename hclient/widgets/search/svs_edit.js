@@ -395,7 +395,7 @@ function hSvsEdit(args) {
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
                 .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .on('click',function( event ) {
+                .on('click', function( event ) {
                     //that.
                     
                     let dlg_options = null;
@@ -420,7 +420,7 @@ function hSvsEdit(args) {
                 .button({icons: {primary: "ui-icon-close"}, text:false})
                 .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .on('click',function( event ) {
+                .on('click', function( event ) {
                     $dlg.find('#svs_Rules').val('');
                     $dlg.find('#svs_Rules2').val('');
                 });

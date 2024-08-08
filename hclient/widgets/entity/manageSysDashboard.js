@@ -97,7 +97,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
-            .on('change',function(){
+            .on('change', function(){
                 that.recordList.resultList('option','view_mode', 'thumbs');
                     //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
                 that.saveUiPreferences();
@@ -110,7 +110,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this._setMode(this.options.isViewMode);
         
-        this.searchForm.find('#edit_dashboard').on('click',function(){
+        this.searchForm.find('#edit_dashboard').on('click', function(){
             that._setMode(false);
         });
                     

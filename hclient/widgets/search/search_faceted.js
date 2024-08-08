@@ -2183,7 +2183,7 @@ $.widget( "heurist.search_faceted", {
                         $('<div class="bor-filter-expand bor-toggler">'
                             +'<span class="bor-toggle-show-on" style="display:none;margin-bottom: 5px;"><span>&nbsp;less...&nbsp;</span></span>'
                             +'<span class="bor-toggle-show-off" style="margin-bottom: 5px;"><span>&nbsp;more...&nbsp;</span></span>'
-                         +'</div>').on('click',function(event){
+                         +'</div>').on('click', function(event){
                                 if($(event.target).is('span[class^="ui-selectmenu"],select')){
                                     return;
                                 }

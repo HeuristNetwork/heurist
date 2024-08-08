@@ -94,20 +94,20 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             uploadWidget.trigger('click');
                         });
         let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
                             _doParse();
                         });
         let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .on('click',function(e) {
+                    .on('click', function(e) {
 
                             let trm_sep = $('#term_separator').val();
                             if(!window.hWin.HEURIST4.util.isempty(trm_sep)){
@@ -188,7 +188,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
 
                         
                         
-        $('.column_roles').on('change',function(e){ 
+        $('.column_roles').on('change', function(e){ 
                 
                 let ele = $(e.target);
                 if(ele.val()>=0){

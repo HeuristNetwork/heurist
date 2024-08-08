@@ -1045,7 +1045,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             //add extra click functionalities to save buttons
-            this._toolbar.find('#btnSaveExt').show().on('click',function(){
+            this._toolbar.find('#btnSaveExt').show().on('click', function(){
                 window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', 1);
             }); 
 

@@ -2028,7 +2028,7 @@ window.hWin.HEURIST4.ui = {
             ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icons:{primary:'ui-icon-circlesmall-close'}})
             .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
-            .on('click',function(event){
+            .on('click', function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You are about to delete link between records<br><br>Are you sure?',
                      function(){
@@ -2103,7 +2103,7 @@ window.hWin.HEURIST4.ui = {
             
             bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
                 'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
-            .on('click',function(event){
+            .on('click', function(event){
                 event.preventDefault();
                 
                 let recID = ele.attr('data-relID');
@@ -2165,7 +2165,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         /* 2017-08-11 no more link for edit linked record :(    
-        ele.find('a').on('click',function(event){
+        ele.find('a').on('click', function(event){
             event.preventDefault();
             var inpt = $(event.target);
             var recID = inpt.attr('data-recID');
@@ -2210,7 +2210,7 @@ window.hWin.HEURIST4.ui = {
                 
                 btn_edit
                     .attr('data-recID', info['rec_ID'])
-                    .on('click',function(event){
+                    .on('click', function(event){
            
             let recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')

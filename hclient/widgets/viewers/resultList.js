@@ -604,7 +604,7 @@ $.widget( "heurist.resultList", {
             this.btn_select_and_close = this.element.find('#btn_select_and_close')
             .css({'min-width':'11.9em'})
             .button({label: window.hWin.HR( this.options.selectbutton_label )})
-            .on('click',function(e) {
+            .on('click', function(e) {
                 that._trigger( "onaction", null, 'select-and-close' );
             });
 
@@ -658,7 +658,7 @@ $.widget( "heurist.resultList", {
                 btn_icon = {primary: btn_icon};
                 $('<div>',{'data-key':key}).button({icons: btn_icon, text:true, label:window.hWin.HR(title) })
                 .appendTo(this.action_buttons_div)
-                .on('click',function( event ) {
+                .on('click', function( event ) {
                     let key = $(event.target).parent().attr('data-key');
                     that._trigger( "onaction", null, key );
                 });
@@ -1514,7 +1514,7 @@ $.widget( "heurist.resultList", {
                                         +$Db.rty(rt,'rty_Plural')+')</span>')
                                     .appendTo($emptyres.find('.not-found2'));
                                 $('<div>').button({label:window.hWin.HR('Add')+' '+$Db.rty(rt,'rty_Name'), icon:'ui-icon-plusthick'})
-                                    .on('click',function(){
+                                    .on('click', function(){
                                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                             {new_record_params:{RecTypeID:rt}});                                        
                                     })
@@ -2840,7 +2840,7 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode=='select_multi'){
             let that = this;
-            this.span_info.find('a').on('click',function(){
+            this.span_info.find('a').on('click', function(){
                 that._currentMultiSelection = null;
                 that._updateInfo();
 
@@ -3363,7 +3363,7 @@ $.widget( "heurist.resultList", {
             }
         
             this.div_content.find('div[data-grp]')
-                    .on('click',function(event){
+                    .on('click', function(event){
                         let btn = $(event.target);
                         let grp_val = btn.attr('data-grp');
                         if(!grp_val){

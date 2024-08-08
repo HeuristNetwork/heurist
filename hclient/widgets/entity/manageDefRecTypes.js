@@ -1252,7 +1252,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             .css({'font-weight': 'bold','font-size':'12px'})
                             .addClass('ui-heurist-button')
                             .width(150)
-                            .on('click',function(){
+                            .on('click', function(){
                                 //close this form and open edit structure
                                 function __openEditStructure(){
                                     that._currentEditID = null;

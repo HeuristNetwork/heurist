@@ -608,7 +608,7 @@ $.widget( "heurist.searchBuilder", {
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
                 .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .on('click',function( event ) {
+                .on('click', function( event ) {
                     that._editRules();
                 });
 
@@ -616,7 +616,7 @@ $.widget( "heurist.searchBuilder", {
                 .button({icons: {primary: "ui-icon-close"}, text:false})
                 .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .on('click',function( event ) {
+                .on('click', function( event ) {
                     that.rulesetSection.find('#svs_Rules').val('');
                 });
             }
@@ -1044,7 +1044,7 @@ $.widget( "heurist.searchBuilder", {
             that.current_tree_rectype_ids = rectypeIds.join(',');
 
 
-            $("#fsw_showreverse").on('change',function(event){
+            $("#fsw_showreverse").on('change', function(event){
                 that.showHideReverse();
             });
 

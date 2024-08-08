@@ -83,7 +83,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         _fillSelectRecordScope();
         
-        $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).on('click',function(){window.close();});
+        $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).on('click', function(){window.close();});
     }
 
     //
@@ -336,7 +336,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<div class="header">'  // style="padding-left: 16px;"
                 +'<label for="cb_replace_all">Replace all values</label></div>'
                 +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
-                +'</div>').on('change',function(){
+                +'</div>').on('change', function(){
 
                     if ($(this).find('input').is(':checked')){
                         $('#cb_whole_value').parent().hide();   
@@ -376,7 +376,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-1', window.hWin.HR('Remove value matching'));
 
             
-            $('#cb_remove_all').on('change',function(){ 
+            $('#cb_remove_all').on('change', function(){ 
                     if ($(this).is(':checked')){
                         $('#cb_whole_value').parent().hide();   
                         $('#fld-1').hide();

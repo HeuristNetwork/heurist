@@ -289,7 +289,7 @@ function hMapManager( _options )
                 +'</span>')
                 .css({'line-height':'15px',height:'14px',width:'50px',background: 'none',float:'right'})
                 .on('click',_createNewMapDocument)
-                //.on('click',function(){that.filterListMapDocuments(true);})
+                //.on('click', function(){that.filterListMapDocuments(true);})
                 .appendTo($header);
                 
            //$header.addClass('with_supplementals');
@@ -894,7 +894,7 @@ function hMapManager( _options )
             $('<div class="svs-contextmenu4"></div>').appendTo(parent_span);
                 
                 
-            actionspan.find('.ui-icon').on('click',function(event){
+            actionspan.find('.ui-icon').on('click', function(event){
                 let ele = $(event.target);
                 let parent_span = ele.parents('span.fancytree-node');
                 

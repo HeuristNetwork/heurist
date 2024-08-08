@@ -219,7 +219,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //init role dropdown selector
                 this.recordList.find('select.user-role')
                 .each(function(idx,item){$(item).val($(item).attr('data-value'))})
-                .on('change',function(event){
+                .on('change', function(event){
 
                     let ugl_GroupID = that.searchForm.find('#input_search_group').val(); 
                     if(!(ugl_GroupID>0)) return;
@@ -229,7 +229,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         .each(function(idx,item){
                             $(item).attr('title','Edit user membership');
                         })
-                        .on('click',function(event){
+                        .on('click', function(event){
                             alert('Need open group mgr')
                         });
                         return;   
@@ -283,7 +283,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
                 //manage membership of user in all groups
                 this.recordList.find('.edit-members')
-                .on('click',function(event){
+                .on('click', function(event){
                     let user_ID = $(event.target).parents('.recordDiv').attr('recid');
                     let enabled = $(event.target).parents('.recordDiv').attr('usr_status');
                     

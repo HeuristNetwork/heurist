@@ -541,7 +541,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         legenditem.find(".overlay-legend").on('change',_showHideOverlay);
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
-            .on('click',function(event){ 
+            .on('click', function(event){ 
                 //delete layer from map  
                 let overlay_id = $(this).attr("layerid");
                 _removeOverlayById( overlay_id );
@@ -550,7 +550,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             .appendTo(legenditem);
             
             $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
-            .on('click',function(event){ 
+            .on('click', function(event){ 
 
                 let overlayid = $(this).attr("layerid");
                 let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -564,7 +564,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             
             $('<div class="svs-contextmenu ui-icon ui-icon-circle-zoomin" layerid="'+overlay_idx+'"></div>')
-            .on('click',function(event){ 
+            .on('click', function(event){ 
 
                 let overlayid = $(this).attr("layerid");
                 let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -1728,7 +1728,7 @@ map.data.addListener('mouseover', function(event) {
         //$(legend).css('top','60px');
         
         // Legend collapse listener
-        $("#collapse").on('click',function(e) {
+        $("#collapse").on('click', function(e) {
             let tocollapse = ($(this).text() == "-");
             tocollapse ? $(this).text("+") : $(this).text("-");  // Update text to + or -
             

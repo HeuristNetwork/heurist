@@ -1773,7 +1773,7 @@ $.widget( "heurist.svs_list", {
                 .html('<span class="ui-icon ui-icon-plus hasmenu2 droppable" '
                     +' style="display:inline-block; vertical-align: bottom"></span>'
                     +'<span class="hasmenu2 droppable">add</span>')
-                .on('click',function(event){
+                .on('click', function(event){
                     append_link.contextmenu('open', append_link.find('span.ui-icon') );
                     //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
              });
@@ -1889,7 +1889,7 @@ $.widget( "heurist.svs_list", {
 
                 if(ele.find('.svs-contextmenu2').length==0){
                     $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
-                    .on('click',function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
+                    .on('click', function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
                     .appendTo(ele);
                 }
 
@@ -2931,7 +2931,7 @@ $.widget( "heurist.svs_list", {
 /*
 
 jQuery(document).ready(function(){
-$('.accordion .head').on('click',function() {
+$('.accordion .head').on('click', function() {
 $(this).next().toggle();
 return false;
 }).next().hide();

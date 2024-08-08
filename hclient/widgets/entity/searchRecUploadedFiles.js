@@ -48,7 +48,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Select file to upload"), icons: {
                             primary: "ui-icon-plus"
                     }})
-                .on('click',function(e) {
+                .on('click', function(e) {
                     that._trigger( "onaddlocal" );
                 }); 
 
@@ -56,7 +56,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Drag and drop file to upload"), icons: {
                             primary: "ui-icon-plus"
                     }})
-                .on('click',function(e) {
+                .on('click', function(e) {
                     that._trigger( "onaddpopup" );
                 }); 
             
@@ -64,7 +64,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Specify external file/URL"),icons: {
                             primary: "ui-icon-plus"
                     }})
-                .on('click',function(e) {
+                .on('click', function(e) {
                     that._trigger( "onaddext" );
                 }); 
                 
@@ -73,13 +73,13 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Define mime types"),icons: {
                             primary: "ui-icon-pencil"
                     }})
-                .on('click',function(e) {
+                .on('click', function(e) {
                     window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
                                                 {edit_mode:'inline', width:900});
                 }); 
 
             this.btn_remove_dups.button({label: window.hWin.HR("Combine duplicates")})
-                .on('click',function(e) {
+                .on('click', function(e) {
                     that._checkUserPermissions(1, 'onremovedups');
                 });
 
@@ -87,12 +87,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
 // TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
 // or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.
 //            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
-//                .on('click',function(e) {
+//                .on('click', function(e) {
 //                    that._checkUserPermissions(1, 'onremoveunused');
 //                }); 
 
             this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
-                .on('click',function() {
+                .on('click', function() {
                     that._checkUserPermissions(1, 'onfilerecs')
                 });
                 /*.position({
@@ -102,22 +102,22 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 });*/
 
             this.btn_refresh_index.button({label: window.hWin.HR("Index new files")})
-                .on('click',function() {
+                .on('click', function() {
                     that._checkUserPermissions(1, 'onrefreshindex')
                 });
 
             this.element.find('#select_all')
-                .on('change',function() {
+                .on('change', function() {
                     that._trigger('onselectall');
                 });
 
             this.element.find('#selected_only')
-                .on('change',function() {
+                .on('change', function() {
                     that._trigger('onselectedonly');
                 });
 
             this.btn_check_files.button({label: window.hWin.HR("Check files")})
-                .on('click',function(){
+                .on('click', function(){
                     let url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`;
                     window.open(url, '_blank');
                 });

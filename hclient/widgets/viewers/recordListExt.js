@@ -456,7 +456,7 @@ $.widget( "heurist.recordListExt", {
                             href = '/' + window.hWin.HAPI4.database+'/tpl/'+smarty_template+'/'+encodeURIComponent(query);
                         }
                                     
-                        $(link).on('click',function(event){
+                        $(link).on('click', function(event){
                             window.hWin.HEURIST4.util.stopEvent(event);
                             window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
                             return false;

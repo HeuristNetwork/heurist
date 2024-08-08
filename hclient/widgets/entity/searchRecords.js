@@ -101,7 +101,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             .button({label: window.hWin.HR('Add Record'), 
                         icon: is_browse?null:"ui-icon-plus"})
             .addClass('ui-button-action')
-            .on('click',function(e) {
+            .on('click', function(e) {
 
                 let search_val = that.element.find('#fill_in_data').val();
                 search_val = search_val == '' ? that.options.init_filter : search_val;

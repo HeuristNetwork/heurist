@@ -640,7 +640,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 
             let that = this;
 
-            actionspan.find('span').on('click',function(event){
+            actionspan.find('span').on('click', function(event){
                 let ele = $(event.target);
                 that._lockDefaultEdit = true;
                 //timeout need to activate current node    
@@ -2917,7 +2917,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         //enable proceed button on checkbox mark    
         let btn = $dlg.parent().find('button:contains("Proceed")');
-        let chb = $dlg.find('input[type="checkbox"]').on('change',function(){
+        let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
             window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
         })
         window.hWin.HEURIST4.util.setDisabled(btn, true);

@@ -650,37 +650,37 @@ $.widget( "heurist.timeline", {
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
             },text:false, label:window.hWin.HR("Zoom In")})
-            .on('click',function(){ __timelineZoom(-0.25); })
+            .on('click', function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
             },text:false, label:window.hWin.HR("Zoom Out")})
-            .on('click',function(){ __timelineZoom(0.5); })
+            .on('click', function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:window.hWin.HR("Zoom to All")})
-            .on('click',function(){ that._timelineZoomToAll(); })
+            .on('click', function(){ that._timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:window.hWin.HR("Zoom to selection")})
-            .on('click',function(){ __timelineZoomToSelection(); })
+            .on('click', function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:window.hWin.HR("Move to Start")})
-            .on('click',function(){ __timelineMoveToLeft(); })
+            .on('click', function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:window.hWin.HR("Move to End")})
-            .on('click',function(){ __timelineMoveToRight(); })
+            .on('click', function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-gear"
             },text:false, label:window.hWin.HR("Timeline options")})
-            .on('click',function(){ __timelineEditProperties(); })
+            .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
         $("<span>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);

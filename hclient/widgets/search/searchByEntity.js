@@ -497,7 +497,7 @@ $.widget( "heurist.searchByEntity", {
                                 window.hWin.HEURIST4.util.stopEvent(e);
                             }}});
                         /*
-                        menu.find('span.rt-checkbox').on('click',function(e){
+                        menu.find('span.rt-checkbox').on('click', function(e){
                             if($(event.target).is('span')){
                                 opts.onmarker.call(that, $(event.target) );
                                 window.hWin.HEURIST4.util.stopEvent(e);

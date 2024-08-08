@@ -1248,7 +1248,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
-            .on('change',function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
             
             if(Array.isArray(this.configMode)){
@@ -1285,7 +1285,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .on('change',function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
             var mode = null;
             
@@ -1310,7 +1310,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .on('change',function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
@@ -1908,7 +1908,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
             .on('keyup', function(){that.onChange();})
-            .on('change',function(){
+            .on('change', function(){
                     that.onChange();
             })
             .appendTo( $inputdiv );
@@ -2224,7 +2224,7 @@ $.widget( "heurist.editing_input", {
 
                     var popele = $(pdiv);
 
-                    popele.find('input[class="bkm_points"]').on('click',function(e){
+                    popele.find('input[class="bkm_points"]').on('click', function(e){
                         var url = window.hWin.HAPI4.baseURL 
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
 
@@ -4530,7 +4530,7 @@ console.log('remove ', input_id);
                     
                     var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
-                            .on('change',function(){
+                            .on('change', function(){
                                 that.onChange();
                             })
                             .insertAfter(edash);
@@ -4778,7 +4778,7 @@ console.log('remove ', input_id);
             var isChecked = (values && values.includes(trm_id)) ? true : false;
 
             var $btn = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
-                .on('change',function(event){ 
+                .on('change', function(event){ 
 
                     var isNewVal = false;
                     var changed_val = $(event.target).val();

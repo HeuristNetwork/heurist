@@ -3351,7 +3351,7 @@ function showWarningAboutTermUsage(recID, refs){
         , null, {title:'Warning'},
         {default_palette_class: 'ui-heurist-design'});        
 
-    $dlg.find('a[data-dty_ID]').on('click',function(e){
+    $dlg.find('a[data-dty_ID]').on('click', function(e){
 
         let rg_options = {
             isdialog: true, 
