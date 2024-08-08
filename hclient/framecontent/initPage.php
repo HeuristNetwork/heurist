@@ -359,7 +359,10 @@ if($isLocalHost){
             }
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Cannot initialize system on client side, please consult Heurist developers',
+                error_title: 'Unable to initialise Heurist'
+            });
             success = false;
         }
 
@@ -396,7 +399,10 @@ if($isLocalHost){
                             callback(true);
                         }
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(sMsg);
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: sMsg,
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                         if($.isFunction(callback)){ callback(false);}
                     }
                     }

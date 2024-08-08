@@ -398,8 +398,11 @@ if(isset($_POST['data'])) {
                         email.message = prepareMessage(rawMessage, records[r], definitions);// Determine message
                         data.emails.push(email);
                     }else{
-                         window.hWin.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
-                         return;
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "Define email field. It is mandatory",
+                            status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                        });
+                        return;
                     }
                 }
 
