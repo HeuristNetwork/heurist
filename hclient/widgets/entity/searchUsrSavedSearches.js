@@ -22,10 +22,10 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
         
         this.input_search_group = this.element.find('#input_search_group');   //user group
-        var topOptions = [{key:'any',title:'any group'},{key:window.hWin.HAPI4.user_id(),title:'My Filters'}];
+        let topOptions = [{key:'any',title:'any group'},{key:window.hWin.HAPI4.user_id(),title:'My Filters'}];
         
         if(window.hWin.HAPI4.is_admin()){
             window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], 'all_my_first' , 
@@ -38,7 +38,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         this._super();
 
         //hide all help divs except current mode
-        var smode = this.options.select_mode; 
+        let smode = this.options.select_mode; 
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
@@ -85,7 +85,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
             
             if(this.options.initial_filter!=null){
                 request = this.options.initial_filter;
@@ -134,13 +134,13 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
             //we may search users in any database
             request['db']     = this.options.database;
 
-            var that = this;                                                
+            let that = this;                                                
        
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
+                            {recordset:new HRecordSet(response.data), request:request} );
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }

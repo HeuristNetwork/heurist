@@ -24,13 +24,13 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global temporalToHumanReadableString, TimeMap, TimeMapTheme, google, vis, hMappingControls, mxn, _adjustLegendHeight */
 
 function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
-    var _className = "Mapping",
+    const _className = "Mapping",
     _version   = "0.4";
 
-    var mapdiv_id = null,
+    let mapdiv_id = null,
     timelinediv_id = null,
     _current_stack_setting = true,
 
@@ -39,14 +39,14 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     mylayout,         // layout object that contains map and timeline
     _curr_layout = null; // keep current layout sets to avoid redundant update
 
-    var options = {
+    let options = {
         mapVisible: true, //otherwise show timeline only
         legendVisible: true,
         defaultZoom: 2
         //to be extended
     };
     
-    var tmap = null,  // timemap object
+    let tmap = null,  // timemap object
     vis_timeline = null, // vis timeline object
     vis_timeline_range = null,
     vis_timeline_label_mode = 0, //default full label
@@ -96,7 +96,7 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     */
     function _updateLayout(){
         
-        var ismap = false, istime = false;
+        let ismap = false, istime = false;
 
 
         $.each(all_mapdata, function(dataset_id, _mapdata){
@@ -126,15 +126,15 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
             //$(".ui-layout-resizer-south").css('height',0);
             //mylayout.sizePane('south','100%');
         }*/
-        var new_layout = ((ismap?'1':'0') + (istime?'1':'0'));
+        let new_layout = ((ismap?'1':'0') + (istime?'1':'0'));
 
         if(_curr_layout != new_layout){
 
             //mylayout.changeOption('center','minSize',300);
             //$(".ui-layout-resizer-south").css('height',7);
 
-            var tha = $('#mapping').height();    //entire height of layout
-            var th = Math.floor(tha*0.2);
+            let tha = $('#mapping').height();    //entire height of layout
+            let th = Math.floor(tha*0.2);
             th = th>200?200:th;
 
             $(".ui-layout-north").show();
@@ -174,17 +174,17 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
 
     /**
     * Load timemap datasets
-    * @see hRecordSet.toTimemap()
+    * @see HRecordSet.toTimemap()
     *
     * @param _mapdata
     */
     function _addDataset(_mapdata){
 
-        var res = false;
+        let res = false;
 
         if(!window.hWin.HEURIST4.util.isnull(_mapdata)){
 
-            var dataset_id = _mapdata.id;
+            let dataset_id = _mapdata.id;
 
             if(_isEmptyDataset(_mapdata)){ //show/hide panels
 
@@ -196,8 +196,8 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
 
                 _updateLayout();   //show hide panels
 
-var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
-var ele_warn = $('#map_limit_warning');
+let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+let ele_warn = $('#map_limit_warning');
 
 if(_mapdata.limit_warning){
     //cnt = _mapdata.options.items.length;
@@ -229,15 +229,15 @@ if(_mapdata.limit_warning){
     //
     function _changeDatasetColor( dataset_id, new_color, updateOnMap ){
 
-            var mapdata = _getDataset( dataset_id );
+            let mapdata = _getDataset( dataset_id );
 
             if(mapdata['color']!=new_color){
                 
-                var new_color2 = encodeURIComponent(new_color);
+                let new_color2 = encodeURIComponent(new_color);
 
-                for (var i=0; i<mapdata.options.items.length; i++){
+                for (let i=0; i<mapdata.options.items.length; i++){
                     
-                    var iconId = mapdata.options.items[i].options.iconId;
+                    let iconId = mapdata.options.items[i].options.iconId;
                     if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
                         mapdata.options.items[i].options.icon = iconId;
                     }else{
@@ -269,11 +269,11 @@ if(_mapdata.limit_warning){
 
                 //tmap.opts.centerOnItems = false;
                 
-                var dataset = tmap.datasets[dataset_id];
+                let dataset = tmap.datasets[dataset_id];
 
-                var mapdata = _getDataset(dataset_id);
+                let mapdata = _getDataset(dataset_id);
 
-                /*var datasetTheme = new TimeMapTheme({
+                /*let datasetTheme = new TimeMapTheme({
                     color: mapdata['color'],
                     lineColor: mapdata['color'],
                     fillColor: mapdata['color']
@@ -288,9 +288,9 @@ if(_mapdata.limit_warning){
                     //dataset.changeTheme(datasetTheme)
                 }
                 
-                var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+                let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 
-                var pnt_counts = 0; //in case MarkerClusterer we have to increase the delay
+                let pnt_counts = 0; //in case MarkerClusterer we have to increase the delay
 
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
@@ -298,8 +298,8 @@ if(_mapdata.limit_warning){
                     
                     if(item.placemark){
                         if(item.placemark.points){ //polygone or polyline
-                            for(i=0; i<item.placemark.points.length; i++){
-                                var point = item.placemark.points[i];
+                            for(let i=0; i<item.placemark.points.length; i++){
+                                let point = item.placemark.points[i];
                                 
                                 if (point.lat < minLat) minLat = point.lat;
                                 if (point.lat > maxLat) maxLat = point.lat;
@@ -307,9 +307,9 @@ if(_mapdata.limit_warning){
                                 if (point.lon > maxLng) maxLng = point.lon;
                             }
                         }else{
-                                var pm = item.getNativePlacemark();
+                                let pm = item.getNativePlacemark();
                                 if(pm){
-                                    var point = pm.getPosition();
+                                    let point = pm.getPosition();
                                     
                                     if (point.lat() < minLat) minLat = point.lat();
                                     if (point.lat() > maxLat) maxLat = point.lat();
@@ -322,7 +322,7 @@ if(_mapdata.limit_warning){
                     
                 });
                 
-                var forceZoom = false;
+                let forceZoom = false;
                 if(minLat<-40 && maxLat>70 && minLng<-120 && maxLng>120){
                     minLat = -40;
                     maxLat = 70;
@@ -343,12 +343,12 @@ if(_mapdata.limit_warning){
                 
                 if(mapdata.min_zoom>0){
                     if(maxLat-minLat<mapdata.min_zoom){
-                        var d = minLat+(maxLat-minLat)/2;
+                        let d = minLat+(maxLat-minLat)/2;
                         maxLat = d + mapdata.min_zoom/2;
                         minLat = d - mapdata.min_zoom/2;
                     }
                     if(maxLng-minLng<mapdata.min_zoom){
-                        var d = minLng+(maxLng-minLng)/2;
+                        let d = minLng+(maxLng-minLng)/2;
                         maxLng = d + mapdata.min_zoom/2;
                         minLng = d - mapdata.min_zoom/2;
                     }
@@ -357,8 +357,8 @@ if(_mapdata.limit_warning){
                     forceZoom = true;  
                 }
                 
-                var southWest = new google.maps.LatLng(minLat, minLng);
-                var northEast = new google.maps.LatLng(maxLat, maxLng);
+                let southWest = new google.maps.LatLng(minLat, minLng);
+                let northEast = new google.maps.LatLng(maxLat, maxLng);
                 mapdata.geoextent = new google.maps.LatLngBounds(southWest, northEast);
 
                 dataset.hide();
@@ -375,17 +375,17 @@ if(_mapdata.limit_warning){
     function _deleteDataset(dataset_id){
 
             // remove from map
-            var dataset = tmap.datasets[dataset_id];
+            let dataset = tmap.datasets[dataset_id];
             if(dataset){
                  tmap.deleteDataset(dataset_id);
             }
 
-            var mapdata = _getDataset(dataset_id);
+            let mapdata = _getDataset(dataset_id);
 
             //remove from storage and reload timeline
             if(mapdata){
 
-                     var was_timeenabled = (mapdata.timeenabled>0);
+                     let was_timeenabled = (mapdata.timeenabled>0);
 
                      delete all_mapdata[dataset_id];
                      //all_mapdata[dataset_id] = undefined;
@@ -403,7 +403,7 @@ if(_mapdata.limit_warning){
     //
     //
     function _showDataset(dataset_id, is_show){
-        var dataset = tmap.datasets[dataset_id];
+        let dataset = tmap.datasets[dataset_id];
         if(dataset){
             if(is_show){
                 tmap.showDataset(dataset_id);
@@ -411,7 +411,7 @@ if(_mapdata.limit_warning){
                 tmap.hideDataset(dataset_id);
             }
         }
-        var mapdata = _getDataset(dataset_id);
+        let mapdata = _getDataset(dataset_id);
         mapdata.visible = is_show;
         //remove from storage and reload timeline
         if(mapdata && mapdata.timeenabled>0){
@@ -424,15 +424,15 @@ if(_mapdata.limit_warning){
     //
     function _zoomDataset(dataset_id){
         
-        //var dataset = tmap.datasets[dataset_id];
-        var mapdata = _getDataset(dataset_id);
+        //let dataset = tmap.datasets[dataset_id];
+        let mapdata = _getDataset(dataset_id);
         if(mapdata && mapdata.geoextent){
 
               //zoom to geo extent
-              var nativemap = tmap.getNativeMap();
+              let nativemap = tmap.getNativeMap();
               
-              var ne = mapdata.geoextent.getNorthEast();
-              var sw = mapdata.geoextent.getSouthWest();
+              let ne = mapdata.geoextent.getNorthEast();
+              let sw = mapdata.geoextent.getSouthWest();
               if( Math.abs(ne.lat()-sw.lat())<0.06 && Math.abs(ne.lng()-sw.lng())<0.06 ){
                     nativemap.setCenter(mapdata.geoextent.getCenter()); 
                     nativemap.setZoom(14);      
@@ -452,7 +452,7 @@ if(_mapdata.limit_warning){
     // item - record id or timelime item, field - start|end
     function _getUnixTs(item, field, ds){
 
-        var item_id = 0;
+        let item_id = 0;
         if(item && item['id']){
             item_id = item['id'];
         }else{
@@ -462,9 +462,9 @@ if(_mapdata.limit_warning){
 
             if(!ds) ds = vis_timeline.itemsData;
 
-            var type = {};
+            let type = {};
             type[field] = 'Moment';
-            var val = ds.get(item_id,{fields: [field], type: type });
+            let val = ds.get(item_id,{fields: [field], type: type });
 
             if(val!=null && val[field] && val[field]._isAMomentObject){
                 //return val[field].toDate().getTime(); //unix
@@ -478,7 +478,7 @@ if(_mapdata.limit_warning){
             if(vis_timeline_range==null){
                 vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
-            //var range = vis_timeline.getItemRange(); //@todo calculate once
+            //let range = vis_timeline.getItemRange(); //@todo calculate once
             _timelineZoomToRange( vis_timeline_range );
     }
 
@@ -486,21 +486,21 @@ if(_mapdata.limit_warning){
                                                         
             if(!(range && range.min  && range.max && vis_timeline)) return;
         
-            var min = vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
+            let min = vis_timeline.getDate(range.min), // new Date(range.min).getTime(),
                 max = vis_timeline.getDate(range.max); //new Date(range.max).getTime();
-            var delta = 0;
+            let delta = 0;
 
             if(isNaN(min) || isNaN(max) ) return;
             
             
             if(range['nofit']==undefined){
-            var interval = max-min;
-            var YEAR = 31536000000;
-            var DAY = 86400000;
+            let interval = max-min;
+            let YEAR = 31536000000;
+            let DAY = 86400000;
 
-            var yearmax = (new Date(range.max)).getFullYear();
-            var dt = range['omax'];
-            var dta = [];
+            let yearmax = (new Date(range.max)).getFullYear();
+            let dt = range['omax'];
+            let dta = [];
             if(dt!=undefined){
                 dta = dt.split('-');
                 if(dta.length>0)
@@ -532,7 +532,7 @@ if(_mapdata.limit_warning){
             }else if(interval < YEAR*50){
 
                 //zoom depend on epoch
-                //var yearmax = (new Date(range.max)).getFullYear();
+                //yearmax = (new Date(range.max)).getFullYear();
                 if(yearmax<0){
                     delta = interval*1.5;
                 }else if(yearmax<1500){
@@ -571,20 +571,16 @@ if(_mapdata.limit_warning){
         //loop by timeline datasets
         
         //if fit range
-        var items_visible = [], items_hidden=[];
+        let items_visible = [], items_hidden=[];
                  
         
         vis_timeline.itemsData.forEach(function (itemData) {
                     
-            var start = _getUnixTs(itemData, 'start');
-            var end = 'end' in itemData ? _getUnixTs(itemData, 'end') :start;
-            //var start = itemData.start.valueOf();
-            //var end = 'end' in itemData ? itemData.end.valueOf() : itemData.start.valueOf();            
-            //start = (new Date(start)).getTime();
-            //end = (new Date(end)).getTime();
+            let start = _getUnixTs(itemData, 'start');
+            let end = 'end' in itemData ? _getUnixTs(itemData, 'end') :start;
             
             //intersection
-            var res = false;
+            let res = false;
             if(start == end){
                 res = (start>=params.start_stamp && start<=params.end_stamp);
             }else{
@@ -626,8 +622,8 @@ if(_mapdata.limit_warning){
          * @param {Number} percentage   For example 0.1 (zoom out) or -0.1 (zoom in)
          */
         function __timelineZoom (percentage) {
-            var range = vis_timeline.getWindow();
-            var interval = range.end - range.start;
+            let range = vis_timeline.getWindow();
+            let interval = range.end - range.start;
 
             vis_timeline.setWindow({
                 start: range.start.valueOf() - interval * percentage,
@@ -637,17 +633,17 @@ if(_mapdata.limit_warning){
 
         function __timelineZoomToSelection(){
 
-                    var sels = vis_timeline.getSelection();
+                    let sels = vis_timeline.getSelection();
                     if(sels && sels['length']>0){
-                           var range = vis_timeline.getDataRangeHeurist(new vis.DataSet(vis_timeline.itemsData.get(sels)));
+                           let range = vis_timeline.getDataRangeHeurist(new vis.DataSet(vis_timeline.itemsData.get(sels)));
                            _timelineZoomToRange(range);
                     }
         }
 
         function __timelineMoveToLeft(){
 
-            var range2 = vis_timeline.getWindow();
-            var interval = range2.end - range2.start;
+            let range2 = vis_timeline.getWindow();
+            let interval = range2.end - range2.start;
 
             if(vis_timeline_range==null){
                     vis_timeline_range = vis_timeline.getDataRangeHeurist();
@@ -658,9 +654,9 @@ if(_mapdata.limit_warning){
 
         function __timelineMoveToRight(){
 
-            var range2 = vis_timeline.getWindow();
-            var interval = range2.end - range2.start;
-            var delta = interval*0.1;
+            let range2 = vis_timeline.getWindow();
+            let interval = range2.end - range2.start;
+            let delta = interval*0.1;
             if(vis_timeline_range==null){
                     vis_timeline_range = vis_timeline.getDataRangeHeurist();
             }
@@ -679,7 +675,7 @@ if(_mapdata.limit_warning){
         
         function __timelineEditProperties(){
             
-            var $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
+            let $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
                 width: 450,
                 modal: true,
                 resizable: false,
@@ -687,17 +683,17 @@ if(_mapdata.limit_warning){
                 buttons: [
                     {text:window.hWin.HR('Apply'), click: function(){
                         
-                        var mode = $( this ).find('input[type="radio"][name="time-label"]:checked').val();
+                        let mode = $( this ).find('input[type="radio"][name="time-label"]:checked').val();
                         
                         vis_timeline_label_mode = mode;
-                        var spinner = $("#timeline_spinner");
+                        let spinner = $("#timeline_spinner");
                         if(mode==2){
                             spinner.show();
                         }else{
                             spinner.hide();
                         }
                         
-                        var labelpos = $( this ).find('input[type="radio"][name="time-label-pos"]:checked').val();
+                        let labelpos = $( this ).find('input[type="radio"][name="time-label-pos"]:checked').val();
 
                         _current_stack_setting = ($( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1);
 
@@ -705,7 +701,7 @@ if(_mapdata.limit_warning){
                         vis_timeline.redraw();    
                         
                         /*
-                        var stack_mode = $( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1;
+                        let stack_mode = $( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1;
                         if(_current_stack_setting != (stack_mode==1)){
                             _current_stack_setting = (stack_mode==1);
                             vis_timeline.setOptions({'stack':_current_stack_setting});
@@ -713,7 +709,7 @@ if(_mapdata.limit_warning){
                             vis_timeline.redraw();    
                         }*/
                         
-                        var newval = $( this ).find('input[type="checkbox"][name="time-filter-map"]').is(':checked');
+                        let newval = $( this ).find('input[type="checkbox"][name="time-filter-map"]').is(':checked');
                         
                         if(isApplyTimelineFilter !== newval){
                             isApplyTimelineFilter = newval;
@@ -741,7 +737,7 @@ if(_mapdata.limit_warning){
             
         }
         
-        var toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
+        let toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
@@ -782,7 +778,7 @@ if(_mapdata.limit_warning){
             .text('').css('font-style','italic').appendTo(toolbar);
 
             /*
-        var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
+        let menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
                         +'<li id="tlm1"><a href="#"><span/>Truncate to bar</a></li>'
                         +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
@@ -797,7 +793,7 @@ if(_mapdata.limit_warning){
         .menu({
             select: function( event, ui ) {
 
-                var mode =  Number(ui.item.attr('id').substr(3));
+                let mode =  Number(ui.item.attr('id').substr(3));
                 
                 if(mode>=10){
                     return;
@@ -808,7 +804,7 @@ if(_mapdata.limit_warning){
                 ui.item.find('span').addClass('ui-icon ui-icon-check');
                 
                 vis_timeline_label_mode = mode;
-                var spinner = $("#timeline_spinner");
+                let spinner = $("#timeline_spinner");
                 if(mode==2){
                     spinner.show();
                 }else{
@@ -826,7 +822,7 @@ if(_mapdata.limit_warning){
             .on('click',function(){
                 $('.menu-or-popup').hide(); //hide other
 
-                var menu = $( menu_label_settings )
+                let menu = $( menu_label_settings )
                 .show()
                 .position({my: "right top", at: "right bottom", of: this });
                 $( document ).one( "click", function() { menu.hide(); });
@@ -837,7 +833,7 @@ if(_mapdata.limit_warning){
             .appendTo(toolbar);
         */
 
-        var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
+        let spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
         $("#timeline_spinner").spinner({
               value: 10,
               spin: function( event, ui ) {
@@ -862,27 +858,6 @@ if(_mapdata.limit_warning){
             $('#timeline-edit-dialog').find('input[type="checkbox"][name="time-filter-map"]').prop('checked',true);
         }
        
-            
-            
-        /*
-        $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
-        $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
-        $("#btn_timeline_labels").button({icons: {
-            primary: "ui-icon-tag"
-            },text:false, label:window.hWin.HR("Show labels")})
-            .on('click',function(){ __timelineShowLabels(); })
-            .appendTo(toolbar);
-        */
-        
-        /*
-        var el = $('<label style="padding:3px 4px;background:#DDDDDD"><input type="checkbox" checked>Stack</label>').appendTo(toolbar);
-        el.find('input').on('change',function(event){ 
-              _current_stack_setting = $(event.target).is(':checked');
-              vis_timeline.setOptions({'stack':_current_stack_setting}); //(mode!=4)
-//              vis_timeline.redraw();
-        });
-        */
-
     }
     
     //  mode 
@@ -890,8 +865,8 @@ if(_mapdata.limit_warning){
     //
     function _applyTimeLineLabelsSettings(mode, labelpos){
         
-                var contents = $(".vis-item-content");
-                var spinner = $("#timeline_spinner");
+                let contents = $(".vis-item-content");
+                let spinner = $("#timeline_spinner");
 
                 /*if(mode==0){  //full length
                     $.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});
@@ -943,12 +918,12 @@ if(_mapdata.limit_warning){
     //init visjs timeline
     function _loadVisTimeline(){
 
-        var timeline_data = [],
+        let timeline_data = [],
             timeline_groups = [];
 
         $.each(all_mapdata, function(dataset_id, mapdata){
 
-            var cnt = mapdata.timeline.items.length;
+            let cnt = mapdata.timeline.items.length;
             if(mapdata.visible && cnt>0){
 
                 timeline_data = timeline_data.concat( mapdata.timeline.items );
@@ -959,17 +934,17 @@ if(_mapdata.limit_warning){
 
         if(timeline_data){
 
-        var groups = new vis.DataSet( timeline_groups );
-        var items = new vis.DataSet( timeline_data ); //options.items );
+        let groups = new vis.DataSet( timeline_groups );
+        let items = new vis.DataSet( timeline_data ); //options.items );
 
-        var is_stack = _current_stack_setting;//(timeline_groups.length<2 && timeline_data.length<250);
+        let is_stack = _current_stack_setting;//(timeline_groups.length<2 && timeline_data.length<250);
 
-        var timeline_ele = document.getElementById(timelinediv_id)
+        let timeline_ele = document.getElementById(timelinediv_id)
 
         if(vis_timeline==null){
             timeline_ele = document.getElementById(timelinediv_id);
             // Configuration for the Timeline
-            var options = {dataAttributes: ['id'],
+            let options = {dataAttributes: ['id'],
                            orientation:'both', //scale on top and bottom
                            selectable:true, multiselect:true,
                            zoomMax:31536000000*500000,
@@ -992,7 +967,7 @@ if(_mapdata.limit_warning){
                 selection = params.items;
                 if(selection && selection.length>0){
 
-                    var e = params.event;
+                    let e = params.event;
                                                 //div.vis-item.vis-dot.vis-selected.vis-readonly
                     e.cancelBubble = true;
                     if (e.stopPropagation) e.stopPropagation();
@@ -1001,7 +976,7 @@ if(_mapdata.limit_warning){
 
                     //remove dataset prefixes
                     $.each(selection,function(idx, itemid){
-                        var k = itemid.indexOf('-');
+                        let k = itemid.indexOf('-');
                         if(k>0){
                             itemid = itemid.substring(k+1);
                             k = itemid.indexOf('-');
@@ -1027,7 +1002,7 @@ if(_mapdata.limit_warning){
 
         vis_timeline_range = null;
         
-        var timeline_content = $(timeline_ele).find('.vis-itemset');
+        let timeline_content = $(timeline_ele).find('.vis-itemset');
         timeline_content.hide();
         
         vis_timeline.setGroups(groups);
@@ -1056,15 +1031,15 @@ if(_mapdata.limit_warning){
                 tmap = _tmap;
 
                 //first map initialization
-                var nativemap = tmap.getNativeMap();
+                let nativemap = tmap.getNativeMap();
 
                 google.maps.event.addListenerOnce(nativemap, 'tilesloaded', function(){
 
-                    var lt = window.hWin.HAPI4.sysinfo['layout'];  
-                    var scrollwheel = true;
+                    let lt = window.hWin.HAPI4.sysinfo['layout'];  
+                    let scrollwheel = true;
                     
                     // Add controls if the map is not initialized yet
-                    var mapOptions = {
+                    let mapOptions = {
                         //panControl: true,
                         zoomControl: true,
                         mapTypeControl: true,
@@ -1079,11 +1054,11 @@ if(_mapdata.limit_warning){
                         }
                     };
                     
-                    var nativemap = tmap.getNativeMap();
+                    let nativemap = tmap.getNativeMap();
                     nativemap.setOptions(mapOptions);
 
                     // MapTypeStyleFeatureType 
-                    var styledMapType = new google.maps.StyledMapType(
+                    let styledMapType = new google.maps.StyledMapType(
                             [{
                                 "featureType": "poi",
                                 //"elementType": "labels",
@@ -1118,13 +1093,10 @@ if(_mapdata.limit_warning){
                     }
                     
 
-                    if(false){ // && dataset.mapenabled>0
-                        tmap.datasets.main.hide();
-                        tmap.datasets.main.show();
-                    }else if (!__startup_mapdocument) { //zoom to whole world
-                        var swBound = new google.maps.LatLng(-40, -120);
-                        var neBound = new google.maps.LatLng(70, 120);
-                        var bounds = new google.maps.LatLngBounds(swBound, neBound);
+                    if (!__startup_mapdocument) { //zoom to whole world
+                        let swBound = new google.maps.LatLng(-40, -120);
+                        let neBound = new google.maps.LatLng(70, 120);
+                        let bounds = new google.maps.LatLngBounds(swBound, neBound);
                         nativemap.fitBounds(bounds);
                     }
                     
@@ -1184,15 +1156,15 @@ if(_mapdata.limit_warning){
                 _mapdata = [{id: "main", type: "basic", options: { items: [] }}];
             }
             
-            var useMarkerClusterer = window.hWin.HEURIST4.util.getUrlParameter('mapcluster');
-            var markerClustererOpts = {};
+            let useMarkerClusterer = window.hWin.HEURIST4.util.getUrlParameter('mapcluster');
+            let markerClustererOpts = {};
             
             if(!window.hWin.HEURIST4.util.isempty(useMarkerClusterer)){ //take all MarkerClusterer options from URL
             
                 if(useMarkerClusterer=='off'){
                    useMarkerClusterer = false; 
                 }else{
-                    var params = useMarkerClusterer.split(',');
+                    let params = useMarkerClusterer.split(',');
                     if(params.length>0 && params[0]>0){
                         markerClustererOpts['gridSize'] = parseInt(params[0]);
                     }
@@ -1245,10 +1217,10 @@ if(_mapdata.limit_warning){
         
             if(drawingManager!=null) return;
 
-            var shift_draw = false;
+            let shift_draw = false;
 
             //addd drawing manager to draw rectangle selection tool
-            var shapeOptions = {
+            let shapeOptions = {
                 strokeWeight: 1,
                 strokeOpacity: 1,
                 fillOpacity: 0.2,
@@ -1326,7 +1298,7 @@ if(_mapdata.limit_warning){
 
             });
 
-            /*var shift_draw = false;
+            /*let shift_draw = false;
 
             $(document).on('keydown', function(e) {
             if(e.keyCode==16 && shift_draw == false){
@@ -1352,11 +1324,11 @@ if(_mapdata.limit_warning){
                 __clearCurrentShape();
             }); 
             
-            google.maps.event.addListener(map, 'mousedown', function () {
+            google.maps.event.addListener(tmap, 'mousedown', function () {
                 __clearCurrentShape();
             });
 
-            google.maps.event.addListener(map, 'drag', function () {
+            google.maps.event.addListener(tmap, 'drag', function () {
                 __clearCurrentShape();
             });
             
@@ -1393,22 +1365,22 @@ if(_mapdata.limit_warning){
 
         selection = [];
 
-        var isRect = (lastSelectionShape.type == google.maps.drawing.OverlayType.RECTANGLE);
-        var lastBounds, i;
+        let isRect = (lastSelectionShape.type == google.maps.drawing.OverlayType.RECTANGLE);
+        let lastBounds, i;
         if(isRect){
             lastBounds = lastSelectionShape.getBounds();
         }
-        var selected_placemarks = [];
+        let selected_placemarks = [];
 
-        var dataset = tmap.datasets.main;  //take main dataset
+        let dataset = tmap.datasets.main;  //take main dataset
             dataset.each(function(item){ //loop trough all items
 
                         if(item.placemark){
-                            var isOK = false;
+                            let isOK = false;
                             if(item.placemark.points){ //polygone or polyline
-                                for(i=0; i<item.placemark.points.length; i++){
-                                    var pnt = item.placemark.points[i];
-                                    var pos = new google.maps.LatLng(pnt.lat, pnt.lon);
+                                for(let i=0; i<item.placemark.points.length; i++){
+                                    let pnt = item.placemark.points[i];
+                                    let pos = new google.maps.LatLng(pnt.lat, pnt.lon);
                                     if(isRect){
                                         isOK = lastBounds.contains( pos );
                                     }else{
@@ -1419,13 +1391,13 @@ if(_mapdata.limit_warning){
 
                             }else{
 
-                                var placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
-                                for(var i=0;i<placemarks.length;i++){
-                                    //var pos = placemarks[i].getPosition();
-                                    //var pos = item.getNativePlacemark().getPosition();
-                                    var pnt = placemarks[i].location;
-                                    var pos = new google.maps.LatLng(pnt.lat, pnt.lon);
-                                    var isInShape = false;
+                                let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
+                                for(let i=0;i<placemarks.length;i++){
+                                    //let pos = placemarks[i].getPosition();
+                                    //let pos = item.getNativePlacemark().getPosition();
+                                    let pnt = placemarks[i].location;
+                                    let pos = new google.maps.LatLng(pnt.lat, pnt.lon);
+                                    let isInShape = false;
                                 
                                     if(isRect){
                                         isInShape = lastBounds.contains( pos );
@@ -1470,31 +1442,31 @@ if(_mapdata.limit_warning){
         }
 
         //find markers with the same coordinates 
-        var res = _getPlaceMarkFromItem( main_item, selected_placemark );
+        let res = _getPlaceMarkFromItem( main_item, selected_placemark );
         if(res.placemark_type=='marker'){
         
             selection = [];
             
-            var selected_placemarks = [];
+            let selected_placemarks = [];
             
             //main_item.getNativePlacemark()   
-            /*var pos = res.placemark.getPosition();
-            var lat = pos.lat();
-            var lng = pos.lng();*/
-            var lat = res.placemark.location.lat;
-            var lng = res.placemark.location.lon;
+            /*let pos = res.placemark.getPosition();
+            let lat = pos.lat();
+            let lng = pos.lng();*/
+            let lat = res.placemark.location.lat;
+            let lng = res.placemark.location.lon;
 
-            var dataset = tmap.datasets.main;  //take main dataset
+            let dataset = tmap.datasets.main;  //take main dataset
                 dataset.each(function(item){ //loop trough all items
                     if(item.placemark){
                         
-                        var placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
+                        let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
                         
-                        for(var i=0;i<placemarks.length;i++){
+                        for(let i=0;i<placemarks.length;i++){
                             if(!placemarks[i].points && placemarks[i] instanceof mxn.Marker){
                                 
-                                //var pos = placemarks[i].getPosition();
-                                var pos = placemarks[i].location;
+                                //let pos = placemarks[i].getPosition();
+                                let pos = placemarks[i].location;
                                 
                                 if(pos.lat==lat && pos.lon==lng){
                                     selection.push(item.opts.recid);
@@ -1524,7 +1496,7 @@ if(_mapdata.limit_warning){
         //this - item (map item)
         //placemark_selected that was cliked - item may have several placemarks
         
-        var res = _getPlaceMarkFromItem( this, selected_placemark );
+        let res = _getPlaceMarkFromItem( this, selected_placemark );
         if(res.placemark_type=='marker' && 
             !this.placemark.points && this.dataset.id=='main'){
         
@@ -1552,7 +1524,7 @@ if(_mapdata.limit_warning){
             //select items on timeline
             if(!fromtimeline && vis_timeline){
 
-                var selection_vis = [];
+                let selection_vis = [];
 
                 $.each(all_mapdata, function(dataset_id, _mapdata){
                    if(_mapdata.timeenabled>0) {
@@ -1568,9 +1540,9 @@ if(_mapdata.limit_warning){
 
             if(selection && selection.length>0){
 
-                var lastRecID = selection[selection.length-1];
-                var lastSelectedItem = null;
-                var selected_placemark = null;
+                let lastRecID = selection[selection.length-1];
+                let lastSelectedItem = null;
+                let selected_placemark = null;
                 
                 if(Array.isArray(selected_placemarks) && selected_placemarks.length>0){
                     $(selected_placemarks).each( function(i, pm){
@@ -1623,14 +1595,14 @@ if(_mapdata.limit_warning){
     //
     function _showSelection_old( isreset ){
 
-        var lastSelectedItem = null;
-        var items_to_update = [];       //current item to be deleted
-        var items_to_update_data = [];  // items to be added (replacement for previous)
-        //var dataset = tmap.datasets.main;  //take main dataset
+        let lastSelectedItem = null;
+        let items_to_update = [];       //current item to be deleted
+        let items_to_update_data = [];  // items to be added (replacement for previous)
+        //let dataset = tmap.datasets.main;  //take main dataset
 
         if ( isreset || (selection && selection.length>0) ){
 
-            var lastRecID = (selection)?selection[selection.length-1]:-1;
+            let lastRecID = (selection)?selection[selection.length-1]:-1;
 
             tmap.each(function(dataset){
 
@@ -1638,9 +1610,9 @@ if(_mapdata.limit_warning){
 
                     if(item.opts.places && item.opts.places.length>0){
 
-                        var idx = selection ?selection.indexOf(item.opts.recid) :-1;
+                        let idx = selection ?selection.indexOf(item.opts.recid) :-1;
 
-                        var itemdata = {
+                        let itemdata = {
                         datasetid: dataset.id,
                         title: ''+item.opts.title,
                         start: item.opts.start,
@@ -1684,7 +1656,7 @@ if(_mapdata.limit_warning){
                         }else{ //clear selection
                             //item.opts.theme
                             //item.changeTheme(customTheme, true); - dont work
-                            var usual_icon = item.opts.iconId; // + 'm.png'; //it will have usual gray bg
+                            let usual_icon = item.opts.iconId; // + 'm.png'; //it will have usual gray bg
                             if(usual_icon != itemdata.options.eventIconImage){
 
                                 items_to_update.push(item);
@@ -1719,17 +1691,17 @@ if(_mapdata.limit_warning){
 
             if(items_to_update.length>0) {
 
-                var tlband0 = $("#"+timelinediv_id).find("#timeline-band-0");
-                var keep_height = (tlband0.length>0)?tlband0.height():0;
+                let tlband0 = $("#"+timelinediv_id).find("#timeline-band-0");
+                let keep_height = (tlband0.length>0)?tlband0.height():0;
 
                 //dataset.hide();
 
-                var newitem,i,affected_datasets = [];
-                for (i=0;i<items_to_update.length;i++){
+                let newitem,i,affected_datasets = [];
+                for(let i=0;i<items_to_update.length;i++){
                         //items_to_update[i].clear();
-                        var ds_id = items_to_update_data[i].datasetid;
+                        let ds_id = items_to_update_data[i].datasetid;
 
-                        var dataset = tmap.datasets[ ds_id ];
+                        let dataset = tmap.datasets[ ds_id ];
 
                         dataset.deleteItem(items_to_update[i]);
 
@@ -1750,8 +1722,8 @@ if(_mapdata.limit_warning){
                 //dataset.show();
 
                 //hide and show the affected datasets - to apply changes
-                for (i=0;i<affected_datasets.length;i++){
-                    var dataset = tmap.datasets[ affected_datasets[i] ];
+                for(let i=0;i<affected_datasets.length;i++){
+                    let dataset = tmap.datasets[ affected_datasets[i] ];
                     if(dataset.visible){
                         dataset.hide();
                         dataset.show();
@@ -1773,10 +1745,10 @@ if(_mapdata.limit_warning){
 
         }
 
-        /*var lastRecID = (selection)?selection[selection.length-1]:-1;
+        /*let lastRecID = (selection)?selection[selection.length-1]:-1;
         // loop through all items - change openInfoWindow
         if(items_to_update.length>0 || !isreset){
-            var k = 0;
+            let k = 0;
             dataset.each(function(item){
                 item.opts.openInfoWindow = _onItemSelection;
                 //item.showPlacemark();
@@ -1798,14 +1770,14 @@ if(_mapdata.limit_warning){
     //
     function _getPlaceMarkFromItem( item, selected_placemark ){
     
-            var placemark, placemark_type;
+            let placemark, placemark_type;
         
             if( selected_placemark ){
                 placemark = selected_placemark;
             }else {
-                var placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
+                let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
                 
-                for(var i=0;i<placemarks.length;i++){
+                for(let i=0;i<placemarks.length;i++){
                     if(placemarks[i] instanceof mxn.Marker){
                         placemark = placemarks[i];
                         placemark_type = "marker";
@@ -1840,21 +1812,21 @@ if(_mapdata.limit_warning){
             //close others bubbles
             $( document ).bubble( "closeAll" );
 
-            var item = this,
+            let item = this,
                 html = item.getInfoHtml(),
                 ds = item.dataset,
                 placemark, placemark_type,
                 show_bubble_on_map = false;
                 
-            var res = _getPlaceMarkFromItem( item,  selected_placemark );
+            let res = _getPlaceMarkFromItem( item,  selected_placemark );
             placemark = res.placemark;
             placemark_type = res.placemark_type;
                                                               
                                                               
             show_bubble_on_map = (placemark_type != "" && placemark.api!=null);
-            var bubble_header = '<div style="width:99%;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
-            var ed_html =  '';
-            var popupURL = null;
+            let bubble_header = '<div style="width:99%;'+(show_bubble_on_map?'':'padding-right:10px;')+'">'
+            let ed_html =  '';
+            let popupURL = null;
 
             //popup can be shown
             // 1. as a result of mapdocument smarty template  (popupURL)  - expermental
@@ -1863,15 +1835,15 @@ if(_mapdata.limit_warning){
             //              - this is main customization way for Digital Harlem
             // 4. html content is created from item.opts values
             
-            if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
+            //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){
 
                 //if(!item.opts.info){
                 //    return;   //supress popup
                 //}else 
 
-                var mapdocument = null;
+                let mapdocument = null;
                 /*                
-                var mapdocument = that.map_control.getMapDocumentDataById(); //get current map document
+                let mapdocument = that.map_control.getMapDocumentDataById(); //get current map document
                 mapdocument = {popup_template:'Person connected to Place via Events.tpl'};
                 mapdocument = {popup_template:'BoroPlaceOnMap.tpl'};
                 */
@@ -1899,57 +1871,19 @@ if(_mapdata.limit_warning){
                     //html =  bubble_header + item.opts.info + '</div>'; //predefined content
                 }
 
-            }else{
-                //compose content of popup dynamically - workable although NOT USED - in favour of renderRecordData.php
-
-                var recID       = item.opts.recid,
-                    rectypeID   = item.opts.rectype,
-                    bkm_ID      = item.opts.bkmid,
-                    recTitle    = window.hWin.HEURIST4.util.htmlEscape(item.opts.title),
-                    startDate   = item.opts.start,
-                    endDate     = item.opts.end,
-                    description = window.hWin.HEURIST4.util.htmlEscape(item.opts.description),
-                    recURL      = item.opts.URL,
-                    html_thumb  = item.opts.thumb || '';
-
-                ed_html = bubble_header
-            +   '<div style="display:inline-block;">'
-            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" class="rt-icon" style="background-image: url(&quot;'+window.hWin.HAPI4.iconBaseURL + rectypeID+'&quot;);">'
-            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/13x13.gif" class="'+(bkm_ID?'bookmarked':'unbookmarked')+'">'
-            +   '</div>'
-            +  ((window.hWin.HAPI4.currentUser.ugr_ID>0)?
-                '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" >'
-              /*  '<div title="Click to edit record" style="float:right;height:16px;width:16px;" id="btnEditRecordFromBubble" '
-            + 'class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
-            //+ ' onclick={event.preventDefault(); window.open("'+(window.hWin.HAPI4.baseURL+'?fmt=edit&db='+window.hWin.HAPI4.database+'&recID='+recID)+'", "_new");} >'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'*/
-            +   '</div>':'')
-            + '</div>';
-
-            html =
-ed_html +
-'<div style="min-width:190px;height:124px;overflow-y:auto;">'+  // border:solid red 1px;
-'<div style="font-weight:bold;width:100%;padding-bottom:4px;">'+(recURL ?("<a href='"+recURL+"' target='_blank'>"+ recTitle + "</a>") :recTitle)+'</div>'+  //class="timeline-event-bubble-title"
-'<div class="popup_body">'+ html_thumb + description +'</div>'+
-((startDate)?'<div class="timeline-event-bubble-time" style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(startDate)+'</div>':'')+
-((endDate)?'<div class="timeline-event-bubble-time"  style="width:170px;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">'+temporalToHumanReadableString(endDate)+'</div>':'')+
-'</div>';
-
-            }
-
-            var marker = null;
+                let marker = null;
 
             // scroll timeline if necessary
             if (!item.onVisibleTimeline()) {    //old
                 ds.timemap.scrollToDate(item.getStart());
             }
             if(vis_timeline && item.opts.start){
-                var stime = _getUnixTs(item.opts.recid, 'start');
-                var range = vis_timeline.getWindow();
+                let stime = _getUnixTs(item.opts.recid, 'start');
+                let range = vis_timeline.getWindow();
                 if(stime<range.start || stime>range.end){
                         vis_timeline.moveTo(stime);
                 }
-                var ele = $("#"+timelinediv_id);
+                let ele = $("#"+timelinediv_id);
                 marker = ele.find("[data-id="+ds.id+'-'+item.opts.recid +"]");
                 //horizontal scroll
                 if(marker && marker.position()) ele.scrollTop( marker.position().top );
@@ -2022,8 +1956,8 @@ ed_html +
 
                 }else if(item.event){    //reference to Simile timeline event   - NOT USED
 
-                    var painter = item.timeline.getBand(0).getEventPainter();
-                    var marker = painter._eventIdToElmt[item.event.getID()]; //find marker div by internal ID
+                    let painter = item.timeline.getBand(0).getEventPainter();
+                    let marker = painter._eventIdToElmt[item.event.getID()]; //find marker div by internal ID
 
                     //@todo - need to horizonatal scroll to show marker in viewport
 
@@ -2055,7 +1989,7 @@ ed_html +
                      .on('click',function( event ) {
                 event.preventDefault();
                 //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, true, null)
-                window.open(window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+recID, "_new");
+                window.open(window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+item.opts.recid, "_new");
                     });
             }
 
@@ -2070,26 +2004,23 @@ ed_html +
             keepMinMaxDate = false;
             setTimeout(function (){
 
-                var band = tmap.timeline.getBand(0);
+                let band = tmap.timeline.getBand(0);
                 band.setMinVisibleDate(keepMinDate);
                 band.setMaxVisibleDate(keepMaxDate);
                 tmap.timeline.layout();
 
                 //fix bug with height of band
-                _timeLineFixHeightBug();
+                //function not found _timeLineFixHeightBug();
 
                 keepMinMaxDate = true;
                 
-                _adjustLegendHeight();
+                _adjustLegendHeight(); //global in map.php
                 
                 }, 1000);
         }
     }
 
     function _printMap() {
-
-          //if(!gmap) return;
-          //var map = gmap;
 
           if(!tmap) return;
 
@@ -2102,18 +2033,18 @@ ed_html +
                 rotateControl: false
           });
 
-          var popUpAndPrint = function() {
-            dataUrl = [];
+          let popUpAndPrint = function() {
+            let dataUrl = [];
 
             $('#map canvas').filter(function() {
                 dataUrl.push(this.toDataURL("image/png"));
             })
 
-            var container = document.getElementById('map'); //map-canvas
-            var clone = $(container).clone();
+            let container = document.getElementById('map'); //map-canvas
+            let clone = $(container).clone();
 
-            var width = container.clientWidth
-            var height = container.clientHeight
+            let width = container.clientWidth
+            let height = container.clientHeight
 
             $(clone).find('canvas').each(function(i, item) {
               $(item).replaceWith(
@@ -2126,7 +2057,7 @@ ed_html +
                   .css('height', height + 'px');
             });
 
-            var printWindow = window.open('', 'PrintMap',
+            let printWindow = window.open('', 'PrintMap',
               'width=' + width + ',height=' + height);
             printWindow.document.writeln($(clone).html());
             printWindow.document.close();
@@ -2149,7 +2080,7 @@ ed_html +
 
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -2192,7 +2123,7 @@ ed_html +
 
         onWinResize: function(){
             if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
-                    var ele = $("#mapping").find('.ui-layout-center');
+                    let ele = $("#mapping").find('.ui-layout-center');
                     tmap.map.resizeTo(ele.width(),ele.height());
             }
             _onWinResize(); //adjust timeline and legend position
@@ -2251,7 +2182,7 @@ ed_html +
 }
 
 
-var recordPopupFrame = null;
+let recordPopupFrame = null;
 //
 // function to open link from record viewer
 //
@@ -2288,13 +2219,10 @@ function sane_link_opener(link) {
         return false;
     }
 }
-//stub
-function showPlayer(obj, id, url) {
-}
 
 // this function is required for printing local time form map popup info
 function printLTime(sdate, ele){
-    var date = new Date(sdate+"+00:00");
+    let date = new Date(sdate+"+00:00");
     ele = document.getElementById(ele)
     ele.innerHTML = (''+date.getHours()).padStart(2, "0")
                         +':'+(''+date.getMinutes()).padStart(2, "0")

@@ -61,8 +61,8 @@ if(@$_REQUEST['u']){
 //      (that's double precaution - it is already checked in bookmarkletPopup)    
 
     //  fix url to be complete with protocol and remove any trailing slash
-    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'https://' . $url;       
-    if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
+    if (! preg_match('!^[a-z]+:!i', $url)) {$url = 'https://' . $url;}
+    if (substr($url, -1) == '/') {$url = substr($url, 0, strlen($url)-1);}
 
     $mysqli = $system->get_mysqli();
     
@@ -92,7 +92,7 @@ if(@$_REQUEST['u']){
         
         
         
-        $rec_rectype = @$_REQUEST['rec_rectype'];    
+        $rec_rectype = @$_REQUEST['rec_rectype'];
         if($rec_rectype!=null){
             $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
             $params['rec_rectype'] = $rec_rectype;
@@ -168,7 +168,7 @@ if(@$_REQUEST['u']){
 else{
     $params = array();
     
-    $rec_rectype = @$_REQUEST['rec_rectype'];    
+    $rec_rectype = @$_REQUEST['rec_rectype'];
     if($rec_rectype!=null){
         $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
         $params['rec_rectype'] = $rec_rectype;
@@ -221,7 +221,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                 if(success){
                 
                     //FORCE LOGIN  
-                    if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true); }))
+                    if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true);}))
                     {
                         return;
                     }
@@ -258,7 +258,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                         /*
                         $details = array();
                         new_record_params['title'] = __param('d');
-                        new_record_params['title'] = __param('f'); //favicon
+                        new_record_params['title'] = __param('f');//favicon
                         
                         if(count($details)>0)
                             new_record_params['details'] = $details;
@@ -303,7 +303,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                                     //that.loadanimation(false);
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         
-                                        var recset = new hRecordSet(response.data);
+                                        var recset = new HRecordSet(response.data);
                                         if(recset.length()>0){
                                             $container.manageRecords('updateRecordList', null, {recordset:recset});
                                             $container.manageRecords('addEditRecord', recset.getOrder()[0]);
@@ -319,19 +319,19 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                                             
                                             window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
                                                 {ok:'Close', title:'Record not found or hidden'}, 
-                                                    {close:function(){ window.close(); }});
+                                                    {close:function(){ window.close();}});
                                             
                                         }
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response, false, 
-                                            {close:function(){ if(isPopup){ window.close(); }}});
+                                            {close:function(){ if(isPopup){ window.close();}}});
                                     }
 
                                 });
                             
                             }else{
                                 
-                                $container.manageRecords('addEditRecord',-1); //call widget method
+                                $container.manageRecords('addEditRecord',-1);//call widget method
                             }                            
                             
                         }

@@ -22,6 +22,9 @@ import "./editInputDate.js";
 import "./editInputRecFile.js";
 import "./editInputFile.js";
 
+/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinymce, EditorCodeMirror, 
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
+
 $.widget( "heurist.editing_input", {
 
     // default options
@@ -166,9 +169,9 @@ $.widget( "heurist.editing_input", {
         
         this.options.showclear_button = this.options.showclear_button && !this.isReadonly();
 
-        var that = this;
+        let that = this;
 
-        var required = "";
+        let required = "";
         if(this.isReadonly()) {
             required = "readonly";
         }else{
@@ -177,10 +180,11 @@ $.widget( "heurist.editing_input", {
             }
         }
         
-        var lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
+        let lblTitle = (window.hWin.HEURIST4.util.isempty(this.options.title)?this.f('rst_DisplayName'):this.options.title);
 
         //header
-        if(true){ // || this.options.show_header
+        const is_show_header = true; // this.options.show_header
+        if(is_show_header){ 
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
@@ -189,7 +193,7 @@ $.widget( "heurist.editing_input", {
             .appendTo( this.element );
 
             // Apply user pref font size
-            var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+            let usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
             if(usr_font_size != 0){
                 usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
                 this.header.css('font-size', usr_font_size+'px');
@@ -210,13 +214,13 @@ $.widget( "heurist.editing_input", {
         }else{
 
             //hardcoded list of fields and record types where multivalues mean translation (multilang support)
-            var is_translation = this.f('rst_MultiLang') || 
+            let is_translation = this.f('rst_MultiLang') || 
                ((that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                 that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
                 && that.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
             
             //saw TODO this really needs to check many exist
-            var repeatable = (Number(this.f('rst_MaxValues')) != 1  || is_translation)? true : false;
+            let repeatable = (Number(this.f('rst_MaxValues')) != 1  || is_translation)? true : false;
             
             if(!repeatable || this.options.suppress_repeat){  
                 //spacer
@@ -230,7 +234,7 @@ $.widget( "heurist.editing_input", {
                 this.is_sortable = !that.is_disabled && !that.isReadonly() 
                         && (this.detailType!="relmarker") && !that.options.is_faceted_search; 
             
-                var btn_cont = $('<span>', {class: 'editint-inout-repeat-container'})
+                let btn_cont = $('<span>', {class: 'editint-inout-repeat-container'})
                     .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
                             'min-width':'22px',  'border-color':'transparent'})
                     .appendTo( this.element );
@@ -425,7 +429,7 @@ $.widget( "heurist.editing_input", {
                 axis: 'y',
                 stop:function(event, ui){
                     
-                    var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+                    let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
                     if(isparententity){ //remove parent entity flag to avoid autosave
                         that.fset('rst_CreateChildIfRecPtr', 0);
                     }
@@ -465,7 +469,7 @@ $.widget( "heurist.editing_input", {
         .appendTo( this.input_cell );
 
         //add prompt/help text
-        var help_text = window.hWin.HEURIST4.ui.getRidGarbageHelp(this.f('rst_DisplayHelpText'));
+        let help_text = window.hWin.HEURIST4.ui.getRidGarbageHelp(this.f('rst_DisplayHelpText'));
         
         this.input_prompt = $( "<div>")
             .html( help_text && !this.options.suppress_prompts ?help_text:'' )
@@ -473,11 +477,11 @@ $.widget( "heurist.editing_input", {
         this.input_prompt.appendTo( this.input_cell );
 
         // Add extended description, if available, viewable via clicking more... and collapsible with less...
-        var extend_help_text = window.hWin.HEURIST4.util.htmlEscape(this.f('rst_DisplayExtendedDescription'));
+        let extend_help_text = window.hWin.HEURIST4.util.htmlEscape(this.f('rst_DisplayExtendedDescription'));
         if(help_text && !this.options.suppress_prompts 
             && extend_help_text && this.options.recordset && this.options.recordset.entityName == 'Records'){
 
-            var $extend_help_eles = $("<span id='show_extended' style='color:blue;cursor:pointer;'> more...</span>"
+            let $extend_help_eles = $("<span id='show_extended' style='color:blue;cursor:pointer;'> more...</span>"
                 + "<span id='extended_help' style='display:none;font-style:italic;'><br>"+ extend_help_text +"</span>"
                 + "<span id='hide_extended' style='display:none;color:blue;cursor:pointer;'> less...</span>")
                 .appendTo(this.input_prompt);
@@ -491,12 +495,12 @@ $.widget( "heurist.editing_input", {
         }
 
         //values are not defined - assign default value
-        var values_to_set;
+        let values_to_set;
         
         if( !Array.isArray(this.options.values) ){
-            var def_value = this.f('rst_DefaultValue');
+            let def_value = this.f('rst_DefaultValue');
             
-            var isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
+            let isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
 
             if( !this.options.is_insert_mode || window.hWin.HEURIST4.util.isempty(def_value) || isparententity){
                 // reset default value - default value for new record only
@@ -621,7 +625,7 @@ $.widget( "heurist.editing_input", {
         }      
         
         //refresh filter for resourse popup 
-        var val = this.f('rst_FieldConfig');
+        let val = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(val)){
             val = window.hWin.HEURIST4.util.isJSON(val);
             if(val!==false && this.configMode.entity){
@@ -658,7 +662,7 @@ $.widget( "heurist.editing_input", {
     removeTooltip: function(id){
 
         if(this.tooltips && this.tooltips[id]){
-            var $tooltip = this.tooltips[id];
+            let $tooltip = this.tooltips[id];
             if($tooltip && $tooltip.tooltip('instance') != undefined){
                 $tooltip.tooltip('destroy');
                 $tooltip = null;
@@ -686,15 +690,29 @@ $.widget( "heurist.editing_input", {
         this.element.find('span.field-visibility').remove();
         this.element.find('div.field-visibility2').remove();
         
-        var that = this;
+        let that = this;
         if(this.inputs){
             $.each(this.inputs, function(index, input){ 
 
                     that.removeTooltip(input.attr('id'));
 
-                    if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
-                    
-                    //check for "between" input (date and freetext)
+                    if(that.detailType=='blocktext'){
+                        let eid = '#'+input.attr('id')+'_editor';
+                        //tinymce.remove('#'+input.attr('id')); 
+                        tinymce.remove(eid);
+                        $(eid).parent().remove(); //remove editor element
+                        //$(eid).remove(); 
+
+                        eid = '#'+input.attr('id')+'_codemirror';
+                        $(eid).parent().remove(); //remove editor element
+
+                        
+                    }else if(that.detailType=='file'){
+                        if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
+                    }else{
+                        if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
+                    }
+                    //check for "between" input
                     that.element.find('#'+$(input).attr('id')+'-2').remove();
                     
                     input.remove();
@@ -733,7 +751,7 @@ $.widget( "heurist.editing_input", {
     */
     f: function(fieldname){
 
-        var val = this.options['dtFields'][fieldname]; //try get by name
+        let val = this.options['dtFields'][fieldname]; //try get by name
         
         if(window.hWin.HEURIST4.util.isnull(val) && this.options.dtID>0 && this.options.rectypeID>0){ //try get from $Db
             val = $Db.rst(this.options.rectypeID, this.options.dtID, fieldname);
@@ -776,24 +794,26 @@ $.widget( "heurist.editing_input", {
     //
     _removeInput: function(input_id){
 
-        var that = this;
-
-        this.removeTooltip(input_id);        
+        let that = this;
+        
+        this._removeTooltip(input_id);        
 
         if(this.inputs.length>1 && this.enum_buttons == null){
 
             //find in array
             $.each(this.inputs, function(idx, item){
 
-                var $input = $(item);
+                let $input = $(item);
                 if($input.attr('id')==input_id){
                     if(that.newvalues[input_id]){
                         delete that.newvalues[input_id];
                     }
                     
                     if(that.detailType=='file'){
-                        
-                        var $parent = that._getInputDiv($input);
+                        if($input.fileupload('instance')){
+                            $input.fileupload('destroy');
+                        }
+                        let $parent = $input.parents('.input-div');
                         $input.remove();
                         $parent.remove();
                         
@@ -815,13 +835,13 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
 
-            var $input;
+            let $input;
 
             $(this.inputs[0]).val(''); // Set first value to empty
 
             if(this.inputs.length > 1){
 
-                for (var i = 1; i < this.inputs.length; i++) {
+                for (let i = 1; i < this.inputs.length; i++) {
                     
                     $input = $(this.inputs[i]);
 
@@ -901,7 +921,7 @@ $.widget( "heurist.editing_input", {
             return 300;
         }
         
-        var maxW = 0;
+        let maxW = 0;
         $.each(this.inputs, function(index, input){ 
             maxW = Math.max(maxW, $(input).width());
         });
@@ -940,17 +960,17 @@ $.widget( "heurist.editing_input", {
             this.newvalues = {};
         }
 
-        var that = this;
+        let that = this;
 
-        var $input = null;
-        //@todo check faceted search!!!!! var inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
+        let $input = null;
+        //@todo check faceted search!!!!! inputid = 'input'+(this.options.varid?this.options.varid :idx+'_'+this.options.dtID);
         //repalce to uniqueId() if need
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
 
-        var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
+        let $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
 
         // Apply user pref font size
-        var usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
+        let usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
         if(usr_font_size != 0){
             usr_font_size = (usr_font_size < 8) ? 8 : (usr_font_size > 18) ? 18 : usr_font_size;
             $inputdiv.css('font-size', usr_font_size+'px');
@@ -966,7 +986,7 @@ $.widget( "heurist.editing_input", {
         else 
         if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
-            var dwidth;
+            let dwidth;
             if(this.configMode && this.configMode.entity!='records'){
                 dwidth = this.f('rst_DisplayWidth');
                 if(parseFloat(dwidth)>0){
@@ -981,7 +1001,7 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv );
             
             if(this.options.dtID=='access'){
-                var sel_options = [
+                const sel_options = [
                     {key: '', title: ''}, 
                     {key: 'viewable', title: 'viewable'}, 
                     {key: 'hidden', title: 'hidden'}, 
@@ -993,8 +1013,8 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HEURIST4.ui.initHSelect($input, false);
             }
             else if(this.options.dtID=='tag'){
-                var groups = [];
-                var req = {};
+                let groups = [];
+                let req = {};
                 req['a'] = 'search';
                 req['details'] = 'name'; // Get group id and name
                 req['entity'] = 'sysGroups';
@@ -1004,7 +1024,7 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HAPI4.EntityMgr.doRequest(req, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            var recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
                                 recset.each2(function(id, val){
                                     groups.push([val['ugr_ID'], val['ugr_Name']]);
@@ -1016,8 +1036,8 @@ $.widget( "heurist.editing_input", {
                     }
                 );
 
-                var sel_options = [];
-                var u_id = window.hWin.HAPI4.currentUser['ugr_ID'];
+                let sel_options = [];
+                let u_id = window.hWin.HAPI4.currentUser['ugr_ID'];
 
                 req = {};
                 req['a'] = 'search';
@@ -1030,35 +1050,36 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HAPI4.EntityMgr.doRequest(req, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            var gIDs = [];
-                            var recset = new hRecordSet(response.data);
+                            let gIDs = [];
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
-                                records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
+                                let records = recset.getSubSetByRequest({'sort:tag_UGrpID':1});
                                 
-                                u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
+                                let u_tags = records.getSubSetByRequest({'tag_UGrpID':'='+u_id});
                                 u_tags.each2(function(id, val){ // Get User Tags first
-                                    var tag_name = filter_val = val['tag_Text'];
-                                    var tag_group = val['tag_UGrpID'];
+                                    const tag_name = val['tag_Text'];
+                                    //let tag_group = val['tag_UGrpID'];
 
-                                    var values = {};
-                                    values['key'] = filter_val;
+                                    let values = {};
+                                    values['key'] = tag_name;
                                     values['title'] = tag_name;
 
                                     sel_options.push(values);
                                 });  
 
-                                w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
+                                let w_tags = records.getSubSetByRequest({'tag_UGrpID':'!='+u_id});
                                 w_tags.each2(function(id, val){ // Get Workgroup Tags second
-                                    var tag_name = filter_val = val['tag_Text'];
-                                    var tag_group = val['tag_UGrpID'];
+                                    let tag_name = val['tag_Text'];
+                                    const filter_val = val['tag_Text'];
+                                    let tag_group = val['tag_UGrpID'];
 
-                                    for(var i=0; i<groups.length; i++){
+                                    for(let i=0; i<groups.length; i++){
                                         if(groups[i][0] == tag_group){
                                             tag_name = groups[i][1] + '.' + tag_name;
                                         }
                                     }
 
-                                    var values = {};
+                                    let values = {};
                                     values['key'] = filter_val;
                                     values['title'] = tag_name;
 
@@ -1106,7 +1127,7 @@ $.widget( "heurist.editing_input", {
             
             this._on( $input, {change:this._onTermChange} );
             
-            var allTerms = this.f('rst_FieldConfig');    
+            let allTerms = this.f('rst_FieldConfig');    
             
             if($.isPlainObject(allTerms)){
                 this.options.showclear_button = this.options.showclear_button && (allTerms.hideclear!=1);
@@ -1119,9 +1140,9 @@ $.widget( "heurist.editing_input", {
                 if (!(window.hWin.HEURIST4.util.isempty(allTerms) && 
                     this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])) {
 
-                    var isVocabulary = !isNaN(Number(allTerms)); 
+                    let isVocabulary = !isNaN(Number(allTerms)); 
 
-                    var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
+                    let $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
                     .addClass('smallicon ui-icon ui-icon-image show-onhover')
                     .css({
                         'margin-top': '2px',
@@ -1132,7 +1153,7 @@ $.widget( "heurist.editing_input", {
                     
                     if(that.child_terms==null){
                         
-                        var vocab_id = that.f('rst_FilteredJsonTermIDTree');    
+                        const vocab_id = that.f('rst_FilteredJsonTermIDTree');    
                         that.child_terms = $Db.trm_TreeData(vocab_id, 'set');
                         
                         that._checkTermsWithImages(); //show hide $btn_termsel
@@ -1142,12 +1163,12 @@ $.widget( "heurist.editing_input", {
 
                     this._on( $btn_termsel, { click: function(){
 
-                        var vocab_id = Number(this.f('rst_FilteredJsonTermIDTree'));    
+                        let vocab_id = Number(this.f('rst_FilteredJsonTermIDTree'));    
                         
                         if(this.is_disabled || !(vocab_id>0)) return;
 
-                            var selectmode = that.enum_buttons == 'checkbox' ? 'select_multi' : 'select_single';
-                            var dlg_title = 'Term selection for ' + that.f('rst_DisplayName');
+                            let selectmode = that.enum_buttons == 'checkbox' ? 'select_multi' : 'select_single';
+                            let dlg_title = 'Term selection for ' + that.f('rst_DisplayName');
 
                             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', {
                                 empty_remark: 'No terms available',
@@ -1172,11 +1193,11 @@ $.widget( "heurist.editing_input", {
                                                                     
                     }});
 
-                    var vocab_id = Number(allTerms);
+                    let vocab_id = Number(allTerms);
 
                     if(window.hWin.HAPI4.is_admin()){            
                         
-                        var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
+                        let $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
                         .addClass('smallicon ui-icon ui-icon-gear btn_add_term show-onhover')
                         .css({'margin-top':'2px',cursor:'pointer'})
                         .appendTo( $inputdiv );
@@ -1187,7 +1208,7 @@ $.widget( "heurist.editing_input", {
                 
                     if(!window.hWin.HAPI4.is_guest_user()){
                     
-                    var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
+                    let $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
                     .addClass('smallicon ui-icon ui-icon-plus btn_add_term show-onhover')
                     .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
                     .appendTo( $inputdiv );
@@ -1200,7 +1221,7 @@ $.widget( "heurist.editing_input", {
                     if(this.is_disabled) return;
                     
                     //add new term to specified vocabulary
-                    var rg_options = {
+                    let rg_options = {
                             isdialog: true, 
                             select_mode: 'manager',
                             edit_mode: 'editonly',
@@ -1222,12 +1243,12 @@ $.widget( "heurist.editing_input", {
             }//allow edit terms only for true defTerms enum
             
             // Display term selector as radio buttons/checkboxes
-            var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
+            let asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
             if(asButtons && this.child_terms  && this.child_terms.length<=20){
 
                     this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
-                    var inpt_id = $input.attr('id');
-                    var dtb_res = false;
+                    let inpt_id = $input.attr('id');
+                    let dtb_res = false;
 
                     if(this.enum_buttons == 'checkbox' && $inputdiv.parent().find('input:checkbox').length > 0){ // Multi value, check if checkboxes exist
 
@@ -1306,8 +1327,9 @@ $.widget( "heurist.editing_input", {
             .val(value)
             .on('change',function(){that.onChange();})
             .appendTo( $inputdiv );
-            var mode = null;
+            let mode = null;
             
+            let topOptions;
             if(this.configMode && (this.configMode.mode=='all_users' || this.configMode.mode=='all_users_and_groups')){
                 topOptions = this.configMode.topOptions;
                 mode = this.configMode.mode;
@@ -1349,12 +1371,12 @@ $.widget( "heurist.editing_input", {
                 if(this.inputs.length==0){ //show current relations
                 
                     //these are relmarker fields from other rectypes that points to this record
-                    var isInwardRelation = (that.f('rst_DisplayOrder')>1000);
+                    let isInwardRelation = (that.f('rst_DisplayOrder')>1000);
                 
                 
                     function __onRelRemove(){
-                        var tot_links = that.element.find('.link-div').length;
-                        var rev_links = that.element.find('.reverse-relation').length; 
+                        let tot_links = that.element.find('.link-div').length;
+                        let rev_links = that.element.find('.reverse-relation').length; 
                         if( tot_links-rev_links==0){ //hide this button if there are links
                             that.element.find('.rel_link').show();
                         }else{
@@ -1365,20 +1387,20 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                     
-                    var isOpened = false;
+                    let isOpened = false;
                     
-                    var rts = [];
-                    var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+                    let rts = [];
+                    const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                     
-                    for (var k=0; k<ptrset.length; k++) {
-                        var sname = $Db.rty(ptrset[k],'rty_Name');
+                    for (let k=0; k<ptrset.length; k++) {
+                        const sname = $Db.rty(ptrset[k],'rty_Name');
                         if(!window.hWin.HEURIST4.util.isempty(sname)){
                             rts.push(sname);
                         }
                     }
                     
                 
-                    var __show_addlink_dialog = function(){
+                    let __show_addlink_dialog = function(){
                         if(isOpened || that.is_disabled) return;
                         
                         isOpened = true;
@@ -1392,13 +1414,13 @@ $.widget( "heurist.editing_input", {
                             
                             if(context && context.count>0){
                                 
-                                var link_info = isInwardRelation?context.source:context.target;
+                                let link_info = isInwardRelation?context.source:context.target;
                                 link_info.relation_recID = context.relation_recID; //existing relationship record
                                 link_info.relmarker_field = that.options.dtID;
                                 link_info.trm_ID = context.trm_ID;
                                 link_info.is_inward = isInwardRelation;
                                 
-                                var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
+                                let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
                                     link_info, true);
                                 ele.insertBefore(that.element.find('.rel_link'));
                                 that.element.find('.rel_link').hide();//hide this button if there are links
@@ -1418,7 +1440,7 @@ $.widget( "heurist.editing_input", {
                             };
                         }
                         
-                        var rty_names = '';
+                        let rty_names = '';
                         if(rts.length>0 && that.options.rectypeID>0){
                             rty_names = $Db.rty(that.options.rectypeID,'rty_Name') 
                                         + ' and ' + rts.join(', ');
@@ -1426,7 +1448,7 @@ $.widget( "heurist.editing_input", {
                             rty_names = 'records';
                         }
                         
-                        var opts = {
+                        let opts = {
                             height:480, width:750, 
                             title: 'Create relationship between '+rty_names+' ( Field: "'
                                 +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
@@ -1452,27 +1474,27 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
                     };
                     
-                    var sRels = '';
+                    let sRels = '';
                     if(that.options.recordset){
                     
-                    var relations = that.options.recordset.getRelations();
+                    let relations = that.options.recordset.getRelations();
                   
                     if(relations && (relations.direct || relations.reverse)){
                         
-                        var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+                        const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                         
-                        var vocab_id = this.f('rst_FilteredJsonTermIDTree');        
+                        let vocab_id = this.f('rst_FilteredJsonTermIDTree');        
 
-                        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-                        var headers = relations.headers;
-                        var dtID = this.options.dtID;
+                        let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+                        let headers = relations.headers;
+                        let dtID = this.options.dtID;
                         
                         
                       if(!isInwardRelation){
-                            var direct = relations.direct; //outward
+                            let direct = relations.direct; //outward
                             
                         //take only those that satisify to allowed terms and pointer constraints
-                        for(var k in direct){
+                        for(let k in direct){
                             //direct[k]['dtID']==this.options.dtID && 
                             if(direct[k]['trmID']>0){ //relation   
                             
@@ -1481,20 +1503,20 @@ $.widget( "heurist.editing_input", {
                                 { //it satisfies to allowed relationship types
 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
-                                        var targetID = direct[k].targetID;
+                                        let targetID = direct[k].targetID;
                                         
                                         if(!headers[targetID]){
                                             //there is not such record in database
                                             continue;                                            
                                         }
                                         
-                                        var targetRectypeID = headers[targetID][1];
+                                        let targetRectypeID = headers[targetID][1];
                                         if( headers[targetID]['used_in_reverse'+dtID]!=1 &&
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
                                             
-                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                            let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: headers[targetID][1], 
@@ -1517,12 +1539,12 @@ $.widget( "heurist.editing_input", {
 
                         
                         //small subheader before reverse entries
-                        var isSubHeaderAdded = isInwardRelation;
+                        let isSubHeaderAdded = isInwardRelation;
                         
                         //now scan all indirect /inward relations
-                        var reverse = relations.reverse; //outward
+                        let reverse = relations.reverse; //outward
                         //take only those that satisify to allowed terms and pointer constraints
-                        for(var k in reverse){
+                        for(let k in reverse){
                             //direct[k]['dtID']==this.options.dtID && 
                             if(reverse[k]['trmID']>0){ //relation   
                                 
@@ -1530,14 +1552,14 @@ $.widget( "heurist.editing_input", {
                                 { //it satisfies to allowed relationship types
                                 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
-                                        var targetID = reverse[k].sourceID;
+                                        let targetID = reverse[k].sourceID;
                                         
                                         if(!headers[targetID]){
                                             //there is not such record in database
                                             continue;                                            
                                         }
                                         
-                                        var targetRectypeID = headers[targetID][1];
+                                        let targetRectypeID = headers[targetID][1];
                                         
                                         if (headers[targetID]['used_in_direct'+dtID]!=1 && (ptrset.length==0) ||
                                                 (window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
@@ -1550,9 +1572,7 @@ $.widget( "heurist.editing_input", {
 //                                                        .appendTo($inputdiv);
                                             }
                                             
-                                            //var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
-                                            
-                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                            let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: targetRectypeID, 
@@ -1590,22 +1610,19 @@ $.widget( "heurist.editing_input", {
                         .uniqueId();
                    $input = $inputdiv;
 
-                   var rty_names = '';
+                   let rty_names = '';
                    if(rts.length>0){
                         rty_names = '<div class="truncate" style="max-width:200px;display:inline-block;vertical-align:top">&nbsp;to '
                                 +rts.join(', ') +'</div>';
-                   }else{
-                        rty_names = '';
                    }
                    
-                   
                    //define explicit add relationship button
-                   var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
+                   let $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
                         .addClass("rel_link") //.css({display:'block'})
                         .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'
                                 +rty_names});
                        
-                   var rheader = that.element.find('.reverse-relation-header');     
+                   let rheader = that.element.find('.reverse-relation-header');     
                    if(rheader.length>0){
                         $btn_add_rel_dialog.insertBefore( rheader );
                    }else{
@@ -1653,17 +1670,17 @@ $.widget( "heurist.editing_input", {
             }
             */
             
-            var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+            let isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
             
             //replace input with div
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
                             
-            var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+            const ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
             
-            var rts = [];
-            for (var k=0; k<ptrset.length; k++) {
-                var sname = $Db.rty(ptrset[k],'rty_Name');
+            let rts = [];
+            for (let k=0; k<ptrset.length; k++) {
+                const sname = $Db.rty(ptrset[k],'rty_Name');
                 if(!window.hWin.HEURIST4.util.isempty(sname)){
                     rts.push(sname);
                 }
@@ -1686,7 +1703,7 @@ $.widget( "heurist.editing_input", {
                         .addClass(classes).css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
-            var __show_select_function = null;
+            let __show_select_function = null;
             if(typeof browseRecords!=='undefined' && window.hWin.HUL.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
@@ -1702,14 +1719,14 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='resource' && 
                 (this.configMode.entity=='DefRecTypes' || this.configMode.entity=='DefDetailTypes')){ //-----------
             //it defines slightly different select dialog for defRecTypes
-            __show_select_dialog = function(event){
+            let __show_select_dialog = function(event){
         
                 if(that.is_disabled) return;
                 event.preventDefault();
                 
-                var sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
+                let sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
                 
-                var rg_options = {
+                let rg_options = {
                     select_mode: (this.configMode.csv!==false?'select_multi':'select_single'),
                     edit_mode: 'popup',
                     isdialog: true,
@@ -1719,7 +1736,7 @@ $.widget( "heurist.editing_input", {
                     onselect:function(event, data){
                         
                         if(data && data.selection){
-                            var newsel = data.selection;
+                            let newsel = data.selection;
                             that._findAndAssignTitle($input, newsel);
                             that.newvalues[$input.attr('id')] = newsel.join(',');
                             that.onChange();
@@ -1746,16 +1763,15 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').hide()
                         .appendTo( $inputdiv );
             
-            var $input_img, $gicon;
-            var select_return_mode = 'ids';
+            let $input_img;
+            let select_return_mode = 'ids';
             
-            var icon_for_button = 'ui-icon-pencil'; //was -link
             if(this.configMode.select_return_mode &&
                this.configMode.select_return_mode!='ids'){
                  select_return_mode = 'recordset'
             }
                 
-            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            let $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
             +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
@@ -1791,16 +1807,15 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').hide()
                         .appendTo( $inputdiv );
             
-            var $input_img, $gicon;
-            var select_return_mode = 'ids';
+            let $input_img;
+            let select_return_mode = 'ids';
             
-            var icon_for_button = 'ui-icon-pencil'; //was -link
             if(this.configMode.select_return_mode &&
                this.configMode.select_return_mode!='ids'){
                  select_return_mode = 'recordset'
             }
                 
-            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            let $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
             +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
@@ -1808,17 +1823,9 @@ $.widget( "heurist.editing_input", {
 
             $input.css({'min-wdith':'22ex'});
 
-            var ptrset = that.f('rst_PtrFilteredIDs');
+            const ptrset = that.f('rst_PtrFilteredIDs');
 
-            var __show_select_dialog = null;
-            /* 2017-11-08 no more buttons
-            var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
-            .addClass('smallicon ui-icon '+icon_for_button)
-            .appendTo( $inputdiv );
-            */
-            //.button({icons:{primary: icon_for_button},text:false});
-
-            var popup_options = {
+            let popup_options = {
                 isdialog: true,
                 select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                 select_return_mode:select_return_mode, //ids or recordset(for files)
@@ -1832,7 +1839,7 @@ $.widget( "heurist.editing_input", {
                         if(select_return_mode=='ids'){
 
 
-                            var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
+                            let newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
 
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
@@ -1854,19 +1861,19 @@ $.widget( "heurist.editing_input", {
             $input.hide();
             that._findAndAssignTitle($input, value);
 
-            __show_select_dialog = function(event){
+            let __show_select_dialog = function(event){
                 
                     if(that.is_disabled) return;
 
                     event.preventDefault();
                     
-                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                    let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
                         {width: null,  //null triggers default width within particular widget
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
         
                     popup_options.width = usrPreferences.width;
                     popup_options.height = usrPreferences.height;
-                    var sels = this.newvalues[$input.attr('id')];//$(event.target).attr('id')];
+                    let sels = this.newvalues[$input.attr('id')];//$(event.target).attr('id')];
                     /*if(!sels && this.options.values && this.options.values[0]){
                          sels = this.options.values[0];
                     }*/ 
@@ -1884,7 +1891,7 @@ $.widget( "heurist.editing_input", {
                         popup_options.search_form_visible = this.configMode.search_form_visible;    
                     }
 
-                    var popup_options2 = popup_options;
+                    let popup_options2 = popup_options;
                     if(this.configMode.popup_options){
                          popup_options2  = $.extend(popup_options, this.configMode.popup_options);
                     }
@@ -1961,7 +1968,7 @@ $.widget( "heurist.editing_input", {
             
             if(this.options.dtID=='rec_URL' || this.detailType=='url'){//----------------------------------
                 
-                    var $btn_extlink = null, $btn_editlink = null;
+                    let $btn_extlink = null, $btn_editlink = null;
                 
                     function __url_input_state(force_edit){
                     
@@ -2014,9 +2021,9 @@ $.widget( "heurist.editing_input", {
 
                  
                 $input.on('keypress', function (e) {
-                    var code = e.charCode || e.keyCode;
-                    var charValue = String.fromCharCode(code);
-                    var valid = false;
+                    let code = e.charCode || e.keyCode;
+                    let charValue = String.fromCharCode(code);
+                    let valid = false;
 
                     if(charValue=='-' && this.value.indexOf('-')<0){
                         this.value = '-'+this.value;
@@ -2062,9 +2069,9 @@ $.widget( "heurist.editing_input", {
             if(this.detailType=="float"){//----------------------------------------------------
 
                 $input.on('keypress', function (e) {
-                    var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
-                    var charValue = String.fromCharCode(code);
-                    var valid = false;
+                    let code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
+                    let charValue = String.fromCharCode(code);
+                    let valid = false;
 
 
                     if(charValue=='-' && this.value.indexOf('-')<0){
@@ -2115,10 +2122,10 @@ $.widget( "heurist.editing_input", {
                 
                 $input.css({'padding-left':'30px'});
                 
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
-                var $select_folder_dlg = $('<div>').hide().appendTo( $inputdiv );
+                let $select_folder_dlg = $('<div>').hide().appendTo( $inputdiv );
                 
                 that.newvalues[$input.attr('id')] = value;
                     
@@ -2126,7 +2133,7 @@ $.widget( "heurist.editing_input", {
                        $select_folder_dlg.selectFolders({
                        onselect:function(newsel){
                             if(newsel){
-                                var newsel = newsel.join(';');
+                                newsel = newsel.join(';');
                                 that.newvalues[$input.attr('id')] = newsel;
                                 $input.val(newsel);
                                 that.onChange();
@@ -2141,7 +2148,7 @@ $.widget( "heurist.editing_input", {
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                    
-                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                let $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
             
@@ -2153,12 +2160,12 @@ $.widget( "heurist.editing_input", {
                 $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).css('cursor','hand');
                 
                       
-                var __show_action_dialog = function (event){
+                let __show_action_dialog = function (event){
                         event.preventDefault();
                         
                         if(that.is_disabled) return;
                         
-                        var dlg_options = that.newvalues[$input.attr('id')];
+                        let dlg_options = that.newvalues[$input.attr('id')];
                         if(  window.hWin.HEURIST4.util.isempty(dlg_options) ){
                             dlg_options = {};
                         }
@@ -2197,19 +2204,19 @@ $.widget( "heurist.editing_input", {
 
                 $input.css({cursor:'hand'});
 
-                __show_geoBookmark_dialog = function(event) {
+                let __show_geoBookmark_dialog = function(event) {
                     event.preventDefault();
 
                     if(that.is_disabled) return;
 
-                    var current_val = $input.val();
+                    let current_val = $input.val();
 
                     // split current_val into parts based on , 
-                    var setup_val = current_val.split(",");
+                    let setup_val = current_val.split(",");
 
-                    var $dlg = null;
+                    let $dlg = null;
 
-                    var pdiv = '<div style="display:grid;grid-template-columns:100%;">'
+                    let pdiv = '<div style="display:grid;grid-template-columns:100%;">'
 
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
                             + '<label class="required">Bookmark Name:</label><input type="text" id="bkm_name"></div>'
@@ -2226,21 +2233,21 @@ $.widget( "heurist.editing_input", {
                             + '<div style="margin-bottom:10px;display:grid;grid-template-columns:150px 200px;">'
                             + '<label style="color:#6A7C99">Ending Date:</label><input type="text" id="bkm_edate"></div>'
 
-                    var popele = $(pdiv);
+                    let popele = $(pdiv);
 
                     popele.find('input[class="bkm_points"]').on('click',function(e){
-                        var url = window.hWin.HAPI4.baseURL 
+                        let url = window.hWin.HAPI4.baseURL 
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
 
-                        var wkt_points = $('input[id="bkm_long"]').val() + ',' + $('input[id="bkm_lat"]').val();
-                        var points = wkt_points.split(/[\s,]+/);
+                        let wkt_points = $('input[id="bkm_long"]').val() + ',' + $('input[id="bkm_lat"]').val();
+                        let points = wkt_points.split(/[\s,]+/);
 
-                        var geo_points = points[0] + ',' + points[2] + ' ' + points[1] + ',' + points[3];
+                        let geo_points = points[0] + ',' + points[2] + ' ' + points[1] + ',' + points[3];
 
-                        var wkt_params = {'wkt': geo_points};
+                        let wkt_params = {'wkt': geo_points};
                         wkt_params['tool_option'] = 'rectangle';
 
-                        var d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+                        let d_width = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         d_height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95;
 
                         window.hWin.HEURIST4.msg.showDialog(url, {
@@ -2254,13 +2261,13 @@ $.widget( "heurist.editing_input", {
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     
-                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt, true);
-                                    var geocode = geovalue.summary;
+                                    let geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt, true);
+                                    let geocode = geovalue.summary;
                                     geocode = geocode.replace('X', '');
                                     geocode = geocode.replace('Y', '');
                                     geocode = geocode.replace(' ', '');
 
-                                    var points = geocode.split(/[\s,]+/);
+                                    let points = geocode.split(/[\s,]+/);
 
                                     $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).trigger('change');
                                     $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).trigger('change');
@@ -2278,24 +2285,24 @@ $.widget( "heurist.editing_input", {
                         popele.find('input[id="bkm_edate"]').val(setup_val[6]);
                     }
 
-                    var btns = [
+                    let btns = [
                         {text:window.hWin.HR('Apply'),
                             click: function(){
 
-                                var title = popele.find('input[id="bkm_name"]').val();
-                                var long_points = popele.find('input[id="bkm_long"]').val();
-                                var lat_points = popele.find('input[id="bkm_lat"]').val();
-                                var sdate = popele.find('input[id="bkm_sdate"]').val();
-                                var edate = popele.find('input[id="bkm_edate"]').val();
+                                let title = popele.find('input[id="bkm_name"]').val();
+                                let long_points = popele.find('input[id="bkm_long"]').val();
+                                let lat_points = popele.find('input[id="bkm_lat"]').val();
+                                let sdate = popele.find('input[id="bkm_sdate"]').val();
+                                let edate = popele.find('input[id="bkm_edate"]').val();
 
-                                var geo_points = long_points + ',' + lat_points;
+                                let geo_points = long_points + ',' + lat_points;
 
                                 if(window.hWin.HEURIST4.util.isempty(title) || window.hWin.HEURIST4.util.isempty(geo_points)){
                                     window.hWin.HEURIST4.msg.showMsgFlash('A title and map points must be provided', 2500);
                                     return;
                                 }
 
-                                var points = geo_points.split(/[\s,]+/);
+                                let points = geo_points.split(/[\s,]+/);
 
                                 if(points.length != 4){
                                     window.hWin.HEURIST4.msg.showMsgFlash('You need 2 sets of geographical points', 2500);
@@ -2303,13 +2310,13 @@ $.widget( "heurist.editing_input", {
                                 }
 
                                 geo_points = "";
-                                for(var i = 0; i < points.length; i++){
-                                    var n = points[i];
+                                for(let i = 0; i < points.length; i++){
+                                    let n = points[i];
                                     geo_points = geo_points + ',' + parseFloat(n).toFixed(2);
                                 }
 
-                                var has_start_date = window.hWin.HEURIST4.util.isempty(sdate);
-                                var has_end_date = window.hWin.HEURIST4.util.isempty(edate);
+                                let has_start_date = window.hWin.HEURIST4.util.isempty(sdate);
+                                let has_end_date = window.hWin.HEURIST4.util.isempty(edate);
 
                                 if(has_start_date && has_end_date){
                                     $input.val(title + geo_points);
@@ -2356,19 +2363,19 @@ $.widget( "heurist.editing_input", {
                 if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){
                     
                         //custom/user heurist theme
-                        var $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
+                        let $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open color sheme editor'})
                             .addClass('smallbutton btn_add_term')
                             .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                             .appendTo( $inputdiv );
 
-                        var $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
+                        let $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
                             .addClass('smallbutton btn_add_term')
                             .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                             .appendTo($inputdiv )
                             .on( { click: function(){ $input.val('');that.onChange(); } });
                             
                         function __openThemeDialog(){
-                                var current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
+                                let current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
                                 if(!current_val) current_val = {};
                                 window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
                                     $input.val(JSON.stringify(new_value));
@@ -2381,7 +2388,7 @@ $.widget( "heurist.editing_input", {
                     
                 }else{
                 
-                    var $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
+                    let $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
                         //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                         .addClass('smallbutton btn_add_term')
                         .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
@@ -2389,22 +2396,22 @@ $.widget( "heurist.editing_input", {
                     
                     this._on( $btn_edit_switcher, { click: function(){
                         
-                            var mode_edit = 0;
-                            var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                            let mode_edit = 0;
+                            let current_val = window.hWin.HEURIST4.util.isJSON($input.val());
                             if(!current_val) current_val = {};
                         
                             if(that.options.rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER']){
                                 
                                 //get query from linked datasource
-                                var ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
-                                var vals = ele.editing_input('getValues');
-                                var dataset_record_id = vals[0];
+                                let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']);
+                                let vals = ele.editing_input('getValues');
+                                let dataset_record_id = vals[0];
                                 
                                 if(dataset_record_id>0){
                                     
                                     const DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
                                 
-                                    var server_request = {
+                                    let server_request = {
                                         q: 'ids:'+dataset_record_id,
                                         restapi: 1,
                                         columns: 
@@ -2431,7 +2438,7 @@ $.widget( "heurist.editing_input", {
                                                             return;                                                            
                                                         }else if (rectype==window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
                                                             
-                                                            var res = response['records'][0]['details'];
+                                                            let res = response['records'][0]['details'];
                                                             if(res[DT_QUERY_STRING]){
                                                                 //{12:{4407:"t:10"}}
                                                                 hquery = res[DT_QUERY_STRING][ Object.keys(res[DT_QUERY_STRING])[0] ];
@@ -2484,15 +2491,15 @@ $.widget( "heurist.editing_input", {
                             && this.options.dtID.indexOf('ReferenceURL') !== -1;
         if(freetext_url || semantic_uri){
 
-            $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
+            let $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
                 .addClass('smallicon ui-icon ui-icon-extlink')
                 .appendTo( $inputdiv );
 
             that._on($btn_extlink, { 
                 click: function(){
-                    var cur_val = $input.val();
+                    let cur_val = $input.val();
                     if(!window.hWin.HEURIST4.util.isempty(cur_val)){ // check for value
-                        var urls = cur_val.split(';');
+                        let urls = cur_val.split(';');
                         urls = urls.map((url, idx) => { 
                             if(!window.hWin.HEURIST4.util.isempty(url)){
                                 url = url.trim();
@@ -2508,12 +2515,10 @@ $.widget( "heurist.editing_input", {
         //for calculated field
         if(window.hWin.HAPI4.is_admin() && this.options.dtFields && this.options.dtFields['rst_CalcFunctionID']>0){            
             
-            var $btn_calcfield = $( '<span>', {title: 'Edit calculated field formula'})
+            let $btn_calcfield = $( '<span>', {title: 'Edit calculated field formula'})
             .addClass('smallicon ui-icon ui-icon-calculator-b btn_add_term')
             .css({'margin-top':'2px',cursor:'pointer'})
             .appendTo( $inputdiv );
-            
-            var that = this;
             
             this._on( $btn_calcfield,{ click: function(){ 
                 window.hWin.HEURIST4.dbs.editCalculatedField( this.options.dtFields['rst_CalcFunctionID'], 
@@ -2521,12 +2526,12 @@ $.widget( "heurist.editing_input", {
                         //refresh value
                         if(!(that.options.recID>0)) return;
 
-                        var request = request = {q: 'ids:'+that.options.recID, w: 'all', detail:[that.options.dtID] };
+                        const request = {q: 'ids:'+that.options.recID, w: 'all', detail:[that.options.dtID] };
 
                         window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
                             {
                                 if ( recordset!=null ){
-                                    var val = recordset.fld(recordset.getFirstRecord(), that.options.dtID);
+                                    let val = recordset.fld(recordset.getFirstRecord(), that.options.dtID);
                                     that.setValue(val);
                                     that.options.values = that.getValues();
                                 }
@@ -2541,7 +2546,7 @@ $.widget( "heurist.editing_input", {
         
         this.inputs.push($input);
         
-        var dwidth = this.f('rst_DisplayWidth');
+        const dwidth = this.f('rst_DisplayWidth');
         
         if(this.dtwidget!=null && $input[this.dtwidget]('instance')){
             $input[this.dtwidget]('setWidth', dwidth);
@@ -2554,7 +2559,7 @@ $.widget( "heurist.editing_input", {
                 || this.detailType=='integer' || this.detailType=='float') {  
 
               //if the size is greater than zero
-              var nw = (this.detailType=='integer' || this.detailType=='float')?40:120;
+              let nw = (this.detailType=='integer' || this.detailType=='float')?40:120;
               if (parseFloat( dwidth ) > 0){ 
                   nw = Math.round( 3+Number(dwidth) );
                     //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
@@ -2586,12 +2591,11 @@ $.widget( "heurist.editing_input", {
         //name="type:1[bd:138]"
         
         //clear button
-        //var $btn_clear = $( "<div>")
         if(this.options.showclear_button && this.options.dtID!='rec_URL')
         {
             if(!(this.detailType == 'enum' && this.inputs.length > 1 && this.enum_buttons == 'checkbox')){
 
-                var $btn_clear = $('<span>')
+                let $btn_clear = $('<span>')
                 .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear show-onhover")//   ui-icon
                 .attr('tabindex', '-1')
                 .attr('title', 'Clear entered value')
@@ -2635,8 +2639,8 @@ $.widget( "heurist.editing_input", {
                             return;
                         }
 
-                        var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
-console.log('remove ', input_id);                        
+                        let input_id = $(e.target).attr('data-input-id');  //parent(). need if button
+               
                         if(that.detailType=="resource" && that.configMode.entity=='records' 
                                 && that.f('rst_CreateChildIfRecPtr')==1){
                             that._clearChildRecordPointer( input_id );
@@ -2656,7 +2660,7 @@ console.log('remove ', input_id);
             && (this.detailType!="relmarker")
             && !this.enum_buttons && this.f('rst_MultiLang')!=1){
 
-            var $btn_sort = $('<span>')
+            let $btn_sort = $('<span>')
                 .addClass('ui-icon ui-icon-arrow-2-n-s btn_input_move smallicon')
                 .attr('title', 'Drag to re-arrange values')
                 .css('display', 'none');
@@ -2684,7 +2688,7 @@ console.log('remove ', input_id);
         if(!that.isReadonly()){
         
         //adds individual field visibility button
-        var btn_field_visibility = $( '<span>', {title: 'Show/hide value from public'})
+        let btn_field_visibility = $( '<span>', {title: 'Show/hide value from public'})
                     .addClass('field-visibility smallicon ui-icon ui-icon-eye-open')
                     .attr('data-input-id', $input.attr('id'))
                     .css({
@@ -2702,7 +2706,7 @@ console.log('remove ', input_id);
         btn_field_visibility.hide();
                     
                     
-        var chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
+                let chbox_field_visibility = $( '<div><span class="smallicon ui-icon ui-icon-check-off" style="font-size:1em"></span> '
                     +'Hide this value from public</div>', 
                     {title: 'Per record visibility'})
                     .addClass('field-visibility2 graytext')
@@ -2721,10 +2725,10 @@ console.log('remove ', input_id);
             'click': function(e){
                 if(that.is_disabled) return;
 
-                var chbox = $(e.target);
+                let chbox = $(e.target);
                 if(chbox.is('span')) chbox = chbox.parent();
                 
-                var btn = this.element.find('span.field-visibility[data-input-id="'+chbox.attr('data-input-id')+'"]');
+                let btn = this.element.find('span.field-visibility[data-input-id="'+chbox.attr('data-input-id')+'"]');
                 
                 btn.trigger('click');
             }});
@@ -2737,7 +2741,7 @@ console.log('remove ', input_id);
 
                 if(that.is_disabled || vis_mode == 'viewable' || vis_mode == 'hidden') return;
                 
-                var btn = $(e.target);
+                let btn = $(e.target);
                 
                 if(btn.attr('hide_field')=='1'){
                     btn.attr('hide_field',0);
@@ -2755,7 +2759,7 @@ console.log('remove ', input_id);
         }
 
         //move term error message to last 
-        var trm_err = $inputdiv.find('.term-error-message');
+        let trm_err = $inputdiv.find('.term-error-message');
         if(trm_err.length>0){
            trm_err.appendTo($inputdiv);
         }
@@ -2769,22 +2773,22 @@ console.log('remove ', input_id);
     //
     _setVisibilityStatus: function(input_id){
 
-        var vis_mode = this.f('rst_NonOwnerVisibility');
+        let vis_mode = this.f('rst_NonOwnerVisibility');
 
         if(this.options.showedit_button && this.detailType!="relmarker" &&
            (this.options.recordset && this.options.recordset.entityName == 'Records') && 
            (!window.hWin.HEURIST4.util.isempty(vis_mode)))
         {
         
-            var that = this;
-            var vis_btns = this.element.find('span.field-visibility'+
+            let that = this;
+            let vis_btns = this.element.find('span.field-visibility'+
                     (input_id?'[data-input-id="'+input_id+'"]':'')); 
             
             $.each(vis_btns, function(idx, btn){
 
                 btn = $(btn);
-                var chbox = that.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
-                var $input_div =  btn.parent('.input-div');
+                let chbox = that.element.find('div.field-visibility2[data-input-id="'+btn.attr('data-input-id')+'"]');
+                let $input_div =  btn.parent('.input-div');
 
                 let $first_icon = $input_div.find('.show-onhover:first');
                 if($first_icon.length == 1 && !$first_icon.hasClass('field-visibility')){ // make eye the first icon
@@ -2869,11 +2873,11 @@ console.log('remove ', input_id);
     //
     _clearChildRecordPointer: function( input_id ){
         
-            var that = this;
+            let that = this;
         
-            var popele = that.element.find('.child_delete_dlg');
+            let popele = that.element.find('.child_delete_dlg');
             if(popele.length==0){
-                var sdiv = '<div class="child_delete_dlg">'
+                let sdiv = '<div class="child_delete_dlg">'
                 +'<div style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</div>'
                 //Actions:<br>
                 +'<div><label><input type="radio" value="1" name="delete_mode" style="outline:none"/>'
@@ -2887,21 +2891,21 @@ console.log('remove ', input_id);
                 popele = $(sdiv).appendTo(that.element);
             }
             
-            var $dlg_pce = null;
+            let $dlg_pce = null;
             
-            var btns = [
+            let btns = [
                     {text:window.hWin.HR('Proceed'),
                           click: function() { 
                           
-                          var mode = popele.find('input[name="delete_mode"]:checked').val();     
+                          let mode = popele.find('input[name="delete_mode"]:checked').val();     
                           if(mode==2){
                               //remove child record
-                              var child_rec_to_delete = that.newvalues[input_id];
+                              let child_rec_to_delete = that.newvalues[input_id];
                               window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, 
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         
-                                        var delcnt = response.data.deleted.length, msg = '';
+                                        let delcnt = response.data.deleted.length, msg = '';
                                         if(delcnt>1){
                                             msg = delcnt + ' records have been removed.';
                                             if(response.data.bkmk_count>0 || response.data.rels_count>0){
@@ -2944,20 +2948,20 @@ console.log('remove ', input_id);
     //
     _findAndAssignTitle: function(ele, value, selector_function){
         
-        var that = this;
+        let that = this;
         
         if(this.dtwidget!=null && ele[this.dtwidget]('instance')){
             res = ele[this.dtwidget]('findAndAssignTitle', value);
                     
         }else if(this.configMode.entity==='records'){     //RECORD
         
-                var isChildRecord = that.f('rst_CreateChildIfRecPtr');
+                let isChildRecord = that.f('rst_CreateChildIfRecPtr');
         
                 //assign initial display value
                 if(Number(value)>0){
-                    var sTitle = null;
+                    let sTitle = null;
                     if(that.options.recordset){
-                        var relations = that.options.recordset.getRelations();
+                        let relations = that.options.recordset.getRelations();
                         if(relations && relations.headers && relations.headers[value]){
                             
                             sTitle = relations.headers[value][0];
@@ -2982,13 +2986,13 @@ console.log('remove ', input_id);
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     ele.empty();
 
-                                    var recordset = new hRecordSet(response.data);
+                                    let recordset = new HRecordSet(response.data);
                                     if(recordset.length()>0){
-                                        var record = recordset.getFirstRecord();
-                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        let record = recordset.getFirstRecord();
+                                        let rec_Title = recordset.fld(record,'rec_Title');
                                         if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
                                         
-                                        var rec_RecType = recordset.fld(record,'rec_RecTypeID');
+                                        let rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                         window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                                 {rec_ID: value, 
                                                  rec_Title: rec_Title, 
@@ -3049,9 +3053,9 @@ console.log('remove ', input_id);
                 window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value,
                    function( display_value ){
                        ele.empty();
-                       var hasValues = false;
+                       let hasValues = false;
                        if(display_value && display_value.length>0){
-                           for(var i=0; i<display_value.length; i++){
+                           for(let i=0; i<display_value.length; i++){
                                if(display_value[i]){
                                     $('<div class="link-div">'+display_value[i]+'</div>').appendTo(ele);     
                                     hasValues = true;
@@ -3068,8 +3072,6 @@ console.log('remove ', input_id);
                            ele.parent().find('.sel_link2').show();
                        }
                        
-                        ///var rec_Title  = display_value.join(',');           
-                        //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
                    });
             }
         }
@@ -3081,14 +3083,14 @@ console.log('remove ', input_id);
     //
     _onTermChange: function( orig, data ){
         
-        var $input = (orig.target)? $(orig.target): orig;
+        let $input = (orig.target)? $(orig.target): orig;
                 
                 if(! $input.attr('radiogroup')){
                 
                     if($input.hSelect("instance")!=undefined){
                         
-                        var opt = $input.find('option[value="'+$input.val()+'"]');
-                        var parentTerms = opt.attr('parents');
+                        let opt = $input.find('option[value="'+$input.val()+'"]');
+                        let parentTerms = opt.attr('parents');
                         if(parentTerms){
                             $input.hSelect("widget").find('.ui-selectmenu-text').html( parentTerms+'.'+opt.text() );    
                         }    
@@ -3100,8 +3102,8 @@ console.log('remove ', input_id);
                         });
                         
                         //assign for selected term value in format: parent.child 
-                        var opt = $input.find( "option:selected" );
-                        var parentTerms = opt.attr('parents');
+                        let opt = $input.find( "option:selected" );
+                        let parentTerms = opt.attr('parents');
                         if(parentTerms){
                              opt.text(parentTerms+'.'+opt.attr('term-orig'));
                         }
@@ -3119,9 +3121,9 @@ console.log('remove ', input_id);
     //
     _openManageTerms: function( vocab_id ){
         
-        var that = this;
+        let that = this;
         
-        var rg_options = {
+        let rg_options = {
             height:800, width:1300,
             selection_on_init: vocab_id,
             innerTitle: false,
@@ -3129,7 +3131,7 @@ console.log('remove ', input_id);
                 +(that.options.dtID>0?('<span style="margin-left:260px">Field: <b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b></span>'):'')
                 +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(vocab_id,'trm_Label')+'</b></span></div>'),
             onInitFinished: function(){
-                var that2 = this;
+                let that2 = this;
                 setTimeout(function(){
                     that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
                 },500);
@@ -3147,7 +3149,7 @@ console.log('remove ', input_id);
     //
     _recreateSelector: function($input, value){
 
-        var that = this;
+        let that = this;
 
         if(value===true){
             //keep current
@@ -3156,7 +3158,7 @@ console.log('remove ', input_id);
 
         if($input) $input.empty();
 
-        var allTerms = this.f('rst_FieldConfig');
+        let allTerms = this.f('rst_FieldConfig');
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)){
 
@@ -3169,13 +3171,11 @@ console.log('remove ', input_id);
                     //this.configMode.filter_group
                     //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
-                    var selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
+                    let selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
                     
                     //add add/browse buttons
-                    if(this.configMode.button_browse){
-
-                    }
+                    //if(this.configMode.button_browse){}
                 
                 }else{
                     //type: select, radio, checkbox
@@ -3197,7 +3197,7 @@ console.log('remove ', input_id);
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(allTerms)){
                     if(window.hWin.HEURIST4.util.isnull(allTerms[0]['key'])){
                         //plain array
-                        var idx, options = [];
+                        let idx, options = [];
                         for (idx=0; idx<allTerms.length; idx++){
                             options.push({key:allTerms[idx], title:allTerms[idx]});
                         }
@@ -3208,7 +3208,7 @@ console.log('remove ', input_id);
                     
                     //array of key:title objects
                     //if($input==null) $input = $('<select>').uniqueId();
-                    var selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
+                    let selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
 
                     // move menuWidget to current dialog/document 
@@ -3238,7 +3238,7 @@ console.log('remove ', input_id);
             
             //show error message on init -----------                   
             //ART0921 - todo in browseTerms
-            var err_ele = $input.parent().find('.term-error-message');
+            let err_ele = $input.parent().find('.term-error-message');
             if(err_ele.length>0){
                 err_ele.remove();
             }
@@ -3248,20 +3248,20 @@ console.log('remove ', input_id);
                 window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
                 
                 this.error_message.css({'font-weight': 'bold', color: 'red'});    
-                var sMsg = null;
-                var name = $Db.trm(value,'trm_Label');
+                let sMsg = null;
+                let name = $Db.trm(value,'trm_Label');
                 if(window.hWin.HEURIST4.util.isempty(name)){
                     //missed
                     sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';
                 }else{
                     //exists however in different vocabulary
                     //get name for this vocabulary
-                    var vocName = $Db.trm(allTerms,'trm_Label');
+                    let vocName = $Db.trm(allTerms,'trm_Label');
                     //get name for term vocabulary
-                    var vocId2 = $Db.getTermVocab(value);
-                    var vocName2 = $Db.trm(vocId2, 'trm_Label');
+                    let vocId2 = $Db.getTermVocab(value);
+                    let vocName2 = $Db.trm(vocId2, 'trm_Label');
                     //check that the same name vocabulary exists in this vocabualry
-                    var code2 = $Db.getTermByLabel(allTerms, name);
+                    let code2 = $Db.getTermByLabel(allTerms, name);
                     
                     sMsg = '';
                     if(code2>0){
@@ -3296,7 +3296,7 @@ console.log('remove ', input_id);
                         }
                     }
                     
-                    var opt = window.hWin.HEURIST4.ui.addoption($input[0], value, '!!! '+name); 
+                    let opt = window.hWin.HEURIST4.ui.addoption($input[0], value, '!!! '+name); 
                     $(opt).attr('ui-state-error',1);
                     $input.val(value);
                     $input.hSelect('refresh');
@@ -3336,11 +3336,11 @@ console.log('remove ', input_id);
                         //
                         this._on(err_ele.find('.term-sel'),{click:function(e){
                             
-                            var trm_id = $(e.target).attr('data-term');
-                            var trm_id_re = $(e.target).attr('data-term-replace');
-                            var fieldName = this.f('rst_DisplayName');
+                            let trm_id = $(e.target).attr('data-term');
+                            let trm_id_re = $(e.target).attr('data-term-replace');
+                            let fieldName = this.f('rst_DisplayName');
                             
-                            var request = {a:'replace', rtyID:this.options.rectypeID,
+                            let request = {a:'replace', rtyID:this.options.rectypeID,
                                 dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
                                 
                             window.hWin.HEURIST4.msg.showMsgDlg(
@@ -3379,7 +3379,7 @@ console.log('remove ', input_id);
                     
                         this._on(err_ele.find('.term-fix'),{click:function(e){
                             //see manageDefTerms.js
-                            var trm_ID = $(e.target).attr('data-term');
+                            let trm_ID = $(e.target).attr('data-term');
                             correctionOfInvalidTerm(
                                 trm_ID,
                                 $(e.target).attr('data-vocab'),
@@ -3455,10 +3455,10 @@ console.log('remove ', input_id);
     //
     _clearValue: function(input_id, value, display_value){
 
-        var that = this;
+        let that = this;
         $.each(this.inputs, function(idx, item){
 
-            var $input = $(item);
+            let $input = $(item);
             if($input.attr('id')==input_id){
                 if(that.newvalues[input_id]){
                     that.newvalues[input_id] = '';
@@ -3513,21 +3513,21 @@ console.log('remove ', input_id);
         
         if(!Array.isArray(values)) values = [values];
 
-        var isReadOnly = this.isReadonly();
+        let isReadOnly = this.isReadonly();
         
-        var i;
+        let i;
         for (i=0; i<values.length; i++){
             if(isReadOnly && !(this.detailType=='relmarker' || this.detailType=='geo')){
                 this._addReadOnlyContent(values[i]);
             }else{
-                var inpt_id = this._addInput(values[i]);
+                let inpt_id = this._addInput(values[i]);
             }
         }
         if (isReadOnly || (make_as_nochanged==true)) {
             this.options.values = values;
         }
 
-        var repeatable = (Number(this.f('rst_MaxValues')) != 1);
+        let repeatable = (Number(this.f('rst_MaxValues')) != 1);
         if(values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }else{
@@ -3557,8 +3557,8 @@ console.log('remove ', input_id);
 
         if(this.detailType=="relmarker") return null;
         
-        var res = null;
-        var $input = $(input_id);
+        let res = null;
+        let $input = $(input_id);
         
         if(this.dtwidget!=null && $input[this.dtwidget]('instance')){
             res = $input[this.dtwidget]('getValue');
@@ -3614,9 +3614,9 @@ console.log('remove ', input_id);
         this.btn_cancel_reorder.hide();
         
         if(this.isReadonly()) return;
-        var idx, ele_after = this.firstdiv; //this.error_message;
+        let idx, ele_after = this.firstdiv; //this.error_message;
         for (idx in this.inputs) {
-            var ele = this._getInputDiv(inputs[idx]);
+            let ele = this._getInputDiv(inputs[idx]);
             ele.insertAfter(ele_after);
             ele_after = ele;
         }    
@@ -3627,33 +3627,31 @@ console.log('remove ', input_id);
     //
     getVisibilities: function(){
         
-        var ress2 = [];
-        var visibility_mode = this.f('rst_NonOwnerVisibility');
+        let ress2 = [];
+        let visibility_mode = this.f('rst_NonOwnerVisibility');
         if(visibility_mode=='public' || visibility_mode=='pending')
         {
-            var idx;
-            var ress = {};
+            let ress = {};
             
-            
-            for (idx in this.inputs) {
-                var $input = this.inputs[idx];
+            for (let idx in this.inputs) {
+                let $input = this.inputs[idx];
                 
-                var val = this._getValue($input);
+                let val = this._getValue($input);
                 if(!window.hWin.HEURIST4.util.isempty( val )){                 
                 
                     let res = 0;
                     
-                    var ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                    let ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                     res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
                                         
-                    var ele = this._getInputDiv($input);
-                    var k = ele.index();
+                    ele = this._getInputDiv($input);
+                    let k = ele.index();
                     ress[k] = res;
                 }
             }
             
             ress2 = [];
-            for(idx in ress){
+            for(let idx in ress){
                 ress2.push(ress[idx]);
             }
         }
@@ -3666,17 +3664,17 @@ console.log('remove ', input_id);
     //
     setVisibilities: function(vals){
         
-        var vis_mode = this.f('rst_NonOwnerVisibility');
+        let vis_mode = this.f('rst_NonOwnerVisibility');
         
         if(this.options.showedit_button && this.detailType!="relmarker" && 
             !window.hWin.HEURIST4.util.isempty(vis_mode))
         {
-            var idx, k=0;
+            let idx, k=0;
             
             for (idx in this.inputs) {
 
-                var $input = this.inputs[idx];
-                var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                let $input = this.inputs[idx];
+                let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
                 
                 if(vals && k<vals.length && vals[k]==1){
                     btn.attr('hide_field',1);
@@ -3718,19 +3716,19 @@ console.log('remove ', input_id);
         if(this.isReadonly()){
             return this.options.values;
         }else{
-            var idx;
-            var ress = {};
-            var ress2 = [];
+            let idx;
+            let ress = {};
+            let ress2 = [];
             
             for (idx in this.inputs) {
-                var $input = this.inputs[idx];
+                let $input = this.inputs[idx];
                 
-                var res = this._getValue($input);
+                let res = this._getValue($input);
 
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
 
                     if(this.options.is_between_mode){
-                        var res2;
+                        let res2;
                         if(this.detailType=='date'){
                             res2 = this.newvalues[$input.attr('id')+'-2'];    
                         }else{
@@ -3748,8 +3746,8 @@ console.log('remove ', input_id);
                     }
                  
                     //to keep order                   
-                    var ele = this._getInputDiv($input);
-                    var k = ele.index();
+                    let ele = this._getInputDiv($input);
+                    let k = ele.index();
                     
                     ress[k] = res;
                     //ress2.push(res);
@@ -3799,19 +3797,19 @@ console.log('remove ', input_id);
         //return;
         if(!this.isReadonly()){
             
-            var check_ind_visibility = this.options.showedit_button 
+            let check_ind_visibility = this.options.showedit_button 
                     && this.detailType!="relmarker"
                     && !window.hWin.HEURIST4.util.isempty(this.f('rst_NonOwnerVisibility'));
             
-            var idx;
+            let idx;
             for (idx in this.inputs) {
                 if(!this.isFileForRecord) { 
-                    var input_id = this.inputs[idx];
-                    var $input = $(input_id);
+                    let input_id = this.inputs[idx];
+                    let $input = $(input_id);
                     window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
                     
                     if(check_ind_visibility){
-                        var btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                        let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
 
                         this._setHiddenField($input, (is_disabled && btn.attr('hide_field')==1));
                     }
@@ -3844,9 +3842,9 @@ console.log('remove ', input_id);
                     return true;
                 }
                 
-                var idx;
+                let idx;
                 for (idx in this.inputs) {
-                    var res = this._getValue(this.inputs[idx]);
+                    let res = this._getValue(this.inputs[idx]);
                     //both original and current values are not empty
                     if (!(window.hWin.HEURIST4.util.isempty(this.options.values[idx]) && window.hWin.HEURIST4.util.isempty(res))){
                         
@@ -3873,7 +3871,7 @@ console.log('remove ', input_id);
         
         this.options.values = [];
                 
-        var idx;
+        let idx;
         for (idx in this.inputs) {
             this.options.values.push(this._getValue(this.inputs[idx]));
         }
@@ -3905,10 +3903,10 @@ console.log('remove ', input_id);
 
         if (this.f('rst_Display')=='hidden' || this.isReadonly()) return true;
         
-        var req_type = this.f('rst_RequirementType');
-        var max_length = this.f('dty_Size');
-        var data_type = this.f('dty_Type');
-        var errorMessage = '';
+        let req_type = this.f('rst_RequirementType');
+        let max_length = this.f('dty_Size');
+        let data_type = this.f('dty_Type');
+        let errorMessage = '';
 
         if(req_type=='required'){
             
@@ -3919,7 +3917,7 @@ console.log('remove ', input_id);
                         errorMessage = 'Define a relationship. It is required.';
                     }
             }else{
-                var ress = this.getValues();
+                let ress = this.getValues();
 
                 if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || 
                     ($.isPlainObject(ress[0]) &&  $.isEmptyObject(ress[0])) || 
@@ -3946,9 +3944,8 @@ console.log('remove ', input_id);
         if(max_length>0 &&
             (data_type=='freetext' || data_type=='url' || data_type=='blocktext')){
 
-            var idx;
-            for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
+            for (let idx in this.inputs) {
+                let res = this._getValue(this.inputs[idx]);
                 if(!window.hWin.HEURIST4.util.isempty( res ) && res.length>max_length){
                     //error highlight
                     $(this.inputs[idx]).addClass( "ui-state-error" );
@@ -3957,28 +3954,29 @@ console.log('remove ', input_id);
                 }
             }
         }
-        if(data_type=='integer' || this.detailType=='year'){
+        /*if(data_type=='integer' || this.detailType=='year'){
             //@todo validate 
             
         }else if(data_type=='float'){
+            //@todo validate 
             
+        }else */
+        if(data_type=='resource'){
             
-        }else if(data_type=='resource'){
+            const ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
             
-            var ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
-            
-            var idx, snames = [];
+            let snames = [];
             if(ptrset.length>0){
-                for (idx in ptrset) {
+                for (let idx in ptrset) {
                     snames.push($Db.rty(ptrset[idx],'rty_Name'));
                 }
             }
             snames = snames.join(', ');
             
-            for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
+            for (let idx in this.inputs) {
+                let res = this._getValue(this.inputs[idx]);
                 //check record type
-                var rty_ID = $(this.inputs[idx]).find('.related_record_title').attr('data-rectypeid')
+                let rty_ID = $(this.inputs[idx]).find('.related_record_title').attr('data-rectypeid')
                 
                 if(rty_ID>0  && ptrset.length>0 && 
                     window.hWin.HEURIST4.util.findArrayIndex(rty_ID, ptrset)<0)
@@ -4020,14 +4018,14 @@ console.log('remove ', input_id);
     //
     _addReadOnlyContent: function(value, idx) {
 
-        var disp_value ='';
+        let disp_value ='';
         
 
-        var $inputdiv = $( "<div>" ).addClass('input-div')
+        let $inputdiv = $( "<div>" ).addClass('input-div')
                 .css({'font-weight':'bold','padding-top':'4px'})
                 .insertBefore(this.input_prompt);
 
-        var dwidth = this.f('rst_DisplayWidth');
+        let dwidth = this.f('rst_DisplayWidth');
         if (parseFloat( dwidth ) > 0 
             &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {
              $inputdiv.css('max-width', Math.round(2 + Math.min(80, Number(dwidth))) + "ex");
@@ -4064,7 +4062,7 @@ console.log('remove ', input_id);
 
         } else if(this.detailType=="url"){
 
-            var def_value = this.f('rst_DefaultValue');
+            let def_value = this.f('rst_DefaultValue');
             if(window.hWin.HEURIST4.util.isempty(value)) value = def_value;
             
             if(!window.hWin.HEURIST4.util.isempty(value) &&
@@ -4111,24 +4109,24 @@ console.log('remove ', input_id);
       
         $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
         
-        var that = this;
+        let that = this;
 
         function __onDateChange(){
 
-            var value = $input.val();
+            let value = $input.val();
             
             that.newvalues[$input.attr('id')] = value; 
             
             if(that.options.dtID>0){
                 
-                var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                let isTemporalValue = value && value.search(/\|VER/) != -1; 
                 if(isTemporalValue) {
                     window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
 
-                    var temporal = new Temporal(value);
-                    var content = '<p>'+temporal.toReadableExt('<br>')+'</p>';
+                    let temporal = new Temporal(value);
+                    let content = '<p>'+temporal.toReadableExt('<br>')+'</p>';
                     
-                    var $tooltip = $input.tooltip({
+                    let $tooltip = $input.tooltip({
                         items: "input.ui-widget-content",
                         position: { // Post it to the right of $input
                             my: "left+20 center",
@@ -4170,7 +4168,7 @@ console.log('remove ', input_id);
             }
 
             if(typeof date == 'string'){
-                var date_parts = date.split('-');
+                let date_parts = date.split('-');
                 date = {};
                 date['year'] = date_parts[0];
 
@@ -4182,50 +4180,55 @@ console.log('remove ', input_id);
                 }
             }
 
-            var new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
+            let new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
             if(!new_cal){
                 return date;
             }
 
-            var julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
+            let julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
             return to_calendar.fromJD(julian_date);
         }
 
-        var defDate = $input.val();
-        var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
+        let defDate = $input.val();
+        let $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
                         .val(defDate).insertAfter( $input );
 
         if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
-            var calendar = $.calendars.instance('gregorian');
-            var g_calendar = $.calendars.instance('gregorian');
-            var temporal = null;
+            let temporal = null;
 
             try {
                 temporal = Temporal.parse($input.val());
             } catch(e) {
                 temporal = null;
             }
-            var cal_name = temporal ? temporal.getField('CLD') : null;
-            var tDate = temporal ? temporal.getTDate("DAT") : null;
+            let cal_name = temporal ? temporal.getField('CLD') : null;
+            let tDate = temporal ? temporal.getTDate("DAT") : null;
 
-            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate && cal_name && cal_name.toLowerCase() !== 'gregorian'){
+            if(cal_name){
+                cal_name = cal_name.toLowerCase();
+            }else{
+                cal_name = 'gregorian';
+            }
 
-                // change calendar to current type
-                calendar = $.calendars.instance(cal_name);                
+            // change calendar to current type
+            let calendar = $.calendars.instance(cal_name);
+            let g_calendar = $.calendars.instance('gregorian');
+
+            if(!window.hWin.HEURIST4.util.isempty($input.val()) && tDate){
 
                 if(tDate && tDate.getYear()){
-                    var hasMonth = tDate.getMonth();
-                    var hasDay = tDate.getDay();
+                    let hasMonth = tDate.getMonth();
+                    let hasDay = tDate.getDay();
 
-                    var month = hasMonth ? tDate.getMonth() : 1;
-                    var day = hasDay ? tDate.getDay() : 1;
+                    let month = hasMonth ? tDate.getMonth() : 1;
+                    let day = hasDay ? tDate.getDay() : 1;
 
                     defDate = translateDate({'year': tDate.getYear(), 'month': month, 'day': day}, g_calendar, calendar);
                 }
             }else if(tDate){
                 // remove padding zeroes from year
-                var year = Number(tDate.getYear());
+                let year = Number(tDate.getYear());
                 defDate = tDate.toString('yyyy-MM-dd');
                 defDate = defDate.replace(tDate.getYear(), year);
             }
@@ -4347,10 +4350,10 @@ console.log('remove ', input_id);
                         let g_value = translateDate({'year': val_parts[0], 'month': val_parts[1], 'day': val_parts[2]}, cur_cal, g_calendar);
                         g_value = g_calendar.formatDate('yyyy-mm-dd', g_value);
 
-                        if(g_value != ''){
+                        if(g_value != ''){//translated value
                             try {
 
-                                var new_tdate = TDate.parse(g_value);
+                                let new_tdate = TDate.parse(g_value);
 
                                 new_temporal.setType('s');
                                 new_temporal.setTDate('DAT', new_tdate);
@@ -4368,7 +4371,7 @@ console.log('remove ', input_id);
                 },
                 onClose: function(){
                     let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
-                    if(cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
+                    if(cur_cal && cur_cal.local.name.toLowerCase() === 'japanese' && current_era != value_era){ // Reset calendarPicker options
 
                         let date = true;
                         try{
@@ -4384,7 +4387,7 @@ console.log('remove ', input_id);
                 showTrigger: '<span class="smallicon ui-icon ui-icon-calendar" style="display:inline-block" data-picker="'+$input.attr('id')+'" title="Show calendar" />'}
             );
 
-            if(cal_name && cal_name.toLowerCase() === 'japanese'){
+            if(cal_name === 'japanese'){
                 value_era = calendar.getEraFromGregorian(...$tinpt.val().split('-'));
                 setMinMaxDatesJPN(calendar, value_era);
             }
@@ -4396,16 +4399,13 @@ console.log('remove ', input_id);
             });
         }else{ // we use jquery datepicker for general use
 
-                /*var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
-                        .val($input.val()).insertAfter( $input );*/
-
-                var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
+                let $btn_datepicker = $( '<span>', {title: 'Show calendar'})
                     .attr('data-picker',$input.attr('id'))
                     .addClass('smallicon ui-icon ui-icon-calendar')
                     .insertAfter( $tinpt );
                     
                 
-                var $datepicker = $tinpt.datepicker({
+                let $datepicker = $tinpt.datepicker({
                     /*showOn: "button",
                     buttonImage: "ui-icon-calendar",
                     buttonImageOnly: true,*/
@@ -4416,9 +4416,9 @@ console.log('remove ', input_id);
                     beforeShow: function(){
                         
                         if(that.is_disabled) return false;
-                        var cv = $input.val();
+                        let cv = $input.val();
                         
-                        var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
+                        let prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
                         if(cv=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
                             //$datepicker.datepicker( "setDate", prev_dp_value );    
                             $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
@@ -4444,7 +4444,7 @@ console.log('remove ', input_id);
                 this._on( $input, {
                     keyup: function(event){
                         if(!isNaN(String.fromCharCode(event.which))){
-                            var cv = $input.val();
+                            let cv = $input.val();
                             if(cv!='' && cv.indexOf('-')<0){
                                 $datepicker.datepicker( "setDate", cv+'-01-01');   
                                 $input.val(cv);
@@ -4452,9 +4452,9 @@ console.log('remove ', input_id);
                         }
                     },
                     keypress: function (e) {
-                        var code = e.charCode || e.keyCode;
-                        var charValue = String.fromCharCode(code);
-                        var valid = false;
+                        let code = e.charCode || e.keyCode;
+                        let charValue = String.fromCharCode(code);
+                        let valid = false;
 
                         if(charValue=='-'){
                             valid = true;
@@ -4507,7 +4507,7 @@ console.log('remove ', input_id);
                 
                 if(that.is_disabled) return;
 
-                var url = window.hWin.HAPI4.baseURL 
+                let url = window.hWin.HAPI4.baseURL 
                     + 'hclient/widgets/editing/editTemporalObject.html?'
                     + encodeURIComponent(that.newvalues[$input.attr('id')]
                                 ?that.newvalues[$input.attr('id')]:$input.val());
@@ -4525,9 +4525,9 @@ console.log('remove ', input_id);
 
                         if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
-                            var new_temporal = null;
-                            var new_cal = null;
-                            var new_date = null;
+                            let new_temporal = null;
+                            let new_cal = null;
+                            let new_date = null;
                             try {
                                 new_temporal = Temporal.parse(str);
                                 new_cal = new_temporal.getField('CLD');
@@ -4542,17 +4542,19 @@ console.log('remove ', input_id);
                             if(new_cal && new_date && typeof $tinpt !== 'undefined'){
 
                                 if(new_date.getYear()){
-                                    var hasMonth = new_date.getMonth();
-                                    var hasDay = new_date.getDay();
+                                    let hasMonth = new_date.getMonth();
+                                    let hasDay = new_date.getDay();
 
-                                    var month = hasMonth ? new_date.getMonth() : 1;
-                                    var day = hasDay ? new_date.getDay() : 1;
+                                    let month = hasMonth ? new_date.getMonth() : 1;
+                                    let day = hasDay ? new_date.getDay() : 1;
+
+                                    let g_calendar = $.calendars.instance('gregorian');
 
                                     new_date = translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
                                     new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
                                 }
 
-                                var cur_cal = $tinpt.calendarsPicker('option', 'calendar');
+                                let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
                                 if(cur_cal.local.name.toLowerCase() != new_cal.local.name.toLowerCase()){
                                     $tinpt.calendarsPicker('option', 'calendar', new_cal);
                                 }
@@ -4586,10 +4588,10 @@ console.log('remove ', input_id);
            if(this.options.is_between_mode){
                 this.addSecondInput();           
            }else{
-               var that = this;
+               let that = this;
                this.element.find('.span-dash').remove();
                $.each(this.inputs, function(idx, item){
-                    var id = $(item).attr('id')+'-2';
+                    let id = $(item).attr('id')+'-2';
                     that.element.find('#'+id).remove();
                     if(that.detailType=='date') {
                         that.element.find('input[data-picker="'+id+'"]').remove();
@@ -4605,25 +4607,24 @@ console.log('remove ', input_id);
     //
     addSecondInput: function(input_id){
 
-        var that = this;
+        let that = this;
         $.each(this.inputs, function(idx, item){
 
-            var $input = $(item);
+            let $input = $(item);
             if(input_id==null || $input.attr('id')==input_id){
                 
-                var $inputdiv = that._getInputDiv($input);
+                let $inputdiv = that._getInputDiv($input);
                 
-                var edash = $('<span class="span-dash">&nbsp;-&nbsp;</span>')
+                let edash = $('<span class="span-dash">&nbsp;-&nbsp;</span>')
                 //duplicate input for between mode
                 if(that.detailType=='date') {
                     
                     
-                    //var dpicker = that.element.find('input[data-picker="'+$input.attr('id')+'"]');
-                    var dpicker_btn = that.element.find('span[data-picker="'+$input.attr('id')+'"]');
+                    let dpicker_btn = that.element.find('span[data-picker="'+$input.attr('id')+'"]');
                     
                     edash.insertAfter(dpicker_btn);
                     
-                    var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
+                    let inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
                             .on('change',function(){
                                 that.onChange();
@@ -4634,13 +4635,6 @@ console.log('remove ', input_id);
                             
                     that._createDateInput(inpt2, $inputdiv);
             
-                    /*
-                    var opts = window.hWin.HEURIST4.util.cloneJSON(that.options);
-                    opts.showclear_button = false;
-                    opts.is_between_mode = false;
-                    opts.suppress_repeat = false;
-                    $('<div>').attr('id',$input.attr('id')+'-2').editing_input(that.options).insertAfter(edash);    
-                    */
                 }else{
                     edash.insertAfter($input);
                     
@@ -4662,24 +4656,24 @@ console.log('remove ', input_id);
 	//
 	_recreateEnumField: function(vocab_id){
 
-        var that = this;
+        let that = this;
 
         this.child_terms = $Db.trm_TreeData(vocab_id, 'set'); //refresh
-        var asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
+        let asButtons = this.options.recordset && this.options.recordset.entityName=='Records' && this.f('rst_TermsAsButtons') == 1;
 
         if(asButtons && this.child_terms.length <= 20){ // recreate buttons/checkboxes
 
             this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
-            var dtb_res = this._createEnumButtons(true);
+            let dtb_res = this._createEnumButtons(true);
 
             if(dtb_res){
 
                 // Change from select to input text
                 $.each(this.inputs, function(idx, input){
 
-                    var $input = $(input);
-                    var value = $input.val();
-                    var inpt_id = $input.attr('id');
+                    let $input = $(input);
+                    let value = $input.val();
+                    let inpt_id = $input.attr('id');
 
                     if($input.is('select')){
 
@@ -4687,7 +4681,7 @@ console.log('remove ', input_id);
                             $input.hSelect('destroy');
                         }
                         that._off($input, 'change');
-                        var $inputdiv = $input.parent();
+                        let $inputdiv = $input.parent();
                         $input.remove();
 
                         $input = $('<input type="text" class="text ui-widget-content ui-corner-all">')
@@ -4718,17 +4712,19 @@ console.log('remove ', input_id);
 
             $.each(this.inputs, function(idx, input){ 
 
-                var $input = $(input);
-                var value = $input.val();
+                let $input = $(input);
+                let value = $input.val();
 
                 if($input.is('input')){
 
                     that._off($input, 'change');
-                    var $inputdiv = $input.parent();
+                    let $inputdiv = $input.parent();
                     if(idx == 0){
                         $inputdiv.find('label.enum_input, br').remove();
                         $inputdiv.find('.smallicon').css({'top': '', 'margin-top': '2px'});
                     }
+
+                    let inpt_id = $input.attr('id');
                     $input.remove();
 
                     $input = $('<select>')
@@ -4785,7 +4781,7 @@ console.log('remove ', input_id);
         
         if(this.child_terms.length>0){
 
-                var trm_img_req = {
+                let trm_img_req = {
                     'a': 'search',
                     'entity': 'defTerms',
                     'details': 'list',
@@ -4794,11 +4790,11 @@ console.log('remove ', input_id);
                     'request_id': window.hWin.HEURIST4.util.random()
                 };
 
-                var that = this;
+                let that = this;
 
                 window.hWin.HAPI4.EntityMgr.doRequest(trm_img_req, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var recset = new hRecordSet(response.data);
+                        let recset = new HRecordSet(response.data);
                         that._enumsHasImages = (recset.length() > 0);
                         if(that._enumsHasImages){
                             that.input_cell.find('.ui-icon-image').show();
@@ -4824,9 +4820,9 @@ console.log('remove ', input_id);
     //
     _createEnumButtons: function(isRefresh, $inputdiv, values){
 
-        var that = this;
+        let that = this;
         
-        var terms_list = this.child_terms;
+        let terms_list = this.child_terms;
 
         if($inputdiv == null){
             $inputdiv = $(this.inputs[0]).parent();
@@ -4836,7 +4832,7 @@ console.log('remove ', input_id);
             values = [];
 
             $.each(that.inputs, function(idx, ele){
-                var $ele = $(ele);
+                let $ele = $(ele);
 
                 values.push($ele.val());
             });
@@ -4849,7 +4845,7 @@ console.log('remove ', input_id);
 
         if(isRefresh){
 
-            var $eles = $(this.inputs[0]).parent().find('label.enum_input, br');
+            let $eles = $(this.inputs[0]).parent().find('label.enum_input, br');
 
             if($eles.length > 0){
                 $eles.remove();
@@ -4857,26 +4853,22 @@ console.log('remove ', input_id);
         }
 
         // input div's width
-        var f_width = parseInt(this.f('rst_DisplayWidth'));
+        let f_width = parseInt(this.f('rst_DisplayWidth'));
         f_width = (window.hWin.HEURIST4.util.isempty(f_width) || f_width < 100) ? 110 : f_width + 10; // +10 for extra room
-
-		//var labelWidth = 25; // label+input width
-        //var taken_width = this.input_cell.parent().find('span.editint-inout-repeat-button').width() + this.input_cell.parent().find('div.header').width() + 20;
-        //var row_limit = Math.floor(f_width / labelWidth);
 
         $inputdiv.css({'max-width': (f_width + 20) + 'ex', 'min-width': f_width + 'ex'});
 
-        for(var i = 0; i < terms_list.length; i++){
+        for(let i = 0; i < terms_list.length; i++){
 
-            var trm_label = $Db.trm(terms_list[i], 'trm_Label');
-            var trm_id = terms_list[i];
-            var isChecked = (values && values.includes(trm_id)) ? true : false;
+            let trm_label = $Db.trm(terms_list[i], 'trm_Label');
+            let trm_id = terms_list[i];
+            let isChecked = (values && values.includes(trm_id)) ? true : false;
 
-            var $btn = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
+            let $btn = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
                 .on('change',function(event){ 
 
-                    var isNewVal = false;
-                    var changed_val = $(event.target).val();
+                    let isNewVal = false;
+                    let changed_val = $(event.target).val();
 
                     if($(event.target).is(':checked')){
                         isNewVal = true;
@@ -4898,7 +4890,7 @@ console.log('remove ', input_id);
                             }else{
                                 $.each(that.inputs, function(idx, ele){
 
-                                    var $ele = $(ele);
+                                    let $ele = $(ele);
 
                                     if($ele.val() == changed_val){
 
@@ -4909,8 +4901,8 @@ console.log('remove ', input_id);
                                             return false;
                                         }else{
 
-                                            var last_idx = that.inputs.length - 1;
-                                            var $last_ele = $(that.inputs[last_idx]);
+                                            let last_idx = that.inputs.length - 1;
+                                            let $last_ele = $(that.inputs[last_idx]);
 
                                             $(that.inputs[0]).val($last_ele.val());
 
@@ -4944,7 +4936,7 @@ console.log('remove ', input_id);
                     .appendTo($inputdiv);
         }
 
-        var $other_btns = $inputdiv.find('.smallicon, .smallbutton');
+        let $other_btns = $inputdiv.find('.smallicon, .smallbutton');
 
         if($other_btns.length > 0){
             $other_btns.appendTo($inputdiv);

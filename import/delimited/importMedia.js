@@ -20,30 +20,30 @@
 */
 
 function hImportMedia() {
-    var _className = "ImportMedia",
-    _version   = "0.4",
+    const _className = "ImportMedia",
+    _version   = "0.4";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata;
     
     function _init(){
         
-        var uploadWidget = $('#uploadFile');
+        let uploadWidget = $('#uploadFile');
         
         //buttons
-        var btnUploadFile = $('#btnUploadFile')
+        let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
                     .on('click',function(e) {
                             uploadWidget.trigger('click');
                         });
-        var btnParseData = $('#btnParseData')
+        let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .on('click',function(e) {
                             _doParse();
                         });
-        var btnStartImport = $('#btnImportData')
+        let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
@@ -55,7 +55,7 @@ function hImportMedia() {
                         
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
-        var src_content = ''; 
+        let src_content = ''; 
         
         $('#sourceContent').on('keyup', function(e){
             if(src_content != $(this).val().trim()){
@@ -79,13 +79,13 @@ function hImportMedia() {
     done: function (e, response) {
             response = response.result;
             if(response.status==window.hWin.ResponseStatus.OK){
-                var data = response.data;
+                let data = response.data;
                 $.each(data.files, function (index, file) {
                     if(file.error){
                         $('#sourceContent').val(file.error);
                     }else{
                         
-                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                        let url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
                             +'&encoding='+$('#csv_encoding').val()+'&&db='+window.hWin.HAPI4.database;
                         
                         $('#sourceContent').load(url_get, function(){
@@ -98,10 +98,10 @@ function hImportMedia() {
                     }
                 });
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
             }
              
-                var inpt = this;
+                let inpt = this;
                 btnUploadFile.off('click');
                 btnUploadFile.on({click: function(){
                             $(inpt).trigger('click');
@@ -114,7 +114,7 @@ function hImportMedia() {
                         
         $('.column_roles').on('change',function(e){ 
                 
-                var ele = $(e.target);
+                let ele = $(e.target);
                 if(ele.val()>=0){
                     $('.column_roles').each(function(idx, item){
                        if($(item).attr('id')!= ele.attr('id') && $(item).val() == ele.val()){
@@ -139,26 +139,26 @@ function hImportMedia() {
         
             if(_parseddata==null) return;
         
-            var i, j, maxcol = 0;
-            for(i in _parseddata){
+            let maxcol = 0;
+            for(let i in _parseddata){
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                     maxcol = Math.max(maxcol,_parseddata[i].length);
                 }
             }
            
-            var container = $('#divParsePreview').empty();    
-            var tbl  = $('<table>')
+            let container = $('#divParsePreview').empty();    
+            let tbl  = $('<table>')
                         .addClass('tbmain')
                         .appendTo(container);
                         
             //HEADER FIELDS            
-            var headers = [], ifrom=0;
+            let headers = [], ifrom=0;
             if( $('#csv_header').is(':checked') ){ 
                 
-                for(i=0;i<_parseddata.length;i++){
+                for(let i=0;i<_parseddata.length;i++){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                         
-                        for(j=0;j<maxcol;j++){
+                        for(let j=0;j<maxcol;j++){
                             if(j>=_parseddata[i].length || window.hWin.HEURIST4.util.isempty(_parseddata[i][j])){
                                 headers.push('column '+j);     
                             }else{
@@ -170,16 +170,16 @@ function hImportMedia() {
                     }
                 }
             }else{
-                for(j=0;j<maxcol;j++){
+                for(let j=0;j<maxcol;j++){
                     headers.push('column '+j);
                 }
             }
             
             //TABLE HEADER
-            var tr  = $('<tr>').appendTo(tbl);
-            for(j=0;j<maxcol;j++){
+            let tr  = $('<tr>').appendTo(tbl);
+            for(let j=0;j<maxcol;j++){
                 
-                var cs = {};
+                let cs = {};
                 if(maxcol>3){
                     cs['width'] = ((j==0)?20:((j==maxcol-1)?40:10))+'%';
                 }
@@ -190,10 +190,10 @@ function hImportMedia() {
             }
             
             //TABLE BODY
-            for(i=ifrom;i<_parseddata.length;i++){
-                var tr  = $('<tr>').appendTo(tbl);
+            for(let i=ifrom;i<_parseddata.length;i++){
+                tr  = $('<tr>').appendTo(tbl);
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                    for(j=0;j<maxcol;j++){
+                    for(let j=0;j<maxcol;j++){
                         
                         $('<td>').addClass('truncate')
                             .text(j<_parseddata[i].length?_parseddata[i][j]:' ').appendTo(tr);
@@ -203,8 +203,8 @@ function hImportMedia() {
             
             //COLUMN ROLES SELECTORS
             $('.column_roles').empty();
-            for(j=-1; j<maxcol; j++){
-                var opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
+            for(let j=-1; j<maxcol; j++){
+                let opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
                 opt.appendTo($('#field_url'));
                 opt.clone().appendTo($('#field_desc'));
             }
@@ -212,8 +212,8 @@ function hImportMedia() {
                 //$('#field_term').val(0);
                 
                 //AUTODETECT COLUMN ROLES by name
-                for(j=0;j<maxcol;j++){
-                    var s = headers[j].toLowerCase();
+                for(let j=0;j<maxcol;j++){
+                    let s = headers[j].toLowerCase();
                     if(s.indexOf('url')>=0 || s.indexOf('path')>=0 || s.indexOf('uri')>=0){
                         $('#field_url').val(j);
                         _doPrepare();
@@ -231,17 +231,17 @@ function hImportMedia() {
     function _doParse(){
             
             //noothing defined
-            var content = $('#sourceContent').val();
+            let content = $('#sourceContent').val();
 
             _setCurtain(2);
             
             if(content==''){
-                //$(recordList).resultList('updateResultSet', new hRecordSet());
+                //$(recordList).resultList('updateResultSet', new HRecordSet());
             }else{
             
                         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
                 
-                        var request = { content: content,
+                        let request = { content: content,
                                         csv_delimiter: $('#csv_delimiter').val(),
                                         csv_enclosure: $('#csv_enclosure').val(),
                                         csv_linebreak: $('#csv_linebreak').val(),
@@ -261,12 +261,12 @@ function hImportMedia() {
                                 $('#csv_header').prop('checked', _parseddata && _parseddata.length>0 && _parseddata[0].length>1);
                                 
                                 if (!$('#csv_header').is(':checked')) {
-                                    var firstline_without_quotes = false;
-                                    var pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
+                                    let firstline_without_quotes = false;
+                                    let pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
 
-                                    for(var i=0; i<_parseddata.length; i++){
+                                    for(let i=0; i<_parseddata.length; i++){
                                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                                            var len = _parseddata[i].join(',').length;
+                                            let len = _parseddata[i].join(',').length;
                                             firstline_without_quotes = pos>len;
                                             break;
                                         }
@@ -308,7 +308,8 @@ function hImportMedia() {
     //
     function _doPrepare(){
         
-        var msg = '';
+        let msg = '';
+        let skip_na = 0, skip_dup = 0, skip_long = 0;
         
         _prepareddata = [];
         
@@ -316,19 +317,19 @@ function hImportMedia() {
             msg = '<i>No data. Upload and parse</i>';
         }else{
         
-            var field_url = $('#field_url').val();
+            let field_url = $('#field_url').val();
             if(field_url<0){
                 msg = '<span style="color:red">URL/Path must be always defined</span>';
             }else{
                 
-                var field_desc = $('#field_desc').val();
-                var field_desc_sep = ', Download '; //$('#field_desc_sep').val(); // "), Donwload "
-                var field_desc_concat = $('#field_desc_concat').is(':checked'); 
-                var multival_separator = $('#multival_separator').val();
+                let field_desc = $('#field_desc').val();
+                let field_desc_sep = ', Download '; //$('#field_desc_sep').val(); // "), Donwload "
+                let field_desc_concat = $('#field_desc_concat').is(':checked'); 
+                let multival_separator = $('#multival_separator').val();
                 
-                var i, record, skip_na = 0, skip_dup = 0, skip_long = 0, urls = [];
+                let i, record, urls = [], _urls;
                         
-                var hasHeader = $('#csv_header').is(':checked');
+                let hasHeader = $('#csv_header').is(':checked');
                 i = hasHeader?1:0;        
                         
                 for(;i<_parseddata.length;i++){
@@ -337,7 +338,7 @@ function hImportMedia() {
                     
                     if(field_url>=_parseddata[i].length) continue;
                     
-                    var _url = null, _descriptions = [];
+                    let _url = null, _descriptions = [];
                     
                     if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_url])){
                         _url = _parseddata[i][field_url].trim();
@@ -350,7 +351,7 @@ function hImportMedia() {
 
                     if(!window.hWin.HEURIST4.util.isempty(field_desc) && field_desc>=0){
                         
-                        var desc = _parseddata[i][field_desc];
+                        let desc = _parseddata[i][field_desc];
                         
                         //remove leading Donwload
                         if(desc){
@@ -363,7 +364,7 @@ function hImportMedia() {
                     }
 
                     
-                    for(var j=0; j<_urls.length; j++){
+                    for(let j=0; j<_urls.length; j++){
                         
                         _url = _urls[j].trim();
                     
@@ -380,9 +381,9 @@ function hImportMedia() {
                                 }
                                 
                                 
-                                var _desc = (j<_descriptions.length)?(_descriptions[j]):''; //+')'
+                                let _desc = (j<_descriptions.length)?(_descriptions[j]):''; //+')'
                                 if(field_desc_concat){ //add other fields to description
-                                    for(var k=0;k<_parseddata[i].length;k++){
+                                    for(let k=0;k<_parseddata[i].length;k++){
                                         if(k!=field_url && k!=field_desc){
                                             _desc = _parseddata[i][k] + ', '+_desc;
                                         }
@@ -444,7 +445,7 @@ function hImportMedia() {
         
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
 
-        var request = {
+        let request = {
             'a'          : 'batch',
             'entity'     : 'recUploadedFiles',
             'request_id' : window.hWin.HEURIST4.util.random(),
@@ -453,7 +454,7 @@ function hImportMedia() {
             'is_download': $('#field_download').is(':checked')?1:0
         };
     
-        var that = this;
+        let that = this;
         //that.loadanimation(true);
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
@@ -471,7 +472,7 @@ function hImportMedia() {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

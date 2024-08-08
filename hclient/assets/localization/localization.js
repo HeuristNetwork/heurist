@@ -32,7 +32,6 @@ For translation of UI (labels, help, documentation) use 2 chars codes
 
 */        
 
-
 var regional = {};
 regional['ENG'] = {
     language: 'English',
@@ -105,7 +104,7 @@ regional['ENG'] = {
     'Build': '',
     'Filter builder': '',
     'Facets builder': '',
-    'Save filter': '',
+    'Save filter for re-use': '',
     'Advanced': '',
     'Rules': '',
     'Favourites': '',
@@ -338,6 +337,7 @@ regional['ENG'] = {
         'menu-selected-value-delete': 'Delete Field Value',
         'menu-selected-value-delete-hint': 'Delete field value found in filtered records',
         'menu-selected-add-link': 'Relate: Link',
+        'menu-selected-add-link-match': 'Foreign Key match',
         'menu-selected-add-link-hint': 'Add new link or create new relationship between records',
         'menu-selected-rectype-change': 'Change record types',
         'menu-selected-rectype-change-hint': 'Change record types for filtered records',

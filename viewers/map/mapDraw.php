@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
 
@@ -69,7 +69,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             // Callback function on map initialization
             function onPageInit(success){
                 
-                if(!success) return;
+                if(!success) {return;}
 
                 /* init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
@@ -99,7 +99,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     ondraw_editstart: onMapDraw,
                     ondrawend:  onMapDraw,
                     drawMode: 'full' //(is_geofilter?'filter':'full')
-                });                
+                });
                 
                 //initialize buttons
                 $('.save-button').button().on({click:getWktAndClose});
@@ -131,13 +131,13 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         
                         if(!window.hWin.HEURIST4.util.isJSON(geodata)){
 
-                            geodata = geodata.toUpperCase(); // ensure captialised
-                            geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
-                            geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
-                            geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+                            geodata = geodata.toUpperCase();// ensure captialised
+                            geodata = geodata.replace(/\s\s+/g, ' ').trim();// remove double spacing
+                            geodata = geodata.replace(/\s*\(\s*/g, '(');// remove space before+after left bracket
+                            geodata = geodata.replace(/\s*\)/g, ')');// remove space before right bracket
 
                             if(geodata.indexOf('POINT') >= 0){
-                                geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                                geodata = geodata.replace(/\,\s*/g, ' ');// replace comma | comma+space with a single space
                             }
 
                             $dlg.find('#geodata_textarea').val(geodata);
@@ -184,13 +184,13 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         let geodata = $dlg.find('#geodata_textarea').val();
                         if(!window.hWin.HEURIST4.util.isJSON(geodata)){
 
-                            geodata = geodata.toUpperCase(); // ensure captialised
-                            geodata = geodata.replace(/\s\s+/g, ' ').trim(); // remove double spacing
-                            geodata = geodata.replace(/\s*\(\s*/g, '('); // remove space before+after left bracket
-                            geodata = geodata.replace(/\s*\)/g, ')'); // remove space before right bracket
+                            geodata = geodata.toUpperCase();// ensure captialised
+                            geodata = geodata.replace(/\s\s+/g, ' ').trim();// remove double spacing
+                            geodata = geodata.replace(/\s*\(\s*/g, '(');// remove space before+after left bracket
+                            geodata = geodata.replace(/\s*\)/g, ')');// remove space before right bracket
 
                             if(geodata.indexOf('POINT') >= 0){
-                                geodata = geodata.replace(/\,\s*/g, ' '); // replace comma | comma+space with a single space
+                                geodata = geodata.replace(/\,\s*/g, ' ');// replace comma | comma+space with a single space
                             }
 
                             $dlg.find('#geodata_textarea').val(geodata);
@@ -219,12 +219,12 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                        if(el_name=='get-coord-wkt' && is_checked){
                            
                             var res = mapping.mapping( 'drawGetWkt', 'messsage');
-                            el_text.val(res);    
+                            el_text.val(res);
                            
                        }else{
                             var res = mapping.mapping( 'drawGetJson' );
                             if(window.hWin.HEURIST4.util.isGeoJSON(res)){
-                                el_text.val(JSON.stringify(res));    
+                                el_text.val(JSON.stringify(res));
                             }else{
                                 el_text.val('');
                             }
@@ -379,7 +379,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 }
                 
                 if(params && params['imageurl']){
-                    imageurl = params['imageurl'];   
+                    imageurl = params['imageurl'];
                 }else{
                     imageurl = null;
                 }
@@ -426,7 +426,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 var mode = 'full';
                 if(imageurl) mode = 'image'
                 else if (is_geofilter) mode = 'filter';
-                mapping.mapping( 'drawSetControls', mode );   
+                mapping.mapping( 'drawSetControls', mode );
                 
                 if(!window.hWin.HEURIST4.util.isempty(tool_option) && tool_option != null){ // check if only one type of drawing tool is allowed
                     mapping.mapping( 'drawSetControls', tool_option);
@@ -444,27 +444,27 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                
                     if(zoom_with_delay){
                         setTimeout(function(){ 
-                                mapping.mapping( 'drawZoomTo' ); 
+                                mapping.mapping( 'drawZoomTo' );
 
                                 if(initial_wkt.indexOf('POINT') >= 0){ // Zoom out to avoid a de-loaded base map
-                                    mapping.mapping('setMapZoom', 5, true); // userAgent.indexOf('Firefox') >= 0 ? 10 : 5
+                                    mapping.mapping('setMapZoom', 5, true);// userAgent.indexOf('Firefox') >= 0 ? 10 : 5
                                 }
 
                                 refreshImageOverlay( true );
                         }, 2000);
                     }
 
-                    $('.leaflet-control-geocoder').removeClass('leaflet-control-geocoder-expanded'); // hide search box  
+                    $('.leaflet-control-geocoder').removeClass('leaflet-control-geocoder-expanded');// hide search box  
                 }else{
 
-                    $('.leaflet-control-geocoder').addClass('leaflet-control-geocoder-expanded'); // expand search box
+                    $('.leaflet-control-geocoder').addClass('leaflet-control-geocoder-expanded');// expand search box
 
                     $('#cbAllowMulti').prop('checked',false);
                     mapping.mapping( 'drawClearAll' );
                     
                     //zoom to saved extent
                     if(zoom_with_delay){
-                        setTimeout(function(){ mapping.mapping('getSetMapBounds', false); }, 2000);
+                        setTimeout(function(){ mapping.mapping('getSetMapBounds', false);}, 2000);
                     }
                     
                     if(is_geofilter){
@@ -482,7 +482,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                 var map = {};
                                 map['layer'] = layer; 
 
-                                onMapDrawAdd(); //clears other markers if multiple objects are not allowed
+                                onMapDrawAdd();//clears other markers if multiple objects are not allowed
 
                                 // Draw marker on top of geocoder result, if point tool is available
                                 var marker_ele = $('.leaflet-draw-draw-marker');
@@ -493,11 +493,11 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                                 that.options.ondrawend.call(that, map);
                             }
-                        }); 
+                        });
                     });
                     
                     }
-                $('.leaflet-control-geocoder-form > input').trigger('focus');    
+                $('.leaflet-control-geocoder-form > input').trigger('focus');
                
                 is_map_inited = true;
             }
@@ -519,7 +519,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 var res = mapping.mapping( 'drawGetJson',  e);
                 if(window.hWin.HEURIST4.util.isGeoJSON(res)){
                     $('#coords1').text(JSON.stringify(res));
-                    refreshImageOverlay( false ); //repos
+                    refreshImageOverlay( false );//repos
                 }else{
                     $('#coords1').text('');
                 }

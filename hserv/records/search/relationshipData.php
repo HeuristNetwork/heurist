@@ -57,7 +57,7 @@ function fetch_relation_details($recID, $i_am_primary) {
                 if ($i_am_primary) {
                     $bd['RelTermID'] = $row['dtl_Value'];
                 } else {
-                    $bd['RelTermID'] = reltype_inverse($row['dtl_Value']); // BUG: assumes reltype_inverse returns ID
+                    $bd['RelTermID'] = reltype_inverse($row['dtl_Value']);// BUG: assumes reltype_inverse returns ID
                     //TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". term label requires checking smarty/showReps
                 }
                 $relval = mysql__select_row_assoc($mysqli, 
@@ -70,14 +70,14 @@ function fetch_relation_details($recID, $i_am_primary) {
                 }
                 break;
             case $relTrgDT: // linked resource
-                if (!$i_am_primary) break;
+                if (!$i_am_primary) {break;}
 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
                                     'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
                                     ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
                 break;
             case $relSrcDT:
-                if ($i_am_primary) break;
+                if ($i_am_primary) {break;}
                 
                 $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
                                     'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
@@ -103,6 +103,7 @@ function fetch_relation_details($recID, $i_am_primary) {
             case $endDT:
                 $bd['EndDate'] = $row['dtl_Value'];
                 break;
+            default;
         }
     }
         $res->close();
@@ -124,15 +125,15 @@ function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id
     
     $mysqli = $system->get_mysqli();
 
-    if (!$relTermID) return;
+    if (!$relTermID) {return;}
     if (!$inverses) {
         $inverses = mysql__select_assoc2($mysqli, 
                 "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"
                 ." WHERE A.trm_Label is not null and B.trm_Label is not null");
     }
     $inverse = @$inverses[$relTermID];
-    if (!$inverse) $inverse = array_search($relTermID, $inverses);//do an inverse search and return key.
-    if (!$inverse) $inverse = $relTermID; //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
+    if (!$inverse) {$inverse = array_search($relTermID, $inverses);}//do an inverse search and return key.
+    if (!$inverse) {$inverse = $relTermID;} //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
     return $inverse;
 }
 ?>

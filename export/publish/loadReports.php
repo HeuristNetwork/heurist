@@ -56,7 +56,7 @@ $mysqli = $system->get_mysqli();
         //search the list of users by specified parameters
         $f_id     = @$_REQUEST['recID'];
         $f_name = $mysqli->real_escape_string(filter_var(@$_REQUEST['name'], FILTER_SANITIZE_STRING));
-        $f_userid = @$_REQUEST['usrID']; //@todo
+        $f_userid = @$_REQUEST['usrID'];//@todo
 
         $records = array();
         $recordsCount = 0;
@@ -122,7 +122,7 @@ $mysqli = $system->get_mysqli();
 
         $colNames = $data['report']['colNames'];
 
-        $rv = array(); //result
+        $rv = array();//result
 
         foreach ($data['report']['defs'] as $recID => $rt) {
             array_push($rv, updateReportSchedule($mysqli, $colNames, intval($recID), $rt));
@@ -163,7 +163,7 @@ exit;
 
         if($row['rps_FilePath']!=null){
             $dir = $row['rps_FilePath'];
-            if(substr($dir,-1)!="/") $dir = $dir."/";
+            if(substr($dir,-1)!="/") {$dir = $dir."/";}
         }else{
             $dir = HEURIST_FILESTORE_DIR."generated-reports/";
         }
@@ -241,7 +241,7 @@ exit;
                 if (array_key_exists($colName, $sys_usrReportSchedule_ColumnNames))
                 {
 
-                    if($query!="") $query = $query.",";
+                    if($query!="") {$query = $query.",";}
 
                     if($isInsert){
                             $query = $query."?";
@@ -249,7 +249,7 @@ exit;
                             $query = $query."$colName = ?";
                     }
 
-                    $parameters[0] = $parameters[0].$sys_usrReportSchedule_ColumnNames[$colName]; //take datatype from array
+                    $parameters[0] = $parameters[0].$sys_usrReportSchedule_ColumnNames[$colName];//take datatype from array
                     array_push($parameters, $val);
                     
                     if($colName=='rps_Title'){

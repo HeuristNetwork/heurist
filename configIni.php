@@ -82,7 +82,7 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.5.7"; // sets current program version number, determined by Heurist development lead
+$version = "6.5.7";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
 
@@ -92,7 +92,7 @@ $version = "6.5.7"; // sets current program version number, determined by Heuris
 // 2024 release dates: 6.5.4 21 Feb 2024  6.5.3 05 Feb 2024  6.5.2 19 Jan 2024  6.5.1  1 Jan 2024  
 // Version 6 released early 2021. Version 5 released 25 Jul 2018  Version 4.2.20 5 Jun 2017. Not recorded prior. 
 
-$heuristReferenceServer = "https://heuristref.net"; // DO NOT CHANGE THIS as it is critical for a number of functions
+$heuristReferenceServer = "https://heuristref.net";// DO NOT CHANGE THIS as it is critical for a number of functions
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
@@ -115,10 +115,10 @@ $dbMySQLDump = null;
 // from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
 // The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
 
-$dbPrefix = 'hdb_'; // Although this can be overwritten in heuristConfigIni.php WE STRONGLY recommend retaining hdb_
+$dbPrefix = 'hdb_';// Although this can be overwritten in heuristConfigIni.php WE STRONGLY recommend retaining hdb_
 
 // Elastic Search (Lucene) server
-$indexServerAddress = ''; 
+$indexServerAddress = '';
 $indexServerPort = '';
 
 $httpProxyAlwaysActive = false; // if true - always use proxy for CURL, otherwise proxy will be used for non heurist resources mostly
@@ -129,10 +129,10 @@ $indexServerPort='';
 
 // Functions normally available only to the system adminstrator. Password(s) must be > 14 characters or they are treated as blank
 // If DatabaseDeletion password set, system administrator can delete up to 10 at a time (with password challenge) 
-$passwordForDatabaseCreation =''; // normally blank = any logged in user can create, otherwise password challenge
-$passwordForDatabaseDeletion =''; // if blank = no one can delete db except db owner (to delete from server management)
-$passwordForReservedChanges  =''; // if blank = no-one can modify reserved fields, otherwise password challenge
-$passwordForServerFunctions  =''; // if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
+$passwordForDatabaseCreation ='';// normally blank = any logged in user can create, otherwise password challenge
+$passwordForDatabaseDeletion ='';// if blank = no one can delete db except db owner (to delete from server management)
+$passwordForReservedChanges  ='';// if blank = no-one can modify reserved fields, otherwise password challenge
+$passwordForServerFunctions  ='';// if blank = no-one can run server analysis functions - risk of overload - otherwise password challenge
 
 $defaultRootFileUploadPath ='';
 $defaultRootFileUploadURL = '';
@@ -154,7 +154,7 @@ $saml_service_provides = null;
 // if value is 1, it hides the standard heurist login and show SAML auth only ($saml_service_provides must be defined)
 $hideStandardLogin = 0;
 
-$defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
+$defaultFaimsModulesPath = "";// FAIMS only: the location where FAIMS module files will be written
 
 // use webserver to fasten access to thumbnail images and uploaded files
 // otherwise images will be accessed via php
@@ -173,6 +173,6 @@ $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
 if (is_file($parentIni)){
-    include_once($parentIni);
+    include_once $parentIni;
 }
 ?>

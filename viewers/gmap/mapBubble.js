@@ -61,10 +61,10 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
     
     closeAll: function(){
       
-        var that = this;
+        let that = this;
         
         $.each( this.tooltips, function( id, tooltipData ) {
-            var event = $.Event( "blur" );
+            let event = $.Event( "blur" );
             event.target = event.currentTarget = tooltipData.element[ 0 ];
             that.close( event, true );
         } );        
@@ -76,7 +76,7 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
         if(!event || content=="") return; //==undefined   
 
         if(content.indexOf('http')==0){
-            var that = this;
+            let that = this;
             $.get(content, function(responseTxt, statusTxt, xhr){
                 if(statusTxt == "success"){
                     that._open( event, target, responseTxt )
@@ -86,7 +86,7 @@ $.widget( "heurist.bubble", $.ui.tooltip, {
         }
 
         
-     var w = 420, h = 152;   
+     let w = 420, h = 152;   
      
      //copy from google map    
 content =     
@@ -128,31 +128,31 @@ content =
     
         this._super( event, target, content );
         
-        var tooltip = this._find( target );
+        let tooltip = this._find( target );
         if ( tooltip.length>0 ) {
             
             tooltip.css({'box-shadow':'none', 'border':'none', 'background':'none !important', 'padding':0, 'max-width':'400px'});
             
-            var posx = tooltip.position().left;
-            var posy = tooltip.position().top;
+            let posx = tooltip.position().left;
+            let posy = tooltip.position().top;
          
-            var docw = $(window).width();
-            var a = tooltip.find('.tooltip-arrow');
-            var ab = tooltip.find('.tooltip-arrow-border');
+            let docw = $(window).width();
+            let a = tooltip.find('.tooltip-arrow');
+            let ab = tooltip.find('.tooltip-arrow-border');
             if(posx<5){
                 tooltip.css('left',5);
                 /*var pos_ax = a.position().left;
                 a.css('left', pos_ax + 5 + posx);
                 ab.css('left', pos_ax + 5 + posx);*/
             }else if(posx+w > docw){
-                var posxnew = docw - w - 5;
+                let posxnew = docw - w - 5;
                 tooltip.css('left', posxnew);
                 /*var pos_ax = a.position().left;
                 a.css('left', pos_ax + (posx - posxnew));
                 ab.css('left', pos_ax + (posx - posxnew));*/
             }
         
-            var posynew = posy-150;
+            let posynew = posy-150;
             if(posynew<0) posynew = 0;
             //tooltip.css('top', posynew);
             /*var pos_ay = a.position().top;

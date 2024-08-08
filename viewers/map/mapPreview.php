@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -46,7 +46,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     // Callback function on map initialization
     function onPageInit(success){
         
-        if(!success) return;
+        if(!success) {return;}
 
         /* init helper (see utils.js)
         window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
@@ -78,7 +78,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             element_map: '#map_digitizer',
             layout_params:layout_params
             //oninit: onMapInit
-        });                
+        });
         
         //initialize buttons
         $('#save-button').button().on({click:function()
@@ -100,7 +100,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         if(params && params['ids']){
             initial_layers = params['ids'];
             if(params['target_db']){
-               target_database = params['target_db']; 
+               target_database = params['target_db'];
             }
         }else{
             initial_layers = null;
@@ -117,14 +117,14 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         if(!target_database){
             window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
                 +'It is not possiblle to perform this operation');
-            window.close(); 
+            window.close();
         }
         
 
         if(initial_layers){ //create virtual mapspace
         
             //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
-            var dfd = new $.Deferred();            
+            var dfd = new $.Deferred();
             mapping.mapping('getMapManager').createVirtualMapDocument( initial_layers, dfd );
             
             //create map snapshot as soon as map is loaded
@@ -133,7 +133,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                     setTimeout(function(){  
                              // _createMapSnapShot();
-                    }, 2000);                    
+                    }, 2000);
                 }
             );
         }
@@ -190,9 +190,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     window.hWin.HEURIST4.msg.showMsgFlash('Cannot create mapdocument snapshot');
                     $('#save-button').show();
                 }else{
-                    _exportMapSpace();    
+                    _exportMapSpace();
                 }
-            });                                
+            });
             
         }catch(e){
             window.hWin.HEURIST4.msg.showMsgFlash('Cannot create mapdocument snapshot');
@@ -239,8 +239,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             var not_public = [], cnt_dt = 0, cnt_ds = 0;
             var idx, records = recordset.getRecords();
             
-            var native_ids = [];  //leaflet ids
-            var heurist_ids = []; //heurist layer ids in mapdoc
+            var native_ids = [];//leaflet ids
+            var heurist_ids = [];//heurist layer ids in mapdoc
             
             for(idx in records){
                 if(idx)
@@ -262,8 +262,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         not_public.push(recName+' ('+recType+')');
                         
                     }else if((recType==RT_MAP_LAYER || recType==RT_TLCMAP_DATASET) && record['layer']){
-                        heurist_ids.push(recordset.fld(record, 'rec_ID'));    
-                        native_ids.push((record['layer']).getNativeId());    
+                        heurist_ids.push(recordset.fld(record, 'rec_ID'));
+                        native_ids.push((record['layer']).getNativeId());
                     }
                 }
             }
@@ -319,7 +319,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 mbox = 'pl POLYGON(('+mbox.join(',')+'))';
                 //{geo:{type:'pl',wkt:'POLYGON(('+mbox.join(',')+'))'}};
                 
-                var zoomKm = Math.round(bounds.getSouthWest().distanceTo(bounds.getNorthEast())/10000); //100000
+                var zoomKm = Math.round(bounds.getSouthWest().distanceTo(bounds.getNorthEast())/10000);//100000
                 
                 var details = {};
                 details['t:'+DT_NAME] = [ mapdoc_name ];
@@ -373,7 +373,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             //databasese are different: maps and clearinghouse  - not in use anymore
             
             //$('#divStep2').hide();
-            var session_id = Math.round((new Date()).getTime()/1000);  //for progress
+            var session_id = Math.round((new Date()).getTime()/1000);//for progress
         
             var request = { 
                 source_db: window.hWin.HAPI4.database,

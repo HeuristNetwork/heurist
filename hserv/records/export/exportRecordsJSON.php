@@ -47,7 +47,7 @@ class ExportRecordsJSON extends ExportRecords {
     private $maplayer_fields = null;
     private $mapdoc_defaults = array();
     private $maplayer_records = array();
-    private $maplayer_extents = array(); //to calculate summary extent
+    private $maplayer_extents = array();//to calculate summary extent
     
 //
 //
@@ -78,7 +78,7 @@ protected function _outputPrepareFields($params){
     
     if($this->datatable_session_id>0){
         
-        $this->datatable_columns = array('0'=>array()); //for datatable
+        $this->datatable_columns = array('0'=>array());//for datatable
         $this->datatable_row_placeholder = array();
         $need_rec_type = false;
 
@@ -91,7 +91,7 @@ protected function _outputPrepareFields($params){
         */
         $need_tags = false;
         $this->retrieve_detail_fields = array();
-        $this->retrieve_header_fields = array(); //header fields
+        $this->retrieve_header_fields = array();//header fields
         $retrieve_relmarker_fields = array();
         
         if(is_array($params['columns'])){
@@ -99,9 +99,9 @@ protected function _outputPrepareFields($params){
                 $col_name = $column['data'];
 
                 if(strpos($col_name,'.')>0){
-                    list($rt_id, $col_name) = explode('.',$col_name);    
+                    list($rt_id, $col_name) = explode('.',$col_name);
                     
-                    if(!@$this->datatable_row_placeholder[$rt_id]) $this->datatable_row_placeholder[$rt_id] = array();
+                    if(!@$this->datatable_row_placeholder[$rt_id]) {$this->datatable_row_placeholder[$rt_id] = array();}
                     $this->datatable_row_placeholder[$rt_id][$col_name] = '';
                 }else{
                     $rt_id = 0;
@@ -127,7 +127,7 @@ protected function _outputPrepareFields($params){
                 if(!array_key_exists($rt_id, $this->datatable_columns)) {
                       $this->datatable_columns[$rt_id] = array();
                 }
-                array_push($this->datatable_columns[$rt_id], $col_name);    
+                array_push($this->datatable_columns[$rt_id], $col_name);
             }
         }
         
@@ -145,7 +145,7 @@ protected function _outputPrepareFields($params){
             array_push($this->datatable_columns['0'],'rec_RecTypeID');
         }
 
-        $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);        
+        $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);
         
     }else if($this->extended_mode==3){ //for media viewer
         
@@ -163,14 +163,14 @@ protected function _outputPrepareFields($params){
             $this->tlc_mapdoc_name = $params['tlcmap'];
             //get list of detail types for MAP_LAYER
             $this->maplayer_fields = mysql__select_list2($this->mysqli,
-                'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);        
+                'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);
             //get list of field types with type "file"
             //$this->ds_file_fields = mysql__select_list2($this->mysqli,
-            //    'select dty_ID from defDetailTypes where dty_Type="file"');        
+            //    'select dty_ID from defDetailTypes where dty_Type="file"');
             //get default values for mapspace
             $this->mapdoc_defaults = mysql__select_assoc2($this->mysqli,
                 'select rst_DetailTypeID, rst_DefaultValue from defRecStructure where rst_RecTypeID='.RT_MAP_DOCUMENT
-                .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
+                .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );
                 
             $this->maplayer_records = array();
             $this->maplayer_extents = array();
@@ -190,23 +190,23 @@ protected function _outputHeader(){
                      .',"recordsTotal":'.$this->records_cnt
                      .',"recordsFiltered":'
                      .($this->records_cnt_filtered>0?$this->records_cnt_filtered:$this->records_cnt)
-                     .',"data":[');     
+                     .',"data":[');
             
     }else if($this->datatable_session_id==1){
             
-            fwrite($this->fd, '{"data": [');     
+            fwrite($this->fd, '{"data": [');
             
     }else if($this->is_restapi==1){
 
         if(count($this->records)==1){
-            //fwrite($this->fd, '');             
+            //fwrite($this->fd, '');
         }else{
-            fwrite($this->fd, '{"records":[');             
+            fwrite($this->fd, '{"records":[');
         }
         
     }else {
         
-        fwrite($this->fd, '{"heurist":{"records":[');         
+        fwrite($this->fd, '{"heurist":{"records":[');
     }
     
 }
@@ -262,7 +262,7 @@ protected function _outputRecord($record){
                 $this->maplayer_records[] = array('id'=>$record['rec_ID']);
         }        
         
-        fwrite($this->fd, $this->comma.json_encode($record)); //as is
+        fwrite($this->fd, $this->comma.json_encode($record));//as is
     }
     $this->comma = ',';
  
@@ -276,14 +276,14 @@ protected function _outputFooter(){
     
     if($this->datatable_session_id>0){ //session id
             
-        fwrite($this->fd, ']}'); 
+        fwrite($this->fd, ']}');
             
     }else if($this->is_restapi==1){
 
         if(count($this->records)==1){
-            //fwrite($this->fd, '');             
+            //fwrite($this->fd, '');
         }else{
-            fwrite($this->fd, ']}');             
+            fwrite($this->fd, ']}');
         }
         
     }else {
@@ -295,14 +295,14 @@ protected function _outputFooter(){
             $this->_outputRecord($record);
         }
         
-        //header fwrite($this->fd, '{"heurist":{"records":[');         
+        //header fwrite($this->fd, '{"heurist":{"records":[');
         
         fwrite($this->fd, ']');
         
         $database_info = $this->_getDatabaseInfo();
         
         fwrite($this->fd, ',"database":'.json_encode($database_info));
-        fwrite($this->fd, '}}');     
+        fwrite($this->fd, '}}');
         
     }
     
@@ -333,7 +333,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         self::$defTerms = new DbsTerms($this->system, self::$defTerms);
     }
 
-    if(!array_key_exists($rt_id, $columns)) return null;
+    if(!array_key_exists($rt_id, $columns)) {return null;}
 
     foreach($columns[$rt_id] as $column){
 
@@ -350,8 +350,10 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         }else if($column=='typeid'){
             $res[$col_name] = $record['rec_RecTypeID'];
         }else if($column=='typename'){
-            if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 0);            
-            $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];    
+            if(self::$defRecTypes==null){
+                self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 0);  
+            } 
+            $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];
         }else if($column=='added'){
             $res[$col_name] = $record['rec_Added'];
         }else if($column=='modified'){
@@ -367,12 +369,12 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         }else if($column=='visibility'){
             $res[$col_name] = $record['rec_NonOwnerVisibility'];
         }else{
-            $res[$col_name] = ''; //placeholder
+            $res[$col_name] = '';//placeholder
         }
     }
 
     if(self::$defDetailtypes==null){
-        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);   
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
     }
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
 
@@ -387,7 +389,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                 $dty_ID = 'lt'.$dty_ID;
             }
 
-            if(!in_array($dty_ID, $columns[$rt_id])) continue;
+            if(!in_array($dty_ID, $columns[$rt_id])) {continue;}
 
             $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
 
@@ -424,7 +426,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                             $record2 = recordSearchByID($this->system, $relation_id, true, null );
                             $field_value2 = $this->_getJsonFlat( $record2, $columns, null, $level+1 );
                             if($field_value2!=null){
-                                $rt_id_link = 't'.$record2['rec_RecTypeID']; //t1
+                                $rt_id_link = 't'.$record2['rec_RecTypeID'];//t1
                                 if(@$res[$rt_id_link]){
                                     foreach($field_value2 as $col=>$field){
                                         //$col = 'r.'.$col;
@@ -443,7 +445,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                             }
                         }
                     }
-                    $field_value = $record['rec_Title']; //$link_rec_Id Record ID replaced with Record Title
+                    $field_value = $record['rec_Title'];//$link_rec_Id Record ID replaced with Record Title
 
                 }else if ($field_type=='file'){
 
@@ -470,7 +472,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
             } //for detail multivalues
 
             if(is_array(@$res[$col_name]) && count($res[$col_name])==1){
-                $res[$col_name] = $res[$col_name][0];  
+                $res[$col_name] = $res[$col_name][0];
             } 
         } //for all details of record
     }
@@ -495,7 +497,7 @@ private function _getJsonFeature($record, $extended_mode){
     $res['details'] = array();
     
     if(self::$defDetailtypes==null){
-        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);   
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
     }
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     
@@ -516,9 +518,9 @@ private function _getJsonFeature($record, $extended_mode){
         
         $idx_ccode2 = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_ConceptID'];
         
-        $res['rec_RecTypeName'] = self::$defRecTypes['names'][$rty_ID];    
+        $res['rec_RecTypeName'] = self::$defRecTypes['names'][$rty_ID];
         $idx_ccode2 = self::$defRecTypes['typedefs'][$rty_ID]['commonFields'][$idx_ccode2];
-        if($idx_ccode2) $res['rec_RecTypeConceptID'] = $idx_ccode2;
+        if($idx_ccode2) {$res['rec_RecTypeConceptID'] = $idx_ccode2;}
         
     }
 
@@ -536,16 +538,16 @@ private function _getJsonFeature($record, $extended_mode){
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
                     $term_code  = self::$defTerms->getTermCode($value);
-                    if($term_code) $val['termCode'] = $term_code; 
+                    if($term_code) {$val['termCode'] = $term_code; }
                     $term_code  = self::$defTerms->getTermConceptID($value);
-                    if($term_code) $val['termConceptID'] = $term_code;    
+                    if($term_code) {$val['termConceptID'] = $term_code;}
                 }
 
                 if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
-                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];
                 }else{
                     //non standard field
-                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];
                 }
 
                 $val['fieldType'] = $field_type;
@@ -572,7 +574,7 @@ private function _getJsonFeature($record, $extended_mode){
 //
 private static function _getMediaViewerData($record){
 
-    $res = '';    
+    $res = '';
     $comma = '';
     $info = array();
     
@@ -588,7 +590,7 @@ private static function _getMediaViewerData($record){
     
         foreach($info as $fileinfo){
             
-            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) continue;
+            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) {continue;}
     
             $mimeType = $fileinfo['fxm_MimeType'];
         
@@ -597,7 +599,7 @@ private static function _getMediaViewerData($record){
             if(strpos($mimeType,"video/")===0){
                 $resource_type = 'Video';
             }else if(strpos($mimeType,"audio/")===0){
-                if(strpos($mimeType,"soundcloud")>0) continue;
+                if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
             }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
                 $resource_type = 'Image';
@@ -619,7 +621,7 @@ private static function _getMediaViewerData($record){
                                'id'=>$fileid,
                                'mimeType'=>$mimeType,
                                'filename'=>htmlspecialchars($fileinfo['ulf_OrigFileName']),
-                               'external'=>htmlspecialchars($external_url)));  //important need restore on client side
+                               'external'=>htmlspecialchars($external_url)));//important need restore on client side
                 $comma =  ",\n";
                                
             }
@@ -643,7 +645,7 @@ private function _calculateSummaryExtent($is_return_rec){
             foreach($values as $value){
                 if(is_array($value) && @$value['geo']){
                     $wkt = $value['geo']['wkt'];
-                    $bbox = self::_getExtentFromWkt($wkt);  
+                    $bbox = self::_getExtentFromWkt($wkt);
                     if($bbox!=null){
                         if( !@$mbox['maxy'] || $mbox['maxy']<$bbox['maxy'] ){
                             $mbox['maxy'] = $bbox['maxy'];
@@ -684,7 +686,7 @@ private function _calculateSummaryExtent($is_return_rec){
             $record['rec_ID'] = 999999999;
             $record['rec_RecTypeID'] = RT_MAP_DOCUMENT;
             $record['rec_Title'] = $this->tlc_mapdoc_name;
-            $record['rec_URL'] = ''; 
+            $record['rec_URL'] = '';
             $record['rec_ScratchPad'] = '';
             $record["details"] = array(
                 DT_NAME=>array('1'=>$this->tlc_mapdoc_name),

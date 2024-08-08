@@ -61,7 +61,7 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_no_action = false;
+    if (@$ARGV['-purge']) {$arg_no_action = false;}
 
 }else{
     
@@ -74,7 +74,7 @@ if (@$argv) {
 }
 
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -98,7 +98,7 @@ if( !$system->init(null, false, false) ){
 }
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 $exclusion_list = exclusion_list();
 
@@ -106,12 +106,12 @@ if(!$arg_no_action){
     
     $action = 'purgeFullTextIndexes';
     if(false && !isActionInProgress($action, 1)){
-        exit("It appears that 'purge full text indexes' operation has been started already. Please try this function later\n");        
+        exit("It appears that 'purge full text indexes' operation has been started already. Please try this function later\n");
     }
 }
 
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $datetime1 = date_create('now');
@@ -162,17 +162,17 @@ foreach ($databases as $idx=>$db_name){
     }
 
     //"processing ".
-    //echo $db_name.' '; //.'  in '.$folder
+    //echo $db_name.' ';//.'  in '.$folder
     $report = '';
     
-    $interval = date_diff($datetime1, $datetime2);    
+    $interval = date_diff($datetime1, $datetime2);
     $diff = $interval->format('%y')*12 + $interval->format('%m');
 
     if($diff>=3){ //older than 3 months
         //drop full text indexes and optiomize table
         $report = $diff.' months, n='.$vals['cnt'];
         if($arg_no_action){
-            $report .= ' '; 
+            $report .= ' ';
         }else{
             
             $res = false;
@@ -187,7 +187,7 @@ foreach ($databases as $idx=>$db_name){
                     $res = mysql__exec_param_query($mysqli, $query, null);
                 }
             }else{
-                $report .= ' Records index does not exist '; 
+                $report .= ' Records index does not exist ';
                 $res = 'skip';
             }
             if($res===true){                
@@ -202,13 +202,13 @@ foreach ($databases as $idx=>$db_name){
                     }
                 }
             }else{
-                $report .= ' Details index does not exist '; 
+                $report .= ' Details index does not exist ';
                 $res = 'skip';
             }
 
             if($res===true){
                 
-                $report .= ' full text index purged '; 
+                $report .= ' full text index purged ';
                 $cnt_processed++;
             }else if($res!='skip'){
                 $report .= ('ERROR: '.$res);
@@ -221,7 +221,7 @@ foreach ($databases as $idx=>$db_name){
     }
 
 
-    //echo "   ".$db_name." OK \n"; //.'  in '.$folder
+    //echo "   ".$db_name." OK \n";//.'  in '.$folder
 }//for
 
 
@@ -240,7 +240,7 @@ function exclusion_list(){
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            if($line=='' || substr($line,0,1)=='#') continue;
+            if($line=='' || substr($line,0,1)=='#') {continue;}
             $res[] = $line;
         }
         fclose($handle);

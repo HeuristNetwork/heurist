@@ -17,8 +17,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var Hul = window.hWin.HEURIST4.util;
-
 $.widget( "heurist.resultListMenu", {
 
     // default options
@@ -36,7 +34,7 @@ $.widget( "heurist.resultListMenu", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         this.element
         .css('font-size', this.options.is_h6style?'1.2em':'1.3em')
@@ -72,7 +70,7 @@ $.widget( "heurist.resultListMenu", {
         //this.divMainMenuItems.children('li>a>.ui-icon').css({right: '2px', left:'unset'});
         
         //-----------------------     listener of global events
-        var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+        let sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
                  +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
                  +window.hWin.HAPI4.Event.ON_REC_COLLECT+' '
                  +window.hWin.HAPI4.Event.ON_REC_SELECT;
@@ -159,7 +157,7 @@ $.widget( "heurist.resultListMenu", {
                 item = $(item);
                 let lvl_user =  item.attr('data-user-admin-status');
                 let is_visible = window.hWin.HAPI4.has_access(lvl_user);
-                var elink = item.find('a');
+                let elink = item.find('a');
                 if(is_visible){
                     window.hWin.HEURIST4.util.setDisabled(elink, false);
                     item.attr('title', '');
@@ -218,11 +216,11 @@ $.widget( "heurist.resultListMenu", {
     //
     _initMenu: function(name, menu_label, competency_level){
 
-        var that = this;
-        var myTimeoutId = -1;
+        let that = this;
+        let myTimeoutId = -1;
 
         //show hide function
-        var _hide = function(ele) {
+        let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 1);
@@ -232,7 +230,7 @@ $.widget( "heurist.resultListMenu", {
             clearTimeout(myTimeoutId);
 
             $('.menu-or-popup').hide(); //hide other
-            var menu = $( ele )
+            let menu = $( ele )
             //.css('width', this.btn_user.width())
             .show()
             .position({my: "left top", at: "left bottom", of: parent, collision:'none' });
@@ -241,7 +239,7 @@ $.widget( "heurist.resultListMenu", {
             return false;
         };
 
-        var link = $('<a href="#"'
+        let link = $('<a href="#"'
                 +(this.options.is_h6style?' style="padding-right:22px !important"':'')
                 +'>'+window.hWin.HR(menu_label?menu_label:name)+'</a>')
         //,{});
@@ -264,7 +262,7 @@ $.widget( "heurist.resultListMenu", {
         .appendTo( this.divMainMenuItems );
         
         
-        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
         
         if(competency_level>=0){
             this['btn_'+name].addClass('heurist-competency'+competency_level);    
@@ -323,8 +321,8 @@ $.widget( "heurist.resultListMenu", {
 
                 //localization                
                 that['menu_'+name].find('li[id^="menu-"]').each(function(){
-                    var menu_id = $(this).attr('id');
-                    var item = $(this).find('a');
+                    let menu_id = $(this).attr('id');
+                    let item = $(this).find('a');
                     item.text(window.hWin.HR( menu_id ));
                     item.attr('title',window.hWin.HR( menu_id+'_hint'));
                 });
@@ -356,7 +354,7 @@ $.widget( "heurist.resultListMenu", {
 
     menuActionHandler: function(action){
 
-        var that = this;
+        let that = this;
 
         if(action == "menu-selected-select-all"){
 
@@ -382,7 +380,7 @@ $.widget( "heurist.resultListMenu", {
            
             if(this.isResultSetEmpty()) return;
             
-            var opts = {
+            let opts = {
                 width:700,
                 groups: (action == "menu-selected-bookmark")?'personal':'all',
                 onClose:
@@ -423,7 +421,7 @@ $.widget( "heurist.resultListMenu", {
             if(this.isResultSetEmpty()) return;
             
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds( window.hWin.HR('resultList_select_record') );
-            if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
+            if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
 
             window.hWin.HAPI4.SystemMgr.verify_credentials(() => {
 
@@ -511,6 +509,11 @@ $.widget( "heurist.resultListMenu", {
             if(this.isResultSetEmpty()) return;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink');
             
+        }else if(action == "menu-selected-add-link-match"){
+
+            if(this.isResultSetEmpty()) return;
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLinkMatch');
+            
         }else if(action == "menu-selected-extract-pdf"){
 
             this.detailBatchEditPopup('extract_pdf');
@@ -565,7 +568,7 @@ $.widget( "heurist.resultListMenu", {
                 
             }else {
             
-                var scope = window.hWin.HAPI4.currentRecordset.getIds();
+                let scope = window.hWin.HAPI4.currentRecordset.getIds();
                 
                 window.hWin.HAPI4.SystemMgr.user_wss({ids:scope.join(',')},
                     function(response){
@@ -611,7 +614,7 @@ $.widget( "heurist.resultListMenu", {
     // 
     reloadSearch: function(query){
 
-        if(!Hul.isempty(query)){
+        if(!window.hWin.HEURIST4.util.isempty(query)){
             this._query_request.q = query;
         }
 
@@ -633,12 +636,12 @@ $.widget( "heurist.resultListMenu", {
     //
     getSelectionIds: function(msg, limit){
 
-        var recIDs_list = [];
+        let recIDs_list = [];
         if (this._selection!=null) {
             recIDs_list = this._selection.getIds();
         }
 
-        if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
+        if (recIDs_list.length == 0 && !window.hWin.HEURIST4.util.isempty(msg)) {
             window.hWin.HEURIST4.msg.showMsg(msg, {default_palette_class:'ui-heurist-explore'});
             return null;
         }else if (limit>0 && recIDs_list.length > limit) {
@@ -652,13 +655,13 @@ $.widget( "heurist.resultListMenu", {
     //-------------------------------------- EMAIL FORM -------------------------------
     openEmailForm: function() {
         // Selection check
-        var ids = this.getSelectionIds('resultList_select_record');
-        if(Hul.isempty(ids)) {
+        let ids = this.getSelectionIds('resultList_select_record');
+        if(window.hWin.HEURIST4.util.isempty(ids)) {
             return;
         }
 
         // Open URL
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/send_email.php?db=" + window.hWin.HAPI4.database;
+        let url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/send_email.php?db=" + window.hWin.HAPI4.database;
         window.hWin.HAPI4.selectedRecordIds = ids;  //the only place it is assigned
         window.hWin.HEURIST4.msg.showDialog(url, { width:500, height:600, title: window.hWin.HR('Email information') });
 
@@ -690,9 +693,9 @@ $.widget( "heurist.resultListMenu", {
 
     selectShowNewTab: function(){
         if(this._selection!=null){
-            var recIDs_list = this._selection.getIds();
+            let recIDs_list = this._selection.getIds();
             if (recIDs_list.length > 0) {
-                var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',') + '&nometadatadisplay=true';
+                let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',') + '&nometadatadisplay=true';
                 window.open(url, "_blank");
             }
         }
@@ -713,14 +716,14 @@ $.widget( "heurist.resultListMenu", {
     fixDuplicatesPopup: function(){
 
 
-        var recIDs_list = this.getSelectionIds(null);
-        if(Hul.isempty(recIDs_list) || recIDs_list.length<2){
+        let recIDs_list = this.getSelectionIds(null);
+        if(window.hWin.HEURIST4.util.isempty(recIDs_list) || recIDs_list.length<2){
             window.hWin.HEURIST4.msg.showMsg('resultList_select_record2',{default_palette_class:'ui-heurist-explore'});
             return;
         }
 
-        var that = this;
-        var url = window.hWin.HAPI4.baseURL 
+        let that = this;
+        let url = window.hWin.HAPI4.baseURL 
                     + 'admin/verification/combineDuplicateRecords.php?bib_ids='
                     + recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
 
@@ -737,8 +740,8 @@ $.widget( "heurist.resultListMenu", {
 
     
     isResultSetEmpty: function(){
-        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
-        if (Hul.isempty(recIDs_all)) {
+        let recIDs_all = window.hWin.HAPI4.getSelection("all", true);
+        if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
             window.hWin.HEURIST4.msg.showMsg('resultList_noresult', {default_palette_class:'ui-heurist-explore'});
             return true;
         }else{
@@ -755,13 +758,13 @@ $.widget( "heurist.resultListMenu", {
         
         if(this.isResultSetEmpty()) return;
 
-        var script_name = 'recordAction';
+        let script_name = 'recordAction';
         
         if(action_type=='add_link'){
             script_name = 'recordAddLink';
             callback = function(context) {
                         if(context!="" && context!=undefined) {
-                            var sMsg = (context==true)?'Link created...':context;
+                            let sMsg = (context==true)?'Link created...':context;
                             window.hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
                         }
             };            
@@ -779,7 +782,7 @@ $.widget( "heurist.resultListMenu", {
             }
         }
         
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
+        let url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/'+script_name+'.php?'
                 +'db='+window.hWin.HAPI4.database+'&action='+action_type;
 
         let height = action_type == 'case_conversion' ? 750 : 510;

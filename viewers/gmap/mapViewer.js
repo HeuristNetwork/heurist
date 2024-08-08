@@ -33,7 +33,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/Map  
 */
-var mapStaticURL = '';
+/* global HintDiv */
+
+let mapStaticURL = '';
 if(window.hWin && window.hWin.HAPI4){
     mapStaticURL = window.hWin.HAPI4.baseURL+"viewers/gmap/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
 }
@@ -41,16 +43,16 @@ if(window.hWin && window.hWin.HAPI4){
 function MapViewer() {
 
 	//private members
-	var _className = "MapViewer";
+	const _className = "MapViewer";
     							//id                               content
-	var hintDiv = new HintDiv('mapPopup', 300, 300, '<div id="map_viewer" style="width:100%;height:100%;"></div>');
+	let hintDiv = new HintDiv('mapPopup', 300, 300, '<div id="map_viewer" style="width:100%;height:100%;"></div>');
 
 
-	function _showAt(event, geovalue)
+	function _showAt(event, geovalue) //not used
 	{
 			hintDiv.showAt(event);
 
-			initmap_viewer('map_viewer', geovalue); //from digitizer.js
+			//initmap_viewer('map_viewer', geovalue); //from digitizer.js
 	}
 
 	function _showAtStatic(event, recid, value)
@@ -58,15 +60,15 @@ function MapViewer() {
 			hintDiv.showAt(event);
 
 			//add image with url to static google map
-			var mapImg = this.document.getElementById('map_static_image');
+			let mapImg = this.document.getElementById('map_static_image');
 			if(!mapImg){
-				var map_viewer = this.document.getElementById('map_viewer');
+				let map_viewer = this.document.getElementById('map_viewer');
 				mapImg = map_viewer.appendChild(this.document.createElement("img"));
 				mapImg.id = "map_static_image";
 			}
-			var d = new Date().getTime()
+			let d = new Date().getTime()
 
-			var surl = mapStaticURL+"&t="+d;
+			let surl = mapStaticURL+"&t="+d;
 
 			if(value){
 				surl = surl + "&value="+encodeURIComponent(value);
@@ -78,9 +80,9 @@ function MapViewer() {
 
 
 	//public members
-	var that = {
+	let that = {
 
-		showAt: function(event, geovalue){
+		showAt: function(event, geovalue){//not used
 			_showAt(event, geovalue);
 		},
 		showAtStatic: function(event, recid, value){
@@ -102,4 +104,4 @@ function MapViewer() {
 	return that;
 }
 
-var mapViewer = new MapViewer();
+let mapViewer = new MapViewer();

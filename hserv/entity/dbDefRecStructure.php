@@ -57,25 +57,25 @@ class DbDefRecStructure extends DbEntityBase
         }
 
         //compose WHERE 
-        $where = array(); 
-        $from_table = array($this->config['tableName']);   
+        $where = array();
+        $from_table = array($this->config['tableName']);
 
         $pred = $this->searchMgr->getPredicate('rst_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rst_RecTypeID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rst_DetailTypeID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('rst_CalcFunctionID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $needCheck = false;
         $is_structure = false;
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -171,7 +171,7 @@ class DbDefRecStructure extends DbEntityBase
         .' FROM '.implode(',', $from_table);
         
         if($is_structure){
-            $query = $query.' left join defDetailTypes on rst_DetailTypeID = dty_ID ';  
+            $query = $query.' left join defDetailTypes on rst_DetailTypeID = dty_ID ';
         }
 
         if(count($where)>0){
@@ -233,7 +233,7 @@ class DbDefRecStructure extends DbEntityBase
             if($isInsert){
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
-                if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+                if(!@$this->records[$idx]['rst_Status']) {$this->records[$idx]['rst_Status'] = 'open';}
                 
                 if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
                     $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
@@ -241,14 +241,14 @@ class DbDefRecStructure extends DbEntityBase
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
-                if(@$this->records[$idx]['rst_Status']=='') $this->records[$idx]['rst_Status'] = 'open';
+                if(@$this->records[$idx]['rst_Status']=='') {$this->records[$idx]['rst_Status'] = 'open';}
             }
 
             if(@$this->records[$idx]['rst_MaxValues']==null ||
-                !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) $this->records[$idx]['rst_MaxValues'] = 1;
+                !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
             
-            $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s');//reset
 
             $this->records[$idx]['is_new'] = $isInsert;
         }
@@ -368,7 +368,7 @@ class DbDefRecStructure extends DbEntityBase
         if($ret){
             $mysqli->commit();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             
         return $ret;        
     }
@@ -403,49 +403,50 @@ class DbDefRecStructure extends DbEntityBase
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
         $newfields_values  = @$newfields['values']?$newfields['values']:array();
         $order = 0;
-        if(isset($this->data['order'])){ $order = $this->data['order']; }
+        if(isset($this->data['order'])){ $order = $this->data['order'];}
         
         $dt_fields = dbs_GetDetailTypes($this->system, $fields);
         $dt_fields = $dt_fields['typedefs'];
         $di = $dt_fields['fieldNamesToIndex'];
         
         
-        $records = array();        
-        foreach($fields as $dty_ID)
-        if(@$dt_fields[$dty_ID])
-        {
-        
-            $dt = $dt_fields[$dty_ID]['commonFields'];
+        $records = array();
+        foreach($fields as $dty_ID){
+            if(@$dt_fields[$dty_ID])
+            {
             
-            $recvalues = array(
-            'rst_ID'=> $dty_ID,
-            'rst_RecTypeID'=> $rty_ID,
-            'rst_DisplayOrder'=> $order,
-            'rst_DetailTypeID'=> $dty_ID,
-            'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
-                                     ?$newfields_values[$dty_ID]['dty_Name'] 
-                                     :$dt[$di['dty_Name']],
-            'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
-                                     ?$newfields_values[$dty_ID]['dty_HelpText'] 
-                                     :$dt[$di['dty_HelpText']],
-            'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
-            'rst_MaxValues'=> 1,
-            'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
+                $dt = $dt_fields[$dty_ID]['commonFields'];
+                
+                $recvalues = array(
+                'rst_ID'=> $dty_ID,
+                'rst_RecTypeID'=> $rty_ID,
+                'rst_DisplayOrder'=> $order,
+                'rst_DetailTypeID'=> $dty_ID,
+                'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
+                                         ?$newfields_values[$dty_ID]['dty_Name'] 
+                                         :$dt[$di['dty_Name']],
+                'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
+                                         ?$newfields_values[$dty_ID]['dty_HelpText'] 
+                                         :$dt[$di['dty_HelpText']],
+                'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
+                'rst_MaxValues'=> 1,
+                'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
 
 
-            if(@$dt[$di['dty_SemanticReferenceURL']]){
-                $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+                if(@$dt[$di['dty_SemanticReferenceURL']]){
+                    $recvalues['rst_SemanticReferenceURL'] = $dt[$di['dty_SemanticReferenceURL']];
+                }
+                if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
+                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
+                }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                    $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
+                }
+                
+                $records[] = $recvalues;
+                
+                if(isset($this->data['order'])){ $order = $this->data['order'];}
+                else { $order = $order+10; }
             }
-            if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
-                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
-            }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
-                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
-            }
-            
-            $records[] = $recvalues;
-            
-            if(isset($this->data['order'])){ $order = $this->data['order']; }
-            else { $order = $order+10; }
         }
         
         if(count($records)>0){
@@ -482,7 +483,7 @@ class DbDefRecStructure extends DbEntityBase
                     . 'INNER JOIN Records ON rec_ID=dtl_RecID '
                     . 'WHERE rec_RecTypeID=' . $rty_ID . ' '
                     . 'GROUP BY dtl_DetailTypeID';
-                $detail_usage = mysql__select_assoc2($mysqli, $query); // [ dty_ID1 => count1, ... ]
+                $detail_usage = mysql__select_assoc2($mysqli, $query);// [ dty_ID1 => count1, ... ]
                 if($detail_usage){
                     $res = $detail_usage; 
                 }else if(empty($mysqli->error)){
@@ -497,20 +498,20 @@ class DbDefRecStructure extends DbEntityBase
                     . 'FROM defRecStructure '
                     . 'INNER JOIN defDetailTypes ON rst_DetailTypeID=dty_ID '
                     . 'WHERE dty_Type="relmarker" AND rst_RecTypeID=' . $rty_ID;
-                $relmarker_filters = mysql__select_assoc($mysqli, $query); // [ relmarker_fld_ID1 => [rty_id_list1, trm_id1], ... ]
+                $relmarker_filters = mysql__select_assoc($mysqli, $query);// [ relmarker_fld_ID1 => [rty_id_list1, trm_id1], ... ]
                 if($relmarker_filters && count($relmarker_filters) > 0){
 
                     // Retrieve record ids that are relevant
                     $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID 
                         . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
-                    $ids = mysql__select_list2($mysqli, $query); // returns array of rec ids
+                    $ids = mysql__select_list2($mysqli, $query);// returns array of rec ids
                     if(is_array($ids) && count($ids) > 0){
 
                         $rec_ids = implode(',', $ids);
                         foreach ($relmarker_filters as $dty_id => $fld_details) {
 
-                            $allowed_recs = array(); // records that meet the rectype requirement
-                            $not_allowed_recs = array(); // records that don't meet the rectype requirement
+                            $allowed_recs = array();// records that meet the rectype requirement
+                            $not_allowed_recs = array();// records that don't meet the rectype requirement
                             $count = 0;
 
                             // Get possible related types (relation terms)
@@ -524,7 +525,7 @@ class DbDefRecStructure extends DbEntityBase
                                 $query = 'SELECT rl_TargetID '
                                     . 'FROM recLinks '
                                     . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_SourceID IN ('. $rec_ids .')';
-                                $rel_usage_from = mysql__select_list2($mysqli, $query); // returns count
+                                $rel_usage_from = mysql__select_list2($mysqli, $query);// returns count
                                 if(!empty($mysqli->error)){
                                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
                                     return false;
@@ -533,7 +534,7 @@ class DbDefRecStructure extends DbEntityBase
                                 $query = 'SELECT rl_SourceID '
                                 . 'FROM recLinks '
                                 . 'WHERE rl_RelationTypeID IN (' . implode(',', $terms) . ') AND rl_TargetID IN ('. $rec_ids .')';
-                                $rel_usage_to = mysql__select_list2($mysqli, $query); // returns count
+                                $rel_usage_to = mysql__select_list2($mysqli, $query);// returns count
                                 if(!empty($mysqli->error)){
                                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve reverse relationship marker usage for field #'.$dty_id.' from record type #'.$rty_ID, $mysqli->error);
                                     return false;

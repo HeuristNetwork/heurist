@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * record manipulation - add, save, delete
     *
     * @package     Heurist academic knowledge management system
@@ -108,7 +108,7 @@
                 
                 $mysqli = $system->get_mysqli();
                 $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-                if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+                if($keep_autocommit===true) {$mysqli->autocommit(FALSE);}
                 if (strnatcmp(phpversion(), '5.5') >= 0) {
                     $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
                 }
@@ -120,7 +120,7 @@
                 }else{
                     $mysqli->rollback();
                 }
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);                
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
             } else {
                 $response = $system->addError(HEURIST_INVALID_REQUEST);

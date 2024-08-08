@@ -25,6 +25,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global regional, prepared_params */
+
 /*
 
 Properties:
@@ -42,7 +44,7 @@ Localization routines (assigned to window.hWin)
     HRes = returns url or loads content for localized resource
     HRJ = returns localized value for json (options in widget)
 
-LayoutMgr   hLayout object (@todo replace to new version from CMS)
+LayoutMgr   HLayout object (@todo replace to new version from CMS)
 
 Classes for server interaction
 
@@ -53,9 +55,9 @@ Classes for server interaction
 
 */
 function hAPI(_db, _oninit, _baseURL) { //, _currentUser
-    var _className = "HAPI",
-        _version = "0.4",
-        _database = null, //same as public property  @toremove      
+    const _className = "HAPI",
+        _version = "0.4";
+    let _database = null, //same as public property  @toremove      
 
         _region = null, //current region ISO639-2 (alpha3) in uppercase
         _regional = null, //localization resources
@@ -63,6 +65,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         _guestUser = { ugr_ID: 0, ugr_FullName: 'Guest' },
         _listeners = [],
         _is_callserver_in_progress = false,
+        _last_check_dbcache_relevance = 0,
 
         _use_debug = true;
                 
@@ -86,7 +89,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             _database = window.hWin.HEURIST4.util.getUrlParameter('db');
         }
 
-        var installDir = '';
+        let installDir = '';
         
         if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
             installDir = '/heurist/';
@@ -112,7 +115,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             installDir = installDir.split('/');
-            for (var i = installDir.length - 1; i >= 0; i--) {
+            for (let i = installDir.length - 1; i >= 0; i--) {
                 if (installDir[i] != '') {
                     installDir[i] = 'heurist';
                     break;
@@ -138,12 +141,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         // layout and configuration arrays are defined (from layout_default.js)    
-        if (typeof hLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hLayout)
+        if (typeof HLayout !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HLayout)
             && typeof cfg_widgets !== 'undefined' && typeof cfg_layouts !== 'undefined') {
-            that.LayoutMgr = new hLayout();
+            that.LayoutMgr = new HLayout();
         }
-        if (typeof hRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(hRecordSearch)) {
-            that.RecordSearch = new hRecordSearch();
+        if (typeof HRecordSearch !== 'undefined' && window.hWin.HEURIST4.util.isFunction(HRecordSearch)) {
+            that.RecordSearch = new HRecordSearch();
         }
 
         if (!window.onresize) {
@@ -168,7 +171,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.SystemMgr.sys_info(function (success) {
                 if (success) {
                     that.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
-                    var lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
+                    let lang = window.hWin.HEURIST4.util.getUrlParameter('lang');
                     if (lang) {
                         //save in preferences
                         window.hWin.HAPI4.save_pref('layout_language', lang);
@@ -191,13 +194,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
     }
     
-    var _key_count;
+    let _key_count;
     function _getKeyCount(data, level) {
         level = level || 0;
         //_key_count[level] = _key_count[level] || 0;
-        var _key_count = 0;
-        for (var k in data) {
-            data.hasOwnProperty(k) && _key_count++;
+        let _key_count = 0;
+        for (let k in data) {
+            Object.hasOwn(data, k) && _key_count++;
             if(typeof data[k] === 'object'){
                 _key_count = _key_count + _getKeyCount(data[k], level + 1);   
             }
@@ -232,7 +235,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      */
 
     /**
-     * internal function see hSystemMgr, hRecordMgr - ajax request to server
+     * internal function see HSystemMgr, HRecordMgr - ajax request to server
      *
      * @param {string} action - name of php script in hserv/controller folder on server side
      * @param {Request} request - data to be sent to server side
@@ -244,6 +247,35 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
+        
+        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info'
+            && (new Date().getTime())-_last_check_dbcache_relevance> 3000){ //7 seconds
+            _last_check_dbcache_relevance = new Date().getTime();
+            
+            /*
+            function __is_Not_Active_StrutureEditor(name){
+                let editors = $('div.'+name);
+                if(editors.length>0){
+                    return !editors.is('visible');
+                }else{
+                    return true;                    
+                }
+            }
+                __is_Not_Active_StrutureEditor('defRecStructure')
+                && __checkStrutureEditors('defVocabularyGroups') 
+                && __checkStrutureEditors('defRecTypes')            
+            */
+            
+            //ignore if record structure editor is opened
+            if($('div.defRecStructure').length==0)
+            {
+                window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
+                    _callserver(action, request, callback, timeout);
+                });
+                return;
+            }
+        }
+        
 
         if (!request.db) {
             request.db = _database;
@@ -255,10 +287,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //set d=0 and c=0 to disable debug  https://www.nusphere.com/kb/technicalfaq/faq_dbg_related.htm
         request.DBGSESSID = (_use_debug) ? '425944380594800002;d=1,p=0,c=1' : '425944380594800002;d=0,p=0,c=0';
 
-        var url = that.baseURL + "hserv/controller/" + action + ".php"; //+(new Date().getTime());
+        let url = that.baseURL + "hserv/controller/" + action + ".php"; //+(new Date().getTime());
         
         //@todo - count keys in request to avoid "Input variables exceeded 1000" on server side
-        var cnt = _getKeyCount(request);
+        let cnt = _getKeyCount(request);
         if(cnt>999){
             if(that.baseURL.indexOf('127.0.0.1')>0){
                 alert('Input variables exceeded 1000: '+cnt+' ,'+action);              
@@ -266,9 +298,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             console.error('Input variables exceeded 1000',cnt);
         }
 
-        var request_code = { script: action, action: request.a };
+        let request_code = { script: action, action: request.a };
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        var ajax_options = {
+        let ajax_options = {
             url: url,
             type: "POST",
             data: request,
@@ -282,7 +314,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                var response;
+                let response;
                 if (jqXHR.responseJSON && jqXHR.responseJSON.status) {
                     response = jqXHR.responseJSON;
                 } else {
@@ -320,7 +352,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
+                let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
 
                 if (window.hWin.HEURIST4.util.isFunction(callback)) {
                     callback(response);
@@ -353,7 +385,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (response.affectedRty) {
                 //clear record browse cache
                 if (window.hWin.HEURIST4.browseRecordTargets) {
-                    var rtys = [];
+                    let rtys = [];
                     if (Array.isArray(response.affectedRty)) {
                         rtys = response.affectedRty;
                     } else if (typeof response.affectedRty === 'string') {
@@ -436,9 +468,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *
     * @returns {Object}
     */
-    function hSystemMgr() {
+    function HSystemMgr() {
 
-        var that = {
+        let that = {
 
             /**
             * @param {Request} request
@@ -497,7 +529,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             verify_credentials: function (callback, requiredLevel, password_protected, password_entered, requiredPermission) {
 
-                var requiredMembership = 0;
+                let requiredMembership = 0;
 
                 if (typeof requiredLevel === 'string' && requiredLevel.indexOf(';') > 0) {
 
@@ -560,13 +592,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         //verification is accepted now check for password protection
                         window.hWin.HAPI4.SystemMgr.verify_credentials(callback, -1, password_protected, password_entered);
                     } else {
-                        var response = {};
+                        let response = {};
                         response.sysmsg = 0;
                         response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
                         response.message = 'To perform this operation you have to be logged in (you may have been logged out due to lack of activity - if so, please reload the page)';
 
                         if (requiredMembership > 0) {
-                            var sGrpName = '';
+                            let sGrpName = '';
                             if (window.hWin.HAPI4.sysinfo.db_usergroups
                                 && window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]) {
                                 sGrpName = ' "' + window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership] + '"';
@@ -578,7 +610,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         } else if (requiredLevel == 2) {
                             response.message += ' as database onwer';
                         } else if (requiredLevel > 0) {
-                            var sGrpName = '';
+                            let sGrpName = '';
                             if (window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel]) {
                                 sGrpName = ' "' + window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel] + '"';
                             }
@@ -614,10 +646,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             //!!!!  assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                         }
 
-                        var is_expired = false;
+                        let is_expired = false;
                         if (response.data.currentUser) {
 
-                            var old_id = window.hWin.HAPI4.user_id();
+                            let old_id = window.hWin.HAPI4.user_id();
 
                             window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
 
@@ -636,8 +668,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }
                 }
 
-
-                if (false) { //MODE1 verify locally only
+                const VERIFY_LOCALLY = false;
+                if (VERIFY_LOCALLY) { //MODE1 verify locally only
                     __verify();
 
                 } else {
@@ -680,7 +712,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             sys_info: function (callback) {
 
-                var request = { a: 'sysinfo' };                
+                let request = { a: 'sysinfo' };                
 
                 if(typeof prepared_params !== 'undefined' && prepared_params['guest_data']){
                     request['is_guest'] = 1;  //guest user allowed (self registered - not enabled)
@@ -688,7 +720,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _callserver('usr_info', request,
                     function (response) {
-                        var success = (response.status == window.hWin.ResponseStatus.OK);
+                        let success = (response.status == window.hWin.ResponseStatus.OK);
                         if (success) {
 
                             if (response.data.currentUser) {
@@ -758,7 +790,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             usr_names: function (request, callback) {
 
-                var ugrp_ids = request.UGrpID;
+                let ugrp_ids = request.UGrpID;
                 if (ugrp_ids >= 0) {
                     ugrp_ids = [ugrp_ids];
                 } else {
@@ -766,13 +798,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
 
                 //first try to take on client side
-                var sUserNames = {};
+                let sUserNames = {};
                 request.UGrpID = [];
 
-                for (var idx in ugrp_ids) {
+                for (let idx in ugrp_ids) {
 
-                    var usr_ID = Number(ugrp_ids[idx]);
-                    var sUserName = that.getUserNameLocal(usr_ID);
+                    let usr_ID = Number(ugrp_ids[idx]);
+                    let sUserName = that.getUserNameLocal(usr_ID);
 
                     if (sUserName) {
                         sUserNames[usr_ID] = sUserName;
@@ -807,8 +839,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             getUserNameLocal: function(ugrp_id) {
                 
-                var usr_ID = Number(ugrp_id);
-                var sUserName = null;
+                let usr_ID = Number(ugrp_id);
+                let sUserName = null;
 
                 if (usr_ID == 0) {
                     sUserName = window.hWin.HR('Everyone');
@@ -843,75 +875,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
 
             /**
-             * Log activity of user in the system, using Google tags
+             * Log activity of user in the system
              * @param {string} activity underscore-seperated string of actions to log
              * @param {string} suplementary info 
              */
             user_log: function (activity, suplementary) {
-
-                if (typeof gtag !== 'undefined' && window.hWin.HEURIST4.util.isFunction(gtag)) { //google log function
-                    /*                    
-                    Category
-                    Action
-                    Label (optional, but recommended) is the string that will appear as the event label.
-                    Value (optional) is a non-negative integer that will appear as the event value.
-                    
-                    gtag('event', <action>, {
-                      'event_category': <category>,
-                      'event_label': <label>,
-                      'value': <value>
-                    });
-                    */
-                    /*
-                    [open]_structure_Terms  Structure - category, open - action, Terms - label
-                    add_Record   Record - category   "add" action
-                    open_Crosstabs
-                    db_Register
-                    
-                    actions:
-                    open - default
-                    add
-                    imp =import
-                    sync
-                    upl =upload
-                    verify
-                    refresh
-                    exp =export
-                    
-                    short categories
-                    db  =Database
-                    st  =Structure
-                    Rec =Rceord 
-                    admin
-                    hlp
-                    prof =Profile
-                    
-                    
-                    */
-                    var parts = activity.split('_');
-                    //allowed actions
-                    var actions = ['open', 'add', 'imp', 'sync', 'upl', 'verify', 'refresh', 'exp', 'search', 'delete', 'edit'];
-
-                    var idx = 0;
-                    var k = actions.indexOf(parts[0].toLowerCase());
-                    var evt_action = 'open';
-                    if (k >= 0) {
-                        evt_action = actions[k];
-                        idx++;
-                    }
-
-                    //short names for cats
-                    var categories = { 'db': 'database', 'st': 'structure', 'rec': 'record', 'hlp': 'help', 'prof': 'profile' };
-
-                    var evt_category = parts[idx].toLowerCase();
-                    if (categories[evt_category]) evt_category = categories[evt_category];
-                    idx++;
-
-                    var evt_label = (idx < parts.length) ? parts[idx].toLowerCase() : null;
-
-
-                    gtag('event', evt_action, { 'event_category': evt_category, 'event_label': evt_label });
-                }
 
                 const log_actions = ['editRec', 'VisitPage']; // interactions to add to Heurist's logs
                 const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp']; // interactions w/ prefix to Heurist's logs
@@ -927,7 +895,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         activity = action_parts.join('');
                     }
 
-                    var request = { a: 'usr_log', activity: activity, suplementary: suplementary, user: window.hWin.HAPI4.user_id() };
+                    let request = { a: 'usr_log', activity: activity, suplementary: suplementary, user: window.hWin.HAPI4.user_id() };
                     _callserver('usr_info', request);
                 }
             },
@@ -1056,7 +1024,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
 
-                var that = this;
+                let that = this;
 
                 //hard reload of database definitions
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('force_all', function (success) {
@@ -1066,7 +1034,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         if (is_message==true) {
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes (ctrl-F5 will refresh data + code).');
                             $dlg.parent('.ui-dialog').css({top:150,left:150});    
                         }      
@@ -1090,7 +1058,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             get_url_content_type: function (url, callback) {
                 /** @type {Request} */
-                var request = { a: 'get_url_content_type', url: url };
+                let request = { a: 'get_url_content_type', url: url };
                 _callserver('usr_info', request, callback);
             },
 
@@ -1101,7 +1069,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             get_foldercontent: function (source, exts, callback) {
                 /** @type {Request} */
-                var request = { a: 'foldercontent', source: source, exts:exts };
+                let request = { a: 'foldercontent', source: source, exts:exts };
                 _callserver('usr_info', request, callback);
             },
 
@@ -1259,7 +1227,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
 
                 //check what rectypes are missed in this database                  
-                var missed = [];
+                let missed = [];
 
                 if (force_refresh) {
 
@@ -1267,8 +1235,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 } else {
 
-                    for (var i = 0; i < rty_IDs.length; i++) {
-                        var local_id = $Db.getLocalID('rty', rty_IDs[i]);
+                    for (let i = 0; i < rty_IDs.length; i++) {
+                        let local_id = $Db.getLocalID('rty', rty_IDs[i]);
                         if (!(local_id > 0)) {
                             //not found
                             missed.push(rty_IDs[i]);
@@ -1291,12 +1259,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 } else {
 
-                    var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
+                    let $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
                         + '<br>'
                         + window.hWin.HR('Click "Import" to get these definitions'),
                         {
                             'Import': function () {
-                                var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg2.dialog('close');
 
                                 window.hWin.HEURIST4.msg.bringCoverallToFront();
@@ -1306,7 +1274,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', 
                                     function (response) {
                                         window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                                        let $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
                                         if ($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                         if (response.status == window.hWin.ResponseStatus.OK) {
@@ -1318,7 +1286,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                             },
                             'Cancel': function () {
-                                var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg2.dialog('close');
                             }
                         },
@@ -1339,7 +1307,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             import_definitions: function (databaseID, definitionID, is_rename_target, entity, callback) {
 
                 /** @type {Request} */
-                var request = {
+                let request = {
                     databaseID: databaseID,
                     definitionID: definitionID,
                     is_rename_target: is_rename_target ? 1 : 0,
@@ -1355,7 +1323,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             if (response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
                             
                             if (response.defs.entities)
-                                for (var entityName in response.defs.entities) {
+                                for (let entityName in response.defs.entities) {
                                     //refresh local definitions
                                     window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
                                         response.defs.entities);
@@ -1381,8 +1349,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //@todo define parameter in layout "production=true"
                 if (!window.hWin.HAPI4.is_publish_mode) {
 
-                    var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null);
-                    var need_exit = false;
+                    let version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null);
+                    let need_exit = false;
 
                     //
                     // version of code to compare with server provided - to avoid caching issue
@@ -1398,7 +1366,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                     {
                                         hideTitle: true, closeOnEscape: false,
                                         open: function (event, ui) {
-                                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                             $dlg.find('#version_cache').text(version_in_cache);
                                             $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
                                         }
@@ -1410,7 +1378,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         }
                         if (need_exit) return true;
 
-                        var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req,
+                        let res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req,
                             window.hWin.HAPI4.sysinfo.db_version);
                         if (res == -2) { //-2= db_version_req newer
                             // show lock popup that forces to upgrade database
@@ -1423,7 +1391,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 {
                                     hideTitle: false, closeOnEscape: false,
                                     open: function (event, ui) {
-                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                        let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                         $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
                                         $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
                                         $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
@@ -1486,9 +1454,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     * - get_facets
     * - search_related
     *
-    * @returns {hRecordMgr}
+    * @returns {HRecordMgr}
     */
-    function hRecordMgr() {
+    function HRecordMgr() {
 
         /**
          * @typedef Record
@@ -1512,7 +1480,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
          * should be set.
          */
 
-        var that = {
+        let that = {
 
             /**
             * Creates temporary new record
@@ -1521,7 +1489,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             * @param {string} [request.rt] - optional: rectype
             * @param {string} [request.ro] - optional: owner
             * @param {string} [request.rv] - optional: visibility
-            * @param {callserverCallback} callback - response hRecordSet object
+            * @param {callserverCallback} callback - response HRecordSet object
             */
             addRecord: function (request, callback) {
                 if (request) {
@@ -1537,12 +1505,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              *
              * @param {Request} request - request.a will be set to s|save
              * @param {Record} request.record - record data to be saved
-             * @param {callserverCallback} callback - response hRecordSet object
+             * @param {callserverCallback} callback - response HRecordSet object
              */
             saveRecord: function (request, callback) {
                 if (request) request.a = 's';
                 
-                var encode_type = window.hWin.HAPI4.sysinfo['need_encode'];
+                let encode_type = window.hWin.HAPI4.sysinfo['need_encode'];
                 if(!(encode_type>0)) encode_type = 3; //json by default
 
                 window.hWin.HEURIST4.util.encodeRequest(request, ['details','details_visibility'], encode_type);
@@ -1595,7 +1563,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              */
             increment: function (rtyID, dtyID, callback) {
                 /** @type {Request} */
-                var request = { a: 'increment', rtyID: rtyID, dtyID: dtyID };
+                let request = { a: 'increment', rtyID: rtyID, dtyID: dtyID };
                 _callserver('record_edit', request, callback);
             },
 
@@ -1674,15 +1642,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         request.id = window.hWin.HEURIST4.util.random();
                     }
 
-                    var document = callback;
+                    let document = callback;
                     if (!window.hWin.HEURIST4.util.isnull(document) && !request.increment) {
                         document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [request]); //global app event
                     }
 
                     callback = function (response) {
-                        var resdata = null;
+                        let resdata = null;
                         if (response.status == window.hWin.ResponseStatus.OK) {
-                            resdata = new hRecordSet(response.data);
+                            resdata = new HRecordSet(response.data);
                         } else {
 
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1765,11 +1733,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
 
 
-            // find min and max values for
+            // find min and max values, or count of distinct values, or matching counts
+            // for
             // rt - record type
             // dt - detailtyep
-            , minmax: function (request, callback) {
-                if (request) request.a = 'minmax';
+            , get_aggregations: function (request, callback) {
+                //if (request) request.a = 'minmax';
                 _callserver('record_search', request, callback);
             }
 
@@ -1823,13 +1792,14 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *
     * @returns {Object}
     */
-    function hEntityMgr() {
+    function HEntityMgr() {
 
-        var entity_configs = {};
-        var entity_data = {};
-        var entity_timestamp = 0;
+        let entity_configs = {};
+        let entity_data = {};
+        let entity_timestamp = 0;
+        let _msgOnRefreshEntityData = 0;
 
-        var that = {
+        let that = {
 
             //load entity configuration file
             // entityScrud.action = config
@@ -1891,12 +1861,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             resolveFields: function (entityName) {
 
-                var entity_cfg = entity_configs[entityName];
+                let entity_cfg = entity_configs[entityName];
 
                 if (entity_cfg) {
 
                     function __findFields(fields) {
-                        var idx;
+                        let idx;
                         for (idx in fields) {
                             if (fields[idx].children) {
                                 __findFields(fields[idx].children);
@@ -1923,17 +1893,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // 4) reverse links rty <- rty_IDs - linked from
             //
             createRstIndex: function () {
-                var rst_index = {};
-                var rst_references = {}; //list of resource and relmarker fields that refers this rectype
-                var rst_reverse = {};    //linked FROM rectypes
-                var rst_direct = {};     //linked TO rectypes
+                let rst_index = {};
+                let rst_references = {}; //list of resource and relmarker fields that refers this rectype
+                let rst_reverse = {};    //linked FROM rectypes
+                let rst_direct = {};     //linked TO rectypes
 
-                var recset = entity_data['defRecStructure'];
+                let recset = entity_data['defRecStructure'];
                 recset.each2(function (rst_ID, record) {
 
                     //rstfield = recset.getRecord(rst_ID)
-                    var rty_ID = record['rst_RecTypeID'];
-                    var dty_ID = record['rst_DetailTypeID'];
+                    let rty_ID = record['rst_RecTypeID'];
+                    let dty_ID = record['rst_DetailTypeID'];
 
                     if (!rst_index[rty_ID]) rst_index[rty_ID] = {};
                     if (!rst_index[rty_ID][dty_ID]) {
@@ -1974,9 +1944,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 });
 
                 //create separate recordset for every rectype
-                for (var rty_ID in rst_index) {
-                    var _order = Object.keys(rst_index[rty_ID]);
-                    rst_index[rty_ID] = new hRecordSet({
+                for (let rty_ID in rst_index) {
+                    let _order = Object.keys(rst_index[rty_ID]);
+                    rst_index[rty_ID] = new HRecordSet({
                         entityName: 'defRecStructure',
                         count: _order.length,
                         records: rst_index[rty_ID],
@@ -1999,8 +1969,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // see initialLoadDatabaseDefintions 
             //
             relevanceEntityData: function (callback) {
+                
                 if(entity_timestamp>0){
                     window.hWin.HAPI4.EntityMgr.refreshEntityData('relevance', callback)
+                }else if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                    callback(this, true);
                 }
             },
             
@@ -2009,9 +1982,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // 
             refreshEntityData: function (entityName, callback) {
 
-                var params = { a: 'structure', 'details': 'full'};
+                let params = { a: 'structure', 'details': 'full'};
                 params['entity'] = entityName;
-                params['timestamp'] = entity_timestamp;
+                params['timestamp'] = entity_timestamp; //db defitions time on client side
 
                 /*
                 if($.isPlainObject(opts) && opts['recID']>0){ 
@@ -2022,25 +1995,31 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     params['entity'] = opts; //entityName
                 }*/
                 
-                var s_time = new Date().getTime() / 1000;
-                //'multi':1,  
-//[domain]/h6-alpha/hserv/controller/entityScrud.php?db=[database]&a=structure&entity=all                
+                let s_time = new Date().getTime() / 1000;
+                if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
+                _msgOnRefreshEntityData = setTimeout(function(){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Database definitions refresh', false);
+                }, 1000);
+
                  
                 _callserver('entityScrud', params,
                     function (response) {
+
+                        if(_msgOnRefreshEntityData) clearTimeout(_msgOnRefreshEntityData);
+                        _msgOnRefreshEntityData = 0;
+                        window.hWin.HEURIST4.msg.closeMsgFlash();
                         
                         if (response && response['uptodate']) { //relevance db definitions
-                            
-                            //console.log('definitions are up to date');
+                            //definitions are up to date
                             if (window.hWin.HEURIST4.util.isFunction(callback)) callback(this, true);
                             
                         }else if (response && response.status == window.hWin.ResponseStatus.OK || response['defRecTypes']) {
 
-                            var fin_time = new Date().getTime() / 1000;
+                            let fin_time = new Date().getTime() / 1000;
                             console.log('definitions are loaded: '+(fin_time-s_time)+' sec');
                             
-                            var dbdefs = (response['defRecTypes']?response:response['data']);
-                            for (var entityName in dbdefs) {
+                            let dbdefs = (response['defRecTypes']?response:response['data']);
+                            for (let entityName in dbdefs) {
                                 window.hWin.HAPI4.EntityMgr.setEntityData(entityName, dbdefs)
                             }
 
@@ -2066,7 +2045,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 
                 if ($.isEmptyObject(entity_data[entityName]) || force_reload == true) {
 
-                    var det = 'list';
+                    let det = 'list';
                     if (entityName == 'defRecStructure'){ //|| entityName == 'defTerms') {
                         det = 'full';
                     }
@@ -2075,7 +2054,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         function (response) {
                             if (response.status == window.hWin.ResponseStatus.OK) {
 
-                                entity_data[response.data.entityName] = new hRecordSet(response.data);
+                                entity_data[response.data.entityName] = new HRecordSet(response.data);
 
                                 if (response.data.entityName == 'defRecStructure') {
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
@@ -2114,15 +2093,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             setEntityData: function (entityName, data) {
                 
                 if(entityName=='timestamp'){ 
-                    
                     entity_timestamp = Number(data[entityName]); //db structure cache file last update time
-                    //console.log('entity_timestamp: ', entity_timestamp)
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
                 } else {
                     
-                    entity_data[entityName] = new hRecordSet(data[entityName]);
+                    entity_data[entityName] = new HRecordSet(data[entityName]);
 
                     //build rst index
                     if (entityName == 'defRecStructure') {
@@ -2159,9 +2136,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             getTitlesByIds: function (entityName, recIDs, callback) {
 
-                var idx, display_value = [];
+                let idx, display_value = [];
                 if (entity_data[entityName]) {
-                    var ecfg = entity_configs[entityName];
+                    let ecfg = entity_configs[entityName];
                     if (!ecfg) {
                         window.hWin.HAPI4.EntityMgr.getEntityConfig(entityName, function () {
                             window.hWin.HAPI4.EntityMgr.getTitlesByIds(entityName, recIDs, callback);
@@ -2170,7 +2147,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }
 
 
-                    var edata = entity_data[entityName];
+                    let edata = entity_data[entityName];
                     if (!Array.isArray(recIDs)) recIDs = [recIDs];
                     for (idx in recIDs) {
                         display_value.push(
@@ -2181,7 +2158,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 } else {
 
 
-                    var request = {};
+                    let request = {};
                     request['recID'] = recIDs;
                     request['a'] = 'title'; //action
                     request['entity'] = entityName;
@@ -2225,7 +2202,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){ 
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        let recordset = new hRecordSet(response.data);
+                        let recordset = new HRecordSet(response.data);
                         window.hWin.HAPI4.EntityMgr.setEntityData(key, recordset); // save to local cache
 
                         callback.call(this, recordset);
@@ -2241,7 +2218,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
 
     //public members
-    var that = {
+    let that = {
 
         baseURL: '',
         iconBaseURL: '',
@@ -2275,7 +2252,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         */
         setCurrentUser: function (user) {
 
-            var isChanged = (that.currentUser != user);
+            let isChanged = (that.currentUser != user);
 
             if (user && user['ugr_Permissions'] && !user['ugr_Permissions']['disabled']) {
                 that.currentUser = user;
@@ -2283,7 +2260,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 that.currentUser = _guestUser;
             }
 
-            if (false) { //disabled: verify credentials if user is idle
+            const ENABLE_VERIFY_IDLE = false;
+            if (ENABLE_VERIFY_IDLE) { //disabled: verify credentials if user is idle
 
                 if (that.currentUser['ugr_ID'] > 0) {
 
@@ -2360,8 +2338,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 ugs = Array.isArray(ugs) ? ugs : ugs.split(',')
             }
 
-            for (var idx in ugs) {
-                var ug = ugs[idx];
+            for (let idx in ugs) {
+                let ug = ugs[idx];
                 if (ug == 0 || that.currentUser['ugr_ID'] == ug ||
                     (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug])) {
                     return true;
@@ -2418,8 +2396,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (window.hWin.HEURIST4.util.isempty(name)) {
                 return that.currentUser['ugr_Preferences']; //returns all preferences
             } else {
-                var res = '';
-                if(that.currentUser['ugr_Preferences'] && that.currentUser['ugr_Preferences'][name]){
+                let res = '';
+                if(that.currentUser['ugr_Preferences'] && Object.hasOwn(that.currentUser['ugr_Preferences'], name)){
                     res = that.currentUser['ugr_Preferences'][name];
                 }
 
@@ -2436,7 +2414,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         },
 
         get_prefs_def: function (name, defvalue) {
-            var res = window.hWin.HAPI4.get_prefs(name);
+            let res = window.hWin.HAPI4.get_prefs(name);
             if (window.hWin.HEURIST4.util.isempty(res)) {
                 res = defvalue;
             }
@@ -2456,7 +2434,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (Array.isArray(value) && limit > 0) {
                 value = value.slice(0, limit);
 
-                var cur_value = window.hWin.HAPI4.get_prefs(name);
+                let cur_value = window.hWin.HAPI4.get_prefs(name);
                 cur_value = (cur_value ? cur_value.split(',') : null);
                 if (!Array.isArray(cur_value)) cur_value = [];
 
@@ -2466,7 +2444,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 value = cur_value.slice(0, limit).join(',');
             }
 
-            var request = {};
+            let request = {};
             request[name] = value;
 
             window.hWin.HAPI4.SystemMgr.save_prefs(request,
@@ -2482,7 +2460,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             $(window.hWin.document).trigger(eventType, data);
 
             //this is for listeners in other frames
-            for (var i = 0; i < _listeners.length; i++) {
+            for (let i = 0; i < _listeners.length; i++) {
                 if (_listeners[i].event_type == eventType) {
                     _listeners[i].callback.call(_listeners[i].obj, data);
                 }
@@ -2495,7 +2473,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         },
 
         removeEventListener: function (object, event_type) {
-            for (var i = 0; i < _listeners.length; i++) {
+            for (let i = 0; i < _listeners.length; i++) {
                 if (_listeners[i].event_type == event_type && _listeners[i].obj == object) {
 
                     _listeners.splice(i, 1);
@@ -2525,15 +2503,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         //UserMgr: new hUserMgr(),
 
-        SystemMgr: new hSystemMgr(),
+        SystemMgr: new HSystemMgr(),
 
         /*SystemMgr: function(){
-        return hSystemMgr();
+        return HSystemMgr();
         },*/
 
-        RecordMgr: new hRecordMgr(),
+        RecordMgr: new HRecordMgr(),
 
-        EntityMgr: new hEntityMgr(),
+        EntityMgr: new HEntityMgr(),
 
         //assign it later since we may have different search managers - incremental, partial...
         RecordSearch: null, //class that responsible for search and incremental loading of result
@@ -2553,7 +2531,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if(lang && lang != 'def'){
                 if(lang.length==2){
                     lang = lang.toLowerCase();
-                    for(var code3 in that.sysinfo.common_languages){
+                    for(let code3 in that.sysinfo.common_languages){
                         if(lang==that.sysinfo.common_languages[code3]['a2']){
                             return code3;
                         }
@@ -2581,19 +2559,19 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 lang = window.hWin.HAPI4.getLangCode3(lang);
                 let a2_lang = that.sysinfo.common_languages[lang]['a2'].toUpperCase();
 
-                var def_val = '';
-                var is_object = $.isPlainObject(val);
+                let def_val = '';
+                let is_object = $.isPlainObject(values);
                 
-                for (var key in values) {
-                    if (!is_object || val.hasOwnProperty(key)) {
+                for (let key in values) {
+                    if (!is_object || Object.hasOwn(values, key)) {
 
-                        var val = values[key];
+                        let val = values[key];
                         
                         if(val!=null){
 
-                            var val_orig = val, tag_to_remove = null;
+                            let val_orig = val, tag_to_remove = null;
                             if(val.indexOf('<p')===0 || val.indexOf('<span')===0){
-                                tag_to_remove = strpos($val,'<p')===0?'</p>':'</span>';
+                                tag_to_remove = val.indexOf('<p')===0?'</p>':'</span>';
                                 val = window.hWin.HEURIST4.util.stripTags(val); //remove all tags
                             }
                             function __removeFirstTag(){
@@ -2669,7 +2647,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (window.hWin.HEURIST4.util.isempty(res)) {
                     return '';
                 }
-                var key = res.trim();
+                let key = res.trim();
                 //if (key.indexOf('menu-') == 0) {
                 //    key = key.replaceAll('-', '_');
                 //}
@@ -2714,7 +2692,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
                 
                 $.each($(ele).find('.slocale'), function (i, item) {
-                    var s = $(item).text();
+                    let s = $(item).text();
                     $(item).html(window.hWin.HR(s));
                 });
 
@@ -2729,11 +2707,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         //
         HRJ: function (name, options, lang) {
 
-            var def_value = options[name];
+            let def_value = options[name];
             
             lang = that.getLangCode3(lang, _region);
 
-            var loc_value = options[name + ':' + lang];
+            let loc_value = options[name + ':' + lang];
 
             return loc_value ? loc_value : def_value;
         },
@@ -2746,7 +2724,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         HRes: function (name, ele) {
 
             //window.hWin.HAPI4.getLocale()
-            var sURL = window.hWin.HAPI4.baseURL + '?lang=' + _region + '&asset=' + name;
+            let sURL = window.hWin.HAPI4.baseURL + '?lang=' + _region + '&asset=' + name;
         
             if (ele) {
                 ele.load(sURL);
@@ -2792,7 +2770,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
             }
             if (selection) {
-                if ((typeof selection.isA == "function") && selection.isA("hRecordSet")) {
+                if ((typeof selection.isA == "function") && selection.isA("HRecordSet")) {
                     if (selection.length() > 0) {
                         return (needIds) ? selection.getIds() : selection; //array of record ids
                     }
@@ -2830,7 +2808,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             if (entityName == 'Records') {
 
-                var request = {
+                let request = {
                     db: window.hWin.HAPI4.database,
                     file: recID,  // ulf_ID
                     mode: 'metaonly'  // get width and height for image file
@@ -2841,7 +2819,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             } else {
 
-                var checkURL = window.hWin.HAPI4.getImageUrl(entityName, recID, version, 'check');
+                let checkURL = window.hWin.HAPI4.getImageUrl(entityName, recID, version, 'check');
 
                 window.hWin.HEURIST4.util.sendRequest(checkURL, null, null, callback);
 

@@ -69,25 +69,25 @@ class DbUsrReminders extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('rem_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rem_OwnerUGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rem_RecID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rem_Message');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('rem_ToWorkgroupID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rem_ToUserID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rem_ToEmail');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
 
         //compose SELECT it depends on param 'details' ------------------------
@@ -188,7 +188,7 @@ class DbUsrReminders extends DbEntityBase
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
                     'rem_ID in ('.implode(',', $this->recordIDs).') AND rem_OwnerUGrpID!='.$ugrID);
             
-            $cnt = count($recIDs_norights);       
+            $cnt = count($recIDs_norights);
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
@@ -220,9 +220,9 @@ class DbUsrReminders extends DbEntityBase
                     $this->records[$idx]['rem_OwnerUGrpID'] = $this->system->get_user_id();
                 }
                 $this->records[$idx]['rem_Nonce'] = dechex(random_int(1,99));
-                $this->fields['rem_Nonce'] = array(); //to pass data to save 
+                $this->fields['rem_Nonce'] = array();//to pass data to save 
             }
-            $this->records[$idx]['rem_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['rem_Modified'] = date('Y-m-d H:i:s');//reset
         }
 
         return $ret;
@@ -230,7 +230,7 @@ class DbUsrReminders extends DbEntityBase
     }    
     
     public function setmysql($mysqli){
-        $this->system->set_mysqli($mysqli);    
+        $this->system->set_mysqli($mysqli);
     }
     
     //
@@ -243,7 +243,7 @@ class DbUsrReminders extends DbEntityBase
     public function batch_action(){
         
         $rec_IDs = prepareIds(@$this->data['rec_IDs']);
-        $is_notification = (count($rec_IDs)>0); //sends emails for given set of records
+        $is_notification = (count($rec_IDs)>0);//sends emails for given set of records
         $query = null;
         $record = null;
         
@@ -260,7 +260,7 @@ class DbUsrReminders extends DbEntityBase
             $is_notification = true;
             
             if(count($rec_IDs)==0){
-                $rec_IDs = array($this->data['fields']['rem_RecID']);                
+                $rec_IDs = array($this->data['fields']['rem_RecID']);
             }
             $record = $this->data['fields'];
             
@@ -300,7 +300,7 @@ class DbUsrReminders extends DbEntityBase
         $mysqli = $this->system->get_mysqli();
 /*        
         if(!$mysqli){
-echo 'Database connection not established '.spl_object_id($this->system).'   '.isset($mysqli).'>>>'."\n";   
+echo 'Database connection not established '.spl_object_id($this->system).'   '.isset($mysqli).'>>>'."\n";
 exit;         
             //$this->system->addError(HEURIST_ERROR, 'Database connection not established');
             return false;
@@ -358,11 +358,12 @@ exit;
                                 
                 $recs = mysql__select_all($mysqli, $query);
                 
-                foreach ($recs as $row)
+                foreach ($recs as $row){
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
                         "e"        => null,
                         "u"        => $row[3]));
+                }
             }
             
             //
@@ -370,7 +371,7 @@ exit;
             //
             if(count($recipients)>0){
                 
-                if(!@$report[$record['rem_Freq']]) $report[$record['rem_Freq']] = 0;
+                if(!@$report[$record['rem_Freq']]) {$report[$record['rem_Freq']] = 0;}
                 $report[$record['rem_Freq']] = $report[$record['rem_Freq']] + count($recipients);
 
             //sender params - reminder owner
@@ -385,7 +386,7 @@ exit;
                 if($is_notification){
                     //sened notification email for one or several records
                     $email_from_name = 'Heurist notification';
-                    $email_headers = 'From: '.$email_owner.' <no-reply@'.HEURIST_SERVER_NAME.'>';    
+                    $email_headers = 'From: '.$email_owner.' <no-reply@'.HEURIST_SERVER_NAME.'>';
                     
                     //find associated records
                     $bibs = mysql__select_assoc2($mysqli,
@@ -398,7 +399,7 @@ exit;
                     //sened reminder email about particular record
                     
                     $email_from_name = 'Heurist reminder service';
-                    $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';        
+                    $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';
                     
                     //find associated record
                     $bib = mysql__select_row($mysqli,
@@ -406,7 +407,7 @@ exit;
                                         'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
                                         'where rec_ID = '.intval($record['rem_RecID']));
                     
-                    $email_title = '"'.$bib[0].'"'; //rec_Title    
+                    $email_title = '"'.$bib[0].'"';//rec_Title    
                     if (@$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
                         $email_title .= ' from ' . $owner[0].' '.$owner[1];
                     }
@@ -427,7 +428,7 @@ exit;
                                     . 'Access them and add them (if desired) to your Heurist records at:' . "\n\n"
                                     . HEURIST_BASE_URL.'?w=all&db='.$this->system->dbname().'&q=ids:'.implode(',', $rec_IDs) . "\n\n"
                                     . 'To add records, select them and then Selected > Bookmark' . "\n\n"
-                                    . "Id      Title\n" . "------  ---------\n";                            
+                                    . "Id      Title\n" . "------  ---------\n"; 
                         foreach($bibs as $rec_id => $rec_title){
                             $email_text .= str_pad("$rec_id", 8) . $rec_title . "\n";
                         }
@@ -493,7 +494,7 @@ exit;
             
             }//while
             
-            $res->close();        
+            $res->close();
         }//for reminders        
         
         return $is_notification?true:$report;
@@ -507,12 +508,12 @@ exit;
         if(is_numeric(@$this->data['rem_ID']) && $this->data['rem_ID']>0 && $this->data['h']){
                                        
             //find reminder
-            $mysqli = $this->system->get_mysqli();        
+            $mysqli = $this->system->get_mysqli();
             $query = 'SELECT rem_ID FROM '.$this->config['tableName'].' WHERE rem_ID='.$this->data['rem_ID']
                 .' and rem_Nonce="'.$mysqli->real_escape_string($this->data['h']).'"';
                     
-            $rem_ID = mysql__select_value($mysqli, $query);  
-            $rem_ID = intval($rem_ID);    
+            $rem_ID = mysql__select_value($mysqli, $query);
+            $rem_ID = intval($rem_ID);
             
             if($rem_ID>0){
                 

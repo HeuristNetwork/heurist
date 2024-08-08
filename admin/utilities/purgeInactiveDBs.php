@@ -123,7 +123,7 @@ if (@$argv) {
         }
     }
     
-    if (@$ARGV['-purge']) $arg_no_action = false;
+    if (@$ARGV['-purge']) {$arg_no_action = false;}
 
 }else{
     //report only
@@ -137,7 +137,7 @@ if (@$argv) {
 }
 
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -163,14 +163,14 @@ if( !$system->init(null, false, false) ){
 
 
 
-if(!defined('HEURIST_MAIL_DOMAIN')) define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);//'heurist.huma-num.fr'
-if(!defined('HEURIST_SERVER_NAME')) define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');
+if(!defined('HEURIST_MAIL_DOMAIN')) {define('HEURIST_MAIL_DOMAIN', 'cchum-kvm-heurist.in2p3.fr');}
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}//'heurist.huma-num.fr'
+if(!defined('HEURIST_SERVER_NAME')) {define('HEURIST_SERVER_NAME', 'heurist.huma-num.fr');}
 
 print 'Mail: '.HEURIST_MAIL_DOMAIN.'   Domain: '.HEURIST_SERVER_NAME."\n";
 
 $mysqli = $system->get_mysqli();
-$databases = mysql__getdatabases4($mysqli, false);   
+$databases = mysql__getdatabases4($mysqli, false);
 
 $upload_root = $system->getFileStoreRootFolder();
 $backup_root = $upload_root.'DELETED_DATABASES/';
@@ -181,7 +181,7 @@ define('HEURIST_FILESTORE_ROOT', $upload_root );
 
 $exclusion_list = exclusion_list();
 
-if($exclusion_list===false) exit;
+if($exclusion_list===false) {exit;}
 
 if(!$arg_no_action){
     if (!folderCreate($backup_root, true)) {
@@ -203,7 +203,7 @@ if(!$arg_no_action){
     
     $action = 'purgeOldDBs';
     if(false && !isActionInProgress($action, 1)){
-        exit("It appears that backup operation has been started already. Please try this function later\n");        
+        exit("It appears that backup operation has been started already. Please try this function later\n");
     }
 }
 
@@ -215,7 +215,7 @@ $databases = array('AmateurS1');
 //$databases = array('ARNMP_COMET');
 */
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $datetime1 = date_create('now');
@@ -241,7 +241,7 @@ foreach ($databases as $idx=>$db_name){
             //$mysqli->error 'gone away'
             $sMsg = 'Cannot execute purgeInactiveDBs. Execution stopped on database '
                 .$db_name.' ('.$arg_no_action.','.$is_shell.'). Error message: '.$mysqli->error;
-            error_log($sMsg);    
+            error_log($sMsg);
             $sTitle = 'purgeInactiveDBs has been terminated. On '.HEURIST_SERVER_NAME;                
             sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sMsg, false);
                 
@@ -299,17 +299,17 @@ foreach ($databases as $idx=>$db_name){
     }
 
     //"processing ".
-    //echo $db_name.' '; //.'  in '.$folder
+    //echo $db_name.' ';//.'  in '.$folder
     $report = '';
     
-    $interval = date_diff($datetime1, $datetime2);    
+    $interval = date_diff($datetime1, $datetime2);
     $diff = $interval->format('%y')*12 + $interval->format('%m');
 
     $archive_db = ($vals['cnt']<11 && $diff>=6) || ($vals['cnt']<51 && $diff>=12) || ($vals['cnt']<101 && $diff>=24);
 
     if($archive_db){ // check for structure updates
     
-        $datetime3 = getDefinitionsModTime($mysqli); //see utils_db
+        $datetime3 = getDefinitionsModTime($mysqli);//see utils_db
 
         if(!$datetime3){
             echo $tabs0.$db_name.' cannot detect last structure modification date'.$eol;
@@ -326,7 +326,7 @@ foreach ($databases as $idx=>$db_name){
         //archive and drop database
         $report = $diff.' months, n='.$vals['cnt'];
         if($arg_no_action){
-            $report .= ' to ARCHIVE'; 
+            $report .= ' to ARCHIVE';
         }else{
             $usr_owner = user_getByField($mysqli, 'ugr_ID', 2);
             
@@ -367,7 +367,7 @@ if($need_email){
     sendEmail(array($usr_owner['ugr_eMail']), $email_title, $email_text, true);
 }
                 
-                $report .= ' ARCHIVED'; 
+                $report .= ' ARCHIVED';
                 $cnt_archived++;
             }else{
                 $err = $system->getError();
@@ -403,9 +403,9 @@ if($need_email){
 * HEURIST_FILESTORE/_PURGES_IMPORTS/dbname_[name of original file]_yyyy-mm-dd.bz2
 */        
 
-        $sif_purge = array();    
-        $sif_purge2 = array();    
-        $sif_list = mysql__select_assoc2($mysqli, 'SELECT sif_ID, sif_ProcessingInfo FROM sysImportFiles'); //sif_TempDataTable, 
+        $sif_purge = array();
+        $sif_purge2 = array();
+        $sif_list = mysql__select_assoc2($mysqli, 'SELECT sif_ID, sif_ProcessingInfo FROM sysImportFiles');//sif_TempDataTable, 
         if(is_array($sif_list)){
             $sif_count = count($sif_list);
             $diff2 = ($sif_count>10) ?1 :2;
@@ -431,8 +431,8 @@ if($need_email){
                 
                 $datetime2 = date_create($date);
                 
-                $interval = date_diff($datetime1, $datetime2);    
-                $diff = $interval->format('%y')*12 + $interval->format('%m');                
+                $interval = date_diff($datetime1, $datetime2);
+                $diff = $interval->format('%y')*12 + $interval->format('%m');
             
                 if($diff>$diff2){
                     $sif_purge[$sif_id] = $imp_table;
@@ -478,14 +478,14 @@ if($need_email){
                     
                     $file_name = preg_replace('/[()]/g','',$file_name);
                     
-//echo $file_name."\n";                    
-//echo strlen($file_name)."\n";                        
+//echo $file_name."\n";
+//echo strlen($file_name)."\n";
                     $len = strlen($file_name);
                     if($len>96){ //100 is max for tar file
                         $len = $len-100+26;
                         $file_name = substr($file_name,0,-$len).substr($file_name,-19);
-//echo $file_name."\n";                        
-//echo strlen($file_name)."\n";                        
+//echo $file_name."\n";
+//echo strlen($file_name)."\n";
                     }
                     
                     $dumpfile = $backup_imports2."/".$file_name.'.sql';
@@ -497,12 +497,12 @@ if($need_email){
                                   'skip-triggers' => true,  
                                   'add-drop-trigger' => false);
                     
-                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts); //import tables
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);//import tables
                     if($res===false){
                         $err = $system->getError();
                         $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name. "
                                 .$err['message']."\n");
-                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
                         $cnt_dumped++;
                     }
@@ -514,7 +514,7 @@ if($need_email){
                                             
                             $dump->start($dumpfile);
                             
-                            $cnt_dumped++;            
+                            $cnt_dumped++;
                         } catch (Exception $e) {
                            $report .= (" Error: unable to generate MySQL database dump for import table $sif_table in $db_name."
                                 .$e->getMessage()."\n");
@@ -552,14 +552,14 @@ if($need_email){
         }//sif list
         
         if(ALLOW_ARCHIVE_SYSARCHIVE){ //alow archive sysArchive
-        $arc_count = intval(mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive')); //sif_TempDataTable, 
+        $arc_count = intval(mysql__select_value($mysqli, 'SELECT count(arc_ID) FROM sysArchive'));//sif_TempDataTable, 
         if($arc_count>50000){
             
             if($arg_no_action){
                     $report .= (' ... sysArchive, n='.$arc_count.', archive');
             }else{
                 
-                $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';  //.$db_name.' '
+                $dumpfile = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d').'.sql';//.$db_name.' '
                     $opts = array('include-tables' => array('sysArchive'),
                                   'default-character-set'=>'utf8',  
                                   'single-transaction'=>true,  
@@ -583,13 +583,13 @@ if($need_email){
                         }
                     */
                     
-                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);  //sysArchive
+                    $res = DbUtils::databaseDump($db_name, $dumpfile, $opts);//sysArchive
                     if($res===false){
                         $err = $system->getError();
 
                         $report .= (" Error: unable to generate MySQL database dump $dumpfile for sysArchive table in $db_name.\n"
                                     .$err['message']."\n");
-                        if($err['status']==HEURIST_SYSTEM_CONFIG) break;
+                        if($err['status']==HEURIST_SYSTEM_CONFIG) {break;}
                     }else{
                         $destination = $backup_sysarch.$db_name.'_'.$datetime1->format('Y-m-d');
                         
@@ -602,7 +602,7 @@ if($need_email){
                             $archOK = UArchive::createBz2($dumpfile, null, $destination, false);
                         }else{
                             
-                            $destination = $destination.'.zip'; 
+                            $destination = $destination.'.zip';
                             $archOK = UArchive::zip($dumpfile, null, $destination, false);
                         }
                         
@@ -629,7 +629,7 @@ if($need_email){
                         }else{
                             $report .= ("Cannot create archive sysArchive table. Failed to archive $dumpfile to $destination");
                         }
-                        unlink($dumpfile);                        
+                        unlink($dumpfile);
                     }
             }   
             
@@ -643,7 +643,7 @@ if($need_email){
     }
 
 
-    //echo "   ".$db_name." OK \n"; //.'  in '.$folder
+    //echo "   ".$db_name." OK \n";//.'  in '.$folder
 }//for
 
 
@@ -682,10 +682,10 @@ function exclusion_list(){
         $handle = @fopen($fname, "r");
         while (!feof($handle)) {
             $line = trim(fgets($handle, 100));
-            //if($line=='' || substr($line,0,1)=='#') continue; //remark
+            //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
             if(strpos($line,'#')!==false){
                 $line = trim(strstr($line,'#',true));
-                if($line=='') continue;
+                if($line=='') {continue;}
             }
             $res[] = $line;
         }
@@ -700,7 +700,7 @@ function exclusion_list(){
         if($arg_no_action){
                print $sMsg.'<br>';
         }
-        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg); 
+        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg);
         return false;
     }
     return $res;

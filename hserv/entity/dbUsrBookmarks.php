@@ -53,16 +53,16 @@ class DbUsrBookmarks extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('bkm_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('bkm_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('bkm_RecID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('bkm_Rating');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -121,17 +121,17 @@ class DbUsrBookmarks extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
              
             $recIDs_norights = mysql__select_list($mysqli, $this->config['tableName'], $this->primaryField, 
-                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID); //' not in ('.implode(',',$ugrs).')');
+                    'bkm_ID in ('.implode(',', $this->recordIDs).') AND bkm_UGrpID!='.$ugrID);//' not in ('.implode(',',$ugrs).')');
             
             
-            $cnt = count($recIDs_norights);       
+            $cnt = count($recIDs_norights);
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
                 (($cnt==1 && (!is_array($this->records) || count($this->records)==1))
                     ? 'Bookmark belongs'
                     : $cnt.' Bookmark belong')
-                    .' to other user. Insufficient rights (logout/in to refresh) for this operation'); // or workgroup you are not a member
+                    .' to other user. Insufficient rights (logout/in to refresh) for this operation');// or workgroup you are not a member
                 return false;
             }
         }
@@ -156,7 +156,7 @@ class DbUsrBookmarks extends DbEntityBase
             if($isinsert || !$this->records[$idx]['bkm_Added']){
                 $this->records[$idx]['bkm_Added'] = date('Y/m/d H:i:s');
             }
-            $this->records[$idx]['bkm_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['bkm_Modified'] = date('Y-m-d H:i:s');//reset
         }
 
         return $ret;
@@ -168,7 +168,7 @@ class DbUsrBookmarks extends DbEntityBase
     //
     public function delete($disable_foreign_checks = false){
 
-        $this->recordIDs = prepareIds($this->data[$this->primaryField]);  //bookmark ids
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);//bookmark ids
         
         $mysqli = $this->system->get_mysqli();
        
@@ -185,7 +185,7 @@ class DbUsrBookmarks extends DbEntityBase
                 return false;
         }
     
-        $ret = parent::delete();    
+        $ret = parent::delete();
     }
     
     
@@ -196,7 +196,7 @@ class DbUsrBookmarks extends DbEntityBase
 
         $is_unbookmark = (@$this->data['mode']=='unbookmark');
         
-        $rec_IDs = prepareIds(@$this->data['bkm_RecID']); //these are rec_IDs from Record table
+        $rec_IDs = prepareIds(@$this->data['bkm_RecID']);//these are rec_IDs from Record table
         $bkm_IDs = prepareIds(@$this->data['bkm_ID']);
 
         if(count($rec_IDs)==0 && count($bkm_IDs)==0){             
@@ -204,7 +204,7 @@ class DbUsrBookmarks extends DbEntityBase
             return false;
         }       
         
-        $mysqli = $this->system->get_mysqli(); 
+        $mysqli = $this->system->get_mysqli();
 
         //bookmarks id not defined - find them by record ids         
         if(count($bkm_IDs)==0){   
@@ -231,14 +231,14 @@ class DbUsrBookmarks extends DbEntityBase
             
             if(count($bkm_IDs)>0){  
 
-                $keep_autocommit = mysql__begin_transaction($mysqli);            
+                $keep_autocommit = mysql__begin_transaction($mysqli);
             
                 $query = 'DELETE usrRecTagLinks FROM usrBookmarks LEFT JOIN usrRecTagLinks ON rtl_RecID=bkm_RecID '
                 .' WHERE bkm_ID IN ('.implode(',', $bkm_IDs).') AND bkm_UGrpID=' .$this->system->get_user_id();
                 $res = $mysqli->query($query);
                 if(!$res){
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                     
                     $this->system->addError(HEURIST_DB_ERROR,"Cannot detach personal tags from records", $mysqli->error );
                     return false;
@@ -250,7 +250,7 @@ class DbUsrBookmarks extends DbEntityBase
                 $res = $mysqli->query($query);
                 if(!$res){
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                     
                     $this->system->addError(HEURIST_DB_ERROR,"Cannot remove bookmarks", $mysqli->error );
                     return false;

@@ -22,37 +22,16 @@
 //
 function imgFilter( current_cfg, main_callback, $container=null ){
 
-    var _className = 'imgFilter';
-    var _default_values = {};
+    const _className = 'imgFilter';
+    let _default_values = {};
+    let $dlg;
     
     function _init(){
 
-        var buttons= [
-            {text:window.hWin.HR('Cancel'), 
-                id:'btnCancel',
-                css:{'float':'right','margin-left':'10px','margin-right':'20px'}, 
-                click: function() { 
-                    $dlg.dialog( "close" );
-            }},
-            {text:window.hWin.HR('Reset'), 
-                id:'btnReset',
-                css:{'float':'right','margin-left':'10px'}, 
-                click: function() { 
-                    _resetValues();
-            }},
-            {text:window.hWin.HR('Apply'), 
-                id:'btnDoAction',
-                class:'ui-button-action',
-                //disabled:'disabled',
-                css:{'float':'right'}, 
-                click: function() { 
-                        var config = _getValues();
-                        main_callback.call(this, config);
-                        $dlg.dialog( "close" );    
-        }}];
 
         if($container && $container.length>0){
             //container provided
+            $dlg = $container;
 
             $container.empty().load(window.hWin.HAPI4.baseURL
                 +'hclient/widgets/editing/imgFilter.html',
@@ -61,7 +40,30 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
         }else{
             //open as popup
-
+            let buttons= [
+                {text:window.hWin.HR('Cancel'), 
+                    id:'btnCancel',
+                    css:{'float':'right','margin-left':'10px','margin-right':'20px'}, 
+                    click: function() { 
+                        $dlg.dialog( "close" );
+                }},
+                {text:window.hWin.HR('Reset'), 
+                    id:'btnReset',
+                    css:{'float':'right','margin-left':'10px'}, 
+                    click: function() { 
+                        _resetValues();
+                }},
+                {text:window.hWin.HR('Apply'), 
+                    id:'btnDoAction',
+                    class:'ui-button-action',
+                    //disabled:'disabled',
+                    css:{'float':'right'}, 
+                    click: function() { 
+                            let config = _getValues();
+                            main_callback.call(this, config);
+                            $dlg.dialog( "close" );    
+            }}];
+    
             $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/editing/imgFilter.html?t="+(new Date().getTime()), 
                 buttons, 'Define Filters', 
@@ -95,11 +97,10 @@ function imgFilter( current_cfg, main_callback, $container=null ){
             $(item).on({change:function(e){
                 $(e.target).prev().text( $(e.target).val() );
             }});
-            
-            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')]))
-            {
-                var val = parseFloat(current_cfg[item.attr('name')]);
-                item.val( val ).trigger('change');    
+
+            if(current_cfg && !window.hWin.HEURIST4.util.isempty(current_cfg[item.attr('name')])){
+                let val = parseFloat(current_cfg[item.attr('name')]);
+                item.val( val ).trigger('change'); 
             }
             
         });
@@ -119,14 +120,14 @@ function imgFilter( current_cfg, main_callback, $container=null ){
     //
     function _getValues(){
         
-        var filter_cfg = {};
-        var filter = '';
+        let filter_cfg = {};
+        let filter = '';
         $.each($dlg.find('input'), function(idx, item){
             item = $(item);
             
-            var val = item.val();
+            let val = item.val();
             if(val!=_default_values[item.attr('name')]){
-                var suffix = item.attr('data-suffix');
+                let suffix = item.attr('data-suffix');
                 if(!suffix) suffix = '';
                 
                 filter_cfg[item.attr('name')] = val+suffix;
@@ -141,7 +142,7 @@ function imgFilter( current_cfg, main_callback, $container=null ){
 
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

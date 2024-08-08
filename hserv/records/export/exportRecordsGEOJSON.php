@@ -39,13 +39,13 @@ class ExportRecordsGEOJSON extends ExportRecords {
     private $search_all_geofields = true;
     
     // variables for leaflet 
-    private $geojson_ids = array(); //simplify array('all'=>array());
-    private $geojson_dty_ids = array(); //unique list of all geofields 
+    private $geojson_ids = array();//simplify array('all'=>array());
+    private $geojson_dty_ids = array();//unique list of all geofields 
     private $geojson_rty_ids = array();
-    private $timeline_dty_ids = array(); //unique list of all date fields 
+    private $timeline_dty_ids = array();//unique list of all date fields 
     
     private $timeline_data = array();
-    private $layers_record_ids = array(); //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse  
+    private $layers_record_ids = array();//list of ids RT_MAP_LAYER if this is search for layers in clearinghouse  
     
     private $simplify_wkt = true;
     private $detail_mode = 0;
@@ -113,7 +113,7 @@ protected function _outputPrepare($data, $params){
                                 if(!@$code['q']){
                                     array_push($this->find_by_geofields,$code['id']);
                                 }else{
-                                    array_push($this->find_by_geofields,$code); //with query to linked record                    
+                                    array_push($this->find_by_geofields,$code);//with query to linked record                    
                                 }
                                 
                             }else{
@@ -172,22 +172,22 @@ protected function _outputPrepareFields($params){
 protected function _outputHeader(){
 
     if($this->is_leaflet){
-        fwrite($this->fd, '{"geojson":');         
+        fwrite($this->fd, '{"geojson":');
     }else{
         fwrite($this->fd, '{"type":"FeatureCollection","features":');
     }
     
-    fwrite($this->fd, '[');         
+    fwrite($this->fd, '[');
     
     $this->comma = '';
     
     //reset values    
     $this->geojson_ids = array();
-    $this->geojson_dty_ids = array(); //unique list of all geofields 
+    $this->geojson_dty_ids = array();//unique list of all geofields 
     $this->geojson_rty_ids = array();
-    $this->timeline_dty_ids = array(); //unique list of all date fields 
+    $this->timeline_dty_ids = array();//unique list of all date fields 
     $this->timeline_data = array();
-    $this->layers_record_ids = array(); 
+    $this->layers_record_ids = array();
 }
 
 //
@@ -199,7 +199,7 @@ protected function _outputRecord($record){
         ($this->extended_mode==2), 
         $this->simplify_wkt,  //simplify
         $this->detail_mode, //mode for details if leaflet - description only
-        $this->separate_entity);  //separate multi geo values per record as separate entries
+        $this->separate_entity);//separate multi geo values per record as separate entries
         
     if($this->is_leaflet){ //include only geoenabled features, timeline data goes in the separate timeline array
     
@@ -224,10 +224,10 @@ protected function _outputRecord($record){
 
         if( (defined('RT_TLCMAP_DATASET') && $rty_ID==RT_TLCMAP_DATASET) || 
         (defined('RT_MAP_LAYER') && $rty_ID==RT_MAP_LAYER) ){
-            array_push($this->layers_record_ids, $recID);    
+            array_push($this->layers_record_ids, $recID);
         }
 
-        if(!@$feature['geometry']) return true;
+        if(!@$feature['geometry']) {return true;}
 
         $this->geojson_ids[] = $recID;
         /* simplify
@@ -239,7 +239,7 @@ protected function _outputRecord($record){
         array_push($this->geojson_ids[$feature['geofield']], $recID);
         }
         $feature['geofield'] = null;
-        unset($feature['geofield']); 
+        unset($feature['geofield']);
         }*/
 
     }
@@ -256,21 +256,21 @@ protected function _outputRecord($record){
         
         foreach ($geoms as $idx=>$geom){
                 $feature['geometry'] = $geom;
-                $feature['properties']['rec_GeoField'] = $geoms_dty[$idx]; //dty_ID
+                $feature['properties']['rec_GeoField'] = $geoms_dty[$idx];//dty_ID
                 fwrite($this->fd, $this->comma.json_encode($feature));
                 $this->comma = ',';
                 
                 if(!in_array($geoms_dty[$idx], $this->geojson_dty_ids)){
-                    $this->geojson_dty_ids[] = $geoms_dty[$idx];  //unique list of all geofields 
+                    $this->geojson_dty_ids[] = $geoms_dty[$idx];//unique list of all geofields 
                 } 
         }
         $this->geojson_rty_ids = array_keys($this->rt_counts);
         
     }else{
-        fwrite($this->fd, $this->comma.json_encode($feature));    
+        fwrite($this->fd, $this->comma.json_encode($feature));
     }
     
-    $this->comma = ',';    
+    $this->comma = ',';
     
     return true;   
         
@@ -282,18 +282,18 @@ protected function _outputRecord($record){
 protected function _outputFooter(){
 
 
-    fwrite($this->fd, ']'); //close
+    fwrite($this->fd, ']');//close
 
     if($this->is_leaflet){ //return 2 array - pure geojson and timeline items
 
         fwrite($this->fd, ',"timeline":'.json_encode($this->timeline_data));
-        fwrite($this->fd, ',"timeline_dty_ids":'.json_encode($this->timeline_dty_ids)); //unique list of all date fields 
+        fwrite($this->fd, ',"timeline_dty_ids":'.json_encode($this->timeline_dty_ids));//unique list of all date fields 
         fwrite($this->fd, ',"geojson_ids":'.json_encode($this->geojson_ids));
-        fwrite($this->fd, ',"geojson_dty_ids":'.json_encode($this->geojson_dty_ids)); //unique list of all geofields 
+        fwrite($this->fd, ',"geojson_dty_ids":'.json_encode($this->geojson_dty_ids));//unique list of all geofields 
         fwrite($this->fd, ',"geojson_rty_ids":'.json_encode($this->geojson_rty_ids));
         fwrite($this->fd, ',"layers_ids":'.json_encode($this->layers_record_ids).'}');
     }else{
-        fwrite($this->fd, '}'); //close for FeatureCollection
+        fwrite($this->fd, '}');//close for FeatureCollection
     }    
 
 }
@@ -322,7 +322,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
     }
                     
     if($extended){
-        if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
+        if(self::$defRecTypes==null) {self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);}
         $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
         if(self::$defTerms==null) {
@@ -333,7 +333,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         $idx_name = -1;
     }    
     
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
+    if(self::$defDetailtypes==null) {self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);}
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $idx_ccode = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
@@ -416,7 +416,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         }
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
-                    $symbology = json_decode($value,true);                    
+                    $symbology = json_decode($value,true);
                 //}else if(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
                 //    $ext_description = $value;
                 }else if(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
@@ -427,7 +427,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 $val = $value;
             }
             
-            if(!isset($val)) $val = '';
+            if(!isset($val)) {$val = '';}
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
@@ -441,15 +441,15 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
                     $term_code  = self::$defTerms->getTermCode($val['value']);
-                    if($term_code) $val['termCode'] = $term_code;    
+                    if($term_code) {$val['termCode'] = $term_code;}
                 }
 
                 //take name for rt structure    
                 if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID] && $idx_name>=0){
-                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];
                 }else{
                     //non standard field
-                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];
                 }
 
                 $val['fieldType'] = $field_type;
@@ -462,7 +462,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
     
     if($detail_mode==0){ //for leaflet - header and description only
-        if($ext_description) $res['properties']['description'] = $ext_description;
+        if($ext_description) {$res['properties']['description'] = $ext_description;}
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
     }else if($detail_mode==1){
@@ -487,7 +487,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                             $json = self::_getJsonFromWkt($wkt, $simplify);
                             if($json){
                                $geovalues[] = $json; 
-                               //$geovalues_dty[] = $value['geo']['pointerDtyID']; 
+                               //$geovalues_dty[] = $value['geo']['pointerDtyID'];
                             }
                         }
                     }
@@ -517,7 +517,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         //"geo" => array("type","wkt","placeID","pointerDtyID")
         $geodetails = recordSearchGeoDetails($this->system, $record['rec_ID'], 
                                 $this->find_geo_by_pointer_rty, 
-                                $this->search_all_geofields?null:$this->find_geo_by_pointer_dty);   
+                                $this->search_all_geofields?null:$this->find_geo_by_pointer_dty);
                                  
         foreach ($geodetails as $dty_ID=>$field_details) {
             foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
@@ -592,23 +592,23 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 
                 
             }else{
-                $path = array('type'=>'LineString', 'coordinates'=>array());    
+                $path = array('type'=>'LineString', 'coordinates'=>array());
                 
-                if(count($point0)>0) $path['coordinates'][] = $point0[0]['coordinates'];
+                if(count($point0)>0) {$path['coordinates'][] = $point0[0]['coordinates'];}
 
-                if(count($points)>0)
+                if(count($points)>0){
                     foreach($points as $pnt){
                         $path['coordinates'][] = $pnt['coordinates'];
                     }                
-                
-                if(count($point1)>0) $path['coordinates'][] = $point1[0]['coordinates'];
+                }
+                if(count($point1)>0) {$path['coordinates'][] = $point1[0]['coordinates'];}
             
             }
             
             
             if(count($path['coordinates'])>0){
                 $geovalues[] = $path;
-                $geovalues_dty[] = 'Path';    
+                $geovalues_dty[] = 'Path';
             }
         }
     }//if search for linked values
@@ -690,8 +690,8 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
             if($simplify)$geom->simplify(0.0001, TRUE);
             */
 
-            $geojson_adapter = new GeoJSON(); 
-            $json = $geojson_adapter->write($geom, true); 
+            $geojson_adapter = new GeoJSON();
+            $json = $geojson_adapter->write($geom, true);
 
             if(is_array(@$json['coordinates']) && count($json['coordinates'])>0){
 
@@ -706,9 +706,9 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
                         }
                     } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                     {
-                        for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
-                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);
+                        for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
+                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);}}
                     }
                 }
 

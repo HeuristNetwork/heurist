@@ -34,7 +34,7 @@
     require_once dirname(__FILE__).'/../../hserv/System.php';
     require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
     
-    require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+    require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapEncodePolyline.php";
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapSimplify.php";
@@ -68,7 +68,7 @@
         
         
         if(@$_REQUEST['id'] && !$_REQUEST['q']){
-            $_REQUEST['q'] = 'ids:'.$_REQUEST['id'];    
+            $_REQUEST['q'] = 'ids:'.$_REQUEST['id'];
         }
         $_REQUEST['w'] = 'e';
         $_REQUEST['detail'] = 'timemap';
@@ -81,76 +81,79 @@
              
             $records = $response['data']['records'];
             foreach($records as $recID => $record){
-             if($record['d'])
-              foreach($geo_fieldtypes_ids as $dty_ID)
-               if(@$record['d'][$dty_ID])
-                foreach($record['d'][$dty_ID] as $as_wkt){
-                    //extract type
-                    $k = strpos($as_wkt, ' ');
-                    $geo_type = substr($as_wkt, 0, $k);
-                    $as_wkt = substr($as_wkt, $k+1);
-                    
-                    switch ($geo_type) {
-                    
-                        case "r":   //special case for rectangle
-                            if (preg_match("/POLYGON\s?\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $as_wkt, $matches)) {
-                                
-                                array_push($mapobjects, array("type" => "rect",
-                                    "geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), 
-                                            "x1" => floatval($matches[5]), "y1" => floatval($matches[6]))));
-                                    
-                            }
-                            break;
+                if($record['d']){
+                    foreach($geo_fieldtypes_ids as $dty_ID){
+                        if(@$record['d'][$dty_ID]){
+                            foreach($record['d'][$dty_ID] as $as_wkt){
+                                //extract type
+                                $k = strpos($as_wkt, ' ');
+                                $geo_type = substr($as_wkt, 0, $k);
+                                $as_wkt = substr($as_wkt, $k+1);
 
-                        case "c": //special case for circle
-                            if (preg_match("/LINESTRING\s?\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $as_wkt, $matches)) {
-                                
-                                array_push($mapobjects, array("type" => "circle",
-                                "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), 
-                                            "radius" => floatval($matches[3] - $matches[1]))));
-                            }
-                            break;
+                                switch ($geo_type) {
 
-                        default:                        
-                        
-                            //'geoObjects' => array() $geoObject['geo']['points']
-                            //$geoObject['type']
-                        
-                            //geometryType()
-                            //getGeos()
-                        
-                            $geom = geoPHP::load($as_wkt, 'wkt');
-                            if(!$geom->isEmpty()){
-                               
-                               $geojson_adapter = new GeoJSON(); 
-                               $json = $geojson_adapter->write($geom, true); 
-                               
-                               ///$json = $geom->out('json'); 
-                               // $geom->numGeometries()
-                               if(count($json['coordinates'])>0){
-                                   if($json['type']=='Polygon'){
-                                       foreach($json['coordinates'] as $points){
-                                           array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
-                                       }
-                                   }else if ($json['type']=='MultiPoint'){
-                                        array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
-                                   }else if ($json['type']=='MultiPolygon' 
+                                    case "r":   //special case for rectangle
+                                        if (preg_match("/POLYGON\s?\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $as_wkt, $matches)) {
+
+                                            array_push($mapobjects, array("type" => "rect",
+                                                "geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), 
+                                                    "x1" => floatval($matches[5]), "y1" => floatval($matches[6]))));
+
+                                        }
+                                        break;
+
+                                    case "c": //special case for circle
+                                        if (preg_match("/LINESTRING\s?\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $as_wkt, $matches)) {
+
+                                            array_push($mapobjects, array("type" => "circle",
+                                                "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), 
+                                                    "radius" => floatval($matches[3] - $matches[1]))));
+                                        }
+                                        break;
+
+                                    default:                        
+
+                                        //'geoObjects' => array() $geoObject['geo']['points']
+                                        //$geoObject['type']
+
+                                        //geometryType()
+                                        //getGeos()
+
+                                        $geom = geoPHP::load($as_wkt, 'wkt');
+                                        if(!$geom->isEmpty()){
+
+                                            $geojson_adapter = new GeoJSON();
+                                            $json = $geojson_adapter->write($geom, true);
+
+                                            ///$json = $geom->out('json');
+                                            // $geom->numGeometries()
+                                            if(count($json['coordinates'])>0){
+                                                if($json['type']=='Polygon'){
+                                                    foreach($json['coordinates'] as $points){
+                                                        array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
+                                                    }
+                                                }else if ($json['type']=='MultiPoint'){
+                                                    array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
+                                                }else if ($json['type']=='MultiPolygon' 
                                                 || $json['type']=='MultiLineString'){
-                                       foreach($json['coordinates'] as $shape){
-                                           foreach($shape as $points){
-                                                array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
-                                           }
-                                       }
-                                   }else{
-                                       array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
-                                   }
-                               }
-                               
-                               // array_push($points, array(floatval($point['y']), floatval($point['x'])) );
-                            }
-                    }//switch
-                    
-                }//foreach multi values
+                                                    foreach($json['coordinates'] as $shape){
+                                                        foreach($shape as $points){
+                                                            array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
+                                                        }
+                                                    }
+                                                }else{
+                                                    array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
+                                                }
+                                            }
+
+                                            // array_push($points, array(floatval($point['y']), floatval($point['x'])) );
+                                        }
+                                }//switch
+
+                            }//foreach multi values
+                        }
+                    }
+                }
             }//foreach
         }
 	}
@@ -288,7 +291,7 @@
 
                     if(count($points2)>1000){
                     
-                        $points = array();    
+                        $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }
@@ -302,11 +305,11 @@
                             $crn++;
                         }//while simplify
 
-                        if(count($points2)<=1000)
-                        foreach ($points2 as $point) {
-                            array_push($points_to_encode, array($point['y'], $point['x']) );
+                        if(count($points2)<=1000){
+                            foreach ($points2 as $point) {
+                                array_push($points_to_encode, array($point['y'], $point['x']) );
+                            }
                         }
-                        
                     }else{
                         
                         foreach ($points2 as $point) {
@@ -317,7 +320,7 @@
                     if(count($points_to_encode)>1){
                         
                         if($geoObject['type']=="polygon" || $geoObject['type']=="pl"){
-                            array_push($points_to_encode, $points_to_encode[0]); //add last as first
+                            array_push($points_to_encode, $points_to_encode[0]);//add last as first
                         }
 
                         $encodedPoints = dpEncode($points_to_encode);
@@ -328,7 +331,7 @@
                                 break; //total length of url is too long
                             }
                         }else{
-                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];        
+                            $path_all = $path_all."&path=".$style_path."|enc:".$encodedPoints[0];
                             if(strlen($path_all)>1900){
                                 break; //total length of url is too long
                             }
@@ -344,7 +347,7 @@
 
                     if(count($points2)>100){
                     
-                        $points = array();    
+                        $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }
@@ -358,14 +361,14 @@
                             $crn++;
                         }//while simplify
 
-                        if($verties_cnt+count($points2)<=100)
-                        foreach ($points2 as $point) {
-                            $points_to_encode[] = $point['x'];
-                            $points_to_encode[] = $point['y'];
-                            $shapes_cnt++;
-                            $verties_cnt = $verties_cnt + count($points2);
+                        if($verties_cnt+count($points2)<=100){
+                            foreach ($points2 as $point) {
+                                $points_to_encode[] = $point['x'];
+                                $points_to_encode[] = $point['y'];
+                                $shapes_cnt++;
+                                $verties_cnt = $verties_cnt + count($points2);
+                            }
                         }
-                        
                     }else{
                         $shapes_cnt++;
                         if(is_array($points2) && count($points2)>0){

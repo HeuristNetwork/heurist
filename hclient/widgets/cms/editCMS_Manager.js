@@ -17,6 +17,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global layoutMgr, hLayoutMgr */
+
+
 /**
 * @param options
 
@@ -29,15 +32,15 @@ container
 */
 function editCMS_Manager( options ){
 
-    var _className = "EditCMS_Manager";
+    const _className = "EditCMS_Manager";
 
 
-    var home_page_record_id = options.record_id,
+    let home_page_record_id = options.record_id,
     main_callback = options.callback,
     webpage_title = options.webpage_title,
     webpage_private = (options.webpage_private==true);
 
-    var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+    const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
     RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
     DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
     DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
@@ -88,14 +91,12 @@ function editCMS_Manager( options ){
     }
     
     
-    var edit_dialog = null;
-    var web_link, tree_element = null;
-    var was_something_edited = false;
-    var remove_menu_records = false;
-    var open_page_on_init = -1;
-    var home_page_record_title = '';
+    let edit_dialog = null;
+    let web_link, tree_element = null;
+    let open_page_on_init = -1;
+    let home_page_record_title = '';
 
-    var isWebPage = false; //single page website/embed otherwise website with menu
+    let isWebPage = false; //single page website/embed otherwise website with menu
 
     _initWebSiteEditor();
     
@@ -118,9 +119,9 @@ function editCMS_Manager( options ){
                     :'Creating the set of website records')
                 , 10000);
 
-            var session_id = Math.round((new Date()).getTime()/1000); //for progress
+            let session_id = Math.round((new Date()).getTime()/1000); //for progress
 
-            var request = { action: 'import_records',
+            let request = { action: 'import_records',
                 filename: isWebPage?'webpageStarterRecords.xml':'websiteStarterRecords.xml',
                 is_cms_init: 1,
                 make_public: (webpage_private===true)?0:1 ,
@@ -131,7 +132,7 @@ function editCMS_Manager( options ){
             //create default set of records for website see importController
             function __callback( response ){
                 
-                $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
                 $dlg.dialog('close');
 
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -143,15 +144,15 @@ function editCMS_Manager( options ){
                         //update title of webpage
                         if(!window.hWin.HEURIST4.util.isempty(webpage_title)){
 
-                            var page_recid = response.data.ids[0];
+                            let page_recid = response.data.ids[0];
 
                             //replace name of webpage to the provided one
-                            var request = {a: 'replace',
+                            let request = {a: 'replace',
                                 recIDs: page_recid,
                                 dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
                                 rVal: webpage_title};
                             window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                                if(response.status == hWin.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     options.record_id = page_recid;
                                     editCMS_Manager( options );
                                 }else{
@@ -192,7 +193,7 @@ function editCMS_Manager( options ){
     
 
         // 1. load template files
-        var sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
 
         // 2. Loads template json
         $.getJSON(sURL, 
@@ -203,13 +204,12 @@ function editCMS_Manager( options ){
             layoutMgr.prepareTemplate(new_element_json, function(updated_json){
 
                 //replace content of blog webpage
-                var request = {a: 'replace',
+                let request = {a: 'replace',
                     recIDs: affected_page_id,
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
                     rVal: JSON.stringify( updated_json )};
                 window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                    if(response.status == hWin.ResponseStatus.OK){
-                    }else{
+                    if(response.status != window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -224,7 +224,7 @@ function editCMS_Manager( options ){
     //
     function _initWebSiteEditor(){
         
-        var sURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&id='+options.record_id;
+        let sURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&website&id='+options.record_id;
         
         if(options.is_open_in_new_tab){ //open in new tab
 
@@ -248,7 +248,7 @@ function editCMS_Manager( options ){
 
             }else{ 
                 //load into popup dialog
-                var edit_buttons = [
+                let edit_buttons = [
                     {text:window.hWin.HR('Close'), 
                         id:'btnRecCancel',
                         css:{'float':'right'}, 
@@ -302,7 +302,6 @@ function editCMS_Manager( options ){
                 }
             }
         }
-        editCMS_instance = null;
     }
 
     //
@@ -310,10 +309,10 @@ function editCMS_Manager( options ){
     //
     function beforeCloseCMSEditor(){
         if(edit_dialog){
-            var preview_frame = edit_dialog.find('#web_preview');
+            let preview_frame = edit_dialog.find('#web_preview');
             if(preview_frame.length>0 && preview_frame[0].contentWindow.cmsEditing){
                 //check that everything is saved
-                var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
+                let res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
                     function( need_close_explicitly ){
                         //exit allowed
                         if(need_close_explicitly!==false) closeCMSEditorFinally();
@@ -330,7 +329,7 @@ function editCMS_Manager( options ){
     }    
 
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;

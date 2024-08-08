@@ -56,7 +56,7 @@ if (@$argv) {
         }
     }
 
-    if (@$ARGV['-db']) $arg_database = explode(',', $ARGV['-db']);
+    if (@$ARGV['-db']) {$arg_database = explode(',', $ARGV['-db']);}
 
 }else{
     /*web browser
@@ -73,7 +73,7 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../../hserv/consts.php';
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
@@ -85,7 +85,7 @@ if( !$system->init(null, false, false) ){
 }
 
 // Setup server name
-if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) define('HEURIST_SERVER_NAME', $serverName);
+if(!defined('HEURIST_SERVER_NAME') && isset($serverName)) {define('HEURIST_SERVER_NAME', $serverName);}
 
 if(!defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME)){
     exit('The script was unable to determine the server\'s name, please define it within heuristConfigIni.php then re-run this script.');
@@ -130,7 +130,7 @@ $email_body = "This is a reminder that you can download an archive package of yo
 . "Please note: some very large databases could create files which are too large to download.<br>"
 . "In that case please ".CONTACT_SYSADMIN." so that we are aware of the problem and can arrange an alternative procedure.";
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 ini_set('memory_limit','1024M');
 
 $month_ago = strtotime('-1 month');

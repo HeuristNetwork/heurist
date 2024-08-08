@@ -53,7 +53,9 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         }
 
         this._super();
-        
+
+        let that = this;
+
         if(this.options.isFrontUI){
             
             this.searchForm.css({padding:'10px 5px 0 10px'});
@@ -61,7 +63,6 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
         
             if(this.options.select_mode=='manager'){ //adjust table widths
-                var that = this;
                 window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, 
                     function(){
                         if(that.recordList && that.recordList.resultList('instance')){
@@ -74,7 +75,6 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         
         
         //refresh list        
-        var that = this;
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { 
                 if(!data || 
@@ -104,24 +104,22 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             return false;
         }
       
-        var that = this;
+        let that = this;
 
         if(this.options.edit_mode=='editonly'){
             //load rules
             if(this.options.swf_ID>0){
-                    var request = {};
+                    let request = {};
                     request['swf_ID']  = this.options.rem_RecID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    var that = this;                                                
-                    
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
+                                let recset = new HRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -144,7 +142,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             this.searchForm.searchSysWorkflowRules(this.options);
             
             
-            var iheight = 12;
+            let iheight = 12;
             this.searchForm.css({'height':iheight+'em',padding:'10px'});
             this.recordList.css({'top':iheight+0.5+'em'});
             
@@ -154,8 +152,8 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 sortable: true,
                 onSortStop: function(){
                     
-                    var recordset = this.getRecordSet();
-                    var that = this;
+                    let recordset = this.getRecordSet();
+                    let that = this;
                     window.hWin.HEURIST4.dbs.applyOrder(recordset, 'swf', function(res){
                         //that._triggerRefresh('swf');
                     });
@@ -165,21 +163,21 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
 
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});
             
-            var vocab_id = $Db.getLocalID('trm', '2-9453');
+            let vocab_id = $Db.getLocalID('trm', '2-9453');
             
             this._on( this.searchForm, {
                 "searchsysworkflowrulesonfilter": this.filterRecordList,
                 "searchsysworkflowrulesonresult": this.updateRecordList,
                 "searchsysworkflowrulesonadd": function() {
 
-                        var recset = this.recordList.resultList('getRecordSet');
+                        let recset = this.recordList.resultList('getRecordSet');
                     
                         if(recset.length()==0){
                             this._addRuleSet();
                         }else{
-                            var rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
-                            var terms = $Db.trm_TreeData(vocab_id, 'set');
-                            var _swf_rules = $Db.getSwfByRectype(rty_ID);
+                            let rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
+                            let terms = $Db.trm_TreeData(vocab_id, 'set');
+                            let _swf_rules = $Db.getSwfByRectype(rty_ID);
                             if(_swf_rules.length<terms.length){
                                 this._onActionListener(null, 'add');    
                             }else{
@@ -192,7 +190,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 },
                 "searchsysworkflowrulesonvocabedit": function() {
 
-                    var options = {
+                    let options = {
                         height:800, width:1300,
                         selection_on_init: vocab_id,
                         innerTitle: false,
@@ -200,7 +198,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                             +'<span style="margin-left:260px"><b>Editing Workflow Vocabulary</b></span>'
                             +'</div>'),
                         onInitFinished: function(){
-                            var that2 = this;
+                            let that2 = this;
                             setTimeout(function(){
                                 that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
                             },500);
@@ -229,7 +227,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             this._loadData(true);
         }
 
-        var results = this._super(event, request);
+        let results = this._super(event, request);
         
         this.searchForm.searchSysWorkflowRules('setButton', (results==null || results.length()==0));
         this.searchForm.searchSysWorkflowRules('refreshRectypeList');
@@ -239,8 +237,8 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             /*            
             if(this.options.select_mode=='manager'){
                 
-                var sMsg;
-                var s_all = this.element.find('#chb_show_all_groups').is(':checked');
+                let sMsg;
+                let s_all = this.element.find('#chb_show_all_groups').is(':checked');
                 if(!s_all){
                     sMsg = '<div style="margin-top:1em;">There are no record types defined in this group.'
                             +'<br><br>Please drag record types from other groups or add new<br>record types to this group.</div>';   
@@ -264,9 +262,9 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     //
     _addRuleSet: function(){
         
-        var that = this;
-        var rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
-        var request = {a:'batch', entity:this.options.entity.entityName, 
+        let that = this;
+        let rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
+        let request = {a:'batch', entity:this.options.entity.entityName, 
             operation: 'add_rule_set',
             rty_ID:rty_ID};
         if(rty_ID>0)
@@ -290,7 +288,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
 //----------------------------------------------------------------------------------    
     _getValidatedValues: function(){
         
-        var fields = this._super();
+        let fields = this._super();
         
         if(fields!=null){
             
@@ -325,7 +323,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
 
         //assign record id    
         if(this.options.edit_mode=='editonly' && this.options.swf_ID>0){
-            var ele2 = this._editing.getFieldByName('swf_ID');
+            let ele2 = this._editing.getFieldByName('swf_ID');
             ele2.editing_input('setValue', this.options.swf_ID );
         }
                                                                                   
@@ -353,7 +351,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this rule?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -371,19 +369,19 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
 
         this._super();
         
-        var that = this;
+        let that = this;
         
         if(this.options.edit_mode=='editonly' || this.options.edit_mode=='popup'){
             
             if(that._currentEditID<0){
-                var rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
+                const rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
                 that._editing.setFieldValueByName('swf_RecTypeID', rty_ID, false);
                 
                 //disable already selected stages
-                var _swf_rules = $Db.getSwfByRectype(rty_ID);
-                var ele = that._editing.getFieldByName('swf_Stage').editing_input('getInputs');
+                let _swf_rules = $Db.getSwfByRectype(rty_ID);
+                let ele = that._editing.getFieldByName('swf_Stage').editing_input('getInputs');
                 ele = ele[0];
-                for(var i=0; i<_swf_rules.length; i++){
+                for(let i=0; i<_swf_rules.length; i++){
                     ele.find('option[value='+_swf_rules[i]['swf_Stage']+']').attr('disabled',true);
                 }
                 ele.hSelect('refresh');
@@ -396,10 +394,10 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             
 
             function __onChangeVisType(is_first){ 
-                var ele = that._editing.getFieldByName('swf_Visibility');
-                var ele1 = that._editing.getFieldByName('swf_SetVisibility');
+                let ele = that._editing.getFieldByName('swf_Visibility');
+                let ele1 = that._editing.getFieldByName('swf_SetVisibility');
                 
-                var res = ele.editing_input('getValues'); 
+                let res = ele.editing_input('getValues'); 
                 if(res[0]=='hidden'){
                         ele1.show();
                 }else{
@@ -412,9 +410,9 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 } 
             }
 
-            var ele = that._editing.getFieldByName('swf_Visibility');
-            var ele1 = that._editing.getFieldByName('swf_SetVisibility');        
-            var res = ele1.editing_input('getValues'); 
+            let ele = that._editing.getFieldByName('swf_Visibility');
+            let ele1 = that._editing.getFieldByName('swf_SetVisibility');        
+            let res = ele1.editing_input('getValues'); 
             
             //assign value to swf_Visibility
             if(res[0]=='viewable' || res[0]=='public'){
@@ -437,10 +435,10 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             //ownership     
             /*
             function __onChangeOwnerType(is_first){ 
-                var ele = that._editing.getFieldByName('swf_Ownership');
-                var ele1 = that._editing.getFieldByName('swf_SetOwnership');
+                let ele = that._editing.getFieldByName('swf_Ownership');
+                let ele1 = that._editing.getFieldByName('swf_SetOwnership');
                 
-                var res = ele.editing_input('getValues'); 
+                let res = ele.editing_input('getValues'); 
                 if(res[0]=='group'){
                         ele1.show();
                         if(is_first!==true) ele1.find('.entity_selector').trigger('click');
@@ -506,7 +504,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         
         function fld(fldname, def){
             
-            var val = recordset.fld(record, fldname);
+            let val = recordset.fld(record, fldname);
             if(val){
                 if(fldname=='swf_Stage'){
                     val = $Db.trm(val,'trm_Label');
@@ -515,9 +513,9 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                         return val;
                     }
                     
-                    var names = [];
+                    let names = [];
                     $.each(val.split(','), function(i,item){
-                        var name = window.hWin.HAPI4.sysinfo.db_usergroups[item];
+                        let name = window.hWin.HAPI4.sysinfo.db_usergroups[item];
                         if(!name && window.hWin.HEURIST4.allUsersCache){
                             let idx = window.hWin.HEURIST4.allUsersCache.findIndex((user) => {
                                 return user.name == name;
@@ -537,7 +535,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(val);
         }
         function fld2(val, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
@@ -550,16 +548,16 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         //rem_ToUserName        
 
         
-        var recID   = recordset.fld(record,'swf_ID');
+        let recID   = recordset.fld(record,'swf_ID');
         
-        var s_restrict = fld('swf_StageRestrictedTo','no restrictions'),
+        let s_restrict = fld('swf_StageRestrictedTo','no restrictions'),
             s_ownership = fld('swf_SetOwnership','no changes'),
             s_visibility = fld('swf_SetVisibility','no changes'),
             s_email = fld('swf_SendEmail','no notification'),
             s_stage = fld('swf_Stage');
         
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2(s_stage,'25ex')
                 + fld2(s_restrict,'25ex')
                 + fld2(s_ownership,'25ex')

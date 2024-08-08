@@ -215,12 +215,16 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-external/
 ext/
 vendor/
 help/
 external/
 documentation_and_templates/api/
+node_modules/
+
+*.mjs
+package.json
+package-lock.json
 
 #PHPStorm
 .idea/*

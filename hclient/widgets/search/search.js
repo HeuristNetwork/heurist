@@ -20,7 +20,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+/* global showSearchBuilder */
 
 $.widget( "heurist.search", {
 
@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.hasClass('cms-element')){
 
@@ -75,7 +75,7 @@ $.widget( "heurist.search", {
             this.options.button_class = '';
         }
 
-        var sz_search = '600px',
+        let sz_search = '600px',
         sz_input = '450px',
         sz_search_padding = this.options.is_h6style?'5px':'20px';
 
@@ -123,7 +123,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         if(this.options.search_input_label){
-            var lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
+            let lbl = window.hWin.HRJ('search_input_label', this.options, this.options.language);
             this.div_search_header.text( lbl ).css({'padding-right':'4px'});     
         }
 
@@ -161,7 +161,7 @@ $.widget( "heurist.search", {
         .uniqueId()
         .appendTo(  this.div_search_input );
 
-        var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
+        let isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
@@ -218,7 +218,7 @@ $.widget( "heurist.search", {
         //help link and quick access of saved filters
         if(!this._is_publication && this.options.is_h6style){
 
-            var link = $('<span title="'+window.hWin.HR('filter_help_hint')+'">'
+            let link = $('<span title="'+window.hWin.HR('filter_help_hint')+'">'
                 + window.hWin.HR('Filter help')
                 + ' <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
@@ -230,7 +230,7 @@ $.widget( "heurist.search", {
                 window.open('context_help/advanced_search.html','_blank');
             } });
 
-            var adjustTextareaRows = (context) => {
+            let adjustTextareaRows = (context) => {
 
                 if(context.input_search_prompt2.is(':visible') && context.input_search_prompt2.css('visibility') != 'hidden'){
                     return;
@@ -261,20 +261,21 @@ $.widget( "heurist.search", {
         }
 
 
-        var menu_h = window.hWin.HEURIST4.util.em(1); //get current font size in em
+        let menu_h = window.hWin.HEURIST4.util.em(1); //get current font size in em
 
         this.input_search.data('x', this.input_search.outerWidth());
         this.input_search.data('y', this.input_search.outerHeight());
 
         /*AAAA*/
         this.input_search.on('mouseup',function () {
-            var $this = $(this);
+            let $this = $(this);
             if ($this.outerWidth() != $this.data('x') || $this.outerHeight() != $this.data('y')) {
                 //alert($this.outerWidth() + ' - ' + $this.data('x') + '\n' + $this.outerHeight() + ' - ' + $this.data('y'));
                 if($this.outerHeight()<25){
                     //aaa  that.div_search.css('padding-top','1.8em');
                     $this.height(23);
                 }else{
+                    let pt;
                     if($this.outerHeight()> that.element.height()-menu_h-8){    //, 'max-height': (this.element.height()-12)+':px'
                         $this.height(that.element.height()-menu_h-10);
                         pt = '2px';
@@ -314,9 +315,9 @@ $.widget( "heurist.search", {
             .appendTo(this.div_buttons);
 
             this._on(this.btn_saved_filters, {click: function(){
-                var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
                 if(widget){
-                    var ele = this.btn_saved_filters;
+                    let ele = this.btn_saved_filters;
                     widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
                         {top:ele.position().top+18 , left:ele.offset().left });
                 }            
@@ -325,7 +326,7 @@ $.widget( "heurist.search", {
             // Filter builder button
             this.btn_filter_wiz = $('<a>',{href:'#',
                 title:window.hWin.HR('filter_builder_hint')})
-            .css({display:'inline-block','padding-right':'5px'}) //,top:'-3px'
+            .css({display:'inline-block'}) //,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-magnify-explore" style="height:15px;font-size:larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -337,7 +338,7 @@ $.widget( "heurist.search", {
             // Facet builder button
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('filter_facetbuilder_hint')})
-            .css({display:'inline-block','padding-right':'5px'}) //width:90,,top:'-3px'
+            .css({display:'inline-block',padding:'0px 15px'}) //width:90,,top:'-3px'
             .addClass('ui-main-color btn-aux')
             .append('<span class="ui-icon ui-icon-box" style="font-size: larger;" ></span>')
             .append('<span style="display:inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
@@ -345,9 +346,9 @@ $.widget( "heurist.search", {
             .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
 
-                var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
                 if(widget){
-                    var ele = this.btn_faceted_wiz;
+                    let ele = this.btn_faceted_wiz;
                     widget.mainMenu6('show_ExploreMenu', null, 'svsAddFaceted', 
                         {top:ele.offset().top , left:ele.offset().left });
                 }            
@@ -359,12 +360,12 @@ $.widget( "heurist.search", {
             .css({display:'inline-block'})  //width:'70px',
             .append('<span class="ui-icon ui-icon-save" ></span>')
             .append('<span style="display: inline-block; text-decoration: none; font-size: smaller; margin-left: 5px">'
-            + window.hWin.HR('Save filter') +'</span>')
+            + window.hWin.HR('Save filter for re-use') +'</span>')
             .appendTo(this.div_buttons); // div_save_filter
             this._on(this.btn_save_filter, {click: function(){
-                var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
                 if(widget){
-                    var ele = this.btn_saved_filters;
+                    let ele = this.btn_saved_filters;
 
                     widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', 
                         {top:ele.offset().top , left:ele.offset().left-300 });
@@ -372,7 +373,7 @@ $.widget( "heurist.search", {
             }});
 
             this.div_search_input.find('#search_help_link')
-            .css({'margin-left':'-10px'})
+            .css({'margin-left':'10px'})
             .appendTo(this.div_buttons);
         }
 
@@ -396,7 +397,7 @@ $.widget( "heurist.search", {
             this.btn_search_as_user.css({'font-size':'1.3em','min-width':'9em'})      
         }else
             if(this.options.search_button_label){
-                var w = window.hWin.HEURIST4.util.px(this.options.search_button_label, this.btn_search_as_user);
+                let w = window.hWin.HEURIST4.util.px(this.options.search_button_label, this.btn_search_as_user);
                 this.btn_search_as_user.css({'width': (30+w)+'px'}); 
             }
 
@@ -411,10 +412,10 @@ $.widget( "heurist.search", {
 
         //btn_search_domain is hidden this.div_search_as_user.controlgroup();
 
-        var dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
-        var smenu = "";
+        let dset = ((this.options.search_domain_set)?this.options.search_domain_set:'a,b').split(',');//,c,r,s';
+        let smenu = "";
         $.each(dset, function(index, value){
-            var lbl = that._getSearchDomainLabel(value);
+            let lbl = that._getSearchDomainLabel(value);
             if(lbl){
                 smenu = smenu + '<li id="search-domain-'+value+'"><a href="#">'+window.hWin.HR(lbl)+'</a></li>'
             }
@@ -425,7 +426,7 @@ $.widget( "heurist.search", {
         .appendTo( this.document.find('body') )
         .menu({
             select: function( event, ui ) {
-                var mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
+                let mode =  ui.item.attr('id').substr(14);  //(ui.item.attr('id')=="search-domain-b")?"b":"a";
                 that.option("search_domain", mode);
                 that._refresh();
         }})
@@ -434,7 +435,7 @@ $.widget( "heurist.search", {
         this._on( this.btn_search_domain, {
             click: function() {
                 $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
-                var menu = $( this.menu_search_domain )
+                let menu = $( this.menu_search_domain )
                 .css('width', '100px')     //was this.div_search_as_user.width()
                 .show()
                 .position({my: "right top", at: "right bottom", of: this.btn_search_domain });
@@ -515,13 +516,12 @@ $.widget( "heurist.search", {
 
             }});
 
-            var that = this;
             this._on( this.btn_select_owner, {
                 click:  function(){
 
-                    var btn_select_owner = this.btn_select_owner;
+                    let btn_select_owner = this.btn_select_owner;
 
-                    var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                    let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                     if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                         add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                     }
@@ -574,7 +574,7 @@ $.widget( "heurist.search", {
         /* AAAA */        
         this._on( this.input_search, {
             keypress: function(e){
-                var code = (e.keyCode ? e.keyCode : e.which);
+                let code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13 && !e.shiftKey) { // run search if enter is pressed w/out shift
                     window.hWin.HEURIST4.util.stopEvent(e);
                     e.preventDefault();
@@ -582,7 +582,7 @@ $.widget( "heurist.search", {
                 }
             },
             keydown: function(e){
-                var code = (e.keyCode ? e.keyCode : e.which);
+                let code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 65 && (e.ctrlKey || e.metaKey)) {
                     e.target.select();
                 }
@@ -626,13 +626,13 @@ $.widget( "heurist.search", {
     //   
     setOwnerAccessButtonLabel: function( add_rec_prefs ){
 
-        var that = this;
+        let that = this;
 
         window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
-                    var ownership = [], title = [], cnt = 0;
-                    for(var ugr_id in response.data){
+                    let ownership = [], title = [], cnt = 0;
+                    for(let ugr_id in response.data){
                         if(cnt<1){
                             ownership = response.data[ugr_id];    
                         }
@@ -646,7 +646,7 @@ $.widget( "heurist.search", {
                         title = '';
                     }
 
-                    var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                    let access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
                     if(add_rec_prefs[4]){
                         access = 'Groups';
                         title = title + 'Viewable for '+(add_rec_prefs[4].split(',').length)+' groups';
@@ -730,15 +730,15 @@ $.widget( "heurist.search", {
                     this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
                 }
 
-                var that = this;
+                let that = this;
                 this.select_rectype_addrec.hSelect({change: function(event, data){
 
-                    var selval = data.item.value;
+                    let selval = data.item.value;
                     that.select_rectype_addrec.val(selval);
-                    var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
+                    let opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
                     that.btn_add_record.button({label: 'Add '+opt.text().trim()});
 
-                    var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                    let prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                     if(!Array.isArray(prefs) || prefs.length<4){
                         prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
                     }else{
@@ -756,7 +756,7 @@ $.widget( "heurist.search", {
 
             }
 
-            var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
             if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                 add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
             }
@@ -766,7 +766,7 @@ $.widget( "heurist.search", {
 
             if(add_rec_prefs[0]>0) {
                 this.select_rectype_addrec.val(add_rec_prefs[0]); 
-                var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
+                let opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
                 this.btn_add_record.button({label: 'Add '+opt.text()});
             }
 
@@ -815,15 +815,9 @@ $.widget( "heurist.search", {
                 }
 
                 this.div_buttons.position({
-                    my: 'left+10 top+5',
+                    my: 'left+10 top+10',
                     at: 'left bottom',
                     of: this.div_search_input
-                });
-
-                this.btn_save_filter.position({
-                    my: 'left top+10',
-                    at: 'left bottom',
-                    of: this.btn_search_as_user
                 });
 
             // Move 'saved filters' dropdown
@@ -851,7 +845,7 @@ $.widget( "heurist.search", {
 
     _onSearchGlobalListener: function(e, data){
 
-        var that = this;
+        let that = this;
 
         if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
         {
@@ -869,7 +863,7 @@ $.widget( "heurist.search", {
 
                     //request is from some other widget (outside)
                     if(data.source!=that.element.attr('id')){
-                        var qs;
+                        let qs;
                         if(Array.isArray(data.q)){
                             qs = JSON.stringify(data.q);
                         }else{
@@ -890,13 +884,13 @@ $.widget( "heurist.search", {
                         }
                     }
 
-                    var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
+                    let is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
                     is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
 
                     if(is_keep && !this.options.search_realm){
-                        var qs = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(data, true);
+                        let qs = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest(data, true);
                         if(qs && qs.length<2000){
-                            var s = location.pathname;
+                            let s = location.pathname;
                             while (s.substring(0, 2) === '//') s = s.substring(1);
 
                             window.history.pushState("object or string", "Title", s+'?'+qs );
@@ -963,14 +957,14 @@ $.widget( "heurist.search", {
 
     /*
     _handleKeyPress: function(e){
-    var code = (e.keyCode ? e.keyCode : e.which);
+    let code = (e.keyCode ? e.keyCode : e.which);
     if (code == 13) {
     this._doSearch();
     }
     },
     */
     _getSearchDomainLabel: function(value){
-        var lbl = null;
+        let lbl = null;
         if(value=='b' || value=='bookmark') { lbl = 'Bookmarks'; }
         else if(value=='r') { lbl = 'recently added'; } //not implemented
             else if(value=='s') { lbl = 'recently selected'; } //not implemented
@@ -984,7 +978,7 @@ $.widget( "heurist.search", {
     //
     _doSearch: function(fl_btn){
 
-        var qsearch = qsearch = this.input_search.val();
+        let qsearch = this.input_search.val();
 
         qsearch = qsearch.replace(/,\s*$/, "");
 
@@ -994,7 +988,7 @@ $.widget( "heurist.search", {
             // w  all|bookmark
             // stype  key|all   - key-search tags, all-title and pointer record title, by default rec_Title
 
-            var that = this;
+            let that = this;
 
             /* concatenation with previos search  -- NOT USED
             if(this.options.search_domain=="c" && !window.hWin.HEURIST4.util.isnull(this.query_request)){ 
@@ -1005,7 +999,7 @@ $.widget( "heurist.search", {
 
             window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
 
-            var request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
+            let request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
             request.w  = this.options.search_domain;
             request.detail = 'ids'; //'detail';
@@ -1035,21 +1029,21 @@ $.widget( "heurist.search", {
             return;
         }
 
-        var that = this;
+        let that = this;
 
 
         if(this.options.is_h6style){
-            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
-                var pos = this.element.offset();
+                let pos = this.element.offset();
                 widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
             }
         }else{
 
             if(!window.hWin.HUL.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
 
-                var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
-                var scripts = [ path+'searchBuilder.js', 
+                let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
+                let scripts = [ path+'searchBuilder.js', 
                     path+'searchBuilderItem.js',
                     path+'searchBuilderSort.js'];
                 $.getMultiScripts(scripts)

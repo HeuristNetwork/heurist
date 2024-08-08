@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
@@ -118,8 +118,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 } else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
 	$db_request = $_REQUEST['db_filtering'];
-	$dbs = array(); // list of databases
-	$databases = array(); // array of database details
+	$dbs = array();// list of databases
+	$databases = array();// array of database details
 	$invalid_dbs = array();
 
 	// Get all dbs that start with the Heurist prefix
@@ -184,7 +184,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
         switch (strtoupper(@$db_request['lastmod_unit'])) {
             case 'DAY':  $lastmod_unit = 'DAY'; break;
             case 'MONTH':  $lastmod_unit = 'MONTH'; break;
-            case 'YEAR':  $lastmod_unit = 'YEAR';
+            case 'YEAR':  $lastmod_unit = 'YEAR'; break;
+            default;
         }
 
 		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic 
@@ -246,7 +247,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	foreach($dbs as $db){
         
-        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
+        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
 
 		if($user_request == "owner"){ // Owners
 			$where_clause = "WHERE ugr.ugr_ID = 2";
@@ -314,7 +315,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$data = array();
 	foreach($dbs as $db){
         if(strpos($db,'hdb_')===0){
-            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);  //for snyk
+            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
 		    $query = 'SELECT count(*) FROM `' . $db . '`.`Records` WHERE rec_FlagTemporary != 1';
 		    $res = $mysqli->query($query);
 		    if(!$res){

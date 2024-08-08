@@ -27,7 +27,7 @@ $accessToken_GoogleAPI = '';
 $accessToken_GeonamesAPI = '';
 
 if (is_file($parentIni)){
-    include_once($parentIni);
+    include_once $parentIni;
 }
 
 echo 'var accessToken_MapBox="'.$accessToken_MapBox.'",';

@@ -44,7 +44,7 @@ if($sysadmin_pwd==null){
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 
-    $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete); //for snyk
+    $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete);//for snyk
 
     if(array_key_exists('create_archive', $_REQUEST)){
         $create_arc = $_REQUEST['create_archive'];
@@ -61,7 +61,7 @@ if($sysadmin_pwd==null){
         if($database_to_delete){
             
             //if database to be deleted is not current - only system admin can do it
-            $isSystemInited = $system->init(@$_REQUEST['db']); //need to verify credentials for current database
+            $isSystemInited = $system->init(@$_REQUEST['db']);//need to verify credentials for current database
 
             /** Db check */
             if($isSystemInited){
@@ -77,7 +77,7 @@ if($sysadmin_pwd==null){
 
                     if($is_delete_current_db){
                 
-                        $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in current db
+                        $user = user_getById($system->get_mysqli(), $system->get_user_id());//user in current db
                             
                         $allow_deletion = false;
                         //find the same user in database to be deleted
@@ -111,7 +111,7 @@ if($sysadmin_pwd==null){
                         $usr_owner = user_getByField($system->get_mysqli(), 'ugr_ID', 2, $dbname_full);
                 
                         //not verbose
-                        $res = DbUtils::databaseDrop(false, $database_to_delete, $create_arc);    
+                        $res = DbUtils::databaseDrop(false, $database_to_delete, $create_arc);
                         
                         // in case deletion by sysadmin - send email to onwer of deleted database
                         if($res && !$is_delete_current_db)

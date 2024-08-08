@@ -23,7 +23,7 @@
 * 
 * for import:     importParser.php  prepareDateField   @todo validate real dates only
 *                 syncZotero.php
-* for validation: listDatabaseErrors.php               @todo validate real dates only     
+* for validation: dbVerify.php
 *                 composeSql.php
 * 
 *  - converts temporal string to human readable
@@ -188,8 +188,8 @@ class Temporal {
                     $res[5] = $date['profile'];
                 }else{
                     //fuzzy range
-                    if(@$date['start']['profile']>0) $res[5] = $date['start']['profile'];
-                    if(@$date['end']['profile']>0) $res[6] = $date['end']['profile'];
+                    if(@$date['start']['profile']>0) {$res[5] = $date['start']['profile'];}
+                    if(@$date['end']['profile']>0) {$res[6] = $date['end']['profile'];}
                 }
             }
 
@@ -206,7 +206,7 @@ class Temporal {
     //
     //
     public function isValid(){
-        return ($this->tDate!=null);   
+        return $this->tDate!=null;
     }
 
     //
@@ -238,7 +238,7 @@ class Temporal {
 
                 if(preg_match('/fl|abt\.|abt|about|around|vers|^c\s|ca|circa|~/i',$value)){
 
-                    preg_match_all('/fl|abt\.|abt|about|around|vers|ca\.|ca|circa|^c|~\s*|[-|\w+|\s]+$/i', $value, $matches); 
+                    preg_match_all('/fl|abt\.|abt|about|around|vers|ca\.|ca|circa|^c|~\s*|[-|\w+|\s]+$/i', $value, $matches);
 
                     if(@$matches[0][1]){
 
@@ -256,11 +256,11 @@ class Temporal {
                       || preg_match('/^\d{4}-$/i', $value))
                 {
                     if(preg_match('/^\d{4}-$/i', $value)){
-                        preg_match_all('/^\d{4}-$/i', $value, $matches);     
+                        preg_match_all('/^\d{4}-$/i', $value, $matches);
                         $matches[0][1] = substr($matches[0][0],0,4);
                         $matches[0][0] = 'after';
                     }else{
-                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|[-|\w+|\s]+$/i', $value, $matches);     
+                        preg_match_all('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)\s+|[-|\w+|\s]+$/i', $value, $matches);
                     }
 
 
@@ -376,7 +376,7 @@ class Temporal {
                             $period = str_replace('years','Y',$period);
                             $period = str_replace('months','M',$period);
                             $period = str_replace('days','D',$period);
-                            $period = preg_replace('/\s+/', '', $period); //remove spaces
+                            $period = preg_replace('/\s+/', '', $period);//remove spaces
                             $period = 'P'.$period;
                         }else if(strpos($period,'year')!==false){
                             $period = 'P1Y';
@@ -386,7 +386,7 @@ class Temporal {
                             $period = 'P1D';
                         }
                         if(!preg_match('/[Y|M|D]$/i',$period)){
-                            $period = $period.'Y'; //year by default
+                            $period = $period.'Y';//year by default
                         }
                         $timespan = Temporal::_getInterval(trim($values[0]), $period, 0);
 
@@ -415,13 +415,13 @@ class Temporal {
             if($timespan!=null && is_array($timespan)){
                 //json object
                 if(@$timespan[0]){
-                    $timespan = $timespan[0]; //in case [{}]
+                    $timespan = $timespan[0];//in case [{}]
                 }    
 
             }else if (strpos($value,"|")!==false) {// temporal encoded date - converts to array
 
                 $tDate = array();
-                $props = explode("|",substr_replace($value,"",0,1)); // remove first verticle bar and create array
+                $props = explode("|",substr_replace($value,"",0,1));// remove first verticle bar and create array
                 foreach ($props as $prop) {//create an assoc array
                     list($tag, $val) = explode("=",$prop);
                     $tDate[$tag] = $val;
@@ -429,7 +429,7 @@ class Temporal {
 
                 if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
                     $cld = $tDate["CL2"]." ".$tDate["CLD"];
-                    if(strpos($cld,'null')!==false) $tDate["CLD"] = substr($cld,4); //some dates were saved in wrong format - fix it
+                    if(strpos($cld,'null')!==false) {$tDate["CLD"] = substr($cld,4);}//some dates were saved in wrong format - fix it
                 }        
 
 
@@ -452,14 +452,14 @@ class Temporal {
 
                         break;
                     case 'f'://fuzzy
-                        $timespan = array('timestamp'=>array('in'=>@$tDate['DAT'],'deviation'=>$tDate['RNG'], 'type'=>'f'));    
+                        $timespan = array('timestamp'=>array('in'=>@$tDate['DAT'],'deviation'=>$tDate['RNG'], 'type'=>'f'));
 
                         break;
                     case 'c'://carbon
 
                         //BPD - before present date
                         if(@$tDate['BPD']){
-                            $date = 1950 - $tDate['BPD']; //date('Y')
+                            $date = 1950 - $tDate['BPD'];//date('Y')
                         }else{
                             $date = -intval($tDate['BCE']);
                         }
@@ -494,22 +494,23 @@ class Temporal {
                             $timespan['end']['earliest'] = $tDate['PDE'];
                         }
 
-                        if(@$tDate['SPF']) $timespan['start']['profile'] = $tDate['SPF'];
-                        if(@$tDate['EPF']) $timespan['end']['profile'] = $tDate['EPF'];
-                        if(@$tDate['PRF']) $timespan['profile'] = $tDate['PRF'];
+                        if(@$tDate['SPF']) {$timespan['start']['profile'] = $tDate['SPF'];}
+                        if(@$tDate['EPF']) {$timespan['end']['profile'] = $tDate['EPF'];}
+                        if(@$tDate['PRF']) {$timespan['profile'] = $tDate['PRF'];}
 
                         break;
+                    default;
                 }//end case
 
 
-                if(@$tDate['DET']) $timespan['determination'] = $tDate['DET'];
-                if(@$tDate['CLD'] && $tDate['CLD']!='Gregorian') $timespan['calendar'] = $tDate['CLD'];
-                if(@$tDate['COM'] && $tDate['COM']!='') $timespan['comment'] = $tDate['COM'];
+                if(@$tDate['DET']) {$timespan['determination'] = $tDate['DET'];}
+                if(@$tDate['CLD'] && $tDate['CLD']!='Gregorian') {$timespan['calendar'] = $tDate['CLD'];}
+                if(@$tDate['COM'] && $tDate['COM']!='') {$timespan['comment'] = $tDate['COM'];}
                 //labaratory code for C14
-                if(@$tDate['COD']) $timespan['labcode'] = $tDate['COD'];
-                if(@$tDate['CAL']) $timespan['calibrated'] = 1;
+                if(@$tDate['COD']) {$timespan['labcode'] = $tDate['COD'];}
+                if(@$tDate['CAL']) {$timespan['calibrated'] = 1;}
                 //human readable in native calendar
-                if(@$tDate['CL2']) $timespan['native'] = $tDate['CL2'];
+                if(@$tDate['CL2']) {$timespan['native'] = $tDate['CL2'];}
 
             }  else {
                 $timespan = Temporal::_getIntervalForMonth($value);
@@ -524,7 +525,7 @@ class Temporal {
     //
     private static function _getIntervalForMonth($value){
 
-        $value = Temporal::dateToISO($value, 2, false, 'now');  //standard order, days not need
+        $value = Temporal::dateToISO($value, 2, false, 'now');//standard order, days not need
         $timespan = null;
 
         if($value){
@@ -534,7 +535,7 @@ class Temporal {
                 $timespan = array('start'=>array('earliest'=>$value.'-01' ),
                     'end'=>array('latest'=>date("Y-m-t", strtotime($value.'-01')) ));
             }else{
-                $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));    
+                $timespan = array('timestamp'=>array('in'=>$value, 'type'=>'s'));
             }
         }
         return $timespan;
@@ -548,20 +549,20 @@ class Temporal {
 
         $is_year_only = ($deviation==null || preg_match('/^P\d+Y$/',$deviation)) && preg_match('/^-?\d+$/',$timestamp);
 
-        $dt = Temporal::dateToISO($timestamp, 2, !$is_year_only);    
+        $dt = Temporal::dateToISO($timestamp, 2, !$is_year_only);
 
         if($is_year_only){
 
             $tStart = $dt;
             $tEnd = $dt;
             if($deviation!=null){
-                $years = intval(substr($deviation,1,-1)); //remove P and Y
+                $years = intval(substr($deviation,1,-1));//remove P and Y
 
                 if($direction>=0){
-                    $tEnd = strval(intval($dt)+$years);    
+                    $tEnd = strval(intval($dt)+$years);
                 }
                 if($direction<=0){
-                    $tStart = strval(intval($dt)-$years);    
+                    $tStart = strval(intval($dt)-$years);
                 }
             }
 
@@ -571,7 +572,7 @@ class Temporal {
             $tEnd = null;
 
             if($deviation!=null){
-                $dt = Temporal::dateToISO($timestamp);    
+                $dt = Temporal::dateToISO($timestamp);
                 try{
                     $tStart = new DateTime($dt);
                     $tEnd = new DateTime($dt);
@@ -580,16 +581,16 @@ class Temporal {
                 $deviation = strtoupper($deviation);
                 $i = null;
                 try{
-                    $i = new DateInterval($deviation);    
+                    $i = new DateInterval($deviation);
                 } catch (Exception  $e){
                 }
 
                 if($tStart!=null && $i!=null){
                     if($direction>=0){
-                        $tEnd->add($i);    
+                        $tEnd->add($i);
                     }
                     if($direction<=0){
-                        $tStart->sub($i);    
+                        $tStart->sub($i);
                     }
 
                     $format = 'Y-m-d H:i:s';
@@ -735,16 +736,16 @@ class Temporal {
         $date = strval($date);
         $k = strpos($date,'.');
         if($k>0){
-            $res = substr($date,0,$k); //year
-            $mmdd = substr($date,$k+1); 
+            $res = substr($date,0,$k);//year
+            $mmdd = substr($date,$k+1);
             if(strlen($mmdd)<3){
-                $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT); 
+                $month = str_pad($mmdd,2,'0',STR_PAD_RIGHT);
             }else{
-                $month = substr($mmdd,0,2); 
+                $month = substr($mmdd,0,2);
                 if(substr($mmdd,2)==0){
                     $day = '01';
                 }else{
-                    $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);     
+                    $day = str_pad(substr($mmdd,2), 2,'0',STR_PAD_RIGHT);
                 }
             }
 
@@ -772,7 +773,7 @@ class Temporal {
     //
     private static function _datePrepare($value, $month_day_order=2){
 
-        if($value==null) return null;
+        if($value==null) {return null;}
 
         //1. Preparation of sting value - trim, remove "?", remove padding zeroes for year, 
         $origHasDays = false;
@@ -799,7 +800,7 @@ class Temporal {
                     $new_year_val = str_pad(strval(intval($parts[1])), 4, '0', STR_PAD_LEFT);
                     $value = str_replace('-'.$parts[1], $new_year_val, $value);
                 }else{
-                    $value = '-'.$parts[1]; //drop months for years <10kya
+                    $value = '-'.$parts[1];//drop months for years <10kya
                 }
             }
         }
@@ -811,11 +812,11 @@ class Temporal {
                 .' '.substr($value,8,2).':'.substr($value,10,2).':'.substr($value,12,2);
             }else if(intval($value)>9999){ //20090410 
                 $nval = substr($value,0,4);
-                if(strlen($value)>4) $nval = $nval.'-'.substr($value,4,2);
-                if(strlen($value)>6) $nval = $nval.'-'.substr($value,6,2);
+                if(strlen($value)>4) {$nval = $nval.'-'.substr($value,4,2);}
+                if(strlen($value)>6) {$nval = $nval.'-'.substr($value,6,2);}
                 $value = $nval;
             }else{
-                $value = preg_replace('/\s+/', '', $value); //remove spaces
+                $value = preg_replace('/\s+/', '', $value);//remove spaces
                 $date = array('year'=>$value);
             }
         }
@@ -850,7 +851,7 @@ class Temporal {
 
                 } catch (Exception  $e){
                     $date = null;
-                    //print $value.' => NOT SUPPORTED<br>';                            
+                    //print $value.' => NOT SUPPORTED<br>'; 
                 }                            
             }
 
@@ -917,12 +918,12 @@ class Temporal {
 
                 //year must be four digit for CE and 6 for BCE
                 if($isbce){
-                    $res = str_pad($res,6,'0',STR_PAD_LEFT); // timeline requires 6 digits for BCE years
+                    $res = str_pad($res,6,'0',STR_PAD_LEFT);// timeline requires 6 digits for BCE years
                 }else if(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
 
                     if($need_day && count($date) == 1){ // only year, add -01-01 for ISO format
-                        if($need_day===true) $need_day = '-01-01';
+                        if($need_day===true) {$need_day = '-01-01';}
                         $res = $res . $need_day;
                     }
                 }
@@ -1009,13 +1010,13 @@ class Temporal {
                 if(@$date['has_days']!=true){
 
                 }else if(@$date['day']){
-                    $res2 = $date['day']; 
+                    $res2 = $date['day'];
                 }
                 if(@$date['month']){
-                    $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1)); //strtotime($date['month'].'01')); 
+                    $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1));//strtotime($date['month'].'01'));
                 }
 
-                $res = trim($res2."  ".$res); // day month year
+                $res = trim($res2."  ".$res);// day month year
 
             }else{
                 if(@$date['month'] || $has_time){
@@ -1055,7 +1056,7 @@ class Temporal {
                         //$res = (intval($res)/1000).' kya';
                     }
                 }else{
-                    $res = $res.' BCE';    
+                    $res = $res.' BCE';
                 }
 
             }
@@ -1082,10 +1083,10 @@ class Temporal {
         $is_ambiguation = false;
 
         //chnage / and . separators to -
-        $cnt_dash = substr_count($value,'-');  
+        $cnt_dash = substr_count($value,'-');
         if($cnt_dash==0){
-            $cnt_dots = substr_count($value,'.');  //try to convert from format with . fullstops
-            $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
+            $cnt_dots = substr_count($value,'.');//try to convert from format with . fullstops
+            $cnt_slash = substr_count($value,'/');//try to convert from format with / separator
             if( $cnt_slash>0){  // 6/2006  =  1-6-2006
                 $value = str_replace('/','-',$value);
             }else if($cnt_dots>0 && preg_match('/\d{1,4}\.\d{1,4}/', $value)){  // 4.3.2006  =  4-3-2006   exclude Mar.2, 2021
@@ -1120,7 +1121,7 @@ class Temporal {
                     $value = '20'.$m.'-'.$y;
                 }
             }
-            $is_ambiguation = ($y<13 && $m<13); //ambiguation
+            $is_ambiguation = ($y<13 && $m<13);//ambiguation
         }
 
         if(substr_count($value,'-')==2 && strpos($value,':')===false) {
@@ -1131,7 +1132,7 @@ class Temporal {
             // or rare case: year is last  as 10-11-1970
             if( $y>31 || ($is_dots_slash && (!is_numeric($m) || $m<32)) ){
 
-                if($y>22 && $y<100) $y = '19'.$y; 
+                if($y>22 && $y<100) {$y = '19'.$y; }
 
                 if(strlen($m)>2 || $d>12){ // month is word
                     //$value = $y.'-'.$m.'-'.$d;
@@ -1153,7 +1154,7 @@ class Temporal {
                         //$value = $y.'-'.$m.'-'.$d; // mm/dd
                     }
 
-                    $is_ambiguation = ($m<13 && $d<13); //day-month ambiguation
+                    $is_ambiguation = ($m<13 && $d<13);//day-month ambiguation
                 }
 
                 $value = $y.'-'.$m.'-'.$d; // mm/dd
@@ -1165,7 +1166,7 @@ class Temporal {
                 if($m==13){
                     $is_ambiguation = true;    
                 }else{
-                    $days_req = cal_days_in_month(CAL_GREGORIAN, intval($m), intval($y));        
+                    $days_req = cal_days_in_month(CAL_GREGORIAN, intval($m), intval($y));
                     if($days_req+1==$d || $days_req+2==$d){
                         $is_ambiguation = true;
                     }
@@ -1173,7 +1174,8 @@ class Temporal {
             }
         }
 
-        return ($check_ambiguation)?$is_ambiguation :$value;    
+        $ret = ($check_ambiguation)?$is_ambiguation :$value;
+        return $ret;
     }
 
     //
@@ -1181,8 +1183,8 @@ class Temporal {
     //
     public static function getPeriod($date1, $date2){
 
-        $dt1 = Temporal::_datePrepare($date1);        
-        $dt2 = Temporal::_datePrepare($date2);        
+        $dt1 = Temporal::_datePrepare($date1);
+        $dt2 = Temporal::_datePrepare($date2);
 
         if(intval($dt1['year'])<-10000 || intval($dt2['year'])<-10000){
             //years only
@@ -1274,20 +1276,20 @@ class Temporal {
 
     //
     // $dt - string
-    // $mode - 0  simple
-    //         1  compact
-    //         2  extended
+    // $mode - 0  simple  (native first)
+    //         1  compact (gregorian first) 
+    //         2  extended  (list of all fields - pipe (|) separated)
 
     //
-    public static function toHumanReadable($dt, $print_invalid_str = false, $mode=0, $sep='|'){
+    public static function toHumanReadable($dt, $print_invalid_str=false, $mode=0, $sep='|', $calendar="both"){
 
         if($dt){
             $dt2 = new Temporal($dt);
             if($dt2 && $dt2->isValid()) {
                 if($mode>0){
-                    return $dt2->toReadableExt($sep, ($mode==1));
+                    return $dt2->toReadableExt($sep, ($mode==1), $calendar);
                 }else{
-                    return $dt2->toReadable();       
+                    return $dt2->toReadable($calendar);
                 }            
             }else{
                 $dt = $print_invalid_str && is_string($dt) && !empty($dt) ? '('. $dt .')' : '';
@@ -1364,9 +1366,10 @@ class Temporal {
             try{
                 $i = new DateInterval($value);
                 if($i){
-                    return ($i->y ? ("$prefix{$i->y} years") :
+                    $ret = ($i->y ? ("$prefix{$i->y} years") :
                         ($i->m ? ("$prefix{$i->m} months") :
                             ($i->d ? ("$prefix{$i->d} days") :'' )));
+                    return $ret;
                 }
             } catch (Exception  $e){
             }
@@ -1377,12 +1380,18 @@ class Temporal {
     //
     // Outputs human readable representation of temporal object
     //    
-    public function toReadable(){
+    public function toReadable($out_calendar='both'){
         if($this->tDate){
 
             $date = $this->tDate;
 
             $calendar = @$date['calendar'];
+
+            $native = null;
+            $is_greg_or_julian = (!$calendar || strtolower($calendar)=='gregorian');// || strtolower($calendar)=='julian'
+            if(@$date['native'] && !$is_greg_or_julian){
+                $native = @$date['native'];
+            }            
 
             if(@$date['timestamp']){
 
@@ -1392,17 +1401,25 @@ class Temporal {
                     $res = $res.Temporal::_deviationSuffix( $date['timestamp'] );
                 }
 
+                $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $res = 'circa '.$res;
+                    $prefix = 'circa ';
                 }else if(@$date['timestamp']['before']){
-                    $res = 'before '.$res;
+                    $prefix = 'before ';
                 }else if(@$date['timestamp']['after']){
-                    $res = 'after '.$res;
+                    $prefix = 'after ';
+                }
+                
+                if($prefix){
+                    $res = $prefix.$res;
+                    if($native){
+                        $native = $prefix.$native;
+                    }
                 }
 
             }else{
 
-                $from = '';                
+                $from = '';
                 $to = '';
 
                 if(@$date['start'] && @$date['start']['in']){
@@ -1426,13 +1443,15 @@ class Temporal {
             }
 
             //add native decription as prefix
-            $is_greg_or_julian = (!$calendar || 
-                strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
-
-            if($calendar && @$date['native'] && !$is_greg_or_julian){
-                $res = $date['native'].'  '.$calendar.' (Gregorian '.$res.')';
-            }            
-
+            if($native){
+                if($out_calendar=='native'){
+                    $res = $native; //native only    
+                }else if($out_calendar!='gregorian'){
+                    //both gregorian and native
+                    $res = $native.'  '.$calendar.' (Gregorian '.$res.')';
+                }
+            }
+            
             return $res;
 
         }else{
@@ -1444,7 +1463,7 @@ class Temporal {
     //
     // Outputs human readable representation of temporal object
     //    
-    public function toReadableExt($separator, $is_compact=false){
+    public function toReadableExt($separator, $is_compact=false, $out_calendar=null){
 
         if($this->tDate){
 
@@ -1455,6 +1474,12 @@ class Temporal {
             $is_simple = false;
 
             $res['Type'] = '';
+            
+            $native = null;
+            $is_greg_or_julian = (!$calendar || strtolower($calendar)=='gregorian');// || strtolower($calendar)=='julian'
+            if(@$date['native'] && !$is_greg_or_julian){
+                $native = @$date['native'];
+            }            
 
             if(@$date['timestamp']){
 
@@ -1466,15 +1491,23 @@ class Temporal {
                 if($timestamp){
                     $timestamp = $timestamp.Temporal::_deviationSuffix( $date['timestamp'] );
                 }
+                
+                $res['Date']  = $timestamp;
 
+                $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $res['Date'] = 'circa '.$timestamp;
+                    $prefix = 'circa ';
                 }else if(@$date['timestamp']['before']){
-                    $res['Date'] = 'before '.$timestamp;
+                    $prefix = 'before ';
                 }else if(@$date['timestamp']['after']){
-                    $res['Date'] = 'after '.$timestamp;
-                }else {
-                    $res['Date']  = $timestamp;    
+                    $prefix = 'after ';
+                }
+                
+                if($prefix){
+                    $res['Date'] = $prefix.$res['Date'];
+                    if($native){
+                        $native = $prefix.$native;
+                    }
                 }
 
             }else if(@$date['start'] && $date['type']=='r'){  //simple range
@@ -1491,7 +1524,7 @@ class Temporal {
             }else{ //timespan - range
 
 
-                $from = '';                
+                $from = '';
                 $to = '';
                 $is_simple = true;
 
@@ -1515,7 +1548,7 @@ class Temporal {
                     }
 
                     $res[$is_simple?'Earliest estimate':'Terminus Post Quem'] = $from;
-                    if(!$is_simple) $res['Probable Begin'] = $dt;
+                    if(!$is_simple) {$res['Probable Begin'] = $dt;}
                     if(@$date['start']['profile']){
                         $res['Start Profile'] = $this->dictProfile[intval($date['start']['profile'])];
                     }
@@ -1552,27 +1585,23 @@ class Temporal {
             }
 
             //add native decription as prefix
-            $is_greg_or_julian = (!$calendar || 
-                strtolower($calendar)=='gregorian' || strtolower($calendar)=='julian');
+            //$is_greg_or_julian = (!$calendar || 
+            //    strtolower($calendar)=='gregorian');// || strtolower($calendar)=='julian'
 
-            if(!$is_greg_or_julian){
-                //add native decription as suffux
-                $res['Calendar'] = $date['calendar'].' '.($date['native']?$date['native']:'');  
-            } 
-
-
-
-            if(@$date['comment']) $res['Comment'] = $date['comment'];
-            if(@$date['determination']) $res['Determination'] = $this->dictDetermination[intval($date['determination'])];
+            if(@$date['comment']) {$res['Comment'] = $date['comment'];}
+            if(@$date['determination']) {$res['Determination'] = $this->dictDetermination[intval($date['determination'])];}
             //labaratory code for C14
-            if(@$date['labcode']) $res['Labaratory Code'] = $date['labcode'];
-            if(@$date['calibrated']) $res['Calibarated'] = 'yes';
+            if(@$date['labcode']) {$res['Labaratory Code'] = $date['labcode'];}
+            if(@$date['calibrated']) {$res['Calibarated'] = 'yes';}
 
             $res2 = '';
             if($is_compact){
 
                 if($res['Type']!='Simple' && $res['Type']!='Simple Range'){
-                    $res2 = $res['Type'].' ';    
+                    $res2 = $res['Type'].' ';
+                    if($native && $out_calendar=='native'){
+                        $native = $res['Type'].' '.$native;    
+                    }
                 }
 
                 if($res['Date']){
@@ -1588,16 +1617,27 @@ class Temporal {
                 }
 
                 $supinfo = array();
-                if($res['Determination']) $supinfo[] = $res['Determination'];
-                if($date['calibrated']) $supinfo[] = 'Calibarated';
-                if(!$is_greg_or_julian) {
-                    $supinfo[] = $res['Calendar'];
+                if($res['Determination']) {$supinfo[] = $res['Determination'];}
+                if($date['calibrated']) {$supinfo[] = 'Calibarated';}
+                
+                //add native decription as prefix
+                if($native){
+                    if($out_calendar=='native'){
+                        $res2 = $native; //native only    
+                    }else if($out_calendar!='gregorian'){
+                        //both gregorian and native
+                        $supinfo[] =  $calendar.' '.$native;
+                    }
                 }
+                    
                 if(count($supinfo)>0){
                     $res2 = $res2 . ' (' . implode(', ', $supinfo) . ')';
                 }
 
             }else{
+                if($native!=null){
+                    $res['Calendar'] = $date['calendar'].' '.$native; //($date['native']?$date['native']:'');
+                } 
                 foreach($res as $key=>$val){
                     $res2 = $res2.$key.': '.$val.$separator;
                 }
@@ -1632,13 +1672,13 @@ class Temporal {
                         $res['BCE'] = ''.abs(intval(@$date['timestamp']['in']));
                     }
                     if(@$date['timestamp']['deviation']){
-                        $res['DEV'] = $date['timestamp']['deviation'];    
+                        $res['DEV'] = $date['timestamp']['deviation'];
                     }else{
                         if(@$date['timestamp']['deviation_negative']){
-                            $res['DVN'] = $date['timestamp']['deviation_negative'];    
+                            $res['DVN'] = $date['timestamp']['deviation_negative'];
                         }
                         if(@$date['timestamp']['deviation_positive']){
-                            $res['DVP'] = $date['timestamp']['deviation_positive'];    
+                            $res['DVP'] = $date['timestamp']['deviation_positive'];
                         }
                     }
 
@@ -1652,17 +1692,17 @@ class Temporal {
                         $res['TPQ'] = Temporal::decimalToYMD($date['estMinDate']);
                         $res['TAQ'] = Temporal::decimalToYMD($date['estMaxDate']);
 
-                        $res['RNG'] = $date['timestamp']['deviation'];    
-                        if(@$date['timestamp']['profile']) $res['PRF'] = $date['timestamp']['profile'];
+                        $res['RNG'] = $date['timestamp']['deviation'];
+                        if(@$date['timestamp']['profile']) {$res['PRF'] = $date['timestamp']['profile'];}
 
                     }else{
                         $res['TYP'] = 's';
                         if(@$date['timestamp']['circa']){
-                            $res['CIR'] = '1';  
+                            $res['CIR'] = '1';
                         }else if(@$date['timestamp']['before']){
-                            $res['CIR'] = '2';  
+                            $res['CIR'] = '2';
                         }else if(@$date['timestamp']['after']){
-                            $res['CIR'] = '3';  
+                            $res['CIR'] = '3';
                         }
                     }
                 }
@@ -1684,30 +1724,30 @@ class Temporal {
                     $res['TPQ'] = $date['start']['in'];
                 }else{
                     $res['TPQ'] = $date['start']['earliest'];
-                    if(@$date['start']['latest']) $res['PDB'] = $date['start']['latest'];
+                    if(@$date['start']['latest']) {$res['PDB'] = $date['start']['latest'];}
                 }
 
                 if(@$date['end'] && @$date['end']['in']){
                     $res['TAQ'] = $date['end']['in'];
                 }else{
-                    if(@$date['end']['earliest']) $res['PDE'] = $date['end']['earliest'];
+                    if(@$date['end']['earliest']) {$res['PDE'] = $date['end']['earliest'];}
                     $res['TAQ'] = $date['end']['latest'];
                 }
 
-                if(@$date['start']['profile']) $res['SPF'] = $date['start']['profile'];    
-                if(@$date['end']['profile']) $res['EPF'] = $date['end']['profile'];
-                if(@$date['profile']) $res['PRF'] = $date['profile'];
+                if(@$date['start']['profile']) {$res['SPF'] = $date['start']['profile'];}
+                if(@$date['end']['profile']) {$res['EPF'] = $date['end']['profile'];}
+                if(@$date['profile']) {$res['PRF'] = $date['profile'];}
             }
 
 
-            if(@$date['determination']) $res['DET'] = $date['determination'];
-            if(@$date['calendar']) $res['CLD'] = $date['calendar'];
-            if(@$date['comment']) $res['COM'] = $date['comment'];
+            if(@$date['determination']) {$res['DET'] = $date['determination'];}
+            if(@$date['calendar']) {$res['CLD'] = $date['calendar'];}
+            if(@$date['comment']) {$res['COM'] = $date['comment'];}
             //labaratory code for C14
-            if(@$date['labcode']) $res['COD'] = $date['labcode'];
-            if(@$date['calibrated']) $res['CAL'] = '1';
+            if(@$date['labcode']) {$res['COD'] = $date['labcode'];}
+            if(@$date['calibrated']) {$res['CAL'] = '1';}
             //human readable in native calendar
-            if(@$date['native']) $res['CL2'] = $date['native'];
+            if(@$date['native']) {$res['CL2'] = $date['native'];}
 
             $res2 = '|VER=1';
             foreach($res as $key=>$val){
@@ -1732,12 +1772,12 @@ class Temporal {
             // saves as usual date
             // if date is Simple, 0<year>9999 (CE) and has both month and day 
             if($preparedDate->isValidSimple()){
-                $dtl_Value = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                $dtl_Value = $preparedDate->getValue(true);//returns simple yyyy-mm-dd
             }else{
                 if($useNewTemporalFormatInRecDetails){
-                    $dtl_Value = $preparedDate->toJSON(); //json encoded string
+                    $dtl_Value = $preparedDate->toJSON();//json encoded string
                 }else{
-                    $dtl_Value = $preparedDate->toPlain(); //Plain string (|VER=1|DAT=....)
+                    $dtl_Value = $preparedDate->toPlain();//Plain string (|VER=1|DAT=....)
                 }
             }
         }

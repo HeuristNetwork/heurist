@@ -58,7 +58,7 @@ $.widget( "heurist.searchBuilderSort", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         //create elements for predicate
         // 1. field selector for field or links tokens
@@ -88,7 +88,7 @@ $.widget( "heurist.searchBuilderSort", {
             .css({'margin':'0 1em','min-width':'90px', border:'none'})
             .appendTo( this.sel_container );
 
-        var topOptions3 = [
+        let topOptions3 = [
                 {key:'0', title: 'Ascending (A..Z, 1..9)'},
                 {key:'1', title: 'Descending (Z..A, 9..1)'}];
 
@@ -107,7 +107,6 @@ $.widget( "heurist.searchBuilderSort", {
             }    
         } });
         
-        var that = this;
         this.sel_container
         .on( 'mouseenter', function(event){ 
             that.remove_token.css({visibility:'visible'});
@@ -138,7 +137,7 @@ $.widget( "heurist.searchBuilderSort", {
     */
     _refresh: function(){
         
-            var topOptions2 = [
+            let topOptions2 = [
                     {key:'', title:window.hWin.HR("select...")},
                     {key:'t', title:window.hWin.HR("record title")},
                     {key:'id', title:window.hWin.HR("record id")},
@@ -149,7 +148,7 @@ $.widget( "heurist.searchBuilderSort", {
                     {key:'r', title:window.hWin.HR("personal rating")},
                     {key:'p', title:window.hWin.HR("popularity")}];
                     
-            var allowed_fieldtypes = ['enum','freetext','blocktext','year','date','integer','float'];
+            let allowed_fieldtypes = ['enum','freetext','blocktext','year','date','integer','float'];
             
             //show field selector
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.rty_ID, 
@@ -176,7 +175,7 @@ $.widget( "heurist.searchBuilderSort", {
     //
     getValue: function(){
         
-        var key = this.select_fields.val();
+        let key = this.select_fields.val();
         
         if(key && key>0){
             key = 'f:'+key;
@@ -190,7 +189,7 @@ $.widget( "heurist.searchBuilderSort", {
     // Get label of selected value
     getLabel: function(){
 
-        var label 
+        let label 
         if(this.select_fields.hSelect('instance')){
             label = this.select_fields.hSelect('widget').text();    
         }

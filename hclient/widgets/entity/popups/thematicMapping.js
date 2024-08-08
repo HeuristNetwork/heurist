@@ -89,7 +89,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     _destroy: function() {
         this._super(); 
         
-        var treediv = this.element.find('.rtt-tree');
+        let treediv = this.element.find('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -101,8 +101,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
-        var that = this;
+        let res = this._super();
+        let that = this;
         res[1].text = window.hWin.HR('Save thematic map');
         res[0].text = window.hWin.HR('Cancel');
         return res;
@@ -116,7 +116,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.selectRecordScope.empty();
 
         
-        var fields_sel = this.element.find('#selected_fields');
+        let fields_sel = this.element.find('#selected_fields');
         
         this._on(fields_sel,{change: this._onThemeFieldSelect});
 
@@ -135,7 +135,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.options.thematic_mapping = window.hWin.HEURIST4.util.isJSON( this.options.thematic_mapping );
         
         //load list of thematic maps
-        var themes_list = this.element.find('#thematic_maps_list');
+        let themes_list = this.element.find('#thematic_maps_list');
         this._on(themes_list,{change: this._onThematicMapSelect});
         themes_list.empty();
         
@@ -146,9 +146,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             this.options.thematic_mapping = [];//
         }
             
-        var i=0;
+        let i=0;
         while(i<this.options.thematic_mapping.length){
-            var t_map = this.options.thematic_mapping[i];
+            let t_map = this.options.thematic_mapping[i];
             if(t_map.fields){ //with fields - thematic map
                 window.hWin.HEURIST4.ui.addoption(themes_list[0], i, t_map.title);
                 i++;
@@ -159,7 +159,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
         
         //default layer symbol
-        var def_style = window.hWin.HEURIST4.util.isJSON(this.baseLayerSymbol);
+        let def_style = window.hWin.HEURIST4.util.isJSON(this.baseLayerSymbol);
         if(!def_style){
             def_style = window.hWin.HAPI4.get_prefs('map_default_style');
             if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
@@ -186,7 +186,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         //
         //
         //
-        var opt, selScope = this.selectRecordScope.get(0);
+        let opt, selScope = this.selectRecordScope.get(0);
         this.selectRecordScope = window.hWin.HEURIST4.ui.createRectypeSelectNew( selScope,
         {
             topOptions: [{key:'-1',title:'select record type...'}],
@@ -206,33 +206,31 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         //
         if(this.options.maplayer_query){
             
-            var request = { q: this.options.maplayer_query,
+            let request = { q: this.options.maplayer_query,
                     w: 'a',
                     detail: 'count_by_rty'};
 
-            var that = this;
+            let that = this;
             window.HAPI4.RecordMgr.search(request, function(response){ 
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     if(response.data && $.isPlainObject(response.data.recordtypes)){
-                        var rty_IDs = Object.keys(response.data.recordtypes);
+                        let rty_IDs = Object.keys(response.data.recordtypes);
                         
                         if(rty_IDs.length>0){
 
-                            for(var i=0; i<rty_IDs.length; i++){
-                                var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
+                            for(let i=0; i<rty_IDs.length; i++){
+                                let name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_IDs[i], 'rty_Name'));
                                 
-                                var option = document.createElement("option");
+                                let option = document.createElement("option");
                                 option.text = name;
                                 option.value = rty_IDs[i];
                                 $(option).attr('depth', 1);
                                 selScope.insertBefore(option, selScope.options[1]);
-                                //var opt = window.hWin.HEURIST4.ui.addoption(selScope, rty_IDs[i], name);
-                                //$(opt).attr('depth', 1);
                             }
                             
-                            var option = document.createElement("option");
+                            let option = document.createElement("option");
                             option.text = 'Record types in layer';
                             option.disabled = 'disabled'
                             $(option).attr('group', 1);
@@ -245,7 +243,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             
                             if(response.data.count<1000){
                                 //search ids
-                                var request2 = { q: that.options.maplayer_query,
+                                let request2 = { q: that.options.maplayer_query,
                                         w: 'a',
                                         detail: 'ids'};
                                 window.HAPI4.RecordMgr.search(request2, function(response){ 
@@ -300,11 +298,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _onRecordScopeChange: function() 
     {
-        var isdisabled = this._super();
+        let isdisabled = this._super();
         
         //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
         
-        var rtyID = this.selectRecordScope.val();
+        let rtyID = this.selectRecordScope.val();
         
         if(this._selectedRtyID!=rtyID ){
             if(rtyID>0){
@@ -324,23 +322,20 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _loadRecordTypesTreeView: function(rtyID){
         
-        var that = this;
+        let that = this;
 
         if(this._selectedRtyID!=rtyID ){
             
             this._selectedRtyID = rtyID;
 
-            //var main_area = this.element.find('#div_work_area').empty();
-            //$('<select id="selected_fields" size="5" style="min-width:400px">').appendTo(main_area);
-            
-            var allowed_fieldtypes = [//'rec_Title','rec_ID',
+            let allowed_fieldtypes = [//'rec_Title','rec_ID',
                 'enum','year','date','integer','float','resource']; //'freetext',
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
+            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
             
         //load treeview
-        var treediv = this.element.find('.rtt-tree');
+        let treediv = this.element.find('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -360,7 +355,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 if( data.node.hasChildren() ){
 
                     if(data.node.isExpanded()){
-                        for(var i = 0; i < data.node.children.length; i++){
+                        for(let i = 0; i < data.node.children.length; i++){
                             let node = data.node.children[i];
 
                             if(node.key == 'term'){ // if node is a term
@@ -385,27 +380,27 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 {
                     //define action button
                    
-                    var item = $(data.node);
-                    var item_li = $(data.node.li);
+                    let item = $(data.node);
+                    let item_li = $(data.node.li);
                     if($(item).find('.svs-contextmenu3').length==0){
                      
-                        var parent_span = item_li.children('span.fancytree-node');
+                        let parent_span = item_li.children('span.fancytree-node');
 
                         //add icon
-                        var actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                        let actionspan = $('<div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
                         +item.data.parent_id+'" data-code="'+data.node.key+'">'
                         +'<span class="ui-icon ui-icon-circle-b-plus" title="Add field" style="font-size:0.9em"></span>'
                         +'</div>').appendTo(parent_span);
                         
                         actionspan.find('.ui-icon-circle-b-plus').on('click',function(event){
-                            var ele = $(event.target);
+                            let ele = $(event.target);
                             window.hWin.HEURIST4.util.stopEvent(event);
                             that._addThemeField( ele.parents('[data-code]').attr('data-code') );                           
                         });
                         
                         //hide icons on mouse exit
                         function _onmouseexit(event){
-                            var node;
+                            let node;
                             if($(event.target).is('li')){
                                 node = $(event.target).find('.fancytree-node');
                             }else if($(event.target).hasClass('fancytree-node')){
@@ -415,12 +410,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                 node = $(event.target).parents('.fancytree-node');
                                 if(node) node = $(node[0]);
                             }
-                            var ele = node.find('.svs-contextmenu3');
+                            let ele = node.find('.svs-contextmenu3');
                             ele.hide();
                         }    
                         
                         function _onmouseenter(event){
-                            var node;
+                            let node;
                             if($(event.target).hasClass('fancytree-node')){
                                 node =  $(event.target);
                             }else{
@@ -457,11 +452,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 }
             },
             lazyLoad: function(event, data){
-                var node = data.node;
-                var parentcode = node.data.code; 
-                var rectypes = node.data.rt_ids;
+                let node = data.node;
+                let parentcode = node.data.code; 
+                let rectypes = node.data.rt_ids;
 
-                var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                     rectypes, allowed_fieldtypes, parentcode );
                 if(res.length>1){
                     data.result = res;
@@ -485,8 +480,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     return false;
                 }
 
-                var isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-                var setDefaults = !data.node.isExpanded();
+                let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+                let setDefaults = !data.node.isExpanded();
 
                 if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                     
@@ -495,7 +490,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     }
                 
                     if(setDefaults){
-                        for(var i = 0; i < data.node.children.length; i++){
+                        for(let i = 0; i < data.node.children.length; i++){
                             let node = data.node.children[i];
 
                             if(node.key == 'term'){ // if node is a term
@@ -536,7 +531,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             this.options.thematic_mapping.push({title:newname, active:false, fields:[]});
 
             
-            var themes_list = this.element.find('#thematic_maps_list');
+            let themes_list = this.element.find('#thematic_maps_list');
             window.hWin.HEURIST4.ui.addoption(themes_list[0], last_idx, newname);
             //ele.value = $(ele).uniqueId();
             //this.options.thematic_mapping[last_idx].uid = ele.value;
@@ -553,7 +548,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     _onThematicMapDelete: function(unconditional){
         if(this.currentThemeIdx>=0){
             
-            var that = this;
+            let that = this;
 
             if(unconditional!==true){    
                 window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
@@ -561,7 +556,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 return;
             }
             
-            var themes_list = this.element.find('#thematic_maps_list');
+            let themes_list = this.element.find('#thematic_maps_list');
             this.options.thematic_mapping.splice(this.currentThemeIdx, 1);
             //remove from select
             themes_list.find('option:eq(' + this.currentThemeIdx + ')').remove();
@@ -591,7 +586,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         if(this.currentThemeIdx>=0){
         
-            var t_map = this.options.thematic_mapping[this.currentThemeIdx];
+            let t_map = this.options.thematic_mapping[this.currentThemeIdx];
         
             t_map.title = this.element.find('#tm_name').val();
             t_map.active = this.element.find('#tm_active').is(':checked');
@@ -604,9 +599,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             this.currentField = 0;
             
-            var len = Object.keys(this.selectedFields).length;
-            for (var k=0;k<len;k++){
-                key = Object.keys(this.selectedFields)[k];
+            let len = Object.keys(this.selectedFields).length;
+            for (let k=0;k<len;k++){
+                const key = Object.keys(this.selectedFields)[k];
                 if(this.selectedFields[key].ranges.length>0){
                     t_map.fields.push( this.selectedFields[key] );    
                 }
@@ -640,26 +635,26 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
             this.currentThemeIdx = event?event.target.selectedIndex:0;
             
-            var t_map = this.options.thematic_mapping[this.currentThemeIdx];
+            let t_map = this.options.thematic_mapping[this.currentThemeIdx];
         
             this.element.find('#tm_name').val(t_map.title);
             this.element.find('#tm_active').prop('checked', t_map.active);
             
-            var base_symbol = window.hWin.HEURIST4.util.isJSON( t_map.symbol );
+            let base_symbol = window.hWin.HEURIST4.util.isJSON( t_map.symbol );
             base_symbol = (!base_symbol)?'':JSON.stringify(base_symbol);
             this.element.find('#tm_symbol').val(base_symbol);
             
             this.selectedFields = {};
             
-            var flds = t_map.fields;
+            let flds = t_map.fields;
             
-            var fields_sel = this.element.find('#selected_fields');
+            let fields_sel = this.element.find('#selected_fields');
             fields_sel.empty();
             
             if(flds){
-                for(var i=0; i<flds.length; i++){
-                    var fld = flds[i];
-                    var key = fld.code.split(':');
+                for(let i=0; i<flds.length; i++){
+                    let fld = flds[i];
+                    let key = fld.code.split(':');
                     key = key[key.length-1];//dty_ID
                     
                     this.selectedFields[key] = fld;
@@ -682,16 +677,16 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _addThemeField: function( nodekey )
     {
-        var tree = this.element.find('.rtt-tree').fancytree("getTree");
+        let tree = this.element.find('.rtt-tree').fancytree("getTree");
         
-        var node = tree.getNodeByKey(nodekey);
+        let node = tree.getNodeByKey(nodekey);
         
-        var key = node.key.split(':');
+        let key = node.key.split(':');
         key = key[key.length-1];
         
         if(!this.selectedFields[key]){
             this.selectedFields[key] = {code:node.data.code, title:node.data.name, ranges:[]};
-            var sel = this.element.find('#selected_fields');
+            let sel = this.element.find('#selected_fields');
             
             //+' ('+this.selectedFields[key].code+'  '+key+')'
             window.hWin.HEURIST4.ui.addoption(sel[0], key, this.selectedFields[key].title);
@@ -712,10 +707,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     _saveThemeField: function(){
         
         if(this.currentField>0){
-            var selfield = this.selectedFields[this.currentField];
+            let selfield = this.selectedFields[this.currentField];
             //get values from UI
-            var main_area = this.element.find('#div_work_area');        
-            var f_ranges = main_area.find('#f_ranges');
+            let main_area = this.element.find('#div_work_area');        
+            let f_ranges = main_area.find('#f_ranges');
             
             if(f_ranges.children().length>0){
                 $.each(f_ranges.children(), function(i, ele){
@@ -743,7 +738,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                                 
                             if(val1){
                                 selfield.ranges[i].value = val1;
-                                var symb = window.hWin.HEURIST4.util.isJSON(ele.find('.field-symbol').val());
+                                let symb = window.hWin.HEURIST4.util.isJSON(ele.find('.field-symbol').val());
                                 selfield.ranges[i].symbol = symb?symb:'';
                                 selfield.ranges[i].uid = null;
                                 delete selfield.ranges[i].uid;
@@ -773,9 +768,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _onThemeFieldSelect: function(event){                                                           
         
-        var main_area = this.element.find('#div_work_area');        
-        var f_ranges = main_area.find('#f_ranges');
-        var selfield;
+        let main_area = this.element.find('#div_work_area');        
+        let f_ranges = main_area.find('#f_ranges');
+        let selfield;
         
         //save previous
         this._saveThemeField();
@@ -793,7 +788,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             main_area.find('#f_title').val(selfield.title);
             
             //add ranges elements
-            for (var k=0;k<selfield.ranges.length;k++){
+            for (let k=0;k<selfield.ranges.length;k++){
                 this._defThemeFieldRange(k, selfield.ranges[k]);
             }
         }else{
@@ -806,13 +801,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _defThemeFieldRange: function(idx, range){   
 
-        var selfield = this.selectedFields[this.currentField];
-        var key = selfield.code.split(':');
+        let selfield = this.selectedFields[this.currentField];
+        let key = selfield.code.split(':');
         key = key[key.length-1];//dty_ID
-        var dty_Type = $Db.dty(key, 'dty_Type');
-        var vocab_id = $Db.dty(key, 'dty_JsonTermIDTree');
+        let dty_Type = $Db.dty(key, 'dty_Type');
+        let vocab_id = $Db.dty(key, 'dty_JsonTermIDTree');
 
-        var ele = $('<div style="padding:5px" class="field-range">'
+        let ele = $('<div style="padding:5px" class="field-range">'
             +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"/>'
             + ((dty_Type=='enum')
             ? '<select class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
@@ -823,12 +818,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
         ele.uniqueId();
-        var uid = ele.attr('id');
+        let uid = ele.attr('id');
         range.uid = uid;
 
-        var val1 = range.value, val2 = '';
+        let val1 = range.value, val2 = '';
         if(val1 && val1.indexOf('<>')>0){
-            var vals = val1.split('<>');
+            let vals = val1.split('<>');
             val2 = (vals && vals.length==2)?vals[1]:'';
             val1 = (vals && vals.length==2)?vals[0]:'';
         }
@@ -858,11 +853,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         
         this._on(ele.find('.ui-icon-circle-b-close'),{click:function(event){
-            var ele = $(event.target).parents('.field-range');
-            var range_uid = ele.attr('id');
+            let ele = $(event.target).parents('.field-range');
+            let range_uid = ele.attr('id');
             ele.remove();
 
-            var selfield = this.selectedFields[this.currentField];
+            let selfield = this.selectedFields[this.currentField];
 
             $.each(selfield.ranges,function(i,item){
                 if(item.uid  == range_uid){
@@ -879,10 +874,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _initSymbolEditor: function(fele){
         
-        var f_ranges = this.element.find('#f_ranges');
+        let f_ranges = this.element.find('#f_ranges');
         fele.attr('readonly','readonly');
         
-        var $btn_edit_clear = $('<span>')
+        let $btn_edit_clear = $('<span>')
         .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
         .attr('tabindex', '-1')
         .attr('title', 'Reset default symbology')
@@ -892,13 +887,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
                 function(){fele.val('');}); }});
         
-        var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+        let $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
             .addClass('smallbutton btn_add_term')
             .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'}) //'vertical-align':'top'
             .appendTo( fele.parent('div') );
         
         $btn_edit_switcher.on( { click: function(){
-                var current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
+                let current_val = window.hWin.HEURIST4.util.isJSON( fele.val() );
                 if(!current_val) current_val = {};
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, 4, function(new_value){
                     fele.val(JSON.stringify(new_value)).trigger('change');
@@ -914,9 +909,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
         if(this.currentField>0){
             
-            var that = this;
+            let that = this;
         
-            var key = $(event.target).is('button')
+            let key = $(event.target).is('button')
                                 ?$(event.target).attr('id')
                                 :$(event.target).parent().attr('id');
             
@@ -934,8 +929,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
             }else if(key=='btn_f_range_add'){
                 
-                var selfield = this.selectedFields[this.currentField];
-                var idx = selfield.ranges.length
+                let selfield = this.selectedFields[this.currentField];
+                let idx = selfield.ranges.length
                 selfield.ranges.push({value:'', symbol:''});
                 
                 this._defThemeFieldRange(idx, selfield.ranges[idx]);
@@ -943,7 +938,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }else if(key=='btn_f_range_auto'){
                 
                 //find min/max and unique values show ranges dialog
-                var selfield = this.selectedFields[this.currentField];
+                let selfield = this.selectedFields[this.currentField];
                 this._defineAutoRanges(selfield.code);
             
             }else if(key=='btn_f_range_reset'){
@@ -956,11 +951,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 
             }else if(key=='btn_f_range_symb'){
 
-                var selfield = this.selectedFields[this.currentField];
-                var cnt = selfield.ranges.length;
+                let selfield = this.selectedFields[this.currentField];
+                let cnt = selfield.ranges.length;
                 
                 window.hWin.HEURIST4.ui.showEditSymbologyDialog({}, 5, function(new_value){
-                    var fillGradient = [], colorGradient = [], strokeOpacity = [], fillOpacity = [], iconSize = [];
+                    let fillGradient = [], colorGradient = [], strokeOpacity = [], fillOpacity = [], iconSize = [];
                     if(new_value.fillColor1 && new_value.fillColor2){
                         fillGradient = window.hWin.HEURIST4.ui.getColourGradient(new_value.fillColor1, new_value.fillColor2, cnt);
                     }
@@ -981,9 +976,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.fillOpacity2 = __prepareInt(new_value.fillOpacity2);
 
                     if(new_value.fillOpacity1>0 || new_value.fillOpacity2>0){
-                        var step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
-                        var val = new_value.fillOpacity1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.fillOpacity2 - new_value.fillOpacity1)/cnt;
+                        let val = new_value.fillOpacity1;
+                        for(let i=0; i<cnt; i++){
                             fillOpacity.push((i==cnt-1 || val>new_value.fillOpacity2)?new_value.fillOpacity2:val);
                             val = Math.round(val + step);
                         }
@@ -993,9 +988,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.strokeOpacity2 = __prepareInt(new_value.strokeOpacity2);
 
                     if(new_value.strokeOpacity1>0 || new_value.strokeOpacity2>0){
-                        var step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
-                        var val = new_value.strokeOpacity1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.strokeOpacity2 - new_value.strokeOpacity1)/cnt;
+                        let val = new_value.strokeOpacity1;
+                        for(let i=0; i<cnt; i++){
                             strokeOpacity.push((i==cnt-1 || val>new_value.strokeOpacity2)?new_value.strokeOpacity2:val);
                             val = Math.round(val + step);
                         }
@@ -1005,20 +1000,20 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     new_value.iconSize2 = __prepareInt(new_value.iconSize2);
 
                     if(new_value.iconSize1>0 || new_value.iconSize2>0){
-                        var step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
-                        var val = new_value.iconSize1;
-                        for(var i=0; i<cnt; i++){
+                        let step = (new_value.iconSize2 - new_value.iconSize1)/cnt;
+                        let val = new_value.iconSize1;
+                        for(let i=0; i<cnt; i++){
                             iconSize.push((i==cnt-1 || val>new_value.iconSize2)?new_value.iconSize2:val);
                             val = Math.round(val + step);
                         }
                     }
 
                     
-                    var f_ranges = that.element.find('#f_ranges');
+                    let f_ranges = that.element.find('#f_ranges');
                     
-                    for(var i=0; i<cnt; i++){
+                    for(let i=0; i<cnt; i++){
                         
-                        var symbol = window.hWin.HEURIST4.util.isJSON(selfield.ranges[i].symbol);
+                        let symbol = window.hWin.HEURIST4.util.isJSON(selfield.ranges[i].symbol);
                         if(!symbol) symbol = {};
                         if(fillGradient.length>0){
                             symbol.fillColor = fillGradient[i];
@@ -1054,9 +1049,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _defineAutoRanges: function(code){
         
-        var $dlg;
+        let $dlg;
         
-        var field = window.hWin.HEURIST4.query.createFacetQuery(code, true, false);
+        let field = window.hWin.HEURIST4.query.createFacetQuery(code, true, false);
         field['type'] = $Db.dty(field['id'], 'dty_Type');
          
         this.popele.find('.numeric').hide();
@@ -1078,12 +1073,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.popele.find('input').val('');
         this.popele.find('#int_count').val(10);
         
+        let that = this;
         //
         // substitute $IDS in facet query with list of ids OR current query(todo)
         // 
         if(this.options.maplayer_query){
 
-            var that = this;
             function __fillQuery(q){
                 $(q).each(function(idx, predicate){
 
@@ -1100,7 +1095,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }        
 
 
-            var query;
+            let query;
             if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 //replace with list of ids
                 query = this.options.maplayer_query; //{ids: this._currentRecordset.getMainSet().join(',')};
@@ -1117,7 +1112,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 __fillQuery(query);                
             }
 
-            var request = {q: query, count_query:null, w: 'a', a:'getfacets',
+            let request = {q: query, count_query:null, w: 'a', a:'getfacets',
                 facet_index: 0, 
                 field:  field['id'],
                 type:   field['type'],
@@ -1130,12 +1125,9 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 //request_id:this._request_id,
                 source:this.element.attr('id') }; //, facets: facets
 
-            var that = this;
             window.HAPI4.RecordMgr.get_facets(request, function(response){ 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    //var this.popele = that.element.find('#divAutoRanges');
-                    
                     that.fieldSelected = field;
 
                     if(field['type']=='enum'){
@@ -1158,7 +1150,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
             
         
-        var btns = [
+        let btns = [
                     {text:window.hWin.HR('Apply'),
                         click: function(){
 
@@ -1167,15 +1159,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                             //create new ranges
                             if(that.preview_ranges.length>0){
                                 
-                                var selfield = that.selectedFields[that.currentField];
+                                let selfield = that.selectedFields[that.currentField];
                                 selfield.ranges = [];
                                 
-                                var main_area = that.element.find('#div_work_area');        
+                                let main_area = that.element.find('#div_work_area');        
                                 main_area.find('#f_ranges').empty();
                                 
                                 //add ranges elements
-                                for (var k=0;k<that.preview_ranges.length;k++){
-                                    var range = that.preview_ranges[k];
+                                for (let k=0;k<that.preview_ranges.length;k++){
+                                    let range = that.preview_ranges[k];
                                     selfield.ranges.push({value:$.isPlainObject(range)?(range.min+'<>'+range.max):range, symbol:''})
                                     that._defThemeFieldRange(k, selfield.ranges[k]);
                                 }                                
@@ -1205,30 +1197,29 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     //
     _definePreviewRanges: function(){
 
-        //var this.popele = this.element.find('#divAutoRanges');
         this.preview_ranges = [];
-        var ranges = [];
-        var div_preview = this.popele.find('#ranges_preview').empty();
+        let ranges = [];
+        let div_preview = this.popele.find('#ranges_preview').empty();
         
         if(this.fieldSelected==null) return;
         
-        var dty_Type = this.fieldSelected['type'];
+        let dty_Type = this.fieldSelected['type'];
 
         if(dty_Type=='enum'){
             
             if(this.popele.find('#enum_db').is(':checked')){
                 //actual db values
-                for (var i=0; i<this.enumValues.length; i++){
+                for (let i=0; i<this.enumValues.length; i++){
                     ranges.push(this.enumValues[i][0]);
                 }
             }else{
                 //all available enums 
-                var vocab_id = $Db.dty(this.fieldSelected['id'],'dty_JsonTermIDTree');
+                let vocab_id = $Db.dty(this.fieldSelected['id'],'dty_JsonTermIDTree');
                 //$Db.rst(this.fieldSelected['rtid'],this.fieldSelected['id'],'rst_FilteredJsonTermIDTree');
                 ranges = $Db.trm_TreeData(vocab_id, 'set');
             }
 
-            for (var i=0; i<ranges.length; i++){
+            for (let i=0; i<ranges.length; i++){
                 $('<div style="padding:5px" class="field-range">'
                 +'<span style="display:inline-block;width:100px;">'+ranges[i]+'</span>'
                 +'<span>'+$Db.trm(ranges[i], 'trm_Label')+'</span>'  
@@ -1238,14 +1229,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
         else{
 
-            var minVal = parseFloat(this.popele.find('#int_min').val());
-            var maxVal = parseFloat(this.popele.find('#int_max').val());
-            var count = parseInt(this.popele.find('#int_count').val());
-            var int_round = parseInt(this.popele.find('#int_round').val());
+            let minVal = parseFloat(this.popele.find('#int_min').val());
+            let maxVal = parseFloat(this.popele.find('#int_max').val());
+            let count = parseInt(this.popele.find('#int_count').val());
+            let int_round = parseInt(this.popele.find('#int_round').val());
             
             if(isNaN(minVal) || isNaN(maxVal) || isNaN(count) || count<=0 || minVal>maxVal) return;
             
-            var step = (maxVal-minVal)/count;
+            let step = (maxVal-minVal)/count;
             
             if(dty_Type=='integer'){
                 step = Math.round(step);
@@ -1253,7 +1244,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             function __rnd(original){
                 if(dty_Type=='float' && int_round<10){
-                    //var multiplier = Math.pow(10, int_round);
+                    //let multiplier = Math.pow(10, int_round);
                     //return Math.round(original*multiplier)/multiplier;   
                     return int_round==0?Math.round(original): parseFloat( original.toFixed(int_round) );
                 }else if(int_round>=10){
@@ -1270,11 +1261,11 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                     step = int_round;
                 }
                 
-                var cnt = 0;
-                var val0 = minVal;
+                let cnt = 0;
+                let val0 = minVal;
                 while (val0<maxVal && cnt<count){
                     
-                    var val1 = (val0+step>maxVal)?maxVal:val0+step;
+                    let val1 = (val0+step>maxVal)?maxVal:val0+step;
                     if(cnt==count-1 && val1!=maxVal){
                         val1 = maxVal;
                     }else{
@@ -1287,7 +1278,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 }
             }
 
-            for (var i=0; i<ranges.length; i++){
+            for (let i=0; i<ranges.length; i++){
                 $('<div style="padding:5px" class="field-range">'
                 +'<span style="display:inline-block;width:100px;">'+ranges[i].min+'</span>'
                 +('<span style="display:inline-block;width:50px;">&nbsp;to&nbsp;&lt;&nbsp;</span>'
@@ -1307,8 +1298,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
             if(ele==null){
                 //update all ranges
-                var that = this;
-                var f_ranges = this.element.find('#f_ranges');
+                let that = this;
+                let f_ranges = this.element.find('#f_ranges');
                 if(f_ranges.children().length>0){
                     $.each(f_ranges.children(), function(i, ele){
                         ele = $(ele);
@@ -1329,10 +1320,10 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
             function __mergeThematicSymbol(basesymbol, fsymb){
                 
-                    var use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
+                    let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
                     if($.isPlainObject(range_symbol)){
-                        var keys = Object.keys(fsymb);
-                        for(var j=0; j<keys.length; j++){
+                        let keys = Object.keys(fsymb);
+                        for(let j=0; j<keys.length; j++){
                             use_style[keys[j]] = fsymb[keys[j]];
                         }
                     }
@@ -1342,13 +1333,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
             range_symbol = window.hWin.HEURIST4.util.isJSON( range_symbol );
         
-            var style = __mergeThematicSymbol(base_symbol, range_symbol);
+            let style = __mergeThematicSymbol(base_symbol, range_symbol);
         
-            var dcss = {'display':'inline-block', 'background-image':'none'};
+            let dcss = {'display':'inline-block', 'background-image':'none'};
             if(style['stroke']!==false){
                 
-                var opacity = style['opacity']>0?style['opacity']:1;
-                var weight = (style['weight']>0&&style['weight']<10)?style['weight']:10;
+                let opacity = style['opacity']>0?style['opacity']:1;
+                let weight = (style['weight']>0&&style['weight']<10)?style['weight']:10;
                 dcss['width']  = 22-weight*2; 
                 dcss['height'] = 22-weight*2;
                 
@@ -1364,8 +1355,8 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }
 
             if(style['fill']!==false){
-                var fillColor = style['fillColor']?style['fillColor']:style['color'];
-                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                let fillColor = style['fillColor']?style['fillColor']:style['color'];
+                let fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
                 dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
             }else{
                 dcss['background'] = 'none';

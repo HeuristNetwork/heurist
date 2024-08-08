@@ -57,19 +57,19 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             //load comment for edit
             if(this.options.cmt_ID>0){
-                    var request = {};
+                    let request = {};
                     request['cmt_ID']  = this.options.cmt_ID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    var that = this;                                                
+                    let that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
+                                let recset = new HRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
                                     that.addEditRecord( recset.getOrder()[0] );
@@ -109,7 +109,7 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
 
         //assign record id    
         if(this.options.edit_mode=='editonly' && this.options.cmt_RecID>0){
-            var ele2 = this._editing.getFieldByName('cmt_RecID');
+            let ele2 = this._editing.getFieldByName('cmt_RecID');
             ele2.editing_input('setValue', this.options.cmt_RecID );
         }
         
@@ -151,7 +151,7 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = 'width:'+col_width;
             }
@@ -159,9 +159,9 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
                     +fld(fldname)+'</div>';
         }
         
-        var recID   = fld('cmt_ID');
+        let recID   = fld('cmt_ID');
         
-        var html = '<div class="recordDiv" style="display:table-row;height:3em" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" style="display:table-row;height:3em" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2('cmt_RecTitle','20ex') + ' ' 
                 + fld2('cmt_Modified','12ex')+fld2('cmt_Text','40ex');
         

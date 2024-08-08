@@ -26,29 +26,29 @@
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 require_once dirname(__FILE__).'/utilities/uSystem.php';
 
-define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.3.14"); //minimal version of db for current version of code
+define('HEURIST_VERSION', $version);//code version is defined congigIni.php
+define('HEURIST_MIN_DBVERSION', "1.3.14");//minimal version of db for current version of code
 
 // The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database, 
 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'https://heuristref.net';  //default value
+    $heuristReferenceServer = 'https://heuristref.net';//default value
     //$heuristReferenceServer = 'https://HeuristRef.Net';
 }
 
 define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
-define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/'); //central index and template databases url
-define('HEURIST_INDEX_DBREC', '1-22'); //concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
+define('HEURIST_INDEX_BASE_URL', $heuristReferenceServer.'/heurist/');//central index and template databases url
+define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
 
-define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index'); 
+define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
 define('HEURIST_HELP', $heuristReferenceServer.'/heurist/help');
 
 if (@$httpProxy != '') {
-    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true)); //always use proxy for CURL
-    define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
+    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));//always use proxy for CURL
+    define('HEURIST_HTTP_PROXY', $httpProxy);//http address:port for proxy request
     if (@$httpProxyAuth != '') {
-        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth); // "username:password" for proxy authorization
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth);// "username:password" for proxy authorization
     }
 }
 
@@ -63,25 +63,25 @@ if (!@$mailDomain) {
 }
 
 define('HEURIST_SERVER_URL', $host_params['server_url']);
-define('HEURIST_SERVER_NAME', @$host_params['server_name']); // server host name for the configured name, eg. myheurist.net
+define('HEURIST_SERVER_NAME', @$host_params['server_name']);// server host name for the configured name, eg. myheurist.net
 
-if(@$_SERVER["REQUEST_URI"]) define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]); //NOT USED
+if(@$_SERVER["REQUEST_URI"]) {define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]);}//NOT USED
 if(!defined('HEURIST_DIR')){
   define('HEURIST_DIR', 
     (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"]) 
-    . $host_params['install_dir']); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)  
+    . $host_params['install_dir']);//  eg. /var/www/html/HEURIST @todo - read simlink (realpath)  
 } 
 
-define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  ); // eg. https://myheurist.net/heurist/
+define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  );// eg. https://myheurist.net/heurist/
 
-define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] ); // production url eg. https://myheurist.net/heurist/
+define('HEURIST_BASE_URL_PRO', $host_params['server_url'] . $host_params['install_dir_pro'] );// production url eg. https://myheurist.net/heurist/
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 
 if ($dbHost) {
     define('HEURIST_DBSERVER_NAME', $dbHost);
 } else {
-    define('HEURIST_DBSERVER_NAME', "localhost"); //configure to access mysql on the same machine as the Heurist codebase
+    define('HEURIST_DBSERVER_NAME', "localhost");//configure to access mysql on the same machine as the Heurist codebase
 }
 //to use native mysqldump you have to specify file with mysql credentials
 //mysql_config_editor set --login-path=local --host=localhost --user={usename} --password
@@ -90,7 +90,7 @@ if ($dbHost) {
 
 //path to mysqldump - it is required if $dbDumpMode==2
 if(isset($dbMySQLDump) && file_exists($dbMySQLDump)){
-    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);  
+    define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);
     $dbDumpMode = isset($dbDumpMode)?$dbDumpMode:2;
 }else{
     $dbDumpMode = 0;
@@ -98,7 +98,7 @@ if(isset($dbMySQLDump) && file_exists($dbMySQLDump)){
 define('HEURIST_DB_MYSQL_DUMP_MODE', $dbDumpMode);
 
 if(isset($dbMySQLpath) && file_exists($dbMySQLpath)){
-    define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);  
+    define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);
     $dbScriptMode = isset($dbScriptMode)?$dbScriptMode:2;
 }else{
     $dbScriptMode = 0;
@@ -115,7 +115,7 @@ if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){
 returnErrorMsgPage(1, "MySql user password may not contain special characters. To avoid problems down the line they are restricted to alphanumeric only. Set in configIni.php");
 }
 */
-define('ADMIN_DBUSERNAME', $dbAdminUsername); //user with all rights so we can create databases, etc.
+define('ADMIN_DBUSERNAME', $dbAdminUsername);//user with all rights so we can create databases, etc.
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
 define('HEURIST_DB_PREFIX', $dbPrefix);
 define('HEURIST_DB_PORT', $dbPort);
@@ -123,21 +123,21 @@ define('HEURIST_DB_PORT', $dbPort);
 //---------------------------------
 $date = new DateTime();
 //define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2023 The University of Sydney.');
-define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION); //.' '.$date->format('d M Y @ H:i') );
+define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);//.' '.$date->format('d M Y @ H:i') );
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js
 */
-define("HEURIST_INVALID_REQUEST", "invalid");    // 400 The Request provided was invalid.
-define("HEURIST_NOT_FOUND", "notfound");         // 404 The requested object not found.
-define("HEURIST_ERROR", "error");                // 500 General error: wrong data, file i/o
-define("HEURIST_OK", "ok");                      // 200 The response contains a valid Result.
-define("HEURIST_REQUEST_DENIED", "denied");      // 403 Not enough rights (logout/in to refresh) or action
-define("HEURIST_ACTION_BLOCKED", "blocked");     // 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
-define("HEURIST_UNKNOWN_ERROR", "unknown");      // 500 A request could not be processed due to a server error. The request may succeed if you try again.
-define("HEURIST_DB_ERROR", "database");          // 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-define("HEURIST_SYSTEM_CONFIG", "syscfg");       // 500 System not-fatal configuration error. Contact system admin
-define("HEURIST_SYSTEM_FATAL", "system");        // 500 System fatal configuration error. Contact system admin
+define("HEURIST_INVALID_REQUEST", "invalid");// 400 The Request provided was invalid.
+define("HEURIST_NOT_FOUND", "notfound");// 404 The requested object not found.
+define("HEURIST_ERROR", "error");// 500 General error: wrong data, file i/o
+define("HEURIST_OK", "ok");// 200 The response contains a valid Result.
+define("HEURIST_REQUEST_DENIED", "denied");// 403 Not enough rights (logout/in to refresh) or action
+define("HEURIST_ACTION_BLOCKED", "blocked");// 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
+define("HEURIST_UNKNOWN_ERROR", "unknown");// 500 A request could not be processed due to a server error. The request may succeed if you try again.
+define("HEURIST_DB_ERROR", "database");// 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
+define("HEURIST_SYSTEM_CONFIG", "syscfg");// 500 System not-fatal configuration error. Contact system admin
+define("HEURIST_SYSTEM_FATAL", "system");// 500 System fatal configuration error. Contact system admin
 /*
 $usrTags = array(
 "rty_ID"=>"i",
@@ -193,7 +193,7 @@ $glb_lang_codes = null;
 
 //common languages for translation database definitions (ISO639-2 codes)
 if(!isset($common_languages_for_translation)){
-    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');    
+    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ARA','GER','POR','LAT','GRE','GRC');
 }
 
 //---------------------------------
@@ -408,7 +408,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 
-); //TODO: add email magic numbers
+);//TODO: add email magic numbers
 
 
 $trmDefines = array(
@@ -433,10 +433,7 @@ $trmDefines = array(
 //---------------------------------
 
 function boot_error_handler($errno, $errstr, $errfile, $errline){
-    switch($errno){
-        case E_WARNING:
-        //case E_PARSE:
-        //case E_NOTICE:
+    if($errno==E_WARNING){ //E_PARSE E_NOTICE
             if(strpos($errstr,'Input variables')>0){
         
                 $message = "$errstr $errfile:$errline";
@@ -452,7 +449,6 @@ function boot_error_handler($errno, $errstr, $errfile, $errline){
             }
             */
             }
-            break;
     }
 }
 ?>

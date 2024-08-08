@@ -57,16 +57,16 @@ class DbDefRecTypes extends DbEntityBase
         $from_table = array($this->config['tableName']);
 
         $pred = $this->searchMgr->getPredicate('rty_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('rty_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         //find rectype belong to group
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -102,7 +102,7 @@ class DbDefRecTypes extends DbEntityBase
             if(($usr_ID>0) || ($usr_ID===0)){
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $this->where_for_count[0] = $conds[0];
-                $this->where_for_count[1] =  ' AND '.$conds[1];      
+                $this->where_for_count[1] =  ' AND '.$conds[1];
             }else{
                 $this->where_for_count[0] = '';
                 $this->where_for_count[1] = 'AND (not r0.rec_FlagTemporary)';
@@ -122,12 +122,12 @@ class DbDefRecTypes extends DbEntityBase
 
                     $idx = array_search('rty_TitleMask', $fields);
                     if($idx!==false){
-                        $fileid = $row[$idx]; 
+                        $fileid = $row[$idx];
                         
                         $mask_concept_codes = $row[$idx];
-                        array_push($row, $mask_concept_codes); //keep
+                        array_push($row, $mask_concept_codes);//keep
                         //convert to human readable
-                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, _ERR_REP_SILENT);
+                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, ERROR_REP_SILENT);
                     }else{
                         array_push($row, '');
                     }
@@ -194,7 +194,7 @@ class DbDefRecTypes extends DbEntityBase
             if(($usr_ID>0) || ($usr_ID===0)){
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $query2 = $query2 . $conds[0];
-                $where2 = $where2 . ' AND '.$conds[1];      
+                $where2 = $where2 . ' AND '.$conds[1];
             }else{  
                 $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
             }
@@ -292,7 +292,7 @@ class DbDefRecTypes extends DbEntityBase
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
         $recIds = mysql__select_list2($mysqli, $query);
         if(is_array($recIds) && count($recIds)>0) {
-            $res = recordDelete($this->system, $recIds, false);   
+            $res = recordDelete($this->system, $recIds, false);
             $res = ($res['status']==HEURIST_OK);
         }
 
@@ -310,14 +310,14 @@ class DbDefRecTypes extends DbEntityBase
        
         
         if($res){
-            $res = parent::delete(true);        
+            $res = parent::delete(true);
         }
         if($res){
-            $mysqli->commit();   
+            $mysqli->commit();
         }else{
             $mysqli->rollback();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $res;
     }
@@ -394,7 +394,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
             }
             
-            $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s');//reset
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
         }
@@ -414,7 +414,7 @@ class DbDefRecTypes extends DbEntityBase
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
-            if(!($dbID>0)) $dbID = 0;
+            if(!($dbID>0)) {$dbID = 0;}
             
             $mysqli = $this->system->get_mysqli();
             
@@ -447,7 +447,7 @@ class DbDefRecTypes extends DbEntityBase
                     $mask = @$record['rty_TitleMask'];
                     if($mask){
                             $parameters = array("");
-                            $val = TitleMask::execute($mask, $rty_ID, 1, null, _ERR_REP_SILENT);//convert from human to coded
+                            $val = TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);//convert from human to coded
                             $parameters = array('s', $val);
 
                             $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";
@@ -542,7 +542,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
 
                 $idx_to_do = array_keys($this->data['fields']);
-                $this->data['fields'] = array_values($this->data['fields']); // re-write indexes
+                $this->data['fields'] = array_values($this->data['fields']);// re-write indexes
 
                 $result = true;
                 if(count($this->data['fields']) > 0){ // ensure there are still rectypes to define
@@ -571,10 +571,10 @@ class DbDefRecTypes extends DbEntityBase
         if($ret===false){
             $mysqli->rollback();
         }else{
-            $mysqli->commit();    
+            $mysqli->commit();
         }
 
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
     }    
@@ -600,11 +600,11 @@ class DbDefRecTypes extends DbEntityBase
                             $wg_ids = array_keys($currentUser['ugr_Groups']);
                             array_push($wg_ids, $ugr_ID);
                         }else{
-                            $wg_ids = $this->system->get_user_group_ids();    
+                            $wg_ids = $this->system->get_user_group_ids();
                         }
                     }
                 }
-                array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
+                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup    
         
                     //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
                 
@@ -621,7 +621,7 @@ class DbDefRecTypes extends DbEntityBase
                     
                 $where2_conj = ' or ';
         }else{
-            $wg_ids = array(); //all groups for admin    
+            $wg_ids = array();//all groups for admin    
         }        
         if($ugr_ID>0 && is_array($wg_ids) && count($wg_ids)>0){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
@@ -653,7 +653,7 @@ WHERE
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
                 $query = $query . $conds[0];
-                $where = $where . $conds[1];      
+                $where = $where . $conds[1];
             }else{
                 $where = $where . '(not r0.rec_FlagTemporary)';
             }
@@ -661,7 +661,7 @@ WHERE
                 $where = $where . ' AND (r0.rec_RecTypeID='.$this->data['rty_ID'].')';
             }
             
-            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID'; // ORDER BY cnt DESC
+            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
           
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
            
@@ -676,26 +676,26 @@ WHERE
 
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
-                if(@$conds[1]) $conds[1] = ' AND '.$conds[1];
+                if(@$conds[1]) {$conds[1] = ' AND '.$conds[1];}
             }else{
                 $conds = array('', ' AND (not r0.rec_FlagTemporary)');
             }
            
-            $res = mysql__select_value($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]); //total count
+            $res = mysql__select_value($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);//total count
             
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
 
             $res2 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
-            if($res2==null) $res2 = array();
+            if($res2==null) {$res2 = array();}
             
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
 
             $res3 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
-            if($res3==null) $res3 = array();
+            if($res3==null) {$res3 = array();}
             
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
                 'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);

@@ -23,7 +23,7 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         
         this.btn_add_record = this.element.find('#btn_add_record');
@@ -50,12 +50,12 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
             request['cfn_Name'] = this.input_search.val();    
             
             if($.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
+                this._trigger( "onresult", null, {recordset:new HRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
@@ -64,13 +64,13 @@ $.widget( "heurist.searchDefCalcFunctions", $.heurist.searchEntity, {
                 request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
+                                {recordset:new HRecordSet(response.data), request:request} );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

@@ -317,7 +317,7 @@ $query = "CREATE TABLE defVocabularyGroups (
             .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
             
             
-            $report[] = 'defTerms: trm_VocabularyGroupID filled';           
+            $report[] = 'defTerms: trm_VocabularyGroupID filled';
         }
         
         //-----------------------------
@@ -340,7 +340,7 @@ $query = "CREATE TABLE defTermsLinks (
             $report[] = 'defTermsLinks created';
             
         }else{
-            $report[] = 'defTermsLinks already exists';            
+            $report[] = 'defTermsLinks already exists';
         }
 
 
@@ -351,7 +351,7 @@ $query = "CREATE TABLE defTermsLinks (
                 insert into defTermsLinks (trl_ParentID,trl_TermID)
                         values (NEW.trm_ParentTermID, NEW.trm_ID);
             end if;
-        end');  
+        end');
         
         $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
 
@@ -368,7 +368,7 @@ $query = "CREATE TABLE defTermsLinks (
         $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
         begin
             delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
-        end');            
+        end');
         
         $report[] = 'defTerms triggers updated';
 
@@ -403,21 +403,21 @@ $query = "CREATE TABLE defTermsLinks (
             $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
             $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
             $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
-            $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');            
-            $report[] = 'sysTableLastUpdated and related triggers removed';            
+            $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');
+            $report[] = 'sysTableLastUpdated and related triggers removed';
         }
         
         
         //update version
         $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=0 WHERE 1');
         
-        $system->get_system(null, true); //reset system values - to update version
+        $system->get_system(null, true);//reset system values - to update version
         
         //validate default values for record type structures
         $list = getInvalidDefaultValues($mysqli);
         
         if($list && is_array(@$list['rt_defvalues']) && count($list['rt_defvalues'])>0){
-            $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
+            $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';
         }
         
         
@@ -426,21 +426,21 @@ $query = "CREATE TABLE defTermsLinks (
 $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
 .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
             $mysqli->query($query);
-            $report[] = '"Trash" group has been added to rectype groups';                        
+            $report[] = '"Trash" group has been added to rectype groups';
         }
 
         if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
 $query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
 .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
             $mysqli->query($query);
-            $report[] = '"Trash" group has been added to vocabulary groups';                        
+            $report[] = '"Trash" group has been added to vocabulary groups';
         }
 
         if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
 $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
-.'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+.'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
             $mysqli->query($query);
-            $report[] = '"Trash" group has been added to field groups';                        
+            $report[] = '"Trash" group has been added to field groups';
         }
         
    
@@ -465,7 +465,7 @@ function fillTermsLinks( $mysqli ){
     
 
             //clear individual term selection for relationtype (this is the only field (#6))     
-            $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree="" WHERE dty_Type="relationtype"'; //for dty_ID=6
+            $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree="" WHERE dty_Type="relationtype"';//for dty_ID=6
             $mysqli->query($query);
             
             $vocab_group = 7;//
@@ -473,7 +473,7 @@ function fillTermsLinks( $mysqli ){
             
             //converts custom-selected term tree to vocab with references
             $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
-                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"'; //except relationtype which is one dty_ID=6
+                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';//except relationtype which is one dty_ID=6
         
             $res = $mysqli->query($query);
             while (($row = $res->fetch_row())) {
@@ -495,7 +495,7 @@ function fillTermsLinks( $mysqli ){
                    $name = $name . '  ' . $cnt; 
                 }
 
-                $report[] = htmlspecialchars($row[3].'  '.$name);   
+                $report[] = htmlspecialchars($row[3].'  '.$name);
                 
                 //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
 
@@ -509,10 +509,10 @@ function fillTermsLinks( $mysqli ){
                     
                     $id_orig = 0;
                     if($row[5]==3){  //dty_OriginatingDBID
-                        if($row[6]==1079) $id_orig = 6255;  //dty_IDInOriginatingDB
-                        else if($row[6]==1080) $id_orig = 6256;
-                        else if($row[6]==1087) $id_orig = 6257;
-                        else if($row[6]==1088) $id_orig = 6258;
+                        if($row[6]==1079) {$id_orig = 6255;}  //dty_IDInOriginatingDB
+                        else if($row[6]==1080) {$id_orig = 6256;}
+                        else if($row[6]==1087) {$id_orig = 6257;}
+                        else if($row[6]==1088) {$id_orig = 6258;}
                         
                         if($id_orig>0){
                             $values['trm_OriginatingDBID'] = 2;
@@ -536,7 +536,7 @@ function fillTermsLinks( $mysqli ){
                     $terms_links = _prepare_terms($vocab_id, $terms);
                     
                     foreach ($terms_links as $line){
-                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.intval($line[0]).','.intval($line[1]).')');    
+                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.intval($line[0]).','.intval($line[1]).')');
                     }
 
                     //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree, 
@@ -545,7 +545,7 @@ function fillTermsLinks( $mysqli ){
                     $mysqli->query($query);
 
                 }else{
-                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);   
+                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);
                 }
             }
    
@@ -554,7 +554,7 @@ function fillTermsLinks( $mysqli ){
 
 // {"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
 function _prepare_terms($parent_id, $terms){
-    $res = array();       
+    $res = array();
     foreach($terms as $trm_ID=>$children){
         array_push($res, array($parent_id, $trm_ID));
         if(is_array($children) && count($children)>0){

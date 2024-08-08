@@ -80,7 +80,7 @@ $.widget( "heurist.searchBuilderItem", {
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         //create elements for predicate
         // 2. field selector for field or links tokens
@@ -162,7 +162,6 @@ $.widget( "heurist.searchBuilderItem", {
 
             
         // 4. conjunction selector for multivalues
-        //var ele = $('<div>').css('padding-top','2px').hide().appendTo( this.sel_container );
         this.select_conjunction = $( '<select><option value="any">or</option><option value="all">and</option></select>' )
             .attr('title', 'Should field satisfy all criteria or any of them' )
             .addClass('text ui-corner-all')
@@ -178,7 +177,6 @@ $.widget( "heurist.searchBuilderItem", {
             .appendTo( this.sel_container );
         
 
-        var that = this;
         this.sel_container
         .on( 'mouseenter', function(event){ 
             that.remove_token.css({visibility:'visible'});
@@ -186,15 +184,6 @@ $.widget( "heurist.searchBuilderItem", {
         .on( 'mouseleave', function(event){
             that.remove_token.css({visibility:'hidden'});
         } );
-        
-        
-/*        var div_btn =  $('<div>').css({'width':(this.options.level<3)?'12em':'6em'}).appendTo(this.value_container); 
-
-        var btn_delete = $( "<button>", {text:'Delete'})
-        .attr('title', 'Delete this token' )
-        .css('font-size','0.8em')
-        .button({icons: { primary: "ui-icon-closethick" }, text:false}).appendTo(this.div_btn);
-*/
 
         this._refresh();
         
@@ -234,7 +223,7 @@ $.widget( "heurist.searchBuilderItem", {
             //this.label_token.hide();    
 
            
-            var topOptions2 = [
+            let topOptions2 = [
                 {key:0,title:'Generic fields', group:1, disabled:true},
                 {key:'title',title:'Title (constructed)', depth:1},
                 {key:'added',title:'Date added', depth:1},
@@ -248,7 +237,7 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'anyfield',title:window.hWin.HR('Any field')}
             ];
 
-            var bottomOptions = null;
+            let bottomOptions = null;
             //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
             //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
 
@@ -258,7 +247,7 @@ $.widget( "heurist.searchBuilderItem", {
                 this.select_fields.hide();
 
             }else{
-                var allowed_fieldtypes = ['enum','freetext','blocktext',
+                let allowed_fieldtypes = ['enum','freetext','blocktext',
                     'geo','year','date','integer','float','resource','relmarker'];
 
                 this.select_fields_btn.hide();
@@ -279,47 +268,6 @@ $.widget( "heurist.searchBuilderItem", {
 
         }
 
-        /*        
-        if(this.options.token=='f'){
-
-        if(this.options.hasFieldSelector)
-        {
-        var allowed = Object.keys($Db.baseFieldType);
-        allowed.splice(allowed.indexOf("separator"),1);
-        allowed.splice(allowed.indexOf("relmarker"),1);
-        allowed.splice(allowed.indexOf("resource"),1);
-        //allowed.splice(allowed.indexOf("geo"),1);
-        allowed.splice(allowed.indexOf("file"),1);
-
-        //list of fields for rtyIDs            
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
-        allowed, window.hWin.HR('Any field type'), {selectedValue:this.options.dty_ID});
-
-        this.select_fields.show();
-        }else{
-        this.select_fields.hide();    
-        }
-
-
-        }else if(this.options.token=='links'){    
-
-        this.select_fields.show();
-        }else
-        {
-        this.select_fields.hide();
-        this.select_relationtype.hide();
-
-        this._defineInputElement();
-
-        }
-        if(this.options.token=='links'){
-        this.select_relationtype.show();    
-        this.select_comparison.hide();
-        }else{
-        this.select_relationtype.hide();    
-        this.select_comparison.show();
-        }
-        */
     },
     //
     // custom, widget-specific, cleanup.
@@ -330,11 +278,11 @@ $.widget( "heurist.searchBuilderItem", {
     _defineInputElement: function( field_type ){
 
         if(this.options.code){
-            var res = $Db.parseHierarchyCode(this.options.code, this.options.top_rty_ID);
+            let res = $Db.parseHierarchyCode(this.options.code, this.options.top_rty_ID);
             if(res!==false){
                 if(this.options.top_rty_ID>0){
                     
-                    var lbl_text = res.harchy[res.harchy.length-1];
+                    let lbl_text = res.harchy[res.harchy.length-1];
                     if(this.options.enum_field!=null){
                         lbl_text = lbl_text + '.'+this.options.enum_field;
                     }
@@ -364,10 +312,10 @@ $.widget( "heurist.searchBuilderItem", {
             this.label_token.text(lbl_text);    
         }
         
-        var that = this;
+        let that = this;
 
 
-        var ed_options = {
+        let ed_options = {
             recID: -1,
             //dtID: dtID,
             values: [''],
@@ -395,7 +343,7 @@ $.widget( "heurist.searchBuilderItem", {
             
         };
 
-        var dty_ID = this.options.dty_ID;
+        let dty_ID = this.options.dty_ID;
         
         if(dty_ID.indexOf('r.')==0){
             dty_ID = dty_ID.substr(2);    
@@ -414,7 +362,7 @@ $.widget( "heurist.searchBuilderItem", {
                 ed_options['rectypeID'] = this.options.rty_ID;
             }else{
                 
-                    var dtFields = {dty_Type:field_type, 
+                    let dtFields = {dty_Type:field_type, 
                                     rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
                                     rst_FilteredJsonTermIDTree: $Db.dty(dty_ID,'dty_JsonTermIDTree'),
                                     rst_PtrFilteredIDs: $Db.dty(dty_ID,'dty_PtrTargetRectypeIDs'),
@@ -465,7 +413,7 @@ $.widget( "heurist.searchBuilderItem", {
                 }
             }
             
-            var dtFields = {dty_Type:field_type, rst_DisplayName:'', rst_MaxValues:100};
+            let dtFields = {dty_Type:field_type, rst_DisplayName:'', rst_MaxValues:100};
 
             if(field_type=="rectype"){
                 dtFields['cst_EmptyValue'] = window.hWin.HR('Any record type');
@@ -475,7 +423,7 @@ $.widget( "heurist.searchBuilderItem", {
         }//========
 
         
-        var eqopts = [];
+        let eqopts = [];
 
         if(field_type=='geo'){
 
@@ -590,7 +538,7 @@ Whole value = EQUAL
         this._off( this.select_conjunction, 'change');
         this._off( this.select_comparison, 'change');
         
-        var prev_opt = this.select_comparison.val();
+        let prev_opt = this.select_comparison.val();
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
         
@@ -608,7 +556,7 @@ Whole value = EQUAL
         
         this._on( this.select_comparison, { change: function(){
 
-            var cval = this.select_comparison.val();
+            let cval = this.select_comparison.val();
             if(cval=='NULL' || cval=='any' || cval=='count' ){
                 if(this._predicate_reltype_ele) this._predicate_reltype_ele.css('visibility', 'hidden');
                 this._predicate_input_ele.css('visibility', (cval=='count' ? 'visible' : 'hidden'));
@@ -665,7 +613,7 @@ Whole value = EQUAL
             
         this._current_field_type = field_type;
         //clear input values
-        var prev_value = [''], prev_type = null;
+        let prev_value = [''], prev_type = null;
         if(this._predicate_input_ele){
             
             if(this._predicate_input_ele.editing_input('instance')){
@@ -686,7 +634,7 @@ Whole value = EQUAL
             // relation type selector and resource record selector
             ed_options['detailtype'] = 'relationtype';
             ed_options['dtID'] = 'r';
-            var dtFields = {dty_Type:'relationtype', 
+            let dtFields = {dty_Type:'relationtype', 
                             rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
                             rst_FilteredJsonTermIDTree: $Db.dty(dty_ID,'dty_JsonTermIDTree'),
                             rst_DefaultValue: '',
@@ -694,12 +642,11 @@ Whole value = EQUAL
             ed_options['dtFields'] = dtFields;
             
             this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
-            var ele = this._predicate_reltype_ele.find('.editint-inout-repeat-button')
+            let ele = this._predicate_reltype_ele.find('.editint-inout-repeat-button')
                         .css({'margin-left':'22px','min-width':'16px'});
-            var ele = ele.parent();
+            ele = ele.parent();
             ele.css('min-width','44px');
 
-            
             ed_options['detailtype'] = 'resource';
             ed_options['dtID'] = dty_ID;
             ed_options['dtFields'] = null;
@@ -724,7 +671,7 @@ Whole value = EQUAL
             .editing_input(ed_options).appendTo(this.values_container);
             
         //transfer conjunction to input element
-        var ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
+        let ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
                     .css({'margin-left':'22px','min-width':'16px'});
 
         ele = ele.parent();
@@ -739,7 +686,7 @@ Whole value = EQUAL
     //
     //
     getCodes: function(){
-        var codes = this.options.code.split(':');
+        let codes = this.options.code.split(':');
         codes[codes.length-1] = this.options.dty_ID
         
         if(this.options.enum_field!=null){
@@ -755,12 +702,12 @@ Whole value = EQUAL
     getValues: function(){
         if(this._predicate_input_ele){
             
-            var relatype_vals = null;
-            var has_relatype_value = false, has_value = false;
-            var vals = $(this._predicate_input_ele).editing_input('getValues');
-            var isnegate =  this.cb_negate.is(':visible') && 
+            let relatype_vals = null;
+            let has_relatype_value = false, has_value = false;
+            let vals = $(this._predicate_input_ele).editing_input('getValues');
+            let isnegate =  this.cb_negate.is(':visible') && 
                             this.cb_negate.find('input').is(':checked');
-            var op = this.select_comparison.val();
+            let op = this.select_comparison.val();
 
             let lang_code = this.options.language;
 
@@ -849,7 +796,7 @@ Whole value = EQUAL
 
             }
 
-            var key;
+            let key;
             let org_op = this.select_comparison.val();
             
             if (this._current_field_type=='geo') {
@@ -875,21 +822,21 @@ Whole value = EQUAL
                 key = (org_op != 'count' ? '' : 'fc:') + this.options.dty_ID;
             }
             
-            var res = {};
+            let res = {};
             
             if(vals.length==1){
                 res = {};
                 res[key] = vals[0];     
             }else{
-                var conj = this.select_conjunction.val();
+                let conj = this.select_conjunction.val();
                 if(key=='tag'){
-                    var p = {}; 
+                    let p = {}; 
                     p[conj] = vals;
                     res[key] = p;
                 }else{
                     res[conj] = [];
                     $.each(vals,function(i,val){ 
-                        var p = {}; 
+                        let p = {}; 
                         p[key] = val;
                         res[conj].push(p); 
                     });        
@@ -920,13 +867,10 @@ Whole value = EQUAL
     _manageConjunction: function()
     {                
         this.select_conjunction.parent().find('.conj').remove(); //previous
-        var ft = this._current_field_type;
+        let ft = this._current_field_type;
 
-        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
-        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getInputs');
-        
-        var eles = !this._predicate_input_ele?[]:this._predicate_input_ele.find('.input-cell > .input-div');
-        var cnt = eles.length;
+        let eles = !this._predicate_input_ele?[]:this._predicate_input_ele.find('.input-cell > .input-div');
+        let cnt = eles.length;
         
         if(ft=='user' ||  ft=='ids' || cnt<2){
             if(ft=='user' ||  ft=='ids'){
@@ -937,7 +881,7 @@ Whole value = EQUAL
             this.select_conjunction.css('visibility', 'visible');
             this.select_conjunction.show();
             
-            var is_any = (this.select_conjunction.val()=='any');
+            let is_any = (this.select_conjunction.val()=='any');
             
             if(is_any){
                 this.select_conjunction.css({'margin':'10px 0px 2px 8px',width:'33px'});
@@ -948,7 +892,7 @@ Whole value = EQUAL
             //add or/and
             if(cnt>2){
 
-                var mh = $(eles[0]).height();
+                let mh = $(eles[0]).height();
 
                 cnt = cnt-2;
                 eles = [];

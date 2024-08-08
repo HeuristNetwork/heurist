@@ -71,8 +71,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         //update dialog title
-        var title = null;
-        var usr_ID = 0;
+        let title = null;
+        let usr_ID = 0;
+        let that = this;
         
         
         if(this.options.title){
@@ -107,7 +108,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         if(usr_ID>0 && title){
-            var that = this;
             function __set_dlg_title(res){
                 if(res && res.status==window.hWin.ResponseStatus.OK){
                     that.setTitle( title+res.data[usr_ID] );    
@@ -121,7 +121,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchSysUsers(this.options);
         
-        var iheight = 7;
+        let iheight = 7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
@@ -132,7 +132,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
         this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
-        var that = this;
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -172,9 +171,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 "searchsysusersonadd": function() { this.addEditRecord(-1); },
                 "searchsysusersonfind": function() { 
                     
-                        var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
+                        let ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
 
-                        var options = {select_mode: 'select_multi',
+                        let options = {select_mode: 'select_multi',
                                 ugl_GroupID: -ugl_GroupID,
                                 edit_mode:'none',
                                 title: ("Select Users to add to Workgroup #"+ugl_GroupID),
@@ -182,7 +181,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         
                                     if(data && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
                                     {
-                                        var request = {};
+                                        let request = {};
                                         request['a']        = 'action'; //batch action
                                         request['entity']   = 'sysGroups';
                                         request['role']     = 'member';
@@ -222,11 +221,10 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 .each(function(idx,item){$(item).val($(item).attr('data-value'))})
                 .on('change',function(event){
 
-                    var ugl_GroupID = that.searchForm.find('#input_search_group').val(); 
+                    let ugl_GroupID = that.searchForm.find('#input_search_group').val(); 
                     if(!(ugl_GroupID>0)) return;
                     /*if(!(ugl_GroupID>0)) {
                         
-                        var that = this;
                         this.recordList.find('.user-list-edit')
                         .each(function(idx,item){
                             $(item).attr('title','Edit user membership');
@@ -239,11 +237,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
                     //apply new role to user
                     
-					var selector = $(event.target);
-                    var usr_ID = selector.parents('.recordDiv').attr('recid');  
-                    var newRole = selector.val();
+					let selector = $(event.target);
+                    let usr_ID = selector.parents('.recordDiv').attr('recid');  
+                    let newRole = selector.val();
 
-                    var request = {};
+                    let request = {};
                     request['a']        = 'action';
                     request['entity']   = 'sysGroups';
                     request['role']     = newRole;
@@ -257,7 +255,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                 //reload
                                 //that.searchForm.searchSysUsers('startSearch');
                                 if(newRole=='remove'){
-                                    var recset = that.recordList.resultList('getRecordSet');
+                                    let recset = that.recordList.resultList('getRecordSet');
                                     recset.removeRecord(usr_ID);
                                     that.recordList.resultList('refreshPage');  
                                     window.hWin.HEURIST4.msg.showMsgFlash('User removed from group');
@@ -286,8 +284,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 //manage membership of user in all groups
                 this.recordList.find('.edit-members')
                 .on('click',function(event){
-                    var user_ID = $(event.target).parents('.recordDiv').attr('recid');
-                    var enabled = $(event.target).parents('.recordDiv').attr('usr_status');
+                    let user_ID = $(event.target).parents('.recordDiv').attr('recid');
+                    let enabled = $(event.target).parents('.recordDiv').attr('usr_status');
                     
                     if (enabled=='n')
                     {
@@ -295,7 +293,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         return;                        
                     }
 
-                    var options = {select_mode: 'manager',
+                    let options = {select_mode: 'manager',
                         ugl_UserID: user_ID,
                         edit_mode:'popup',
                         title: ("Manage Membership for User #"+user_ID),
@@ -303,7 +301,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         beforeClose:function(){
                             
                             //count user memebrship in groups
-                            var request = {
+                            let request = {
                                 'a'          : 'search',
                                 'entity'     : 'sysUsers',
                                 'details'    : 'count',
@@ -312,11 +310,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
-                                        var resp = new hRecordSet( response.data );
-                                        var rec_updated = resp.getFirstRecord();
-                                        var cnt = resp.fld(rec_updated, 'ugr_Member');
+                                        let resp = new HRecordSet( response.data );
+                                        let rec_updated = resp.getFirstRecord();
+                                        let cnt = resp.fld(rec_updated, 'ugr_Member');
                                         if(cnt>0){
-                                            var record = that.getRecordSet().getById(user_ID);
+                                            let record = that.getRecordSet().getById(user_ID);
                                             that.getRecordSet().setFld(record, 'ugr_Member', cnt);
                                             that.recordList.resultList('refreshPage');  
                                             $('body').find('div[id^="heurist-dialog-SysGroups-"]').manageSysGroups('closeDialog', true);
@@ -354,7 +352,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, sstyle){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(sstyle)){
                 swidth = ` style="${sstyle}"`;
             }
@@ -461,7 +459,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
-        var request = {
+        let request = {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
@@ -469,7 +467,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 'db'         : this.options.database  
                 
         };
-        var ugl_GroupID = this.searchForm.find('#input_search_group').val();
+        let ugl_GroupID = this.searchForm.find('#input_search_group').val();
         if(ugl_GroupID>0){
             request['ugl_GroupID'] = ugl_GroupID;
         }
@@ -486,10 +484,10 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         this._super();
 
-        var ugl_GroupID = this.searchForm.find('#input_search_group').val();
+        let ugl_GroupID = this.searchForm.find('#input_search_group').val();
         if(ugl_GroupID>0 && !this._currentEditRecordset){ //insert       
 
-            var ele = this._editing.getFieldByName('ugl_GroupID');
+            let ele = this._editing.getFieldByName('ugl_GroupID');
             ele.editing_input('setValue', ugl_GroupID);
             //hide save button
             if(this._toolbar){
@@ -498,11 +496,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else
         //hide after edit init btnRecRemove for dbowner (user #2)
         if(this._currentEditID==2 || !window.hWin.HAPI4.is_admin()){
-            var ele = this._toolbar;
+            let ele = this._toolbar;
             ele.find('#btnRecRemove').hide();
         }
         
-        var btnTrOwner = this._toolbar.find('#btnTransferOwnership');
+        let btnTrOwner = this._toolbar.find('#btnTransferOwnership');
         
         if(this._currentEditID>0 && this._currentEditID!=2 && window.hWin.HAPI4.user_id()==2){
             //add ownershup transfer button
@@ -520,16 +518,16 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         if(!window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.currentUser['ugr_ID']==this._currentEditID){
-            var input_ele = this._editing.getFieldByName('ugr_Enabled');
+            let input_ele = this._editing.getFieldByName('ugr_Enabled');
             input_ele.hide();
             //input_ele.editing_input('f', 'rst_Display', 'hidden');
         }
         
         //fill SAML service providers list
-        var saml_sel = this._editing.getFieldByName('ugl_SpID').find('select');
-        var has_saml = false;
+        let saml_sel = this._editing.getFieldByName('ugl_SpID').find('select');
+        let has_saml = false;
         if($.isPlainObject(window.hWin.HAPI4.sysinfo.saml_service_provides)){
-            var sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
+            let sp_keys = Object.keys(window.hWin.HAPI4.sysinfo.saml_service_provides);
             if(sp_keys.length>0){
                 saml_sel.empty();
                 
@@ -627,7 +625,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
@@ -652,7 +650,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -669,8 +667,9 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(this._currentEditID==null || this._currentEditID<1) return;
 
-        var isEnabled = this._editing.getValue('ugr_Enabled')[0];
-        var isModified = this._editing.isModified();
+        const isEnabled = this._editing.getValue('ugr_Enabled')[0];
+        const isModified = this._editing.isModified();
+        let that = this;
 
         if(isModified){
 
@@ -684,7 +683,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(unconditionally===true){
             
-            var request = {
+            const request = {
                 'a': 'action',
                 'transferOwner': true,
                 'entity'     : this.options.entity.entityName,
@@ -692,13 +691,11 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 'recID'      : this._currentEditID 
             };
 
-            var that = this;
-
             window.hWin.HAPI4.EntityMgr.doRequest(request,
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recID = that._currentEditID;
+                        let recID = that._currentEditID;
                         that._afterTransferOwnerHandler(recID);
                     
                     }else{
@@ -708,7 +705,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             );
             
         }else{
-            var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to transfer the ownership of this database to the selected user? This action can only be undone by the new owner.<br>'
                 +' <p style="font-size: 1.1em; font-weight: bold;">'

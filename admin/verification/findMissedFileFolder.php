@@ -27,8 +27,8 @@
 
 ini_set('max_execution_time', '0');
  
-define('ADMIN_PWD_REQUIRED',1); 
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -43,7 +43,7 @@ if(!@$_REQUEST['mail']){
     </head>
     <body class="popup">
             
-        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
+        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>  
         <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
                 <h2>List of databases with missing or non-writeable folders</h2>
 <?php            
@@ -52,7 +52,7 @@ if(!@$_REQUEST['mail']){
     $mysqli = $system->get_mysqli();
     
     //1. find all database
-    $databases = mysql__getdatabases4($mysqli, false);   
+    $databases = mysql__getdatabases4($mysqli, false);
 
 /*    
     $query = 'show databases';
@@ -94,7 +94,7 @@ if(!@$_REQUEST['mail']){
              //check subfolders
              foreach ($folders as $folder_name=>$folder){
                  
-                 if($folder[0]=='' || $folder[0]==null || $folder_name=='uploaded_tilestacks') continue;
+                 if($folder[0]=='' || $folder[0]==null || $folder_name=='uploaded_tilestacks') {continue;}
                  
                  $subdir = $dir.$folder_name.'/';
                  $check = folderExists($subdir, true);

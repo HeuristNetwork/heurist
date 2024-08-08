@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
@@ -43,7 +43,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             // Callback function on map initialization
             function onPageInit(success){
                 
-                if(!success) return;
+                if(!success) {return;}
 
                 // init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'), 
@@ -55,7 +55,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     handleApiReady();
                 }else{                            
                     $.getScript('https://maps.googleapis.com/maps/api/js?key=<?php echo $accessToken_GoogleAPI;?>'
-                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');                                           
+                    +'&libraries=drawing,geometry,marker&callback=handleApiReady');
                 }
 
             } //onPageInit

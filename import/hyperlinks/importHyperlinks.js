@@ -32,8 +32,8 @@
 //
 //
  function selectExistingLink(linkno) {
-	var radios = document.getElementsByName('recID['+linkno+']');
-	for (i=0; i < radios.length; ++i) {
+	let radios = document.getElementsByName('recID['+linkno+']');
+	for(let i=0; i < radios.length; ++i) {
 		if (radios[i].checked)
 			radios[i].parentNode.parentNode.style.backgroundColor = '#C0C0C0';
 		else
@@ -45,8 +45,8 @@
 //
 //
 function selectAllNotes() {
-	var noteses = document.getElementsByTagName('input');
-	for (i=0; i < noteses.length; ++i)
+	let noteses = document.getElementsByTagName('input');
+	for(let i=0; i < noteses.length; ++i)
 		if (noteses[i].className == 'use_notes_checkbox') noteses[i].checked = true;
 }
 
@@ -54,8 +54,8 @@ function selectAllNotes() {
 //
 //
 function deselectAllNotes() {
-	var noteses = document.getElementsByTagName('input');
-	for (i=0; i < noteses.length; ++i)
+	let noteses = document.getElementsByTagName('input');
+	for(let i=0; i < noteses.length; ++i)
 		if (noteses[i].className == 'use_notes_checkbox') noteses[i].checked = false;
 }
 
@@ -63,15 +63,15 @@ function deselectAllNotes() {
 //
 //
 function checkAll() {
-	var i = 1;
+	let i = 1;
 	while (document.getElementsByName('link['+i+']').length) {
-		var e = document.getElementById('flag'+i);
+		let e = document.getElementById('flag'+i);
 		if (e) {
 			e.checked = true;
-			var t = document.getElementById('t'+i).value;
-			var n = document.getElementById('n'+i).value;
+			let t = document.getElementById('t'+i).value;
+			let n = document.getElementById('n'+i).value;
 			if (n.length > t.length) {
-				var e2 = document.getElementById('un'+i);
+				let e2 = document.getElementById('un'+i);
 				if (e2) e2.checked = true;
 			}
 		}
@@ -83,12 +83,12 @@ function checkAll() {
 //
 //
 function unCheckAll() {
-	var i = 1;
+	let i = 1;
 	while (document.getElementsByName('link['+i+']').length) {
-		var e = document.getElementById('flag'+i);
+		let e = document.getElementById('flag'+i);
 		if (e) {
 			e.checked = false;
-			e2 = document.getElementById('un'+i);
+			let e2 = document.getElementById('un'+i);
 			if (e2) e2.checked = false;
 		}
 		i++;
@@ -103,9 +103,9 @@ function lookup_revert(button, linkno){
 	if (button.value == 'Lookup Title'){
 		lookupTitle(button);
 	} else {
-		var e1 = document.getElementById('t'+linkno);
-		var e2 = document.getElementById('at'+linkno);
-		var tmp = e1.value;
+		let e1 = document.getElementById('t'+linkno);
+		let e2 = document.getElementById('at'+linkno);
+		let tmp = e1.value;
 		e1.value = e2.value;
 		e2.value = tmp;
 	}
@@ -119,9 +119,9 @@ function lookupTitle(button) {
     // button.display.style = 'none';
     
 	// buttonName should be "lookup[xxx]"; we extract that numeric xxx
-	var buttonName = button.name;
+	let buttonName = button.name;
 
-	var buttonNum, titleElt, urlElt;
+	let buttonNum, titleElt, urlElt;
 	if (buttonName != 'popup') {
         //lookup title
 		buttonNum = parseInt(buttonName.substring(7));
@@ -139,9 +139,9 @@ function lookupTitle(button) {
 	// if we're already grabbing some other title, cancel that one (people will learn not to do this!)
 	if (document.forms['mainform'].elements['titlegrabber_lock'].value  &&  document.forms['mainform'].elements['titlegrabber_lock'].value != 'popup')
 	{
-		var lockedNum = document.forms['mainform'].elements['titlegrabber_lock'].value;
-		var lockedTitleElt = document.forms['mainform'].elements['title['+lockedNum+']'];
-		var lockedLookupElt = document.forms['mainform'].elements['lookup['+lockedNum+']'];
+		let lockedNum = document.forms['mainform'].elements['titlegrabber_lock'].value;
+		let lockedTitleElt = document.forms['mainform'].elements['title['+lockedNum+']'];
+		let lockedLookupElt = document.forms['mainform'].elements['lookup['+lockedNum+']'];
 
 		if (lockedTitleElt) lockedTitleElt.disabled = false;
 		if (lockedLookupElt) lockedLookupElt.disabled = false;
@@ -152,7 +152,7 @@ function lookupTitle(button) {
 	button.disabled = true;
 	titleElt.disabled = true;
     
-	var baseurl = window.hWin.HAPI4.baseURL+'import/hyperlinks/getTitleFromURL.php';//'?num='+buttonNum+'&url='+escape(urlElt.value);
+	let baseurl = window.hWin.HAPI4.baseURL+'import/hyperlinks/getTitleFromURL.php';//'?num='+buttonNum+'&url='+escape(urlElt.value);
     
     window.hWin.HEURIST4.util.sendRequest(baseurl, 
             {db:window.hWin.HAPI4.database,
@@ -164,10 +164,10 @@ function lookupTitle(button) {
             
                     response = response.data;
                     if(!window.hWin.HEURIST4.util.isnull(response)){
-                        var num = response.num;
+                        let num = response.num;
                         
-                        var lockedLookupElt = document.forms['mainform'].elements['lookup['+num+']'];
-                        var lockedTitleElt = document.forms['mainform'].elements['title['+num+']'];
+                        let lockedLookupElt = document.forms['mainform'].elements['lookup['+num+']'];
+                        let lockedTitleElt = document.forms['mainform'].elements['title['+num+']'];
                         lockedTitleElt.disabled = false;
                         lockedLookupElt.disabled = false;
                     
@@ -198,7 +198,7 @@ function doBookmark(){
         return;
    }
     
-   var opts = {
+   let opts = {
        title: 'Bookmark selected URLs',
        modes: ['bookmark_url'],
        groups: 'personal',

@@ -1,6 +1,6 @@
 <?php
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Record search and output in required format
     * used in recordExportCSV.js
     * 
@@ -94,11 +94,11 @@
 
         if( ! $system->init(@$params['db']) ){
             //get error and response
-            $system->error_exit_api(); //exit from script
+            $system->error_exit_api();//exit from script
         }
     }
 
-    set_time_limit(0); //no limit
+    set_time_limit(0);//no limit
 
     if(@$params['file_refs']){
         downloadFileReferences($system, $params['ids']);
@@ -138,7 +138,7 @@
         $search_params['q'] = @$params['q'];
     }
     if($search_params['q']==null || $search_params['q']==''){
-        $search_params['q'] = 'sortby:-m'; //get all records
+        $search_params['q'] = 'sortby:-m';//get all records
     }
 
 
@@ -152,7 +152,7 @@
 
     $is_csv = (@$params['format'] == 'csv');
     /*if(@$params['format']=='json' && @$params['detail']!=null){
-        $search_params['detail'] = $params['detail'];    
+        $search_params['detail'] = $params['detail'];
     }else */
     if(@$params['format']){
         //search only ids - all 
@@ -179,7 +179,7 @@
                 
                 if($search_params['q']==null){
                     //query was removed 
-                    header( 'Content-Type: application/json');    
+                    header( 'Content-Type: application/json');
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
@@ -199,10 +199,10 @@
                       $search_by_field = '{"f":"'.addslashes($params['search']['value']).'"},';
                 }
                 if($search_by_type!='' || $search_by_field!=''){
-                    $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';    
+                    $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';
                     
                     $search_params['detail'] = 'count';
-                    $response = recordSearch($system, $search_params); //datatable search - reccount only
+                    $response = recordSearch($system, $search_params);//datatable search - reccount only
                     $search_params['detail'] = 'ids';
                     
                     $params['recordsFiltered'] = $response['data']['count'];
@@ -221,27 +221,28 @@
                 $dbname = $system->dbname_full();
                 if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
                     $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);
-                    if(is_array($keys))
-                    foreach ($keys as $key) {
-                        if(strpos($key,'datatable')===0){
-                            $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
-                            unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
+                    if(is_array($keys)){
+                        foreach ($keys as $key) {
+                            if(strpos($key,'datatable')===0){
+                                $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
+                                unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
+                            }
                         }
                     }
                 }
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
-                header( 'Content-Type: application/json');    
+                header( 'Content-Type: application/json');
                 echo json_encode(array('status'=>HEURIST_OK));
                 exit;
             }
         }
        
-        $response = recordSearch($system, $search_params);  //search ids
+        $response = recordSearch($system, $search_params);//search ids
     }
         
-    $system->defineConstant('DT_PARENT_ENTITY');    
+    $system->defineConstant('DT_PARENT_ENTITY');
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
     $system->defineConstant('DT_SYMBOLOGY');
@@ -286,19 +287,19 @@
                     return true;
                 }
                 return false;
-            });        
+            });
             
             $outputHandler = false;
             
             if(class_exists($classname, true)){
-                $outputHandler = new $classname($system);    
+                $outputHandler = new $classname($system);
             }
             
             if(!$outputHandler){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
                 return false;
             }else{
-                $res = $outputHandler->output( $response, $params );    
+                $res = $outputHandler->output( $response, $params );
             }
         
         }else{
@@ -355,13 +356,24 @@ function downloadFileReferences($system, $ids){
                    FROM recUploadedFiles 
                    LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID' . $where_clause;
 
-    $file_refs = mysql__select_all($mysqli, $file_query, 1);
-    if(!$file_refs){
-
+    $res_files = $mysqli->query($file_query);
+    
+    $err_message = null;
+    if (!$res_files) {
+        $err_message = 'File record details could not be retrieved from database.<br><br>'
+                        .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
+    }else{
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');    
+        if($total_count_rows==0){
+            $err_message = 'Empty result set';     
+        }
+    }
+                   
+    if($err_message!=null){
         fclose($fd);
 
         header('Content-type: text/html');
-        echo 'File record details could not be retrieved from database.<br><br>' (!empty($mysqli->error) ? $mysqli->error : 'Unknown error');
+        echo $err_message;
         exit;
     }
 
@@ -391,7 +403,9 @@ function downloadFileReferences($system, $ids){
         [12] => Copyright
         [13] => Copyowner
     */
-    foreach ($file_refs as $id => $details) {
+    while ($details = $res_files->fetch_row()){
+        
+        $id = array_shift($details);
 
         $name = !empty($details[0]) ? $details[0] : $details[1];
         $path = !empty($details[3]) ? $details[3] . $name : 'External Source';
@@ -408,6 +422,7 @@ function downloadFileReferences($system, $ids){
         }
         fputcsv($fd, array($id, implode('|', $recs), "", $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10]), $sep);
     }
+    $res_files->close();
 
     rewind($fd);
     $output = stream_get_contents($fd);
@@ -415,7 +430,7 @@ function downloadFileReferences($system, $ids){
     fclose($fd);
 
     if($len>0){
-        header('Content-Length: ' . $len);   
+        header('Content-Length: ' . $len);
     }
     exit($output);
 }

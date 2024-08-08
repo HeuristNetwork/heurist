@@ -73,8 +73,7 @@ class DbUtils {
 
     public static function initialize($mysqli=null)
     {
-        if (self::$initialized)
-            return;
+        if (self::$initialized) {return;}
 
         global $system;
         self::$system = $system;
@@ -82,7 +81,7 @@ class DbUtils {
         if($mysqli){
             self::$mysqli = $mysqli;
         }else{
-            self::$mysqli = $system->get_mysqli();    
+            self::$mysqli = $system->get_mysqli();
         }
 
         self::$initialized = true;
@@ -138,9 +137,9 @@ class DbUtils {
         $sHasNewDefsWarning = false;
         if($rty>0 || $dty>0 || $trm>0){
             $s = array();
-            if($rty>0) { $s[] = intval($rty).' record types'; }
-            if($dty>0) { $s[] = intval($dty).' base fields'; }
-            if($trm>0) { $s[] = intval($trm).' vocabularies or terms'; }
+            if($rty>0) { $s[] = intval($rty).' record types';}
+            if($dty>0) { $s[] = intval($dty).' base fields';}
+            if($trm>0) { $s[] = intval($trm).' vocabularies or terms';}
             $sHasNewDefsWarning = implode(', ',$s);
         }
         
@@ -180,7 +179,7 @@ class DbUtils {
         if($database_name==null){
             $msg = 'Database parameter not defined';
             self::$system->addError(HEURIST_INVALID_REQUEST, $msg);
-            if($verbose) echo '<br>'.$msg;
+            if($verbose) {echo '<br>'.$msg;}
             return false;
         }
 
@@ -198,10 +197,10 @@ class DbUtils {
            $connected = true;
         }
         
-        $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";   
+        $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";
         $db_dump_file = null;     
         
-        $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //  HEURIST_FILESTORE_DIR;  database upload folder
+        $source = HEURIST_FILESTORE_ROOT.$database_name.'/';//  HEURIST_FILESTORE_DIR;  database upload folder
         $archOK = true;
 
         
@@ -209,7 +208,7 @@ class DbUtils {
             $msg = $msg_prefix.' Failed to connect to database '
                     .($database_name).'  '.($createArchive);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br>'.htmlspecialchars($msg);
+            if($verbose) {echo '<br>'.htmlspecialchars($msg);}
             self::$db_del_in_progress = null;
             return false;
         }else 
@@ -217,28 +216,28 @@ class DbUtils {
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
                     $system->addError(HEURIST_ACTION_BLOCKED, 
-                        $msg_prefix.' Cannot create archive folder for database to be deleteted.');                
+                        $msg_prefix.' Cannot create archive folder for database to be deleteted.');
                     self::$db_del_in_progress = null;
                     return false;
             }
             
-            self::setSessionVal(1); //archive folder created
+            self::setSessionVal(1);//archive folder created
                                 
             $db_dump_file = self::databaseDump( $database_name, null, null, $verbose );
             
             if ($db_dump_file===false) {
                     $msg = $msg_prefix.' Failed to dump database to a .sql file';
-                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);                
-                    if($verbose) echo '<br>'.htmlspecialchars($msg);
+                    self::$system->addError(HEURIST_ACTION_BLOCKED, $msg);
+                    if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                     self::$db_del_in_progress = null;
                     return false;
             }
 
-            if(self::setSessionVal(2)) return false; //database dumped            
+            if(self::setSessionVal(2)) {return false;} //database dumped            
         
             // Zip $source to $destination
             $datetime1 = date_create('now');
-            $destination = $archiveFolder.$database_name.'_'.$datetime1->format('Y-m-d_H_i_s'); 
+            $destination = $archiveFolder.$database_name.'_'.$datetime1->format('Y-m-d_H_i_s');
             
             $filestore_dir = HEURIST_FILESTORE_ROOT.$database_name.'/';
             $folders_to_copy = folderSubs($filestore_dir, array('backup', 'scratch', 'documentation_and_templates', 
@@ -247,7 +246,7 @@ class DbUtils {
             foreach($folders_to_copy as $idx=>$folder_name){
                 $folder_name = realpath($folder_name);
                 if($folder_name!==false){
-                    $folders_to_copy[$idx] = str_replace('\\', '/', $folder_name);    
+                    $folders_to_copy[$idx] = str_replace('\\', '/', $folder_name);
                 }
                 
             }
@@ -257,11 +256,11 @@ class DbUtils {
             
             if($format=='zip' || !extension_loaded('bz2')){
                 
-                $destination = $destination.'.zip'; 
+                $destination = $destination.'.zip';
                 
                 $archOK = UArchive::zip($source, $folders_to_copy, $destination, $verbose);
             }else{
-                $destination = $destination.'.tar'; 
+                $destination = $destination.'.tar';
                 
                 $archOK = UArchive::createBz2($source, $folders_to_copy, $destination, $verbose);
             }
@@ -275,13 +274,13 @@ class DbUtils {
                 
                 $msg = $msg_prefix.' Cannot create archive with database folder. Failed to archive '
                         .($source).' to '.($destination);
-                self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                if($verbose) echo '<br>'.htmlspecialchars($msg);
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
+                if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                 self::$db_del_in_progress = null;
                 return false;
             }
             
-            if(self::setSessionVal(3)) return false; //database dump archived
+            if(self::setSessionVal(3)) {return false;} //database dump archived
         }
             
         if($archOK){
@@ -301,11 +300,11 @@ class DbUtils {
 
                     $msg = $msg_prefix.' Database error on sql drop operation. '.$mysqli->error;
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-                    if($verbose) echo '<br>'.htmlspecialchars($msg);
+                    if($verbose) {echo '<br>'.htmlspecialchars($msg);}
                     return false;
                 }
 
-                if(self::setSessionVal(4)) return false; //database dropped
+                if(self::setSessionVal(4)) {return false;} //database dropped
 
                 if($verbose) {
                     echo "<br>Database ".htmlspecialchars($database_name)." has been dropped";
@@ -316,20 +315,20 @@ class DbUtils {
                 //change current folder
                 chdir(HEURIST_FILESTORE_ROOT);
                 if($verbose) {
-                    echo "<br>Folder ".htmlspecialchars($source)." has been deleted";   
+                    echo "<br>Folder ".htmlspecialchars($source)." has been deleted";
                 }
-                if(self::setSessionVal(5)) return false; //database folder deleted
+                if(self::setSessionVal(5)) {return false;} //database folder deleted
 
                 //add to log file
                 $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
-                $fp = fopen($filename, 'a'); //open for add
+                $fp = fopen($filename, 'a');//open for add
                 if($fp){
                     $row = array($database_name,  
                         $owner_user['ugr_LastName'],
                         $owner_user['ugr_FirstName'],
                         $owner_user['ugr_eMail'],
                     date_create('now')->format('Y-m-d H:i:s'));
-                    fputcsv($fp, $row); 
+                    fputcsv($fp, $row);
                     fclose($fp);
                 }
                 
@@ -343,11 +342,11 @@ class DbUtils {
                         'usrPassword'=>$dbowner['ugr_Password'], 
                         'usrEmail'=>$dbowner['ugr_eMail']
                     );
-                    $res = DbRegis::registrationDelete($params);    
+                    $res = DbRegis::registrationDelete($params);
                     // if not integer - this is error
                     if(is_bool($res) && $res===false){
                         self::$system->addErrorMsg(
-                            'Failed to delete record in reference index for #'.$regID.' for deleted database '.$db_target.'<br>');                    
+                            'Failed to delete record in reference index for #'.$regID.' for deleted database '.$db_target.'<br>');
                     }
                     */
                 }
@@ -392,8 +391,8 @@ class DbUtils {
             if($database_dumpfile==null){
                 $directory = HEURIST_FILESTORE_ROOT.$database_name;
                 /*if(!folderCreate($directory, true)){
-                    self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
-                    if($verbose) echo 'Unable to create folder '.$directory;
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');
+                    if($verbose) {echo 'Unable to create folder '.$directory;}
                     return false;
                 }*/
                 
@@ -432,7 +431,7 @@ class DbUtils {
                     .'(note the settings required for a single server vs mysql running on a separate server)';
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
-                    if($verbose) echo '<br>'.$msg;
+                    if($verbose) {echo '<br>'.$msg;}
                     return false;
                 }
             }else{ //use php library
@@ -462,7 +461,7 @@ class DbUtils {
                 }
                 
                 if(count($tables)>0){
-                    $tables = implode(' ', $tables); //'--tables '.
+                    $tables = implode(' ', $tables);//'--tables '.
                 }else{
                     $tables = '';
                 }
@@ -498,7 +497,7 @@ class DbUtils {
                             .' failed with a return status: '.($res2!=null?intval($res2):'unknown')
                             .'. Output: '.(is_array($arr_out)&&count($arr_out)>0?print_r($arr_out, true):'');
 
-                    if($verbose) echo '<br>'.$msg;
+                    if($verbose) {echo '<br>'.$msg;}
                     
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);
                     
@@ -510,15 +509,15 @@ class DbUtils {
                     
                     return false;
                 }else if($verbose){
-                    echo 'MySQL Dump completed<br>';                
+                    echo 'MySQL Dump completed<br>';
                 }
                             
             
             }
             else{ //USE 3d Party php MySQLdump lib
             
-                if(@$dump_options['quick']){ unset($dump_options['quick']); } //not supported
-                if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']); }
+                if(@$dump_options['quick']){ unset($dump_options['quick']);} //not supported
+                if(@$dump_options['no-create-db']){ unset($dump_options['no-create-db']);}
                 
                 try{
                     $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
@@ -534,7 +533,7 @@ class DbUtils {
             
             //$mysqli->close();
             
-            chmod($database_dumpfile, 0777);    
+            chmod($database_dumpfile, 0750);
 
             // Echo output
             if($verbose) {
@@ -549,7 +548,7 @@ class DbUtils {
         }else{
             $msg = 'Failed to connect to database '.htmlspecialchars($database_name_full);
             self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br>'.$msg;
+            if($verbose) {echo '<br>'.$msg;}
             return false;
         }
     }
@@ -572,7 +571,7 @@ class DbUtils {
             if($templateFileName==null){
                 $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
             }
-            $templateFoldersContent = 'NOT DEFINED'; //it is used for template database only
+            $templateFoldersContent = 'NOT DEFINED';//it is used for template database only
 
             //check template
             if(!file_exists($templateFileName)){
@@ -584,13 +583,13 @@ class DbUtils {
             list($database_name_full, $database_name) = mysql__get_names( $database_name );
             
             //checks that database name is valid, correct length and unique
-            $error_msg = self::databaseValidateName($database_name, 1); //unique
+            $error_msg = self::databaseValidateName($database_name, 1);//unique
             if ($error_msg!=null) {
                 self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
                 return false;
             }
             
-            if(self::setSessionVal(1)) return false;
+            if(self::setSessionVal(1)) {return false;}
             
             //create folders 
             $upload_root = self::$system->getFileStoreRootFolder();
@@ -599,24 +598,24 @@ class DbUtils {
             
             $warnings = self::databaseCreateFolders($database_name);
             if(is_array($warnings) && count($warnings)>0){
-                folderDelete($database_folder);  
+                folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED, 
                                             implode("<br>",$warnings));
                 return false;
             }
 
-            if(self::setSessionVal(2)) return false;
+            if(self::setSessionVal(2)) {return false;}
             
             //create empty database
             if(!self::databaseCreate($database_name_full)){ //with structure and triggers from default dump file 
-                folderDelete($database_folder);  
+                folderDelete($database_folder);
                 return false;
             }
             
-            if(self::setSessionVal(3)) return false;
+            if(self::setSessionVal(3)) {return false;}
             
             //switch to new database            
-            mysql__usedatabase( $mysqli, $database_name_full );  
+            mysql__usedatabase( $mysqli, $database_name_full );
 
             if(file_exists($templateFileName) && filesize($templateFileName)>0){ 
             
@@ -632,14 +631,14 @@ class DbUtils {
                         .' for database '.$database_name_full.'<br>'
                         .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
                         
-                    folderDelete($database_folder);  
+                    folderDelete($database_folder);
                     mysql__drop_database( $mysqli, $database_name_full );
                     return false;
                 }
                 
             }
 
-            if(self::setSessionVal(4)) return false; //import core defs
+            if(self::setSessionVal(4)) {return false;} //import core defs
             
             //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
             //not used 
@@ -652,15 +651,15 @@ class DbUtils {
                 }catch(Exception $e){
                     array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
                                 //.' Target :'.$upload_root.$database_name
-                                .' Error: '.$e->getMessage());        
+                                .' Error: '.$e->getMessage());
                 }
             }            
             
             $warnings2 = self::_databaseInitForNew($user_record);
 
-            if(self::setSessionVal(5)) return false;
+            if(self::setSessionVal(5)) {return false;}
             
-            $warnings = array_merge($warnings, $warnings2); 
+            $warnings = array_merge($warnings, $warnings2);
 
             //self::setSessionVal('REMOVE');
             
@@ -685,7 +684,7 @@ class DbUtils {
             
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', $user_record);
             if($ret!=2){
-                array_push($warnings, 'Cannot set owner user. '.$ret);                
+                array_push($warnings, 'Cannot set owner user. '.$ret);
             }
            
             //add default saved searches and tree
@@ -693,7 +692,7 @@ class DbUtils {
 //{"key":"28","title":"Organisations","data":{"isfaceted":false}},{"key":"29","title":"Persons","data":{"isfaceted":false}},{"key":"30","title":"Media items","data":{"isfaceted":false}}
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
             if($ret!=1){
-                array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);                
+                array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);
             }
             
             //ADD DEFAULT LOOKUPS
@@ -794,17 +793,17 @@ class DbUtils {
                 strcasecmp($database_name,'DBS_TO_RESTORE')==0 ||
                 strcasecmp($database_name,'AAA_LOGS')==0)){
 
-                $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';    
+                $error_msg = 'Database name '.htmlspecialchars($database_name).' is reserved. Try different name.';
                    
             }else{
                 //verify that database with such name already exists
                 $dblist = mysql__select_list2(self::$mysqli, 'show databases');
                 if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
                     if($check_exist_or_unique==1){
-                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';    
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';
                     }
                 }else if($check_exist_or_unique==2){
-                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';    
+                        $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';
                 }
             }
         }
@@ -833,7 +832,7 @@ class DbUtils {
             if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                 $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
             }else{
-                $lib_path = '/srv/BACKUP/ARCHIVE/';    
+                $lib_path = '/srv/BACKUP/ARCHIVE/';
             }
         }else if($source==4){
             $lib_path = $upload_root.'DBS_TO_RESTORE/';
@@ -842,7 +841,7 @@ class DbUtils {
             $lib_path = $upload_root.'DELETED_DATABASES/';
         }
 
-        $archive_file = $lib_path.basename($archive_file); 
+        $archive_file = $lib_path.basename($archive_file);
 
         //check archive
         if(!file_exists($archive_file)){
@@ -853,26 +852,26 @@ class DbUtils {
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
         //check database name and unique 
-        $error_msg = self::databaseValidateName($database_name, 1); //unique
+        $error_msg = self::databaseValidateName($database_name, 1);//unique
         if ($error_msg!=null) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             return false;
         }
 
-        self::setSessionVal(1); //database name and archive validated
+        self::setSessionVal(1);//database name and archive validated
         
         //create folders and all subfolders with default content
         $database_folder = $upload_root.$database_name.'/';
         
         $warnings = self::databaseCreateFolders($database_name);
         if(is_array($warnings) && count($warnings)>0){
-            folderDelete($database_folder);  
+            folderDelete($database_folder);
             self::$system->addError(HEURIST_ACTION_BLOCKED, 
                                     implode('<br>',$warnings));
             return false;
         }
         
-        self::setSessionVal(2); //folders created
+        self::setSessionVal(2);//folders created
 
         $needCopyCurrentDbFolder = false; 
         //unpack archive into this folder
@@ -881,29 +880,29 @@ class DbUtils {
             $path_parts = pathinfo($archive_file);
             $ext = 'zip';
             if(array_key_exists('extension', $path_parts)){
-                $ext = $path_parts['extension'];                
+                $ext = $path_parts['extension'];
             }
             
             if(strcasecmp($ext, 'bz2')==0 || strpos($archive_file,'.sql.bz2.')>0){
                 if(extension_loaded('bz2')){
                     $needCopyCurrentDbFolder = true;    
-                    UArchive::bunzip2($archive_file, $database_folder.'dump.sql');        
+                    UArchive::bunzip2($archive_file, $database_folder.'dump.sql');
                 }else{
                     throw new Exception('bz2 extension is not detected');
                 }
             }else{
-                $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);    
+                $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);
                 $needCopyCurrentDbFolder = ($fileCount==1);
             }
             
         }catch(Exception $e){
-            folderDelete($database_folder);  
+            folderDelete($database_folder);
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
-                            .' Error: '.$e->getMessage());        
+                            .' Error: '.$e->getMessage());
             return false;
         }
 
-        self::setSessionVal(3); //unpack archive
+        self::setSessionVal(3);//unpack archive
 
         //find dump file 
         $dumpfile = folderFirstFile($database_folder, 'sql', false);
@@ -911,7 +910,7 @@ class DbUtils {
         //create database and import data from dumpfile
         if(!file_exists($dumpfile)){
 
-            folderDelete($database_folder);  
+            folderDelete($database_folder);
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Archive does not contain sql dump file');
             return false;
             
@@ -928,29 +927,29 @@ class DbUtils {
                 if(folderRecurseCopy( HEURIST_FILESTORE_DIR, $database_folder )){
                     self::databaseUpdateFilePaths(self::$system->dbname() , $database_name);
                 }else{
-                    folderDelete($database_folder);  
+                    folderDelete($database_folder);
                     self::$system->addError(HEURIST_ACTION_BLOCKED, 
                         'Sorry, we were not able to copy file directories for restoring database.');
                     return false;
                 }                
             }
             
-            fileDelete($dumpfile_from_archive); //remove temp dump file
+            fileDelete($dumpfile_from_archive);//remove temp dump file
             $dumpfile = $database_folder.'_temp_dump.sql';
-            file_put_contents($dumpfile, preg_replace('/DEFINER=`\w+`@`[\w.]+`/m', 'DEFINER=CURRENT_USER', $filecontent));            
+            file_put_contents($dumpfile, preg_replace('/DEFINER=`\w+`@`[\w.]+`/m', 'DEFINER=CURRENT_USER', $filecontent));
             
             $script_file = basename($dumpfile);
             //$script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
             //fileCopy($dumpfile, $script_file);
 
-            $res = self::databaseCreate($database_name, 1, $script_file); //from archive
+            $res = self::databaseCreate($database_name, 1, $script_file);//from archive
 
-            self::setSessionVal(4); //database restored from dump
+            self::setSessionVal(4);//database restored from dump
             
-            fileDelete($dumpfile); //remove temp dump file
+            fileDelete($dumpfile);//remove temp dump file
                            
             if(!$res){
-                folderDelete($database_folder);  
+                folderDelete($database_folder);
             }else{        
                 $path = realpath(dirname(__FILE__).'/../../../');
                 $now = new DateTime('now', new DateTimeZone('UTC'));
@@ -975,7 +974,7 @@ class DbUtils {
         
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
-        $error_msg = self::databaseValidateName($database_name, 1); //unique
+        $error_msg = self::databaseValidateName($database_name, 1);//unique
         if ($error_msg!=null) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             return false;
@@ -1009,14 +1008,14 @@ class DbUtils {
         $res = mysql__create_database($mysqli, $database_name_full);
         
         if (is_array($res)){
-            self::$system->addErrorArr($res); //can't create
+            self::$system->addErrorArr($res);//can't create
         }else
         if($level<1){
             return true; //create empty database
             
         }else{
             //restore data from sql dump
-            $res = mysql__script($database_name_full, $dumpfile, $database_folder); //restore from dump
+            $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
@@ -1075,17 +1074,17 @@ class DbUtils {
         $database_folder = $upload_root.$database_name.'/';
 
         if (folderCreate($database_folder, true)){
-            folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
+            folderAddIndexHTML( $database_folder );//add index file to block directory browsing
         }else{
             return array('Heurist was unable to create the required database root folder,<br>Database name: '
-                        . $database_name . '<br>Server url: ' . HEURIST_BASE_URL); //, 'revert'=>true
+                        . $database_name . '<br>Server url: ' . HEURIST_BASE_URL);//, 'revert'=>true
         }
 
         $warnings = array();
 
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/icons", $database_folder."entity" )){
             
-            folderAddIndexHTML($database_folder."entity"); // index file to block directory browsing
+            folderAddIndexHTML($database_folder."entity");// index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy entity folder (icons) to $database_folder";
         }
@@ -1094,14 +1093,14 @@ class DbUtils {
 
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/dbcreate/smarty-templates", $database_folder."smarty-templates" )){
             
-            folderAddIndexHTML($database_folder."smarty-templates"); // index file to block directory browsing
+            folderAddIndexHTML($database_folder."smarty-templates");// index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy smarty-templates folder to $database_folder";
         }
 /* removed 2021-07-15
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/xsl-templates", $database_folder."xsl-templates" )){
             
-            folderAddIndexHTML($database_folder."xsl-templates"); // index file to block directory browsing
+            folderAddIndexHTML($database_folder."xsl-templates");// index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
         }
@@ -1111,7 +1110,7 @@ class DbUtils {
     if(false){ 
         if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
             
-            folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
+            folderAddIndexHTML($database_folder."documentation_and_templates");// index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
@@ -1129,7 +1128,7 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
         
         //remove empty warns
-        $warnings = array_filter($warnings, function($value) { return $value !== ''; });
+        $warnings = array_filter($warnings, function($value) { return $value !== '';});
         if(count($warnings)>0){
             array_unshift($warnings, "Unable to create the sub directories within the database root directory,<br>Database name: " 
                         . $database_name . ",<br><br>Server url: " . HEURIST_BASE_URL . ",<br>Warnings:\n");
@@ -1149,7 +1148,7 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
         
-        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>"; }
+        if($verbose){ echo "Deleting ".htmlspecialchars($remark)."</br>";}
 
         self::setSessionVal($remark);
         
@@ -1163,7 +1162,7 @@ class DbUtils {
             }
             return false;
         }else{
-            //if($verbose) { echo "<p>OK</p>"; }
+            //if($verbose) { echo "<p>OK</p>";}
             return true;
         }
     }
@@ -1181,7 +1180,7 @@ class DbUtils {
         $mysqli = self::$mysqli;
         $system  = self::$system;
         
-        $error_msg = self::databaseValidateName($database_name, 2); //exists
+        $error_msg = self::databaseValidateName($database_name, 2);//exists
         if ($error_msg!=null) {
             $system->addError(HEURIST_ACTION_BLOCKED, $error_msg);
             return false;
@@ -1199,14 +1198,14 @@ class DbUtils {
         if(!$connected){
             $msg = 'Failed to connect to database '.htmlspecialchars($database_name);
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
-            if($verbose) echo '<br><p>'.$msg.'</p>';
+            if($verbose) {echo '<br><p>'.$msg.'</p>';}
             return false;
         }
         
         self::setSessionVal('Permission validation');
         
         $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+        if($keep_autocommit===true) {$mysqli->autocommit(FALSE);}
 
         if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
             //not used
@@ -1243,7 +1242,7 @@ class DbUtils {
 
             if($res){
                 $res2 = $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
-                if($res2) $mysqli->commit();
+                if($res2) {$mysqli->commit();}
             }
         }
     
@@ -1251,7 +1250,7 @@ class DbUtils {
             $mysqli->rollback();
         }
 
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         //$mysqli->close();
 
         return $res;
@@ -1321,10 +1320,10 @@ class DbUtils {
                 'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots', 'sysarchive');
           
                 
-                $tables = $mysqli->query("SHOW TABLES");  //get all tables from target db
+                $tables = $mysqli->query("SHOW TABLES");//get all tables from target db
                 if($tables){
 
-                    $mysqli->query("SET foreign_key_checks = 0"); //disable
+                    $mysqli->query("SET foreign_key_checks = 0");//disable
                     $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
                     if($verbose) {
@@ -1342,7 +1341,7 @@ class DbUtils {
                         
                         if(strtolower($table)=='usrrecpermissions'){
                             $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
-                            if(!($cnt>0)) continue;
+                            if(!($cnt>0)) {continue;}
                         }else if($table=='sysUGrps'){
                             $cnt = mysql__select_value($mysqli, "SELECT count(*) FROM `". $db_source ."`.sysUGrps WHERE ugr_Enabled != 'n' AND ugr_Enabled != 'y'");
 
@@ -1394,7 +1393,7 @@ class DbUtils {
                     }
                     
                     
-                    $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
+                    $mysqli->query("SET foreign_key_checks = 1");//restore/enable foreign indexes verification
 
                     //cleanup target database to avoid issues with addition of constraints
 
@@ -1439,12 +1438,12 @@ class DbUtils {
 
 
                 //$mysqli->autocommit(FALSE);
-                //if($res) $mysqli->commit();
+                //if($res) {$mysqli->commit();}
             }
 
         if(!$res){
             if($verbose) {
-                if($message) echo htmlspecialchars($message);
+                if($message) {echo htmlspecialchars($message);}
             }else{
                 self::$system->addError(HEURIST_ERROR, $message);
             }
@@ -1474,7 +1473,7 @@ class DbUtils {
         
         //$system = self::$system;
         $mysqli = self::$mysqli;
-        $ugr_ID = self::$system->get_user_id(); //current user
+        $ugr_ID = self::$system->get_user_id();//current user
         $usr_owner = user_getById($mysqli, $ugr_ID);
         
         
@@ -1482,7 +1481,7 @@ class DbUtils {
         list($db_target_full, $db_target ) = mysql__get_names($db_target);
         
         
-        $sErrorMsg = DbUtils::databaseValidateName($db_target, 1); //unique
+        $sErrorMsg = DbUtils::databaseValidateName($db_target, 1);//unique
         if ($sErrorMsg!=null) {
             self::$system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
             return false;
@@ -1492,11 +1491,11 @@ class DbUtils {
         if($db_source==HEURIST_DBNAME && !self::$system->is_admin()){
                 
                 self::$system->addError(HEURIST_REQUEST_DENIED, 
-                            'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');                        
+                            'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');
                 return false;
         } 
         
-        if(self::setSessionVal(1)) return false; //validation
+        if(self::setSessionVal(1)) {return false;} //validation
         
         //create folders 
         $upload_root = self::$system->getFileStoreRootFolder();
@@ -1508,7 +1507,7 @@ class DbUtils {
             //limited set of folders
             $warnings = self::databaseCreateFolders($db_target);
             if(is_array($warnings) && count($warnings)>0){
-                folderDelete($database_folder);  
+                folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED, 
                     'Sorry, we were not able to create all file directories required by the database. '
                                                 .implode("<br>",$warnings));
@@ -1523,32 +1522,32 @@ class DbUtils {
                         HEURIST_FILESTORE_ROOT.$db_target."/entity" );
 
         }else if(!folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source, HEURIST_FILESTORE_ROOT.$db_target )){
-                folderDelete($database_folder);  
+                folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED, 
                     'Sorry, we were not able to copy file directories for cloning  database.');
                 return false;
         }
-        if(self::setSessionVal(2)) return false; //copy folders
+        if(self::setSessionVal(2)) {return false;} //copy folders
 
         //3. create target database  
         $res = DbUtils::databaseCreate($db_target, 1);
 
         if(!$res){
-            folderDelete($database_folder);  
+            folderDelete($database_folder);
             return false;
         }
         
-        if(self::setSessionVal(3)) return false; //database creation
+        if(self::setSessionVal(3)) {return false;} //database creation
 
         //4. copy tables  - it switches to target db
-        $res = DbUtils::databaseClone($db_source_full, $db_target_full, false, $nodata, $isCloneTemplate);  
+        $res = DbUtils::databaseClone($db_source_full, $db_target_full, false, $nodata, $isCloneTemplate);
 
         if(!$res){
             DbUtils::databaseDrop( false, $db_target, false);
             return false;
         }
 
-        if(self::setSessionVal(4)) return false; //copy data
+        if(self::setSessionVal(4)) {return false;} //copy data
         
         if($isCloneTemplate){
         //5. add current user from current database as owner to target cloned db
@@ -1569,12 +1568,12 @@ class DbUtils {
             return false;
         }
 
-        if(self::setSessionVal(5)) return false; //triggers and constraints
+        if(self::setSessionVal(5)) {return false;} //triggers and constraints
         
         // 7. Update file path in target database  with absolute paths
         self::databaseUpdateFilePaths($db_source, $db_target);
 
-        if(self::setSessionVal(6)) return false; //triggers and constraints
+        if(self::setSessionVal(6)) {return false;} //triggers and constraints
         
         return true;
     }
@@ -1623,7 +1622,7 @@ class DbUtils {
             
         $res1 = self::$mysqli->query($query1);
         if($sourceRegID>0){
-            self::updateOriginatingDB($sourceRegID);   
+            self::updateOriginatingDB($sourceRegID);
         }
     }
     
@@ -1682,11 +1681,11 @@ class DbUtils {
                     'usrEmail'=>$dbowner['ugr_eMail'],
                     'serverURL'=>$serverURL //new url
                 );
-                $res2 = DbRegis::registrationUpdate($params);    
+                $res2 = DbRegis::registrationUpdate($params);
                 // if not integer - this is error
                 if(is_bool($res2) && $res2===false){
                     self::$system->addErrorMsg(
-                        'Failed to update reference index for #'.$regID.' for renamed database '.$db_target.'<br>');                    
+                        'Failed to update reference index for #'.$regID.' for renamed database '.$db_target.'<br>');
                 }
             }
                     

@@ -44,23 +44,23 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
     $recid = 0;
     if(@$_REQUEST['recID']){
-        $recid = $_REQUEST['recID'];    
+        $recid = $_REQUEST['recID'];
     }elseif(@$_REQUEST['recid']){
-        $recid = $_REQUEST['recid'];        
+        $recid = $_REQUEST['recid'];
     }elseif(@$_REQUEST['id']){
-        $recid = $_REQUEST['id'];                
+        $recid = $_REQUEST['id'];
     }
     if(strpos($recid, '-')>0){
         list($database_id, $recid) = explode('-', $recid, 2);
         $database_id = intval($database_id);
         $recid = intval($database_id).'-'.intval($recid);
     }else{
-        $recid = intval($recid);        
+        $recid = intval($recid);
     }
     
     
     if(@$_REQUEST['fmt']){
-        $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);    
+        $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
     }elseif(@$_REQUEST['format']){
         $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
     }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
@@ -73,13 +73,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
             require_once dirname(__FILE__).'/hserv/System.php';
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
-            if(!defined('PDIR')) define('PDIR','');    
+            if(!defined('PDIR')) {define('PDIR','');}
         }
         include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit;
 
         if(intval(@$_REQUEST['field'])>0){
-            $redirect = $redirect.'&field='.intval($_REQUEST['field']);    
+            $redirect = $redirect.'&field='.intval($_REQUEST['field']);
         }
 
 
@@ -106,9 +106,9 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
-        if(@$_REQUEST['rty']) $s = 'rty='.$_REQUEST['rty'];
-        else if(@$_REQUEST['dty']) $s = 'dty='.$_REQUEST['dty'];
-            else if(@$_REQUEST['trm']) $s = 'trm='.$_REQUEST['trm'];
+        if(@$_REQUEST['rty']) {$s = 'rty='.$_REQUEST['rty'];}
+        else if(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
+            else if(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
                 header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
@@ -119,14 +119,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
-        $script_name = 'hserv/controller/fileGet.php';        
+        $script_name = 'hserv/controller/fileGet.php';
     }else if(array_key_exists('template',$_REQUEST))
     {
         //execute smarty template
-        $script_name = 'viewers/smarty/showReps.php';        
+        $script_name = 'viewers/smarty/showReps.php';
     }else {
         //download file, thumb or remote url for recUploadedFiles
-        $script_name = 'hserv/controller/fileDownload.php';        
+        $script_name = 'hserv/controller/fileDownload.php';
     }
         
     //to avoid "Open Redirect" security warning    
@@ -145,18 +145,18 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $name = $name . '.html';
     }
 
-    $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING); //locale
+    $locale = filter_var(@$_REQUEST['lang'], FILTER_SANITIZE_STRING);//locale
     if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
         $locale = urlencode(strtolower($locale));
         $locale = ($locale=='eng')?'' :($locale.'/');
     }else{
-        $locale = '';    
+        $locale = '';
     }
 
     $asset = 'context_help/'.$locale.urlencode($name);
     if(!file_exists('context_help/'.$locale.$name)){
         //without locale - default is English
-        $asset = 'context_help/'.urlencode($name);   
+        $asset = 'context_help/'.urlencode($name);
     }
 
     if(file_exists('context_help/'.$name)){
@@ -183,7 +183,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 
 define('IS_INDEX_PAGE',true);
-if(!defined('PDIR')) define('PDIR','');
+if(!defined('PDIR')) {define('PDIR','');}
 
 require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 ?>
@@ -338,14 +338,14 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
     function onPageInit(success){
 
-        if(!success) return;
+        if(!success) {return;}
 
 
         $(document).on('focusin', function(e) {
             if ($(e.target).closest(".mce-window, .moxman-window").length) {
                 e.stopImmediatePropagation();
             }
-        });   
+        });
 
 <?php        
 /*
@@ -370,7 +370,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
 
         <?php
         //returns total records in db and counts of active entries in dashboard  
-        list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
+        list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard();
         echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
         echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
         echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
@@ -492,7 +492,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                     {
                     var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
                     window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
-                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
+                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);//hide button
 
                     window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
                     {onClose:function(){
@@ -504,7 +504,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                     */
                 }
 
-            $('body').css({'overflow':'hidden'});   
+            $('body').css({'overflow':'hidden'});
 
         }
 
@@ -528,7 +528,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                         window.hWin.HAPI4.LayoutMgr.visibilityAppById('map', false);
                     if(active_tab.indexOf('list')<0)
                         window.hWin.HAPI4.LayoutMgr.visibilityAppById('list', false);
-                    window.hWin.HAPI4.LayoutMgr.putAppOnTopById(active_tab[0]); //by layout_id
+                    window.hWin.HAPI4.LayoutMgr.putAppOnTopById(active_tab[0]);//by layout_id
                 }
             }
         }
@@ -541,7 +541,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 {element:document.getElementById('heurist-platform-warning'),
                     width:480, height:220,
                     title: 'Welcome',
-                    buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  
+                    buttons:{'Close':function(){ $(this).dialog( 'close' )} } });
         }else if (window.hWin.HEURIST4.util.isIE() ) {
             window.hWin.HEURIST4.msg.showMsgDlg('Heurist is not fully supported in Internet Explorer. Please use Chrome, Firefox or Edge.');
         }else if (platform.description.toLowerCase().indexOf('safari')>=0){
@@ -549,7 +549,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 {element:document.getElementById('heurist-safari-warning'),
                     width:480, height:260,
                     title: 'Safari browser support',
-                    buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  
+                    buttons:{'Close':function(){ $(this).dialog( 'close' )} } });
         }
 
     } //onInitCompleted_PerformSearch

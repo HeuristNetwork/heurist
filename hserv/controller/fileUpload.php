@@ -44,7 +44,7 @@ if($system->init(@$_REQUEST['db'])){
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $params = filter_input_array(INPUT_POST);
     }else{
-        $params = filter_input_array(INPUT_GET);    
+        $params = filter_input_array(INPUT_GET);
     }
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $params['entity'] /
@@ -52,12 +52,12 @@ if($system->init(@$_REQUEST['db'])){
     $is_autodect_csv = (@$params['autodect']==1);
     $recID = @$params['recID'];
     $registerAtOnce = (@$params['registerAtOnce']==1);
-    $tiledImageStack = (@$params['tiledImageStack']==1); //unzip archive and copy to uploaded_tilestacks
+    $tiledImageStack = (@$params['tiledImageStack']==1);//unzip archive and copy to uploaded_tilestacks
     
     $new_file_name = @$params['newfilename'];
     if($new_file_name){
         $new_file_name = basename($new_file_name);
-        $new_file_name = USanitize::sanitizeFileName($new_file_name, false); 
+        $new_file_name = USanitize::sanitizeFileName($new_file_name, false);
     }
     
     if(@$params['entity']){
@@ -86,7 +86,7 @@ if($system->init(@$_REQUEST['db'])){
     
     if(!$response){
         
-        $quota = $system->getDiskQuota(); //takes value from disk_quota_allowances.txt
+        $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
             $quota = 1073741824; //1GB    
@@ -118,7 +118,7 @@ if($response!=null){
     header('Content-type: application/json;charset=UTF-8');
     http_response_code(406);
     if(is_array($response)){
-        print json_encode($response);    
+        print json_encode($response);
     }else{
         print $response;    
     }
@@ -165,14 +165,14 @@ if($response!=null){
 /*
   it was form parameters in manageFilesUpload        
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
-            <input type="hidden" name="upload_thumb_url" value="<?php echo defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:''; ?>"/>
+            <input type="hidden" name="upload_thumb_url" value="<?php echo defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:'';?>"/>
 */        
         
     }else
     if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 
            
-        $max_file_size = intval(@$params['max_file_size']);                           
+        $max_file_size = intval(@$params['max_file_size']);
         if($max_file_size>0){
 // it does not work             
 //            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess', 
@@ -246,7 +246,7 @@ if($response!=null){
                 //'print_response ' => false
         );
         
-        allowWebAccessForForlder($entityDir.$version.'/');    
+        allowWebAccessForForlder($entityDir.$version.'/');
     
     }
 
@@ -258,7 +258,7 @@ if($response!=null){
         foreach($allowed_exts_2 as $ext){
             if(in_array(strtolower($ext), $allowed_exts_all)){
                 $idx = array_search(strtolower($ext), $allowed_exts_all);
-                if($idx>=0) $allowed_exts[] = $allowed_exts_all[$idx];    
+                if($idx>=0) {$allowed_exts[] = $allowed_exts_all[$idx];}
             }    
         }
         */
@@ -272,16 +272,16 @@ if($response!=null){
     
     $options['database'] = $system->dbname();
     
-    $upload_handler = new UploadHandler($options);  // from 3d party uploader
+    $upload_handler = new UploadHandler($options);// from 3d party uploader
     
     //@todo set print_response=false
     //and send to client standard HEURIST response
     $response = null;
-    $res = $upload_handler->get_response(); //it returns file object  $res['size]
+    $res = $upload_handler->get_response();//it returns file object  $res['size]
         
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-            $sMsg = "Sorry, file was not processed due to the following reported error:\n\n".$file->error.".\n\n"; // Error Log
+            $sMsg = "Sorry, file was not processed due to the following reported error:\n\n".$file->error.".\n\n";// Error Log
 
             if(strpos($file->error, 'Filetype not')===0 || strpos($file->error, 'File with the same name')===0){
                 
@@ -313,7 +313,7 @@ if($response!=null){
                 if($registerAtOnce==1){
                 
                     $entity = new DbRecUploadedFiles($system);
-                    $ret = $entity->registerFile($file, null, true, $tiledImageStack); //it returns ulf_ID
+                    $ret = $entity->registerFile($file, null, true, $tiledImageStack);//it returns ulf_ID
                     
                     if( is_bool($ret) && !$ret ){
                         $response = $system->getError();

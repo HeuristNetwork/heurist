@@ -1,5 +1,5 @@
 /**
-* Search wrapper for hRecordMgr.search. 
+* Search wrapper for HRecordMgr.search. 
 * It executes this method either callback or global events.
 * It allows to load entire set of records (incremental search by chunks has been disabled)
 * 
@@ -33,18 +33,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hRecordSearch() {
-     var _className = "hRecordSearch",
-         _version   = "0.4",
-         _query_request = null,
+function HRecordSearch() {
+     const _className = "HRecordSearch",
+         _version   = "0.4";
+     let _query_request = null,
          _owner_doc = null; //to trigger ON_REC_SEARCHSTART and ON_REC_SEARCHFINISH
          
-    /**
-    * Initialization
-    */
-    function _init( ) {
-    }
-    
     //
     // standalone search with callback (without event trigger)
     //
@@ -59,7 +53,7 @@ function hRecordSearch() {
                            window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
                     }
                     
-                    callback( hRecordSet(response.data) );
+                    callback( HRecordSet(response.data) );
                 }else{
                     callback( null );
                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -74,7 +68,7 @@ function hRecordSearch() {
     //   
     function _doSearch( originator, request ){
         
-            var owner_element_id, owner_doc;
+            let owner_element_id, owner_doc;
         
             if(originator){
                 if(originator.document){
@@ -139,11 +133,11 @@ function hRecordSearch() {
     //
     function _onSearchResult(response){
 
-            var recordset = null;
+            let recordset = null;
             if(_query_request!=null && _query_request[response.queryid]) {
                 
-                var qid = response.queryid;
-                var qr = window.hWin.HEURIST4.util.cloneJSON(_query_request[qid]);
+                let qid = response.queryid;
+                let qr = window.hWin.HEURIST4.util.cloneJSON(_query_request[qid]);
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -151,7 +145,7 @@ function hRecordSearch() {
                                window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
                         }
                         
-                        recordset = new hRecordSet(response.data);
+                        recordset = new HRecordSet(response.data);
                         recordset.setRequest( qr  );
 
                 }else{
@@ -194,7 +188,7 @@ function hRecordSearch() {
         
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getOrder())){
         
-            var request = { apply_rules:true, //do not include search in browser and search input
+            let request = { apply_rules:true, //do not include search in browser and search input
                             q: 'ids:'+window.hWin.HAPI4.currentRecordset.getOrder().join(','),
                             rules: rules,
                             rulesonly: rulesonly,
@@ -209,7 +203,7 @@ function hRecordSearch() {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -235,6 +229,6 @@ function hRecordSearch() {
         
     }
 
-    _init( );
+    //_init();
     return that;  //returns object
 }

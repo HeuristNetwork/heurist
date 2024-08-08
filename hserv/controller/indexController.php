@@ -23,7 +23,7 @@ delete
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/../utilities/dbRegis.php';
 
-    $isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false); //this is NOT reference server
+    $isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);//this is NOT reference server
 
     $res = false;
 
@@ -31,7 +31,7 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
     
     $allow_action = true;
 
-    $system = new System(); //global system
+    $system = new System();//global system
     
     //if db parameter is defined this is initial request
     //1. checks permission - must be dbowner or sysadmin password provided
@@ -45,7 +45,7 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
                 $allow_action = true;         
             }else{
                 //sysadmin protection
-                $allow_action = !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions);        
+                $allow_action = !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions);
             }
             
             if($allow_action){                
@@ -63,7 +63,7 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
                 
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 
-                            'To perform this action you must be logged in as Database Owner');                        
+                            'To perform this action you must be logged in as Database Owner');
             }
         }
     }
@@ -72,11 +72,11 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
         if($action=='info'){
             $res = DbRegis::registrationGet($_REQUEST);
         }else if($action=='register'){
-            $res = DbRegis::registrationAdd($_REQUEST); //returns ID or false
+            $res = DbRegis::registrationAdd($_REQUEST);//returns ID or false
         }else if($action=='update'){
             $res = DbRegis::registrationUpdate($_REQUEST);
         }else if($action=='delete'){
-            $res = DbRegis::registrationDelete($_REQUEST); //returns ID or false
+            $res = DbRegis::registrationDelete($_REQUEST);//returns ID or false
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, 'Action parameter is missing or incorrect');
         }            

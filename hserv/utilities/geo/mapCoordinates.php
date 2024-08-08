@@ -41,12 +41,12 @@
             if($gPoint && ($json['type']=='Point')){
                 
                 $pnt = array($json['coordinates']);
-                geo_SimplifyAndConvert($pnt, false, $gPoint);    
+                geo_SimplifyAndConvert($pnt, false, $gPoint);
                 $json['coordinates'] = $pnt[0];
                 
             }else if($gPoint && ($json['type']=='MultiPoint')){
                 
-                geo_SimplifyAndConvert($json['coordinates'], false, $gPoint);    
+                geo_SimplifyAndConvert($json['coordinates'], false, $gPoint);
                 
             }else if($json['type']=='LineString'){
 
@@ -58,9 +58,10 @@
                 }
             } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
-                for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
                         geo_SimplifyAndConvert($json['coordinates'][$idx][$idx2], $need_simplify, $gPoint);
+                }}
             }
 
             return $json;
@@ -78,14 +79,14 @@
         if($need_simplify && count($orig_points)>1000){
             
             //invert
-            $points = array();    
+            $points = array();
             foreach ($orig_points as $point) {
                 if($gPoint!=null){
                     $gPoint->setUTM($point[0], $point[1]);
                     $gPoint->convertTMtoLL();
                     array_push($points, array('y'=>$gPoint->Lat(), 'x'=>$gPoint->Long()));
                 }else{
-                    array_push($points, array('y'=>$point[1], 'x'=>$point[0]));    
+                    array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                 }
             }
             
@@ -135,12 +136,12 @@
             if($json['type']=='Point'){
                 
                 $pnt = array($json['coordinates']);
-                geo_CorrectLng($pnt);    
+                geo_CorrectLng($pnt);
                 $json['coordinates'] = $pnt[0];
                 
             }else if($json['type']=='MultiPoint'){
                 
-                geo_CorrectLng($json['coordinates']);    
+                geo_CorrectLng($json['coordinates']);
                 
             }else if($json['type']=='LineString'){
 
@@ -152,9 +153,10 @@
                 }
             } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
-                for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
+                    for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
                         geo_CorrectLng($json['coordinates'][$idx][$idx2]);
+                }}
             }
 
             return $json;
@@ -167,7 +169,7 @@
     function geo_CorrectLng(&$orig_points){
 
         //invert
-        $points = array();    
+        $points = array();
         foreach ($orig_points as $idx => $point) {
 
             $lng = $point[0];
@@ -178,7 +180,7 @@
             $lng = ($lng - $k*360);
             
             if(abs($lng)>180){
-                if($k==0) $k = ($lng<0)?-1:1;
+                if($k==0) {$k = ($lng<0)?-1:1;}
                 $lng = $lng - $k*360;
             }
             

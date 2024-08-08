@@ -65,14 +65,14 @@ $.widget( "heurist.mediaViewer", {
         if(this.options.search_initial)
         {
             
-            var request = {
+            let request = {
                     q: this.options.search_initial,
                     restapi: 1,
                     zip: 1,
                     extended: 3, 
                     format:'json'};
                         
-            var that = this;
+            let that = this;
                         
             window.hWin.HAPI4.RecordMgr.search_new(request, function(response){
                 if(window.hWin.HEURIST4.util.isJSON(response)) {
@@ -113,7 +113,7 @@ $.widget( "heurist.mediaViewer", {
     
     , _htmlUnescape:function(text) {
         if(text){
-            var e = document.createElement("textarea");
+            let e = document.createElement("textarea");
             e.innerHTML = text;
             // handle case of empty input
             return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;    
@@ -132,11 +132,12 @@ $.widget( "heurist.mediaViewer", {
         if(Array.isArray(this.options.rec_Files))
         {
 
-            for (var idx in this.options.rec_Files){
+            for (let idx in this.options.rec_Files){
                 if(idx>=0){ 
-                    var file = this.options.rec_Files[idx];
-                    
-                    var obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, mode_3d_viewer = '';
+
+                    let obf_recID, mimeType, filetitle = '', filename = null, external_url= null, rec_ID=0, mode_3d_viewer = '';
+
+                    let file = this.options.rec_Files[idx];
                     
                     if($.isPlainObject(file)){
                         rec_ID = file.rec_ID;
@@ -153,15 +154,15 @@ $.widget( "heurist.mediaViewer", {
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
 
-                    var fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
+                    let fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
 
-                    var thumbURL =  this.options.baseURL+'?db=' +  this.options.database 
+                    let thumbURL =  this.options.baseURL+'?db=' +  this.options.database 
                                  + '&thumb='+obf_recID
 
 
                     //thumbnail preview
-                    var $alink = $('<a>')
+                    let $alink = $('<a>')
                             .attr('data-id', obf_recID)
                             .appendTo($("<div>").css({cursor:'pointer',height:'auto','display':'inline-block','data-caption':filetitle})
                             .appendTo(this.mediacontent));
@@ -169,7 +170,6 @@ $.widget( "heurist.mediaViewer", {
                     $('<img>', {src: thumbURL, title:filetitle})
                             .css({border: '2px solid #FFF', margin:'5px', 'box-shadow': '0 2px 4px #bbb', width:'200px'})
                             .appendTo($alink);
-                }
                 
                 if(this.options.showLink){
                     $('<br>').appendTo(this.mediacontent);
@@ -221,17 +221,17 @@ $.widget( "heurist.mediaViewer", {
                         }
                     }
                     $('<br>').appendTo(this.mediacontent);
-                }
+                }//showLink
 
-                
-            }
+                }
+            }//for
 
             this.mediacontent.show();
             
             this._initThumbnails('a[data-id]');
 
             /*
-            var fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
+            let fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
                                 selector : 'a[data-myfancybox="fb-images"]', 
                                 loop:true};
             
@@ -252,39 +252,39 @@ $.widget( "heurist.mediaViewer", {
     //
     ,_initThumbnails: function(selector){
 
-        var eles = this.mediacontent.find(selector);
-        var that = this;
+        let eles = this.mediacontent.find(selector);
+        let that = this;
         
         $.each(eles, function(idx, $alink){
             
             $alink = $($alink);
-            var recid = $alink.attr('data-id');
+            let recid = $alink.attr('data-id');
 
             if(recid)
-            for (var idx in that.options.rec_Files){
+            for (let idx in that.options.rec_Files){
                 if(idx>=0){  //skip first
-                    var file = that.options.rec_Files[idx];
+                    let file = that.options.rec_Files[idx];
                     if(recid && recid==file.rec_ID || recid==file.id){ 
                         //found
-                        var rec_ID = file.rec_ID,
+                        let rec_ID = file.rec_ID,
                         obf_recID = file.id,
                         mimeType = file.mimeType,
                         filename = file.filename, //to detect _iiif or _tiled
                         filetitle = file.title,
-                        external_url = that._htmlUnescape(file.external);
+                        external_url = that._htmlUnescape(file.external),
                         mode_3d_viewer = file.mode_3d_viewer;
                     
                         if(!mimeType) mimeType = '';
 
-                        var fileURL = that.options.baseURL+'?db=' + that.options.database //+ (needplayer?'&player=1':'')
+                        let fileURL = that.options.baseURL+'?db=' + that.options.database //+ (needplayer?'&player=1':'')
                                      + '&file='+obf_recID;
 
-                        var thumbURL =  that.options.baseURL+'?db=' +  that.options.database 
+                        let thumbURL =  that.options.baseURL+'?db=' +  that.options.database 
                                      + '&thumb='+obf_recID
                     
                         if(filename && filename.indexOf('_iiif') === 0){ //manifest
 
-                            var param = 'manifest';
+                            let param = 'manifest';
                             if(filename == '_iiif_image'){
                                 
                                 if(rec_ID>0){
@@ -332,14 +332,14 @@ $.widget( "heurist.mediaViewer", {
                                     }
                                 }
 
-                                var ele = $(e.target)
+                                let ele = $(e.target)
                                 if(!ele.attr('data-iiif')){
                                     ele = ele.parents('[data-iiif]');
                                 }
-                                var param  = ele.attr('data-iiif');
-                                var obf_recID = ele.attr('data-id');
+                                let param  = ele.attr('data-iiif');
+                                let obf_recID = ele.attr('data-id');
 
-                                var url =  that.options.baseURL 
+                                let url =  that.options.baseURL 
                                 + 'hclient/widgets/viewers/miradorViewer.php?db='
                                 +  that.options.database
                                 + '&' + param;// + '='+obf_recID;
@@ -358,7 +358,7 @@ $.widget( "heurist.mediaViewer", {
                                             width:'90%',height:'95%',
                                             allowfullscreen:true,'padding-content':'0px'});   
 
-                                    $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+                                    let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
 
                                     $dlg.parent().css('top','50px');
                                 }else{
@@ -381,13 +381,13 @@ $.widget( "heurist.mediaViewer", {
                             //on thumbnail click
                             that._on($alink, {click:function(e){
                         
-                                  var ele = $(e.target)
+                                  let ele = $(e.target)
                                   if(!ele.attr('data-id')){
                                       ele = ele.parents('[data-id]');
                                   }
-                                  var obf_recID = ele.attr('data-id');
+                                  let obf_recID = ele.attr('data-id');
                                   
-                                  var url =  that.options.baseURL 
+                                  let url =  that.options.baseURL 
                                      + 'hclient/widgets/viewers/'+mode_3d_viewer+'Viewer.php?db='
                                      +  that.options.database+'&file='+obf_recID;
                                     
@@ -444,7 +444,7 @@ $.widget( "heurist.mediaViewer", {
                             }else{
                                 fileURL = fileURL  + '&mode=tag';
                                 $alink.hide();
-                                var ele = $('<div>').css({width:'90%',height:'160px'}).load( fileURL );
+                                let ele = $('<div>').css({width:'90%',height:'160px'}).load( fileURL );
                                 ele.insertAfter($alink);
                             }
                         }                        
@@ -455,7 +455,7 @@ $.widget( "heurist.mediaViewer", {
         });
         
         
-        var fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
+        let fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
                             selector : '[data-myfancybox="fb-images"]', 
                             loop:true};
         $('body').off("click.fb-start"); //was unbind

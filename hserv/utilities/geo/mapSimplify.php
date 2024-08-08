@@ -18,7 +18,7 @@ class Simplify {
      * @return array
      */
     public static function run(array $points, $tolerance = 1, $highestQuality = false) {
-        if (count($points) <= 1) return $points;
+        if (count($points) <= 1) {return $points;}
 
         $sqTolerance = $tolerance*$tolerance;
 
@@ -44,7 +44,7 @@ class Simplify {
             }
         }
 
-        if ($prevPoint !== $point) $newPoints[] = $point;
+        if ($prevPoint !== $point) {$newPoints[] = $point;}
 
         return $newPoints;
     }
@@ -95,7 +95,7 @@ class Simplify {
 
         //var_dump($markers, $points, $i);
         for ($i = 0; $i < $len; $i++) {
-            if ($markers[$i]) $newPoints[] = $points[$i];
+            if ($markers[$i]) {$newPoints[] = $points[$i];}
         }
 
         return $newPoints;
@@ -138,7 +138,7 @@ function simplifyCoordinates(&$orig_points){
     if(count($orig_points)>1000){
         
         //invert
-        $points = array();    
+        $points = array();
         foreach ($orig_points as $point) {
             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
         }

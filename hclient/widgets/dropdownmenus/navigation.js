@@ -17,6 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global layoutMgr */
 
 $.widget( "heurist.navigation", {
 
@@ -36,7 +37,7 @@ $.widget( "heurist.navigation", {
        supp_options: null  //options to init page after load
     },
     
-    menuData: null, //hRecordSet
+    menuData: null, //HRecordSet
 
     pageStyles:{},  //menu_id=>styles
     pageStyles_original:{}, //keep to restore  element_id=>css
@@ -53,12 +54,10 @@ $.widget( "heurist.navigation", {
 
     _current_query_string:'',
     
-    _tree:null,
-
     // the widget's constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
         
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
 
@@ -79,7 +78,7 @@ $.widget( "heurist.navigation", {
       
         if(this.options.orientation=='treeview'){
 
-            var fancytree_options =
+            let fancytree_options =
             {
                 checkbox: false,
                 //titlesTabbable: false,     // Add all node titles to TAB chain
@@ -98,8 +97,6 @@ $.widget( "heurist.navigation", {
 
             this.element.fancytree(fancytree_options).addClass('tree-cms');
             
-            this._tree = $.ui.fancytree.getTree(this.element[0]);
-
         }else{
             
             this.divMainMenu = $("<div>").appendTo(this.element);
@@ -125,7 +122,7 @@ $.widget( "heurist.navigation", {
     reloadMenuData:function(){
         
         //find menu contents by top level ids    
-        var ids = this.options.menu_recIDs;
+        let ids = this.options.menu_recIDs;
         if(ids==null){
             this.options.menu_recIDs = [];
             ids = '';    
@@ -139,7 +136,7 @@ $.widget( "heurist.navigation", {
         }
 
         //retrieve menu content from server side
-        /*var request = { q: 'ids:'+ids,
+        /*let request = { q: 'ids:'+ids,
             detail: //'detail'
                [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'], 
@@ -148,13 +145,13 @@ $.widget( "heurist.navigation", {
             id: window.hWin.HEURIST4.util.random(),
             source:this.element.attr('id') };
             */
-        var request = {ids:ids, a:'cms_menu', main_menu: this.options.main_menu?1:0 };
-        var that = this;
+        let request = {ids:ids, a:'cms_menu', main_menu: this.options.main_menu?1:0 };
+        let that = this;
             
             
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
-                that.menuData = new hRecordSet(response.data);
+                that.menuData = new HRecordSet(response.data);
                 that._onGetMenuData();   
             }else{
                 $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.divMainMenu);
@@ -193,10 +190,10 @@ $.widget( "heurist.navigation", {
             this.ids_recurred = [];
         } 
         
-        var resdata = this.menuData;
+        let resdata = this.menuData;
         parent_id = ''+parent_id;
         
-        var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+        let RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
             DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
@@ -217,8 +214,8 @@ $.widget( "heurist.navigation", {
             TRM_ICON_ONLY = window.hWin.HAPI4.sysinfo['dbconst']['TRM_ICON_ONLY'];
 
         
-        var res = (orientation=='list')?[]:'';
-        var resitems = [];
+        let res = (orientation=='list')?[]:'';
+        let resitems = [];
 
         //submenu selectable is taken from home page
         if(parent_id==0 && menuitems.length==1){ //home page
@@ -229,11 +226,14 @@ $.widget( "heurist.navigation", {
             }
         }
 
-        for(var i=0; i<menuitems.length; i++)
+        for(let i=0; i<menuitems.length; i++)
         {
             
-            var record = resdata.getById(menuitems[i]);
-            var page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
+            let record = resdata.getById(menuitems[i]);
+            
+            if(!record) continue; //record may be non-public or deleted
+            
+            let page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
 
             if(Object.hasOwn(this.ids_menu_entries, page_id) && this.ids_menu_entries[page_id].length > 0){ // check recursive references
 
@@ -301,21 +301,21 @@ $.widget( "heurist.navigation", {
 
             }else{
             
-                var menuName = resdata.fld(record, DT_NAME, this.options.language);
-                var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
-                var menuIcon = resdata.fld(record, DT_THUMBNAIL);
+                let menuName = resdata.fld(record, DT_NAME, this.options.language);
+                let menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
+                let menuIcon = resdata.fld(record, DT_THUMBNAIL);
                 let menuFormat = resdata.fld(record, DT_CMS_MENU_FORMAT);
 
                 if(Array.isArray(menuIcon)){ // remove empty indexes
                     menuIcon = menuIcon.filter((icon) => !window.hWin.HEURIST4.util.isempty(icon));
                 }
 
-                var recType = resdata.fld(record, 'rec_RecTypeID');
+                let recType = resdata.fld(record, 'rec_RecTypeID');
                 
                 //target and position
-                var pageTarget = resdata.fld(record, DT_CMS_TARGET);
-                var pageStyle = resdata.fld(record, DT_CMS_CSS);
-                var showTitle = resdata.fld(record, DT_CMS_PAGETITLE); 
+                let pageTarget = resdata.fld(record, DT_CMS_TARGET);
+                let pageStyle = resdata.fld(record, DT_CMS_CSS);
+                let showTitle = resdata.fld(record, DT_CMS_PAGETITLE); 
                 
                 showTitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
                 
@@ -399,8 +399,8 @@ $.widget( "heurist.navigation", {
                     res = res + $res;
                 }
                     
-                var subres = '';
-                var submenu = resdata.values(record, DT_CMS_MENU);
+                let subres = '';
+                let submenu = resdata.values(record, DT_CMS_MENU);
                 if(!submenu){
                     submenu = resdata.values(record, DT_CMS_TOP_MENU);
                 }
@@ -467,12 +467,12 @@ $.widget( "heurist.navigation", {
         this.first_not_empty_page_id = 0;
         
         //get either treedata or html for jquery menu
-        var menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);     
-        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        let menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);     
+        let DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         
         if(this.ids_recurred.length>0 && window.hWin.HAPI4.has_access()){
-            var s = [];
-            for(var i=0;i<this.ids_recurred.length;i++){
+            let s = [];
+            for(let i=0;i<this.ids_recurred.length;i++){
                 s.push(this.ids_recurred[i]+' '
                     +this.menuData.fld(this.menuData.getById(this.ids_recurred[i]), DT_NAME));
             }
@@ -496,16 +496,15 @@ $.widget( "heurist.navigation", {
         //
         if(this.options.orientation=='treeview'){
             
-            if(this._tree!=null){
-                this._tree.reload( menu_content );
-                this.element.find('.ui-fancytree').show();
-            }
+            let tree = this.element.fancytree('getTree');
+            tree.reload( menu_content );
+            this.element.find('.ui-fancytree').show();
             
         }else{
 
             $(menu_content).appendTo(this.divMainMenuItems);
 
-            var opts = {};
+            let opts = {};
             if(this.options.orientation=='horizontal'){
                 //opts = {position:{ my: "left top", at: "left bottom" }}; //+20
                 
@@ -514,13 +513,13 @@ $.widget( "heurist.navigation", {
                             
                    if(!$(ui.item).parent().hasClass('horizontalmenu')){
                         //indent for submenu
-                        var ele = $(ui.item).children('ul.ui-menu');
+                        let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
                             setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 300);      
                         }
                    }else {
                         //show below
-                        var ele = $(ui.item).children('ul.ui-menu');
+                        let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
                             setTimeout(function() { ele.css({top:'29px',  left:'0px'}); }, 500);      
                         }
@@ -529,9 +528,9 @@ $.widget( "heurist.navigation", {
                 
             }
 
-            var myTimeoutId = 0;
+            let myTimeoutId = 0;
             //show hide function
-            var _hide = function(ele) {
+            let _hide = function(ele) {
                 myTimeoutId = setTimeout(function() {
                     $( ele ).hide();
                     }, 800);
@@ -540,7 +539,7 @@ $.widget( "heurist.navigation", {
                 clearTimeout(myTimeoutId);
                 /*
                 $('.menu-or-popup').hide(); //hide other
-                var menu = $( ele )
+                let menu = $( ele )
                 //.css('width', this.btn_user.width())
                 .show()
                 .position({my: "left-2 top", at: "left bottom", of: parent });
@@ -554,7 +553,7 @@ $.widget( "heurist.navigation", {
             this.divMainMenuItems.menu( opts );
 
 /*            
-            var all_menues = this.divMainMenuItems.find('ul.ui-menu');
+            let all_menues = this.divMainMenuItems.find('ul.ui-menu');
             this._on( all_menues, {
                 mouseenter : function(){ _show(); },
                 mouseleave : function(){ 
@@ -610,7 +609,7 @@ $.widget( "heurist.navigation", {
             $target = $target.parents('[role="menuitem"]');
         }
 
-        var data = {
+        let data = {
             page_id: $target.attr('data-pageid'), 
             page_target: $target.attr('data-target')
         };
@@ -701,7 +700,7 @@ $.widget( "heurist.navigation", {
     //
     _onMenuItemAction: function(data){
 
-        var that = this;
+        let that = this;
 
         if(window.hWin.HUL.isFunction(that.options.onmenuselect)){
 
@@ -711,22 +710,22 @@ $.widget( "heurist.navigation", {
 
             // redirected to websiteRecord.php 
             // with field=1 it loads DT_EXTENDED_DESCRIPTION
-            var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+            let page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
             +'&field=1&recid='+data.page_id;
 
-            var pageCss = that.pageStyles[data.page_id];
+            let pageCss = that.pageStyles[data.page_id];
 
             if(data.page_target=='popup' || this.options.target=='popup'){
 
 
-                var opts =  {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
+                let opts =  {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
                     close: function(){
                         $dlg.dialog('destroy');       
                         $dlg.remove();
                     },
                     open: function(){
 
-                        var pagetitle = $dlg.find('h2.webpageheading');
+                        let pagetitle = $dlg.find('h2.webpageheading');
                         if(pagetitle.length>0){ //find title - this is first children
                             //pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
                             if(!data.page_showtitle){
@@ -738,11 +737,11 @@ $.widget( "heurist.navigation", {
                     }
                 };
 
-                var dlg_css = null;
+                let dlg_css = null;
                 if(pageCss){
 
                     if(pageCss['position']){
-                        var val = window.hWin.HEURIST4.util.isJSON(pageCss['position']);
+                        let val = window.hWin.HEURIST4.util.isJSON(pageCss['position']);
                         if(val==false){
                             delete pageCss['position'];
                         }else{
@@ -760,7 +759,7 @@ $.widget( "heurist.navigation", {
                 }                                
 
 
-                var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
                     'Heurist', opts, dlg_css);
 
                 if(dlg_css){
@@ -771,7 +770,7 @@ $.widget( "heurist.navigation", {
             }
             else{
 
-                var page_target = '#main-content';   
+                let page_target = '#main-content';   
                 
                 if(this.options.target=='inline_page_content'){
                     page_target = '#page-content';
@@ -783,7 +782,7 @@ $.widget( "heurist.navigation", {
                 if(page_target[0]!='#') page_target = '#'+page_target;
 
                 
-                var continue_load_page = function() {
+                let continue_load_page = function() {
                     
                     if(pageCss && Object.keys(pageCss).length>0){
                         if(!that.pageStyles_original[page_target]){ //keep to restore
@@ -796,10 +795,13 @@ $.widget( "heurist.navigation", {
                         $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
                     }
                     
-                    var page_footer = $(page_target).find('#page-footer');
+                    let page_footer = $(page_target).find('#page-footer');
                     if(page_footer.length>0) page_footer.detach();
                 
-                    var server_request = {
+                    const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        
+                    const server_request = {
                         q: 'ids:'+data.page_id,
                         restapi: 1,
                         columns: 
@@ -813,10 +815,10 @@ $.widget( "heurist.navigation", {
                           
                            if(window.hWin.HEURIST4.util.isJSON(response)) {
                                 if(response['records'] && response['records'].length>0){
-                                    var res = response['records'][0]['details'];
-                                    var keys = Object.keys(res);
-                                    for(var idx in keys){
-                                        var key = keys[idx];
+                                    let res = response['records'][0]['details'];
+                                    let keys = Object.keys(res);
+                                    for(let idx in keys){
+                                        let key = keys[idx];
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
                                     //res[DT_NAME] = res[DT_NAME]
@@ -866,7 +868,7 @@ $.widget( "heurist.navigation", {
 
                 //before load we trigger  function
 
-                var event_assigned = false;
+                let event_assigned = false;
 
                 $.each($._data( $( page_target )[0], "events"), function(eventname, event) {
                     if(eventname=='onexitpage'){

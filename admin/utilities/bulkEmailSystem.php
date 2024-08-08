@@ -64,13 +64,13 @@ class SystemEmailExt {
     private $use_native_mail_function = false;
     private $debug_run = false;
     
-	private $log = ''; // log of emails, to be placed within a note record within the databases, extended version of receipt
+	private $log = '';// log of emails, to be placed within a note record within the databases, extended version of receipt
 	private $receipt; // receipt for all email transactions, is saved into current db as a note record with the Notes title (not rec_Title) set to "Heurist System Email Receipt"  
     private $emails_sent_count = 0;
-	private $error_msg = ''; // error message
+	private $error_msg = '';// error message
 
-	private $user_options = array("owner", "admin", "manager", "user"); // available user options
-	private $substitute_vals = array("##firstname##", "##lastname##", "##email##", "##database##", "##dburl##", "##records##", "##lastmodified##"); // available email body substitutions
+	private $user_options = array("owner", "admin", "manager", "user");// available user options
+	private $substitute_vals = array("##firstname##", "##lastname##", "##email##", "##database##", "##dburl##", "##records##", "##lastmodified##");// available email body substitutions
 
 	/*
 	 * Process the data received
@@ -123,7 +123,7 @@ class SystemEmailExt {
 
 			$main_msg = 'No valid users have been provided, this is needed to retrieve a list of users to email from the selected databases.<br>users => ' 
                         . (isset($data["users"])?htmlspecialchars(print_r($data["users"],true)):' not defined') ;
-			$this->set_error($main_msg); // . "<br>Please contact the Heurist team if this problem persists."
+			$this->set_error($main_msg);// . "<br>Please contact the Heurist team if this problem persists."
 			return -1;
 		}
 
@@ -137,7 +137,7 @@ class SystemEmailExt {
 			$this->email_body = $data["emailBody"];
 		} else {
 
-			$this->set_error('No email body has been provided'); //, the Heurist team has been notified
+			$this->set_error('No email body has been provided');//, the Heurist team has been notified
 			//$system->addError(HEURIST_ERROR, "Bulk Email System: The email's body (emailBody) is missing from the form data. Data => " . print_r($data, TRUE));
 			return -1;
 		}
@@ -161,7 +161,7 @@ class SystemEmailExt {
             $this->use_native_mail_function = true;    
         }
 
-		$rtn = $this->createUserList(); // save user information; first and last name, email, and list of databases
+		$rtn = $this->createUserList();// save user information; first and last name, email, and list of databases
 
 		if ($rtn != 0) {
 			return $rtn;
@@ -171,7 +171,7 @@ class SystemEmailExt {
 			return -1;
 		}
 
-		$rtn = $this->createRecordsList(); // save record counts and last modified record dates for each db
+		$rtn = $this->createRecordsList();// save record counts and last modified record dates for each db
 
 		if ($rtn != 0) {
 			return $rtn;
@@ -302,7 +302,7 @@ class SystemEmailExt {
 				if (!$res) {
 
 					continue;
-					//$this->set_error("Query Error: Unable to retrieve the list of users to email<br>Error => " .$mysqli->error);  
+					//$this->set_error("Query Error: Unable to retrieve the list of users to email<br>Error => " .$mysqli->error);
 					//return -2;
 				}
 
@@ -313,7 +313,7 @@ class SystemEmailExt {
                     $email = $row[2];
 
 					if($email){
-						$email = filter_var($email, FILTER_VALIDATE_EMAIL); //FILTER_SANITIZE_EMAIL
+						$email = filter_var($email, FILTER_VALIDATE_EMAIL);//FILTER_SANITIZE_EMAIL
 					}
                     
                     if(!$email){
@@ -387,7 +387,7 @@ class SystemEmailExt {
 		  	if (!$res) { 
 
 		  		$this->set_error('Query Error: Unable to get record count for the '
-                            .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error)); 
+                            .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
 		  		return -2;
 		  	}
 
@@ -439,7 +439,7 @@ class SystemEmailExt {
 				if (!$res) {
 
 					$this->set_error('Query Error: Unable to retrieve a last modified record from '
-                                .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error)); 
+                                .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
 					return -2;
 				}
 
@@ -449,7 +449,7 @@ class SystemEmailExt {
 				}
 		  	}
 
-		  	$this->records[$db] = array($count, $date); // save results
+		  	$this->records[$db] = array($count, $date);// save results
 		}
 
 		return 0;
@@ -478,7 +478,7 @@ class SystemEmailExt {
         }
 
 		// Initialise PHPMailer
-		$mailer = new PHPMailer(true); // send true to use exceptions
+		$mailer = new PHPMailer(true);// send true to use exceptions
 		$mailer->CharSet = "UTF-8";
 		$mailer->Encoding = "base64";
         $mailer->isHTML(true);
@@ -563,7 +563,7 @@ class SystemEmailExt {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $responce = curl_exec($ch);
-                curl_close($ch);            
+                curl_close($ch);
             
                 if($responce!=1){
                     $this->set_error('Unknown error. Sending via heuristref relay');
@@ -609,7 +609,7 @@ class SystemEmailExt {
 					    ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg.'  , '.$email_from )
 					    . '<br><br>';
 
-			$mailer->clearAddresses(); // ensure that the current email is gone
+			$mailer->clearAddresses();// ensure that the current email is gone
 
 			if ($email_rtn != 0) {
 
@@ -786,10 +786,10 @@ class SystemEmailExt {
             foreach ($this->user_invalid_email as $info) {
                 $user_list .= "&nbsp;&nbsp;". $info[0] ." ". $info[1]. '  '. $info[2] .' ('.$info[3].')'.": ". $info[4] ."<br>";
             }
-            $user_list .= "}"; //.$this->get_log();
+            $user_list .= "}";//.$this->get_log();
         }
         
-		$user_list_size = strlen($user_list); // User List part in bytes
+		$user_list_size = strlen($user_list);// User List part in bytes
         
 		// Check if Main and User List parts can be placed together or in different blocktext fields
 		if ($main_size+$user_list_size > $max_size) { // Save the text in chucks
@@ -803,11 +803,11 @@ class SystemEmailExt {
 				$main_t = mb_convert_encoding($main, "UTF-8", "auto");
 				/*$main_s = mb_strlen($main_t);
 				while ($main_s) {
-					$this->receipt[] = mb_substr($main_t, 0, $max_chars, "UTF-8"); // Get chunk
+					$this->receipt[] = mb_substr($main_t, 0, $max_chars, "UTF-8");// Get chunk
 					
-					$main_t = mb_substr($main_t, $max_chars, $main_s, "UTF-8"); // Remove chunk from main string
+					$main_t = mb_substr($main_t, $max_chars, $main_s, "UTF-8");// Remove chunk from main string
 					
-					$main_s = mb_strlen($main_t); // Get length of new string
+					$main_s = mb_strlen($main_t);// Get length of new string
 				}*/
 
 				if ($main_t) {
@@ -826,11 +826,11 @@ class SystemEmailExt {
 				$user_list_t = mb_convert_encoding($user_list, "UTF-8", "auto");
 				/*$user_list_s = mb_strlen($user_list_t);
 				while ($user_list_s) {
-					$this->receipt[] = mb_substr($user_list_t, 0, $max_chars, "UTF-8"); // Get chunk
+					$this->receipt[] = mb_substr($user_list_t, 0, $max_chars, "UTF-8");// Get chunk
 					
-					$user_list_t = mb_substr($user_list_t, $max_chars, $user_list_s, "UTF-8"); // Remove chunk from main string
+					$user_list_t = mb_substr($user_list_t, $max_chars, $user_list_s, "UTF-8");// Remove chunk from main string
 					
-					$user_list_s = mb_strlen($user_list_t); // Get length of new string
+					$user_list_s = mb_strlen($user_list_t);// Get length of new string
 				}*/
 
 				if ($user_list_t) {
@@ -928,7 +928,7 @@ function sendSystemEmail($data) {
 	
 	if ($rtn_value == 0) {
 
-		$rtn_value = $email_obj->constructEmails(); //prepare and send emails
+		$rtn_value = $email_obj->constructEmails();//prepare and send emails
 
 		if ($rtn_value <= -1) {
 

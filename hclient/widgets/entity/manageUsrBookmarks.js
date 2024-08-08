@@ -54,19 +54,19 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
       
         //load bookmark for given record id
         if(this.options.bkm_RecID>0){
-                var request = {};
+                let request = {};
                 request['bkm_RecID']  = this.options.bkm_RecID;
                 request['a']          = 'search'; //action
                 request['entity']     = this._entityName;//options.entity.entityName;
                 request['details']    = 'full';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            var recset = new hRecordSet(response.data);
+                            let recset = new HRecordSet(response.data);
                             if(recset.length()>0){
                                 that.updateRecordList(null, {recordset:recset});
                                 that.addEditRecord( recset.getOrder()[0] );
@@ -90,10 +90,10 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     
     // change label for remove
     _getEditDialogButtons: function(){
-        var btns = this._super();
+        let btns = this._super();
         
-        var that = this;
-        for(var idx in btns){
+        let that = this;
+        for(let idx in btns){
             if(btns[idx].id=='btnRecRemove'){
                 btns[idx].text = window.hWin.HR('Delete bookmark');
                 /*btns[idx].click = function(){
@@ -115,7 +115,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         if(unconditionally===true){
             this._super(); 
         }else{
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this bookmark?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -124,7 +124,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
 
     _saveEditAndClose: function( fields, afteraction ){
         
-        var ele2 = this._editing.getFieldByName('bkm_RecID');
+        let ele2 = this._editing.getFieldByName('bkm_RecID');
         ele2.editing_input('setValue', this.options.bkm_RecID );
         
         this._super();// null, afteraction );

@@ -45,7 +45,7 @@ class DbSysImportFiles extends DbEntityBase
     `sif_UGrpID` int(11) unsigned NOT NULL default 0 COMMENT 'The user ID of the user who imported the file',   
     `sif_TempDataTable` varchar(255) NOT NULL default '' COMMENT 'The name of the temporary data table created by the import',
     `sif_ProcessingInfo` mediumtext  COMMENT 'Primary record type, field matching selections, dependency list etc. created while processing the temporary data table',
-    PRIMARY KEY  (`sif_ID`))";    
+    PRIMARY KEY  (`sif_ID`))";
     
     
             if ($mysqli->query($query)) {
@@ -95,10 +95,10 @@ class DbSysImportFiles extends DbEntityBase
         $where = array();
         
         $pred = $this->searchMgr->getPredicate('sif_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('sif_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $needCheck = false;
         
@@ -127,7 +127,7 @@ class DbSysImportFiles extends DbEntityBase
         }
 
         if(count($where) == 0 && in_array('sif_ID', $this->data['details'])){
-            $orderBy = ' ORDER BY sif_ID DESC'; // newest to oldest
+            $orderBy = ' ORDER BY sif_ID DESC';// newest to oldest
         }
         
         //validate names of fields

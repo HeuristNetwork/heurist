@@ -53,7 +53,7 @@ if(isset($system) && $system->is_inited()){
             if(strpos($src,'@import')===0){
                 $font_styles = $font_styles . $src;
             }else{
-                $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+                $font_styles = $font_styles . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';
             }
             $font_families[] = $font_family;
         }

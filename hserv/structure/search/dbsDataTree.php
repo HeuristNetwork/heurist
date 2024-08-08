@@ -54,7 +54,7 @@
         
         $system->defineConstant('DT_PARENT_ENTITY');
 
-        if($mode>=4) set_time_limit(0); //no limit
+        if($mode>=4) {set_time_limit(0);}//no limit
         
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
@@ -63,7 +63,7 @@
         }
 
         //loads plain array for rectypes
-        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);  //need all
+        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);//need all
         $dbs_lookups = dbs_GetDtLookups();
 
         $rtypes = $dbs_rtStructs['names'];
@@ -107,9 +107,9 @@
                             if(@$def['code']){
 
                                 if(@$det['code']){
-                                    $def['children'][$idx]['code'] = $def['code'].":".$det['code']; 
+                                    $def['children'][$idx]['code'] = $def['code'].":".$det['code'];
                                 }else{
-                                    $def['children'][$idx]['code'] = $def['code'];    
+                                    $def['children'][$idx]['code'] = $def['code'];
                                 }
                             }
                             if(is_array(@$det['children'])){
@@ -126,7 +126,7 @@
         
         global $dbs_rtStructs;
         
-        if(!(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0)) return;
+        if(!(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0)) {return;}
         
         $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
         $parent_Rts = array();
@@ -141,13 +141,13 @@
                 
                 foreach ($details as $dtKey => $dtValue){
                     
-                    if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') continue;
+                    if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') {continue;}
                     
                     if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
                         
                         $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
                         if($constraint && in_array($recTypeId, explode(',',$constraint)) && !in_array($rtKey, $parent_Rts) ){
-                            array_push($parent_Rts, $rtKey);    
+                            array_push($parent_Rts, $rtKey);
                             //break;
                         }
                         
@@ -199,7 +199,7 @@
         
         //add default fields
         if($mode<5 || ($mode==5 && $recursion_depth==0)){
-            if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
+            if($mode==3) {array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));}
             
             array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
                 'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
@@ -220,7 +220,7 @@
                 //this rectype is not loaded yet - load it
                 $rt0 = dbs_GetRectypeStructures($system, $recTypeId, 1);
                 if($rt0){ //merge with $dbs_rtStructs 
-                    $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];    
+                    $dbs_rtStructs['typedefs'][$recTypeId] = $rt0['typedefs'][$recTypeId];
                     $dbs_rtStructs['names'][$recTypeId] = $rt0['names'][$recTypeId];
                 }else{
                     return null;
@@ -233,14 +233,14 @@
                                                                                                               
             if(@$dbs_rtStructs['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
                 $details =  @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!$details) $details = array(); //rectype without fields - exceptional case
+                if(!$details) {$details = array();}//rectype without fields - exceptional case
                 
                 $children_links = array();
                 $new_pointer_fields = array();
 
                 foreach ($details as $dtID => $dtValue){
                     
-                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
+                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') {continue;}
 
                     $dt_type = $dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type']];
                     if($dt_type=='resource' || $dt_type=='relmarker'){
@@ -258,7 +258,7 @@
                         }
                         /*
                         if(is_array($res_dt) && count($res_dt)==1){
-                        $res["f".$dtID] = $res_dt[0];    
+                        $res["f".$dtID] = $res_dt[0];
                         }else{
                         //multi-constrained pointers or simple variable
                         $res["f".$dtID] = $res_dt;
@@ -329,7 +329,7 @@
             if(is_numeric($recTypeId) && $recTypeId!=$rt_ID){ //not itself
                 
                 $details = @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!is_array($details)) continue;
+                if(!is_array($details)) {continue;}
                 
                 foreach ($details as $dtID => $dtValue){
                 
@@ -366,7 +366,7 @@
 
         $res = null;
 
-        $rtNames = $dbs_rtStructs['names']; //???need
+        $rtNames = $dbs_rtStructs['names'];//???need
         $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
 
         $dtValue = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'][$dtID];
@@ -374,10 +374,10 @@
         $detailType = $dtValue[$rst_fi['dty_Type']];
         $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
         $dt_title   = $dtValue[$rst_fi['rst_DisplayName']];
-        $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
+        $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']];//help text
 
         $pref = "";
-        //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
+        //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']];//repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
         
         if (($mode==3) ||  in_array($detailType, $fieldtypes)) //$fieldtypes - allowed types
@@ -413,10 +413,11 @@
             case 'relmarker':
             
                 $max_depth = 2;
-                if ($mode==6 || $mode==4)
+                if ($mode==6 || $mode==4){
                    $max_depth = 3;
-                else if ($mode==5) //make it 1 for lazy load
+                }else if ($mode==5){ //make it 1 for lazy load
                    $max_depth = 1; 
+                }
                                                                 
                 if($recursion_depth<$max_depth){
                     
@@ -439,7 +440,7 @@
                             $pref = ($detailType=="resource")?"lt":"rt";
 
                             $pointerRecTypeId = @$dtValue[$rst_fi['rst_PtrFilteredIDs']];
-                            if($pointerRecTypeId==null) $pointerRecTypeId = '';
+                            if($pointerRecTypeId==null) {$pointerRecTypeId = '';}
                             $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
                             $rectype_ids = explode(",", $pointerRecTypeId);
 
@@ -468,7 +469,7 @@
                                 if(is_array($rectype_ids) && count($rectype_ids)>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     $res['constraint'] = count($rectype_ids);
-                                    if($mode!=5) $res['children'] = array();
+                                    if($mode!=5) {$res['children'] = array();}
                                 }
                                 if($mode==5){
                                     $res['rt_ids'] = $pointerRecTypeId;
@@ -505,7 +506,7 @@
 
         if(is_array($res)){
 
-            if(!@$res['code']) $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
+            if(!@$res['code']) {$res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;}  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
             $res['key'] = "f:".$dtID;
             if($mode==4 || $mode==5){
                     
@@ -515,7 +516,7 @@
                     $res['isreverse'] = 1;
                 }
                 if($stype!=''){
-                    $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";   
+                    $stype = " <span style='font-size:0.7em'>(" . $stype .")</span>";
                 }
                 
                 $res['title'] = $dt_title . $stype;

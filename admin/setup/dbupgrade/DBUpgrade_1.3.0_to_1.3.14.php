@@ -36,7 +36,7 @@
             mysql__usedatabase($mysqli, $dbname);
         }
         
-        $sysValues = $system->get_system(null, true); //refresh
+        $sysValues = $system->get_system(null, true);//refresh
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
@@ -63,7 +63,7 @@
 
                 if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
                     $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
-                    .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+                    .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';
                     $mysqli->query($query);
                 }
 
@@ -336,7 +336,7 @@
                     $res = $importDef->doImport();
                 }
                 if($res){
-                    $report[] = 'Field 2-1080 "Workflow stages imported';    
+                    $report[] = 'Field 2-1080 "Workflow stages imported';
                 }
             }
 

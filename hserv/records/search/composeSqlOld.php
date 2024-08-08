@@ -23,7 +23,7 @@
 
 define('BOOKMARK', 'bookmark');
 define('NO_BOOKMARK', 'nobookmark');
-define('BIBLIO', 'biblio'); //outdated @toremove
+define('BIBLIO', 'biblio');//outdated @toremove
 define('EVERYTHING', 'everything');
 
 
@@ -41,7 +41,7 @@ define('SORT_ID', 'id');
 
 $mysqli = null;
 $currUserID = 0;
-
+$sortType = 0;
 
 /**
 * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
@@ -121,16 +121,16 @@ sortby:
 */
 function get_sql_query_clauses($db, $params, $currentUser=null) {
 
-    global $mysqli, $currUserID;
+    global $mysqli, $currUserID, $sortType;
 
     $mysqli = $db;
 
     /* use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $select_clause */
-    if (! $params) $params = array();//$_REQUEST;
-    if(!defined('stype') && @$params['stype'])  define('stype', @$params['stype']);
+    if (! $params) {$params = array();}//$_REQUEST;
+    if(@$params['stype']) {$sortType = @$params['stype'];}
 
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
-    $wg_ids = array(); //may be better use $system->get_user_group_ids() ???
+    $wg_ids = array();//may be better use $system->get_user_group_ids() ???
     if($currentUser && @$currentUser['ugr_ID']>0){
         if(@$currentUser['ugr_Groups']){
             $wg_ids = array_keys($currentUser['ugr_Groups']);
@@ -141,9 +141,9 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $currUserID = 0;
         $params['w'] = 'all';
     }
-    array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
+    array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
 
-    $publicOnly = (@$params['publiconly']==1); //@todo
+    $publicOnly = (@$params['publiconly']==1);//@todo
 
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp(@$params['w'],'B') == 0  ||  strcasecmp(@$params['w'],BOOKMARK) == 0) {    // my bookmark entries
@@ -157,7 +157,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     //for database owner we will search records of any workgroup and view access
     //@todo UNLESS parameter owner is not defined explicitely
     if($currUserID==2 && $search_domain != BOOKMARK){
-        $wg_ids = array();    
+        $wg_ids = array();
     }
 
     // 3a. SPECIAL CASE for _BROKEN_
@@ -207,7 +207,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     if ($search_domain != EVERYTHING) {
 
-        if ($where_clause) $where_clause = '(' . $where_clause . ') and ';
+        if ($where_clause) {$where_clause = '(' . $where_clause . ') and ';}
 
         if ($search_domain == BOOKMARK) {
             $where_clause .= ' (bkm_UGrpID=' . $currUserID . ' and not TOPBIBLIO.rec_FlagTemporary) ';
@@ -229,7 +229,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     if($query->recVisibilityType && $currUserID>0){
     
         if($query->recVisibilityType=="public"){
-            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';//'pending','public','viewable'
         }else{
             
             if($query->recVisibilityType=='viewable'){
@@ -252,9 +252,9 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             if(is_array($wg_ids) && count($wg_ids)>0){
                 $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
                 if(count($wg_ids)>1){
-                    $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                    $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';
                 }else{
-                    $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                    $where2 = $where2 .' = '.$wg_ids[0] . ' )';
                 }
             }
         }
@@ -263,7 +263,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     }else{
         //visibility type not defined - show records visible for current user
         if($currUserID!=2){
-            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility in ("public","pending"))'; //any can see public
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility in ("public","pending"))';//any can see public
             
             if ($currUserID>0){ //logged in can see viewable
                 $query->from_clause = $query->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=TOPBIBLIO.rec_ID ';
@@ -281,9 +281,9 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             //for hidden
             $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID ';
             if(count($wg_ids)>1){
-                $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';    
+                $where2 = $where2 . 'in (' . join(',', $wg_ids).') )';
             }else{
-                $where2 = $where2 .' = '.$wg_ids[0] . ' )';    
+                $where2 = $where2 .' = '.$wg_ids[0] . ' )';
             }
         }
     }
@@ -322,7 +322,7 @@ function get_offset($params){
     if (@$params["o"]) {
         $offset = intval($params["o"]);
     }else if(@$params["offset"]) {
-        $offset = intval($params["offset"]);  // this is back in since hml.php passes through stuff from sitemap.xmap
+        $offset = intval($params["offset"]);// this is back in since hml.php passes through stuff from sitemap.xmap
     }
     if (!@$offset || $offset < 1){
         $offset = 0;
@@ -342,7 +342,7 @@ function get_offset($params){
 */
 function parse_query($search_domain, $text, $sort_order, $parentquery, $currUserID) {
 
-    if($sort_order==null) $sort_order = '';
+    if($sort_order==null) {$sort_order = '';}
 
     // remove any  lone dashes outside matched quotes.
     $text = preg_replace('/- (?=[^"]*(?:"[^"]*"[^"]*)*$)|-\s*$/', ' ', $text);
@@ -490,8 +490,9 @@ class Query {
                 }
             }
         }
-        if($offset<strlen($text))
+        if($offset<strlen($text)){
             array_push($q_bits, substr($text, $offset));
+        }
 
         foreach ($q_bits as $q_bit) {
             $this->addTopLimb($q_bit);
@@ -518,8 +519,8 @@ class Query {
         array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
 
         /*
-        $or_texts = preg_split('/"[^"]+"|(\\bOR\\b)/i', $text);  // *OR *
-        for ($i=0; $i < count($or_texts); ++$i){
+        $or_texts = preg_split('/"[^"]+"|(\\bOR\\b)/i', $text);// *OR *
+        for ($i=0; $i < count($or_texts);++$i){
         if ($or_texts[$i]){
         array_push( $or_limbs, new OrLimb($this, $or_texts[$i]) );
         }
@@ -549,24 +550,25 @@ class Query {
     
     public function makeJSON() {
 
-        $this->where_json = array(); //reset
+        $this->where_json = array();//reset
         
         $where_clauses = array();
 
-        if(is_array($this->top_limbs))
-        for ($i=0; $i < count($this->top_limbs); ++$i) {
+        if(is_array($this->top_limbs)){
+            for ($i=0; $i < count($this->top_limbs);++$i) {
 
-            $or_clauses = array();
-            $or_limbs = $this->top_limbs[$i];
-            for ($j=0; $j < count($or_limbs); ++$j) {
-                $new_json = $or_limbs[$j]->makeJSON();
-                array_push($or_clauses, $new_json);
-            }
-            
-            if(count($or_clauses)>1){
-                array_push($this->where_json, array('any'=>$or_clauses));
-            }else if(count($or_clauses)>0){
-                array_push($this->where_json, $or_clauses);    
+                $or_clauses = array();
+                $or_limbs = $this->top_limbs[$i];
+                for ($j=0; $j < count($or_limbs);++$j) {
+                    $new_json = $or_limbs[$j]->makeJSON();
+                    array_push($or_clauses, $new_json);
+                }
+                
+                if(count($or_clauses)>1){
+                    array_push($this->where_json, array('any'=>$or_clauses));
+                }else if(count($or_clauses)>0){
+                    array_push($this->where_json, $or_clauses);
+                }
             }
         }
     }   
@@ -576,20 +578,21 @@ class Query {
         //WHERE
         $where_clause = '';
         $and_clauses = array();
-        if(is_array($this->top_limbs))
-        for ($i=0; $i < count($this->top_limbs); ++$i) {
+        if(is_array($this->top_limbs)){
+            for ($i=0; $i < count($this->top_limbs);++$i) {
 
 
             $or_clauses = array();
             $or_limbs = $this->top_limbs[$i];
-            for ($j=0; $j < count($or_limbs); ++$j) {
+            for ($j=0; $j < count($or_limbs);++$j) {
                 $new_sql = $or_limbs[$j]->makeSQL();
                 array_push($or_clauses, '(' . $new_sql . ')');
             }
-            sort($or_clauses);    // alphabetise
+            sort($or_clauses);// alphabetise
             $where_clause = join(' or ', $or_clauses);
-            if(count($or_clauses)>1) $where_clause = '(' . $where_clause . ')';
+            if(count($or_clauses)>1) {$where_clause = '(' . $where_clause . ')';}
             array_push($and_clauses, $where_clause);
+        }
         }
         sort($and_clauses);
         $this->where_clause = join(' and ', $and_clauses);
@@ -598,23 +601,23 @@ class Query {
         //SORT
         $sort_clause = '';
         $sort_clauses = array();
-        for ($i=0; $i < count($this->sort_phrases); ++$i) {
+        for ($i=0; $i < count($this->sort_phrases);++$i) {
             @list($new_sql, $new_sig, $new_tables) = $this->sort_phrases[$i]->makeSQL();
             
             if($new_sql!=null){
 
                 if (! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
-                    if ($sort_clause) $sort_clause .= ', ';
+                    if ($sort_clause) {$sort_clause .= ', ';}
 
                     $sort_clause .= $new_sql;
-                    if ($new_tables) array_push($this->sort_tables, $new_tables);
+                    if ($new_tables) {array_push($this->sort_tables, $new_tables);}
 
                     $sort_clauses[$new_sig] = 1;
                 }
                 
             }
         }
-        if ($sort_clause) $sort_clause = ' ORDER BY ' . $sort_clause;
+        if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
         $this->sort_clause = $sort_clause;
 
         //FROM
@@ -624,7 +627,7 @@ class Query {
             $this->from_clause = 'FROM Records TOPBIBLIO LEFT JOIN usrBookmarks TOPBKMK ON bkm_recID=rec_ID and bkm_UGrpID='.$this->currUserID.' ';
         }
 
-        $this->from_clause .= join(' ', $this->sort_tables);    // sorting may require the introduction of more tables
+        $this->from_clause .= join(' ', $this->sort_tables);// sorting may require the introduction of more tables
 
         //MAKE
         return $this->from_clause . ' WHERE' . $this->where_clause . $this->sort_clause;
@@ -642,7 +645,7 @@ class OrLimb {
         $this->parent = &$parent;
         $this->absoluteStrQuery = $parent->absoluteStrQuery;
         $this->and_limbs = array();
-        if (substr_count($text, '"') % 2 != 0) $text .= '"';    // unmatched quote
+        if (substr_count($text, '"') % 2 != 0) {$text .= '"';}// unmatched quote
 
         //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
         
@@ -655,10 +658,10 @@ class OrLimb {
 
             $and_texts = $matches[0];
 
-            for ($i=0; $i < count($and_texts); ++$i){
+            for ($i=0; $i < count($and_texts);++$i){
                 $str = $and_texts[$i];
                 if ($str!=null && $str!='') {
-                    $str = str_replace('+', " ", $str); //workaround until understand how to regex F:("AA BB CC")
+                    $str = str_replace('+', " ", $str);//workaround until understand how to regex F:("AA BB CC")
                     $this->addAndLimb($str);
                 }
             }
@@ -673,7 +676,7 @@ class OrLimb {
         $sql = '';
 
         $and_clauses = array();
-        for ($i=0; $i < count($this->and_limbs); ++$i) {
+        for ($i=0; $i < count($this->and_limbs);++$i) {
             $new_sql = $this->and_limbs[$i]->pred->makeJSON();
             if (strlen($new_sql) > 0) {
                 array_push($and_clauses, $new_sql);
@@ -686,7 +689,7 @@ class OrLimb {
         $sql = '';
 
         $and_clauses = array();
-        for ($i=0; $i < count($this->and_limbs); ++$i) {
+        for ($i=0; $i < count($this->and_limbs);++$i) {
             $new_sql = $this->and_limbs[$i]->pred->makeSQL();
             if (strlen($new_sql) > 0) {
                 array_push($and_clauses, $new_sql);
@@ -724,12 +727,13 @@ class AndLimb {
         }
 
         //create predicate
-        $this->pred = $this->createPredicate($text); //was by reference
+        $this->pred = $this->createPredicate($text);//was by reference
 
     }
 
 
     private function createPredicate($text) {
+        global $sortType;
 
         $colon_pos = strpos($text, ':');
         if ($equals_pos = strpos($text, '=')) {
@@ -756,13 +760,16 @@ class AndLimb {
 
         if ($this->absoluteStrQuery || ! $colon_pos) {    // a colon was either NOT FOUND or AT THE BEGINNING OF THE STRING
             $pred_val = $this->cleanQuotedValue($text);
-
-            if (defined('stype')  &&  stype == 'key')
+            /* 2024-08-02 
+            if ($sortType == 'key'){
                 return new TagPredicate($this, $pred_val);
-            else if (defined('stype')  &&  stype == 'all')
+            }else if ($sortType == 'all'){
                 return new AnyPredicate($this, $pred_val);
-            else    // title search is default search
+            }else{    // title search is default search
                 return new TitlePredicate($this, $pred_val);
+            }
+            */
+            return new TitlePredicate($this, $pred_val);
         }
 
         $pred_type = substr($text, 0, $colon_pos);
@@ -820,9 +827,9 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
-                    else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
-                        else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
+                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
+                    else if (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
                 }
                 
                 $fieldtype_id = null;
@@ -836,9 +843,9 @@ class AndLimb {
                     $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
                     $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
                     
-                    if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
-                    else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
-                        else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
+                    if (($colon_pos = strpos($value, '='))===0) {$this->exact = true;}
+                    else if (($colon_pos = strpos($value, '<'))===0) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($value, '>'))===0) {$this->greaterthan = true;}
                             if($colon_pos===0){
                         $value = substr($value,1);
                     }
@@ -851,15 +858,15 @@ class AndLimb {
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
-                    if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
-                    else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
-                        else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
-                            //else if (($colon_pos = strpos($raw_pred_val, '@'))) $this->fulltext = true;
+                    if (($colon_pos = strpos($raw_pred_val, '='))) {$this->exact = true;}
+                    else if (($colon_pos = strpos($raw_pred_val, '<'))) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($raw_pred_val, '>'))) {$this->greaterthan = true;}
+                            //else if (($colon_pos = strpos($raw_pred_val, '@'))) {$this->fulltext = true;}
                 }
                 if ($colon_pos === FALSE){
                     $value = $this->cleanQuotedValue($raw_pred_val);
                     
-                    if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if (($colon_pos = strpos($value, '@'))===0) {$this->fulltext = true;}
                     if($colon_pos===0){
                         $value = substr($value,1);
                     }                    
@@ -874,10 +881,10 @@ class AndLimb {
                     $fieldtype_id = $this->cleanQuotedValue(substr($raw_pred_val, 0, $colon_pos));
                     $value = $this->cleanQuotedValue(substr($raw_pred_val, $colon_pos+1));
                           
-                    if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
-                    else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
-                        else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
-                            else if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if (($colon_pos = strpos($value, '='))===0) {$this->exact = true;}
+                    else if (($colon_pos = strpos($value, '<'))===0) {$this->lessthan = true;}
+                        else if (($colon_pos = strpos($value, '>'))===0) {$this->greaterthan = true;}
+                            else if (($colon_pos = strpos($value, '@'))===0) {$this->fulltext = true;}
                     if($colon_pos===0){
                         $value = substr($value,1);
                     }
@@ -943,25 +950,32 @@ class AndLimb {
 
             case 'hhash':
                 return new HHashPredicate($this, $pred_val);
+            default:
+                return new TitlePredicate($this, $pred_val);
         }
 
+        // 2024-08-02
+        /*
         // no predicate-type specified ... look at search type specification
-        if (defined('stype')  &&  stype == 'key') {    // "default" search should be on tag
+        if ($sortType == 'key') {    // "default" search should be on tag
             return new TagPredicate($this, $pred_val);
-        } else if (defined('stype')  &&  stype == 'all') {
+        } else if ($sortType == 'all') {
             return new AnyPredicate($this, $pred_val);
         } else {
             return new TitlePredicate($this, $pred_val);
         }
+        */
+        
     }
 
 
     private function cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
-            if ($val[strlen($val)-1] == '"')
+            if ($val[strlen($val)-1] == '"'){
                 $val = substr($val, 1, -1);
-            else
+            }else{
                 $val = substr($val, 1);
+            }
             return preg_replace('/ +/', ' ', trim($val));
         }
 
@@ -990,8 +1004,8 @@ class SortPhrase {
         $text = substr($this->value, $colon_pos+1);
 
         $colon_pos = strpos($text, ':');
-        if ($colon_pos === FALSE) $subtext = $text;
-        else $subtext = substr($text, 0, $colon_pos);
+        if ($colon_pos === FALSE) {$subtext = $text;}
+        else {$subtext = substr($text, 0, $colon_pos);}
 
         // if sortby: is followed by a -, we sort DESCENDING; if it's a + or nothing, it's ASCENDING
         $scending = '';
@@ -1017,7 +1031,7 @@ class SortPhrase {
 
             case 'r': case 'rating':
                 if ($this->parent->search_domain == BOOKMARK) {
-                    return array('-(bkm_Rating)'.$scending, 'bkmk_rating', NULL); //SAW Ratings Change todo: test queries with rating
+                    return array('-(bkm_Rating)'.$scending, 'bkmk_rating', NULL);//SAW Ratings Change todo: test queries with rating
                 } else {    // default to popularity sort
                     return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
                 }
@@ -1025,19 +1039,19 @@ class SortPhrase {
             case 'interest':    //todo: change help file to reflect depricated predicates
             case 'content':
             case 'quality':
-                return array('rec_Title'.$scending, NULL);    // default to title sort
+                return array('rec_Title'.$scending, NULL);// default to title sort
                 break;
 
             case 'u': case 'url':
                 return array('rec_URL'.$scending, 'rec_URL', NULL);
 
             case 'm': case 'modified':
-                if ($this->parent->search_domain == BOOKMARK) return array('bkm_Modified'.$scending, NULL);
-                else return array('rec_Modified'.$scending, 'rec_Modified', NULL);
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Modified'.$scending, NULL);}
+                else {return array('rec_Modified'.$scending, 'rec_Modified', NULL);}
 
             case 'a': case 'added':
-                if ($this->parent->search_domain == BOOKMARK) return array('bkm_Added'.$scending, NULL);
-                else return array('rec_Added'.$scending, 'rec_Added', NULL);
+                if ($this->parent->search_domain == BOOKMARK) {return array('bkm_Added'.$scending, NULL);}
+                else {return array('rec_Added'.$scending, 'rec_Added', NULL);}
 
             case 'f': case 'field':
                 /* Sort by field is complicated.
@@ -1130,11 +1144,11 @@ class Predicate {
     }
 
     public function makeJSON() {
-        return array();   
+        return array();
     }
     
     //$table_name=null
-    public function makeSQL() { return '1'; }
+    public function makeSQL() { return '1';}
     
     
     public function stopRecursion() { 
@@ -1177,7 +1191,7 @@ class Predicate {
              } catch (Exception  $e){
              }                            
         }
-        return ($timestamp0  &&  $timestamp1);
+        return $timestamp0  &&  $timestamp1;
     }
 
     public function makeDateClause_old() {
@@ -1297,13 +1311,13 @@ class TitlePredicate extends Predicate {
             $not = ($this->parent->negate)? '-' : '';
             
             $compare = '';
-            if ($this->parent->exact)
+            if ($this->parent->exact){
                 $compare = '=';
-            else if ($this->parent->lessthan)
+            }else if ($this->parent->lessthan){
                 $compare = '<';
-            else if ($this->parent->greaterthan)
+            }else if ($this->parent->greaterthan){
                 $compare = '>';
-            
+            }
             return array('f:title'=> $not.$compare.$this->value);
     }
 
@@ -1312,7 +1326,7 @@ class TitlePredicate extends Predicate {
 
         $not = ($this->parent->negate)? 'not ' : '';
 
-        $query = &$this->getQuery(); //not used
+        $query = &$this->getQuery();//not used
         $evalue = $mysqli->real_escape_string($this->value);
 
         if($isTopRec){
@@ -1321,17 +1335,16 @@ class TitlePredicate extends Predicate {
             $topbiblio = "";
         }
 
-        if ($this->parent->exact)
+        if ($this->parent->exact){
             return $not . $topbiblio.'rec_Title = "'.$evalue.'"';
-        else if ($this->parent->lessthan)
+        }else if ($this->parent->lessthan){
             return $not . $topbiblio.'rec_Title < "'.$evalue.'"';
-        else if ($this->parent->greaterthan)
+        }else if ($this->parent->greaterthan){
                 return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
-        else
-                    if(strpos($this->value,"%")===false){
-                        return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
-                    }else{
-                        return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';
+        }else if(strpos($this->value,"%")===false){
+                return $topbiblio.'rec_Title ' . $not . 'like "%'.$evalue.'%"';
+        }else{
+                return $topbiblio.'rec_Title ' . $not . 'like "'.$evalue.'"';
         }
 
     }
@@ -1400,10 +1413,11 @@ class NotesPredicate extends Predicate {
         $not = ($this->parent->negate)? 'not ' : '';
 
         $query = &$this->getQuery();
-        if ($query->search_domain == BOOKMARK)    // saw TODO change this to check for woot match or full text search
+        if ($query->search_domain == BOOKMARK){    // saw TODO change this to check for woot match or full text search
             return '';
-        else
+        }else{
             return 'TOPBIBLIO.rec_ScratchPad ' . $not . 'like "%'.$mysqli->real_escape_string($this->value).'%"';
+        }
     }
 }
 
@@ -1475,21 +1489,22 @@ class AnyPredicate extends Predicate {
             
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
             
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }    
             }
             
             return array('f'=> $compare.$this->value);
@@ -1517,7 +1532,7 @@ class AnyPredicate extends Predicate {
                             ?' IN ('.implode(',',$list_ids).')'
                             :'='.$list_ids[0]).') OR ';
                 }else{
-                    $res = ''; //nothing found    
+                    $res = '';//nothing found    
                 }
                 
                 return '('.$res.' (TOPBIBLIO.rec_Title like "%'.$val.'%"))';
@@ -1557,7 +1572,7 @@ class FieldPredicate extends Predicate {
         if(count($matches)>0 && $matches[0]==$this->value){
 
             $this->nests = array();
-            for ($k=1; $k < count($matches); ++$k) {
+            for ($k=1; $k < count($matches);++$k) {
 
                 $text = $matches[$k];
 
@@ -1565,7 +1580,7 @@ class FieldPredicate extends Predicate {
                 if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches2)) {
                     $and_texts = $matches2[0];
                     $limbs = array();
-                    for ($i=0; $i < count($and_texts); ++$i){
+                    for ($i=0; $i < count($and_texts);++$i){
                         $limbs[] = new AndLimb($this, $and_texts[$i]);
                     }
                     array_push($this->nests, $limbs);
@@ -1573,7 +1588,7 @@ class FieldPredicate extends Predicate {
             }
         }
         /*
-        for ($i=0; $i < count($limbs); ++$i) {
+        for ($i=0; $i < count($limbs);++$i) {
         $new_sql = $limbs[$i]->pred->makeSQL();
         if (strlen($new_sql) > 0) {
         array_push($and_clauses, $new_sql);
@@ -1587,21 +1602,22 @@ class FieldPredicate extends Predicate {
             
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
             
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }   
             }
             
             $res = array();
@@ -1629,17 +1645,17 @@ class FieldPredicate extends Predicate {
                 $isrelmarker_0 = ($this->field_type=="relmarker");
                 $isrelmarker_1 = false;
 
-                for ($i=0; $i < count($this->nests); ++$i) {
+                for ($i=0; $i < count($this->nests);++$i) {
 
                     $limbs = $this->nests[$i];
                     $type_clause = null;
                     $field_type = null;
 
-                    for ($j=0; $j < count($limbs); ++$j) {
+                    for ($j=0; $j < count($limbs);++$j) {
                         $cn = get_class($limbs[$j]->pred);
 
                         if($cn == 'TypePredicate'){
-                            $type_clause = $limbs[$j]->pred->makeSQL(false);  // rec_RecTypeID in (12,14)
+                            $type_clause = $limbs[$j]->pred->makeSQL(false);// rec_RecTypeID in (12,14)
                         }else if($cn == 'FieldPredicate'){
                             if($i==0 && $limbs[$j]->pred->field_type=="relmarker"){ //allowed for i==0 only
                                 $isrelmarker_1 = true;
@@ -1679,21 +1695,22 @@ class FieldPredicate extends Predicate {
 
                         $nest_joins .= ' left join Records link'.$i.' on link'.$i.'.'.$type_clause;
                         if($i==0){
-                            if(!$isrelmarker_0)
+                            if(!$isrelmarker_0){
                                 $nest_joins .= ' and rd.dtl_Value=link0.rec_ID ';
-                        }else{
-                            if(!$isrelmarker_1)
+                            }    
+                        }else if(!$isrelmarker_1){
                                 $nest_joins .= ' and linkdt0.dtl_Value=link1.rec_ID ';
+                                
                         }
 
-                        //$nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID '; //STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
+                        //$nest_joins .= ' and '.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').'=link'.$i.'.rec_ID ';//STRCMP('.($i==0?'rd.dtl_Value':'linkdt'.($i-1).'.dtl_Value').',link'.$i.'.rec_ID)=0
 
                         if($field_type){
                             $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
                         }
 
                     } else {
-                        return ''; //fail - record type is mandatory for nested queries
+                        return '';//fail - record type is mandatory for nested queries
                     }
                 }//for nests
 
@@ -1723,13 +1740,13 @@ class FieldPredicate extends Predicate {
 
             }else{  //working copy!!!!
 
-                for ($i=0; $i < count($this->nests); ++$i) {
+                for ($i=0; $i < count($this->nests);++$i) {
 
                     $limbs = $this->nests[$i];
                     $type_clause = null;
                     $field_type = null;
 
-                    for ($j=0; $j < count($limbs); ++$j) {
+                    for ($j=0; $j < count($limbs);++$j) {
                         $cn = get_class($limbs[$j]->pred);
 
                         if($cn == 'TypePredicate'){
@@ -1756,7 +1773,7 @@ class FieldPredicate extends Predicate {
                             $nest_joins .= ' left join recDetails linkdt'.$i.' on linkdt'.$i.'.dtl_RecID=link'.$i.'.rec_ID and linkdt'.$i.'.dtl_DetailTypeID '.$field_type;
                         }
                     } else {
-                        return ''; //fail - record type is mandatory for nested queries
+                        return '';//fail - record type is mandatory for nested queries
                     }
                 }//for nests
 
@@ -1835,7 +1852,7 @@ class FieldPredicate extends Predicate {
             
             $dateindex_clause = $this->makeDateClause();
             if($dateindex_clause){
-                $res = $res.' AND '.$dateindex_clause.'))';    
+                $res = $res.' AND '.$dateindex_clause.'))';
             }else{
                 $res = '';
             }
@@ -1872,7 +1889,7 @@ class FieldPredicate extends Predicate {
                             ?' IN ('.implode(',',$list_ids).')'
                             :'='.$list_ids[0]).')';
                 }else{
-                    $res = '(1=0)'; //nothing found    
+                    $res = '(1=0)';//nothing found    
                 }
                 
                 return $res;
@@ -1918,7 +1935,7 @@ class FieldPredicate extends Predicate {
                             ?' IN ('.implode(',',$list_ids).')'
                             :'='.$list_ids[0]);
                 }else{
-                    $res = '(1=0)'; //nothing found    
+                    $res = '(1=0)';//nothing found    
                 }             
                 
                 return $res;
@@ -1988,7 +2005,7 @@ class FieldPredicate extends Predicate {
                     
                 $match_pred  = ' in (select trm_ID from defTerms where trm_Label ';
                 if($this->parent->exact){
-                    $match_pred  =  $match_pred.'="'.$value.'"'; 
+                    $match_pred  =  $match_pred.'="'.$value.'"';
                 } else {
                     $match_pred  =  $match_pred.'like "%'.$value.'%"';
                 }
@@ -2007,7 +2024,7 @@ class FieldPredicate extends Predicate {
             
             $cs_ids =null;
             if(!($this->field_type_value=='float' || $this->field_type_value=='integer')){
-                $cs_ids = getCommaSepIds($this->value);    
+                $cs_ids = getCommaSepIds($this->value);
             }
             
             if ($cs_ids) {  
@@ -2068,21 +2085,22 @@ class FieldCountPredicate extends Predicate {
 
             if($this->parent->negate){
                 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '!=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '>=';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '<=';
-                
+                }
             }else{
 
-                if ($this->parent->exact)
+                if ($this->parent->exact){
                     $compare = '=';
-                else if ($this->parent->lessthan)
+                }else if ($this->parent->lessthan){
                     $compare = '<';
-                else if ($this->parent->greaterthan)
+                }else if ($this->parent->greaterthan){
                     $compare = '>';
+                }
             }
             
             $res = array();
@@ -2154,7 +2172,7 @@ class TagPredicate extends Predicate {
 
         // Heavy, heavy DWIM here: if the tag for which we're searching contains comma(s),
         // then split it into several tags, and do an OR search on those.
-        for ($i=0; $i < count($values); ++$i) {
+        for ($i=0; $i < count($values);++$i) {
             if (strpos($values[$i], '\\') === FALSE) {
                 array_push($this->value, trim($values[$i]));
                 array_push($this->wg_value, '');
@@ -2165,7 +2183,7 @@ class TagPredicate extends Predicate {
                 $any_wg_values = true;
             }
         }
-        if (! $any_wg_values) $this->wg_value = array();
+        if (! $any_wg_values) {$this->wg_value = array();}
         $this->query = NULL;
     }
 
@@ -2189,7 +2207,7 @@ class TagPredicate extends Predicate {
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
-                    if (! $first_value) $query .= 'or ';
+                    if (! $first_value) {$query .= 'or ';}
                     if (is_numeric($value)) {
                         $query .= 'rtl_TagID='.intval($value).' ';
                     } else {
@@ -2202,9 +2220,9 @@ class TagPredicate extends Predicate {
                 $query .= ') and kwd.tag_UGrpID='.$pquery->currUserID.')) ';
             } else {
                 $query='('.$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
-                . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
-                for ($i=0; $i < count($this->value); ++$i) {
-                    if ($i > 0) $query .= 'or ';
+                . ' where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
+                for ($i=0; $i < count($this->value);++$i) {
+                    if ($i > 0) {$query .= 'or ';}
 
                     $value = $this->value[$i];
                     $wg_value = $this->wg_value[$i];
@@ -2227,7 +2245,7 @@ class TagPredicate extends Predicate {
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
-                    if (! $first_value) $query .= 'or ';
+                    if (! $first_value) {$query .= 'or ';}
                     if (is_numeric($value)) {
                         $query .= "kwd.tag_ID=$value ";
                     } else {
@@ -2240,8 +2258,8 @@ class TagPredicate extends Predicate {
             } else {
                 $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
-                for ($i=0; $i < count($this->value); ++$i) {
-                    if ($i > 0) $query .= 'or ';
+                for ($i=0; $i < count($this->value);++$i) {
+                    if ($i > 0) {$query .= 'or ';}
 
                     $value = $this->value[$i];
                     $wg_value = $this->wg_value[$i];
@@ -2278,13 +2296,13 @@ class BibIDPredicate extends Predicate {
         $not = ($this->parent->negate)? '-' : '';
         
         $compare = '';
-        if ($this->parent->exact)
+        if ($this->parent->exact){
             $compare = '=';
-        else if ($this->parent->lessthan)
+        }else if ($this->parent->lessthan){
             $compare = '<';
-        else if ($this->parent->greaterthan)
+        }else if ($this->parent->greaterthan){
             $compare = '>';
-        
+        }
         return array('ids'=> $not.$compare.$this->value);
     }
     
@@ -2313,7 +2331,7 @@ class BibIDPredicate extends Predicate {
                     $cs_ids = explode(',', $cs_ids);
                     $rsvd = array();
                     foreach($cs_ids as $recid){
-                        array_push($rsvd, recordSearchReplacement($mysqli, $recid)); //find new value
+                        array_push($rsvd, recordSearchReplacement($mysqli, $recid));//find new value
                     }
                     $cs_ids = implode(',',$rsvd);
                 }
@@ -2676,7 +2694,7 @@ class RelatedFromParentPredicate extends Predicate {
         }
         
         if($select_relto!=null){
-            $select = '('.$select.') OR ('.$select_relto.')';    
+            $select = '('.$select.') OR ('.$select_relto.')';
         }
 
         return $select;
@@ -2765,7 +2783,7 @@ class RelatedToParentPredicate extends Predicate {
         }
 
         if($select_relto!=null){
-            $select = '('.$select.') OR ('.$select_relto.')';    
+            $select = '('.$select.') OR ('.$select_relto.')';
         }
         
         return $select;
@@ -2804,7 +2822,7 @@ class RelatedPredicate extends Predicate {
             }
         }
         
-        if(!($related_rty_ID>0)) return false;
+        if(!($related_rty_ID>0)) {return false;}
 
         //NEW  ---------------------------
         $add_from  = 'recLinks rl ';
@@ -2812,11 +2830,11 @@ class RelatedPredicate extends Predicate {
         if($relation_type_ID>0){
             $add_where = $add_where.'(';
             if($inverseTermId>0){
-                $add_where = $add_where.'(rl.rl_RelationTypeID='.$inverseTermId.') OR ';    
+                $add_where = $add_where.'(rl.rl_RelationTypeID='.$inverseTermId.') OR ';
             }
             $add_where = $add_where.'(rl.rl_RelationTypeID='.$relation_type_ID.'))';
         }else{
-            $add_where = $add_where.' (rl.rl_RelationID is not null)';    
+            $add_where = $add_where.' (rl.rl_RelationID is not null)';
         }
 
         $pquery = &$this->getQuery();
@@ -2990,8 +3008,11 @@ class RelationsForPredicate extends Predicate {
         $ids = $res->fetch_row();
         $ids = $ids[0];
         
-        if (! $ids) return "0";
-        else return "TOPBIBLIO.rec_ID in ($ids)";
+        if (! $ids) {
+            return "0";
+        } else{ 
+            return "TOPBIBLIO.rec_ID in ($ids)";
+        }
     }
 }
 
@@ -3014,7 +3035,7 @@ class AfterPredicate extends Predicate {
             return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
             
          } catch (Exception  $e){
-            //print $this->value.' => NOT SUPPORTED<br>';                            
+            //print $this->value.' => NOT SUPPORTED<br>'; 
          }                            
         return '1';
     }
@@ -3038,7 +3059,7 @@ class BeforePredicate extends Predicate {
             return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
             
          } catch (Exception  $e){
-            //print $this->value.' => NOT SUPPORTED<br>';                            
+            //print $this->value.' => NOT SUPPORTED<br>'; 
          }                            
         return '1';
     }
@@ -3115,7 +3136,7 @@ class SpatialPredicate extends Predicate {
     public function makeSQL() {
         return "(exists (select dtl_ID from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1))";  //MBRContains
+            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1))";//MBRContains
     }
 }
 
@@ -3268,7 +3289,7 @@ $q .= 'tag:"' . $k . '" ';
 }
 if (@$_REQUEST['u']) $q .= 'u:"' . $_REQUEST['u']. '" ';
 if (@$_REQUEST['n']) $q .= 'n:"' . $_REQUEST['n']. '" ';
-if (@$_REQUEST['r']) $q .= 't:' . intval($_REQUEST['r']) . ' ';    // note: defRecTypes was 'r', now 't' (for TYPE!)
+if (@$_REQUEST['r']) $q .= 't:' . intval($_REQUEST['r']) . ' ';// note: defRecTypes was 'r', now 't' (for TYPE!)
 if (@$_REQUEST['uid']) $q .= 'usr:' . intval($_REQUEST['uid']) . ' ';
 if (@$_REQUEST['bi']) $q .= 'id:"' . $_REQUEST['bi'] . '" ';
 if (@$_REQUEST['a']) $q .= 'any:"' . $_REQUEST['a'] . '" ';

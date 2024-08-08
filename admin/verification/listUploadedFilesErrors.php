@@ -23,8 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('OWNER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('OWNER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -46,7 +46,7 @@ $mysqli = $system->get_mysqli();
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
         
         <style type="text/css">
             h3, h3 span {
@@ -78,7 +78,7 @@ $mysqli = $system->get_mysqli();
             <h2>Disk usage and quota</h2>
         </div>
 <?php
-        $quota = $system->getDiskQuota(); //takes value from disk_quota_allowances.txt
+        $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
             $quota = 1073741824; //1GB    
@@ -100,7 +100,7 @@ $mysqli = $system->get_mysqli();
             if($size>0){
                 $size /= 1048576;
                 $size = round((float)$size, 2);
-                print '<tr><td>'.htmlspecialchars($dir).'</td><td>'.$size.'</td></tr>';    
+                print '<tr><td>'.htmlspecialchars($dir).'</td><td>'.$size.'</td></tr>';
             }
         }//for
         print '</table>';
@@ -121,14 +121,14 @@ $mysqli = $system->get_mysqli();
             <?php
 
     $files_duplicates = array();
-    $files_duplicates_all_ids = array(); //not used 
+    $files_duplicates_all_ids = array();//not used 
 
     $files_orphaned = array();
     $files_unused_local = array();
     $files_unused_remote = array();
 
     
-    $files_notfound = array(); //missed files
+    $files_notfound = array();//missed files
     $files_path_to_correct = array();
     $external_count = 0;
     $local_count = 0;
@@ -140,7 +140,7 @@ $mysqli = $system->get_mysqli();
     //search for duplicates
     //local
     $query2 = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles '
-                .'where ulf_FileName is not null GROUP BY ulf_FilePath, ulf_FileName HAVING cnt>1'; //ulf_ID<1000 AND 
+                .'where ulf_FileName is not null GROUP BY ulf_FilePath, ulf_FileName HAVING cnt>1';//ulf_ID<1000 AND 
     $res2 = $mysqli->query($query2);
        
     if ($res2 && $res2->num_rows > 0) {
@@ -164,12 +164,12 @@ $mysqli = $system->get_mysqli();
                 }
                 $res3->close();
                 
-                if(count($dups_ids)<2) continue;
+                if(count($dups_ids)<2) {continue;}
                 
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
                 }else{
-                    $res_fullpath = resolveFilePath( $res['ulf_FilePath'].$res['ulf_FileName'] ); //see recordFile.php
+                    $res_fullpath = resolveFilePath( $res['ulf_FilePath'].$res['ulf_FileName'] );//see recordFile.php
                 }
                 $files_duplicates[$res_fullpath] = $dups_ids;
                 
@@ -177,11 +177,11 @@ $mysqli = $system->get_mysqli();
                 $max_ulf_id = array_shift($dups_ids);
                 $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                 $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-//print $upd_query.'<br>';                
+//print $upd_query.'<br>';
 //print $del_query.'<br>';
                 $mysqli->query($upd_query);
                 $mysqli->query($del_query);
-                $fix_dupes = $fix_dupes + count($dups_ids); 
+                $fix_dupes = $fix_dupes + count($dups_ids);
             }
             
         if($fix_dupes){
@@ -215,18 +215,18 @@ $mysqli = $system->get_mysqli();
                 }
                 $res3->close();
                 
-                if(count($dups_ids)<2) continue;
+                if(count($dups_ids)<2) {continue;}
                 
                 $files_duplicates[$external_url] = $dups_ids;
                 
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
-                $dups_ids = prepareIds($dups_ids); //for stupid snyk
+                $dups_ids = prepareIds($dups_ids);//for stupid snyk
                 $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
                 $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
                 $mysqli->query($upd_query);
                 $mysqli->query($del_query);
-                $fix_dupes = $fix_dupes + count($dups_ids); 
+                $fix_dupes = $fix_dupes + count($dups_ids);
                 $fix_url++;
             }
             
@@ -242,7 +242,7 @@ $mysqli = $system->get_mysqli();
     $query2 = 'SELECT ulf_OrigFileName, count(*) as cnt FROM recUploadedFiles ' 
 .' where ulf_OrigFileName is not null and ulf_OrigFileName<>"_remote" and '   //@todo check preferred source
 .'ulf_OrigFileName NOT LIKE "_iiif%" and ulf_OrigFileName NOT LIKE "_tiled%" '
-.'GROUP BY ulf_OrigFileName HAVING cnt>1'; //@todo check preferred source
+.'GROUP BY ulf_OrigFileName HAVING cnt>1';//@todo check preferred source
     $res2 = $mysqli->query($query2);
     
     if ($res2 && $res2->num_rows > 0) {
@@ -264,7 +264,7 @@ $mysqli = $system->get_mysqli();
                     continue;
                 }
 
-                $dups_files = array(); //id=>path,size,md,array(dup_ids)
+                $dups_files = array();//id=>path,size,md,array(dup_ids)
                 
                 while ($res4 = $res3->fetch_assoc()) {
                     
@@ -272,7 +272,7 @@ $mysqli = $system->get_mysqli();
                     if(@$res4['ulf_FilePath']==null){
                         $res_fullpath = $res4['ulf_FileName'];
                     }else{
-                        $res_fullpath = resolveFilePath( $res4['ulf_FilePath'].$res4['ulf_FileName'] ); //see recordFile.php
+                        $res_fullpath = resolveFilePath( $res4['ulf_FilePath'].$res4['ulf_FileName'] );//see recordFile.php
                     }
                    
                     
@@ -306,11 +306,11 @@ $mysqli = $system->get_mysqli();
                         $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='
                                 .$ulf_ID.' WHERE dtl_UploadedFileID in ('.$dup_ids.')';
                         $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.$dup_ids.')';
-        //print $upd_query.'<br>';                
+        //print $upd_query.'<br>';
         //print $del_query.'<br>';
                         $mysqli->query($upd_query);
                         $mysqli->query($del_query);
-                        $cnt_dupes = $cnt_dupes + count($file_a['dupes']); 
+                        $cnt_dupes = $cnt_dupes + count($file_a['dupes']);
                         $cnt_unique++;
                         
                         /* report
@@ -335,7 +335,7 @@ $mysqli = $system->get_mysqli();
     }//autoRepair
    
 
-    $query1 = 'SELECT ulf_ID, ulf_ExternalFileReference, ulf_FilePath, ulf_FileName from recUploadedFiles'; // where ulf_ID=5188 
+    $query1 = 'SELECT ulf_ID, ulf_ExternalFileReference, ulf_FilePath, ulf_FileName from recUploadedFiles';// where ulf_ID=5188 
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         die ("<p><b>This database does not have uploaded files</b></p>");
@@ -349,7 +349,7 @@ $mysqli = $system->get_mysqli();
     //
     while ( $res = $res1->fetch_assoc() ) {
 
-            //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) continue;
+            //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) {continue;}
         
             //verify path
             $res['db_fullpath'] = null;
@@ -373,7 +373,7 @@ $mysqli = $system->get_mysqli();
                     }else{
                         $files_unused_local[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
                                             'res_fullpath'=>@$res['res_fullpath'],
-                                            'isfound'=>file_exists($res['res_fullpath'])?1:0);    
+                                            'isfound'=>file_exists($res['res_fullpath'])?1:0);
                     }
                     
                     $files_orphaned[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
@@ -381,7 +381,7 @@ $mysqli = $system->get_mysqli();
                                             'isfound'=>file_exists(@$res['res_fullpath'])?1:0,
                                             'ulf_ExternalFileReference'=>@$res['ulf_ExternalFileReference']);
                 }else{
-                    $row = $res2->fetch_row();  
+                    $row = $res2->fetch_row();
                     $currentRecID = $row[0];
                 }
                 $res2->close();
@@ -404,12 +404,12 @@ $mysqli = $system->get_mysqli();
                     
                 }else if($is_local) {
 
-                    chdir(HEURIST_FILESTORE_DIR);  // relatively db root
+                    chdir(HEURIST_FILESTORE_DIR);// relatively db root
 
                     $fpath = realpath($res['db_fullpath']);
 
                     if(!$fpath || !file_exists($fpath)){
-                        chdir(HEURIST_FILES_DIR);  // relatively file_uploads
+                        chdir(HEURIST_FILES_DIR);// relatively file_uploads
                         $fpath = realpath($res['db_fullpath']);
                     }
 
@@ -441,7 +441,7 @@ $mysqli = $system->get_mysqli();
                     if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
                         
                     
-                        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);   //db root folder
+                        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);//db root folder
                     
                         if($relative_path!=@$res['ulf_FilePath']){
                             
@@ -498,7 +498,7 @@ $mysqli = $system->get_mysqli();
     $files_notreg = $reg_info['nonreg'];
     
     //count($files_duplicates)+
-    $is_found = (count($files_unused_remote)+count($files_unused_local)+count($files_notfound)+count($files_notreg)>0);  
+    $is_found = (count($files_unused_remote)+count($files_unused_local)+count($files_notfound)+count($files_notreg)>0);
       
             if ($is_found) {
                 ?>
@@ -642,7 +642,7 @@ $mysqli = $system->get_mysqli();
                     function doRepairAction(action_name){
                         
                         function _callback(context){
-                            document.getElementById('page-inner').style.display = 'block'; //restore visibility
+                            document.getElementById('page-inner').style.display = 'block';//restore visibility
                             
                             if(window.hWin.HEURIST4.util.isnull(context) || context['status']!='ok'){
                                 window.hWin.HEURIST4.msg.showMsgErr(context || context['message']);
@@ -702,7 +702,7 @@ $mysqli = $system->get_mysqli();
                         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
                         
-                        document.getElementById('page-inner').style.display = 'none'; //hide all
+                        document.getElementById('page-inner').style.display = 'none';//hide all
                         
                     }//doRepairAction
                 <?php
@@ -886,7 +886,7 @@ $mysqli = $system->get_mysqli();
 <script>
 /*
     var parent = $(window.parent.document);
-    parent.find('#verification_output').css({width:'100%',height:'100%'}).show(); 
+    parent.find('#verification_output').css({width:'100%',height:'100%'}).show();
     parent.find('#in_porgress').hide();
 */    
 </script>        

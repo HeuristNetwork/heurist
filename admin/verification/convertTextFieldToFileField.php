@@ -25,7 +25,7 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
  
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -56,7 +56,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
 
 ?>            
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>  
          
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>It converts specified text field to file field, registers url (from dtl_Value) and assign ulf_ID to recDetails</p>
@@ -79,7 +79,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $type_2 = 'external';
     $type_ = '_remote';
     if($orig_db_id==2 && $orig_id==34){
-        $type_ = '_tiled@';    
+        $type_ = '_tiled@';
         $type_2 = 'tiled';
     }
     
@@ -139,7 +139,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
                 //$ulf_ID = $entity->registerURL($url, $type_!=='_remote');
                 
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
-                $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png'; //@todo check preferred source
+                $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source
                 
                 $insert_query = "insert into `$db_name`.recUploadedFiles "
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '
@@ -163,7 +163,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
             }//while recDeetails
             
             if($m>0){
-                print $db_name.'  dty_ID='.intval($dty_ID).'  count='.$m.'<br>';    
+                print $db_name.'  dty_ID='.intval($dty_ID).'  count='.$m.'<br>';
             }
             
         }        

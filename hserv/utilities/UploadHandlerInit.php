@@ -33,12 +33,12 @@ $system = null;
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $params = filter_input_array(INPUT_POST);
 }else{
-    $params = filter_input_array(INPUT_GET);    
+    $params = filter_input_array(INPUT_GET);
 }
 
 
 if(@$params['db']){
-    $system = new System(); //to init folder const without actual coonection to db
+    $system = new System();//to init folder const without actual coonection to db
 
     $error = System::dbname_check(@$params['db']);
     if($error){
@@ -58,20 +58,20 @@ if(@$params['db']){
 
 
 if(@$params['acceptFileTypes']!=null){
-    $options['accept_file_types'] = $params['acceptFileTypes'];   
+    $options['accept_file_types'] = $params['acceptFileTypes'];
 }
 if(@$params['unique_filename']!=null){
-    $options['unique_filename'] = ($params['unique_filename']!='0');   
+    $options['unique_filename'] = ($params['unique_filename']!='0');
 }
 if(@$params['max_file_size']>0){
-    $options['max_file_size'] = $params['max_file_size']; 
+    $options['max_file_size'] = $params['max_file_size'];
 }
 if(@$params['upload_subfolder']){
-    $options['upload_subfolder'] = $params['upload_subfolder']; 
+    $options['upload_subfolder'] = $params['upload_subfolder'];
 }
 
 //if(@$_REQUEST['upload_folder']){
-//    $options['upload_dir'] = $_REQUEST['upload_folder'];   
+//    $options['upload_dir'] = $_REQUEST['upload_folder'];
 //}
 
 require_once 'UploadHandler.php';

@@ -3,7 +3,8 @@
 /**
 * longOperationInit.php: 
 * 
-* iframe (wait) wrapper for listUploadedFilesErrors and listDatabaseErrors and rebuild titles
+* iframe (wait) wrapper for listUploadedFilesErrors,rebuildRecordTitles, 
+* rebuildCalculatedFields and checkRecURL
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -54,8 +55,7 @@ if(@$_REQUEST['type']=='urls'){
     $srcURL = 'checkRecURL.php?db='.$dbname;
     $sTitle = 'Check Records URL';
 }else{
-    $srcURL = 'listDatabaseErrors.php?db='.$dbname;
-    $sTitle = 'Verifying database';
+    exit;    
 }
 ?>
 <!DOCTYPE html>
@@ -75,7 +75,7 @@ if(@$_REQUEST['type']=='urls'){
             setTimeout(function(){
                 var $dosframe = $('#verification_output');
                 $dosframe.on('load', function(){
-                    $dosframe.css({width:'97%',height:'97%'}).show(); 
+                    $dosframe.css({width:'97%',height:'97%'}).show();
                     $('#in_porgress').hide()
                 });
                 

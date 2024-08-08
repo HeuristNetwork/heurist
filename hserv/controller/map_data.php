@@ -132,8 +132,9 @@ function getRecord($row) {
 function getDetailedRecord($system, $id) {
     //echo "Get detailed record #".$id;
     $record = getRecordByID($system, $id);
-    if(@$record->id)
+    if(@$record->id){
         $record = getRecordDetails($system, $record);
+    }
     return $record;
 }
 
@@ -361,7 +362,7 @@ function getMapDocuments($system, $recId) {
 
     if(defined('RT_MAP_DOCUMENT') && RT_MAP_DOCUMENT>0){
         // Select all Map Document types
-        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT); //InOriginatingDB
+        $query = $recordQuery." WHERE ".$recordWhere." and rec_RecTypeID=".intval(RT_MAP_DOCUMENT);//InOriginatingDB
 
         if($recId>0){
             $query = $query . ' and rec_ID='.intval($recId);
@@ -390,7 +391,7 @@ $system = new System();
 if( $system->init(@$_REQUEST['db']) ){
 
     $wg_ids = $system->get_user_group_ids();
-    if($wg_ids==null) $wg_ids = array();
+    if($wg_ids==null) {$wg_ids = array();}
     array_push($wg_ids, 0);
     $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
     . 'rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';

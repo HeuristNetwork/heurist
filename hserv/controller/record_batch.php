@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Add/replace/delete details in batch
     *
     * @package     Heurist academic knowledge management system
@@ -68,6 +68,11 @@
             
             $res = $dbRecDetails->addRevercePointerForChild();
             
+        }else if(@$_REQUEST['a'] == 'add_links_by_matching'){
+            
+            $res = $dbRecDetails->createRecordLinksByMatching();
+            
+            
         }else if(@$_REQUEST['a'] == 'rectype_change'){
 
             $res = $dbRecDetails->changeRecordTypeInBatch();
@@ -118,7 +123,7 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
     
-    $system->setResponseHeader(); //UTF-8?? apparently need to remove
+    $system->setResponseHeader();//UTF-8?? apparently need to remove
     print json_encode($response);
     exit;
 ?>

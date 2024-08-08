@@ -55,15 +55,15 @@ class DbDefDetailTypeGroups extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('dtg_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('dtg_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';//default
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
                
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property
@@ -151,7 +151,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
 
     
@@ -196,7 +196,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s');//reset
             
             if(!(@$this->records[$idx]['dtg_Order']>0)){
                 $this->records[$idx]['dtg_Order'] = 2;

@@ -101,7 +101,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
                 
             if(this.options.select_mode=='manager'){ //adjust table widths
-                var that = this;
+                let that = this;
                 window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, 
                     function(){
                         if(that.recordList && that.recordList.resultList('instance')){
@@ -153,7 +153,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this.recordList.css({'min-width': '780px', top:search_top});
         this.searchForm.parent().css({'overflow-x':'auto'});
 
-        var that = this;
+        let that = this;
         
         if(this.options.select_mode=='manager'){
             
@@ -189,9 +189,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     this.selectedRecords(selected_recs); //assign
                                     
                                     if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
-                                        var recs = selected_recs.getOrder();
+                                        let recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
-                                            var recID = recs[recs.length-1];
+                                            let recID = recs[recs.length-1];
                                             this._onActionListener(event, {action:'edit',recID:recID}); 
                                         }
                                     }
@@ -205,7 +205,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this.options.onInitCompleted =  function(){
             
             if(that.options.isFrontUI){
-                var rg_options = {
+                let rg_options = {
                      isdialog: false, 
                      isFrontUI: true,
                      container: that.fieldtype_groups,
@@ -315,7 +315,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _loadData: function(is_first){
         
-        var that = this;
+        let that = this;
         if(this.use_remote && this.options.import_structure){
 
             this.recordList.resultList('resetGroups');
@@ -357,8 +357,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _recordListHeaderRenderer: function(){
 
-        var max_width = this.recordList.find('.div-result-list-content').width() - 23;
-        var used_width = 0;
+        let max_width = this.recordList.find('.div-result-list-content').width() - 23;
+        let used_width = 0;
         
         function fld2(col_width, value, style){
             
@@ -378,11 +378,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
         }
         
-        var html = '';
+        let html = '';
         //if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
-        var fields = this.visible_fields; //this.usrPreferences.fields;
+        let fields = this.visible_fields; //this.usrPreferences.fields;
         
-        var i = 0;
+        let i = 0;
         for (;i<fields.length;i++){
            switch ( fields[i] ) {
                 case 'dtyid': html += fld2(30,'ID','text-align:center'); break;
@@ -416,9 +416,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
         }
 
-        var name_width = 200;
+        let name_width = 200;
 
-        var w_desc = max_width-used_width-name_width;
+        let w_desc = max_width-used_width-name_width;
         if(w_desc<30) w_desc = 30;
 
         html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'));
@@ -465,11 +465,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return '';
         }
         
-        var recID = fld('dty_ID');
+        let recID = fld('dty_ID');
 
-        var html = '';
+        let html = '';
         
-        var fields = this.visible_fields; //this.usrPreferences.fields;
+        let fields = this.visible_fields; //this.usrPreferences.fields;
         
         function __action_btn(action,icon,title){
             return '<div class="item" style="min-width:30px;max-width:30px;text-align:center;"><div title="'+title+'" '
@@ -479,17 +479,17 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     + '</div></div>'            
         }
 
-        var max_width = this.recordList.find('.div-result-list-content').width() 
+        let max_width = this.recordList.find('.div-result-list-content').width() 
                             - ((this.options.select_mode=='select_multi') ?40:33);
-        var used_width = 330;//244;
+        let used_width = 330;//244;
 
-        var name_width = 200;
+        let name_width = 200;
 
-        var w_desc = max_width - used_width - name_width + 10;
+        let w_desc = max_width - used_width - name_width + 10;
         if(w_desc<30) w_desc = 30; 
 
-        var grayed = '';
-        var i = 0;
+        let grayed = '';
+        let i = 0;
         for (;i<fields.length;i++){
             
             switch ( fields[i] ) {
@@ -552,26 +552,26 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         if(action && action.action=='delete'){
             
-            var usage = $Db.rst_usage(action.recID);
+            const usage = $Db.rst_usage(action.recID);
             if(usage && usage.length>0)
             {            
 
-                var sList = '';
-                for(var i=0; i<usage.length; i++){
-                    var rty_Name = $Db.rty(usage[i],'rty_Name');
+                let sList = '';
+                for(let i=0; i<usage.length; i++){
+                    const rty_Name = $Db.rty(usage[i],'rty_Name');
                     if(rty_Name){ //it may already deleted
                         sList += ('<a href="#" data-rty_ID="'+usage[i]+'">'+$Db.rty(usage[i],'rty_Name')+'</a><br>');
                     }
                 }
                 if(sList!=''){ 
-                    var sUsage = '<div><b>Warning</b><br><br><b>'+$Db.dty(action.recID,'dty_Name')
+                    let sUsage = '<div><b>Warning</b><br><br><b>'+$Db.dty(action.recID,'dty_Name')
                             +'</b> is used in the following record types:<br><br>'
                             +sList
                             +'<br><br>'
                             +'You have to either delete the field from the record type, '
                             +'or delete the record type<br>(it may not be possible or desirable to delete the record type)</div>';
 
-                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
+                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
                                 {default_palette_class:this.options.default_palette_class});        
                     
                     this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
@@ -587,12 +587,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         
-        var isResolved = this._super(event, action);
+        let isResolved = this._super(event, action);
 
         if(!isResolved){
             
-            var recID = 0;
-            var target = null;
+            let recID = 0;
+            let target = null;
 
             if(action && action.action){
                 recID =  action.recID;
@@ -601,14 +601,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
             if(recID>0){
                 
-                var that = this;
+                let that = this;
  
-                if(action=='group'){
+                //if(action=='group'){}
                     
-                }else if(action=='show_in_list' || action=='hide_in_list'){
+                if(action=='show_in_list' || action=='hide_in_list'){
                     
                     //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
-                    var newVal = (action=='show_in_list')?1:0;
+                    let newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({dty_ID:recID, dty_ShowInLists:newVal });
                     
                 }else if(action=='usedin'){
@@ -617,12 +617,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     if(Math.abs(this.fieldSelectorLast)!=recID){
                         
                         this.fieldSelectorLast   = recID;
-                        var usage = $Db.rst_usage(recID);
-                        var options = [];
+                        const usage = $Db.rst_usage(recID);
+                        let options = [];
                         if(usage && usage.length>0){
-                            for(var i=0; i<usage.length; i++){
-                                var rty_ID = usage[i];
-                                var rty_Name = $Db.rty(rty_ID, 'rty_Name');
+                            for(let i=0; i<usage.length; i++){
+                                const rty_ID = usage[i];
+                                const rty_Name = $Db.rty(rty_ID, 'rty_Name');
                                 if(rty_Name){
                                     options.push({key:rty_ID, title:$Db.rty(rty_ID, 'rty_Name')});
                                 }
@@ -639,12 +639,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
                             this.fieldSelector = window.hWin.HEURIST4.ui.initHSelect(this.fieldSelectorOrig, false);
                             
-                            var menu = this.fieldSelector.hSelect( "menuWidget" );
+                            let menu = this.fieldSelector.hSelect( "menuWidget" );
                             menu.css({'max-height':'350px'});                        
                                 this.fieldSelector.hSelect({change: function(event, data){
 
                                     //edit structure     
-                                    var new_record_params = {RecTypeID: data.item.value};
+                                    let new_record_params = {RecTypeID: data.item.value};
                                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                         {new_record_params:new_record_params, edit_structure:true});
     
@@ -684,13 +684,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }else{
             this.deleted_from_group_ID = 0;
             
-            var usage = $Db.rst_usage(this._currentEditID);
+            let usage = $Db.rst_usage(this._currentEditID);
             if(usage && usage.length>0){ 
                 window.hWin.HEURIST4.msg.showMsgFlash('Field in use in '+usage.length+' record types. Can\'t remove it');  
                 return;                
             }
             
-            var that = this;
+            let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this field type?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
@@ -725,7 +725,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this._toolbar){
             this._toolbar.find('#btnRecSave').button({label:window.hWin.HR(this._currentEditID>0?'Save':'Create New Field')});
         }
-        var dty_DetailTypeGroupID = this.options.dtg_ID; //this.searchForm.find('#input_search_group').val();
+        let dty_DetailTypeGroupID = this.options.dtg_ID; //this.searchForm.find('#input_search_group').val();
         
         if(!(this._currentEditID>0)){ //insert       
             
@@ -734,128 +734,138 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this._editing.setFieldValueByName('dty_DetailTypeGroupID', dty_DetailTypeGroupID);
-            //var ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
+            //let ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
             //ele.editing_input('setValue', dty_DetailTypeGroupID, true);
         }else{
             
-            var ele = this._editing.getFieldByName('dty_ID');
+            let ele = this._editing.getFieldByName('dty_ID');
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
                                     +$Db.getConceptID('dty',this._currentEditID, true));
         }
 
-        var name_field = this._editing.getInputs('dty_Name');   // Base Field Name input
-        var main_container = $(this._editing.getContainer()[0]).find('fieldset').get(0);
+        let name_field = this._editing.getInputs('dty_Name');   // Base Field Name input
+        let main_container = $(this._editing.getContainer()[0]).find('fieldset').get(0);
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(name_field)){  
 
             if(this._currentEditID<=0){ // Check that a new field is being defined
 
-                if(this.options.newFieldType){
-                    
-                    
-                }else
-                if(this.options.create_sub_record){
-                    this._setupSubRecordField();
-                    this.options.newFieldType = 'resource';
-                }else
-                if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
-                    var flavour_text = $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br>'
-                        + 'However, please read the following notes carefully.</div>'
-                        + '<span id="btn-basefields-list" style="margin:1em 0 1em 3em"></span>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">The base fields chosen should have a <span style="text-decoration:underline">similar sense of meaning</span>, '
-                        + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br>'
-                        + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br>'
-                        + 'to the current record type only (the base field retains its name).<br><br>'
+                if(!this.options.newFieldType){
+                    if(this.options.create_sub_record){
+                        this._setupSubRecordField();
+                        this.options.newFieldType = 'resource';
+                    }else
+                    if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
+                        $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">Rather than defining every field from scratch, you can pick some frequently used pre-defined fields from the existing Base fields.<br>'
+                            + 'However, please read the following notes carefully.</div>'
+                            + '<span id="btn-basefields-list" style="margin:1em 0 1em 3em"></span>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">The base fields chosen should have a <span style="text-decoration:underline">similar sense of meaning</span>, '
+                            + 'e.g. use <em>Start date</em> for <em>Birth date</em>, <em>Creator</em> for <em>Author</em>, <em>Short description</em><br>'
+                            + 'for <em>Abstract</em>, <em>Extended description</em> for <em>Notes</em>. You can rename the fields to what you actually want once selected - the new name applies<br>'
+                            + 'to the current record type only (the base field retains its name).<br><br>'
 
-                        + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br>'
-                        + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br>'
-                        + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br>'
-                        + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br>'
-                        + 'for all the others.</div><hr style="width:80%;margin:1em 10em 1em 0;"/>'
+                            + '<span style="text-decoration:underline">Do not completely redefine a base field</span> for a different purpose than it appears to be intended for, for instance redefining Family name as<br>'
+                            + 'Street, Length as Count, or Format as Condition. Significant change to the meaning of a field may later lead to confusion.<br>'
+                            + 'Fields which use the same base field will reference the same vocabulary (for term-list dropdowns and relationship type) or the same target<br>'
+                            + 'record types (for record pointers and relationships) - you cannot change the vocabulary or target record types for one without changing it<br>'
+                            + 'for all the others.</div><hr style="width:80%;margin:1em 10em 1em 0;"/>'
 
-                        + '<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
-                        + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br>'
-                        + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br>'
-                        + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
+                            + '<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'
+                            + '<div class="heurist-helper2" style="font-size:0.95em">If you can\'t find a suitable base field, type a new name. This will create a new base field and use it to create a new field in this record type.<br>'
+                            + 'It is a good idea to use a rather generic name and description so you can re-use the base field in other record types<br>'
+                            + 'and then customise the field appropriately for this record type.</div><br>').prependTo(main_container);
 
-                    var btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
-                    var rty_ID = this.options.newFieldForRtyID;
-                    var that = this;
+                        let btnBasefieldsList = $(main_container).find('span#btn-basefields-list').button({label: 'Choose base fields'})
+                        let rty_ID = this.options.newFieldForRtyID;
+                        let that = this;
 
-                    function multiFieldPopup(){ // load multi-field popup
+                        function multiFieldPopup(){ // load multi-field popup
 
-                        that._editing.setModified(0);
+                            that._editing.setModified(0);
 
-                        var sURL = window.hWin.HAPI4.baseURL + "hclient/widgets/entity/popups/selectMultiFields.html?&rtyID="+rty_ID;
-                                
-                        window.hWin.HEURIST4.msg.showDialog(sURL, {
-                            "close-on-blur": false,
-                            title: 'Insert Base Fields',
-                            window: window.hWin,
-                            height: '735px',
-                            width: '1020px',
-							padding: 0,
-                            default_palette_class: 'ui-heurist-design',
-                            callback: function(context) {
-                                if(!window.hWin.HEURIST4.util.isempty(context)) {
+                            let sURL = window.hWin.HAPI4.baseURL + "hclient/widgets/entity/popups/selectMultiFields.html?&rtyID="+rty_ID;
+                                    
+                            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                                "close-on-blur": false,
+                                title: 'Insert Base Fields',
+                                window: window.hWin,
+                                height: '735px',
+                                width: '1020px',
+                                padding: 0,
+                                default_palette_class: 'ui-heurist-design',
+                                callback: function(context) {
+                                    if(!window.hWin.HEURIST4.util.isempty(context)) {
 
-                                    var rst_fields = {
-                                        rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
-                                        rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
-                                        rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                        let rst_fields = {
+                                            rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                                            rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
+                                            rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                        };
+
+                                        that._trigger("multiselect", null, {selection:context.reverse(), rst_fields:rst_fields}); // handler in manageDefRecStructure
+
+                                        that.closeDialog( true ); // close base field definition popup
+                                    }
+                                }
+                            });
+                        }
+
+                        this._on(btnBasefieldsList, 
+                            {'click': function(){ // warn the user about the loss of popup data
+                                let isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
+                                                    || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
+                                                    && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
+                                                ); // Check if values have been placed/selected in required fields
+
+                                if(isChanged){
+
+                                    let $dlg, buttons = {};
+                                    buttons['Yes'] = function(){ // close message, open multi-field popup
+                                        $dlg.dialog('close'); 
+                                        multiFieldPopup();
+                                    }; 
+                                    buttons['No'] = function(){
+                                        $dlg.dialog('close'); 
                                     };
 
-                                    that._trigger("multiselect", null, {selection:context.reverse(), rst_fields:rst_fields}); // handler in manageDefRecStructure
+                                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'Items entered into this form may be lost upon completing this process, would you still like to proceed?',
+                                        buttons,
+                                        {title:'Confirm',yes:'Yes',no:'No'}
+                                    );
 
-                                    that.closeDialog( true ); // close base field definition popup
+                                }else{ // in the odd chance that isChanged is false, I don't think it can be in this case
+                                    multiFieldPopup();
                                 }
                             }
                         });
                     }
+                }
 
-                    this._on(btnBasefieldsList, 
-                        {'click': function(){ // warn the user about the loss of popup data
-                            var isChanged = (this._editing.getFieldByName('dty_Type').find('.ui-selectmenu-text').text() != 'Select...'
-                                                || (!window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_HelpText')[0]).val())
-                                                && !window.hWin.HEURIST4.util.isempty($(this._editing.getInputs('dty_Name')[0]).val()))
-                                            ); // Check if values have been placed/selected in required fields
+                if(!window.hWin.HEURIST4.util.isempty(this.options.newFieldName)){
 
-                            if(isChanged){
+                    name_field[0].val(this.options.newFieldName);
 
-                                var $dlg, buttons = {};
-                                buttons['Yes'] = function(){ // close message, open multi-field popup
-                                    $dlg.dialog('close'); 
-                                    multiFieldPopup();
-                                }; 
-                                buttons['No'] = function(){
-                                    $dlg.dialog('close'); 
-                                };
+                    let desc_field = this._editing.getInputs('dty_HelpText');
+                    if(desc_field.length > 0){
+                        desc_field[0].val(this.options.newFieldName);
+                    }
 
-                                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'Items entered into this form may be lost upon completing this process, would you still like to proceed?',
-                                    buttons,
-                                    {title:'Confirm',yes:'Yes',no:'No'}
-                                );
-
-                            }else{ // in the odd chance that isChanged is false, I don't think it can be in this case
-                                multiFieldPopup();
-                            }
-                        }
-                    });
+                    name_field[0].change();
                 }
             }
         }
 
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
-        var elements = this._editing.getInputs('dty_Type');
+        let elements = this._editing.getInputs('dty_Type');
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(elements)){
             
             if(this.options.newFieldType){
 
-                var el = $(elements[0])[0];
-                var _dty_Type = this.options.newFieldType;
+                let el = $(elements[0])[0];
+                const _dty_Type = this.options.newFieldType;
                 $(el).empty();
                 window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
                 el.disabled = true;
@@ -874,9 +884,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(this._currentEditID>0)
             {
                 //limit list and disable in case one option
-                var el = $(elements[0])[0];
-                //var _dty_Type = $(el).val();
-                var _dty_Type = $Db.dty(this._currentEditID,'dty_Type');
+                let el = $(elements[0])[0];
+                const _dty_Type = $Db.dty(this._currentEditID,'dty_Type');
                 
                 $(el).empty();
                 el.disabled = false;
@@ -903,19 +912,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 this._on( $(elements[0]), {    
                     'change': function(event){
-                            var dt_type = $(event.target).val();
+                            let dt_type = $(event.target).val();
                             this._onDataTypeChange(dt_type);
                     }
                 });
             }else {  // setup record type button and handler for selector
                 
-                var that = this;
+                let that = this;
 
-                var ele = this._editing.getFieldByName('dty_Type');  
+                let ele = this._editing.getFieldByName('dty_Type');  
                 ele = ele.find('.input-div');
 
                 if(ele.find('select').hSelect("instance")){ 
-                    var len = ele.find('select').find('option').length;
+                    let len = ele.find('select').find('option').length;
                     $(ele.find('select').find('option')[len-1]).attr({ // select... is listed last
                         "disabled": true,
                         "selected": true,
@@ -927,7 +936,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 this._on(ele.find('select'), {
                     'change':function(event){
-                        var new_dty = $(event.target).val();
+                        let new_dty = $(event.target).val();
 
                         if(!window.hWin.HEURIST4.util.isempty(new_dty)){
                             that._onDataTypeChange(new_dty);
@@ -947,9 +956,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 this._on( this.set_detail_type_btn, {    
                     'click': function(event){
 
-                        var dt_type = this._editing.getValue('dty_Type')[0];
+                        let dt_type = this._editing.getValue('dty_Type')[0];
                 
-                        var $dlg, buttons = [
+                        let $dlg, buttons = [
                             {text:window.hWin.HR('Cancel'),
                                 //id:'btnRecCancel',
                                 css:{'float':'right',margin:'.5em .4em .5em 0px'},  
@@ -959,11 +968,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 class: 'ui-button-action',
                                 click: function() { 
                                     
-                                    var dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
+                                    let dt_type_new = $dlg.find('input[name="ft_type"]:checked').val();
                                     
                                     if(!window.hWin.HEURIST4.util.isempty(dt_type_new)) {
 
-                                        var changeToNewType = true;
+                                        let changeToNewType = true;
                                         if(((dt_type==="resource") || (dt_type==="relmarker") || 
                                             (dt_type==="enum"))  && dt_type!==dt_type_new)
                                         {
@@ -1030,8 +1039,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on( $(elements[0]), {
                 keyup: this._onFieldAddSuggestion });
 
-            var depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
-            for(var idx in depended_fields){
+            let depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
+            for(let idx in depended_fields){
                 $(depended_fields[idx]).show();
             }
 
@@ -1045,11 +1054,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
 
         this.getUiPreferences();
-        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
+        let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        let ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
                         +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
         this._on( ele.find('input'), {change: function( event){
-            var ishelp_on = $(event.target).is(':checked');
+            let ishelp_on = $(event.target).is(':checked');
             this.usrPreferences['help_on'] = ishelp_on;
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper2');
@@ -1067,44 +1076,44 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _onDataTypeChange: function(dt_type)
     {
            /*
-           var ele = this._editing.getFieldByName('dty_Type');
+           let ele = this._editing.getFieldByName('dty_Type');
            ele.editing_input('setValue', dt_type);
            */
            if(this.set_detail_type_btn){
-               var elements = this._editing.getInputs('dty_Type');
+               let elements = this._editing.getInputs('dty_Type');
                $(elements[0]).val( dt_type );
                if($(elements[0]).hSelect("instance")!=undefined){
                    $(elements[0]).hSelect("refresh"); 
                }
                
-               var ele = this._editing.getFieldByName('dty_Type');  
+               let ele = this._editing.getFieldByName('dty_Type');  
                ele.editing_input('showErrorMsg',null);
            }
            
         
            //hide all 
-           var depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
-           for(var idx in depended_fields){
+           let depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
+           for(let idx in depended_fields){
                $(depended_fields[idx]).hide();
            }
            //show specific
            depended_fields = this._editing.getFieldByClass(dt_type);
-           for(var idx in depended_fields){
+           for(let idx in depended_fields){
                $(depended_fields[idx]).show();
            }
            if(dt_type=='enum' || dt_type=='relmarker'){
-                var ele = this._editing.getFieldByName('dty_Mode_enum');  
+                let ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateEnumControls(ele);
            }else if(dt_type=='relationtype'){
-                var ele = this._editing.getFieldByName('dty_Mode_enum');  
+                let ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateRelationTypeControls(ele);
            }
            if(this.options.newFieldForRtyID>0){
                 depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
-                for(var idx in depended_fields){
+                for(let idx in depended_fields){
                     $(depended_fields[idx]).show();
                 }
-                var ele = this._editing.getFieldByName('rst_DisplayWidth');
+                let ele = this._editing.getFieldByName('rst_DisplayWidth');
                 if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
                     ele.editing_input('setValue', dt_type=='float'?10:(dt_type=='freetext'?60:100));
                     ele.show();  
@@ -1122,7 +1131,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _onFieldAddSuggestion: function(event){
         
-        var input_name = $(event.target);
+        let input_name = $(event.target);
         
         //!!!! removeErrorClass(input_name);
         
@@ -1141,24 +1150,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }});
         }
         
-        var setdis = input_name.val().length<3;
+        let setdis = input_name.val().length<3;
         //this._editing.setDisabled( setdis )
-        //var ele = this._editing.getFieldByName('dty_Name');
+        //let ele = this._editing.getFieldByName('dty_Name');
         //ele.editing_input('setDisabled', false);
         //window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), setdis );
       
         //find base field to suggest
         if(input_name.val().length>2){
            
-            var rty_ID = this.options.newFieldForRtyID; 
-            var dty_ID, field_name, field_type;
+            let rty_ID = this.options.newFieldForRtyID; 
+            let dty_ID, field_name, field_type;
                 
             this.fields_list_div.empty();  
-            var is_added = false;
+            let is_added = false;
             
-            var that = this;
+            let that = this;
             //add current value as first
-            var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(this.fields_list_div)
+            let first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(this.fields_list_div)
                             .on('click', function(event){
                                 window.hWin.HEURIST4.util.stopEvent(event);
                                 that.fields_list_div.hide(); 
@@ -1167,12 +1176,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             
             //list of fields that are already in record type
-            var aUsage = $Db.rst(rty_ID); //return rectype
+            let aUsage = $Db.rst(rty_ID); //return rectype
             if(!window.hWin.HEURIST4.util.isRecordSet(aUsage)){
                 aUsage = null;
             }
             
-            var entered = input_name.val().toLowerCase();
+            let entered = input_name.val().toLowerCase();
                             
             //find among fields that are not in current record type
             $Db.dty().each(function(dty_ID, rec){
@@ -1190,7 +1199,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     && sub_rec_check )
                 {
 
-                    var ele;
+                    let ele;
                     if(field_name.toLowerCase()==entered.toLowerCase()){
                         ele = first_ele;
                     }else{
@@ -1203,8 +1212,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     .on('click', function(event){
                         window.hWin.HEURIST4.util.stopEvent(event);
 
-                        var ele = $(event.target).hide();
-                        var _dty_ID = ele.attr('dty_ID');
+                        let ele = $(event.target).hide();
+                        let _dty_ID = ele.attr('dty_ID');
 
 
                         if(_dty_ID>0){
@@ -1215,7 +1224,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             //that.selectedRecords( [_dty_ID] );
                             //that._selectAndClose();
-                            var rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                            let rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
                                 rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
                                 rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] };
 
@@ -1223,7 +1232,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 rst_fields['rst_DisplayWidth'] = 10;
                             }
 
-                            var sematic_url = that._editing.getValue('dty_SemanticReferenceURL')[0];
+                            let sematic_url = that._editing.getValue('dty_SemanticReferenceURL')[0];
                             if(sematic_url){
                                 rst_fields['rst_SemanticReferenceURL'] = sematic_url;
                             }
@@ -1263,7 +1272,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             +'marked as a Relationships vocabulary. You can - and should - use Relationship Marker fields '
             +'to constrain the creation of relationships between particular record types');
         
-            var ele = ele.find('.input-div');
+            ele = ele.find('.input-div');
             //remove old content
             ele.empty();
             
@@ -1292,7 +1301,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _activateEnumControls: function( ele, full_mode ){
         
-            var ele = ele.find('.input-div');
+            ele = ele.find('.input-div');
             //remove old content
             ele.empty();
             
@@ -1343,23 +1352,23 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     */
     _onAddVocabOrTerms: function(event){
         
-        var is_add_vocab = ($(event.target).attr('id')=='add_vocabulary');
+        let is_add_vocab = ($(event.target).attr('id')=='add_vocabulary');
 
         
-        var term_type = this._editing.getValue('dty_Type')[0];
-        var dt_name = this._editing.getValue('dty_Name')[0];
+        let term_type = this._editing.getValue('dty_Type')[0];
+        let dt_name = this._editing.getValue('dty_Name')[0];
 
         if(term_type!="enum"){
             term_type="relation";
         }
 
-        var vocab_id =  this.enum_container.find("#selVocab").val();
-        var is_frist_time = true;
-        var that = this;
+        let vocab_id =  this.enum_container.find("#selVocab").val();
+        let is_frist_time = true;
+        let that = this;
         
         
         //add new term to specified vocabulary
-        var rg_options = {
+        let rg_options = {
                  isdialog: true, 
                  select_mode: 'manager',
                  edit_mode: 'editonly',
@@ -1402,9 +1411,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _showOtherTerms: function(event){
         
 
-        var term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type')[0];
 
-        var vocab_id;
+        let vocab_id;
         if(event=='add_new'){
             vocab_id = 'add_new';
         }else {
@@ -1415,7 +1424,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             if(term_type=='relmarker' && !(vocab_id>0)){
                 //get first vocab in relationship group
-                var vocab_ids = $Db.trm_getVocabs('relation');
+                let vocab_ids = $Db.trm_getVocabs('relation');
                 vocab_id = vocab_ids[0];
     /*            
                 $Db.vcg().each2(function(id,rec){
@@ -1429,7 +1438,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
 
         // Get field name to display in the inner header
-        var fieldname = '';
+        let fieldname = '';
 
         if(this._currentEditID > 0){
             fieldname = $Db.dty(this._currentEditID, 'dty_Name');
@@ -1441,7 +1450,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             fieldname = 'New Field'
         }
 
-        var that = this;
+        let that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
             {isdialog: true, 
                 //auxilary: vocab_id>0?'term':'vocabulary',
@@ -1477,16 +1486,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _recreateTermsVocabSelector: function(newval){
         
         //selected vocabulary
-        var allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
+        let allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
         
-        var term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type')[0];
         
         if(term_type!='enum'){
             term_type='relation';
         }
         
-        var defaultTermID = null;
-        var is_vocabulary = window.hWin.HEURIST4.util.isempty(allTerms) ||
+        let defaultTermID = null;
+        let is_vocabulary = window.hWin.HEURIST4.util.isempty(allTerms) ||
                             window.hWin.HEURIST4.util.isNumber(allTerms);
         if(is_vocabulary){
             defaultTermID = allTerms; //vocabulary
@@ -1495,15 +1504,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.enum_container.find('input[name="enumType"][value="individual"]').prop('checked',true).trigger('change');
         }
         
-        var orig_selector = this.enum_container.find("#selVocab");
+        let orig_selector = this.enum_container.find("#selVocab");
         
-        var opts = {topOptions:'select...', defaultTermID:is_vocabulary?defaultTermID:0};
+        let opts = {topOptions:'select...', defaultTermID:is_vocabulary?defaultTermID:0};
         
         if(term_type=='relation'){
             opts.domain = term_type;
         }
         
-        var selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
+        let selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
 
         this._off(orig_selector, 'change');
         this._on(orig_selector, {change: function(event){
@@ -1526,25 +1535,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _recreateTermsPreviewSelector: function(){
 
-        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+        let allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
 
         //remove old selector
-        var preview_sel = this.enum_container.find("#termsPreview1");
+        let preview_sel = this.enum_container.find("#termsPreview1");
         
         //preview_sel.empty();
         //this.enum_container.find('#termsPreview2').empty();
         
-        var term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type')[0];
         if(term_type=='relationtype'){
             allTerms = 'relation';
         }
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
             
-            //var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
+            //let disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
 
             //append to first preview
-            var new_selector = this.enum_container.find('#selPreview');
+            let new_selector = this.enum_container.find('#selPreview');
             
             new_selector = window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
                     {vocab_id:allTerms, topOptions:false, supressTermCode:true});
@@ -1570,7 +1579,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             (this.options.selectOnSave===true || this.options.select_mode=='select_single'))
         {
                 $Db.dty().addRecord(recID, fieldvalues); 
-                this._selection = new hRecordSet();
+                this._selection = new HRecordSet();
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;    
@@ -1590,7 +1599,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.searchForm.searchDefDetailTypes('startSearch');
             //this._triggerRefresh('dty');
             
-            //var dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
+            //let dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
             //this.updateGroupCount(dtg_ID, 1);
         }else{
             //this._triggerRefresh('dty');    
@@ -1605,8 +1614,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     updateGroupCount:function(dtg_ID,  delta){
         
         if(dtg_ID>0){
-            var cnt = parseInt($Db.dtg(dtg_ID,'dtg_FieldCount'));
-            var cnt = (isNaN(cnt)?0:cnt)+delta;
+            let cnt = parseInt($Db.dtg(dtg_ID,'dtg_FieldCount'));
+            cnt = (isNaN(cnt)?0:cnt)+delta;
             if(cnt<0) cnt = 0;
             $Db.dtg(dtg_ID,'dtg_FieldCount',cnt);
             this._triggerRefresh('dtg');
@@ -1621,13 +1630,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
         
-        var that_widget = this;
+        let that_widget = this;
         
         if(!fields){
             fields = this._getValidatedValues();         
             
             if(fields!=null){
-                var dt_type = fields['dty_Type'];
+                let dt_type = fields['dty_Type'];
                 if(window.hWin.HEURIST4.util.isempty(dt_type)){ //actually it is already checked in _getValidatedValues
                     window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is required');
                     fields = null;
@@ -1667,12 +1676,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     && window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add', 0)==0){ // show customisation for new record pointer fields
 
                     // Customisation options
-                    var pointer_mode = this._editing.getFieldByName('rst_PointerMode');
-					var pointer_mode_inpt = pointer_mode.editing_input('getInputs')[0];
-                    var browser_filter = this._editing.getFieldByName('rst_PointerBrowseFilter');
-                    var child_rec = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
-                    var resource_default = this._editing.getFieldByName('rst_DefaultValue_resource');
-                    var default_val = this._editing.getValue('rst_DefaultValue')[0];
+                    let pointer_mode = this._editing.getFieldByName('rst_PointerMode');
+					let pointer_mode_inpt = pointer_mode.editing_input('getInputs')[0];
+                    let browser_filter = this._editing.getFieldByName('rst_PointerBrowseFilter');
+                    let child_rec = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+                    let resource_default = this._editing.getFieldByName('rst_DefaultValue_resource');
+                    let default_val = this._editing.getValue('rst_DefaultValue')[0];
 
                     // Setup default value
                     resource_default.editing_input('fset','rst_PtrFilteredIDs', fields['dty_PtrTargetRectypeIDs']);
@@ -1687,7 +1696,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     // enable/disable rst_PointerMode depend on rst_CreateChildIfRecPtr                   
                     function __rst_PointerMode_Enable(is_enable){
                         
-                        var inpt = pointer_mode.editing_input('getInputs');
+                        let inpt = pointer_mode.editing_input('getInputs');
                         inpt = inpt[0];
 
                         if(is_enable){
@@ -1700,18 +1709,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             inpt.val('addorbrowse');
                         }
                         inpt.hSelect('refresh');
-                        var ele = inpt.hSelect('menuWidget');
+                        let ele = inpt.hSelect('menuWidget');
                         ele.find('li').show();
                         ele.find('li.ui-state-disabled').hide();
                     }
                     
                     child_rec.editing_input('option','change', function(){
-                        var value = this.getValues()[0];
+                        let value = this.getValues()[0];
                         __rst_PointerMode_Enable(value!=1);
                     }); 
                     
                     // Setup help button
-                    var help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
+                    let help_button = $('<span style="padding-left:40px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"></span>')
                             .appendTo(child_rec.find('.input-div'));
                     window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
                                 url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
@@ -1724,8 +1733,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     );
 
                     // Setup dialog element
-                    var $dlg;
-                    var $ele = $('<fieldset>')
+                    let $dlg;
+                    let $ele = $('<fieldset>')
                         .append(pointer_mode.show())
                         .append(browser_filter.show())
                         .append(child_rec.show())
@@ -1733,7 +1742,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     $ele.find('.heurist-helper1').show();
 
-                    var btns = {};
+                    let btns = {};
                     btns['Apply'] = function(){ 
                         $dlg.dialog('close'); 
                         that_widget._saveEditAndClose(fields, afterAction, onErrorAction); 
@@ -1744,7 +1753,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         element: $ele[0], 
                         open: function(event){
 
-                            var cur_val = pointer_mode_inpt.val(); // retain current value
+                            let cur_val = pointer_mode_inpt.val(); // retain current value
 
                             // Reset mode selector
                             if(pointer_mode_inpt.hSelect('instance')!=undefined){
@@ -1756,8 +1765,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 }
 
                                 $.each(pointer_mode_inpt.find('option'), function(idx, ele){
-                                    var $ele = $(ele);
-                                    var title = $ele.text();
+                                    let $ele = $(ele);
+                                    let title = $ele.text();
 
                                     if(title.indexOf('#') != -1){
                                         $ele.text(title.replace('#', window.hWin.HEURIST4.browseRecordMax));
@@ -1833,14 +1842,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     _onSaveError: function(response){
 
-        var that = this;
+        let that = this;
 
         if(response.sysmsg){
  
-            var res = response.sysmsg;                
+            let res = response.sysmsg;                
             if(res.reccount){ // attempted to delete vocab, is in use
 
-                var sMsg = response.message;
+                let sMsg = response.message;
                 sMsg += '<p><a href="'+window.hWin.HAPI4.baseURL+'?db='
                             + window.hWin.HAPI4.database+'&q=ids:' + res['records'].join(',')
                             + '&nometadatadisplay=true" target="_blank">'
@@ -1850,9 +1859,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     {default_palette_class:this.options.default_palette_class});
             }else if(this._currentEditID == -1 && res.dty_id){ // attempted to create new field, name is already used
 
-                var cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
-                var exist_name = $Db.dty(res.dty_id, 'dty_Name');
-                var msg = 'The name "<span id="field_name">'+ exist_name +'</span>" which you have specified for the new field '
+                let cannotEdit = $Db.dty(res.dty_id, 'dty_Status') == 'reserved' && !window.hWin.HAPI4.sysinfo['pwd_ReservedChanges'];
+                let exist_name = $Db.dty(res.dty_id, 'dty_Name');
+                let msg = 'The name "<span id="field_name">'+ exist_name +'</span>" which you have specified for the new field '
                     + 'is already in use for an existing base field (id = <span id="field_id">'+ res.dty_id +'</span>).<br><br>';
 
                 if(!cannotEdit){
@@ -1870,11 +1879,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     msg += 'The existing field is a reserved type and so cannot be edited at this time, please close this popup and give your new base field a different name.';
                 }
 
-                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Name already in use'}, {default_palette_class: 'ui-heurist-design', dialogId: 'basefield-dup-name'});
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Name already in use'}, {default_palette_class: 'ui-heurist-design', dialogId: 'basefield-dup-name'});
 
                 $dlg.find('#btnDelete').button().css('width', '50px').on('click', function(){
 
-                    var request = {
+                    let request = {
                         'a'          : 'delete',
                         'entity'     : that.options.entity.entityName,
                         'request_id' : window.hWin.HEURIST4.util.random(),
@@ -1902,14 +1911,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 $dlg.find('#btnRename').button().css('width', '50px').on('click', function(){
 
-                    var $rdlg = window.hWin.HEURIST4.msg.showMsgDlg('Please enter a new name: <input class="text ui-corner-all" style="width: 150px" />', 
+                    let $rdlg = window.hWin.HEURIST4.msg.showMsgDlg('Please enter a new name: <input class="text ui-corner-all" style="width: 150px" />', 
                         null, null, {
                             default_palette_class: 'ui-heurist-design', 
                             labels: {'ok': 'Proceed', 'cancel': 'Cancel', title: 'Rename existing base field'}, 
                             dialogId: 'rename-basefield',
                             buttons: {
                                 'Proceed': function(){
-                                    var new_name = $rdlg.find('input').val();
+                                    let new_name = $rdlg.find('input').val();
 
                                     if(window.hWin.HEURIST4.util.isempty(new_name)){
                                         window.hWin.HEURIST4.msg.showMsgFlash('Please enter a new name', 1500);
@@ -1983,11 +1992,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _getValidatedValues: function(){
         
         //fieldvalues - is object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
-        var fieldvalues = this._super();
+        let fieldvalues = this._super();
         
         if(fieldvalues!=null){
             
-            var dt_type = fieldvalues['dty_Type'];
+            let dt_type = fieldvalues['dty_Type'];
             if(dt_type=='enum' || dt_type=='relmarker'){
 
                 if(!fieldvalues['dty_JsonTermIDTree']){
@@ -2020,7 +2029,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _selectAndClose: function(){
         
         if(this.options.newFieldForRtyID>0){
-            var rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType')[0], 
+            let rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType')[0], 
                               rst_MaxValues: this._editing.getValue('rst_MaxValues')[0], 
                               rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth')[0],
                               rst_PointerMode: this._editing.getValue('rst_PointerMode')[0],
@@ -2042,7 +2051,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
 
-        var that = this;
+        let that = this;
         this._saveEditAndClose( params ,
             function(){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -2074,7 +2083,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     addEditRecord: function(recID, is_proceed){
 
         if(recID<0 && is_proceed !== true){
-            var that = this;
+            let that = this;
 
             this.coverMessage(recID);
         }else{
@@ -2104,11 +2113,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
             if(this.options.select_mode=="manager"){
 
-                var s_title = this.element.find('#input_search').val();
-                var s_all = this.element.find('#chb_show_all_groups').is(':checked');
-                var s_type = this.element.find('#input_search_type').val();
+                let s_title = this.element.find('#input_search').val();
+                let s_all = this.element.find('#chb_show_all_groups').is(':checked');
+                let s_type = this.element.find('#input_search_type').val();
                 
-                var sMsg;
+                let sMsg;
 
                 if(window.hWin.HEURIST4.util.isempty(s_title) && !s_all && s_type=='any'){
                     sMsg = '<div style="margin-top:1em;">There are no base fields defined  in this group.'
@@ -2130,11 +2139,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // cover message warning a standard user to not define base fields at this location
     //
     coverMessage: function(recID){
-        var that = this;
+        let that = this;
 
         if(this.element.find('#base-field-warning').length == 0){ // Check if message already exists
 
-            var font_size = (navigator.userAgent.indexOf('Firefox') >= 0) ? '0.95em' : '1.2em';
+            let font_size = (navigator.userAgent.indexOf('Firefox') >= 0) ? '0.95em' : '1.2em';
 
             this.element.append('<div id="base-field-warning" style="position:relative;background:rgb(0,0,0,0.6);z-index:60000;height:100%;">'
                 + '<div style="background:lightgrey;border:2px solid black;color:black;position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);height:200px;width:510px;font-size:'+font_size+';padding:20px;">'
@@ -2156,7 +2165,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $('#base-field-warning').on('click', function(e){
                 if(e.target !== this){ return; }
 
-                var id = (recID)?recID : -1;
+                let id = (recID)?recID : -1;
 
                 that.addEditRecord(id, true);
             });
@@ -2168,11 +2177,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _getEditDialogButtons: function(){
 
-            var btn_array = this._super();
+            let btn_array = this._super();
         
             // Add extra save button to new base field for a record, replaces the original checkbox
             if(this.options.newFieldForRtyID > 0 && !this.options.newFieldType && !this.options.create_sub_record){
-                var that = this;
+                let that = this;
                 
                 btn_array.splice(1, 0, {
                     text:window.hWin.HR('Create and customise new field'),
@@ -2190,7 +2199,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     getRecordsetFromRemote: function( detailtypes, hideDisabled ){
 
-        var rdata = { 
+        let rdata = { 
             entityName:'defDetailTypes',
             total_count: 0,
             fields:[],
@@ -2202,37 +2211,37 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         rdata.fields = detailtypes.typedefs.commonFieldNames;
         rdata.fields.unshift('dty_ID');
         
-        var idx_ccode = 0;
+        let idx_ccode = 0;
         if(this.options.import_structure){
             rdata.fields.push('dty_ID_local');
             idx_ccode = detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
         }
 
-        var idx_visibility = detailtypes.typedefs.fieldNamesToIndex.dty_ShowInLists;
-        var idx_groupid = detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
-        var hasFieldToImport = false;
-        var trash_id = -1;
+        let idx_visibility = detailtypes.typedefs.fieldNamesToIndex.dty_ShowInLists;
+        let idx_groupid = detailtypes.typedefs.fieldNamesToIndex.dty_DetailTypeGroupID;
+        let hasFieldToImport = false;
+        let trash_id = -1;
 
-        for (var key in detailtypes.groups){
+        for (let key in detailtypes.groups){
             if(detailtypes.groups[key].name == 'Trash'){
                 trash_id = detailtypes.groups[key].id;
                 break;
             }
         }
 
-        for (var r_id in detailtypes.typedefs)
+        for (let r_id in detailtypes.typedefs)
         {
             if(r_id>0){
-                var detailtype = detailtypes.typedefs[r_id].commonFields;
-                var isHidden = (detailtype[idx_visibility] == '0' || detailtype[idx_groupid] == trash_id);
+                let detailtype = detailtypes.typedefs[r_id].commonFields;
+                let isHidden = (detailtype[idx_visibility] == '0' || detailtype[idx_groupid] == trash_id);
 
                 if(hideDisabled && isHidden){
                     continue;
                 }
                 
                 if(this.options.import_structure){
-                    var concept_code =  detailtype[ idx_ccode ];
-                    var local_dtyID = $Db.getLocalID( 'dty', concept_code );
+                    let concept_code =  detailtype[ idx_ccode ];
+                    let local_dtyID = $Db.getLocalID( 'dty', concept_code );
                     detailtype.push( local_dtyID );
                     hasFieldToImport = hasFieldToImport || !(local_dtyID>0);
                 }
@@ -2256,7 +2265,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         )+'</div>');
         }
         
-        this._cachedRecordset = new hRecordSet(rdata);
+        this._cachedRecordset = new HRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
         
         this.searchForm.searchDefDetailTypes('startSearch');

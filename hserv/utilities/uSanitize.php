@@ -34,8 +34,6 @@
 */
 class USanitize {
   
-    private function __construct() {}    
-    
     private static $purifier = null;
 
     //
@@ -94,7 +92,7 @@ class USanitize {
             } elseif (!empty($stack)) {
                 array_pop($stack);
             } else {
-                return ''; // Out of the root.
+                return '';// Out of the root.
             }
         }
 
@@ -132,7 +130,7 @@ class USanitize {
             $message = '';
         }else{
             if($allowed_tags==null) {
-                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><font><blockquote><pre><span>';   
+                $allowed_tags = '<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><h5><h6><p><ul><li><img><font><blockquote><pre><span>';
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
@@ -140,17 +138,17 @@ class USanitize {
             $message = strip_tags($message, $allowed_tags);
             if($allowed_tags!=null){
                 // remove attributes except img.src and a.href a.target
-                //$message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message); //remove all attributes
+                //$message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);//remove all attributes
                 
                 //$clean = preg_replace("/\n(<[^ai]([\w\d]+)?).+/i","\n$1>",$clean);
                 //$clean = preg_replace("/<a.+href='([:\w\d#\/\-\.]+)'.+/i","<a href=\"$1\">",$clean);
-                //$clean = preg_replace("/<img.+src='([\w\d_:?.\/%=\-]+)'.+/i","<img src=\"$1\">",$clean);            
+                //$clean = preg_replace("/<img.+src='([\w\d_:?.\/%=\-]+)'.+/i","<img src=\"$1\">",$clean);
             }
             
             $message = htmlspecialchars($message, ENT_NOQUOTES);
             if($allowed_tags!==false){
-                $message = preg_replace("/&lt;/", '<', $message);
-                $message = preg_replace("/&gt;/", '>', $message);
+                $message = str_replace('&lt;', '<', $message);
+                $message = str_replace('&gt;', '>', $message);
             }
         }
         return $message;
@@ -184,16 +182,16 @@ class USanitize {
     //
     public static function getHTMLPurifier(){
 
-            $config = HTMLPurifier_Config::createDefault();  
+            $config = HTMLPurifier_Config::createDefault();
 
-            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');        
-            $config->set('HTML.DefinitionID', 'html5-definitions'); // unqiue id
+            $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
+            $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
             $config->set('HTML.DefinitionRev', 1);
             
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             //$config->set('Core.EscapeNonASCIICharacters', true);
             $config->set('CSS.AllowImportant', true);
-            $config->set('CSS.AllowTricky', true);  //allow css
+            $config->set('CSS.AllowTricky', true);//allow css
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
 
@@ -209,10 +207,10 @@ class USanitize {
             $config->set('HTML.Allowed', array('head'=>true,'style'=>true));
             $config->set('HTML.AllowedElements', array('head'=>true,'style'=>true));
             */
-            $def = $config->getHTMLDefinition(true); //non standard attributes
-            $def->addAttribute('div', 'id', 'Text');            
-            $def->addAttribute('img', 'data-id', 'Text');            
-            $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
+            $def = $config->getHTMLDefinition(true);//non standard attributes
+            $def->addAttribute('div', 'id', 'Text');
+            $def->addAttribute('img', 'data-id', 'Text');
+            $def->addAttribute('div', 'data-heurist-app-id', 'Text');
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
             
@@ -229,7 +227,7 @@ class USanitize {
         
         if($purifier==null){
             if(self::$purifier==null){
-               self::$purifier = USanitize::getHTMLPurifier();   
+               self::$purifier = USanitize::getHTMLPurifier();
             }
             $purifier = self::$purifier;
         }
@@ -274,7 +272,7 @@ class USanitize {
             // avoids ".", ".." or ".hiddenFiles"
             $filename = ltrim($filename, '.-');
             // optional beautification
-            if ($beautify) $filename = USanitize::fileNameBeautify($filename);
+            if ($beautify) {$filename = USanitize::fileNameBeautify($filename);}
             // maximize filename length to 255 bytes http://serverfault.com/a/9548/44086
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
             $filename = mb_strcut(pathinfo($filename, PATHINFO_FILENAME), 0, 255 - ($ext ? strlen($ext) + 1 : 0), mb_detect_encoding($filename)) . ($ext ? '.' . $ext : '');
@@ -314,7 +312,7 @@ class USanitize {
     * @param mixed $message
     */
     public static function errorLog($message){
-        //$regex = '/\R/'; 
+        //$regex = '/\R/';
         $regex = "/[\r\n]/";
         $safe_message = preg_replace($regex, ' ', $message);
         error_log($safe_message);
@@ -329,7 +327,7 @@ class USanitize {
     public static function cleanupSpaces($value){
 
         if(is_string($value)){
-            $value = mb_ereg_replace('[ \t]{2,}', ' ', $value); // strip double spaces and tabs
+            $value = mb_ereg_replace('[ \t]{2,}', ' ', $value);// strip double spaces and tabs
             return function_exists('super_trim') ? super_trim($value) : trim($value);
         }
 

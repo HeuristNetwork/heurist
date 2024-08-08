@@ -35,7 +35,7 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
 }else{
-    $req_params = filter_input_array(INPUT_GET);    
+    $req_params = filter_input_array(INPUT_GET);
 }    
 
 $is_not_inited = true;
@@ -53,7 +53,7 @@ if($system->init($db, true, false)){
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
-            $fileinfo = $listpaths[0]; //
+            $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             if ($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){
                 
@@ -61,11 +61,11 @@ if($system->init($db, true, false)){
                 $is_not_inited = false;    
                 
             }else{
-                $system->addError(HEURIST_ACTION_BLOCKED, 'Requested media is not NEXUS format');      
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Requested media is not NEXUS format');
             }
                 
         }else{
-            $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');      
+            $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');
         }
         
     }else{ // if(@$req_params['id']){
@@ -148,11 +148,11 @@ function setup3dhop() {
 }
 
 function actionsToolbar(action) {
-    if(action=='home') presenter.resetTrackball(); 
+    if(action=='home') presenter.resetTrackball();
     else if(action=='zoomin') presenter.zoomIn();
-    else if(action=='zoomout') presenter.zoomOut(); 
-    else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch(); } 
-    else if(action=='full'  || action=='full_on') fullscreenSwitch(); 
+    else if(action=='zoomout') presenter.zoomOut();
+    else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch();} 
+    else if(action=='full'  || action=='full_on') fullscreenSwitch();
 }
 
 $(document).ready(function(){

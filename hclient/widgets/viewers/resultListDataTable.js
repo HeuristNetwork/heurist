@@ -60,7 +60,7 @@ $.widget( "heurist.resultListDataTable", {
     // the constructor
     _create: function() {
 
-        var that = this;
+        let that = this;
 
         //this.element.css({'overflow':'hidden'});
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
@@ -70,7 +70,7 @@ $.widget( "heurist.resultListDataTable", {
         if(!this.options.dataTableParams) this.options.dataTableParams = {};
         
         //table table-striped table-bordered - for bootstrap.css
-        var classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
+        let classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
                             ?'display compact nowrap cell-border'
                             :this.options.dataTableParams['classes'];
 
@@ -110,7 +110,7 @@ $.widget( "heurist.resultListDataTable", {
     that._dout('search finished');
     
                     that._current_query = data.query;
-                    that.options.recordset = data.recordset; //hRecordSet
+                    that.options.recordset = data.recordset; //HRecordSet
 
                     that._refresh();
                     that.loadanimation(false);
@@ -127,7 +127,7 @@ $.widget( "heurist.resultListDataTable", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
     that._dout('selected');
-                        var sel = window.hWin.HAPI4.getSelection(data.selection, true)
+                        let sel = window.hWin.HAPI4.getSelection(data.selection, true)
                         that.options.selection = sel;
                         that._refresh();
                 }
@@ -165,7 +165,7 @@ that._dout('myOnShowEvent');
 
         if(this.options.search_initial)
         {
-            var request = { q:this.options.search_initial, w: 'a', detail: 'ids', 
+            let request = { q:this.options.search_initial, w: 'a', detail: 'ids', 
                         source:'init', search_realm: this.options.search_realm };
             window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
         }
@@ -207,11 +207,11 @@ that._dout('myOnShowEvent');
 
             this.loadanimation(false);
 
-            var recIds_list = this.options.recordset.getIds();
+            let recIds_list = this.options.recordset.getIds();
 
             if(this._current_query!=this._current_url){                    
 
-                var that = this;
+                let that = this;
         
                 this._current_url = this._current_query;
 
@@ -223,11 +223,11 @@ that._dout('myOnShowEvent');
 
                 if(recIds_list.length>0){
 
-                    var queryURL = window.hWin.HAPI4.baseURL
+                    let queryURL = window.hWin.HAPI4.baseURL
                     +'hserv/controller/record_output.php?format=json'
                     +'&db=' + window.hWin.HAPI4.database;
-                    var queryStr = '';
-                    var rec_total_count = recIds_list.length;
+                    let queryStr = '';
+                    let rec_total_count = recIds_list.length;
                     
                     this.options.serverSide = true; //(rec_total_count>0); 
                     if(rec_total_count>0){ //5000
@@ -244,7 +244,7 @@ that._dout('myOnShowEvent');
                     this.options.dataTableParams['initComplete'] = function(settings, data) {that._onDataTableInitComplete(settings, data);}
                     
                     if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['dom'])){
-                        var dom = '';
+                        let dom = '';
                         if(this.options.show_rt_filter || this.options.show_column_config){
                             dom = dom + '<"selectors">';
                         }
@@ -272,7 +272,7 @@ that._dout('myOnShowEvent');
                     
                     if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['columns'])){
                         
-                        var settings = window.hWin.HAPI4.get_prefs('columns_datatable');
+                        let settings = window.hWin.HAPI4.get_prefs('columns_datatable');
                         
                         if(settings){
                             this.options.initial_cfg = settings;
@@ -288,11 +288,11 @@ that._dout('myOnShowEvent');
                     }
                     
 
-                    var cols = this.options.dataTableParams['columns'];
+                    let cols = this.options.dataTableParams['columns'];
                     this.hidden_cols = [];
-                    for(var i=0;i<cols.length;i++){
+                    for(let i=0;i<cols.length;i++){
                         if(typeof cols[i]['render']==='string'){
-                            var fooName = cols[i]['render']
+                            let fooName = cols[i]['render']
                             if(typeof(eval(fooName))=='function'){ 
                                 cols[i]['render'] = eval(fooName);//function(data,type){ [fooName](data,type); }
                             }else{
@@ -313,7 +313,7 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['processing'] = true;
                         this.options.dataTableParams['serverSide'] = true;
                         
-                        var datatable_id = window.hWin.HEURIST4.util.random();
+                        let datatable_id = window.hWin.HEURIST4.util.random();
                    
                         //to avoid passs thousands of recids for each page request 
                         //pass and save query on server side 
@@ -369,7 +369,7 @@ this._dout('reload datatable '+this.options.serverSide);
         
         //adjust position for datatable controls    
         this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
-        var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
+        let lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
         this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
         //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
         this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
@@ -383,7 +383,7 @@ this._dout('reload datatable '+this.options.serverSide);
         this.div_content.find('.dt-button').css('padding','2px');
         this.selConfigs = null;
 
-        var that = this;
+        const that = this;
 		
         // Ensure that columns set to hidden are hidden
         if(this.hidden_cols.length > 0){
@@ -391,36 +391,36 @@ this._dout('reload datatable '+this.options.serverSide);
         }
         
         // Add title to elements that will truncate
-        var cells = this.div_content.find('div.dataTables_scroll td.truncate, div.dataTables_scroll th.truncate');
+        let cells = this.div_content.find('div.dataTables_scroll td.truncate, div.dataTables_scroll th.truncate');
         if(cells.length > 0){
             $.each(cells, function(idx, cell){
 
-                var $ele = $(cell);
+                let $ele = $(cell);
                 $ele.attr('title', $ele.text());
             });
         }
 
         if(this.options.show_rt_filter || this.options.show_column_config){
 
-            var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 0px','min-width':'570px'});
+            let sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 0px','min-width':'570px'});
 
             if(this.options.show_rt_filter){
                 
                 //add record type selector - filter by record types
-                var rectype_Ids = this.options.recordset.getRectypes();
+                let rectype_Ids = this.options.recordset.getRectypes();
 
                 if(rectype_Ids.length>1){
                     $('<label>Filter by:&nbsp;</label>').appendTo(sel_container)
-                    var selScope = $('<select>').appendTo(sel_container).css({'min-width':'12em'});
+                    let selScope = $('<select>').appendTo(sel_container).css({'min-width':'12em'});
                     
-                    var opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
+                    let opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
                     $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
                 
-                    for (var rty in rectype_Ids){
+                    for (let rty in rectype_Ids){
                         rty = rectype_Ids[rty];
                         if(rty>0 && $Db.rty(rty,'rty_Name') ){
                             
-                            var name = $Db.rty(rty,'rty_Plural');
+                            let name = $Db.rty(rty,'rty_Plural');
                             if(!name) name = $Db.rty(rty,'rty_Name');
                             
                             window.hWin.HEURIST4.ui.addoption(selScope[0], rty, name ); //'only: '+
@@ -443,8 +443,6 @@ this._dout('reload datatable '+this.options.serverSide);
                 
                 if(window.hWin.HUL.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
                     this.selConfigs = $('<div>').appendTo(sel_container);
-                    
-                    var that = this;
                     
                     this.selConfigs.configEntity({
                         entityName: 'defRecTypes',
@@ -490,8 +488,8 @@ this._dout('reload datatable '+this.options.serverSide);
     //
     _onRecordTypeFilter: function(e){
         
-        var rty_ID = $(e.target).val();
-        var that = this;
+        let rty_ID = $(e.target).val();
+        let that = this;
         
         $.each(this.options.dataTableParams['columns'],function(idx,item){
             if(item.data=='rec_RecTypeID'){
@@ -512,7 +510,7 @@ this._dout('reload datatable '+this.options.serverSide);
         this.element.off("myOnShowEvent");
         $(this.document).off(this._events);
 
-        var that = this;
+        let that = this;
 
         // remove generated elements
         this.div_datatable.remove();
@@ -546,9 +544,9 @@ this._dout('reload datatable '+this.options.serverSide);
     //
     _openColumnDefinition: function( is_new ){
         
-        var that = this;
+        let that = this;
     
-        var opts = {
+        let opts = {
             currentRecordset: this.options.recordset,
             initial_cfg: (is_new===true)?null:that.options.initial_cfg,
             onClose: function(context){

@@ -29,8 +29,7 @@ class ImportDefinitions {
 
     public function initialize($mysqli=null)
     {
-        if ($this->initialized)
-            return;
+        if ($this->initialized) {return;}
 
         global $system;
         $this->system = $system;
@@ -38,7 +37,7 @@ class ImportDefinitions {
         if($mysqli){
             $this->mysqli = $mysqli;
         }else{
-            $this->mysqli = $system->get_mysqli();    
+            $this->mysqli = $system->get_mysqli();
         }
         
         define('START_TOKEN', '>>StartData>>');
@@ -172,7 +171,7 @@ class ImportDefinitions {
 
                 $flds = mysql__select_list2($this->mysqli, 'SHOW COLUMNS FROM '.$tables[$idx]);
                 if($tables[$idx]=='defTermsLinks'){
-                    array_shift($flds); //remove primary key field
+                    array_shift($flds);//remove primary key field
                 }                
 
                 $flds = '`'.implode('`,`', $flds).'`';

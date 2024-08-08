@@ -36,7 +36,7 @@ class ExportRecordsGEPHI extends ExportRecords {
     private $fd_links = null;
     private $links_cnt = 0;
     
-
+    private $relmarker_fields = [];
 
 //
 //
@@ -53,8 +53,8 @@ protected function _outputPrepareFields($params){
 //  
 protected function _outputHeader(){
     
-    $this->gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");    
-    $this->fd_links = fopen($this->gephi_links_dest, 'w');  //less than 1MB in memory otherwise as temp file 
+    $this->gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");
+    $this->fd_links = fopen($this->gephi_links_dest, 'w');//less than 1MB in memory otherwise as temp file 
     if (false === $this->fd_links) {
         $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
         return false;
@@ -66,22 +66,46 @@ protected function _outputHeader(){
     //although anyURI is defined it is not recognized by gephi v0.92
     $heurist_url = HEURIST_BASE_URL.'?db='.$this->system->dbname();
 
-    $rec_fields = '<attribute id="0" title="name" type="string"/>
-                <attribute id="1" title="image" type="string"/>
-                <attribute id="2" title="rectype" type="string"/>
-                <attribute id="3" title="count" type="float"/>
-                <attribute id="4" title="url" type="string"/>';
-
+    $rec_fields = '';
     if(!empty($this->retrieve_detail_fields)){
 
         $id_idx = 5;
 
         foreach ($this->retrieve_detail_fields as $dty_ID) {
 
-            $dty_Name = mysql__select_value(self::$mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
+            $dty_Name = mysql__select_value($this->mysqli, "SELECT dty_Name FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
             $rec_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$dty_Name}\" type=\"string\"/>";
 
             $id_idx ++;
+        }
+    }
+
+    // Relationship record values
+    $rel_RecTypeID = $this->system->defineConstant('RT_RELATION') ? RT_RELATION : null;
+    $rel_Source = $this->system->defineConstant('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : null;
+    $rel_Target = $this->system->defineConstant('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : null;
+    $rel_Type = $this->system->defineConstant('DT_RELATION_TYPE') ? DT_RELATION_TYPE : null;
+    $rel_Start = $this->system->defineConstant('DT_START_DATE') ? DT_START_DATE : null;
+    $rel_End = $this->system->defineConstant('DT_END_DATE') ? DT_END_DATE : null;
+
+    $rel_fields = '';
+    if($rel_RecTypeID && $rel_Source && $rel_Target && $rel_Type && $rel_Start && $rel_End){
+
+        $query = "SELECT rst_DisplayName, rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID = ? AND rst_DetailTypeID NOT IN (?,?,?,?,?)";
+        $query_params = ['iiiiii', $rel_RecTypeID, $rel_Source, $rel_Target, $rel_Type, $rel_Start, $rel_End];
+        $res = mysql__select_param_query(self::$mysqli, $query, $query_params);
+
+        $id_idx = 6;
+
+        if($res){
+
+            while($row = $res->fetch_row()){
+
+                $rel_fields .= "\n\t\t\t\t<attribute id=\"{$id_idx}\" title=\"{$row[0]}\" type=\"string\"/>";
+                $this->relmarker_fields[] = $row[1];
+
+                $id_idx ++;
+            }
         }
     }
 
@@ -94,20 +118,26 @@ protected function _outputHeader(){
             </meta>
             <graph mode="static" defaultedgetype="directed">
                 <attributes class="node">
-                    {$rec_fields}
+                    <attribute id="0" title="name" type="string"/>
+                    <attribute id="1" title="image" type="string"/>
+                    <attribute id="2" title="rectype" type="string"/>
+                    <attribute id="3" title="count" type="float"/>
+                    <attribute id="4" title="url" type="string"/>{$rec_fields}
                 </attributes>
                 <attributes class="edge">
                     <attribute id="0" title="relation-id" type="float"/>
                     <attribute id="1" title="relation-name" type="string"/>
                     <attribute id="2" title="relation-image" type="string"/>
                     <attribute id="3" title="relation-count" type="float"/>
+                    <attribute id="4" title="relation-start" type="string"/>
+                    <attribute id="5" title="relation-end" type="string"/>{$rel_fields}
                 </attributes>
                 <nodes>
 XML;
 
     $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
-    fwrite($this->fd, $gephi_header);      
+    fwrite($this->fd, $gephi_header);
     
     $this->links_cnt = 0;
 }
@@ -123,12 +153,7 @@ protected function _outputRecord($record){
     $image  = htmlspecialchars(HEURIST_RTY_ICON.$rty_ID);
     $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.$this->system->dbname());
 
-    $rec_values = "<attvalue for=\"0\" value=\"{$name}\"/>
-            <attvalue for=\"1\" value=\"{$image}\"/>
-            <attvalue for=\"2\" value=\"{$rty_ID}\"/>
-            <attvalue for=\"3\" value=\"0\"/>
-            <attvalue for=\"4\" value=\"{$recURL}\"/>";
-
+    $rec_values = '';
     if(is_array($this->retrieve_detail_fields)){
 
         $att_id = 4;
@@ -138,33 +163,15 @@ protected function _outputRecord($record){
             $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ? 
                         $record['details'][$dty_ID] : null;
 
-            if(empty($values)) { continue; }
-
-            $dty_Type = mysql__select_value(self::$mysqli, "SELECT dty_Type FROM defDetailTypes WHERE dty_ID = {$dty_ID}");
-
-            foreach($values as $dtl_ID => $value){
-
-                if($dty_Type == 'file'){ // get external URL / Heurist URL
-
-                    $f_id = $value['file']['ulf_ObfuscatedFileID'];
-                    $external_url = $value['file']['ulf_ExternalFileReference'];
-
-                    $value = empty($external_url) ? HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file={$f_id}" : $external_url;
-
-                }else if($dty_Type == 'enum'){ // get term label
-                    $value = mysql__select_value(self::$mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = $value");
-                }
-
-                if(strpos($value, '"') !== false){ // add slashes, to avoid double quote issues
-                    $values[$dtl_ID] = addslashes($value);
-                }
-
-                $values[$dtl_ID] = $value;
+            if(empty($values)){
+                continue;
             }
 
-            $values = is_array($values) ? implode('|', $values) : $values;
+            $this->_processFieldData($dty_ID, $values);
 
-            if(empty($values)) { continue; }
+            if(empty($values)){
+                continue;
+            }
 
             $rec_values .= "\n\t\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
         }
@@ -172,6 +179,11 @@ protected function _outputRecord($record){
             $gephi_node = <<<XML
 <node id="{$recID}" label="{$name}">                               
     <attvalues>
+        <attvalue for="0" value="{$name}"/>
+        <attvalue for="1" value="{$image}"/>
+        <attvalue for="2" value="{$rty_ID}"/>
+        <attvalue for="3" value="0"/>
+        <attvalue for="4" value="{$recURL}"/>
         {$rec_values}
     </attvalues>
 </node>
@@ -181,10 +193,12 @@ XML;
     
     $links = recordSearchRelated($this->system, $recID, 0, false);
     if($links['status']==HEURIST_OK){
-        if(@$links['data']['direct'])
+        if(@$links['data']['direct']){
             fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['direct'], $this->links_cnt, 'direct'));
-        if(@$links['data']['reverse'])
+        }
+        if(@$links['data']['reverse']){
             fwrite($this->fd_links, $this->_composeGephiLinks($this->records, $links['data']['reverse'], $this->links_cnt, 'reverse'));
+        }
     }else{
         return false;
     }
@@ -218,7 +232,9 @@ protected function _outputFooter(){
 */
 private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
 
-    if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
+    if(self::$defDetailtypes==null){
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);  
+    } 
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
         self::$defTerms = new DbsTerms($this->system, self::$defTerms);
@@ -227,7 +243,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
 
 
-    $edges = ''; 
+    $edges = '';
 
     if($links){
 
@@ -245,6 +261,9 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
             $relationName = "Floating relationship";
             $relationID = 0;
 
+            $startDate = empty(@$link->dtl_StartDate) ? '' : $link->dtl_StartDate;
+            $endDate = empty(@$link->dtl_EndDate) ? '' : $link->dtl_EndDate;
+
             if(in_array($source, $records) && in_array($target, $records)){
 
                 if($dtID > 0) {
@@ -255,15 +274,42 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                     $relationID = $trmID;
                 }
 
-                $relationName  = htmlspecialchars($relationName);                               
-                $links_cnt++; 
+                $relationName  = htmlspecialchars($relationName); 
+                $links_cnt++;
+
+                $rel_values = '';
+                $att_id = 5;
+                if(!empty($this->relmarker_fields) && !empty($link->relationID) && intval($link->relationID) > 0){
+
+                    $record = recordSearchByID($this->system, intval($link->relationID), $this->relmarker_fields, 'rec_ID');
+
+                    foreach($this->relmarker_fields as $dty_ID){
+                        
+                        $att_id ++;
+
+                        if(!array_key_exists($dty_ID, $record['details']) || empty($record['details'][$dty_ID])){
+                            continue;
+                        }
+
+                        $values = $record['details'][$dty_ID];
+                        $this->_processFieldData($dty_ID, $values);
+
+                        if(empty($values)){
+                            continue;
+                        }
+
+                        $rel_values .= "\n\t\t<attvalue for=\"{$att_id}\" value=\"{$values}\"/>";
+                    }
+                }
 
                 $edges = $edges.<<<XML
 <edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">                               
     <attvalues>
-    <attvalue for="0" value="{$relationID}"/>
-    <attvalue for="1" value="{$relationName}"/>
-    <attvalue for="3" value="1"/>
+        <attvalue for="0" value="{$relationID}"/>
+        <attvalue for="1" value="{$relationName}"/>
+        <attvalue for="3" value="1"/>
+        <attvalue for="4" value="{$startDate}"/>
+        <attvalue for="5" value="{$endDate}"/>{$rel_values}
     </attvalues>
 </edge>
 XML;
@@ -274,6 +320,51 @@ XML;
     }
     return $edges;         
 }
+
+private function _processFieldData($dty_ID, &$values){
+
+    $dty_Type = mysql__select_value($this->mysqli, "SELECT dty_Type FROM defDetailTypes WHERE dty_ID = ?", ['i', $dty_ID]);
+
+    foreach($values as $dtl_ID => $value){
+
+        switch ($dty_Type) {
+            case 'file': // get external URL / Heurist URL
+
+                $f_id = $value['file']['ulf_ObfuscatedFileID'];
+                $external_url = $value['file']['ulf_ExternalFileReference'];
+
+                $value = empty($external_url) ? HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file={$f_id}" : $external_url;
+                break;
+
+            case 'enum': // get term label
+
+                if(is_numeric($value)){
+                    $value = intval($value);
+                    $value = mysql__select_value($this->mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $value]);
+                }
+
+                break;
+
+            case 'resource': // get record title
+
+                if(is_numeric($value)){
+                    $value = intval($value);
+                    $value = mysql__select_value($this->mysqli, "SELECT rec_Title FROM Records WHERE rec_ID = ?", ['i', $value]);
+                }else if(is_array($value)){
+                    $value = $value["title"];
+                }
+
+                break;
+
+            default:
+                break;
+        }
+
+        $values[$dtl_ID] = htmlspecialchars($value);
+    }
+
+    $values = is_array($values) ? implode('|', $values) : $values;
+} 
 
 } //end class
 ?>

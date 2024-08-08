@@ -51,7 +51,7 @@ if( $system->init(@$_REQUEST['db']) ){
         $new_rt_id = $mysqli->insert_id;
     
         $dbID = HEURIST_DBID;
-        if(!($dbID>0)) $dbID = 0;
+        if(!($dbID>0)){ $dbID = 0;}
         
         $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                     .', rty_NameInOriginatingDB=rty_Name'

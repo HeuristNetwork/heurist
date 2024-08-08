@@ -17,6 +17,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global L */
+
 if((typeof L !=='undefined') && L.Control)
 {
     
@@ -40,7 +42,7 @@ L.Control.Publish = L.Control.extend({
     
     onAdd: function(map) {
         
-        var container = this._container = L.DomUtil.create('div','leaflet-bar');
+        let container = this._container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)
@@ -97,7 +99,7 @@ L.Control.Help = L.Control.extend({
     
     onAdd: function(map) {
         
-        var container = this._container = L.DomUtil.create('div','leaflet-bar');
+        let container = this._container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)

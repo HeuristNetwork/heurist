@@ -17,6 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global stringifyMultiWKT, accessToken_GeonamesAPI */
 
 $.widget( "heurist.lookupConfig", {
 
@@ -119,7 +120,7 @@ $.widget( "heurist.lookupConfig", {
             return;
         }
         
-        var that = this;
+        let that = this;
 
         this.options.service_config = window.hWin.HEURIST4.util.isJSON(this.options.service_config);
         if(!this.options.service_config){ // Invalid value / None
@@ -188,7 +189,7 @@ $.widget( "heurist.lookupConfig", {
     //
     _getActionButtons: function(){
 
-        var that = this;
+        let that = this;
 
         return [
             {
@@ -217,10 +218,10 @@ $.widget( "heurist.lookupConfig", {
     //
     _initDialog: function(){
         
-        var options = this.options,
+        let options = this.options,
             btn_array = this._getActionButtons(), 
-            position = null,
-                that = this;
+            position = null;
+        const that = this;
     
         if(!options.beforeClose){
                 options.beforeClose = function(){
@@ -229,14 +230,12 @@ $.widget( "heurist.lookupConfig", {
         }
         
         if(position==null) position = { my: "center", at: "center", of: window };
-        var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
         if(options['width']>maxw) options['width'] = maxw*0.95;
-        var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
         
-        var that = this;
-        
-        var $dlg = this.element.dialog({
+        let $dlg = this.element.dialog({
             autoOpen: false ,
             //element: this.element[0],
             height: options['height'],
@@ -272,7 +271,7 @@ $.widget( "heurist.lookupConfig", {
             this._as_dialog.dialog("open");
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -303,7 +302,7 @@ $.widget( "heurist.lookupConfig", {
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
 
         // check that all assigned services contain valid details
         this.updateOldConfigurations();
@@ -346,10 +345,10 @@ $.widget( "heurist.lookupConfig", {
         this._on(this.selectServiceType[0], {
             change: function(event, ui){
 
-                var service = that.selectServiceType.val(); // selected service
+                let service = that.selectServiceType.val(); // selected service
 
                 if(service == 'ESTC_editions' || service == 'ESTC_works' || service == 'ESTC'){
-                    var req = {
+                    let req = {
                         a: 'check_allow_estc',
                         db: window.hWin.HAPI4.database,
                         ver: service
@@ -368,7 +367,7 @@ $.widget( "heurist.lookupConfig", {
             }
         });
 
-        var ele = this.element.find('#inpt_label');
+        let ele = this.element.find('#inpt_label');
         this._on(ele, {input: this._updateStatus });
 
         ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
@@ -565,15 +564,15 @@ $.widget( "heurist.lookupConfig", {
 
     saveConfigrations: function(){
 
-        var that = this;
+        let that = this;
 
-        var fields = {
+        let fields = {
             'sys_ID': 1,
             'sys_ExternalReferenceLookups': JSON.stringify(this.options.service_config)
         };
 
         // Update sysIdentification record
-        var request = {
+        let request = {
             'a': 'save',
             'entity': 'sysIdentification',
             'request_id': window.hWin.HEURIST4.util.random(),
@@ -602,11 +601,11 @@ $.widget( "heurist.lookupConfig", {
     //
     _closeHandler: function(isSave=false, isMouseLeave=false, trigger){
 
-        var that = this;
+        let that = this;
 
-        var hasChanges = (this._is_modified || this._services_modified);
+        let hasChanges = (this._is_modified || this._services_modified);
 
-        var $dlg, buttons = {};
+        let $dlg, buttons = {};
 
         buttons['Save'] = function(){
             
@@ -627,8 +626,8 @@ $.widget( "heurist.lookupConfig", {
 
         if(!isSave && trigger && !trigger.is('button') && hasChanges){
 
-            var wording = this._is_modified ? 'current configuration' : 'available services';
-            var button = this._is_modified ? '"Apply"' : '"Save"'
+            let wording = this._is_modified ? 'current configuration' : 'available services';
+            let button = this._is_modified ? '"Apply"' : '"Save"'
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'});
@@ -650,11 +649,11 @@ $.widget( "heurist.lookupConfig", {
     //
     _getServiceSelectmenu: function(){
 
-        var options = [];
+        let options = [];
 
-        var values = {};
+        let values = {};
 
-        for(idx in this._available_services){
+        for(let idx in this._available_services){
 
             values = {
                 title: this._available_services[idx].label,
@@ -708,7 +707,7 @@ $.widget( "heurist.lookupConfig", {
         // empty control variables
         this._fillConfigForm('new');
         
-        var ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
+        let ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
     },
     
     //
@@ -728,14 +727,14 @@ $.widget( "heurist.lookupConfig", {
             this.element.find('#service_description').html('<strong>' + cfg0.service + '</strong>: ' + cfg0.description);
             this.element.find('#inpt_label').val(cfg0.label);
             
-            var tbl = this.element.find('#tbl_matches');
+            let tbl = this.element.find('#tbl_matches');
             tbl.empty();
 
             $.each(this._current_cfg.fields, function(field, code){
                 $('<tr><td>'+field+'</td><td><select data-field="'+field+'"></select></td><td class="lookup_data" data-field="'+field+'"></td></tr>').appendTo(tbl);
             });
 
-            var rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
+            let rty_ID = this._current_cfg.rty_ID>0 ?$Db.getLocalID('rty',this._current_cfg.rty_ID) :'';
             
             //select service and type
             if(cfg0.service) {
@@ -792,13 +791,13 @@ $.widget( "heurist.lookupConfig", {
                                || (this._current_cfg.label != this.element.find('#inpt_label').val()); 
                 if(!this._is_modified){
 
-                    var tbl = this.element.find('#tbl_matches');
-                    var fields = {};
-                    var that = this;
+                    let tbl = this.element.find('#tbl_matches');
+                    let fields = {};
+                    let that = this;
                     $.each(tbl.find('select'), function(i, ele){ // get mapped fields
                 
-                        var field = $(ele).attr('data-field');
-                        var dty_ID = $(ele).val();
+                        let field = $(ele).attr('data-field');
+                        let dty_ID = $(ele).val();
 
                         if(dty_ID == ""){
                             //dty_ID = null;
@@ -908,7 +907,7 @@ $.widget( "heurist.lookupConfig", {
     //
     _displayTestResults: function(service_name){
 
-        var that = this;
+        let that = this;
 
         const handled_services = ['bnfLibrary', 'bnfLibraryAut', 'tlcmap', 'geoName', 'postalCodeSearch', 'nomisma', 'nakala', 'nakala_author'];
 
@@ -978,10 +977,10 @@ $.widget( "heurist.lookupConfig", {
         }
 
         // Display data
-        var $tbl_cells = this.element.find('.lookup_data');
+        let $tbl_cells = this.element.find('.lookup_data');
 
-        var idx = this.element.find('#tbl_matches').attr('data-idx');
-        var data = this.example_results[service_name] ? this.example_results[service_name][idx] : null;
+        let idx = this.element.find('#tbl_matches').attr('data-idx');
+        let data = this.example_results[service_name] ? this.example_results[service_name][idx] : null;
 
         if(service_name == 'nakala'){
             let rec_IDs = Object.keys(this.example_results[service_name]);
@@ -992,9 +991,9 @@ $.widget( "heurist.lookupConfig", {
         if(data){
 
             $.each($tbl_cells, function(idx, cell){
-                var $cell = $(cell);
-                var field = $cell.attr('data-field');
-                var value = null;
+                let $cell = $(cell);
+                let field = $cell.attr('data-field');
+                let value = null;
 
                 if(!field){
                     return;
@@ -1002,14 +1001,14 @@ $.widget( "heurist.lookupConfig", {
 
                 if(field.indexOf('.') != -1){
 
-                    var fld_parts = field.split('.');
+                    let fld_parts = field.split('.');
                     value = data[fld_parts[0]];
 
                     if(window.hWin.HEURIST4.util.isempty(value)){
                         return;
                     }
 
-                    for(var i = 1; i < fld_parts.length; i++){
+                    for(let i = 1; i < fld_parts.length; i++){
 
                         if(window.hWin.HEURIST4.util.isempty(value[fld_parts[i]]) && !window.hWin.HEURIST4.util.isempty(value[0])){
                             value = value[0];
@@ -1032,21 +1031,21 @@ $.widget( "heurist.lookupConfig", {
 
                         if(field == 'author'){
 
-                            var creator_val = '';
+                            let creator_val = '';
             
-                            for(var idx in value){
+                            for(let idx in value){
             
-                                var cur_string = '';
-                                var cur_obj = value[idx];
+                                let cur_string = '';
+                                let cur_obj = value[idx];
             
                                 if($.isPlainObject(cur_obj)){
-                                    if(cur_obj.hasOwnProperty('firstname') && cur_obj['firstname'] != ''){
+                                    if(Object.hasOwn(cur_obj,'firstname') && cur_obj['firstname'] != ''){
                                         cur_string = cur_obj['firstname'];
                                     }
-                                    if(cur_obj.hasOwnProperty('surname') && cur_obj['surname'] != ''){
+                                    if(Object.hasOwn(cur_obj,'surname') && cur_obj['surname'] != ''){
                                         cur_string = (cur_string != '') ? cur_obj['surname'] + ', ' + cur_string : cur_obj['surname'];
                                     }
-                                    if(cur_obj.hasOwnProperty('active') && cur_obj['active'] != ''){
+                                    if(Object.hasOwn(cur_obj,'active') && cur_obj['active'] != ''){
                                         cur_string += ' (' + cur_obj['active'] + ')';
                                     }
             
@@ -1067,18 +1066,18 @@ $.widget( "heurist.lookupConfig", {
                             value = creator_val;
                         }else if(field == 'publisher'){
 
-                            var pub_val = '';
+                            let pub_val = '';
             
-                            for(var idx in value){
+                            for(let idx in value){
             
-                                var cur_string = '';
-                                var cur_obj = value[idx];
+                                let cur_string = '';
+                                let cur_obj = value[idx];
             
                                 if($.isPlainObject(cur_obj)){
-                                    if(cur_obj.hasOwnProperty('name') && cur_obj['name'] != ''){
+                                    if(Object.hasOwn(cur_obj,'name') && cur_obj['name'] != ''){
                                         cur_string = cur_obj['name'];
                                     }
-                                    if(cur_obj.hasOwnProperty('location') && cur_obj['location'] != '' && cur_string == ''){
+                                    if(Object.hasOwn(cur_obj,'location') && cur_obj['location'] != '' && cur_string == ''){
                                         cur_string = cur_obj['location'];
                                     }
             
@@ -1103,11 +1102,11 @@ $.widget( "heurist.lookupConfig", {
                         if(field == 'geometry'){
 
                             value = {"type": "Feature", "geometry": value};
-                            var wkt = stringifyMultiWKT(value);    
+                            let wkt = stringifyMultiWKT(value);    
                             if(window.hWin.HEURIST4.util.isempty(wkt)){
                                 value = '';
                             }else{
-                                var typeCode = 'm';
+                                let typeCode = 'm';
                                 if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
                                     if(wkt.indexOf('LINESTRING')>=0){
                                         typeCode = 'l';
@@ -1155,16 +1154,16 @@ $.widget( "heurist.lookupConfig", {
     //
     _runTestNomisma: function(type = ''){
 
-        var that = this;
+        let that = this;
         let service_name = 'nomisma';
         const nomismaServices = ['getMints', 'getHoards', 'getFindspots'];
 
-        if(type == '' && this.example_results.hasOwnProperty(service_name)){
+        if(type == '' && Object.hasOwn(this.example_results, service_name)){
             this._displayTestResults(service_name);
             return;
         }
 
-        if(!this.example_results.hasOwnProperty(service_name)){
+        if(! Object.hasOwn(this.example_results, service_name)){
             this.example_results[service_name] = [];
         }
 
@@ -1206,11 +1205,11 @@ $.widget( "heurist.lookupConfig", {
     //
     _onRectypeChange: function(){
      
-        var rty_ID = this.selectRecordType.val();   
+        let rty_ID = this.selectRecordType.val();   
         
-        var tbl = this.element.find('#tbl_matches');
+        let tbl = this.element.find('#tbl_matches');
         
-        var that = this;
+        let that = this;
         
         $.each(tbl.find('select'), function(i,selObj){
 
@@ -1225,8 +1224,8 @@ $.widget( "heurist.lookupConfig", {
         if(rty_ID>0){
             $.each(tbl.find('select'), function(i, ele){
                 
-                var field = $(ele).attr('data-field');
-                var dty_ID;
+                let field = $(ele).attr('data-field');
+                let dty_ID;
               
                 if(!window.hWin.HEURIST4.util.isempty(that._current_cfg)){
                     
@@ -1234,7 +1233,7 @@ $.widget( "heurist.lookupConfig", {
                     
                 }else if(!window.hWin.HEURIST4.util.isempty(that.selectServiceType.val())){
                     
-                    for(idx in that._available_services){
+                    for(let idx in that._available_services){
 
                         if(that._available_services[idx] == that.selectServiceType.val()){
                             dty_ID = that._available_services[idx].fields[field];
@@ -1258,7 +1257,7 @@ $.widget( "heurist.lookupConfig", {
                     }
                 }
                 
-                var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
+                let sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
                     ['freetext','blocktext','enum','date','geo','float','year','integer','resource','file','relmaker'], '...',
                     {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} );
                     
@@ -1277,7 +1276,7 @@ $.widget( "heurist.lookupConfig", {
         
         if(this._isNewCfg && this._current_cfg.label){
 
-            var s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
+            let s = this._current_cfg.label + '<span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     +  (rty_ID>0?$Db.rty(rty_ID, 'rty_Name'):'select record type');
             this.serviceList.find('li[data-service-id="new"]').html(s);
         }
@@ -1290,29 +1289,29 @@ $.widget( "heurist.lookupConfig", {
     //
     _reloadServiceList: function(){
       
-        var that = this;
+        let that = this;
 
         this._off(this.serviceList.find('span[data-service-id]'),'click');
         this.serviceList.empty(); // empty list
 
-        for(idx in this.options.service_config){ // display all assigned services
+        for(let idx in this.options.service_config){ // display all assigned services
 
-            var cfg = this.options.service_config[idx];
+            let cfg = this.options.service_config[idx];
 
             if(window.hWin.HEURIST4.util.isempty(cfg)){
                 continue;
             }
 
-            var name = cfg.label;
+            let name = cfg.label;
             
-            for(j in this._available_services){
+            for(let j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
                     break;
                 }
             }
 
-            var s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
+            let s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     + $Db.rty(cfg.rty_ID, 'rty_Name');
             s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
 
@@ -1321,12 +1320,12 @@ $.widget( "heurist.lookupConfig", {
         
         this.serviceList.find('li')
         .on( 'mouseenter', function(event){ 
-            var ele = $(event.target);
+            let ele = $(event.target);
             if(!ele.is('li')) ele = ele.parent();
             ele.addClass('ui-state-hover');
         } )
         .on( 'mouseleave', function(event){
-            var ele = $(event.target);
+            let ele = $(event.target);
             if(!ele.is('li')){ 
                 ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
                 ele = ele.parent();
@@ -1347,7 +1346,7 @@ $.widget( "heurist.lookupConfig", {
     
     _reloadServiceList_item: function( service_id, s ){
         
-            var s_active = '';
+            let s_active = '';
             if(service_id=='new' || (this._current_cfg && this._current_cfg.service_id==service_id)){
                 s_active = ' ui-state-active';
             }
@@ -1363,9 +1362,9 @@ $.widget( "heurist.lookupConfig", {
     //
     _applyConfig: function(){
 
-        var rty_ID = this.selectRecordType.val();
-        var service_name = this.selectServiceType.val();
-        var label = this.element.find('#inpt_label').val();
+        let rty_ID = this.selectRecordType.val();
+        let service_name = this.selectServiceType.val();
+        let label = this.element.find('#inpt_label').val();
 
         if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
 
@@ -1374,16 +1373,16 @@ $.widget( "heurist.lookupConfig", {
 
         }else if(rty_ID>0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
-            var that = this;
-            var tbl = this.element.find('#tbl_matches');
-            var is_field_mapped = false;
+            let that = this;
+            let tbl = this.element.find('#tbl_matches');
+            let is_field_mapped = false;
 
-            var fields = {};
+            let fields = {};
 
             $.each(tbl.find('select'), function(i, ele){ // get mapped fields
 
-                var field = $(ele).attr('data-field');
-                var dty_ID = $(ele).val();
+                let field = $(ele).attr('data-field');
+                let dty_ID = $(ele).val();
                 fields[field] = dty_ID; 
 
                 if(dty_ID>0) is_field_mapped = true;
@@ -1397,7 +1396,7 @@ $.widget( "heurist.lookupConfig", {
                     this.options.service_config = {};    
                 } 
 
-                var t_name = service_name + '_' + rty_ID;
+                let t_name = service_name + '_' + rty_ID;
 
                 if(window.hWin.HEURIST4.util.isempty(label)){ // set label to default, if none provided
                     label = service_name;
@@ -1440,7 +1439,7 @@ $.widget( "heurist.lookupConfig", {
     //
     _removeConfig: function(service_id){
 
-        var is_del = false;
+        let is_del = false;
         if(window.hWin.HEURIST4.util.isempty(service_id)) { // check if a service was provided
             if(this._isNewCfg){
                 this._isNewCfg = false;

@@ -24,7 +24,7 @@
                 </div>
                 <div id="main-content" 
                     data-homepageid="<?php print $home_page_record_id;?>" 
-                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?> 
                     data-viewonly="<?php print ($hasAccess)?0:1;?>">
                 </div>
     *  
@@ -172,7 +172,7 @@ if($isWebPage){ //set in websiteRecord.php
 <div class="ent_wrapper heurist-website selectmenu-parent">
 <?php
     if($showWarnAboutPublic){
-        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
+        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';
     }
     if(!$edit_OldEditor && $system->is_member(1)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
@@ -181,7 +181,7 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
     }
 ?>
     <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
@@ -202,7 +202,7 @@ if($isWebPage){ //set in websiteRecord.php
     
 <?php
     if($showWarnAboutPublic){
-      print '<div style="position: absolute;text-align: center;width: 100%;color: red;">Web site record is not public. It will not be visible to the public</div>';  
+      print '<div style="position: absolute;text-align: center;width: 100%;color: red;">Web site record is not public. It will not be visible to the public</div>';
     }
 
     if($page_header!=null && $page_header!=''){ //custom header content
@@ -231,15 +231,15 @@ if($isWebPage){ //set in websiteRecord.php
         .'style="position:absolute;left:5px;top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>';// login link
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light"></div>       
     </div>
     <div class="ent_content_full  ui-heurist-bg-light"  id="main-content-container"
-            style="top:152px;<?php echo $is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':''; ?>padding: 5px;">
+            style="top:152px;<?php echo $is_page_footer_fixed && $page_footer?'margin-bottom: 48px;':'';?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
-            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+            <?php print ($open_page_or_record_on_init>0)?'data-initid="'.$open_page_or_record_on_init.'"':'';?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
             style="<?php echo !$is_page_footer_fixed && $page_footer?'position:static;':'';?>">
         </div>
@@ -248,11 +248,11 @@ if($isWebPage){ //set in websiteRecord.php
                 <button class="keywords" style="position:fixed;top:160px;left:5px;">Back</button>
         </div>
 <?php
-        if(!$is_page_footer_fixed && $page_footer) print $page_footer;
+        if(!$is_page_footer_fixed && $page_footer) {print $page_footer;}
 ?>        
     </div>
 <?php
-        if($is_page_footer_fixed && $page_footer) print $page_footer;
+        if($is_page_footer_fixed && $page_footer) {print $page_footer;}
 ?>        
     </div>
 <?php

@@ -77,11 +77,10 @@ class ElasticSearch {
 
     private static function initialize()
     {
-        if (self::$initialized)
-            return;
+        if (self::$initialized)  {return;}
 
         global $system;
-        self::$mysqli = $system->get_mysqli();    
+        self::$mysqli = $system->get_mysqli();
         self::$initialized = true;
     }
 
@@ -97,19 +96,19 @@ class ElasticSearch {
         
         if(isElasticUp()) {
             
-            self::initialize();                        
+            self::initialize();
             
             $record = new stdClass();
 
             // Retrieve record level data
             $query = "SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
-            "from Records where rec_ID=".intval($recID); // omits scratchpad
+            "from Records where rec_ID=".intval($recID);// omits scratchpad
             $res = self::$mysqli->query($query);
 
             // Check if query has succeed
             if ($res) {
-                $row = $res->fetch_row(); // Fetch record data
+                $row = $res->fetch_row();// Fetch record data
 
                 // Construct record
                 $record->URL            = $row[0];
@@ -261,9 +260,9 @@ class ElasticSearch {
     public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
             
-            self::initialize();                        
+            self::initialize();
             
-            self::deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
+            self::deleteIndexForRectype ($dbName, $recTypeID);// clear the existing index
 
             $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
             $res = self::$mysqli->query($query);
@@ -293,9 +292,9 @@ class ElasticSearch {
     */
     public static function buildAllIndices ($dbName, $print=true) {
         if(isElasticUp()) {
-            if ($print)
+            if ($print){
                 print "Building all Elasticsearch indices for: $dbName<br>";
-
+            }
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
             $res = self::$mysqli->query($query);
             $count = 0;
@@ -311,16 +310,16 @@ class ElasticSearch {
                     }
                 }
 
-                if ($print)
+                if ($print){
                     print "ElasticSearch indices have successfully been built for $count record types.";
-
+                }
                 $res->close();
                 return true;
             }else{
                 error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
         }else{
-           print "ElasticSearch service not detected"; 
+           print "ElasticSearch service not detected";
         }
         return false;
     } // buildAllIndices
@@ -330,7 +329,7 @@ class ElasticSearch {
      */
     private static function checkElasticSync($dbName) {
         
-        self::initialize();  
+        self::initialize();
         // 1. Retrieve highest MySQL timestamp
         $mysqlTimestamp = self::getHighestMySqlTimestamp();
 

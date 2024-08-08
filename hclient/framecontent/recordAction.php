@@ -116,7 +116,7 @@ if(!in_array($action_type, $allowed_actions)){
         font-size:1.1em;
     }
     
-.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%; }
+.calendars-jumps .calendars-cmd-prev, .calendars-jumps .calendars-cmd-next { width: 20%;}
 .calendars-month-header, .calendars-nav, .calendars-month th, 
 .calendars-month-header select, .calendars-ctrl, .calendars a{
     background-color:lightgray;
@@ -146,7 +146,7 @@ if(!in_array($action_type, $allowed_actions)){
                 <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
             <div id="div_sel_fieldtype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_record_scope">Field to modify:</label></div>
+                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_fieldtype">Field to modify:</label></div>
                 <select id="sel_fieldtype" class="ui-widget-content ui-corner-all" style="max-width:30em"></select>
             </div>
 

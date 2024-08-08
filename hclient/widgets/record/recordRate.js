@@ -46,7 +46,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
     },
     
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Set Rating');
         return res;
     },    
@@ -56,17 +56,17 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = this.selectRecordScope.val();
+            let scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
-            var rating = this.element.find('input[type=radio]:checked').val();
+            let rating = this.element.find('input[type=radio]:checked').val();
             
             if(!(rating>=0 && rating<6)){
                 window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
                 return;
             }
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -79,7 +79,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
             }
             
         
-            var request = {
+            let request = {
                 'a'          : 'batch',
                 'entity'     : 'usrBookmarks',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -91,7 +91,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){

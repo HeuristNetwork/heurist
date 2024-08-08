@@ -23,7 +23,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         this.btn_search_start.css('float','right');   
         
@@ -47,9 +47,9 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
-            var val = this.input_search_group.val();
+            let val = this.input_search_group.val();
             if(val!='any'){
                 if(val=='Workgroup') request['rem_ToWorkgroupID'] = '-NULL';
                 else if(val=='User') request['rem_ToUserID'] = '-NULL';
@@ -69,7 +69,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
             }
 
             if($.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
+                this._trigger( "onresult", null, {recordset:new HRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
@@ -78,13 +78,13 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
                 request['details']    = 'list';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
+                                {recordset:new HRecordSet(response.data), request:request} );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

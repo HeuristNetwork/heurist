@@ -104,10 +104,10 @@ All other elements (#main-xxx) are optional.
 */    
 
 if(!defined('PDIR')) {
-    define('PDIR','../../../');  //need for proper path to js and css           
+    define('PDIR','../../../');//need for proper path to js and css           
 }
 
-require_once dirname(__FILE__).'/../../framecontent/initPageMin.php'; //without client hapi
+require_once dirname(__FILE__).'/../../framecontent/initPageMin.php';//without client hapi
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../../hserv/structure/dbsUsersGroups.php';
 
@@ -186,19 +186,19 @@ $hasAccess = (($rec['rec_NonOwnerVisibility'] == 'public') ||
                $system->is_admin() ||
     ( ($system->get_user_id()>0) && 
             ($rec['rec_NonOwnerVisibility'] !== 'hidden' ||    //visible for logged 
-             $system->is_member($rec['rec_OwnerUGrpID']) )) );   //owner
+             $system->is_member($rec['rec_OwnerUGrpID']) )) );//owner
 
 /*             
 print $rec_id.'<br>';
-print $rec['rec_NonOwnerVisibility'].'<br>';    
+print $rec['rec_NonOwnerVisibility'].'<br>';
 print $system->get_user_id().'  >'.($system->is_admin()===true).'<br>';
-print $rec['rec_OwnerUGrpID'].'<br>'; 
-print $hasAccess.'<br>'; 
-print '--------<br>'; 
-print ($rec['rec_NonOwnerVisibility'] === 'public').'<br>'; 
-print ($system->is_admin()===true).'<br>'; 
-print ($system->get_user_id()>0).'<br>'; 
-print ($rec['rec_NonOwnerVisibility'] !== 'hidden').'<br>'; 
+print $rec['rec_OwnerUGrpID'].'<br>';
+print $hasAccess.'<br>';
+print '--------<br>';
+print ($rec['rec_NonOwnerVisibility'] === 'public').'<br>';
+print ($system->is_admin()===true).'<br>';
+print ($system->get_user_id()>0).'<br>';
+print ($rec['rec_NonOwnerVisibility'] !== 'hidden').'<br>';
 print  $system->is_member($rec['rec_OwnerUGrpID']);
 exit;
 */
@@ -219,24 +219,24 @@ $showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'p
 
 $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
 
-$site_owner = user_getDbOwner($mysqli); //info about user #2
+$site_owner = user_getDbOwner($mysqli);//info about user #2
 
 $website_title = '';
 $show_pagetitle = false;
 $isWebPage = false;
 
-$TRM_NO = ConceptCode::getTermLocalID('2-531'); //TRM_NO
-$TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447'); //TRM_NO_OLD
+$TRM_NO = ConceptCode::getTermLocalID('2-531');//TRM_NO
+$TRM_NO_OLD = ConceptCode::getTermLocalID('99-5447');//TRM_NO_OLD
 
     
 $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
             defined('DT_CMS_PAGETYPE') &&
-            __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254')); //TRM_PAGETYPE_WEBPAGE 
+            __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));//TRM_PAGETYPE_WEBPAGE 
 
 if(!$isWebPage){ //for standalone webpage always without title
     $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
     $show_pagetitle = ($show_pagetitle!== $TRM_NO && //TRM_NO
-                       $show_pagetitle!== $TRM_NO_OLD); //TRM_NO_OLD
+                       $show_pagetitle!== $TRM_NO_OLD);//TRM_NO_OLD
 }
 
 
@@ -250,13 +250,13 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
 }                
 
 $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
-$image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
+$image_logo = __getFile($rec, DT_FILE_RESOURCE, null);
 
-$image_altlogo = __getFile($rec, '2-926', null);  //DT_CMS_ALTLOGO
-$image_altlogo_url = __getValue($rec, '2-943'); //DT_CMS_ALTLOGO_URL
-$title_alt = __getValue($rec, '3-1009');  //DT_CMS_ALT_TITLE
+$image_altlogo = __getFile($rec, '2-926', null);//DT_CMS_ALTLOGO
+$image_altlogo_url = __getValue($rec, '2-943');//DT_CMS_ALTLOGO_URL
+$title_alt = __getValue($rec, '3-1009');//DT_CMS_ALT_TITLE
 $title_alt2 = __getValue($rec, '2-1052');
-$image_banner = __getFile($rec, '99-951', null); //DT_CMS_BANNER
+$image_banner = __getFile($rec, '99-951', null);//DT_CMS_BANNER
 
 $image_logo = $image_logo?'<img style="max-width:270px;" src="'.$image_logo.'">':'';
 
@@ -272,16 +272,16 @@ if(defined('DT_LANGUAGES')){
         $orig_arr = print_r($website_languages,true);
         $website_languages_codes = getTermCodes($mysqli, $website_languages);
         $res = '';
-        $website_languages_res = array(); //defined codes
+        $website_languages_res = array();//defined codes
         
         foreach($website_languages as $term_id){
             $lang_code = @$website_languages_codes[$term_id];
             
             if($lang_code){
                 $lang_code = strtoupper($lang_code);
-                if($website_language_def=='') $website_language_def = $lang_code;
+                if($website_language_def=='') {$website_language_def = $lang_code;}
                 $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
-                array_push($website_languages_res, $lang_code);        
+                array_push($website_languages_res, $lang_code);
             } 
         }
         $website_languages_links = $res;
@@ -290,20 +290,20 @@ if(defined('DT_LANGUAGES')){
 }
 
 $current_language = @$_REQUEST['lang'];
-if(!$current_language) $current_language = $website_language_def; 
+if(!$current_language) {$current_language = $website_language_def;}
 
 if(!empty($website_languages_links)){
     $curr_lang_text = 'data-lang="'.$website_language_def.'"';
     $website_languages_links = str_replace($curr_lang_text, $curr_lang_text . ' class="lang-selected"', $website_languages_links);
 }
 
-$website_title = __getValueAsJSON($rec, DT_NAME); //multilang titles
-$website_title_translated = getCurrentTranslation(@$rec['details'][DT_NAME], $current_language); //default title
+$website_title = __getValueAsJSON($rec, DT_NAME);//multilang titles
+$website_title_translated = getCurrentTranslation(@$rec['details'][DT_NAME], $current_language);//default title
 
 
 $show_login_button = true; // by default, show login button
 if(!$isWebPage){
-    $show_login_button = __getValue($rec, '2-1095'); 
+    $show_login_button = __getValue($rec, '2-1095');
     
     $show_login_button = empty($show_login_button) ||
                             ((($show_login_button == $TRM_NO) || 
@@ -429,7 +429,7 @@ if(!$isWebPage){  //not standalone web page
 
     $record_view_smarty_template = defined('DT_SMARTY_TEMPLATE')?__getValue($rec, DT_SMARTY_TEMPLATE):null; 
     $record_view_target = defined('DT_CMS_TARGET')?__getValue($rec, DT_CMS_TARGET):null; 
-    if($record_view_target=='recordview') $record_view_target='main-recordview';
+    if($record_view_target=='recordview') {$record_view_target='main-recordview';}
     
     //backward capability 
     if($custom_website_php_template==null && strpos($record_view_smarty_template, 'cmsTemplate')===0){
@@ -449,7 +449,7 @@ if(!$isWebPage){  //not standalone web page
         if(defined('DT_CMS_FOOTER')){
             $page_footers = @$rec['details'][DT_CMS_FOOTER];
         }
-        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER):''; 
+        //$page_footer = defined('DT_CMS_FOOTER')?__getValue($rec, DT_CMS_FOOTER):'';
         $is_page_footer_fixed = ($page_footer_type != ConceptCode::getTermLocalID('2-531'));
         $default_style = ";border-top:2px solid rgb(112,146,190);background:lightgray;";
         if ($is_page_footer_fixed) {
@@ -504,7 +504,7 @@ $websiteScriptAndStyles_php = HEURIST_DIR.'hclient/widgets/cms/websiteScriptAndS
 
 $template = __getTemplate($custom_website_php_template);
 if(!$template && $default_CMS_Template){
-    $template = __getTemplate($default_CMS_Template);    
+    $template = __getTemplate($default_CMS_Template);
 }
 
 if($template!==false){
@@ -520,7 +520,7 @@ if($template!==false){
             include_once ERROR_REDIR;
             exit;
     }else{
-        include_once 'cmsTemplate.php';    
+        include_once 'cmsTemplate.php';
     }
 } 
 
@@ -535,7 +535,7 @@ function __getTemplate($template){
         }
         if($template!='cmsTemplate.php'){
             $template = HEURIST_DIR.'hclient/widgets/cms/templates/'.$template;
-            if(!file_exists($template)) return false;
+            if(!file_exists($template)) {return false;}
         }
         return $template;
     }
@@ -546,6 +546,6 @@ function __getTemplate($template){
 //
 //
 function _isPositiveInt($val){
-    return (is_numeric($val) && (int)$val>0);
+    return is_numeric($val) && (int)$val>0;
 }
 ?>

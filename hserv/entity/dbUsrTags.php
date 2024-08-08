@@ -62,17 +62,17 @@ class DbUsrTags extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('tag_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('tag_Text');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('tag_Modified');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         $pred = $this->searchMgr->getPredicate('tag_UGrpID', true);
         if($pred!=null) {
-            array_push($where, $pred);   
+            array_push($where, $pred);
         }
 
         
@@ -118,7 +118,7 @@ class DbUsrTags extends DbEntityBase
         $order = array();
         
         //$pred = $this->searchMgr->getSortPredicate('ulf_UploaderUGrpID');
-        //if($pred!=null) array_push($order, $pred);
+        //if($pred!=null) {array_push($order, $pred);}
         $value = @$this->data['sort:tag_Modified'];
         if($value!=null){
             array_push($order, 'tag_Modified '.($value>1?'ASC':'DESC'));
@@ -180,7 +180,7 @@ class DbUsrTags extends DbEntityBase
                     'tag_ID in ('.implode(',', $this->recordIDs).') AND tag_UGrpID not in ('.implode(',',$ugrs).')');
             
             
-            $cnt = count($recIDs_norights);       
+            $cnt = count($recIDs_norights);
                     
             if($cnt>0){
                 $this->system->addError(HEURIST_REQUEST_DENIED, 
@@ -209,7 +209,7 @@ class DbUsrTags extends DbEntityBase
             if($isinsert && !($this->records[$idx]['tag_UGrpID']>0)){
                 $this->records[$idx]['tag_UGrpID'] = $this->system->get_user_id();
             }
-            $this->records[$idx]['tag_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['tag_Modified'] = date('Y-m-d H:i:s');//reset
         }
 
         return $ret;
@@ -233,7 +233,7 @@ class DbUsrTags extends DbEntityBase
             
             $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT rtl_RecID '
                         .'FROM usrRecTagLinks WHERE rtl_TagID in ('.implode(',', $this->recordIDs).')');
-            $cnt = count($recIDs_inuse);       
+            $cnt = count($recIDs_inuse);
                         
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 
@@ -288,7 +288,7 @@ class DbUsrTags extends DbEntityBase
             }
             
         }else{
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');    
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
         }
         
         return $ret;
@@ -317,7 +317,7 @@ class DbUsrTags extends DbEntityBase
         // MODE D  replace several old tags (tagIDs) to new ONE
         $this->newTagID = prepareIds(@$this->data['newTagID']);
         if(count($this->newTagID)>0){             
-            return $this->replaceTags();   
+            return $this->replaceTags();
         }
 
         if(!$this->_validatePermission()){ //check that all tags belongs to current user
@@ -342,7 +342,7 @@ class DbUsrTags extends DbEntityBase
         if($rec_RecTypeID>0){ 
             $assignIDs = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
                 .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID, 'intval');
-            $assignIDs = prepareIds($assignIDs);   
+            $assignIDs = prepareIds($assignIDs);
             if($assignIDs==null || count($assignIDs)==0){             
                 $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                 return false;
@@ -362,7 +362,7 @@ class DbUsrTags extends DbEntityBase
             $res = $mysqli->query($query);
             if(!$res){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 
                 $this->system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
                 return false;
@@ -378,7 +378,7 @@ class DbUsrTags extends DbEntityBase
             $res = $mysqli->query($query);
             if(!$res){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 
                 $this->system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
                 return false;
@@ -401,7 +401,7 @@ class DbUsrTags extends DbEntityBase
             $res = $mysqli->query($insert_query);
             if(!$res){
                 $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 
                 $this->system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
                 return false;
@@ -424,7 +424,7 @@ class DbUsrTags extends DbEntityBase
                 $res = $mysqli->query($insert_query);
                 if(!$res){
                     $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                     
                     $this->system->addError(HEURIST_DB_ERROR,"Cannot create bookmarks", $mysqli->error );
                     return false;
@@ -435,12 +435,12 @@ class DbUsrTags extends DbEntityBase
         
         //commit
         $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return array('processed'=>count($assignIDs), //afffected records
                 'added'=>$res_tag_added, //tags assigned
                 'removed'=>$res_tag_removed, //tags removed
-                'bookmarks'=>$res_bookmarks); //new bookmarks
+                'bookmarks'=>$res_bookmarks);//new bookmarks
         
     }
     

@@ -26,7 +26,7 @@ class DbEntitySearch
 {
     private $system;  
     
-    private $data = array(); //assigned in validate params
+    private $data = array();//assigned in validate params
     
     //data types: ids, int, float, date, bool, enum
     //structure
@@ -155,7 +155,7 @@ class DbEntitySearch
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
                 }else if($is_ids=='ids'){
-                    $res = $this->_validateIds($fieldname, $data_type); //, 'user/group IDs');
+                    $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
                     
                 }else if($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);
@@ -170,7 +170,7 @@ class DbEntitySearch
                 if(!is_bool($res)){
                     $this->data[$fieldname] = $res;
                 }else{
-                    if(!$res) return false;        
+                    if(!$res) {return false;}        
                 }        
             }
         }
@@ -184,10 +184,11 @@ class DbEntitySearch
     //
     private function _cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
-            if ($val[strlen($val)-1] == '"')
+            if ($val[strlen($val)-1] == '"'){
                 $val = substr($val, 1, -1);
-            else
+            }else{
                 $val = substr($val, 1);
+            }
             return preg_replace('/ +/', ' ', trim($val));
         }
 
@@ -200,10 +201,10 @@ class DbEntitySearch
     public function getPredicate($fieldname, $is_ids=false) {
         
         $value = @$this->data[$fieldname];
-        if($value==null) return null;
+        if($value==null) {return null;}
         
         $field_config = @$this->fields[$fieldname];
-        if($field_config==null) return null;
+        if($field_config==null) {return null;}
         $data_type = $field_config['dty_Type'];
         $is_ids = ($is_ids || @$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
         
@@ -219,18 +220,18 @@ class DbEntitySearch
             if(!is_array($value) && is_string($value) && strpos($value, '-')===0){
                 $negate = true;
                 $value = substr($value, 1);
-                if($value=='') return null;
+                if($value=='') {return null;}
             }else{
                 $negate = false;
             }
         
             if($data_type=='freetext' ||  $data_type=='url' || $data_type=='blocktext'){
-                $value = prepareStrIds($value);    
+                $value = prepareStrIds($value);
             }else{
-                $value = prepareIds($value);    
+                $value = prepareIds($value);
             }
             
-            if(count($value)==0) return null;
+            if(count($value)==0) {return null;}
             
             if(count($value)>1){
                 // comma-separated list of ids
@@ -292,7 +293,7 @@ class DbEntitySearch
             
             $value = $this->_cleanQuotedValue($value);
 
-            if($value=='') continue;
+            if($value=='') {continue;}
             
             $mysqli = $this->system->get_mysqli();
             
@@ -312,7 +313,7 @@ class DbEntitySearch
                 if($between){
                     $res = $between.$values[0].' and '.$values[1];
                 }else{
-                    $res = " $eq ".($data_type == 'int'?intval($value):$value);  //no quotes
+                    $res = " $eq ".($data_type == 'int'?intval($value):$value);//no quotes
                 }
             }
             else if ($data_type == 'date') {    
@@ -452,7 +453,7 @@ class DbEntitySearch
                     }
                     //add calculated fields to header
                     if($calculatedFields!=null){
-                        $fields = $calculatedFields($fields); //adds names of calulated fields
+                        $fields = $calculatedFields($fields);//adds names of calulated fields
                     }
 
                     $records = array();
@@ -463,7 +464,7 @@ class DbEntitySearch
                     {
                         
                         if($calculatedFields!=null){
-                            $row = $calculatedFields($fields, $row); //adds values
+                            $row = $calculatedFields($fields, $row);//adds values
                         }
                         $records[$row[0]] = $row;   //record[primary key] = row from db table
                         $order[] = $row[0];
@@ -474,7 +475,7 @@ class DbEntitySearch
                     if(@$this->data['restapi']==1){
                        
                        //converts records to [fieldname=>value,... ]
-                       $response = array(); 
+                       $response = array();
                        foreach ($records as $record) {
                            $rec = array();
                            foreach ($fields as $idx=>$field){
@@ -505,7 +506,7 @@ class DbEntitySearch
                                         if(!is_array($records[$row[0]][$idx])){
                                             $records[$row[0]][$idx] = array($records[$row[0]][$idx]);
                                         }
-                                        array_push($records[$row[0]][$idx], $row[2].':'.$row[3]);    
+                                        array_push($records[$row[0]][$idx], $row[2].':'.$row[3]);
                                     }
                                 }
                                 $res->close();

@@ -65,13 +65,13 @@ protected function _outputPrepare($data, $params)
         $this->dbid = $this->system->get_system('sys_dbRegisteredID');
         
         if(!defined('HEURIST_REF')){
-            define('HEURIST_REF','https://heuristref.net/');    
+            define('HEURIST_REF','https://heuristref.net/');
         }
         
         
         $ext_info = @$params['extinfo'];
-        if($ext_info==null) $ext_info = '0';
-        else if($ext_info==='1') $ext_info = '1111';
+        if($ext_info==null) {$ext_info = '0';}
+        else if($ext_info==='1') {$ext_info = '1111';}
         if(strlen($ext_info)<4){
             $ext_info = str_pad($ext_info,4,'0');
         }
@@ -99,7 +99,7 @@ protected function _outputHeader(){
         self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 2);
     }    
     if(self::$defDetailtypes==null){
-        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);   
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
     }
     
     $this->idx_rty_name = self::$defRecTypes['typedefs']['commonNamesToIndex']['rty_Name'];
@@ -152,7 +152,7 @@ private function _prepareURI($surl, $original_dbid=null){
         }else if(strpos($surl,'http://')===0 || strpos($surl,'https://')===0){
             $parts = explode('/',$surl);
             $type = array_pop($parts);
-            if($type=='') $type = array_pop($parts);
+            if($type=='') {$type = array_pop($parts);}
             $uri = implode('/',$parts).'/';
         }else{
             //dty-2-1
@@ -170,7 +170,7 @@ private function _prepareURI($surl, $original_dbid=null){
                 
                 if(intval($dbid)>0){
                     $uri = HEURIST_REF.'schema/';
-                    $uri .= $original_dbid.'/';    
+                    $uri .= $original_dbid.'/';
                 }
                 
             }
@@ -183,11 +183,11 @@ private function _prepareURI($surl, $original_dbid=null){
                 //https://www.ica.org/standards/RiC/
                 if(strpos($uri, HEURIST_REF.'schema/')===0){
 
-                    $ns = 'heurist';                       
+                    $ns = 'heurist'; 
                     
                     $parts = explode('/',$uri);
                     $dbid = array_pop($parts);
-                    if($dbid=='') $dbid = array_pop($parts);
+                    if($dbid=='') {$dbid = array_pop($parts);}
                     if(intval($dbid)>0){
                         $ns .= $dbid;                       
                     }
@@ -273,7 +273,7 @@ protected function _outputRecord($record){
         $uri = HEURIST_REF.'db/record/'.$this->dbid.'-'.$recID; //new
         
         
-        $me = $this->graph->resource($uri, $type); 
+        $me = $this->graph->resource($uri, $type);
         
         $this->_setResourceProps($record, $me);
 
@@ -309,7 +309,7 @@ protected function _outputFooter(){
         }
      
         $data = $this->graph->serialise( $this->serial_format );
-        fwrite($this->fd, $data);     
+        fwrite($this->fd, $data);
     }
  
 }
@@ -333,7 +333,7 @@ private function _setResourceProps($record, &$resource){
         
 
     // label or name attribute    
-    //$field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name'); //or label ?
+    //$field_surl = $this->_prepareURI('http://www.w3.org/2000/01/rdf-schema#name');//or label ?
     $resource->set('dc:title', $rec_Title);
 
     //convert details to attributes
@@ -341,7 +341,7 @@ private function _setResourceProps($record, &$resource){
         
         $field_URI = $this->_getFieldURI($rty_ID, $dty_ID);
         
-        if($field_URI==null) continue; //sematic url is not defined
+        if($field_URI==null) {continue;} //sematic url is not defined
         
         $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dtype];
 
@@ -355,18 +355,18 @@ private function _setResourceProps($record, &$resource){
                     
                     $file_resource_uri = HEURIST_REF.'db/file/'.$this->dbid.'-'.$fileinfo['ulf_ObfuscatedFileID'];
                     
-                    $value = $this->graph->resource($file_resource_uri); //create new or find resource
+                    $value = $this->graph->resource($file_resource_uri);//create new or find resource
                     if($this->include_resource_file_info){
                         if(@$fileinfo['ulf_OrigFileName']){
                             $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
                                          strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 || 
                                          strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
                             if(!$skip_file){
-                                $value->set('dc:title', $fileinfo['ulf_OrigFileName']);    
+                                $value->set('dc:title', $fileinfo['ulf_OrigFileName']);
                             }
                         }
                         if(@$fileinfo['ulf_Description']){
-                            $value->set('dc:description', $fileinfo['ulf_Description']);    
+                            $value->set('dc:description', $fileinfo['ulf_Description']);
                         }
                     }
                     
@@ -415,15 +415,15 @@ private function _setResourceProps($record, &$resource){
                         $term_resource_uri = HEURIST_REF.'db/term/'.$trm_ConceptCode;
                     }
                     if($term_resource_uri!=null){
-                        $value = $this->graph->resource($term_resource_uri); //create new or find resource
+                        $value = $this->graph->resource($term_resource_uri);//create new or find resource
                         if($this->include_resource_term_label){
-                            $value->set('dc:title', $trm_Label);    
+                            $value->set('dc:title', $trm_Label);
                         }
                         
                         //works: $value->addLiteral('rdfs:name', $label);
                        
                         //as separate resource to graph root
-                        //$value->add($field_surl, $value); //add new resource
+                        //$value->add($field_surl, $value);//add new resource
                     }else{
                         $value = $trm_Label;
                     }
@@ -433,7 +433,7 @@ private function _setResourceProps($record, &$resource){
                 if($field_type=='date' || $field_type=='year'){
                     //http://www.w3.org/2001/XMLSchema#date
                     $dtype = 'xsd:dateTime';
-                    //$dtype = 'xsd:date'; 'xsd:gYear'
+                    //$dtype = 'xsd:date';'xsd:gYear'
                 }else 
                 if($field_type=='float'){
                     $dtype = 'xsd:decimal';
@@ -451,13 +451,13 @@ private function _setResourceProps($record, &$resource){
                     list($lang, $value) = extractLangPrefix($value);
                     $dtype = 'xsd:string';
                     if($lang!=null) {
-                        $lang = 'fr';//strtolower($lang);   
+                        $lang = 'fr';//strtolower($lang);
                     }
                     */
                 }
                 
                 if($dtype!=null){
-                    $value = new \EasyRdf\Literal($value, $lang, $dtype);  
+                    $value = new \EasyRdf\Literal($value, $lang, $dtype);
                 }
                 
                 $val = $value;
@@ -466,7 +466,7 @@ private function _setResourceProps($record, &$resource){
             $resource->add($field_URI, $value);
   
 /*            
-            if(!isset($val)) $val = '';
+            if(!isset($val)) {$val = '';}
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 
@@ -480,15 +480,15 @@ private function _setResourceProps($record, &$resource){
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($val['value'], true);
                     $term_code  = self::$defTerms->getTermCode($val['value']);
-                    if($term_code) $val['termCode'] = $term_code;    
+                    if($term_code) {$val['termCode'] = $term_code; }
                 }
 
                 //take name for rt structure    
                 if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID] && $idx_name>=0){
-                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                    $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];
                 }else{
                     //non standard field
-                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                    $val['fieldName'] = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];
                 }
 
                 $val['fieldType'] = $field_type;
@@ -503,7 +503,7 @@ private function _setResourceProps($record, &$resource){
 
     //all records related to original set of records are already found in outputPrepare (with recordSearchRelatedIds)
     //now we need to detect only relation for current record 
-    $links = recordSearchRelated($this->system, $rec_ID, 0, true);        
+    $links = recordSearchRelated($this->system, $rec_ID, 0, true);
     
     if($links['status']==HEURIST_OK){
         if(@$links['data']['direct']){
@@ -565,7 +565,7 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
         if($field_surl==null){
             //$field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#Relation');
             if($direction=='direct'){
-                $field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#isSourceOf');    
+                $field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#isSourceOf');
             }else{
                 $field_surl = $this->_prepareURI('https://www.ica.org/standards/RiC/ontology#hasSource');
             }
@@ -585,7 +585,7 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
 
             $rec_resource = $this->graph->resource($uri);
             if($this->include_resource_rec_title && @$headers[$related_rec_ID][0]){
-                $rec_resource->set('dc:title', $headers[$related_rec_ID][0]);    
+                $rec_resource->set('dc:title', $headers[$related_rec_ID][0]);
             }
             
             //$resource->add($field_surl, $this->graph->resource($uri));
@@ -602,7 +602,7 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
 private function _getFieldURI($rty_ID, $dty_ID){
   
     $field_URI = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl],
-                                    self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_dbid]);    
+                                    self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_dbid]);
     if($field_URI==null){
         $field_URI = $this->_prepareURI(self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_surl],
                                          self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$this->idx_dty_ccode]);

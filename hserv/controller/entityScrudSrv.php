@@ -4,7 +4,7 @@
     * SCRUD controller
     * search, create, read, update and delete
     * 
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Add/replace/delete details in batch
     *
     * @package     Heurist academic knowledge management system
@@ -75,7 +75,7 @@
             $system->addError(HEURIST_INVALID_REQUEST, 'Wrong entity parameter: '.htmlspecialchars(@$params['entity']));
             return false;
         }else{
-            return $entity->run();    
+            return $entity->run();
         }
     }
 
@@ -98,7 +98,7 @@
                 $rec_ID = @$search_params['recID'];
                 
                 if($rec_ID>0){
-                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.intval($rec_ID)); 
+                    $rty_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.intval($rec_ID));
                     $search_criteria['defRecTypes'] = array('ID'=>$rty_ID);
                 }else{
                     $rty_ID = $search_params['rty_ID'];
@@ -122,7 +122,7 @@
         if($entities=='all' || $entities==null){
             
             //set_time_limit(120);
-            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');  
+            $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');
             
         }else if(!is_array($entities)){
             $entities = explode(',',$entities);
@@ -130,7 +130,7 @@
             
         $params = array();
         $res = array();
-        if($need_config!==false) $need_config = array();
+        if($need_config!==false) {$need_config = array();}
         
         foreach($entities as $idx=>$entity_name){
             
@@ -153,7 +153,7 @@
                 return false;   
             }else{
                 if($need_config!==false){
-                    $need_config[$entity_name]['config'] = $entity->config();    
+                    $need_config[$entity_name]['config'] = $entity->config();
                 }
                 if($entity_name == 'defTerms'){
                     $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
@@ -168,15 +168,15 @@
     //
     function entityResolveName($entity_name)
     {
-            if($entity_name=='rtg') $entity_name = 'defRecTypeGroups';
-            else if($entity_name=='dtg') $entity_name = 'defDetailTypeGroups';
-            else if($entity_name=='rty') $entity_name = 'defRecTypes';
-            else if($entity_name=='dty') $entity_name = 'defDetailTypes';
-            else if($entity_name=='trm' || $entity_name=='term') $entity_name = 'defTerms';
-            else if($entity_name=='vcg') $entity_name = 'defVocabularyGroups';
-            else if($entity_name=='rst') $entity_name = 'defRecStructure';   
-            else if($entity_name=='rem') $entity_name = 'dbUsrReminders';   
-            else if($entity_name=='swf') $entity_name = 'sysWorkflowRules';   
+            if($entity_name=='rtg') {$entity_name = 'defRecTypeGroups';}
+            else if($entity_name=='dtg') {$entity_name = 'defDetailTypeGroups';}
+            else if($entity_name=='rty') {$entity_name = 'defRecTypes';}
+            else if($entity_name=='dty') {$entity_name = 'defDetailTypes';}
+            else if($entity_name=='trm' || $entity_name=='term') {$entity_name = 'defTerms';}
+            else if($entity_name=='vcg') {$entity_name = 'defVocabularyGroups';}
+            else if($entity_name=='rst') {$entity_name = 'defRecStructure';}
+            else if($entity_name=='rem') {$entity_name = 'dbUsrReminders';}
+            else if($entity_name=='swf') {$entity_name = 'sysWorkflowRules';}
             
             if(!preg_match('/^[A-Za-z]+$/', $entity_name)){ //validatate entity name
                 return null;
@@ -191,16 +191,16 @@
     function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
         global $defaultRootFileUploadURL;
         
-        $entity_name = entityResolveName($entity_name); 
+        $entity_name = entityResolveName($entity_name);
 
         if($entity_name=='sysDatabases' && $rec_id){
             
             $db_name = $rec_id;
             if(strpos($rec_id, 'hdb_')===0){
-                $db_name = substr($rec_id,4);    
+                $db_name = substr($rec_id,4);
             }
             $rec_id = 1;    
-            $path = '/entity/sysIdentification/';    
+            $path = '/entity/sysIdentification/';
 
         }else{
 
@@ -212,12 +212,12 @@
                 }
             }
             
-            $path = '/entity/'.$entity_name.'/';    
+            $path = '/entity/'.$entity_name.'/';
         } 
 
         if(!$version){
             //if version is not specified default is thumbnail (except for record types)
-            $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';   
+            $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';
         }else if($version=='thumb'){ 
             $version='thumbnail';
         }

@@ -67,7 +67,7 @@ $.widget( "heurist.embedDialog", {
     //
     _init: function() {
         
-        var that = this;
+        let that = this;
         
         this.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         this.DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
@@ -161,7 +161,7 @@ $.widget( "heurist.embedDialog", {
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
 
         this.selectRecordScope = this.element.find('#sel_layout');
         
@@ -181,7 +181,7 @@ $.widget( "heurist.embedDialog", {
                     that.closeDialog();
                 }
             }} );        
-            var ele = this.element.find('#btnCreateLayout');
+            let ele = this.element.find('#btnCreateLayout');
             ele.button();
             this._on( ele, { click: this._createNewLayout } );        
             
@@ -234,7 +234,7 @@ $.widget( "heurist.embedDialog", {
     //
     _getActionButtons: function(){
 
-        var that = this;        
+        let that = this;        
         return [
                  {text:window.hWin.HR('Close'), 
                     id:'btnCancel',
@@ -259,7 +259,7 @@ $.widget( "heurist.embedDialog", {
     //
     _initDialog: function(){
         
-            var options = this.options,
+            let options = this.options,
                 btn_array = this._getActionButtons(), 
                 position = null,
                     that = this;
@@ -281,14 +281,12 @@ $.widget( "heurist.embedDialog", {
             }
             
             if(position==null) position = { my: "center", at: "center", of: window };
-            var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+            let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+            let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
-            var that = this;
-            
-            var $dlg = this.element.dialog({
+            let $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],
                 height: options['height'],
@@ -329,7 +327,7 @@ $.widget( "heurist.embedDialog", {
             this._as_dialog.dialog("open");
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
             }
         }
@@ -355,9 +353,9 @@ $.widget( "heurist.embedDialog", {
         this.element.find('#div_layout').hide();
         this.element.find('#div_embed').show();
         
-        var rec_id = this.options.layout_rec_id;
+        let rec_id = this.options.layout_rec_id;
             
-        var query = window.hWin.HAPI4.baseURL+
+        let query = window.hWin.HAPI4.baseURL+
                     '?db='+window.hWin.HAPI4.database+'&website&id='+rec_id;
                 
                 //searchIDs=
@@ -380,7 +378,7 @@ $.widget( "heurist.embedDialog", {
             this._fillEmbedForm();            
         }else{
             
-            var layout_name = this.element.find('#layout_name').val();
+            let layout_name = this.element.find('#layout_name').val();
             
             if(window.hWin.HEURIST4.util.isempty(layout_name)){
                 
@@ -388,7 +386,7 @@ $.widget( "heurist.embedDialog", {
                 
             }else{
                 
-                var that = this;
+                let that = this;
                 window.hWin.HAPI4.SystemMgr.check_allow_cms({a:'check_allow_cms'}, function(response){
 
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -415,27 +413,27 @@ $.widget( "heurist.embedDialog", {
 
         this.selectRecordScope.empty();
         
-        var opt, selScope = this.selectRecordScope.get(0);
+        let opt, selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope, '', 'select...');
         //window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Create new layout');
         
         //page type
-        var local_trmID = $Db.getLocalID('trm', '2-6254');
-        var that = this;
-        var query = {t:this.RT_CMS_MENU};
+        let local_trmID = $Db.getLocalID('trm', '2-6254');
+        let that = this;
+        let query = {t:this.RT_CMS_MENU};
         query['f:'+this.DT_CMS_PAGETYPE] = local_trmID;
-        var request = {detail:'header',q:query};
+        let request = {detail:'header',q:query};
         
         window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
-                        var idx, records = resdata.getRecords();
+                        let resdata = new HRecordSet(response.data);
+                        let idx, records = resdata.getRecords();
                         for(idx in records){
                             if(idx)
                             {
-                                var record = records[idx];
+                                let record = records[idx];
                                 window.hWin.HEURIST4.ui.addoption(selScope,
                                     resdata.fld(record, 'rec_ID'),
                                     //resdata.fld(record, 'rec_Title') );

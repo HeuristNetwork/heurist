@@ -18,7 +18,7 @@
                     $dir = $filestore_dir.'scratch/';
                     $warn = folderCreate2($dir, '', false);
                     if($warn==''){
-                        define('HEURIST_SCRATCH_DIR', $dir);        
+                        define('HEURIST_SCRATCH_DIR', $dir);
                     }
                 }
             }
@@ -33,7 +33,7 @@
                 $res = mysql__update_progress($mysqli, intval($_REQUEST['session']), false, null);
             }
         }
-        if($res==null) $res = '';
+        if($res==null) {$res = '';}
         print $res;
     }else{
         print 'terminate';

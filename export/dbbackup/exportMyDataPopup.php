@@ -22,10 +22,10 @@
 
 
 
-define('MANAGER_REQUIRED', 1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('MANAGER_REQUIRED', 1);
+define('PDIR','../../');//need for proper path to js and css    
 
-set_time_limit(0); //no limit
+set_time_limit(0);//no limit
 
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
@@ -38,15 +38,15 @@ require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);
 define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_sql');
 define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_hml');
-define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_tsv'); // TSV folder, for standalone download
+define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME.'_tsv');// TSV folder, for standalone download
 
-$mode = @$_REQUEST['mode']; // mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
-$format = 'zip'; //default
+$mode = @$_REQUEST['mode'];// mode=2 - entire archived folder,  mode=3 - sql dump only, mode=4 - cleanup backup folder, mode=5 - hml file only
+$format = 'zip';//default
 if(array_key_exists('is_zip', $_REQUEST) && $_REQUEST['is_zip']==1){
-    $format = 'zip';    
+    $format = 'zip';
 }
 if(array_key_exists('is_tar', $_REQUEST) && $_REQUEST['is_tar']==1){
-    $format = 'tar';    
+    $format = 'tar';
 }
 
 $mime = $format == 'tar' ? 'application/x-bzip2' : 'application/zip';
@@ -60,7 +60,7 @@ if($mode>1){
     }
 
     if($mode=='2' && file_exists(FOLDER_BACKUP.'.'.$format) ){ //archived entire folder
-        downloadFile($mime, FOLDER_BACKUP.'.'.$format); //see recordFile.php
+        downloadFile($mime, FOLDER_BACKUP.'.'.$format);//see recordFile.php
     }else if($mode=='3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)){  //archived sql dump
         downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
     }else if($mode=='5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)){  //archived hml file
@@ -89,7 +89,7 @@ if($mode>1){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
         
         <script type=text/javascript>
             var is_repository = <?php echo $is_repository?'true':'false';?>;
@@ -121,7 +121,7 @@ if($mode>1){
             // cleanup backup folder on exit
             //
             function closeArchiveWindow(){
-                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.HEURIST_DBNAME.'");'; ?>
+                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.HEURIST_DBNAME.'");';?>
                 window.close();
             }
 
@@ -247,8 +247,10 @@ if($mode>1){
                     data = window.hWin.HEURIST4.util.isJSON(data);
 
                     if(data.status && data.status != window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgErr('An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
-                                + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                         $sel_license.parent().parent().hide();
                         return;
                     }
@@ -261,8 +263,10 @@ if($mode>1){
                         $sel_license.attr('data-init', 'Nakala');
                         $sel_license.parent().parent().show();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.<br>'
-                                + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                         $sel_license.parent().parent().hide();
                     }
                 });
@@ -295,14 +299,14 @@ if($mode>1){
                     $('<div>Preparing archive file...</div>')
                         .addClass('coverall-div')
                         .css({'zIndex':60000,'padding':'30px 0 0 30px','font-size':'1.2em','opacity':0.8,'color':'white'})
-                        .appendTo('body'); 
+                        .appendTo('body');
                     */     
                     //show wait screen
                     window.hWin.HEURIST4.msg.bringCoverallToFront(null, null, 'Preparing archive file...');
                 }
 
                 document.getElementById('buttons').style.visibility = 'hidden';
-                document.forms[0].submit(); //page reload
+                document.forms[0].submit();//page reload
             }
 
         </script>
@@ -436,8 +440,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
         <?php } ?>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
-                    <input type="button" value="<?php echo $is_repository ? 'Export & Upload' : 'Create Archive'; ?>" 
-                        style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive(); }">
+                    <input type="button" value="<?php echo $is_repository ? 'Export & Upload' : 'Create Archive';?>" 
+                        style="margin-right: 20px;" class="ui-button-action" onClick="{ exportArchive();}">
                     <input type="button" id="btnClose_1" value="Cancel" onClick="closeArchiveWindow();">
                 </div>
             </form>
@@ -505,7 +509,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $folders_to_copy = folderSubs(HEURIST_FILESTORE_DIR, 
                     array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs', 
                           'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons', 
-                          'term-images', 'webimagecache')); //except these folders - some of them may exist in old databases only
+                          'term-images', 'webimagecache'));//except these folders - some of them may exist in old databases only
                 
                 //limited set
                 //$folders_to_copy = $system->getSystemFolders( 1 );
@@ -514,7 +518,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             }
             
             if(@$_REQUEST['includeresources']=='1'){ //uploaded images
-                if($folders_to_copy==null) $folders_to_copy = array();    
+                if($folders_to_copy==null) {$folders_to_copy = array();}
                 $folders_to_copy[] = HEURIST_FILES_DIR;
                 $folders_to_copy[] = HEURIST_THUMB_DIR;
                 
@@ -523,11 +527,11 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $copy_files_in_root = false;
             }
             if(@$_REQUEST['include_tilestacks']=='1' && defined('HEURIST_TILESTACKS_DIR')){
-                if($folders_to_copy==null) $folders_to_copy = array();
+                if($folders_to_copy==null) {$folders_to_copy = array();}
                 $folders_to_copy[] = HEURIST_TILESTACKS_DIR;
             }
             if($folders_to_copy==null){
-                $folders_to_copy = array('no copy folders');   
+                $folders_to_copy = array('no copy folders');
             }
             
                 
@@ -536,13 +540,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            }
             
            if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
-                echo_flush2('Copy context_help folder<br>');                
+                echo_flush2('Copy context_help folder<br>');
                 folderRecurseCopy( HEURIST_DIR.'context_help/', FOLDER_BACKUP.'/context_help/', null);
            }
            
            
            //remove dbdef_cache.json (database definitions cache) from entity folder
-           fileDelete(FOLDER_BACKUP.'/entity/db.json'); //old name
+           fileDelete(FOLDER_BACKUP.'/entity/db.json');//old name
            fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
             
 
@@ -556,7 +560,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                //load hml output into string file and save it
                if(@$_REQUEST['allrecs']!="1"){
                    $userid = $system->get_user_id();
-                   $q = "owner:$userid"; //user:$userid OR
+                   $q = "owner:$userid";//user:$userid OR
                    //$_REQUEST['depth'] = '5';
                    $hml_url = $hml_url.'&depth=5';
                }else{
@@ -572,7 +576,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                //load hml output into string file and save it
                if(@$_REQUEST['allrecs']!="1"){
                    $userid = $system->get_user_id();
-                   $q = "owner:$userid"; //user:$userid OR
+                   $q = "owner:$userid";//user:$userid OR
                    $_REQUEST['depth'] = '5';
                }else{
                    $q = "sortby:-m";
@@ -584,15 +588,15 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                $_REQUEST['w'] = 'all';
                $_REQUEST['a'] = '1';
                $_REQUEST['q'] = $q;
-               $_REQUEST['rev'] = 'no'; //do not include reverse pointers
-               $_REQUEST['filename'] = '1'; //FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
+               $_REQUEST['rev'] = 'no';//do not include reverse pointers
+               $_REQUEST['filename'] = '1';//FOLDER_BACKUP."/".HEURIST_DBNAME.".xml";
 
                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
                if (is_file($to_include)) {
                    include_once $to_include;
                }
 
-//error_log('loadRemoteURLContentWithRange <<');        
+//error_log('loadRemoteURLContentWithRange <<');
                
                if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip){
                    $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
@@ -611,7 +615,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     'defCalcFunctions', 'recLinks', 
                     'recSimilarButNotDupes', //'Records', 'recDetails',
                     'sysArchive', 'sysLocks', 'usrHyperlinkFilters'
-                ]; // tables to skip - woot, import and index are filtered out below
+                ];// tables to skip - woot, import and index are filtered out below
 
                 $tables = mysql__select_list2($mysqli, "SHOW TABLES");
 
@@ -660,7 +664,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             }
 
                             if(!array_key_exists($rty_ID, $record_fields)) { 
-                                $record_fields[$rty_ID] = [ 'rec_ID', 'rec_Title' ]; // add id + title by default
+                                $record_fields[$rty_ID] = [ 'rec_ID', 'rec_Title' ];// add id + title by default
                             }
 
                             $record_fields[$rty_ID][] = "$dty_ID";
@@ -762,12 +766,12 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            echo_flush2("Exporting database definitions as readable text<br>");
 
            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
-           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.txt"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.txt");//save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
            echo_flush2("Exporting database definitions as XML<br>");
             
            $url = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
-           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.xml"); //save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
+           saveURLasFile($url, FOLDER_BACKUP."/Database_Structure.xml");//save to HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME
 
 
            if($system->is_admin()){
@@ -795,7 +799,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
            // remove old mysql dump - specifically the ones named HEURIST_DBNAME_FULL.sql
            if(file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql')) {
-               unlink(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql');   
+               unlink(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql');
            }
 
            echo_flush2('<br>Zipping files<br>');
@@ -829,7 +833,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     }
 
                     if($format == 'zip'){
-                        $res_sql = UArchive::zip(FOLDER_BACKUP.'_sql', null, $destination_sql, true);   
+                        $res_sql = UArchive::zip(FOLDER_BACKUP.'_sql', null, $destination_sql, true);
                     }else{
                         $res_sql = UArchive::createBz2(FOLDER_BACKUP.'_sql', null, $destination_sql, true);
                     }
@@ -876,7 +880,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 if(!$is_repository) {
                         //success - print two links to download archives
     
-        $is_zip = '&is_tar='.($format == 'tar' ? 1 : 0); 
+        $is_zip = '&is_tar='.($format == 'tar' ? 1 : 0);
     
         if($format == 'tar'){
             $format = 'tar.bz2';
@@ -1005,13 +1009,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             );
                         }
 
-                        $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey']; //$system->get_system('sys_NakalaKey');
+                        $params['api_key'] = $repo_details[$repo_account]['params']['writeApiKey'];//$system->get_system('sys_NakalaKey');
                         $params['use_test_url'] = @$_REQUEST['use_test_url'] == 1 || strpos($repo_account,'nakala')===1 ? 1 : 0; // use test version
 
-                        $params['status'] = 'pending'; // keep new record private, so it can be deleted
-                        $params['return_type'] = 'editor'; // return link to private record, will require login
+                        $params['status'] = 'pending';// keep new record private, so it can be deleted
+                        $params['return_type'] = 'editor';// return link to private record, will require login
 
-                        $rtn = uploadFileToNakala($system, $params); //upload database archive
+                        $rtn = uploadFileToNakala($system, $params);//upload database archive
 
                         if($rtn === false){
                             $rtn = $system->getError()['message'];
@@ -1066,9 +1070,9 @@ function report_message($message, $is_error=true, $need_cleanup=false)
 
             <!-- <div class="logo" style="background-color:#2e3e50;width:100%"></div> -->
 
-            <div class="<?php echo $is_error?'ui-state-error':''; ?>" 
+            <div class="<?php echo $is_error?'ui-state-error':'';?>" 
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info'; ?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info';?>" 
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo $message;?>
             </div>
@@ -1076,7 +1080,7 @@ function report_message($message, $is_error=true, $need_cleanup=false)
 <?php
     }
 ?>
-        <script>if(window.hWin.HEURIST4.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true); }</script>
+        <script>if(window.hWin.HEURIST4.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true);}</script>
     </body>    
 </html>
 <?php

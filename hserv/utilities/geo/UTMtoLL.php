@@ -23,7 +23,7 @@ function ToLL($north, $east, $utmZone, $hemisphere)
   $Ecc = 0.081819190842622;       // Eccentricity
   $EccSq = $Ecc * $Ecc;
   $Ecc2Sq = $EccSq / (1. - $EccSq);
-  $Ecc2 = sqrt($Ecc2Sq);      // Secondary eccentricity
+  $Ecc2 = sqrt($Ecc2Sq);// Secondary eccentricity
   $E1 = ( 1 - sqrt(1-$EccSq) ) / ( 1 + sqrt(1-$EccSq) );
   $E12 = $E1 * $E1;
   $E13 = $E12 * $E1;

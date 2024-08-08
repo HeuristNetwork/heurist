@@ -36,7 +36,7 @@ class ExportRecordsXML extends ExportRecords {
 //  
 protected function _outputHeader(){
     
-    fwrite($this->fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
+    fwrite($this->fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');
 }
 
 //
@@ -46,7 +46,7 @@ protected function _outputRecord($record){
 
     $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
     self::_array_to_xml($record, $xml);
-    fwrite($this->fd, substr($xml->asXML(),38)); //remove header
+    fwrite($this->fd, substr($xml->asXML(),38));//remove header
 
     return true;
     
@@ -57,14 +57,14 @@ protected function _outputRecord($record){
 //
 protected function _outputFooter(){
     
-    fwrite($this->fd, '</records>');     
+    fwrite($this->fd, '</records>');
 
     $database_info = $this->_getDatabaseInfo();
     
     $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
     self::_array_to_xml($database_info, $xml);
     fwrite($this->fd, substr($xml->asXML(),38));
-    fwrite($this->fd, '</heurist>');     
+    fwrite($this->fd, '</heurist>');
 }
 
 //------------------------

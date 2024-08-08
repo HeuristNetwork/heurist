@@ -18,11 +18,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hPublishDialog( _options )
+function HPublishDialog( _options )
 {    
-    var _className = "PublishDialog",
-    _version   = "0.4",
-    options = {
+    const _className = "PublishDialog",
+    _version   = "0.4";
+    let options = {
         //container:null,
         mode: null, //mapspace, mapquery, smarty, graph, websearch
         mapwidget:null, 
@@ -47,7 +47,7 @@ function hPublishDialog( _options )
                 _updateUrls();
             }});
             
-            var $select = popupelement.find('#map_template');
+            let $select = popupelement.find('#map_template');
             
             window.hWin.HEURIST4.ui.createTemplateSelector( $select, [{key:'',title:'Defaut map popup'}] );
             $select.on({change:function(){
@@ -71,7 +71,7 @@ function hPublishDialog( _options )
         }
         
         popupelement.find('input[type="radio"]').on({change:function(event){
-            var val = $(event.target).val();
+            let val = $(event.target).val();
             $(popupelement).find('textarea[id^="code-textbox-"]').hide();
             $(popupelement).find('#code-textbox-'+val).show()
         }});
@@ -89,7 +89,7 @@ function hPublishDialog( _options )
         
         if(options.mode=='smarty'){
 
-            var content_type = $(popupelement).find('#select-content-type').val();
+            let content_type = $(popupelement).find('#select-content-type').val();
         
             $(popupelement).find("#link-url").attr('href', options.url+'&mode='+content_type); 
             
@@ -124,12 +124,12 @@ function hPublishDialog( _options )
     //
     function _updateUrls(){
 
-        var base_url = window.hWin.HAPI4.baseURL+'viewers/map/'; //map.php
-        var params_search,params_search_encoded;
-        var layout_params = {};
+        let base_url = window.hWin.HAPI4.baseURL+'viewers/map/'; //map.php
+        let params_search,params_search_encoded;
+        let layout_params = {};
         
         if(options.mapwidget){
-            var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
+            let hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
             
             if($(popupelement).find("#m_query").is(':checked')){
                 params_search = window.hWin.HEURIST4.query.composeHeuristQuery2(hquery, false);
@@ -140,7 +140,7 @@ function hPublishDialog( _options )
             }
         
             if($(popupelement).find("#m_mapdocs").is(':checked')){
-                var mapdocs = options.mapwidget.getMapManager().getMapDocumentsIds('visible');
+                let mapdocs = options.mapwidget.getMapManager().getMapDocumentsIds('visible');
                 if(mapdocs.length>0){
                     layout_params['mapdocument'] = mapdocs.join(',');
                 }
@@ -164,7 +164,7 @@ function hPublishDialog( _options )
             layout_params['basemap'] = options.mapwidget.basemaplayer_name;
         }
         
-        var ctrls = [];
+        let ctrls = [];
         $(popupelement).find('input[name="controls"]:checked').each(
             function(idx,item){ctrls.push($(item).val());}
         );
@@ -181,10 +181,10 @@ function hPublishDialog( _options )
             layout_params['template'] = $(popupelement).find('#map_template').val();
         }
         
-        var url     = base_url + params_search;
-        var url_enc = base_url + params_search_encoded;
-        for(var key in layout_params) {
-            if(layout_params.hasOwnProperty(key) && layout_params[key]!==false){
+        let url     = base_url + params_search;
+        let url_enc = base_url + params_search_encoded;
+        for(let key in layout_params) {
+            if(Object.hasOwn(layout_params,key) && layout_params[key]!==false){
                 url = url + '&'+key+'='+(layout_params[key]===true?1:layout_params[key]);
                 url_enc = url_enc + '&'+key+'='+(layout_params[key]===true?1:encodeURIComponent(layout_params[key]));
             }
@@ -204,14 +204,14 @@ function hPublishDialog( _options )
     function _exportKML(){
 
         if(options.mapwidget){
-            var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
-            var query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+            let hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
+            let query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
             if(query=='?'){
                 window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
             }else{
                 query = query + '&a=1&depth=1&db='+window.hWin.HAPI4.database;
-                var url_kml = window.hWin.HAPI4.baseURL+"export/xml/kml.php" + query;
-                var win = window.open(url_kml, "_new");
+                let url_kml = window.hWin.HAPI4.baseURL+"export/xml/kml.php" + query;
+                let win = window.open(url_kml, "_new");
             }
         }
     }
@@ -225,8 +225,8 @@ function hPublishDialog( _options )
                         
         $(event.target).off('click');
 
-        var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+        let body = $(window.hWin.document).find('body');
+        let dim = {h:body.innerHeight(), w:body.innerWidth()};
 
         window.hWin.HEURIST4.msg.showDialog(options.url_schedule, 
         {   "close-on-blur": false,
@@ -243,7 +243,7 @@ function hPublishDialog( _options )
     
 
     //public members
-    var that = {
+    let that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
@@ -253,7 +253,7 @@ function hPublishDialog( _options )
             
             options = new_options; //.mapdocument_id = mapdoc_id;
             
-            var sTitle = 'Publish/Embed';
+            let sTitle = 'Publish/Embed';
             if(options.mode=='mapspace' || options.mode=='mapquery'){
                 sTitle = 'Publish Map';
             }else if(options.mode=='websearch'){

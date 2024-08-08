@@ -38,7 +38,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         
         
         if(this.options.subtitle){
-            var ele = this.element.find('.sub-title');
+            let ele = this.element.find('.sub-title');
             if(ele.length>0){
                 ele.html('<h3 style="margin:1em 0 0 0">'+this.options.subtitle+'</h3>');
             }
@@ -51,7 +51,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     startSearch: function(){
         this._super();
         
-        var request = {};
+        let request = {};
         
         if(this.input_search.val()!=''){
             request['sys_Database'] = this.input_search.val();

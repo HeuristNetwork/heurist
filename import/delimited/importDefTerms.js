@@ -21,15 +21,15 @@
 */
 
 function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
-    var _className = "ImportDefTerms",
-    _version   = "0.4",
+    const _className = "ImportDefTerms",
+    _version   = "0.4";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata,
     
     _isTranslation = false,
     
-    trm_ParentTermID, vcg_ID,
+    trm_ParentTermID,
     trm_ParentDomain,
     trm_VocabularyID,
     vcg_ID,
@@ -88,31 +88,31 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         }
         
         
-        var uploadWidget = $('#uploadFile');
+        let uploadWidget = $('#uploadFile');
         
         //buttons
-        var btnUploadFile = $('#btnUploadFile')
+        let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})  //icons:{secondary: "ui-icon-circle-arrow-e"}
                     .on('click',function(e) {
                             uploadWidget.trigger('click');
                         });
-        var btnParseData = $('#btnParseData')
+        let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .on('click',function(e) {
                             _doParse();
                         });
-        var btnStartImport = $('#btnImportData')
+        let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .on('click',function(e) {
 
-                            var trm_sep = $('#term_separator').val();
+                            let trm_sep = $('#term_separator').val();
                             if(!window.hWin.HEURIST4.util.isempty(trm_sep)){
 
-                                var btns = {};
+                                let btns = {};
                                 btns['Proceed'] = function() { _doPost(); };
                                 btns['Clear character'] = function() { $('#term_separator').val(''); _doPost(); };
 
@@ -131,7 +131,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                         
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
-        var src_content = ''; 
+        let src_content = ''; 
         
         $('#sourceContent').on('keyup', function(e){
             if(src_content != $(this).val().trim()){
@@ -155,13 +155,13 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     done: function (e, response) {
             response = response.result;
             if(response.status==window.hWin.ResponseStatus.OK){
-                var data = response.data;
+                let data = response.data;
                 $.each(data.files, function (index, file) {
                     if(file.error){
                         $('#sourceContent').val(file.error);
                     }else{
                         
-                        var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                        let url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
                             +'&encoding='+$('#csv_encoding').val()+'&&db='+window.hWin.HAPI4.database;
                         
                         $('#sourceContent').load(url_get, function(){
@@ -174,10 +174,10 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                     }
                 });
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
             }
              
-                var inpt = this;
+                let inpt = this;
                 btnUploadFile.off('click');
                 btnUploadFile.on({click: function(){
                             $(inpt).trigger('click');
@@ -190,7 +190,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                         
         $('.column_roles').on('change',function(e){ 
                 
-                var ele = $(e.target);
+                let ele = $(e.target);
                 if(ele.val()>=0){
                     $('.column_roles').each(function(idx, item){
                        if($(item).attr('id')!= ele.attr('id') && $(item).val() == ele.val()){
@@ -219,26 +219,26 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         
             if(_parseddata==null) return;
         
-            var i, j, maxcol = 0;
-            for(i in _parseddata){
+            let maxcol = 0;
+            for(let i in _parseddata){
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                     maxcol = Math.max(maxcol,_parseddata[i].length);
                 }
             }
            
-            var container = $('#divParsePreview').empty();    
-            var tbl  = $('<table>')
+            let container = $('#divParsePreview').empty();    
+            let tbl  = $('<table>')
                         .addClass('tbmain')
                         .appendTo(container);
                         
             //HEADER FIELDS            
-            var headers = [], ifrom=0;
+            let headers = [], ifrom=0;
             if( $('#csv_header').is(':checked') ){ 
                 
-                for(i=0;i<_parseddata.length;i++){
+                for(let i=0;i<_parseddata.length;i++){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                         
-                        for(j=0;j<maxcol;j++){
+                        for(let j=0;j<maxcol;j++){
                             if(j>=_parseddata[i].length || window.hWin.HEURIST4.util.isempty(_parseddata[i][j])){
                                 headers.push('column '+j);     
                             }else{
@@ -250,16 +250,16 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                     }
                 }
             }else{
-                for(j=0;j<maxcol;j++){
+                for(let j=0;j<maxcol;j++){
                     headers.push('column '+j);
                 }
             }
             
             //TABLE HEADER
-            var tr  = $('<tr>').appendTo(tbl);
-            for(j=0;j<maxcol;j++){
+            let tr  = $('<tr>').appendTo(tbl);
+            for(let j=0;j<maxcol;j++){
                 
-                var cs = {};
+                let cs = {};
                 if(maxcol>3){
                     cs['width'] = ((j==0)?20:((j==maxcol-1)?40:10))+'%';
                 }
@@ -270,10 +270,10 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
             }
             
             //TABLE BODY
-            for(i=ifrom;i<_parseddata.length;i++){
-                var tr  = $('<tr>').appendTo(tbl);
+            for(let i=ifrom;i<_parseddata.length;i++){
+                tr  = $('<tr>').appendTo(tbl);
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                    for(j=0;j<maxcol;j++){
+                    for(let j=0;j<maxcol;j++){
                         
                         $('<td>').addClass('truncate')
                             .text(j<_parseddata[i].length?_parseddata[i][j]:' ').appendTo(tr);
@@ -283,8 +283,8 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
             
             //COLUMN ROLES SELECTORS
             $('.column_roles').empty();
-            for(j=-1; j<maxcol; j++){
-                var opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
+            for(let j=-1; j<maxcol; j++){
+                let opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
                 opt.appendTo($('#field_term'));
                 opt.clone().appendTo($('#field_code'));
                 opt.clone().appendTo($('#field_desc'));
@@ -299,8 +299,8 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                 $('#field_term').val(0);
                 
                 //AUTODETECT COLUMN ROLES by name
-                for(j=0;j<maxcol;j++){
-                    var s = headers[j].toLowerCase();
+                for(let j=0;j<maxcol;j++){
+                    let s = headers[j].toLowerCase();
                     if(s.indexOf('term')>=0 || s.indexOf('label')>=0){
                         $('#field_term').val(j);
                     }else if(s.indexOf('code')>=0){
@@ -325,17 +325,17 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     function _doParse(){
             
             //noothing defined
-            var content = $('#sourceContent').val();
+            let content = $('#sourceContent').val();
 
             _setCurtain(2);
             
             if(content==''){
-                //$(recordList).resultList('updateResultSet', new hRecordSet());
+                //$(recordList).resultList('updateResultSet', new HRecordSet());
             }else{
             
                         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
                 
-                        var request = { content: content,
+                        let request = { content: content,
                                         csv_delimiter: $('#csv_delimiter').val(),
                                         csv_enclosure: $('#csv_enclosure').val(),
                                         csv_linebreak: $('#csv_linebreak').val(),
@@ -355,12 +355,12 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                                 $('#csv_header').prop('checked', _parseddata && _parseddata.length>0 && _parseddata[0].length>1);
                                 
                                 if (!$('#csv_header').is(':checked')) {
-                                    var firstline_without_quotes = false;
-                                    var pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
+                                    let firstline_without_quotes = false;
+                                    let pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
 
-                                    for(var i=0; i<_parseddata.length; i++){
+                                    for(let i=0; i<_parseddata.length; i++){
                                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                                            var len = _parseddata[i].join(',').length;
+                                            let len = _parseddata[i].join(',').length;
                                             firstline_without_quotes = pos>len;
                                             break;
                                         }
@@ -409,7 +409,8 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
         }
         
         
-        var msg = '';
+        let msg = '';
+        let skip_na = 0, skip_dup = 0, skip_long = 0;
         
         _prepareddata = [];
         
@@ -417,18 +418,18 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
             msg = '<i>No data. Upload and parse</i>';
         }else{
         
-            var field_term = $('#field_term').val();
+            let field_term = $('#field_term').val();
             if(field_term<0){
                 msg = '<span style="color:red">Term(Label) must be always defined</span>';
             }else{
                 
             
-                var field_code = $('#field_code').val();
-                var field_desc = $('#field_desc').val();
-                var field_uri = $('#field_uri').val();
-                var i, record, skip_na = 0, skip_dup = 0, skip_long = 0, labels = [];
+                let field_code = $('#field_code').val();
+                let field_desc = $('#field_desc').val();
+                let field_uri = $('#field_uri').val();
+                let i, record, labels = [];
                         
-                var hasHeader = $('#csv_header').is(':checked');
+                let hasHeader = $('#csv_header').is(':checked');
                 i = hasHeader?1:0;        
                         
                 for(;i<_parseddata.length;i++){
@@ -437,7 +438,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                     
                     if(field_term>=_parseddata[i].length) continue;
                     
-                    var lbl = null;
+                    let lbl = null;
                     
                     if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_term])){
                         lbl = _parseddata[i][field_term].trim();
@@ -519,7 +520,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     //
     function _doPrepareTranslation(){
         
-        var msg = '';
+        let msg = '';
         
         _prepareddata = [];
         
@@ -531,15 +532,15 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                 msg = '<span style="color:red">Reference Term(Label) must be always defined</span>';
             }else{
                 
-                var field_ref_id = $('#field_ref_id').val();
-                var field_ref_term = $('#field_ref_term').val();
+                let field_ref_id = $('#field_ref_id').val();
+                let field_ref_term = $('#field_ref_term').val();
             
-                var field_trn_term = $('#field_trn_term').val();
-                var field_trn_desc = $('#field_trn_desc').val();
+                let field_trn_term = $('#field_trn_term').val();
+                let field_trn_desc = $('#field_trn_desc').val();
 
-                var i, record, skip_na = 0, skip_not_found = 0, skip_long = 0;
+                let i, record, skip_na = 0, skip_not_found = 0, skip_long = 0;
                         
-                var hasHeader = $('#csv_header').is(':checked');
+                let hasHeader = $('#csv_header').is(':checked');
                 i = hasHeader?1:0;        
                         
                 for(;i<_parseddata.length;i++){
@@ -547,7 +548,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                     if(field_ref_term>=0){
                         if(field_ref_term>=_parseddata[i].length) continue; //out of row extent
                         
-                        var lbl = null;
+                        let lbl = null;
                         
                         if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_ref_term])){
                             lbl = _parseddata[i][field_ref_term].trim();
@@ -618,7 +619,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
 
-        var request = {
+        let request = {
             'a'          : 'batch',
             'entity'     : 'defTerms',
             'request_id' : window.hWin.HEURIST4.util.random()
@@ -632,7 +633,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
             request['term_separator'] = $('#term_separator').val();
         }
     
-        var that = this;
+        let that = this;
         //that.loadanimation(true);
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
@@ -643,7 +644,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         window.close( { result:response.data } );
                     }else{
-                        var recIDs = response.data;
+                        let recIDs = response.data;
                         //refresh local defintions
                         window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
                                 function(){
@@ -662,7 +663,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID, isImportTranslations) {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

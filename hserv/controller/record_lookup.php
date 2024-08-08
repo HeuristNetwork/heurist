@@ -117,8 +117,8 @@
     );
 
     // BnF xml namespace urls
-    $BNF_XML_RECORDS_NAMESPACE = 'http://www.loc.gov/zing/srw/'; // srw
-    $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2'; // mxc
+    $BNF_XML_RECORDS_NAMESPACE = 'http://www.loc.gov/zing/srw/';// srw
+    $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2';// mxc
 
     $is_estc = false;
     $valid_service = false;
@@ -158,7 +158,7 @@
     $is_debug = (@$params['dbg']==1);
 
     if(!$valid_service){
-        $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST); //exit from script
+        $system->error_exit_api('The provided look up details are invalid', HEURIST_INVALID_REQUEST);//exit from script
     }
     if($cur_type == 'geonames' && (!isset($accessToken_GeonamesAPI) || empty($accessToken_GeonamesAPI))){
         $system->error_exit_api('Unable to use the geonames API, API key is missing from configuration file', HEURIST_ACTION_BLOCKED);
@@ -217,7 +217,7 @@
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
                 
                 $base_url = $ESTC_ServerURL 
-                    .'hserv/controller/record_lookup.php?';  //record_output
+                    .'hserv/controller/record_lookup.php?';//record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
                 $params2['serviceType'] = 'ESTC';
@@ -227,19 +227,19 @@
                 $params2['org_db'] = $params['org_db'];
                 $params2['q'] = $params['q'];
                 $params2['rules'] = @$params['rules'];
-                $url = $base_url.http_build_query($params2); // forward request to ESTC server
+                $url = $base_url.http_build_query($params2);// forward request to ESTC server
 
                 $is_inited = $system->init(@$params['db']);
                 
                 // save file that produced with record_output.php from source to temp file  
                 $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
                 
-                $filesize = saveURLasFile($url, $heurist_path); // perform external request and save results to temp file
+                $filesize = saveURLasFile($url, $heurist_path);// perform external request and save results to temp file
 
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
               
-                    require_once dirname(__FILE__).'/../records/import/importHeurist.php'; 
+                    require_once dirname(__FILE__).'/../records/import/importHeurist.php';
                     
                     $params2 = array(
                         'dbg' => ($is_debug?1:0),
@@ -262,7 +262,7 @@
 
             }else{
 
-                $url = $base_url.http_build_query($params); // forward request to ESTC server
+                $url = $base_url.http_build_query($params);// forward request to ESTC server
                 $response = loadRemoteURLContentWithRange($url, null, true, 60);
             }
 
@@ -290,9 +290,9 @@
 
     if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
         //get error and response
-        $system->error_exit_api(); //exit from script
+        $system->error_exit_api();//exit from script
     }else if ( $system->get_user_id()<1 ) {
-        $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED); 
+        $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED);
         //$response = $system->addError(HEURIST_REQUEST_DENIED);
     }
 
@@ -404,7 +404,7 @@
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
         if(strpos($glb_curl_error, '404') !== false && @$params['serviceType'] == 'nomisma'){ // No result for Nomisma returns a 404 error
-            $remote_data = json_encode(array()); // return empty array
+            $remote_data = json_encode(array());// return empty array
         }else{
 
             preg_match("/\d+/", $glb_curl_error, $http_code);
@@ -441,13 +441,13 @@
         }else{
 
             $hasGeo = false;
-            $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
+            $remote_data = str_getcsv($remote_data, "\n");//parse the rows
             if(is_array($remote_data) && count($remote_data)>1){
                 
                 $header = str_getcsv(array_shift($remote_data));
                 $id = 1;
                 foreach($remote_data as &$line){
-                    $line = str_getcsv($line);  
+                    $line = str_getcsv($line);
                     foreach($header as $idx=>$key){
                          $line[$key] = $line[$idx];
                          unset($line[$idx]);
@@ -564,7 +564,7 @@
                     }
 
                     if(!empty($location)){
-                        $formatted_array['publisher'][$pub_idx]['location'] = '[' . implode(' ; ', $location) . ']';
+                        $formatted_array['publisher'][$pub_idx]['location'] = '[' . implode(' ;', $location) . ']';
                     }
                     if(!empty($name)){
                         $formatted_array['publisher'][$pub_idx]['name'] = implode(', ', $name);
@@ -781,7 +781,7 @@
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }else if($sf_code == 'c'){ // Location
-                                    $formatted_array['location'] = (string)$sf_ele[0];    
+                                    $formatted_array['location'] = (string)$sf_ele[0];
                                 }else if($sf_code == 'b'){ // Type
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
@@ -1056,7 +1056,7 @@
                     $code = $details[$code_idx][0]['value'];
                 }
                 $code_parts = explode('/', $uri);
-                $code .= (!empty($code) ? ' ; ' : '') . implode('/', array_splice($code_parts, -2, 2));
+                $code .= (!empty($code) ? ' ;' : '') . implode('/', array_splice($code_parts, -2, 2));
 
                 foreach ($details[$label_idx] as $label_details) {
                     if($label_details['lang'] == $def_lang){
@@ -1068,7 +1068,7 @@
                     }
 
                     $lang_code = getLangCode3($label_details['lang']);
-                    $translated_labels[$lang_code] = $lang_code . ":" . $label_details['value']; // LANG_CODE:Value
+                    $translated_labels[$lang_code] = $lang_code . ":" . $label_details['value'];// LANG_CODE:Value
                 }
 
                 $notes = array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
@@ -1148,7 +1148,7 @@
 
         // Get existing data
         $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
-                        file_get_contents($opentheso_file) : []; // retain original collection data
+                        file_get_contents($opentheso_file) : [];// retain original collection data
         $data_old = json_decode($data_old, TRUE);
         $data_old = json_last_error() !== JSON_ERROR_NONE || !is_array($data_old) ?
                         [] : $data_old;
@@ -1314,7 +1314,7 @@
 
         fileSave(json_encode($data), $opentheso_file);
 
-        return $data[$server][$theso]; // return group details only
+        return $data[$server][$theso];// return group details only
     }
 
     function getNakalaMetadata($system, $type){
@@ -1385,7 +1385,7 @@
         $datatypes_xml = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace_en.xml', null, true, 60);
         $datatypes_xml = simplexml_load_string($datatypes_xml, null, LIBXML_PARSEHUGE);
 
-        $handled_types = array(); // type codes already added
+        $handled_types = array();// type codes already added
 
         while ($page <= $totalPages) {
 

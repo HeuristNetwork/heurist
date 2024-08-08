@@ -26,6 +26,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global stringifyMultiWKT */
 
 $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
 
@@ -54,7 +55,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
     //
     _initControls: function(){
 
-        var that = this;
+        let that = this;
 
         // Extra field styling
         this.element.find('#search_container > div > div > .header.recommended').css({'min-width':'65px', display: 'inline-block'});
@@ -117,7 +118,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
      * Result list rendering function called for each record
      * 
      * Param:
-     *  recordset (hRecordSet) => Heurist Record Set
+     *  recordset (HRecordSet) => Heurist Record Set
      *  record (json) => Current Record being rendered
      * 
      * Return: html
@@ -126,7 +127,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
 
         function fld(fldname, width){
 
-            var s
+            let s
 
             if(fldname == 'dates'){
                 s = recordset.fld(record, 'when.timespans.start') + ' to ' + recordset.fld(record, 'when.timespans.end') 
@@ -136,7 +137,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             }
 
             s = s?s:'';
-            var title = s;
+            let title = s;
 
             if(fldname == 'properties.gazetteer_uri'){
                 s = '<a href="' + s + '" target="_blank"> view here </a>';
@@ -151,9 +152,9 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             return s;
         }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recTitle = '';
+        let recID = fld('rec_ID');
+        let rectypeID = fld('rec_RecTypeID');
+        let recTitle = '';
 
         if(fld('properties.type') == 'hoard'){
             recTitle = fld('properties.type', 10) + fld('label', 30) + fld('dates', 35) + fld('properties.gazetteer_uri', 10);
@@ -161,12 +162,12 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             recTitle = fld('properties.type', 10) + fld('properties.gazetteer_label', 30) + fld('properties.count', 15) + fld('properties.gazetteer_uri', 10); 
         }
 
-        var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
+        let recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID;
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + rectypeID + '&version=thumb&quot;);"></div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" rectype="'+rectypeID+'">'
                         + html_thumb
                         + '<div class="recordIcons">'
                         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
@@ -181,7 +182,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
      * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
      */
     _getActionButtons: function(){
-        var res = this._super(); //dialog buttons
+        let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Select');
         return res;
     },
@@ -192,7 +193,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
     doAction: function(){
 
         //detect selection
-        var sel = this.recordList.resultList('getSelected', false);
+        let sel = this.recordList.resultList('getSelected', false);
         
         if(sel && sel.length() == 1){
 
@@ -208,15 +209,15 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
     //
     _doSearch: function(event){
 
-        var that = this;
-        var search_type = $(event.target).val();
+        let that = this;
+        let search_type = $(event.target).val();
 
         if(this.element.find('#inpt_any').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Enter value to search...', 500);
             return;
         }
 
-        var sURL = '';
+        let sURL = '';
 
         if(search_type == 'mint'){
             sURL = 'https://nomisma.org/apis/getMints?id=';
@@ -232,7 +233,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         
         sURL += encodeURI(this.element.find('#inpt_any').val());
 
-        var request = {service:sURL, serviceType:'nomisma', 'search_type': search_type};
+        let request = {service:sURL, serviceType:'nomisma', 'search_type': search_type};
 
         // calls /heurist/hserv/controller/record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
@@ -256,36 +257,36 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
         
         this.recordList.show();
        
-        var is_wrong_data = true;
+        let is_wrong_data = true;
                         
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
             
-            var res_records = {}, res_orders = [];
+            let res_records = {}, res_orders = [];
                 
-            var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+            let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
             
-            var fields = ['rec_ID','rec_RecTypeID'];
-            var map_flds = Object.keys(this.options.mapping.fields);
+            let fields = ['rec_ID','rec_RecTypeID'];
+            let map_flds = Object.keys(this.options.mapping.fields);
             fields = fields.concat(map_flds);
             
-            for(var k=0; k<map_flds.length; k++){
+            for(let k=0; k<map_flds.length; k++){
                 map_flds[k] = map_flds[k].split('.'); 
             }
             
             if(!geojson_data.features) geojson_data.features = geojson_data;
             
             //parse json
-            var i=0;
+            let i=0;
             for(;i<geojson_data.features.length;i++){
-                var feature = geojson_data.features[i];
+                let feature = geojson_data.features[i];
                 
-                var recID = i+1;
+                let recID = i+1;
                 
-                var hasGeo = false;
-                var values = [recID, this.options.mapping.rty_ID];
-                for(var k=0; k<map_flds.length; k++){
+                let hasGeo = false;
+                let values = [recID, this.options.mapping.rty_ID];
+                for(let k=0; k<map_flds.length; k++){
 
-                    var val = feature[map_flds[k][0]];
+                    let val = feature[map_flds[k][0]];
 
                     if(map_flds[k][0] == 'when' && val){
 
@@ -296,7 +297,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                         }
                     }
 
-                    for(var m=1; m<map_flds[k].length; m++){
+                    for(let m=1; m<map_flds[k].length; m++){
                         if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
                             val = val[ map_flds[k][m] ];
                         }else if(map_flds[k][m] == 'count'){
@@ -307,12 +308,12 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                     if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){ // looking for geospatial values
                         if(!window.hWin.HEURIST4.util.isempty(val)){
                             val = {"type": "Feature", "geometry": val};
-                            var wkt = stringifyMultiWKT(val);    
+                            let wkt = stringifyMultiWKT(val);    
                             if(window.hWin.HEURIST4.util.isempty(wkt)){
                                 val = '';
                             }else{
 
-                                var typeCode = 'm';
+                                let typeCode = 'm';
                                 if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
                                     if(wkt.indexOf('LINESTRING')>=0){
                                         typeCode = 'l';
@@ -339,7 +340,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
             }
 
             if(res_orders.length>0){        
-                var res_recordset = new hRecordSet({
+                let res_recordset = new HRecordSet({
                     count: res_orders.length,
                     offset: 0,
                     fields: fields,

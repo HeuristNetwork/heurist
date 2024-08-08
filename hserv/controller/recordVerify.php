@@ -52,7 +52,7 @@
             if( @$_REQUEST['ignore'] ){
                 $response = RecordsDupes::setIgnoring( $_REQUEST );
             }else{
-                $response = RecordsDupes::findDupes( $_REQUEST );    
+                $response = RecordsDupes::findDupes( $_REQUEST );
             }
 
             $system->dbclose();

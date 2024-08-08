@@ -24,15 +24,14 @@
 * 
 */
 class ImportSession {
-    private function __construct() {}    
+
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;
     
 private static function initialize()
 {
-    if (self::$initialized)
-        return;
+    if (self::$initialized)  {return;}
 
     global $system;
     self::$system  = $system;
@@ -111,7 +110,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         //save session with new ID
         $imp_session['primary_rectype'] = $rty_ID;
         $imp_session['sequence'] = $sequence;
-        $res = self::save($imp_session);    
+        $res = self::save($imp_session);
         if(!is_array($res)){
             self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session #'.$imp_ID, $res);
             return false;
@@ -121,7 +120,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
      }else{
         //get dependent record types
         try{
-            return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');  //?? 6    
+            return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');//?? 6    
         }catch(Exception $e){
             $sMsg = $e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage();
             self::$system->addError(HEURIST_ERROR, 'Cannot generate structure tree for record type '.$rty_ID.' session #'.$imp_ID, $sMsg);
@@ -143,7 +142,7 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
      
      $matching = array();
      
-     if(!($imp_ID>0)) $imp_ID = 0;
+     if(!($imp_ID>0)) {$imp_ID = 0;}
      
      $sessions = mysql__select_assoc2(self::$mysqli, 'select sif_ID, sif_ProcessingInfo from sysImportFiles where sif_ID!='.$imp_ID);
      
@@ -207,8 +206,8 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         $order_field = $id_field;
     }
     
-    if(!($offset>0)) $offset = 0;
-    if(!is_int($limit)) $limit = 100;
+    if(!($offset>0)) {$offset = 0;}
+    if(!is_int($limit)) {$limit = 100;}
 
     if($mapping!=null && !is_array($mapping)){
         $mapping = json_decode($mapping, true);
@@ -222,11 +221,12 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
         $sel_fields = array($order_field);
         
         foreach($field_idx as $idx){
-            if('field_'.$idx!=$id_field)
-                array_push($sel_fields, 'field_'.$idx);        
+            if('field_'.$idx!=$id_field){
+                array_push($sel_fields, 'field_'.$idx);
+            }
         }
         if($mode=='insert' && count($sel_fields)>1){
-            $order_field = $sel_fields[1];    
+            $order_field = $sel_fields[1];
         }
         
         $sel_fields = 'DISTINCT '.implode(',',$sel_fields);

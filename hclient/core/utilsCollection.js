@@ -34,12 +34,12 @@ if (!window.hWin.HEURIST4.collection)
         //
         getSelectionIds: function(_selection, msg, limit){
 
-            var recIDs_list = [];
+            let recIDs_list = [];
             if (_selection!=null) {
                 recIDs_list = _selection.getIds();
             }
 
-            if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
+            if (recIDs_list.length == 0 && !window.hWin.HEURIST4.util.isempty(msg)) {
                 window.hWin.HEURIST4.msg.showMsg(msg, {default_palette_class:'ui-heurist-explore'});
                 return null;
             }else if (limit>0 && recIDs_list.length > limit) {
@@ -54,13 +54,13 @@ if (!window.hWin.HEURIST4.collection)
         collectionAdd: function(recIDs, _selection){
 
             if(!recIDs){
-                var recIDs_list = window.hWin.HEURIST4.collection.getSelectionIds(_selection, 
+                let recIDs_list = window.hWin.HEURIST4.collection.getSelectionIds(_selection, 
                     window.hWin.HR('collection_select_hint'));
                 if(window.hWin.HEURIST4.util.isempty(recIDs_list)) return;
                 recIDs = recIDs_list.join(',')
             }
 
-            var params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
+            let params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
 
             window.hWin.HEURIST4.collection.collectionUpdate(params);
             
@@ -70,29 +70,28 @@ if (!window.hWin.HEURIST4.collection)
         collectionDel: function(recIDs, _selection){
 
             if(!recIDs){
-                var recIDs_list = this.getSelectionIds(_selection,
+                let recIDs_list = this.getSelectionIds(_selection,
                     window.hWin.HR('collection_select_hint2'));
                 if(window.hWin.HEURIST4.util.isempty(recIDs_list)) return;
                 recIDs = recIDs_list.join(',')
             }
 
-            var params = {db:window.hWin.HAPI4.database, fetch:1, remove:recIDs};
+            let params = {db:window.hWin.HAPI4.database, fetch:1, remove:recIDs};
 
             window.hWin.HEURIST4.collection.collectionUpdate(params);
         },
 
         collectionClear: function(){
 
-            var params = {db:window.hWin.HAPI4.database, clear:1};
+            let params = {db:window.hWin.HAPI4.database, clear:1};
             window.hWin.HEURIST4.collection.collectionUpdate(params);
         },
 
         collectionShow: function(){
 
             if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
-
-                if(true){
-                    var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"
+                
+                    let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"
                     +window.hWin.HEURIST4.collection._collection.join(',')+'&nometadatadisplay=true';
 
                     if(url.length>2083){
@@ -102,13 +101,8 @@ if (!window.hWin.HEURIST4.collection)
                             , {default_palette_class:'ui-heurist-explore'});
 
                     }else{
-                        window.open(url, '_blank');    
+                        window.open(url, '_blank');   
                     }    
-
-                }else{
-                    //this._query_request.w = 'all';
-                    //that.reloadSearch('ids:'+this._collection.join(","));
-                }
             }
 
         },
@@ -120,7 +114,7 @@ if (!window.hWin.HEURIST4.collection)
 
             if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
 
-                var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                let  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
 
                 if(widget){
                     //call method editSavedSearch - save collection as search
@@ -139,11 +133,11 @@ if (!window.hWin.HEURIST4.collection)
         collectionUpdate: function(params){
 
             function __collectionOnUpdate(that, results) {
-                if(!Hul.isnull(results)){
+                if(!window.hWin.HEURIST4.util.isnull(results)){
                     if(results.status == window.hWin.ResponseStatus.UNKNOWN_ERROR){
                         window.hWin.HEURIST4.msg.showMsgErr(results);
                     }else{
-                        window.hWin.HEURIST4.collection._collection = Hul.isempty(results.ids)?[]:results.ids;
+                        window.hWin.HEURIST4.collection._collection = window.hWin.HEURIST4.util.isempty(results.ids)?[]:results.ids;
 
                         $(window.hWin.document).trigger( window.hWin.HAPI4.Event.ON_REC_COLLECT, 
                             {collection:window.hWin.HEURIST4.collection._collection} );

@@ -64,7 +64,7 @@ $.widget( "heurist.importStructure", {
         onClose:null
     },
 
-    //cached records hRecordSet for databases
+    //cached records HRecordSet for databases
     _cachedRecordset_dbs:null,
 
     _is_rename_target: false,
@@ -89,7 +89,7 @@ $.widget( "heurist.importStructure", {
             this._initDialog();
         }
 
-        var layout, sTop = '0';
+        let layout, sTop = '0';
         if(this.options.innerTitle){
             layout = ('<div class="ui-heurist-header">'+this.options['title']+'</div>');
             sTop = '38px';
@@ -241,7 +241,7 @@ $.widget( "heurist.importStructure", {
             }
         });
 
-        var ele = this.element.find('#btn_back_to_databases')
+        let ele = this.element.find('#btn_back_to_databases')
         .button({label:'Back to Databases'});
         if(that.options.source_database_id>0){
             ele.hide();
@@ -363,7 +363,7 @@ $.widget( "heurist.importStructure", {
         this.options.entity = window.hWin.entityRecordCfg;
 
         //retrieve all template databases from master index server
-        var query_request = {remote:'master', detail: 'header'};
+        let query_request = {remote:'master', detail: 'header'};
         if(that.options.source_database_id>0){
             query_request['q'] = 'ids:'+that.options.source_database_id;
         }
@@ -375,25 +375,25 @@ $.widget( "heurist.importStructure", {
 
                     response.data.fields.push('rec_ScratchPad');
 
-                    that._cachedRecordset_dbs = new hRecordSet(response.data);
+                    that._cachedRecordset_dbs = new HRecordSet(response.data);
 
                     //prepare recordset - extract database name and transfer title to notes
                     that._cachedRecordset_dbs.each(function(recID, record){
 
-                        var recURL  = this.fld(record, 'rec_URL');
-                        var recDesc = this.fld(record, 'rec_Title');
-                        var dbURL = '';
-                        var dbName = 'Broken registration (Db URL is not defined)';
+                        let recURL  = this.fld(record, 'rec_URL');
+                        let recDesc = this.fld(record, 'rec_Title');
+                        let dbURL = '';
+                        let dbName = 'Broken registration (Db URL is not defined)';
                         
                         if(recURL){
-                            var splittedURL = recURL.split('?');
+                            let splittedURL = recURL.split('?');
                             if(splittedURL && splittedURL.length>0){
                                 dbURL = splittedURL[0];
-                                var matches = recURL.match(/db=([^&]*).*$/);
+                                let matches = recURL.match(/db=([^&]*).*$/);
                                 dbName = (matches && matches.length>1)?matches[1]:'';
                             }
                         }
-                        var url_Error = this.fld(record, 'rec_URLErrorMessage');
+                        let url_Error = this.fld(record, 'rec_URLErrorMessage');
                         if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
                             dbName = dbName + ' (unavailable)';
                             dbURL = '';
@@ -408,7 +408,7 @@ $.widget( "heurist.importStructure", {
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                     if(that.options.source_database_id>0){
-                        var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                        let selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
                         that._loadDefinitionsForDb( selected_recs );
                     }else{
                         that.startSearch_dbs();
@@ -437,7 +437,7 @@ $.widget( "heurist.importStructure", {
     //    
     startSearchOnEnterPress: function(e){
 
-        var code = (e.keyCode ? e.keyCode : e.which);
+        let code = (e.keyCode ? e.keyCode : e.which);
         if (code == 13) {
             window.hWin.HEURIST4.util.stopEvent(e);
             e.preventDefault();
@@ -447,7 +447,7 @@ $.widget( "heurist.importStructure", {
     },
 
     startSearch_dbs: function(){
-        var request = {};
+        let request = {};
         
         if(!this.input_search) return;
 
@@ -486,13 +486,13 @@ $.widget( "heurist.importStructure", {
     _loadDefinitionsForDb: function(db_ids, skip_pass){
 
         const that = this;
-        var panel_dbs = this.element.find('#panel_dbs');
+        let panel_dbs = this.element.find('#panel_dbs');
 
-        var record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
+        let record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
 
-        var sDB_ID = db_ids.fld(record, 'rec_ID');
-        var sURL  = db_ids.fld(record, 'rec_URL');
-        var sDB   = db_ids.fld(record, 'rec_Title');
+        let sDB_ID = db_ids.fld(record, 'rec_ID');
+        let sURL  = db_ids.fld(record, 'rec_URL');
+        let sDB   = db_ids.fld(record, 'rec_Title');
         
         if(!sURL) return; //missed
 
@@ -508,7 +508,7 @@ $.widget( "heurist.importStructure", {
 
             this.element.find('#h_source').text('Entities available in '+sDB_ID+':'+sDB);
 
-            var rty_options = {
+            let rty_options = {
                 isdialog: false,
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
@@ -525,7 +525,7 @@ $.widget( "heurist.importStructure", {
 
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -552,8 +552,8 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var rectypes = window.hWin.HEURIST4.remote.rectypes;
-                        var idx = rectypes.groups.groupIDToIndex[grp_val];
+                        let rectypes = window.hWin.HEURIST4.remote.rectypes;
+                        let idx = rectypes.groups.groupIDToIndex[grp_val];
 
                         return rectypes.groups[idx]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
@@ -573,7 +573,7 @@ $.widget( "heurist.importStructure", {
             //open list of record types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
 
-            var dty_options = {
+            let dty_options = {
                 isdialog: false,
                 container: '#panel_dty_list',
                 select_mode: 'select_single',
@@ -592,7 +592,7 @@ $.widget( "heurist.importStructure", {
                 },
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -619,10 +619,10 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var detailtypes = window.hWin.HEURIST4.remote.detailtypes;
-                        var idx = detailtypes.groups.groupIDToIndex[grp_val];
+                        let detailtypes = window.hWin.HEURIST4.remote.detailtypes;
+                        let idx = detailtypes.groups.groupIDToIndex[grp_val];
 
-                        var output = '';
+                        let output = '';
 
                         if(detailtypes.groups[idx]){
                             output = '<div data-grp="'+grp_val
@@ -647,7 +647,7 @@ $.widget( "heurist.importStructure", {
             //open list of detail types from the remote database
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
 
-            var trm_options = {
+            let trm_options = {
                 isdialog: false,
                 container: '#panel_trm_list',
                 select_mode: 'select_single',
@@ -667,7 +667,7 @@ $.widget( "heurist.importStructure", {
                 },
                 onaction:function(event, action){
 
-                    var recID;     
+                    let recID;     
                     if(action && action.action){
                         recID =  action.recID;
                         action = action.action;
@@ -694,7 +694,7 @@ $.widget( "heurist.importStructure", {
                     groupByCss:'0 1.5em',
                     rendererGroupHeader: function(grp_val, is_expanded){
 
-                        var terms = window.hWin.HEURIST4.remote.terms;
+                        let terms = window.hWin.HEURIST4.remote.terms;
 
                         return terms.groups[grp_val]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
@@ -770,15 +770,15 @@ $.widget( "heurist.importStructure", {
             //this._selectAndClose();
             return true;
         } else {
-            var recID = 0;
+            let recID = 0;
             if(action && action.action){
                 recID =  action.recID;
                 action = action.action;
             }
 
-            var record = this._cachedRecordset_dbs.getById(recID);
-            var dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
-            var recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
+            let record = this._cachedRecordset_dbs.getById(recID);
+            let dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
+            let recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
 
             if(action=='open'){
                 
@@ -811,21 +811,21 @@ $.widget( "heurist.importStructure", {
             return recordset.fld(record, fldname);
         }
 
-        var recID = fld('rec_ID');
-        var recURL = fld('rec_URL');
-        var dbName = fld('rec_Title');
-        var recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
+        let recID = fld('rec_ID');
+        let recURL = fld('rec_URL');
+        let dbName = fld('rec_Title');
+        let recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
 
-        var rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
-        var recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
+        let rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
+        let recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
 
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        let html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
         
-        var w = this.recordList_dbs.width()-550;
+        let w = this.recordList_dbs.width()-550;
         if(w<150) w = 150;
         
-            var url_Error = fld('rec_URLErrorMessage');
+            let url_Error = fld('rec_URLErrorMessage');
             if(!window.hWin.HEURIST4.util.isempty(url_Error)){
                 url_Error = 'The indexed database is currently inaccessible. It returned '
                                 +window.hWin.HEURIST4.util.htmlEscape(url_Error);
@@ -833,7 +833,7 @@ $.widget( "heurist.importStructure", {
                 url_Error = '';
             }
 
-        var recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
+        let recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
         +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold;':'')+ (url_Error?'color:lightgray':'') + '"'
         + ' title="' + url_Error + '"'
         + '>'+dbName+'</div>'
@@ -842,7 +842,7 @@ $.widget( "heurist.importStructure", {
         +'</div>'
         +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  description
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        let html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -854,7 +854,7 @@ $.widget( "heurist.importStructure", {
         + '</div><div class="action-button-container">';
         
         
-        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
         if(usr_exp_level==0){ //advanced
             html = html
             + '<div title="Click to open database in new window" '
@@ -875,7 +875,7 @@ $.widget( "heurist.importStructure", {
     //
     _initDialog: function(){
 
-        var options = this.options,
+        let options = this.options,
         btn_array = [], 
         position = null;
         
@@ -883,15 +883,15 @@ $.widget( "heurist.importStructure", {
 
 
         if(position==null) position = { my: "center", at: "center", of: window };
-        var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
         if(options['width']>maxw) options['width'] = maxw*0.95;
-        var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
 
         //this.options.window = window.hWin;
         this.element.addClass('ui-heurist-bg-light');
 
-        var $dlg = this.element.dialog({
+        let $dlg = this.element.dialog({
             autoOpen: false ,
             //element: this.element[0],
             height: options['height'],
@@ -918,7 +918,7 @@ $.widget( "heurist.importStructure", {
     // adjust width according to width of parent dialog
     //
     _fixWidth: function() {//fix bug
-        var correctWidth = this.element.parent().width()-24;
+        let correctWidth = this.element.parent().width()-24;
         this.element.css({overflow: 'none !important','width':correctWidth });
 
         /*this.panel_rty_list.css({'width': correctWidth/2});
@@ -933,7 +933,7 @@ $.widget( "heurist.importStructure", {
 
             this._as_dialog.dialog("open");
 
-            var helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
+            let helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
 
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 null,
@@ -947,7 +947,7 @@ $.widget( "heurist.importStructure", {
     // listener of onfilter event generated by search
     //
     filterRecordList_dbs: function(request){
-        var subset = null;
+        let subset = null;
         if(this._cachedRecordset_dbs){
             subset = this._cachedRecordset_dbs.getSubSetByRequest(request, this.options.entity.fields);
             this.recordList_dbs.resultList('updateResultSet', subset, request);   
@@ -1075,7 +1075,7 @@ $.widget( "heurist.importStructure", {
                                 +' terms were not properly imported.'
                                 +' Error report has been sent to Heurist support.<ul>');
                             
-                            for(var i=0; i<response.report.broken_terms.length; i++){
+                            for(let i=0; i<response.report.broken_terms.length; i++){
                                 report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
                                 if(i>10){
                                     report += '...';
@@ -1121,17 +1121,17 @@ $.widget( "heurist.importStructure", {
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
-            swidth = '';
+            let swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+fld(fldname)+'</div>';
         }
 
-        var dbs = window.hWin.HEURIST4.remote;
-        var recID = fld('rty_ID');
+        let dbs = window.hWin.HEURIST4.remote;
+        let recID = fld('rty_ID');
 
-        var btn_actions = '<div style="width:60px;">'
+        let btn_actions = '<div style="width:60px;">'
         + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
         + ' style="display:inline-block;height:16px;">'
         +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
@@ -1142,29 +1142,29 @@ $.widget( "heurist.importStructure", {
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
-        var info = '';
+        let info = '';
         if(dbs._selectedRtyID==recID){
-            var rts = dbs.rectypes.typedefs[recID];
+            let rts = dbs.rectypes.typedefs[recID];
 
             info = '<div style="border:2px solid blue;padding:10px 4px;margin-top:10px"><i>' + fld('rty_Description') + "</i><br><br>";   //description
             info += '<table style="text-align: left;font-size:0.9em; font-color:darkgray;width:100%"><tr>';
-            info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
+            info += '<th  style="padding-left:10px;" class="status"><b>Already in DB?</b></th>';
             info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
             info += '<th style="padding-left:10px;"><b>Base field name (shared across record types)</b></th>';
             info += '<th style="width:100px; padding-left:10px;"><b>Field data type</b></th></tr>';
 
 
-            var idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
-            var idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
-            var idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
+            let idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+            let idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            let idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
 
-            var dty;
+            let dty;
             for (dty in rts.dtFields) {
 
-                var rst_fld = rts.dtFields[dty];
+                let rst_fld = rts.dtFields[dty];
 
                 //find in local defintions by concept code - if found - it is already imported
-                var local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
+                let local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
 
                 info += "<tr"+ (local_id>0? ' style="background-color:#CCCCCC;"' : "") +
                 "</td><td style='padding-left:20px;'>" + (local_id>0 == 1? "yes" : "NEW") +
@@ -1177,17 +1177,17 @@ $.widget( "heurist.importStructure", {
             info += "</table></div>";    
         }    
 
-        var recTitle = fld2('rty_Name','15em');
+        let recTitle = fld2('rty_Name','15em');
 
         //find all dependent record types on first level
 
         let linked_rts = $Db.getLinkedRecordTypes(recID, dbs);
 
-        var name_rts = [];
-        for(var i=0;i<linked_rts.length;i++){
+        let name_rts = [];
+        for(let i=0;i<linked_rts.length;i++){
             name_rts.push(dbs.rectypes.names[linked_rts[i]]);
         }
-        var linkedto = '';
+        let linkedto = '';
         if(linked_rts.length>0){
             linkedto = 'Links to: '+ window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','));
         }
@@ -1195,7 +1195,7 @@ $.widget( "heurist.importStructure", {
         + linkedto +'</div>';
 
 
-        var html = '<div class="recordDiv" style="min-height:16px"'
+        let html = '<div class="recordDiv" style="min-height:16px"'
         +' id="rd'+recID+'" recid="'+recID+'">'
         + btn_actions
         + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')

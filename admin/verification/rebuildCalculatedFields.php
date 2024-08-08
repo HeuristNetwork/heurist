@@ -26,8 +26,8 @@
 
 set_time_limit(0);
 
-define('MANGER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('MANGER_REQUIRED',1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
@@ -113,7 +113,7 @@ if($init_client){
         };
 <?php        
         if(@$_REQUEST['recTypeIDs']){
-            print "request['recTypeIDs'] = '".htmlspecialchars($_REQUEST['recTypeIDs'])."';"; //js output
+            print "request['recTypeIDs'] = '".htmlspecialchars($_REQUEST['recTypeIDs'])."';";//js output
         }
 ?>        
         //url to show affected records
@@ -220,7 +220,7 @@ if($init_client){
     if(is_array(@$res['errors']) && count($res['errors'])>0){        
         $q_errors = '';
         foreach($res['errors'] as $key=>$msg){
-            $q_errors = $q_errors . $key . '  ' .$msg . '<br>';           
+            $q_errors = $q_errors . $key . '  ' .$msg . '<br>';
         }
     }else{
         $q_errors = '';

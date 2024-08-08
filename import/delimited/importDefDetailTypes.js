@@ -20,32 +20,32 @@
 */
 
 function hImportDefDetailTypes(_dtg_ID = null) {
-    var _className = "ImportDefDetailTypes",
-    _version   = "0.6",
+    const _className = "ImportDefDetailTypes",
+    _version   = "0.6";
     
-    _parseddata = null,
+    let _parseddata = null,
     _prepareddata = null,
     
     _return_results = !window.hWin.HEURIST4.util.isempty(_dtg_ID);
     
     function _init(){
 
-        var uploadWidget = $('#uploadFile');
+        let uploadWidget = $('#uploadFile');
         
         //buttons
-        var btnUploadFile = $('#btnUploadFile')
+        let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})
                     .on('click',function(e) {
                             uploadWidget.trigger('click');
                         });
-        var btnParseData = $('#btnParseData')
+        let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .on('click',function(e) {
                             _doParse();
                         });
-        var btnStartImport = $('#btnImportData')
+        let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
@@ -55,7 +55,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
 
         window.hWin.HEURIST4.ui.createDetailtypeGroupSelect($('#field_dtg')[0], [{key: 0, title: 'select detail type group...'}]);
         $('#field_dtg').on('change',function(e){
-            var label = $('#field_dtg').find(':selected').text();
+            let label = $('#field_dtg').find(':selected').text();
 
             if($('#field_dtg').hSelect('instance') !== undefined){
                 $('#field_dtg').hSelect('widget').attr('title', label);
@@ -75,7 +75,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
 
         window.hWin.HEURIST4.util.setDisabled(btnStartImport, true);
          
-        var src_content = ''; 
+        let src_content = ''; 
         
         $('#sourceContent').on('keyup', function(e){
             if(src_content != $(this).val().trim()){
@@ -94,23 +94,23 @@ function hImportDefDetailTypes(_dtg_ID = null) {
             done: function (e, response) {
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){
-                    var data = response.data;
+                    let data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
                             $('#sourceContent').val(file.error);
                         }else{
                             
-                            var url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
+                            let url_get = file.deleteUrl.replace('fileUpload.php','fileGet.php')
                                 +'&encoding='+$('#csv_encoding').val()+'&&db='+window.hWin.HAPI4.database;
                             
                             $('#sourceContent').load(url_get, null);
                         }
                     });
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                    window.hWin.HEURIST4.msg.showMsgErr({message: response.message, error_title: 'File upload error', status: response.status});
                 }
                  
-                var inpt = this;
+                let inpt = this;
                 btnUploadFile.off('click');
                 btnUploadFile.on({click: function(){
                             $(inpt).trigger('click');
@@ -120,7 +120,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
 
         $('.column_roles').on('change',function(e){ 
 
-            var ele = $(e.target);
+            let ele = $(e.target);
             if(ele.val()>=0){
                 $('.column_roles').each(function(idx, item){
                    if($(item).attr('id')!= ele.attr('id') && $(item).val() == ele.val()){
@@ -144,26 +144,26 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         
         if(_parseddata==null) return;
     
-        var i, j, maxcol = 0;
-        for(i in _parseddata){
+        let maxcol = 0;
+        for(let i in _parseddata){
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                 maxcol = Math.max(maxcol,_parseddata[i].length);
             }
         }
        
-        var container = $('#divParsePreview').empty();    
-        var tbl  = $('<table>')
+        let container = $('#divParsePreview').empty();    
+        let tbl  = $('<table>')
                     .addClass('tbmain')
                     .appendTo(container);
                     
         //HEADER FIELDS            
-        var headers = [], ifrom=0;
+        let headers = [], ifrom=0;
         if( $('#csv_header').is(':checked') ){ 
             
-            for(i=0;i<_parseddata.length;i++){
+            for(let i=0;i<_parseddata.length;i++){
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                     
-                    for(j=0;j<maxcol;j++){
+                    for(let j=0;j<maxcol;j++){
                         if(j>=_parseddata[i].length || window.hWin.HEURIST4.util.isempty(_parseddata[i][j])){
                             headers.push('column '+j);     
                         }else{
@@ -175,16 +175,16 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                 }
             }
         }else{
-            for(j=0;j<maxcol;j++){
+            for(let j=0;j<maxcol;j++){
                 headers.push('column '+j);
             }
         }
         
         //TABLE HEADER
-        var tr  = $('<tr>').appendTo(tbl);
-        for(j=0;j<maxcol;j++){
+        let tr  = $('<tr>').appendTo(tbl);
+        for(let j=0;j<maxcol;j++){
             
-            var cs = {};
+            let cs = {};
             if(maxcol>3){
                 cs['width'] = ((j==0)?20:((j==maxcol-1)?40:10))+'%';
             }
@@ -195,10 +195,10 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         }
         
         //TABLE BODY
-        for(i=ifrom;i<_parseddata.length;i++){
-            var tr  = $('<tr>').appendTo(tbl);
+        for(let i=ifrom;i<_parseddata.length;i++){
+            tr  = $('<tr>').appendTo(tbl);
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                for(j=0;j<maxcol;j++){
+                for(let j=0;j<maxcol;j++){
                     
                     $('<td>').addClass('truncate')
                         .text(j<_parseddata[i].length?_parseddata[i][j]:' ').appendTo(tr);
@@ -208,8 +208,8 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         
         //COLUMN ROLES SELECTORS
         $('.column_roles').empty();
-        for(j=-1; j<maxcol; j++){
-            var opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
+        for(let j=-1; j<maxcol; j++){
+            let opt = $('<option>',{value:j, text:(j<0)?'select...':headers[j]});                                    
             opt.appendTo($('#field_name'));
             opt.clone().appendTo($('#field_desc'));
             opt.clone().appendTo($('#field_type'));
@@ -221,8 +221,8 @@ function hImportDefDetailTypes(_dtg_ID = null) {
             $('#field_name').val(0);
             
             //AUTODETECT COLUMN ROLES by name
-            for(j=0;j<maxcol;j++){
-                var s = headers[j].toLowerCase();
+            for(let j=0;j<maxcol;j++){
+                let s = headers[j].toLowerCase();
                 if(s.indexOf('name')>=0 || s.indexOf('DetailTypeName')>=0){
                     $('#field_name').val(j);
                 }else if(s=='description'){
@@ -248,7 +248,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
     //
     function _doParse(){
 
-        var content = $('#sourceContent').val();
+        let content = $('#sourceContent').val();
 
         if(content==''){
             window.hWin.HEURIST4.msg.showMsgFlash('No content entered', 1500);
@@ -256,7 +256,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         
             window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
     
-            var request = { content: content,
+            let request = { content: content,
                             csv_delimiter: $('#csv_delimiter').val(),
                             csv_enclosure: $('#csv_enclosure').val(),
                             csv_linebreak: 'auto',
@@ -275,12 +275,12 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                     $('#csv_header').prop('checked', _parseddata && _parseddata.length>0 && _parseddata[0].length>1);
                     
                     if (!$('#csv_header').is(':checked')) {
-                        var firstline_without_quotes = false;
-                        var pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
+                        let firstline_without_quotes = false;
+                        let pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
 
-                        for(var i=0; i<_parseddata.length; i++){
+                        for(let i=0; i<_parseddata.length; i++){
                             if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
-                                var len = _parseddata[i].join(',').length;
+                                let len = _parseddata[i].join(',').length;
                                 firstline_without_quotes = pos>len;
                                 break;
                             }
@@ -302,7 +302,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
     //
     function _doPrepare(){
         
-        var msg = '';
+        let msg = '';
         
         _prepareddata = [];
         
@@ -310,13 +310,13 @@ function hImportDefDetailTypes(_dtg_ID = null) {
             msg = '<i>No data. Upload and parse</i>';
         }else{
 
-            var field_name = $('#field_name').val();
-            var field_desc = $('#field_desc').val();
-            var field_type = $('#field_type').val();
+            let field_name = $('#field_name').val();
+            let field_desc = $('#field_desc').val();
+            let field_type = $('#field_type').val();
 
             if(field_name<0 || field_desc<0 || field_type<0){
 
-                var missing = [];
+                let missing = [];
 
                 if(field_name<0) { 
                     missing.push('Name'); 
@@ -331,7 +331,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                 if(missing.length <= 2){
                     msg = missing.join(' and ');
                 }else{
-                    var last = missing.pop();
+                    let last = missing.pop();
                     msg = missing.join(', ');
                     msg += ' and ' + last;
                 }
@@ -339,13 +339,13 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                 msg = '<span style="color:red">'+ msg +' must be defined</span>';
             }else{
 
-                var field_vocab = $('#field_vocab').val();
-                var field_target = $('#field_target').val();
-                var field_uri = $('#field_uri').val();
+                let field_vocab = $('#field_vocab').val();
+                let field_target = $('#field_target').val();
+                let field_uri = $('#field_uri').val();
 
-                var i, record;
+                let i, record;
                         
-                var hasHeader = $('#csv_header').is(':checked');
+                let hasHeader = $('#csv_header').is(':checked');
                 i = hasHeader?1:0;        
                         
                 for(;i<_parseddata.length;i++){
@@ -354,7 +354,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                     
                     if(field_name>=_parseddata[i].length) continue;
                     
-                    var name = '';
+                    let name = '';
 
                     if(!window.hWin.HEURIST4.util.isempty(_parseddata[i][field_name])){
                         name = _parseddata[i][field_name].trim();
@@ -405,7 +405,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         
         if(_prepareddata.length<1) return;
 
-        var dtgID = $('#field_dtg').val();
+        let dtgID = $('#field_dtg').val();
 
         if(dtgID == 0){
             window.hWin.HEURIST4.msg.showMsgFlash('Please select a detail type group', 2000);
@@ -414,7 +414,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
 
-        var request = {
+        let request = {
             'a'          : 'batch',
             'entity'     : 'defDetailTypes',
             'request_id' : window.hWin.HEURIST4.util.random(),
@@ -423,7 +423,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
             'dtg_ID'     : dtgID
         };
     
-        var that = this;
+        let that = this;
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
@@ -440,11 +440,11 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                         return;
                     }
 
-                    var results = response.data;
-                    var $tbl = $('.tbmain');
-                    var $rows = $tbl.find('tr');
-                    var col_num = 0;
-                    var update_cache = false;
+                    let results = response.data;
+                    let $tbl = $('.tbmain');
+                    let $rows = $tbl.find('tr');
+                    let col_num = 0;
+                    let update_cache = false;
 
                     // Add result header
                     if($($rows[0]).find('.post_results').length == 0){
@@ -454,10 +454,10 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                     }
 
                     // Add result data
-                    for(var i = 1; i < $rows.length; i++){
+                    for(let i = 1; i < $rows.length; i++){
 
-                        var $row = $($rows[i]);
-                        var data = results[i-1];
+                        let $row = $($rows[i]);
+                        let data = results[i-1];
 
                         if(data == null){
                             continue;
@@ -489,7 +489,7 @@ function hImportDefDetailTypes(_dtg_ID = null) {
     }
     
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

@@ -6,7 +6,7 @@ set_time_limit(0);
 $fix = false;
 
 if (!is_array($argv) || count($argv) == 0){
-    $fix = (@$_GET['fix']==1);      
+    $fix = (@$_GET['fix']==1);
     //print 'fix='.@$_GET['fix'];
     $iscmd = false;
 }else{
@@ -30,15 +30,15 @@ $ext3 = '.git'.DIRECTORY_SEPARATOR;
   
 //$path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
 if($fix){
-print $lnbr.'Fix files';    
+print $lnbr.'Fix files';
 }else{
-print $lnbr.'Search files';    
+print $lnbr.'Search files';
 }
 
 print $lnbr.'Check folder :'.realpath(dirname(__FILE__));
 
 $directory = new \RecursiveDirectoryIterator(realpath(dirname(__FILE__)));
-$iterator = new \RecursiveIteratorIterator($directory);        
+$iterator = new \RecursiveIteratorIterator($directory);
 
 $total = 0;
 $dosed = array();
@@ -46,11 +46,11 @@ $dosed = array();
 
 
 foreach ($iterator as $filepath => $info) {
-      if(!$info->isFile()) continue;
+      if(!$info->isFile()) {continue;}
       
       //$filename = $info->getFilename();
       $pathname = $info->getPath();
-      if(strpos($pathname,$ext3)>0 || strpos($pathname,$ext1)>0 || strpos($pathname,$ext2)>0 ) continue;
+      if(strpos($pathname,$ext3)>0 || strpos($pathname,$ext1)>0 || strpos($pathname,$ext2)>0 ) {continue;}
       
       
       //works since PHP 5.3.6 only $extension = $info->getExtension();

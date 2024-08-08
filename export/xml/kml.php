@@ -30,7 +30,7 @@
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
-require_once dirname(__FILE__).'/../../vendor/autoload.php'; //for geoPHP
+require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
@@ -133,9 +133,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     if($islist){
 
-            $_REQUEST['detail'] = 'ids'; // return ids only
+            $_REQUEST['detail'] = 'ids';// return ids only
 
-            $result = recordSearch($system, $_REQUEST); //see recordSearch.php
+            $result = recordSearch($system, $_REQUEST);//see recordSearch.php
         
             if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
                 $error_msg = $system->getError();
@@ -148,7 +148,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             $rec_ids = $result['records'];
             $limit = intval(@$_REQUEST['limit']);
             if($limit>0){
-                $rec_ids = array_slice($rec_ids,0,$limit);    
+                $rec_ids = array_slice($rec_ids,0,$limit);
             }
 
             $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", prepareIds($rec_ids)).") ".$ourwhere;
@@ -174,8 +174,9 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         $kml_reccount = 0;
         if($isSearchKml){
             $res2 = $mysqli->query($squery2);
-            if($res2!==false)
+            if($res2!==false){
                 $kml_reccount = $res2->num_rows;
+            }
         }
 
     }
@@ -199,7 +200,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                             
                             if($row[7] || $row[8]){
                                 
-                                if(!$row[7]) $row[7] = $row[8];
+                                if(!$row[7]) {$row[7] = $row[8];}
                                 
                                 //create timespan from two temporal objects
                                 $dt = Temporal::mergeTemporals($row[7], $row[8]);
@@ -215,7 +216,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                         print '<id>'.htmlspecialchars($row[0]).'</id>';
                         print '<name>'.htmlspecialchars ($row[2]).'</name>';
                         if($row[1]){ //  FILTER_SANITIZE_SPECIAL_CHARS
-                            print '<description><![CDATA[ <a href="'.filter_var($row[1],FILTER_SANITIZE_URL).'">link</a>]]></description>'; 										}
+                            print '<description><![CDATA[ <a href="'.filter_var($row[1],FILTER_SANITIZE_URL).'">link</a>]]></description>';										}
                         print $kml;
                         print '</Placemark>';
                     }

@@ -42,7 +42,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             return;
         }
         
-        var that = this;
+        let that = this;
         
         if(this.options.scope_types=='none'){
             this.element.find('#hr_sel_record_scope').hide();
@@ -80,10 +80,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //    
     _fillAccessControls: function(){
 
-        var that = this;
+        let that = this;
         let groups = window.hWin.HAPI4.is_admin() ? 'all_users_and_groups' : null;
 
-        var fieldSelect = this.element.find('#sel_Ownership');
+        let fieldSelect = this.element.find('#sel_Ownership');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], groups,
             [{key:0, title:'Any logged-in user'}, {key:'current_user', title:'Current user'}], () => {
 
@@ -108,7 +108,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 });
                 
                 //define group selector for edit
-                var ele = that.element.find('#sel_OwnerGroups');
+                let ele = that.element.find('#sel_OwnerGroups');
                 /*
                 if(!ele.editing_input('instance')){
                     ele.empty();
@@ -119,8 +119,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 
                 
                 //define group selector for access
-                var ele = that.element.find('#sel_AccessGroups');
-                if(!ele.editing_input('instance')){
+                ele = that.element.find('#sel_AccessGroups');
+                if(ele.length==0 || !ele.editing_input('instance')){
                     ele.empty();
                     that._createGroupSelectorElement('sel_AccessGroups', that.options.currentAccessGroups);    
                 }
@@ -130,7 +130,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                     
                     fieldSelect.val(that.options.currentOwner);
                     if( fieldSelect.val()==null && that.options.currentOwner){
-                        var editors = that.options.currentOwner.split(',');
+                        let editors = that.options.currentOwner.split(',');
                         fieldSelect.val(editors[0]);
                     }
                     if( fieldSelect.val()==null ){
@@ -226,7 +226,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     //
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Apply');
         return res;
     },    
@@ -238,9 +238,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
         
-        var that = this;
+        let that = this;
 
-        var ed_options = {
+        let ed_options = {
             recID: -1,
             dtID: input_id, //'group_selector',
             //rectypeID: rectypeID,
@@ -263,7 +263,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         ele.find('.header').css({'min-width':'150px','text-align':'right'})
         */
         
-        var ele = this.element.find('#'+input_id);
+        let ele = this.element.find('#'+input_id);
         ele.editing_input(ed_options);
         ele.find('.editint-inout-repeat-button').hide();
         ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px', display:'inline-block'});
@@ -299,23 +299,23 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         */
 
         let mode = this.options.show_modes ? this.element.find('#div_operation_mode [name="mode"]:checked').val() : 0;
-        var ownership = this.element.find('#sel_Ownership').val();
+        let ownership = this.element.find('#sel_Ownership').val();
         
-        var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
+        let visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
         if(!visibility && (mode == 0 || mode == 2)){
             if(showWarning)
                 window.hWin.HEURIST4.msg.showMsgFlash('Select access permission');
             return false;
         }
         
-        var visibility_groups = '';
+        let visibility_groups = '';
         
         if(ownership==0 && visibility!='public'){
             
             visibility='viewable';
             
         }else if(visibility=='hidden' && this.element.find('#sel_AccessGroups').editing_input('instance')){
-            var sel = this.element.find('#sel_AccessGroups').editing_input('getValues');
+            let sel = this.element.find('#sel_AccessGroups').editing_input('getValues');
 
             if(sel && sel.length>0 && sel[0]!=''){
                 visibility = 'viewable';
@@ -335,7 +335,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     doAction: function(){
 
-            var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
+            let scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
             
             if(window.hWin.HEURIST4.util.isempty(scope_val)) return; 
     
@@ -354,7 +354,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 return;
             }
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -367,10 +367,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }
             
             //unique session id    
-            var session_id = Math.round((new Date()).getTime()/1000);
+            let session_id = Math.round((new Date()).getTime()/1000);
             this._showProgress( session_id, false, 1000 );
             
-            var request = {
+            let request = {
                 request_id : window.hWin.HEURIST4.util.random(),
                 ids  : scope.join(','),
                 session: session_id
@@ -396,7 +396,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-                var that = this;                                                
+                let that = this;                                                
                 
                 window.hWin.HAPI4.RecordMgr.access(request, 
                     function(response){
@@ -409,7 +409,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                             
                             that.closeDialog();
                             
-                            var msg = 'Processed : '+response.data.processed + ' record'
+                            let msg = 'Processed : '+response.data.processed + ' record'
                                 + (response.data.processed>1?'s':'') +'. Updated: '
                                 + response.data.updated  + ' record'
                                 + (response.data.updated>1?'s':'');
@@ -433,8 +433,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     _onRecordScopeChange: function () 
     {
         
-        var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
-        var isdisabled = !(scope_val!='' && this.getSelectedParameters(false))
+        let scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
+        let isdisabled = !(scope_val!='' && this.getSelectedParameters(false))
             
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
     }

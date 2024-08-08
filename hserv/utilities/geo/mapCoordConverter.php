@@ -93,8 +93,8 @@ class GpointConverter
      */
     public function __construct($datum='WGS 84')            // Default datum is WGS 84
     {
-        $this->a = self::$ellipsoid[$datum][0];        // Set datum Equatorial Radius
-        $this->e2 = self::$ellipsoid[$datum][1];    // Set datum Square of eccentricity
+        $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
+        $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
     
@@ -105,8 +105,8 @@ class GpointConverter
      */
     public function setDatum($datum='WGS 84')
     {
-        $this->a = self::$ellipsoid[$datum][0];        // Set datum Equatorial Radius
-        $this->e2 = self::$ellipsoid[$datum][1];    // Set datum Square of eccentricity
+        $this->a = self::$ellipsoid[$datum][0];// Set datum Equatorial Radius
+        $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
     
@@ -182,7 +182,7 @@ class GpointConverter
     {
         $this->utmNorthing = $northing;
         $this->utmEasting = $easting;
-        if($zone!=null && $zone!='') $this->utmZone = $zone;
+        if($zone!=null && $zone!='') {$this->utmZone = $zone;}
     }
     
     public function setUTMZone($zone){
@@ -218,7 +218,7 @@ class GpointConverter
      * 
      */
     public function printUTM() {
-        print( "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone);
+        print "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone;
     }
     
     /**
@@ -252,7 +252,7 @@ class GpointConverter
      * 
      */
     public function printLambert() {
-        print( "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting);
+        print  "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting;
     }
     
     /**
@@ -314,7 +314,7 @@ class GpointConverter
 
         if (!$LongOrigin) { // Do a standard UTM conversion - so findout what zone the point is in
             $ZoneNumber = (integer)(($LongTemp + 180)/6) + 1;
-            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) $ZoneNumber = 32;
+            if( $this->lat >= 56.0 && $this->lat < 64.0 && $LongTemp >= 3.0 && $LongTemp < 12.0 ) {$ZoneNumber = 32;}
             // Special zones for Svalbard
             if( $this->lat >= 72.0 && $this->lat < 84.0 )  {
                 if($LongTemp >= 0.0  && $LongTemp <  9.0) {
@@ -355,7 +355,7 @@ class GpointConverter
         $this->utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
                      + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
         
-        if($this->lat < 0) $this->utmNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
+        if($this->lat < 0) {$this->utmNorthing += 10000000.0;} //10000000 meter offset for southern hemisphere
     }
 
     /**
@@ -365,29 +365,29 @@ class GpointConverter
      */
     public function UTMLetterDesignator()
     {    
-        if((84 >= $this->lat) && ($this->lat >= 72)) $LetterDesignator = 'X';
-        else if((72 > $this->lat) && ($this->lat >= 64)) $LetterDesignator = 'W';
-        else if((64 > $this->lat) && ($this->lat >= 56)) $LetterDesignator = 'V';
-        else if((56 > $this->lat) && ($this->lat >= 48)) $LetterDesignator = 'U';
-        else if((48 > $this->lat) && ($this->lat >= 40)) $LetterDesignator = 'T';
-        else if((40 > $this->lat) && ($this->lat >= 32)) $LetterDesignator = 'S';
-        else if((32 > $this->lat) && ($this->lat >= 24)) $LetterDesignator = 'R';
-        else if((24 > $this->lat) && ($this->lat >= 16)) $LetterDesignator = 'Q';
-        else if((16 > $this->lat) && ($this->lat >= 8)) $LetterDesignator = 'P';
-        else if(( 8 > $this->lat) && ($this->lat >= 0)) $LetterDesignator = 'N';
-        else if(( 0 > $this->lat) && ($this->lat >= -8)) $LetterDesignator = 'M';
-        else if((-8 > $this->lat) && ($this->lat >= -16)) $LetterDesignator = 'L';
-        else if((-16 > $this->lat) && ($this->lat >= -24)) $LetterDesignator = 'K';
-        else if((-24 > $this->lat) && ($this->lat >= -32)) $LetterDesignator = 'J';
-        else if((-32 > $this->lat) && ($this->lat >= -40)) $LetterDesignator = 'H';
-        else if((-40 > $this->lat) && ($this->lat >= -48)) $LetterDesignator = 'G';
-        else if((-48 > $this->lat) && ($this->lat >= -56)) $LetterDesignator = 'F';
-        else if((-56 > $this->lat) && ($this->lat >= -64)) $LetterDesignator = 'E';
-        else if((-64 > $this->lat) && ($this->lat >= -72)) $LetterDesignator = 'D';
-        else if((-72 > $this->lat) && ($this->lat >= -80)) $LetterDesignator = 'C';
-        else $LetterDesignator = 'Z'; //This is here as an error flag to show that the Latitude is outside the UTM limits
+        if((84 >= $this->lat) && ($this->lat >= 72)) {$LetterDesignator = 'X';}
+        else if((72 > $this->lat) && ($this->lat >= 64)) {$LetterDesignator = 'W';}
+        else if((64 > $this->lat) && ($this->lat >= 56)) {$LetterDesignator = 'V';}
+        else if((56 > $this->lat) && ($this->lat >= 48)) {$LetterDesignator = 'U';}
+        else if((48 > $this->lat) && ($this->lat >= 40)) {$LetterDesignator = 'T';}
+        else if((40 > $this->lat) && ($this->lat >= 32)) {$LetterDesignator = 'S';}
+        else if((32 > $this->lat) && ($this->lat >= 24)) {$LetterDesignator = 'R';}
+        else if((24 > $this->lat) && ($this->lat >= 16)) {$LetterDesignator = 'Q';}
+        else if((16 > $this->lat) && ($this->lat >= 8)) {$LetterDesignator = 'P';}
+        else if(( 8 > $this->lat) && ($this->lat >= 0)) {$LetterDesignator = 'N';}
+        else if(( 0 > $this->lat) && ($this->lat >= -8)) {$LetterDesignator = 'M';}
+        else if((-8 > $this->lat) && ($this->lat >= -16)) {$LetterDesignator = 'L';}
+        else if((-16 > $this->lat) && ($this->lat >= -24)) {$LetterDesignator = 'K';}
+        else if((-24 > $this->lat) && ($this->lat >= -32)) {$LetterDesignator = 'J';}
+        else if((-32 > $this->lat) && ($this->lat >= -40)) {$LetterDesignator = 'H';}
+        else if((-40 > $this->lat) && ($this->lat >= -48)) {$LetterDesignator = 'G';}
+        else if((-48 > $this->lat) && ($this->lat >= -56)) {$LetterDesignator = 'F';}
+        else if((-56 > $this->lat) && ($this->lat >= -64)) {$LetterDesignator = 'E';}
+        else if((-64 > $this->lat) && ($this->lat >= -72)) {$LetterDesignator = 'D';}
+        else if((-72 > $this->lat) && ($this->lat >= -80)) {$LetterDesignator = 'C';}
+        else {$LetterDesignator = 'Z';}//This is here as an error flag to show that the Latitude is outside the UTM limits
 
-        return($LetterDesignator);
+        return $LetterDesignator;
     }
 
     /**
@@ -508,12 +508,12 @@ class GpointConverter
     {
         $e = sqrt($this->e2);
 
-        $phi     = deg2rad($this->lat);                        // Latitude to convert
-        $phi1    = deg2rad($this->firstStdParallel);            // Latitude of 1st std parallel
-        $phi2    = deg2rad($this->secondStdParallel);        // Latitude of 2nd std parallel
-        $lamda    = deg2rad($this->long);                        // Lonitude to convert
-        $phio    = deg2rad($this->latOfOrigin);                // Latitude of  Origin
-        $lamdao    = deg2rad($this->longOfOrigin);                // Longitude of  Origin
+        $phi     = deg2rad($this->lat);// Latitude to convert
+        $phi1    = deg2rad($this->firstStdParallel);// Latitude of 1st std parallel
+        $phi2    = deg2rad($this->secondStdParallel);// Latitude of 2nd std parallel
+        $lamda    = deg2rad($this->long);// Lonitude to convert
+        $phio    = deg2rad($this->latOfOrigin);// Latitude of  Origin
+        $lamdao    = deg2rad($this->longOfOrigin);// Longitude of  Origin
 
         $m1 = cos($phi1) / sqrt(( 1 - $this->e2*sin($phi1)*sin($phi1)));
         $m2 = cos($phi2) / sqrt(( 1 - $this->e2*sin($phi2)*sin($phi2)));
@@ -547,10 +547,10 @@ class GpointConverter
     {
         $e = sqrt($e2);
 
-        $phi1    = deg2rad($this->firstStdParallel);            // Latitude of 1st std parallel
-        $phi2    = deg2rad($this->secondStdParallel);        // Latitude of 2nd std parallel
-        $phio    = deg2rad($this->latOfOrigin);                // Latitude of  Origin
-        $lamdao    = deg2rad($this->longOfOrigin);                // Longitude of  Origin
+        $phi1    = deg2rad($this->firstStdParallel);// Latitude of 1st std parallel
+        $phi2    = deg2rad($this->secondStdParallel);// Latitude of 2nd std parallel
+        $phio    = deg2rad($this->latOfOrigin);// Latitude of  Origin
+        $lamdao    = deg2rad($this->longOfOrigin);// Longitude of  Origin
         $E        = $this->lccEasting;
         $N        = $this->lccNorthing;
         $Ef        = $this->falseEasting;
@@ -596,7 +596,7 @@ class GpointConverter
 
 //        Alternative formula supposed to be more accurate for short distances
 //        $dist = 2*asin(sqrt( pow(sin(($lat1-$lat2)/2),2) + cos($lat1)*cos($lat2)*pow(sin(($lon1-$lon2)/2),2)));
-        return ( $dist * 6366710 ); // from http://williams.best.vwh.net/avform.htm#GCF
+        return $dist * 6366710;// from http://williams.best.vwh.net/avform.htm#GCF
     }
     
     
@@ -606,8 +606,8 @@ class GpointConverter
      */
     public function distanceFromTM(&$pt)
     { 
-        $E1 = $pt->E();     $N1 = $pt->N();
-        $E2 = $this->E();     $N2 = $this->N();
+        $E1 = $pt->E(); $N1 = $pt->N();
+        $E2 = $this->E(); $N2 = $this->N();
  
         $dist = sqrt(pow(($E1-$E2),2)+pow(($N1-$N2),2));
         return $dist; 
@@ -638,12 +638,12 @@ class GpointConverter
         $this->convertLLtoTM($LongOrigin);
         $x = (($this->E() - $rE) / $Scale)        // The easting in meters times the scale to get pixels
                                                 // is relative to the center of the image so adjust to
-            + ($rX);                            // the left coordinate.
+            + ($rX); // the left coordinate.
         $y = $rY -                              // Adjust to bottom coordinate.
-            (($rN - $this->N()) / $Scale);        // The northing in meters
+            (($rN - $this->N()) / $Scale);// The northing in meters
                                                 // relative to the equator. Subtract center point northing
                                                 // to get relative to image center and convert meters to pixels
-        $this->setXY((int)$x,(int)$y);            // Save the geo-referenced result.
+        $this->setXY((int)$x,(int)$y);// Save the geo-referenced result.
     }
 }
 ?>

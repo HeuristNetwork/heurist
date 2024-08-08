@@ -22,7 +22,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
     //
     _initControls: function() {
         
-        var that = this;
+        let that = this;
         
         this._super();
 
@@ -76,7 +76,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 .on('click',function(e) {
                     
                     //don't show  dashboard on startup
-                    var params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );
+                    let params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );
                     params['show_on_startup'] = 0;
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
                     
@@ -103,7 +103,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
             
             if(this.options.isViewMode){
                 
@@ -145,13 +145,13 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 //we may search users in any database
                 request['db']     = this.options.database;
 
-                var that = this;                                                
+                let that = this;                                                
            
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
+                                {recordset:new HRecordSet(response.data), request:request} );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

@@ -32,7 +32,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
@@ -120,7 +120,7 @@ $failed_exts = array();
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
+        <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
         
     </head>
     <body class="popup">
@@ -192,7 +192,7 @@ $failed_exts = array();
                     $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
                     folderCreate( $mediaFolders, true );
                 }
-                $dirs = explode(';', $mediaFolders); // get an array of folders
+                $dirs = explode(';', $mediaFolders);// get an array of folders
 
                 //sanitize folder names
                 $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
@@ -214,7 +214,7 @@ $failed_exts = array();
 
                 if (!($mediaFolders=="" || count($dirs) == 0)) {
                     print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
-                    print "<input name='mode' value='2' type='hidden'>"; // calls the form to select mappings, step 2
+                    print "<input name='mode' value='2' type='hidden'>";// calls the form to select mappings, step 2
                     print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
                     print '<input name="media" value="'.$mediaFolders.'" type="hidden">';
                     print "<input name='exts' value='$mediaExts' type='hidden'>";
@@ -230,7 +230,7 @@ $failed_exts = array();
             $mediaFolders = filter_var($_REQUEST['media'], FILTER_SANITIZE_STRING);
             print "<p>Now harvesting FieldHelper metadata into <b> ". HEURIST_DBNAME. "</b><br> ";
 
-            $dirs = explode(';', $mediaFolders); // get an array of folders
+            $dirs = explode(';', $mediaFolders);// get an array of folders
 
             $mediaExts = filter_var($_REQUEST['exts'], FILTER_SANITIZE_STRING);
             $mediaExts = explode(',', $mediaExts);
@@ -239,7 +239,7 @@ $failed_exts = array();
             $rep_issues = "";
             $progress_divid = 0;
 
-            set_time_limit(0); //no limit
+            set_time_limit(0);//no limit
 
             doHarvestFieldHelper($dirs);
 			
@@ -258,7 +258,7 @@ $failed_exts = array();
             print '<div style="color:green">Total files processed:'.intval($rep_counter).'</div>';
 
             if($rep_counter > 0){
-                print '<script type="text/javascript">if(window.hWin.HEURIST4.dbs) { window.hWin.HEURIST4.dbs.get_record_counts(null); }</script>';
+                print '<script type="text/javascript">if(window.hWin.HEURIST4.dbs) { window.hWin.HEURIST4.dbs.get_record_counts(null);}</script>';
             }
         }
 
@@ -300,7 +300,7 @@ $failed_exts = array();
                                 $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
                             }
                             
-                            $dir = str_replace('\\','/',$dir);     
+                            $dir = str_replace('\\','/',$dir);
                         }
                         
                         if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
@@ -503,7 +503,7 @@ $failed_exts = array();
                                         if($key3>0){
                                             
                                             $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
-                                            $details["t:".$key3] = array("1"=>$relative_path); //change to relative path
+                                            $details["t:".$key3] = array("1"=>$relative_path);//change to relative path
                                             
                                         }
 
@@ -567,7 +567,7 @@ $failed_exts = array();
                                         $currfile = $filename; //assign to global
 
                                         //add-update the uploaded file
-                                        $file_id = fileRegister($system, $filename); //see recordFile.php
+                                        $file_id = fileRegister($system, $filename);//see recordFile.php
                                         if(is_numeric($file_id)){
                                             $details["t:".$fileDT] = array("1"=>$file_id);
 
@@ -619,7 +619,7 @@ $failed_exts = array();
                                 $record['ScratchPad'] = null;
                                 $record['details'] = $details;
                                 
-                                $out = recordSave($system, $record);  //see recordModify.php
+                                $out = recordSave($system, $record);//see recordModify.php
 
                                 if ( @$out['status'] != HEURIST_OK ) {
                                     print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
@@ -651,7 +651,7 @@ $failed_exts = array();
                                     if (@$out['warning']) {
                                         print '<div>File: <i>'.htmlspecialchars($filename_base).
                                         '</i> <span  style="color:#ff8844">Warning: '.
-                                        htmlspecialchars(implode("; ",$out["warning"]))."</span></div>";
+                                        htmlspecialchars(implode(";",$out["warning"]))."</span></div>";
                                     }
 
                                 }
@@ -735,7 +735,7 @@ XML;
 
                         $details = array();
         
-                        $file_id = fileRegister($system, $filename);  //see recordFile.php
+                        $file_id = fileRegister($system, $filename);//see recordFile.php
                             
                         if($file_id>0){
                             $details["t:".$fileDT] = array("1"=>$file_id);
@@ -770,7 +770,7 @@ XML;
 
                             $targetPath = $flleinfo['dirname'];
                             
-                            $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath); //getRelativePath2($targetPath);
+                            $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath);//getRelativePath2($targetPath);
                             $details["t:".$key] = array("1"=>  $rel_path);
                             
                             /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
@@ -799,7 +799,7 @@ XML;
                         $record['ScratchPad'] = $recordNotes;
                         $record['details'] = $details;
                         
-                        $out = recordSave($system, $record);  //see recordModify.php
+                        $out = recordSave($system, $record);//see recordModify.php
 
                         $f_item = $f_items->addChild("item");
                         $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));

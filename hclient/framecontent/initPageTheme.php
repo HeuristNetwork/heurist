@@ -39,7 +39,7 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 // usage: websiteRecord.php takes color scheme from field of CMS_HOME record
 if(isset($site_colors) && $site_colors!=null){ 
     
-    $ut = json_decode($site_colors, true);    
+    $ut = json_decode($site_colors, true);
     
 }else{
 
@@ -57,13 +57,13 @@ if(isset($site_colors) && $site_colors!=null){
         $user = $system->getCurrentUser();
         $ut = @$user['ugr_Preferences']['custom_theme'];
         if($ut!=null){
-            $ut = json_decode($ut, true);    
+            $ut = json_decode($ut, true);
         }
     }
 }
 
 if(!isset($ut) || !is_array($ut)){
-    $ut = array();    
+    $ut = array();
 }
 
 $def_ut = array(
@@ -106,7 +106,7 @@ $def_ut = array(
 'sp_color'  =>'#ffffff', 
 'sp_bg'     =>'#9CC4D9'
 
-);    
+);
 
 function uout($idx, $def){
     global $ut;
@@ -127,12 +127,12 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
     background: <?php uout('cd_input', '#F4F2F4');?> !important; /*0511 !important;*/
 }
 .ui-widget-content, .ui-widget-content-gray {
-    border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>; 
+    border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>;
     background: <?php uout('cd_bg', '#e0dfe0');?>;
     color: <?php uout('cd_color', '#333333');?>;
 }
 .ui-widget-content a {
-    color: <?php uout('cd_color', '#333333');?>;  
+    color: <?php uout('cd_color', '#333333');?>;
 }
 .ui-heurist-bg-light{
     background-color: <?php uout('cl_bg', '#ffffff');?> !important;
@@ -202,11 +202,11 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     color: <?php uout('ce_color', '#6A7C99');?>;
 }
 .ent_wrapper.editor .text{
-    background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>; /* 0511 !important */
+    background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>;/* 0511 !important */
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;
 }
 .separator2{
-    color: black; /* <?php uout('ce_helper', '#999999');?>; */
+    color: black; /* <?php uout('ce_helper', '#999999');?>;*/
 }
 .ent_wrapper.editor .separator{
     color: <?php uout('ce_helper', '#999999');?>;
@@ -262,7 +262,7 @@ works properly when clicked or hovered */
 html .ui-button.ui-state-disabled:hover,
 html .ui-button.ui-state-disabled:active {
     /*heurist*/
-    border: 1px solid <?php uout('sd_bg', '#f2f2f2');?>; 
+    border: 1px solid <?php uout('sd_bg', '#f2f2f2');?>;
     background: <?php uout('sd_bg', '#f2f2f2');?>;
     font-weight: normal;
     color: <?php uout('sd_color', '#555555');?>;
@@ -281,7 +281,7 @@ a:visited.ui-button,
 /*  CLICKABLE: HOVER AND FOCUS */
 .ui-button:hover,
 .ui-button:focus {
-    border: 1px solid <?php uout('sh_border', '#999999');?>;  /*for buttons change border only*/
+    border: 1px solid <?php uout('sh_border', '#999999');?>;/*for buttons change border only*/
 }
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
@@ -290,7 +290,7 @@ a:visited.ui-button,
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus{
     border: 1px solid <?php uout('sh_border', '#999999');?>;
-    background: <?php uout('sh_bg', '#95A7B7');?>; 
+    background: <?php uout('sh_bg', '#95A7B7');?>;
     font-weight: normal;
     color: <?php uout('sh_color', '#2b2b2b');?>;
 }
@@ -325,7 +325,7 @@ a.ui-button:focus {
 a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
-    background: <?php uout('sp_bg', '#9CC4D9');?>; 
+    background: <?php uout('sp_bg', '#9CC4D9');?>;
     border: 1px solid <?php uout('sp_border', '#003eff');?>;
     color: <?php uout('sp_color', '#ffffff');?>;
     font-weight: normal;
@@ -342,7 +342,7 @@ a.ui-button:active,
     text-decoration: none;
 }
 .fancytree-active, .fancytree-node:hover{
-    background: <?php uout('sa_bg', '#95A7B7');?>; /* !important */
+    background: <?php uout('sa_bg', '#95A7B7');?>;/* !important */
     color: <?php uout('sp_color', '#ffffff');?>;
 }
 /*
@@ -369,7 +369,7 @@ span.fancytree-node:hover{
     background: none;
     border: none;
     padding: 10px;
-    color: <?php uout('publish_title_color', '#FFFFFF');?>;    
+    color: <?php uout('publish_title_color', '#FFFFFF');?>;
 }
 .ui-dialog-heurist{
     border: 0.25px solid #707070 !important;
@@ -572,7 +572,7 @@ span.fancytree-node:hover{
 .ui-heurist-publish .fancytree-active,
 .ui-heurist-publish .fancytree-node:hover
 {
-    background:<?php uout('publish_active', '#CCEBC5');?>; /*  !important */
+    background:<?php uout('publish_active', '#CCEBC5');?>;/*  !important */
 }
     
 /* SECTION SCHEME: ADMIN */

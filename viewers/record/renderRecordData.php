@@ -43,10 +43,10 @@ require_once dirname(__FILE__).'/../../hserv/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 
-define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields
+define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
-$noclutter = array_key_exists('noclutter', $_REQUEST); //NOT USED
+$noclutter = array_key_exists('noclutter', $_REQUEST);//NOT USED
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 $layout_name = @$_REQUEST['ll'];
@@ -74,15 +74,15 @@ if($hide_images<0 || $hide_images>2){
 // How to handle fields set to hidden
 $show_hidden_fields = $is_production || $is_map_popup ? -1 : $system->user_GetPreference('recordData_HiddenFields', 0);
 
-$rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
+$rectypesStructure = dbs_GetRectypeStructures($system);//getAllRectypeStructures();//get all rectype names
 
 $defTerms = dbs_GetTerms($system);
 $defTerms = new DbsTerms($system, $defTerms);
 
 
-$ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  //all groups current user is a member
-if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
-array_push($ACCESSABLE_OWNER_IDS, 0); //everyone
+$ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();//all groups current user is a member
+if(!is_array($ACCESSABLE_OWNER_IDS)) {$ACCESSABLE_OWNER_IDS = array();}
+array_push($ACCESSABLE_OWNER_IDS, 0);//everyone
 
 $ACCESS_CONDITION = 'rec_OwnerUGrpID '.
     (count($ACCESSABLE_OWNER_IDS)==1 ? '='.$ACCESSABLE_OWNER_IDS[0]
@@ -150,7 +150,7 @@ if(is_array($webfonts) && count($webfonts)>0){
         if(strpos($src,'@import')===0){
             $import_webfonts = $import_webfonts . $src;
         }else{
-            $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';    
+            $import_webfonts = $import_webfonts . ' @font-face {font-family:"'.$font_family.'";src:'.$src.';} ';
         }
         $font_families[] = $font_family;
     }
@@ -164,7 +164,7 @@ if ($rec_id>0 && !@$_REQUEST['bkmk_id'])
                     'select bkm_ID from usrBookmarks where bkm_recID = '
                         .$rec_id.' and bkm_UGrpID = '.$system->get_user_id());
 }else{
-    $bkm_ID = intval(@$_REQUEST['bkmk_id']);    
+    $bkm_ID = intval(@$_REQUEST['bkmk_id']);
 }
 $sel_ids = array();
 if(@$_REQUEST['ids']){
@@ -212,7 +212,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 var currentImg = obj;
             
                 if (currentImg.parentNode.className != "fullSize"){
-                    $(currentImg).hide();                    
+                    $(currentImg).hide();
                     currentImg.src = url;
                     currentImg.onload=function(){
                         $(currentImg).fadeIn(500);
@@ -245,7 +245,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
             function roll_open() {
                 var wfe = window.frameElement;
-                if (! wfe) return;
+                if (! wfe) {return;}
                 var current_height = parseInt(wfe.style.height);
 
                 var final_height = document.getElementById('bottom').offsetTop + 2;
@@ -281,7 +281,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 var sMsg = 'Sorry, your group membership does not allow you to view the content of this record'
                 if(window.hWin && window.hWin.HEURIST4){
                     //,null,ele position not work properly 1) long message 2) within iframe
-                    window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1000);                        
+                    window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1000);
                 }else{
                     alert(sMsg);
                 }
@@ -293,7 +293,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
             //
             function show_record(event, rec_id) 
             {
-                $('div[data-recid]').hide();$('div[data-recid='+rec_id+']').show(); 
+                $('div[data-recid]').hide();$('div[data-recid='+rec_id+']').show();
                 return false
             }
             //
@@ -309,7 +309,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 ?>
 
                 let href = link.href;
-                let target = !link.getAttribute("target") ? '_popup' : link.getAttribute("target"); // without a defined target, by default attempt to open in a popup
+                let target = !link.getAttribute("target") ? '_popup' : link.getAttribute("target");// without a defined target, by default attempt to open in a popup
 
                 if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg && target == '_popup'){
                     try{
@@ -469,7 +469,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                 }
                 //$(event.target).parents('.detailRowHeader').hide();
                 if(event!=null && window.hWin && window.hWin.HAPI4){
-                    window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);    
+                    window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);
                 }
             }
 
@@ -617,13 +617,13 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                             var $rel_field = $rel_section.find('div[data-id="'+ related_records[key][i] +'"]').hide();
 
                             if($pre_location.is('fieldset')){
-                                $rel_field.clone().appendTo($pre_location).show(); // show rel field
-                                $pre_location.show(); // show fieldset
-                                $pre_location.prev().show(); // show header
+                                $rel_field.clone().appendTo($pre_location).show();// show rel field
+                                $pre_location.show();// show fieldset
+                                $pre_location.prev().show();// show header
                             }else{
-                                $pre_location.before($rel_field.clone().show()); // show rel field
-                                $pre_location.parent().show(); // show fieldset
-                                $pre_location.parent().prev().show(); // show header
+                                $pre_location.before($rel_field.clone().show());// show rel field
+                                $pre_location.parent().show();// show fieldset
+                                $pre_location.parent().prev().show();// show header
                             }
                         }
                     }
@@ -644,7 +644,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
                     if(window.hWin && window.hWin.HAPI4){
                         $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
-                                showLink:true, database:database, baseURL:baseURL});    
+                                showLink:true, database:database, baseURL:baseURL});
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
                             $('.thumbnail2.main-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D, 
@@ -656,7 +656,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
                     if(window.hWin && window.hWin.HAPI4){
                         $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked, 
-                                showLink:true, database:database, baseURL:baseURL});    
+                                showLink:true, database:database, baseURL:baseURL});
                     }else{
                         $.getScript(baseURL+'external/jquery.fancybox/jquery.fancybox.js', function(){
                             $('.thumbnail2.linked-media').mediaViewer({rec_Files:rec_Files_IIIF_and_3D_linked, 
@@ -673,7 +673,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
 
                 if(!$('.thumbnail').mediaViewer('instance')){
                     $('.thumbnail').mediaViewer({selector:'.mediaViewer_link', 
-                        rec_Files:rec_Files, showLink:false, database:database, baseURL:baseURL });                
+                        rec_Files:rec_Files, showLink:false, database:database, baseURL:baseURL });
                         
                     //setTimeout(function(){$('.thumbnail').mediaViewer('show');},1000);
                 }
@@ -704,7 +704,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                     var url =  baseURL
                     + 'hclient/widgets/viewers/miradorViewer.php?db=' 
                     +  database
-                    + '&recID='<?php echo $bib['rec_ID']; ?>
+                    + '&recID='<?php echo $bib['rec_ID'];?>
                     + '&iiif_image=' + obf_recID;
 
                     if(false && window.hWin && window.hWin.HEURIST4){
@@ -715,13 +715,13 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                                 //maximize:true, 
                                 default_palette_class: 'ui-heurist-explore',
                                 width:'90%',height:'95%',
-                                allowfullscreen:true,'padding-content':'0px'});   
+                                allowfullscreen:true,'padding-content':'0px'});
 
                         $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
 
                         $dlg.parent().css('top','50px');
                     }else{
-                        window.open(url, '_blank');        
+                        window.open(url, '_blank');
                     }                      
 
                     //data-id
@@ -839,7 +839,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
                     $(fieldset).show();
                     $header.show();
 
-                    let $vis_rows = $(fieldset).find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none'; });
+                    let $vis_rows = $(fieldset).find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none';});
                     if($vis_rows.length == 0){
                         $(fieldset).hide();
                         $header.hide();
@@ -900,7 +900,7 @@ $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='
              
                 initMediaViewer();
                 
-                showMediaViewer(); //init thumbs for iiif
+                showMediaViewer();//init thumbs for iiif
 
                 //displayImages(false);
 
@@ -1133,7 +1133,7 @@ if ($bkm_ID>0 || $rec_id>0) {
         }else{
         }*/
 	        
-            print '<div data-recid="'.intval($bibInfo['rec_ID']).'">'; // style="font-size:0.8em"
+            print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
 	        print '</div>';
             
@@ -1147,14 +1147,14 @@ if ($bkm_ID>0 || $rec_id>0) {
                 foreach($sel_ids as $id){
                     
                     $id = intval($id);
-                    if(!($id>0)) continue;
+                    if(!($id>0)) {continue;}
                     
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
                 
                     if($id!=$rec_id){  //print details for linked records - hidden
-                        print '<div data-recid="'.intval($id).'" style="display:none">'; //font-size:0.8em;
+                        print '<div data-recid="'.intval($id).'" style="display:none">';//font-size:0.8em;
                         print_details($bibInfo);
                         print '</div>';
                     }
@@ -1169,7 +1169,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
-.USanitize::sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
+.USanitize::sanitizeString($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';//htmlspecialchars
                    
                     $cnt++;
                 }
@@ -1223,21 +1223,21 @@ function print_details($bib) {
     print_header_line($bib);
 
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
-    $rec_owner  = $bib['rec_OwnerUGrpID']; 
+    $rec_owner  = $bib['rec_OwnerUGrpID'];
     $hasAccess = ($rec_visibility=='public') || 
                                     ($system->has_access() &&  //logged in
-                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS))); //viewable or owner
+                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS)));//viewable or owner
     if($hasAccess){
     
         print_public_details($bib);
         
         $link_cnt = print_relation_details($bib);
-        $link_cnt = print_linked_details($bib, $link_cnt); //links from
+        $link_cnt = print_linked_details($bib, $link_cnt);//links from
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#" oncontextmenu="return false;" 
-                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT); ?>);' style="color:blue">
+                onClick='$(".fieldRow").css("display","table-row");$(".moreRow").hide();createRecordGroups(<?php echo json_encode($group_details, JSON_FORCE_OBJECT);?>);' style="color:blue">
                 more...
             </a>
             </div><div class="detail"></div></div></div>
@@ -1251,7 +1251,7 @@ function print_details($bib) {
             //print_text_details($bib);
         }
         
-        $system->user_LogActivity('viewRec', $bib['rec_ID']); // log action
+        $system->user_LogActivity('viewRec', $bib['rec_ID']);// log action
     }else{
         
         print 'Sorry, your group membership does not allow you to view the content of this record';
@@ -1281,7 +1281,7 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?php echo (USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS)); ?>
+                <?php echo (USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS));?>
         </h2>
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
@@ -1303,7 +1303,7 @@ function print_header_line($bib) {
         ?>
 
             <span style="cursor: default; padding-left: 20px;">
-                Workflow stage: <?php echo htmlspecialchars($wfs_details[1]); ?>
+                Workflow stage: <?php echo htmlspecialchars($wfs_details[1]);?>
                 <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo HEURIST_BASE_URL; ?>hclient/assets/16x16.gif"></span>
             </span>
 
@@ -1394,15 +1394,15 @@ function print_private_details($bib) {
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link" 
-            href="<?php echo $system->recordLink($bib['rec_ID']); ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
+            href="<?php echo $system->recordLink($bib['rec_ID']);?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
     </div>
     <?php
     
-    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
+    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']);//get form database in server time
     
     //zero date not allowed by default since MySQL 5.7 default date changed to 1000
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
-        $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')); //convert to UTC
+        $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'));//convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $add_date.'", "lt0")</script> local)';
 
@@ -1410,9 +1410,9 @@ function print_private_details($bib) {
         $add_date = false;
     }
 
-    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
+    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']);//get form database in server time
     if($mod_date){
-        $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')); //convert to UTC
+        $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'));//convert to UTC
         $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $mod_date.'", "lt1")</script> local)';
     }else{
@@ -1484,13 +1484,13 @@ function print_private_details($bib) {
                         <div class=detailType>Workgroup tags</div>
                         <div class=detail>
                             <?php
-                            for ($i=0; $i < count($kwds); ++$i) {
+                            for ($i=0; $i < count($kwds);++$i) {
                                 $grp = $kwds[$i][0];
                                 $kwd = $kwds[$i][1];
-                                if ($i > 0) print '&nbsp; ';
+                                if ($i > 0) {print '&nbsp; ';}
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
-                                if (preg_match('/\\s/', $grp_kwd)) $grp_kwd = '"'.$grp_kwd.'"';
+                                if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
                                 print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/magglass_12x11.gif"></a>';
                             }
                             ?>
@@ -1524,11 +1524,11 @@ function print_personal_details($bkmk) {
         <div class=detail>
             <?php
             if ($tags) {
-                for ($i=0; $i < count($tags); ++$i) {
-                    if ($i > 0) print '&nbsp; ';
+                for ($i=0; $i < count($tags);++$i) {
+                    if ($i > 0) {print '&nbsp; ';}
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
-                    if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
+                    if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
                     print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/magglass_12x11.gif"></a>';
                 }
                 if (count($tags)) {
@@ -1571,7 +1571,7 @@ function print_public_details($bib) {
         where dtl_RecID = ' . intval($bib['rec_ID']);
     
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
-    $rec_owner  = $bib['rec_OwnerUGrpID']; 
+    $rec_owner  = $bib['rec_OwnerUGrpID'];
     if($system->has_access() && in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         //owner of record can see any field
         $detail_visibility_conditions = '';
@@ -1590,20 +1590,20 @@ function print_public_details($bib) {
         $detail_visibility_conditions .= ' AND IFNULL(rst_NonOwnerVisibility,"")!="hidden" AND IFNULL(rst_RequirementType,"")!="forbidden" AND IFNULL(dtl_HideFromPublic, 0)!=1';
     }else if(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         // hide forbidden fields from all except owners an admins
-        $detail_visibility_conditions .= ' AND IFNULL(rst_RequirementType,"")!="forbidden"';   //ifnull needed for non-standard fields
+        $detail_visibility_conditions .= ' AND IFNULL(rst_RequirementType,"")!="forbidden"';//ifnull needed for non-standard fields
     }
 
     $query = $query.$detail_visibility_conditions
         .' order by rdr.rst_DisplayOrder is null,
         rdr.rst_DisplayOrder,
         dty_ID,
-        dtl_ID';      //show null last
+        dtl_ID';//show null last
 
     $bds = array();
     $bds_temp = array();
     $thumbs = array();
 
-    $bds_res = $mysqli->query($query); //0.8 sec
+    $bds_res = $mysqli->query($query);//0.8 sec
 
     $translations = [];
 
@@ -1635,7 +1635,7 @@ function print_public_details($bib) {
         $allow_execute_this_complex_query = true;           
         if($allow_execute_this_complex_query){  //this query fails for maria db        
                 
-            $bds_res = $mysqli->query($query);     
+            $bds_res = $mysqli->query($query);
             if($bds_res){   
                 while ($bd = $bds_res->fetch_assoc()) {
                     $bds_temp[] = $bd;    
@@ -1666,14 +1666,14 @@ function print_public_details($bib) {
                     //ignore empty date
                     continue;
                 }else{
-                    $bd['rollover'] = Temporal::toHumanReadable($bd['val'], true, 2, "\n"); //extended
-                    $bd['val'] = Temporal::toHumanReadable($bd['val'], true, 1); //compact
+                    $bd['rollover'] = Temporal::toHumanReadable($bd['val'], true, 2, "\n");//extended
+                    $bd['val'] = Temporal::toHumanReadable($bd['val'], true, 1);//compact
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
             }else if ($bd['dty_Type'] == 'blocktext') {
 
-                $bd['val'] = html_entity_decode($bd['val']); // @todo: get translation
+                $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
                 list($lang, $value) = output_chunker($bd['val'], true);
                 $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', $value));
 
@@ -1687,7 +1687,7 @@ function print_public_details($bib) {
                         ($lang == $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language)){
 
                         $translations[$bd['dty_ID']]['lang'] = $lang; // set language
-                        $translations[$bd['dty_ID']]['values'] = []; // reset value tracker
+                        $translations[$bd['dty_ID']]['values'] = [];// reset value tracker
                     }
 
                     if($lang == $translations[$bd['dty_ID']]['lang']){
@@ -1711,7 +1711,7 @@ function print_public_details($bib) {
             }else if ($bd['dty_Type'] == 'resource') {
 
                 
-                $rec_id = intval($bd['val']);                              
+                $rec_id = intval($bd['val']);
                 $row = mysql__select_row($mysqli, 'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID  from Records where rec_ID='.$rec_id);
                 if($row){
                     $rec_title = $row[0];
@@ -1720,7 +1720,7 @@ function print_public_details($bib) {
                     
                     $hasAccess = ($rec_visibility=='public') || 
                                     ($system->has_access() &&  //logged in
-                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS))); //viewable or owner
+                                    ($rec_visibility!='hidden' || in_array($rec_owner, $ACCESSABLE_OWNER_IDS)));//viewable or owner
                                     
                     
                     if($hasAccess){
@@ -1739,7 +1739,7 @@ function print_public_details($bib) {
                     //find dates
                     $row = mysql__select_row($mysqli, 'SELECT rdi_estMinDate ' 
                             .' FROM recDetailsDateIndex'
-                            .' WHERE rdi_RecID='.$rec_id .' AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')'); 
+                            .' WHERE rdi_RecID='.$rec_id .' AND rdi_DetailTypeID IN ('.DT_DATE.','.$startDT.')');
 
                     if($row){
                         $bd['order_by_date'] = $row[0];
@@ -1764,18 +1764,18 @@ function print_public_details($bib) {
                      $ruf_entity = new DbRecUploadedFiles($system);
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
-                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see recordFile.php
+                    $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']);//see recordFile.php
                     if(is_array($listpaths) && count($listpaths)>0){
-                        $fileinfo = $listpaths[0]; //
+                        $fileinfo = $listpaths[0];//
                     }
                 }
                 
                 if($fileinfo){
                     
-                    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
-                    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-                    $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-                    $sourceType = $fileinfo['ulf_PreferredSource'];  
+                    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
+                    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
+                    $mimeType = $fileinfo['fxm_MimeType'];// fxm_MimeType
+                    $sourceType = $fileinfo['ulf_PreferredSource'];
                     $file_Ext = $fileinfo['ulf_MimeExt'];
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
@@ -1895,7 +1895,7 @@ function print_public_details($bib) {
                             ($lang == $primary_language && $translations[$bd['dty_ID']]['lang'] != $primary_language)){
 
                             $translations[$bd['dty_ID']]['lang'] = $lang; // set language
-                            $translations[$bd['dty_ID']]['values'] = []; // reset value tracker
+                            $translations[$bd['dty_ID']]['values'] = [];// reset value tracker
                         }
 
                         if($lang == $translations[$bd['dty_ID']]['lang']){
@@ -1926,7 +1926,7 @@ function print_public_details($bib) {
 
             print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>Parent record</div><div class="detail">'
-            .' '.($bd['val']).'</div></div>';  // htmlentities  
+            .' '.($bd['val']).'</div></div>';// htmlentities  
             break;
         }
     }
@@ -1946,7 +1946,7 @@ function print_public_details($bib) {
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
-                //if($is_map_popup) break;
+                //if($is_map_popup) {break;}
             }else{
                 print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }
@@ -1961,7 +1961,7 @@ function print_public_details($bib) {
     }else{
         print '<div class="thumbnail">';
     }
-        $has_thumbs = (count($thumbs)>0);        
+        $has_thumbs = (count($thumbs)>0);
       
     $several_media = count($thumbs);
     $added_linked_media_cont = false;
@@ -2073,7 +2073,7 @@ function print_public_details($bib) {
                         .htmlspecialchars($thumb['id']).', this.parentNode)">show thumbnail</a>';
             }
 
-            print '</div><!-- CLOSE download_link -->';  //CLOSE download_link
+            print '</div><!-- CLOSE download_link -->';//CLOSE download_link
         }
             
 
@@ -2099,10 +2099,10 @@ function print_public_details($bib) {
                     
                     print '<div id="player'.htmlspecialchars($thumb['id']).'" style="min-height:100px;min-width:200px;text-align:left;">';
 
-                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see recordFile.php
+                    print fileGetPlayerTag($system, $thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);//see recordFile.php
                     
-                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
-                    print '</div>';    
+                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null);
+                    print '</div>';
                 }else{
                     print '<img id="img'.htmlspecialchars($thumb['id']).'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
                     if($isImageOrPdf && !$without_header){                        
@@ -2137,8 +2137,8 @@ function print_public_details($bib) {
     /*
     $webIcon = mysql__select_value($system->get_mysqli(),
                     'select dtl_Value from recDetails where dtl_RecID='
-                    .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
-    if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>";
+                    .$bib['rec_ID'].' and dtl_DetailTypeID=347');//DT_WEBSITE_ICON);
+    if ($webIcon) {print "<img id=website-icon src='" . $webIcon . "'>";}
    */                 
     if (@$url) {
         print '<div class="detailRow" style="border:none 1px #00ff00;">' //width:100%;
@@ -2179,7 +2179,7 @@ function print_public_details($bib) {
         $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
                 .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
 
-        if(!(mysql__select_value($mysqli, $query)>0)) continue; //not in structure
+        if(!(mysql__select_value($mysqli, $query)>0)) {continue;} //not in structure
 
         if( $has_translations && isset( $translations[$bd['dty_ID']] ) && !in_array($bd['dtl_ID'], $translations[$bd['dty_ID']]['values']) ){
             continue;
@@ -2197,7 +2197,7 @@ function print_public_details($bib) {
         if($prevLbl != $bd['name']){ // start new detail row
 
             if($prevLbl != null){
-                print '</div></div>'; // close previous detail row
+                print '</div></div>';// close previous detail row
             }
 
             // open new detail row
@@ -2216,12 +2216,12 @@ function print_public_details($bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
         
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . ($bd['val']) . '</span>'; // add value
+                .'>' . ($bd['val']) . '</span>';// add value
         $prevLbl = $bd['name'];
     }
 
     if($prevLbl != null){
-        print '</div></div>'; // close final detail row
+        print '</div></div>';// close final detail row
     }
 
     $group_details = array();
@@ -2252,7 +2252,7 @@ function print_public_details($bib) {
         echo '<div class="detailRow fieldRow">&nbsp;</div>';
     }
 
-    echo '</div></div>';            
+    echo '</div></div>';
 }
 
 
@@ -2277,14 +2277,14 @@ function print_relation_details($bib) {
 		left join Records on rec_ID = dtl_RecID
 		where dtl_DetailTypeID = '.$relSrcDT.
 		' and rec_RecTypeID = '.$relRT.
-		' and dtl_Value = ' . intval($bib['rec_ID']));        //primary resource
+		' and dtl_Value = ' . intval($bib['rec_ID']));//primary resource
 
     $to_res = $mysqli->query('select recDetails.*
 		from recDetails
 		left join Records on rec_ID = dtl_RecID
 		where dtl_DetailTypeID = '.$relTrgDT.
 		' and rec_RecTypeID = '.$relRT.
-		' and dtl_Value = ' . intval($bib['rec_ID']));          //linked resource
+		' and dtl_Value = ' . intval($bib['rec_ID']));//linked resource
 
     if (($from_res==false || $from_res->num_rows <= 0)  &&  
 		 ($to_res==false || $to_res->num_rows<=0)){
@@ -2297,7 +2297,7 @@ function print_relation_details($bib) {
         print '<div class="detailType fieldRow" style="display:none;line-height:21px">Related</div>';
         print '<div class="map_popup">';
     }else{
-        print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related'; 
+        print '<div class="detailRowHeader relatedSection" Xstyle="float:left">Related';
     }
 
     $relfields_details = mysql__select_all($mysqli,
@@ -2359,7 +2359,7 @@ function print_relation_details($bib) {
 						}else{
 
 							$move_details[$fld_name] = array();
-							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);  //name of field, order, related recid
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);//name of field, order, related recid
 
 							$field_name = $fld_name;
 						}
@@ -2380,7 +2380,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
 			$link_cnt++;
 			//		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
 
@@ -2402,8 +2402,8 @@ function print_relation_details($bib) {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print Temporal::toHumanReadable($bd['StartDate'], true, 1); //compact
-				if (@$bd['EndDate']) print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);
+				if (@$bd['StartDate']) {print Temporal::toHumanReadable($bd['StartDate'], true, 1);}//compact
+				if (@$bd['EndDate']) {print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);}
 			print '</div></div>';
 		}
 		$from_res->close();
@@ -2448,7 +2448,7 @@ function print_relation_details($bib) {
 						}else{
 
 							$move_details[$fld_name] = array();
-							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);  //name of field, order, related recid
+							array_push($move_details[$fld_name], $relfields_details[$i][1], $bd['recID']);//name of field, order, related recid
 
 							$field_name = $fld_name;
 						}
@@ -2469,7 +2469,7 @@ function print_relation_details($bib) {
                 $recTitle = 'record id ' . $relatedRecID;
             }
 
-			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
+			print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
 			$link_cnt++;
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
@@ -2490,8 +2490,8 @@ function print_relation_details($bib) {
 					print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
 				}
 				print '&nbsp;&nbsp;';
-				if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
-				if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
+				if (@$bd['StartDate']) {print htmlspecialchars($bd['StartDate']);}
+				if (@$bd['EndDate']) {print ' until ' . htmlspecialchars($bd['EndDate']);}
 			print '</div></div>';
         }
         $to_res->close();
@@ -2540,17 +2540,17 @@ function print_linked_details($bib, $link_cnt)
                 .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
                 .$ignored_ids
     .' and '.$ACCESS_CONDITION
-    .' ORDER BY rec_RecTypeID, rec_Title';    
+    .' ORDER BY rec_RecTypeID, rec_Title';
     
     $res = $mysqli->query($query);
 
-    if ($res==false || $res->num_rows <= 0) return $link_cnt;
+    if ($res==false || $res->num_rows <= 0) {return $link_cnt;}
     
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
        print '<div class="map_popup">';//
     }else{
-       print '<div class="detailRowHeader" style="float:left">Linked from</div><div>'; 
+       print '<div class="detailRowHeader" style="float:left">Linked from</div><div>';
        if(!$is_production){
     ?>
         <div style="position: relative;top: -7px;margin-bottom: 5px;">
@@ -2574,7 +2574,7 @@ function print_linked_details($bib, $link_cnt)
 
     while ($row = $res->fetch_assoc()) {
 
-        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?'display:none':'').'">'; // && $link_cnt>2 linkRow
+        print '<div class="detailRow fieldRow" style="'.$font_size.($is_map_popup?'display:none':'').'">';// && $link_cnt>2 linkRow
         $link_cnt++;
         
             print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
@@ -2600,7 +2600,7 @@ function print_linked_details($bib, $link_cnt)
 function print_text_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
-        if (! $result["success"] && count($cmts) == 0) return;
+        if (! $result["success"] && count($cmts) == 0) {return;}
         
         $content = "";
         $woot = @$result["woot"];
@@ -2608,20 +2608,20 @@ function print_text_details($bib) {
         foreach ($woot["chunks"] as $chunk) {
             $content .= $chunk["text"] . " ";
         }
-        if (strlen($content) == 0 && count($cmts) == 0) return;
+        if (strlen($content) == 0 && count($cmts) == 0) {return;}
 
         
         print '<div class=detailRowHeader>Text';
         print_woot_precis($content, $bib);
         print_threaded_comments($cmts);
-        print '</div><br>&nbsp;'; // avoid ugly spacing
+        print '</div><br>&nbsp;';// avoid ugly spacing
 }
 
 function output_chunker($val, $return_lang = false) {
 
-    list($lang, $val) = extractLangPrefix($val); // remove possible language prefix
+    list($lang, $val) = extractLangPrefix($val);// remove possible language prefix
     // chunk up the value so that it will be able to line-break if necessary
-    $val = USanitize::sanitizeString($val); 
+    $val = USanitize::sanitizeString($val);
     return $return_lang ? [$lang, $val] : $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
@@ -2685,7 +2685,7 @@ function output_chunker($val, $return_lang = false) {
     [groupName] => ) ) ) ) )
     */
 function print_woot_precis($content,$bib) {
-        if (strlen($content) == 0) return;
+        if (strlen($content) == 0) {return;}
         ?>
         <div class=detailRow>
             <div class=detailType>WYSIWYG Text</div>
@@ -2707,7 +2707,7 @@ function print_woot_precis($content,$bib) {
 
 
 function print_threaded_comments($cmts) {
-        if (count($cmts) == 0) return;
+        if (count($cmts) == 0) {return;}
         ?>
         <div class=detailRow>
             <div class=detailType>Thread Comments</div>
@@ -2735,20 +2735,20 @@ function orderComments($cmts) {
         //handle root nodes
         if ($cmt['owner'] == 0) {
             // skip deleted or children with deleted parents
-            if ($cmt['deleted']) continue;
+            if ($cmt['deleted']) {continue;}
             $level = $cmts[$id]["level"] = 0;
             array_push($orderedCmtIds,$id);
         }else {	//note this algrithm assumes comments are ordered by date and that a child comment always has a more recent date
             // handle deleted or children of deleted
-            if ($cmts[$cmt["owner"]]["deleted"]) $cmt["deleted"] = true;
-            if ($cmt["deleted"]) continue;
+            if ($cmts[$cmt["owner"]]["deleted"]) {$cmt["deleted"] = true;}
+            if ($cmt["deleted"]) {continue;}
             $ownerIndex = array_search($cmt["owner"],$orderedCmtIds);
-            $insertIndex = count($orderedCmtIds);  //set insertion to end of array as default
+            $insertIndex = count($orderedCmtIds);//set insertion to end of array as default
             if($ownerIndex === FALSE) {  // breaks assumption write code to fix up the ordering here
                 array_push($orderErrCmts,array( 'id' => $id, 'level' => 1));
             }else if ($ownerIndex +1 < $insertIndex) { //not found at the end of the array  note array index +1 = array offset
                 if (array_key_exists($cmt["owner"],$cmts) && array_key_exists("level",$cmts[$cmt["owner"]])){
-                    $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ; //child so increase the level
+                    $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ;//child so increase the level
                     for ($i = $ownerIndex+1; $i < $insertIndex; $i++) {
                         if ( $cmts[$orderedCmtIds[$i]]["level"] < $cmts[$id]["level"]) { //found insertion point
                             $insertIndex = $i;
@@ -2762,7 +2762,7 @@ function orderComments($cmts) {
                     array_push($orderErrCmts,array( 'id' => $id, 'level' => 1));
                 }
             }else{ //parent node is at the end of the array so just append
-                $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ; //child so increase the level
+                $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ;//child so increase the level
                 array_push($orderedCmtIds,$id);
             }
         }
@@ -2771,7 +2771,7 @@ function orderComments($cmts) {
     foreach ( $orderedCmtIds as $id) {
         array_push($ret, array( 'id' => $id, 'level' => $cmts[$id]['level']));
     }
-    if (count($orderErrCmts)) $orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);
+    if (count($orderErrCmts)) {$orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);}
     return $ret;
 }
 
@@ -2783,26 +2783,26 @@ function __sortResourcesByDate($a, $b)
         if($a['dty_ID'] == $b['dty_ID']){
             
             if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
-                 return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
+                 $ret = ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
             }else{
-                 return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
+                 $ret = ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
             }
             
-            
         }else{
-            return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
+            $ret = ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
         }
         
     }else {
-        return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
+        $ret = (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
     }
+    return $ret;
 } 
 
 function linkifyValue($value){
 
-    $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value); // "%0A", "%0D"
+    $new_value = str_replace(array("\r\n", "\n\r", "\r", "\n"), '<br>', $value);// "%0A", "%0D"
 
-    preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches); // only urls that contain a protocol [http|https|ftp|mailto]
+    preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches);// only urls that contain a protocol [http|https|ftp|mailto]
 
     if(is_array($url_matches) && count($url_matches[0]) > 0){
 

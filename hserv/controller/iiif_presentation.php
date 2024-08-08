@@ -39,14 +39,14 @@
 
         if( ! $system->init(@$params['db']) ){
             //get error and response
-            $system->error_exit_api(); //exit from script
+            $system->error_exit_api();//exit from script
         }
     }
     
     if(!(array_key_exists('id',$params) 
         && $params['id']!='' && $params['id']!=null)){
         
-        $system->error_exit_api('Resource id is not defined'); //exit from script
+        $system->error_exit_api('Resource id is not defined');//exit from script
     }
     
     if(!(array_key_exists('resource',$params) 

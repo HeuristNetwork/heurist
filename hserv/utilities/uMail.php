@@ -47,15 +47,15 @@ use PHPMailer\PHPMailer\Exception;
         $replyTo = null;//$email_from;
         $replyToName = null;//$email_from_name;
 
-        if(!$email_from) $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
-        if(!$email_from_name) $email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';
+        if(!$email_from) {$email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);}
+        if(!$email_from_name) {$email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';}
         
         if($is_html){
             USanitize::purifyHTML($email_text);
         }
         
         if(is_array($email_text)){
-            $email_text =  json_encode($email_text);    
+            $email_text =  json_encode($email_text);
         }
         
         if(!$email_to){
@@ -91,9 +91,9 @@ use PHPMailer\PHPMailer\Exception;
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $responce = curl_exec($ch);
-            curl_close($ch);            
+            curl_close($ch);
             
-            return ($responce==1);            
+            return $responce==1;
         }
         
         
@@ -101,33 +101,37 @@ use PHPMailer\PHPMailer\Exception;
         $email = new PHPMailer();
         
         /*
-        $mail->IsSMTP(); 
+        $mail->IsSMTP();
         $mail->SMTPAuth   = true; 
         $mail->Port       = 25; 
-        $mail->Host       = "xx.xxx.x.x"; // SMTP server
-        $mail->Username   = "myemail@mydomain.local";  
-        $mail->Password   = <myemailpassword>;        
+        $mail->Host       = "xx.xxx.x.x";// SMTP server
+        $mail->Username   = "myemail@mydomain.local";
+        $mail->Password   = <myemailpassword>;
         
         $mail->From = 'contacto@45norte.com';
-        $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']); //recipient
+        $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']);//recipient
         */
         
         $email->CharSet = 'UTF-8';
         $email->Encoding = 'base64';
-        $email->isHTML( $is_html ); 
+        $email->isHTML( $is_html );
 
         if($replyTo!=null && $replyTo!=$email_from){
             $email->ClearReplyTos();
             $email->addReplyTo($replyTo, $replyToName);
         }
         $email->SetFrom($email_from, $email_from_name);
-        
-        
+
+
         $email->Subject   = $email_title; //'=?UTF-8?B?'.base64_encode($email_title).'?=';
         $email->Body      = $email_text;
-        
+
+        $email_cc = array_key_exists('cc', $email_to) ? $email_to['cc'] : [];
+        $email_bcc = array_key_exists('bcc', $email_to) ? $email_to['bcc'] : [];
+        $email_to = array_key_exists('to', $email_to) ? $email_to['to'] : $email_to;
+
         foreach($email_to as $email_address){
-            
+
             $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
             if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
 
@@ -139,17 +143,35 @@ use PHPMailer\PHPMailer\Exception;
                 }
                 return false;
             }
-            
+
             $email->AddAddress( $email_address );
         }
-        
+        foreach($email_cc as $email_address){
+
+            $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
+            if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                continue;
+            }
+
+            $email->AddCC($email_address);
+        }
+        foreach($email_bcc as $email_address){
+
+            $email_address = filter_var($email_address, FILTER_SANITIZE_EMAIL);
+            if(!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                continue;
+            }
+
+            $email->AddBCC($email_address);
+        }
+
         if($email_attachment!=null){
             if(is_array($email_attachment)){
                 foreach($email_attachment as $attach_file){
-                    $email->addAttachment( $attach_file );    
+                    $email->addAttachment( $attach_file );
                 }
             }else{
-                $email->addAttachment($email_attachment);// , 'new.jpg'); 
+                $email->addAttachment($email_attachment);// , 'new.jpg');
             }
         }
        
@@ -243,7 +265,7 @@ use PHPMailer\PHPMailer\Exception;
     //
     function checkSmtp(){
 
-        $smtpHost = '127.0.0.1'; //'localhost';
+        $smtpHost = '127.0.0.1';//'localhost';
         $smtpPort = '25';
         $smtpTimeout = 5;
 

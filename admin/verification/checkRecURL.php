@@ -81,7 +81,7 @@ if(!$is_included){
     if($has_broken_url){
         echo '<script>$(".records_url").css("background-color", "#E60000");</script>';
     }else{
-        echo '<script>$(".records_url").css("background-color", "#6AA84F");</script>';        
+        echo '<script>$(".records_url").css("background-color", "#6AA84F");</script>';
     }
     print '<br></div>';
 }
@@ -90,10 +90,10 @@ function __updateRecords_lastverified($mysqli){
     global $passed_rec_ids;
     $date = date('Y-m-d H:i:s');
     $query = 'UPDATE Records set rec_URLLastVerified="'.$date.'", rec_URLErrorMessage=null WHERE rec_ID in ('
-            .implode(',',$passed_rec_ids) .')';    
+            .implode(',',$passed_rec_ids) .')';
     $mysqli->query($query);
     
-    $passed_rec_ids = array(); //reset
+    $passed_rec_ids = array();//reset
 }
 
 //
@@ -116,7 +116,7 @@ function checkURLs($system, $return_output, $verbose=false){
     $results = false;
     if($return_output){
         // [0] => Broken rec_URL, [1] => Broken Freetext/Blocktext URLs, [2] => Broken External File URLs in use
-        $results = array(0 => array(0 => array(), 'count' => 0), 1 => array(), 2 => array()); 
+        $results = array(0 => array(0 => array(), 'count' => 0), 1 => array(), 2 => array());
     }
     
     $query = 'SELECT rec_ID, rec_URL, rec_RecTypeID FROM Records WHERE (rec_URL!="") AND (rec_URL IS NOT NULL)';
@@ -304,7 +304,7 @@ function checkURLs($system, $return_output, $verbose=false){
                             $broken_field_urls[$rec_id][$dty_id] = '';
                         }
     
-                        $broken_cnt ++;                            
+                        $broken_cnt ++; 
                         $broken_field_urls[$rec_id][$dty_id] .= '<div><a href="'.$url.'" target="_blank" rel="noopener">'.$url.'</a> '.$glb_curl_error.'</div>';
 
                         if($return_output){
@@ -395,7 +395,7 @@ function checkURLs($system, $return_output, $verbose=false){
                      $fld_names = mysql__select_list2($mysqli, str_replace(array('DTYID'), array($dtyids), $def_name_query));
                 }
     
-                print '<div>' . $recid . ': ' . implode(' ; ', array_values($flds)) 
+                print '<div>' . $recid . ': ' . implode(' ;', array_values($flds)) 
                         . '[found in field(s): ' . htmlspecialchars( implode(',', $fld_names) ). ']<br>';
             }
     

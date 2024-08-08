@@ -19,7 +19,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
@@ -53,7 +53,7 @@ var isStandAlone = false;
 // Callback function on page initialization - see initPage.php
 function onPageInit(success){
 
-    if(!success) return;
+    if(!success) {return;}
                 
         var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
         
@@ -81,7 +81,7 @@ function onPageInit(success){
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var recordset = new hRecordSet(response.data);
+                        var recordset = new HRecordSet(response.data);
                           
                         var records_ids = recordset.getIds(MAXITEMS);
                         if(records_ids.length>0){
@@ -121,7 +121,7 @@ function onPageInit(success){
         <!-- Visualize HTML -->
         <?php 
             $isDatabaseStructure = 0;
-            include_once "visualize.php"; 
+            include_once "visualize.php";
         ?>
 
         <!-- Call from parent iframe -->
@@ -137,8 +137,8 @@ function onPageInit(success){
         */
         function __parseData(records_ids, relations) {
             
-            var data = {}; 
-            var nodes = {};                         
+            var data = {};
+            var nodes = {}; 
             var links = [];
 
             if(records_ids !== undefined && relations !== undefined) {
@@ -190,7 +190,7 @@ function onPageInit(success){
                                                    name: relationName,
                                                    type: dtID>0?'resource':'relationship'} 
                                        };
-                            links.push(link); 
+                            links.push(link);
                         }      
                     }   
                     
@@ -200,8 +200,8 @@ function onPageInit(success){
                        
                 
                 // Links
-                links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
-                links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
+                links = links.concat( __getLinks(nodes, relations.direct)  );// Direct links
+                links = links.concat( __getLinks(nodes, relations.reverse) );// Reverse links
             }
 
             // Construct data object with nodes as array
@@ -248,15 +248,15 @@ function onPageInit(success){
 
                 $("#visualize").visualize({
                     data: data,
-                    getData: function(data) { return getData(data); },
-                    getLineLength: function(record) { return getLineLength(record); },
+                    getData: function(data) { return getData(data);},
+                    getLineLength: function(record) { return getLineLength(record);},
 
                     selectedNodeIds: selectedRecordsIds,   //assign current selection
                     triggerSelection: onSelectEvent,
                     onRefreshData: onRefreshData,
                     /*function(selection){
                         //parentDocument    top.window.document
-                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } ); //this.element.attr('id')} );
+                        $(parentDocument).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, { selection:selection, source:'d3svg' } );//this.element.attr('id')} );
                     },*/
 
                     entityradius: 1,
@@ -268,7 +268,7 @@ function onPageInit(success){
                     gravity: 'off' //'touch', activate gravity, for a moment, to scatter graph
                 });
 
-                //setTimeout(function(){ setGravity('off'); }, 3000); // turn off gravity
+                //setTimeout(function(){ setGravity('off');}, 3000);// turn off gravity
 
                 changeViewMode('icons');
         }

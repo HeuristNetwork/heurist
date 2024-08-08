@@ -118,7 +118,7 @@ body{
         .'style="position:absolute;left:5px; font-size:14px !important; top:5px;color:blue !important;" class="cms-button">website editor</a>';
     }
     if(!$edit_OldEditor && $system->get_user_id() == 0 && $show_login_button){
-        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>'; // login link
+        print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;font-weight: normal;" class="cms-button">login</a>';// login link
     }
 ?>  
     	  
@@ -144,7 +144,7 @@ body{
             <div id="main-content" 
                 style="padding:0 10px;"    
                 data-homepageid="<?php print $home_page_record_id;?>" 
-                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':''; ?> 
+                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?> 
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
         </div>

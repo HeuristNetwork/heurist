@@ -65,7 +65,7 @@ require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 function fileRegister($system, $fullname, $description=null){
     
     
-    $file_id = fileGetByFileName($system, $fullname); //check if it is already registered
+    $file_id = fileGetByFileName($system, $fullname);//check if it is already registered
     
     if(!($file_id>0)) {
                             
@@ -113,7 +113,7 @@ function fileRegister($system, $fullname, $description=null){
 */
 function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 
-    if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) return null;
+    if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) {return null;}
 
     $res = mysql__select_value($system->get_mysqli(), 'select ulf_ID from recUploadedFiles where ulf_ObfuscatedFileID="'.
         $system->get_mysqli()->real_escape_string($ulf_ObfuscatedFileID).'"');
@@ -176,7 +176,7 @@ function fileGetByOriginalFileName($system, $orig_name){
 //
 function fileRenameToOriginal($system, $orig_name, $new_name=null){
 
-    if($new_name==null) $new_name = $orig_name;
+    if($new_name==null) {$new_name = $orig_name;}
     $file_fullpath = HEURIST_FILESTORE_DIR.'file_uploads/'.$new_name;
     
     if(!file_exists($file_fullpath)){
@@ -247,7 +247,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             
             $query = 'ulf_ObfuscatedFileID';
 
-            $filed_ids2 = array();            
+            $filed_ids2 = array();
             foreach($file_ids as $idx=>$v){
                 $filed_ids2[] = preg_replace('/[^a-z0-9]/', "", $v);//for snyk
             }
@@ -342,7 +342,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
     // at first - try to find image that are marked as thumbnail in dedicated field
     if($system->defineConstant('DT_THUMBNAIL') & DT_THUMBNAIL>0){
         $fileid = mysql__select_value($system->get_mysqli(), $query
-                .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1'); 
+                .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1');
     }
     // if special thumbnail not found - try to find image or resource with thumbail (youtube ot iiif)
     if($fileid == null){
@@ -377,7 +377,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
 
         $fileid = preg_replace('/[^a-z0-9]/', "", $fileid);//for snyk
         
-        $thumbfile = 'ulf_'.$fileid.'.png'; // ulf_[obfuscation].png
+        $thumbfile = 'ulf_'.$fileid.'.png';// ulf_[obfuscation].png
 
         if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
@@ -423,12 +423,12 @@ function resolveFilePath($path, $db_name=null){
                 $db_folder_files = HEURIST_FILES_DIR;
             }
         
-            chdir($dir_folder);  // relatively db root
+            chdir($dir_folder);// relatively db root
             $fpath = realpath($path);
             if($fpath!==false && file_exists($fpath)){
                 return $fpath;
             }else{
-                chdir($db_folder_files);          // relatively file_uploads 
+                chdir($db_folder_files);// relatively file_uploads 
                 $fpath = realpath($path);
                 if($fpath!==false && file_exists($fpath)){
                     return $fpath;
@@ -485,7 +485,7 @@ function resolveFilePath($path, $db_name=null){
 */
 function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $originalFileName=null){
 /*
-    $rawdata = loadRemoteURLContent($url, $bypassProxy); //blocked
+    $rawdata = loadRemoteURLContent($url, $bypassProxy);//blocked
     
     if($rawdata!==false){
 
@@ -545,8 +545,8 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         //force download  - important for embed element DO NOT include this atttibute!
         if($originalFileName!=null){
             $contentDispositionField = 'Content-Disposition: attachment; '
-                . sprintf('filename="%s"; ', rawurlencode($originalFileName))
-                . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));            
+                . sprintf('filename="%s";', rawurlencode($originalFileName))
+                . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));
             
         }else{
             $contentDispositionField = 'Content-Disposition: inline';
@@ -559,30 +559,30 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Pragma: public');
         header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename)));
         @ob_clean();
-        ob_end_flush(); //flush();
+        ob_end_flush();//flush();
         
         if($is_zip){
-            ob_start(); 
+            ob_start();
             readfile($filename);
-            $output = gzencode(ob_get_contents(),6); 
-            ob_end_clean(); 
+            $output = gzencode(ob_get_contents(),6);
+            ob_end_clean();
             echo $output; 
-            unset($output);         
+            unset($output);
         }else{
             if(false && filesize($filename)<10*1024*1024){
-                readfile($filename);  //if less than 10MB download at once  
+                readfile($filename);//if less than 10MB download at once  
             }else{
                 $handle = fopen($filename, "rb");
                 if($handle!==false){
                     if($range_max>0){
-                        if($range_min>0) fseek($handle,$range_min);
+                        if($range_min>0) {fseek($handle,$range_min);}
                         $chunk = fread($handle, $range_max-$range_min+1);
-                        //echo unpack("c2/n",$chunk); 
+                        //echo unpack("c2/n",$chunk);
                         echo $chunk; 
-                        //fread($handle, $range_max-$range_min+1);  //by chunks
+                        //fread($handle, $range_max-$range_min+1);//by chunks
                     }else{
                         while (!feof($handle)) {
-                            echo fread($handle, 1000);  //by chunks
+                            echo fread($handle, 1000);//by chunks
                         }            
                     }
                 }else{
@@ -599,10 +599,10 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 //
 function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
   
-    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
-    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-    $mimeType = $fileinfo['fxm_MimeType'];  // fxm_MimeType
-    $source_type = $fileinfo['ulf_PreferredSource']; 
+    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
+    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
+    $mimeType = $fileinfo['fxm_MimeType'];// fxm_MimeType
+    $source_type = $fileinfo['ulf_PreferredSource'];
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $fileSize = $fileinfo['ulf_FileSizeKB'];
     $fileExt = $fileinfo['ulf_MimeExt'];
@@ -619,19 +619,19 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
                 $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
         }
     }
-    if(!$downloadFileName) $downloadFileName = 'Dataset_'.$rec_ID;
+    if(!$downloadFileName) {$downloadFileName = 'Dataset_'.$rec_ID;}
     
     
     $finfo = pathinfo($originalFileName);
     $ext = @$finfo['extension'];
     if($ext==null || $ext==''){
         if($is_local){
-            $finfo = pathinfo($filepath);  //take from path
+            $finfo = pathinfo($filepath);//take from path
         }else{
             $finfo = array();
         }
         if(@$finfo['extension']){
-            $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
+            $originalFileName = $originalFileName.'.'.@$finfo['extension'];
         }else if($fileExt){
             $originalFileName = $originalFileName.'.'.$fileExt;   
         }
@@ -646,7 +646,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
         
         $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         $filepath = $_tmpfile;
-        saveURLasFile($external_url, $_tmpfile); //save to temp in scratch folder
+        saveURLasFile($external_url, $_tmpfile);//save to temp in scratch folder
     }
     
     $file_zip = $downloadFileName.'.zip';
@@ -660,19 +660,19 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     }
 
     $zip->addFromString($downloadFileName.'.txt', 
-                    recordLinksFileContent($system, $record));    
+                    recordLinksFileContent($system, $record));
     
     $zip->close();
     
     //remove temp file
     if($_tmpfile!=null) {
-        unlink($_tmpfile);   
+        unlink($_tmpfile);
     }
     
     //donwload
     $contentDispositionField = 'Content-Disposition: attachment; '
-        . sprintf('filename="%s"; ', rawurlencode($file_zip))
-        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+        . sprintf('filename="%s";', rawurlencode($file_zip))
+        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));
     
     header('Content-Type: application/zip');
     header($contentDispositionField);
@@ -687,18 +687,18 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 //
 function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
 
-    $result = '';    
+    $result = '';
     $is_iiif = false;
     
-    $is_video = (strpos($mimeType,"video/")===0); // || @$params['video']
-    $is_audio = (strpos($mimeType,"audio/")===0); // || @$params['audio']
+    $is_video = (strpos($mimeType,"video/")===0);// || @$params['video']
+    $is_audio = (strpos($mimeType,"audio/")===0);// || @$params['audio']
     $is_image = (strpos($mimeType,"image/")===0);
     if($params && is_array($params)){
         $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0 ||
                     strpos(@$params['var'][0]['ulf_PreferredSource'],'iiif')===0);
     }
     
-    if($style==null) $style='';
+    if($style==null) {$style='';}
 
     if($external_url && strpos($external_url,'http://')!==0){ //download non secure external resource via heurist
         $filepath = $external_url;  //external 
@@ -725,7 +725,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $size = ' height="640" width="800" ';
         }
         $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0" '
-            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
         */
     }else
     if ( $is_video ) {
@@ -745,7 +745,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $playerURL = getPlayerURL($mimeType, $external_url);
 
             $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0" '
-            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
 
         }else{
             
@@ -779,7 +779,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
             $playerURL = getPlayerURL($mimeType, $external_url, $params);
 
-            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
+            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0"></iframe>';
 
         }else{
             
@@ -791,7 +791,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $result = '<audio controls="controls"'.$autoplay.'>'
                 .'<source src="'.$filepath.'" type="'.$mimeType.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
-                .'/>Your browser does not support the audio element.</audio>';                        
+                .'/>Your browser does not support the audio element.</audio>';
         }
 
     }else 
@@ -801,7 +801,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $size = ' height="640" width="800" ';
         }
         
-        $iiif_type = $params['var'][0]['ulf_OrigFileName']; //image or manifest
+        $iiif_type = $params['var'][0]['ulf_OrigFileName'];//image or manifest
         
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
                     .$system->dbname();
@@ -812,7 +812,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $miradorViewer = $miradorViewer.'&'.substr($iiif_type,1).'='.$fileid;
         }
         
-        $result = '<iframe '.$size.$style.' src="'.$miradorViewer.'" frameborder="0"></iframe>';                        
+        $result = '<iframe '.$size.$style.' src="'.$miradorViewer.'" frameborder="0"></iframe>';
         
     }else
     if($is_image){
@@ -822,9 +822,9 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             }
             $fancybox = '';
             if(is_array($params) && @$params['fancybox']){
-                $fancybox =' class="fancybox-thumb" data-id="'.$fileid.'" ';               
+                $fancybox =' class="fancybox-thumb" data-id="'.$fileid.'" '; 
             }else if(!$external_url){
-                $fancybox =' data-id="'.$fileid.'" ';               
+                $fancybox =' data-id="'.$fileid.'" '; 
             }
             $result = '<img '.$size.$style.' src="'.$filepath.'"'
                 .$fancybox
@@ -852,12 +852,12 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
         if($size==null || $size==''){
         $size = 'width="420" height="345"';
         }
-        print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';                        
+        print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';
         */    
     }
     
     if(is_array($params) && @$params['fancybox']){
-        $result = '<div style="width:80%;height:90%">'.$result.'</div>';    
+        $result = '<div style="width:80%;height:90%">'.$result.'</div>';
     }
     
     
@@ -878,7 +878,7 @@ function getPlayerURL($mimeType, $url, $params=null){
         
     }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
         
-        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true); //get vimeo video id
+        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);//get vimeo video id
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;
@@ -997,7 +997,7 @@ function youtube_id_from_url($url) {
 */    
     # https://www.youtube.com/watch?v=nn5hCEMyE-E
     preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
-    return $matches[1];    
+    return $matches[1];
 }
 
 
@@ -1008,9 +1008,9 @@ function youtube_id_from_url($url) {
 function fileGetMetadata($fileinfo){
 
     
-    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
-    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
+    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
+    $mimeType = $fileinfo['fxm_MimeType'];//fxm_MimeType
     $originalFileName = $fileinfo['ulf_OrigFileName'];
     $sourceType = $fileinfo['ulf_PreferredSource'];
     
@@ -1050,7 +1050,7 @@ function fileGetMetadata($fileinfo){
         }else if(file_exists($filepath) && is_array($alt_image) && !empty($alt_image)){ // [0] => width, [1] => height
             $res = array('width' => $alt_image[0], 'height' => $alt_image[1]);
         }else{
-            $res = array('error'=>'Image is not loaded'); //Cannot load image file to get dimensions
+            $res = array('error'=>'Image is not loaded');//Cannot load image file to get dimensions
         }
         
     }else{
@@ -1083,18 +1083,18 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
     $orientation = 0;
     
     if($file!==false){
-        $file = $file[0];    
+        $file = $file[0];
     
-        $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file['ulf_ObfuscatedFileID'].".png";    
+        $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file['ulf_ObfuscatedFileID'].".png";
         
         if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){  //local
             
             if (@$file['fullPath']){
                 $filename = $file['fullPath'];
             }else if (@$file['ulf_FileName']) {
-                $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
+                $filename = $file['ulf_FilePath'].$file['ulf_FileName'];// post 18/11/11 proper file path and name
             } else {
-                $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
+                $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID'];// pre 18/11/11 - bare numbers as names, just use file ID
             }
             $filename = str_replace('/../', '/', $filename);
             
@@ -1109,7 +1109,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             if ($file['ulf_MimeExt']) {
                 $mimeExt = $file['ulf_MimeExt'];
             } else {
-                preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);    //find the extention
+                preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);//find the extention
                 $mimeExt = $matches[1];
             }
 
@@ -1140,7 +1140,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     if($img===false){
                         //this is not an image
                         $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-                        $img = UImage::createFromString($desc); //from string
+                        $img = UImage::createFromString($desc);//from string
                     }
                     
                 }                    
@@ -1153,7 +1153,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             if(@$file['ulf_OrigFileName'] && 
                 (strpos($file['ulf_OrigFileName'],'_tiled')===0 || @$file['ulf_PreferredSource']=='tiled') )  {
                 
-                $img = UImage::createFromString('tiled images stack'); //from string
+                $img = UImage::createFromString('tiled images stack');//from string
         
             }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
@@ -1174,15 +1174,15 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 $img = UImage::getRemoteImage('https://img.youtube.com/vi/'.$youtubeid.'/default.jpg');
                 
                 //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
-                //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg"); //get thumbnail
+                //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");//get thumbnail
             }else if($file['fxm_MimeType'] == 'video/vimeo'){
 
                 $url = $file['ulf_ExternalFileReference'];
                 
-                $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true); //get vimeo thumbnail
+                $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);//get vimeo thumbnail
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){
-                    $img = UImage::getRemoteImage($thumb_url);    
+                    $img = UImage::getRemoteImage($thumb_url);
                 }
                 
                 //it works also - except regex is wrong for some vimeo urls
@@ -1190,7 +1190,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                 if(preg_match('(https?:\/\/)?(www\.)?(player\.)?vimeo\.com\/([a-z]*\/)*([??0-9]{6,11})[?]?.*', $url, $matches)>0){
                     $vimeo_id = $matches[5];
                     $hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$vimeo_id.php"));
-                    $thumb_url = $hash[0]['thumbnail_medium']; 
+                    $thumb_url = $hash[0]['thumbnail_medium'];
                     $img = UImage::getRemoteImage($thumb_url);
                 }
                 */
@@ -1202,7 +1202,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                                 .rawurlencode($url), false), true);
                 $thumb_url = @$hash['thumbnail_url'];
                 if($thumb_url){
-                    $img = UImage::getRemoteImage($thumb_url);    
+                    $img = UImage::getRemoteImage($thumb_url);
                 }else{
                     $img = '../../hclient/assets/branding/logo_soundcloud.png';
                 }
@@ -1222,7 +1222,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             header('Location: '.$placeholder);
         }
     }else{
-        UImage::resizeImage($img, $thumbnail_file, 200, 200, $orientation); //$img will be destroyed inside this function
+        UImage::resizeImage($img, $thumbnail_file, 200, 200, $orientation);//$img will be destroyed inside this function
         if($is_download){
             if(file_exists($thumbnail_file)){
                 header('Content-type: image/png');
@@ -1276,11 +1276,11 @@ function filestoreGetUsageByScan($system){
 
 function filestoreGetUsageByFolders($system){
 
-    $mediaFolders = $system->get_system('sys_MediaFolders'); 
+    $mediaFolders = $system->get_system('sys_MediaFolders');
     if($mediaFolders==null || $mediaFolders == ''){ //not defined
         $mediaFolders = 'uploaded_files';
     }
-    $mediaFolders = explode(';', $mediaFolders); // get an array of folders
+    $mediaFolders = explode(';', $mediaFolders);// get an array of folders
     $dirs = array();
     
     foreach ($mediaFolders as $dir){

@@ -30,9 +30,9 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
     $_REQUEST['list'] = 1;
-    define('ERROR_REDIR','startup/index.php'); //redirects to startup page - list of all databases
+    define('ERROR_REDIR','startup/index.php');//redirects to startup page - list of all databases
 }else{
-    if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
+    if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
     
     $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
@@ -58,6 +58,25 @@ if(!$isSystemInited){
 }
 
 if(defined('IS_INDEX_PAGE')){
+    
+    //verify database version against minimal required
+    $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
+    
+    if($subsubVer==null){
+        $message = $system->getErrorMsg();
+        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+        exit;
+    }
+    
+    if (version_compare(HEURIST_MIN_DBVERSION,
+    $system->get_system('sys_dbVersion').'.'
+    .$system->get_system('sys_dbSubVersion').'.'
+    .$subsubVer)>0){
+
+        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
+        exit;
+    }
+    
     //check for missed tables
     $missed = hasAllTables($system->get_mysqli());
     
@@ -166,31 +185,10 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         $required .=  $required === '' ? 'delete' : ' and delete';
     }
 
-    if($required !== ''){ $message = "To perform this action you need permission to $required records"; }
+    if($required !== ''){ $message = "To perform this action you need permission to $required records";}
 }
 
-//verify database version against minimal required
-if(defined('IS_INDEX_PAGE')){
-    
-    $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
-    
-    if($subsubVer==null){
-        $message = $system->getErrorMsg();
-        include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
-        exit;
-    }
-    
-    if (version_compare(HEURIST_MIN_DBVERSION,
-    $system->get_system('sys_dbVersion').'.'
-    .$system->get_system('sys_dbSubVersion').'.'
-    .$subsubVer)>0){
-
-        include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
-        exit;
-    }
-}
-
-//$system->defineConstants(); //init constants for record and field types
+//$system->defineConstants();//init constants for record and field types
 
 // BASE tag is convenient however it does not suit
 // reason: some jquery widgets uses href (tabcontrol for example)
@@ -200,7 +198,7 @@ if(defined('IS_INDEX_PAGE')){
 <html  class="no-js" lang="en" dir="ltr">
 */
 if(defined('IS_INDEX_PAGE')){
-//header("Content-Security-Policy: frame-ancestors 'self'");    
+//header("Content-Security-Policy: frame-ancestors 'self'");
 ?>
 <!DOCTYPE html>
 <?php    
@@ -248,6 +246,12 @@ $isUpgrade = true;
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core.min.js"></script>
  -->
 
+<script type="text/javascript">
+//init globa variables
+//let Hul, $Db, cfg_widgets, cfg_layout, regional, layoutMgr, editCMS_instance2; 
+</script>
+
+ 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
@@ -264,7 +268,7 @@ $isUpgrade = true;
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utilsCollection.js"></script>
 
 <!-- CSS -->
-<?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
+<?php include_once dirname(__FILE__).'/initPageCss.php';?>
 
 <script type="text/javascript">
 
@@ -281,7 +285,7 @@ $isUpgrade = true;
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
-        orgShow.apply( this, arguments ); //apply original show
+        orgShow.apply( this, arguments );//apply original show
         $(this).trigger( 'myOnShowEvent' );
         return this;
     }
@@ -328,7 +332,7 @@ $isUpgrade = true;
     //
     function onHapiInit(success)
     {
-        //if(isHapiInited) return;
+        //if(isHapiInited) {return;}
 
         isHapiInited = true;
 
@@ -345,7 +349,7 @@ $isUpgrade = true;
 
             if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HUL.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                    onAboutInit(); //init about dialog
+                    onAboutInit();//init about dialog
             }
 
             if(initialLoadDatabaseDefintions(null, onPageInit)){
@@ -353,7 +357,10 @@ $isUpgrade = true;
             }
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Cannot initialize system on client side, please consult Heurist developers',
+                error_title: 'Unable to initialise Heurist'
+            });
             success = false;
         }
 
@@ -372,10 +379,10 @@ $isUpgrade = true;
                 var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
                 +'This is probably due to a network timeout. However, if the problem '
                 +'persists please report to Heurist developers as it could indicate '
-                +'corruption of the database.';                            
+                +'corruption of the database.'; 
                 
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
-                var entities = (params)?params:'all'; //'rty,dty,rst,swf';
+                var entities = (params)?params:'all';//'rty,dty,rst,swf';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){                    
@@ -390,8 +397,11 @@ $isUpgrade = true;
                             callback(true);
                         }
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        if(window.hWin.HUL.isFunction(callback)){ callback(false); }
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: sMsg,
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
+                        if(window.hWin.HUL.isFunction(callback)){ callback(false);}
                     }
                     }
                 });

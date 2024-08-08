@@ -46,8 +46,8 @@
         
         list($database_name_full, $database_name) = mysql__get_names( $dbName );
         
-        $elasticIndex = strtolower($database_name); // Must be lowercase
-        preg_replace('/[^A-Za-z0-9 ]/', '_', $elasticIndex); // Replace non-alphanumeric with underscore
+        $elasticIndex = strtolower($database_name);// Must be lowercase
+        preg_replace('/[^A-Za-z0-9 ]/', '_', $elasticIndex);// Replace non-alphanumeric with underscore
         return $elasticIndex;
     }
 
@@ -177,8 +177,8 @@
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         curl_setopt($curl, CURLOPT_URL, $address);
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($query));
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10); // Max 10 seconds connection time
-        curl_setopt($curl, CURLOPT_TIMEOUT, 60); // Max 60 seconds query time
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);// Max 10 seconds connection time
+        curl_setopt($curl, CURLOPT_TIMEOUT, 60);// Max 60 seconds query time
 
         $json = curl_exec($curl);
         curl_close($curl);

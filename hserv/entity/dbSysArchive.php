@@ -55,22 +55,22 @@ class DbSysArchive extends DbEntityBase
         $from_table = array($this->config['tableName']);
 
         $pred = $this->searchMgr->getPredicate('arc_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('arc_PriKey');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('arc_ChangedByUGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('arc_TimeOfChange');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('arc_ContentType');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('arc_Table');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
 
         //compose SELECT it depends on param 'details' ------------------------
@@ -209,8 +209,9 @@ class DbSysArchive extends DbEntityBase
                     $records[$arc_ID] = $rec;
                 }
                 
-                if(!in_array($rec_RecTypeID, $rectypes))
+                if(!in_array($rec_RecTypeID, $rectypes)){
                     array_push($rectypes, $rec_RecTypeID);
+                }
             }
             
 /*            
@@ -259,7 +260,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
         $mysqli = $this->system->get_mysqli();
 
         /**
-         * Retrieve field value
+         * Retrieve field value, raw value for comparison
          * 
          * @param string $value - arc_DataBeforeChange, archived recDetails row
          * @param array $defStruct - record structure, used to check type
@@ -278,13 +279,13 @@ own"0","viewable",NULL,NULL,NULL,NULL
             $dty_ID = !empty($dtl_record[2]) ? intval($dtl_record[2]) : 0;
 
             if(empty($value) || empty($dty_ID) || $dty_ID < 1){ // ? Unknown
-                return array(null, null);
+                return [null, null];
             }
 
             if($defStruct[$dty_ID] == 'date' && strpos($value, "}") !== false){
                 $dtl_record = explode(",", $value);
 
-                $value = array($dtl_record[3]);
+                $value = [$dtl_record[3]];
 
                 $idx = 4;
                 while($idx < count($dtl_record)){
@@ -299,13 +300,16 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 }
 
                 $value = trim( implode(',', $value) , '"');
+            }else if($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
+                $value = USanitize::cleanupSpaces($value);// remove extra spacing, avoid displaying extra historical values that are actually the same
             }
 
-            return array($value, $dty_ID);
+
+            return [$value, $dty_ID];
         };
 
         /**
-         * Perform extra processing
+         * Perform extra processing, value to show the user
          * 
          * @param mixed $value - field value, to be processed
          * @param string $type - field type
@@ -325,12 +329,12 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                     list($title, $rectype) = mysql__select_row($mysqli, "SELECT rec_Title, rec_RecTypeID FROM Records WHERE rec_ID = $id");
 
-                    $value = array(
+                    $value = [
                         'rec_ID' => $id,
                         'rec_Title' => $title,
                         'rec_RecTypeID' => intval($rectype),
                         'rec_IsChildRecord' => 0
-                    );
+                    ];
 
                     break;
 
@@ -342,7 +346,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     }
                     $org_id = $id;
 
-                    $value = array();
+                    $value = [];
                     while(true){
 
                         list($lbl, $id) = mysql__select_row($mysqli, "SELECT trm_Label, trm_ParentTermID FROM defTerms WHERE trm_ID = $id");
@@ -380,13 +384,15 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                     $value = Temporal::toHumanReadable($value, true, 1);
 
+                    $value = USanitize::cleanupSpaces($value);
+
                     break;
 
                 case 'freetext':
                 case 'blocktext':
-                    // remove newlines + multi-spacing
+                    // clean up strings
 
-                    $value = USanitize::sanitizeString( $value );
+                    $value = USanitize::sanitizeString($value);
 
                     break;
                 
@@ -414,7 +420,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
                 return false;
             }else if(!$record_type){
-                return array();
+                return [];
             }
             $record_type = intval($record_type);
 
@@ -456,7 +462,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                                  "WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? " .
                                  "ORDER BY arc_ID";
 
-                $res_changes = mysql__select_param_query($mysqli, $query_changes, array('is', $rec_ID, $row_date[0]));
+                $res_changes = mysql__select_param_query($mysqli, $query_changes, ['is', $rec_ID, $row_date[0]]);
                                  
                 if(!$res_changes){
                     $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' 
@@ -464,21 +470,21 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     return false;
                 }
 
-                $cur_set = array();
+                $cur_set = [];
 
                 while($row_changes = $res_changes->fetch_assoc()){
 
                     $arc_ID = intval($row_changes['arc_ID']);
                     $ugr_ID = intval($row_changes['arc_ChangedByUGrpID']);
 
-                    $res_row = array(
+                    $res_row = [
                         'arc_ID' => $arc_ID,
                         'arc_ChangedByUGrpID' => 0,
                         'arc_TimeOfChange' => $row_changes['arc_TimeOfChange'],
                         'arc_Value' => '',
                         'arc_Compare' => '',
                         'arc_Action' => 'revert'
-                    );
+                    ];
 
                     list($value, $dty_ID) = $__get_value($row_changes['arc_DataBeforeChange'], $record_fields);
                     if(!$value || !$dty_ID){
@@ -490,7 +496,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                         $last_editor[$dty_ID] = [];
                     }
                     if(!array_key_exists($dty_ID, $cur_set)){
-                        $cur_set[$dty_ID] = array();
+                        $cur_set[$dty_ID] = [];
                     }
 
                     // Replace certain values, for display to user
@@ -512,7 +518,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
 
                     if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
-                        $complete_history[$dty_ID][$dty_idx] = array();
+                        $complete_history[$dty_ID][$dty_idx] = [];
                     }
 
                     if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
@@ -529,7 +535,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     }
 
                     $last_editor[$dty_ID][$dty_idx] = $ugr_ID;
-                    array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
+                    array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
                     $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
                 }
 
@@ -547,21 +553,21 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 return false;
             }
 
-            $final_set = array();
+            $final_set = [];
 
             while($row_current = $res_existing->fetch_assoc()){
 
                 $dtl_ID = intval($row_current['dtl_ID']);
                 $dty_ID = intval($row_current['dtl_DetailTypeID']);
 
-                $res_row = array(
+                $res_row = [
                     'dtl_ID' => $dtl_ID,
                     'arc_ChangedByUGrpID' => 0,
                     'arc_TimeOfChange' => $row_current['dtl_Modified'],
                     'arc_Value' => '',
                     'arc_Compare' => '',
                     'arc_Action' => 'current'
-                );
+                ];
 
                 $value = !empty($row_current['dtl_Value']) ? $row_current['dtl_Value'] : null;
                 $value = !empty($row_current['dtl_UploadedFileID']) ? $row_current['dtl_UploadedFileID'] : $value;
@@ -572,10 +578,10 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 }
 
                 if(!array_key_exists($dty_ID, $complete_history)){
-                    $complete_history[$dty_ID] = array();
+                    $complete_history[$dty_ID] = [];
                 }
                 if(!array_key_exists($dty_ID, $final_set)){
-                    $final_set[$dty_ID] = array();
+                    $final_set[$dty_ID] = [];
                 }
 
                 $display_value = $__process_value($value, $record_fields[$dty_ID]);
@@ -598,7 +604,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
 
                 if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
-                    $complete_history[$dty_ID][$dty_idx] = array();
+                    $complete_history[$dty_ID][$dty_idx] = [];
                 }
 
                 if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
@@ -606,7 +612,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 }
 
                 $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
-                array_unshift($complete_history[$dty_ID][$dty_idx], $res_row); // newest first
+                array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
             }
 
             if(!empty($user_list)){
@@ -632,7 +638,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
         }else if(array_key_exists('revert_record_history', $this->data)){
 
-            $ret = array('errors' => [], 'issues' => []);
+            $ret = ['errors' => [], 'issues' => []];
 
             // Validate record id
             $rec_ID = intval($this->data['rec_ID']);
@@ -648,7 +654,8 @@ own"0","viewable",NULL,NULL,NULL,NULL
             }
 
             if(!$revisions || empty($revisions)){
-                return 'No revisions made.';
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'No record revisions provided');
+                return false;
             }
 
             // Check that rec_ID is a record
@@ -718,13 +725,13 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     $existing_dtl_id = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID = $dty_ID ORDER BY dtl_ID LIMIT $fld_idx, 1");
                     $existing_dtl_id = intval($existing_dtl_id);
 
-                    $record = array();
+                    $record = [];
 
                     // Set value index
                     switch ($record_fields[$dty_ID]['type']) {
 
                         case 'geo':
-                            list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $arc_Value); // recordModify.php
+                            list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $arc_Value);// recordModify.php
                             $record['dtl_Value'] = $dtl_Value === false ? $arc_Value : $dtl_Value;
                             $record['dtl_Geo'] = $dtl_Value === false ? null : $dtl_Geo;
                             break;

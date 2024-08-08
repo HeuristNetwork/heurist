@@ -31,7 +31,7 @@
 */
 header("Content-type: text/javascript");
 
-if (! @$_REQUEST["url"]) return;
+if (! @$_REQUEST["url"]) {return;}
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 $system = new System();
@@ -48,7 +48,7 @@ ob_start();
 $url = $_REQUEST["url"];
 $mysqli = $system->get_mysqli();
 
-if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
+if (substr($url, -1) == "/") {$url = substr($url, 0, strlen($url)-1);}
 
 $url = $mysqli->real_escape_string($url);
 

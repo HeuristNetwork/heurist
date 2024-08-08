@@ -23,7 +23,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
         
-        var that = this;
+        let that = this;
         
         
         this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
@@ -227,9 +227,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {}
+            let request = {}
         
-            var domain = this.currentDomain();
+            let domain = this.currentDomain();
             
             if(domain=='tiled'){
                 
@@ -296,13 +296,13 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             request['details']    = 'id'; //'id';
             request['request_id'] = window.hWin.HEURIST4.util.random();
             
-            var that = this;                                                
+            let that = this;                                                
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that._trigger( "onresult", null, 
-                            {recordset:new hRecordSet(response.data), request:request} );
+                            {recordset:new HRecordSet(response.data), request:request} );
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -311,7 +311,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     },
     
     currentDomain:function(){
-            var domain = this.selectGroup.tabs('option','active');
+            let domain = this.selectGroup.tabs('option','active');
             return domain==1?'external':((domain==2)?'tiled':'local');
     },
     

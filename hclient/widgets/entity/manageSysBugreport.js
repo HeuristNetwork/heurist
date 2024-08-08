@@ -58,10 +58,10 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     
     // change label for remove
     _getEditDialogButtons: function(){
-        var btns = this._super();
+        let btns = this._super();
         
-        var that = this;
-        for(var idx in btns){
+        let that = this;
+        for(let idx in btns){
             if(btns[idx].id=='btnRecSave'){
                 btns[idx].text = window.hWin.HR('Send to heurist development team');
                 break;
@@ -81,10 +81,10 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         this._super();
 
-        var that = this;
+        let that = this;
 
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
-        var ele = this._as_dialog.find('input[type=file]');
+        let ele = this._as_dialog.find('input[type=file]');
         if(ele.length>0){
             ele.fileupload('option','pasteZone',this._as_dialog);
         }
@@ -94,11 +94,11 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this._editing.getFieldByName('3-1058', location.href, false);
 
 		// Add spacing between fields, and give textarea's larger height
-        var eles = this._editing.getAllFields();
+        let eles = this._editing.getAllFields();
         let help = '';
-        for(var i = 0; i < eles.length; i++){ // ignore last element (image field)
+        for(let i = 0; i < eles.length; i++){ // ignore last element (image field)
 
-            var $ele = $(eles[i]);
+            let $ele = $(eles[i]);
 
             if($ele.find('textarea').length != 0 || $ele.find('.fileupload').length != 0){
                 $ele.css({'padding-top': '10px', 'display': 'block'});

@@ -18,6 +18,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/* global CodeMirror */
 
 //aliases
 /**
@@ -34,8 +35,8 @@
 
 function ShowReps( is_snippet_editor ) {
 
-    var _className = "ShowReps",
-    _originalFileName,
+    const _className = "ShowReps";
+    let _originalFileName,
 
     _needListRefresh = false, //if true - reload list of templates after editor exit
     _keepTemplateValue,
@@ -55,10 +56,8 @@ function ShowReps( is_snippet_editor ) {
     _facet_value = null;
     
     
-    var top_repcontainer = '36px';
+    let top_repcontainer = '36px';
     
-    //var progressInterval = null;
-
     /**
     *  show the list of available reports
     *  #todo - filter based on record types in result set
@@ -66,7 +65,7 @@ function ShowReps( is_snippet_editor ) {
     function _updateTemplatesList(context) {
 
 
-        var sel = document.getElementById('selTemplates'),
+        let sel = document.getElementById('selTemplates'),
         option,
         keepSelIndex = sel.selectedIndex,
         _currentTemplate = window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
@@ -98,10 +97,10 @@ function ShowReps( is_snippet_editor ) {
         */
 
 
-        var all_templates = []        
+        let all_templates = []        
         if(context && context.length>0){
 
-            for (var i=0; i<context.length; i++){
+            for (let i=0; i<context.length; i++){
                     all_templates.push({key:context[i].filename, title:context[i].name});
                     
                     if(keepSelIndex<0 && _currentTemplate==context[i].filename){
@@ -110,7 +109,7 @@ function ShowReps( is_snippet_editor ) {
             } // for
 
 
-            var sel2 = window.hWin.HEURIST4.ui.createSelector(sel, all_templates);
+            let sel2 = window.hWin.HEURIST4.ui.createSelector(sel, all_templates);
             sel2.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
             
             window.hWin.HEURIST4.ui.initHSelect(sel2, false);
@@ -140,9 +139,9 @@ function ShowReps( is_snippet_editor ) {
             
         }else{
             
-            var txt = (context && context.message)?context.message:context
+            let txt = (context && context.message)?context.message:context
             
-            var iframe = document.getElementById("rep_container_frame");
+            let iframe = document.getElementById("rep_container_frame");
             iframe.contentWindow.document.open();
             iframe.contentWindow.document.write( txt );
             iframe.contentWindow.document.close();
@@ -162,15 +161,9 @@ function ShowReps( is_snippet_editor ) {
     */
     function _init() {
         
-        if(true){
-            _sQueryMode = "all";
-            $('#cbUseAllRecords1').hide();
-            $('#cbUseAllRecords2').hide();
-        }else{
-            _sQueryMode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty');
-            document.getElementById('cbUseAllRecords2').value = _sQueryMode;
-            document.getElementById('cbUseAllRecords1').value = _sQueryMode;
-        }
+        _sQueryMode = "all";
+        $('#cbUseAllRecords1').hide();
+        $('#cbUseAllRecords2').hide();
 
         if(!_is_snippet_editor){
             _reload_templates();    
@@ -189,9 +182,9 @@ function ShowReps( is_snippet_editor ) {
     */
     function _reload_templates(){
         
-        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-        var callback = _updateTemplatesList;
-        var request = {mode:'list', db:window.hWin.HAPI4.database};
+        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+        let callback = _updateTemplatesList;
+        let request = {mode:'list', db:window.hWin.HAPI4.database};
         
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
@@ -199,7 +192,7 @@ function ShowReps( is_snippet_editor ) {
 
     function _getSelectedTemplate(){
 
-        var sel = document.getElementById('selTemplates');
+        let sel = document.getElementById('selTemplates');
         if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) 
             || sel.options.length===0) { return null; }
             
@@ -217,7 +210,7 @@ function ShowReps( is_snippet_editor ) {
     */
     function _getQueryAndTemplate(template_file, isencode){
 
-        var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
+        let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
 
         if(window.hWin.HEURIST4.util.isempty(squery) ||  (squery.indexOf("&q=")<0) || 
             (squery.indexOf("&q=") == squery.length-3)) {
@@ -251,9 +244,9 @@ function ShowReps( is_snippet_editor ) {
     */
     function _reload(template_file) {
 
-        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
-        var request = null;
-        var session_id = Math.round((new Date()).getTime()/1000);
+        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
+        let request = null;
+        let session_id = Math.round((new Date()).getTime()/1000);
 
         if(_currentRecordset!=null){
             //new approach to support H4
@@ -266,9 +259,9 @@ function ShowReps( is_snippet_editor ) {
             //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
             
             //limit to  records  smarty-output-limit
-            var recset;
+            let recset;
             if(_currentRecordset.recordCount>0){
-                var limit = window.hWin.HAPI4.get_prefs_def('smarty-output-limit',50);
+                let limit = window.hWin.HAPI4.get_prefs_def('smarty-output-limit',50);
                 if(limit>2000) limit = 2000;
                 recset = {recIDs:_currentRecordset.recIDs.slice(0, limit-1), recordCount:limit , resultCount:limit};
             }else{
@@ -321,8 +314,8 @@ function ShowReps( is_snippet_editor ) {
              //return;
         }
        
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        let progressCounter = 0;        
+        let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
         $('#toolbardiv').hide();
         $('#progressbar_div').show();
@@ -330,7 +323,7 @@ function ShowReps( is_snippet_editor ) {
         
         $('#progress_stop').button().on({click: function() {
             
-            var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+            let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 _hideProgress();
@@ -340,8 +333,8 @@ function ShowReps( is_snippet_editor ) {
             });
         } }, 'text');
         
-        var pbar = $('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
+        let pbar = $('#progressbar');
+        let progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
         //pbar.progressbar('value', 0);
         /*{
@@ -356,7 +349,7 @@ function ShowReps( is_snippet_editor ) {
         
         that.progressInterval = setInterval(function(){ 
 
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            let request = {t:(new Date()).getMilliseconds(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 
@@ -364,12 +357,12 @@ function ShowReps( is_snippet_editor ) {
                     _hideProgress();
                 }else{
                     
-                    var resp = response?response.split(','):[0,0];
+                    let resp = response?response.split(','):[0,0];
                     
                     if(resp && resp[0]){
                         if(progressCounter>0){
                             if(resp[1]>0){
-                                var val = resp[0]*100/resp[1];
+                                let val = resp[0]*100/resp[1];
                                 pbar.progressbar( "value", val );
                                 progressLabel.text(resp[0]+' of '+resp[1]);
                             }else{
@@ -438,7 +431,7 @@ function ShowReps( is_snippet_editor ) {
 
             if(isLoadGenerated){
 
-                    var text = [
+                    let text = [
 
 
                         '<html>',
@@ -483,8 +476,8 @@ function ShowReps( is_snippet_editor ) {
                         '</html>'];
 
 
-                    var k;
-                    var res = "";
+                    let k;
+                    let res = "";
                     for (k=0;k<text.length;k++){
                         res += text[k] + "\n"; // + text.substr(k+2);
                     }
@@ -505,8 +498,8 @@ function ShowReps( is_snippet_editor ) {
             __onGenerateTemplate([]);
         }
         
-        var rtSelect = $('#rectype_selector').css('max-width','150px');
-        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
+        let rtSelect = $('#rectype_selector').css('max-width','150px');
+        let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
         $rec_select.on('change',function(event){
             _loadRecordTypeTreeView();
         });
@@ -576,11 +569,11 @@ function ShowReps( is_snippet_editor ) {
             _initEditorMode(template_file, context);
         }
 
-        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+        let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
 
         _originalFileName = template_file;
 
-        var request = {mode:'get', db:window.hWin.HAPI4.database, template:template_file};
+        let request = {mode:'get', db:window.hWin.HAPI4.database, template:template_file};
 
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
         function(obj) {
@@ -601,17 +594,17 @@ function ShowReps( is_snippet_editor ) {
     */
     function _doExportTemplate() {
 
-        var istest = false;
+        let istest = false;
         
-        var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
+        let dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
         if(dbId > 0){
 
-            var template_file = $('#selTemplates').val();
+            let template_file = $('#selTemplates').val();
             if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
             
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+            let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
 
-            var request = { mode:'serve',db:window.hWin.HAPI4.database, dir:0, template:template_file };
+            let request = { mode:'serve',db:window.hWin.HAPI4.database, dir:0, template:template_file };
 
             if(istest){
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
@@ -623,7 +616,7 @@ function ShowReps( is_snippet_editor ) {
                     }
                  },'auto');
             }else{
-                var squery = 'db='+window.hWin.HAPI4.database+'&mode=serve&dir=0&template='+template_file;
+                let squery = 'db='+window.hWin.HAPI4.database+'&mode=serve&dir=0&template='+template_file;
                 //template.gpl
                 window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
             }
@@ -647,7 +640,7 @@ function ShowReps( is_snippet_editor ) {
 
             if(_keepTemplateValue!=codeEditor.getValue()){ 
 
-                var $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+                let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
                     'Formula was changed. Are you sure you wish to exit and lose all modifications?',
                     {'Save': function() {
                         _operationSnippetEditor(2);
@@ -685,9 +678,9 @@ function ShowReps( is_snippet_editor ) {
         
         if(mode>0){
 
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-            var request = {db: window.hWin.HAPI4.database};
-            template_file = null;
+            let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+            let request = {db: window.hWin.HAPI4.database};
+            let template_file = null;
 
             if(mode<3)
             { //save
@@ -710,7 +703,7 @@ function ShowReps( is_snippet_editor ) {
                     }
                 }
 
-                var template_body = codeEditor.getValue();// document.getElementById("edTemplateBody").value;
+                let template_body = codeEditor.getValue();// document.getElementById("edTemplateBody").value;
                 if(template_body && template_body.length>10){
                     request['mode'] = 'save';
                     request['template'] = template_file;
@@ -742,8 +735,8 @@ function ShowReps( is_snippet_editor ) {
 
             if(request!=null){
 
-                var modeRef = mode;
-                var alwin;
+                let modeRef = mode;
+                let alwin;
 
                 function __onOperEnd(context){
                     
@@ -752,7 +745,7 @@ function ShowReps( is_snippet_editor ) {
 
                     if(!window.hWin.HEURIST4.util.isnull(context))
                     {
-                        var mode = context.ok;
+                        let mode = context.ok;
                         //if(mode==="delete"){
                         if(modeRef===3){ //delete
                             //todo!!!! - remove template from the list and clear editor
@@ -792,14 +785,14 @@ function ShowReps( is_snippet_editor ) {
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
                         {'Save': function() {
                             _operationEditor(2);
-                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg.dialog( 'close' );},
                             'Discard': function() {
                                 _setLayout(true, false);
-                                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg.dialog( 'close' );},
                             'Cancel':function() {
-                                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                 $dlg.dialog( 'close' );
                             }
                         },
@@ -821,12 +814,12 @@ function ShowReps( is_snippet_editor ) {
     */
     function _doExecuteFromEditor() {
 
-        var replevel = document.getElementById('cbErrorReportLevel').value;
+        let replevel = document.getElementById('cbErrorReportLevel').value;
         if(replevel<0) {
             document.getElementById('cbErrorReportLevel').value = 0;
             replevel = 0;
         }
-        var debug_limit = document.getElementById('cbDebugReportLimit').value;
+        let debug_limit = document.getElementById('cbDebugReportLimit').value;
 
 
         /*
@@ -836,23 +829,23 @@ function ShowReps( is_snippet_editor ) {
         replevel = 2;
         }*/
 
-        var template_body = codeEditor.getValue();
+        let template_body = codeEditor.getValue();
 
         if(template_body && template_body.length>10){
 
 
             window.hWin.HEURIST4.msg.bringCoverallToFront($(document).find('body'));
             
-            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
+            let baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
 
-            var request = {};
+            let request = {};
 
 
             request['replevel'] = replevel;
             request['template_body'] = template_body;
             
             if(_is_snippet_editor){
-                var rec_ID = $('#listRecords').val();
+                let rec_ID = $('#listRecords').val();
                 if(!(rec_ID>0)){
                     window.hWin.HEURIST4.msg.showMsgErr('Select record to test on');
                     return;
@@ -890,7 +883,7 @@ function ShowReps( is_snippet_editor ) {
 
 
 
-    var layout = null, _isviewer, _iseditor, _kept_width=-1;
+    let layout = null, _isviewer, _iseditor, _kept_width=-1;
 
     /**
     * onclick handler that solves the Safari issue of not responding to onclick
@@ -901,7 +894,7 @@ function ShowReps( is_snippet_editor ) {
     {
         if(navigator.userAgent.indexOf('Safari')>0){
             //Safari so create a click event and dispatch it
-            var event = document.createEvent("HTMLEvents");
+            let event = document.createEvent("HTMLEvents");
             event.initEvent("click", true, true);
             ele.dispatchEvent(event);
         }else{
@@ -924,7 +917,7 @@ function ShowReps( is_snippet_editor ) {
         _keepTemplateValue = template_body;
         
  
-        var mylayout = $('#layout_container').layout();
+        let mylayout = $('#layout_container').layout();
         mylayout.sizePane('north', '100%');
         mylayout.hide('center');
         $('.ui-layout-resizer').hide();
@@ -961,8 +954,8 @@ function ShowReps( is_snippet_editor ) {
             .css({border: '1px solid blue',height:'40px',widht:'100%','margin-top':'10px',overflow:'auto',padding:'10px'})
             .appendTo($('.actionButtons'));
         
-        var rtSelect = $('#rectype_selector').css('max-width','150px');
-        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), rty_IDs, 
+        let rtSelect = $('#rectype_selector').css('max-width','150px');
+        let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), rty_IDs, 
                 (rty_IDs && rty_IDs.length==1)?null:window.hWin.HR('select record type'), true );
         if(rty_IDs && rty_IDs.length==1){
             _loadRecordTypeTreeView();
@@ -986,10 +979,10 @@ function ShowReps( is_snippet_editor ) {
     //
     function _loadTestRecords()
     {
-        var rty_ID = $('#rectype_selector').val();
+        let rty_ID = $('#rectype_selector').val();
         //load list of records for testing 
         if(rty_ID>0){
-        var request = {q: 't:'+rty_ID, w: 'all', detail:'header', limit:100 };
+        let request = {q: 't:'+rty_ID, w: 'all', detail:'header', limit:100 };
          
             window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( recordset )
             {
@@ -997,14 +990,14 @@ function ShowReps( is_snippet_editor ) {
                     
                     // it returns several record of given record type to apply tests
                     //fill list of records
-                    var sel = $('#listRecords')[0];
+                    let sel = $('#listRecords')[0];
                     //clear selection list
                     while (sel.length>1){
                         sel.remove(1);
                     }
 
-                    var recs = recordset.getRecords();
-                    for(var rec_ID in recs) 
+                    let recs = recordset.getRecords();
+                    for(let rec_ID in recs) 
                     if(rec_ID>0){
                         window.hWin.HEURIST4.ui.addoption(sel, rec_ID, 
                             window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
@@ -1030,7 +1023,7 @@ function ShowReps( is_snippet_editor ) {
 
         if(_iseditor!=iseditor){
             //find in parent
-            var restLayout = top.document.getElementById("resetPanels_Smarty"+(iseditor?"On":"Off"));
+            let restLayout = top.document.getElementById("resetPanels_Smarty"+(iseditor?"On":"Off"));
             if(restLayout){
                 clickworkaround(restLayout);
             }
@@ -1044,8 +1037,8 @@ function ShowReps( is_snippet_editor ) {
         document.getElementById("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
         //document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
         
-        var layout_opts = {
-            applyDemoStyles: false,
+        let layout_opts = {
+            applyDefaultStyles: true,
             maskContents: true,
             north:{
                 minHeight:200
@@ -1059,11 +1052,11 @@ function ShowReps( is_snippet_editor ) {
         }
         
 
-        var mylayout = $('#layout_container').layout(layout_opts);
+        let mylayout = $('#layout_container').layout(layout_opts);
         
         if(iseditor){
             mylayout.show('north');    
-            var dh =  this.innerHeight;
+            let dh =  this.innerHeight;
             mylayout.sizePane('north', dh*0.7);
         }else{
             mylayout.hide('north');    
@@ -1078,7 +1071,7 @@ function ShowReps( is_snippet_editor ) {
             _reload_templates();
         }
 
-        var container_ele = $(window.hWin.document).find('div[layout_id="FAP2"]');
+        let container_ele = $(window.hWin.document).find('div[layout_id="FAP2"]');
         
         //resize global cardinal layout
         if( window.hWin.HAPI4.LayoutMgr && window.hWin.HAPI4.LayoutMgr.cardinalPanel){
@@ -1096,9 +1089,9 @@ function ShowReps( is_snippet_editor ) {
                     
                 window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
                 
-                var sel = document.getElementById('selTemplates');
+                let sel = document.getElementById('selTemplates');
                 if(sel.selectedIndex>=0){
-                    var template_file = sel.options[sel.selectedIndex].value;
+                    let template_file = sel.options[sel.selectedIndex].value;
                     _reload(template_file);
                 }
             }
@@ -1111,10 +1104,10 @@ function ShowReps( is_snippet_editor ) {
     //
     function _loadRecordTypeTreeView(){
       
-        var rty_ID = $('#rectype_selector').val();
+        let rty_ID = $('#rectype_selector').val();
 
         //load treeview
-        var treediv = $('.rtt-tree');
+        let treediv = $('.rtt-tree');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
@@ -1127,7 +1120,7 @@ function ShowReps( is_snippet_editor ) {
         treediv.empty();
         
         //generate treedata from rectype structure
-        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
+        let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
                         ['ID','title','typeid','typename','modified','url','tags','all','parent_link'] );
 
         treedata[0].expanded = true; //first expanded
@@ -1148,11 +1141,11 @@ function ShowReps( is_snippet_editor ) {
                 }
             },
             lazyLoad: function(event, data){
-                var node = data.node;
-                var parentcode = node.data.code; 
-                var rectypes = node.data.rt_ids;
+                let node = data.node;
+                let parentcode = node.data.code; 
+                let rectypes = node.data.rt_ids;
 
-                var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
+                let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
                     rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode );
 
                 if(res.length>1){
@@ -1173,7 +1166,7 @@ function ShowReps( is_snippet_editor ) {
                     return false;
                 }
 
-                var ele = $(e.originalEvent.target);
+                let ele = $(e.originalEvent.target);
                 if(ele.is('a')){
                     
                     if(ele.text()=='insert'){
@@ -1206,16 +1199,16 @@ function ShowReps( is_snippet_editor ) {
             },
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
-                var node = data.node;
+                let node = data.node;
 
-                var $span = $(node.span);
-                var new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
+                let $span = $(node.span);
+                let new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
 
                 if(data.node.data.type == 'separator'){
                     $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
                     $(data.node.span.childNodes[1]).hide(); //checkbox for separators
                 }else if(node.data.type!='enum' && node.data.is_rec_fields == null && node.data.is_generic_fields == null){
-                    var op = '';
+                    let op = '';
                     if(node.data.type=='resource' || node.title=='Relationship'){ //resource
                         op = 'repeat';
                     }else if(node.children){
@@ -1243,7 +1236,7 @@ function ShowReps( is_snippet_editor ) {
     //
     function _insertRectypeIf2(_nodep, parent, rectypeId){
         
-        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        let _remark = '{* ' + _getRemark(_nodep) + ' *}';
         
         return '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}'+_remark+ ' \n  \n{/if}'+ _remark +' \n';  
 
@@ -1253,7 +1246,7 @@ function ShowReps( is_snippet_editor ) {
     // NEW
     //    
     function _addIfOperator2(_nodep, varname, language_handle = '', file_handle = ''){
-        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        let _remark = '{* ' + _getRemark(_nodep) + ' *}';
         let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
         inner_val = file_handle !== '' ? file_handle : inner_val;
         return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
@@ -1263,14 +1256,14 @@ function ShowReps( is_snippet_editor ) {
     //
     function _addMagicLoopOperator2(_nodep, varname, language_handle = '', file_handle = ''){
         
-        var _remark = '{* ' + _getRemark(_nodep) + ' *}';
+        let _remark = '{* ' + _getRemark(_nodep) + ' *}';
         
-        var codes = varname.split('.');
-        var field = codes[codes.length-1];
+        let codes = varname.split('.');
+        let field = codes[codes.length-1];
         
         
-        var loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
-        var getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+        let loopname = (_nodep.data.type=='enum')?'ptrloop':'valueloop';
+        let getrecord = (_nodep.data.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
 
         if(!window.hWin.HEURIST4.util.isempty(language_handle)){
             language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
@@ -1298,8 +1291,8 @@ function ShowReps( is_snippet_editor ) {
     //
     function _getRemark(_nodep){
 
-        var s = _nodep.title;
-        var key = _nodep.key;
+        let s = _nodep.title;
+        let key = _nodep.key;
 
         if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){
             s = _nodep.parent.title + '.' + s;
@@ -1317,9 +1310,9 @@ function ShowReps( is_snippet_editor ) {
     //
     function _addVariable2(_nodep, varname, insertMode, language_handle = '', file_handle = ''){
         
-        var res= '';
+        let res= '';
         
-        var remark = _getRemark(_nodep);
+        let remark = _getRemark(_nodep);
 
         if(insertMode==0){ //variable only
 
@@ -1332,18 +1325,22 @@ function ShowReps( is_snippet_editor ) {
             res = _nodep.title+": {$"+varname+"}";  //not used
 
         }else if(_nodep){ // insert with 'wrap' fumction which provides URL and image handling
-            var dtype = _nodep.data.type;
+            let dtype = _nodep.data.type;
             res = '{wrap var=$'+varname;
             if(!(_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
             {
                 if(window.hWin.HEURIST4.util.isempty(dtype) || _nodep.key === 'recURL'){
                     res = res + ' dt="url"';
-                }else if(dtype === 'ge  o'){
+                }else if(dtype === 'geo'){
                     res = res + '_originalvalue dt="'+dtype+'"';
+                }else if(dtype === 'date'){
+                    res = res + '_originalvalue dt="date" mode="0" calendar="native"';
+                    
+                    remark = remark+' mode: 0-simple,1-full,2-all fields; calendar: native,gregorian,both';
+                    
                 }else if(dtype === 'file'){
                     res = res + '_originalvalue dt="'+dtype+'"';
                     res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
-                }else{
                 }
             }
             res = res +'}{*' +  remark + '*}';
@@ -1361,8 +1358,8 @@ function ShowReps( is_snippet_editor ) {
 
         _closeInsertPopup();
         
-        var _text = '';
-        var textedit = document.getElementById("edTemplateBody");
+        let _text = '';
+        let textedit = document.getElementById("edTemplateBody");
 
         if(!pattern){
             pattern = parseInt(document.getElementById("selInsertPattern").value);
@@ -1481,7 +1478,7 @@ function ShowReps( is_snippet_editor ) {
 
 
 
-    var insertPopupID, insert_ID;
+    let insertPopupID, insert_ID;
     
 
     //
@@ -1499,10 +1496,11 @@ function ShowReps( is_snippet_editor ) {
     function _showInsertPopup2( _nodep, elt ){
 
         // show hide         
-        var no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
+        let no_loop = (_nodep.data.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
                     (_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0));
         let show_languages = _nodep.key=='term' || _nodep.key=='desc';
         let show_file_data = _nodep.data.type=='file';
+        let h;
         if(no_loop){
             h = 260;
         }else{
@@ -1535,21 +1533,21 @@ function ShowReps( is_snippet_editor ) {
                 $ele = $ele.parent();
             }
 
-            var $dlg2 = $ele.parents('.ui-dialog-content');
-            var insertMode = $dlg2.find("#selInsertMode").val();
+            let $dlg2 = $ele.parents('.ui-dialog-content');
+            let insertMode = $dlg2.find("#selInsertMode").val();
             let language = $dlg2.find('#selLanguage').val();
             let file_data = $dlg2.find('#selFileData').val();
             
-            var bid = $ele.attr('id');
+            let bid = $ele.attr('id');
             
-            var inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
+            let inloop = (bid=='btn_insert_loop')?1:(bid.indexOf('_loop')>0?2:0);
             
             _insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
             //_add_variable_dlg.dialog('close');
         }
         
         // init buttons
-        $ele_popup = $('#insert-popup');
+        let $ele_popup = $('#insert-popup');
         $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
             .off('click')
             .on('click',__on_add);
@@ -1571,9 +1569,9 @@ function ShowReps( is_snippet_editor ) {
             .off('change')
             .on('change',function __on_add(){
         
-                var $dlg2 = $(event.target).parents('.ui-dialog-content');
-                var sel = $dlg2.find("#selInsertModifiers")
-                var modname = sel.val();
+                let $dlg2 = $(event.target).parents('.ui-dialog-content');
+                let sel = $dlg2.find("#selInsertModifiers")
+                let modname = sel.val();
 
                 if(modname !== ''){
                     insertAtCursor("|"+modname);
@@ -1647,7 +1645,7 @@ function ShowReps( is_snippet_editor ) {
     //
     function _insertSelectedVars2( _nodep, inloop, isif, _insertMode, language_code, file_field ){
 
-        var textedit = document.getElementById('edTemplateBody'),
+        let textedit = document.getElementById('edTemplateBody'),
         _text = "",
         _inloop = inloop,
         _varname = '',
@@ -1672,32 +1670,15 @@ this_id       : "term"
 
   
 */
-/*
-            if(inloop_level==2){
-                
-                var gp_node = _findNodeById(_nodep.parent_full_id);
-                if(gp_node && gp_node.data){
-                    _varname = gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id;
-                }else{
-                    _varname = _nodep.parent_id+"."+_nodep.this_id;
-                }
-                
-            }else  inloop_level==1
-*/            
-            if (true) {
+
                 
                 _varname = '';
                 
-                if(false){ // && _nodep.data.varname
-                    _varname = _nodep.data.varname;
-                }else
-                {
-                    var codes = _nodep.data.code;
+                    let codes = _nodep.data.code;
                     if(!codes) codes = key;
                     
-                    var prefix = 'r';
+                    let prefix = 'r';
                     
-                    if(true){
                         codes = codes.split(':');
                         
                         if(key.indexOf('rec_')===0){
@@ -1715,8 +1696,8 @@ this_id       : "term"
                             _varname = codes[0]+(_varname!=''?('.'+_varname):'');
                         }else{
 
-                            var offset = 3;
-                            var lastcode = codes[codes.length-1];
+                            let offset = 3;
+                            let lastcode = codes[codes.length-1];
                                                 
                             if(_nodep.data.type == 'rectype'){
                                 rectypeId = _nodep.data.rtyID_local;
@@ -1750,10 +1731,10 @@ this_id       : "term"
 */                            
                             if(codes.length>3){ //second level (isif && codes.length==2) || 
                                 
-                                var parent_key = '';
-                                var pkeys = [];
+                                let parent_key = '';
+                                let pkeys = [];
                                 while(codes.length-offset>0){
-                                    var pkey = codes[codes.length-offset];
+                                    let pkey = codes[codes.length-offset];
                                     if(pkey.indexOf('lt')==0){ //resource
                                         pkey = 'f'+pkey.substring(2);
                                     }else{
@@ -1776,7 +1757,7 @@ this_id       : "term"
                                     
                                     //r.
                                     _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
-                                    var _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
+                                    let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
                                     //find if above cursor code already has such line             
                                     if(findAboveCursor(_getrec) || findAboveCursor(_getrec2)) {
                                             _getrec = '';
@@ -1790,9 +1771,6 @@ this_id       : "term"
                                 prefix = '';
                             }
                         }
-                    }else{
-                        _varname = key;
-                    }
                     
                     // 0 - outside loop
                     // 1 - insert loop operator
@@ -1818,12 +1796,9 @@ this_id       : "term"
                     
                     _nodep.data.varname = _varname;
                     //_nodep.data.key = _varname;
-                }
                 
-            }//true
-
             
-            var cursorIndent = 0;
+            let cursorIndent = 0;
             
             if( inloop==1 ){
                 
@@ -1851,112 +1826,6 @@ this_id       : "term"
             }
         }
     }
-    
-    //
-    // inloop_level = 0 no loop
-    //              = 1 parent is repeatable
-    //              = 2 grandparent is repeatable
-    //
-    function _insertSelectedVars( varid, inloop, isif ){
-        
-        var inloop_level=2;
-        if(inloop!=2){
-            inloop_level = (inloop===true)?1:0;
-        }
-
-        if(insertPopupID){
-            $(insertPopupID).dialog('close');
-            insertPopupID = null;
-        }
-
-        if(varid==null){
-            //top.HEURIST.util.closePopup(insertPopupID);
-            insertPopupID = null;
-            varid = insert_ID;
-        }
-
-        var textedit = document.getElementById("edTemplateBody"),
-        _text = "",
-        _varid = varid,
-        _inloop = inloop,
-        _varname = "",
-        _getrec = '';
-
-        var _nodep = _findNodeById(varid);
-
-        if(_nodep){
-
-            _nodep = _nodep.data;
-/*            
-id            : "r.f15.f26.term"
-labelonly     : "Term"
-parent_full_id: "r.f15.f26"
-parent_id     : "f26"
-this_id       : "term"            
-*/
-            if(inloop_level==2){
-                
-                var gp_node = _findNodeById(_nodep.parent_full_id);
-                if(gp_node && gp_node.data){
-                    _varname = gp_node.data.parent_id+'.'+_nodep.parent_id+'.'+_nodep.this_id;
-                }else{
-                    _varname = _nodep.parent_id+"."+_nodep.this_id;
-                }
-                
-            }else if(inloop_level==1){
-                
-                _varname = _nodep.parent_id+"."+_nodep.this_id;
-                
-                //2016-03-22 IJ wants to insert loop instead of var. AO - I am strictly against this inconsistency!
-                if(_nodep.this_id=='term' && !isif){
-                    
-                    _text = _addMagicLoopOperator(_nodep, _varname);
-                    insertAtCursor(_text);
-                    return;
-
-                }else{
-                    _varname = _nodep.parent_id+"."+_nodep.this_id;
-                }
-                
-            }else{
-                
-                var gp_node = _findNodeById(_nodep.parent_full_id);
-                if(gp_node && gp_node.data && gp_node.data.dtype=='resource'){
-                    _getrec = '{$'+_nodep.parent_full_id+
-                                    '=$heurist->getRecord($'+_nodep.parent_full_id+')}\n';
-                    //find if above cursor code already has such line             
-                    if(findAboveCursor(_getrec)) {
-                        _getrec = '';
-                    }
-                }
-                
-                if(_nodep.parent_full_id=='r.Relationship'){
-                    insertGetRelatedRecords();
-                }
-
-                
-                _varname = _nodep.id;
-            }
-
-
-            if(isif){
-                _text = _text + _getrec + _addIfOperator(_nodep, _varname);
-            }else{
-                _text = _text + _getrec + _addVariable(_nodep, _varname);
-            }
-
-            // for loop we also add the variable in the loop
-            /*if(_inloop){
-            _varname = _nodep.parent_id+"."+_nodep.this_id;
-            _text = _text + _addVariable(_nodep, _varname);
-            }*/
-
-        }
-
-        if(_text!=="")    {
-            insertAtCursor(_text);
-        }
-    }
 
 
 
@@ -1972,10 +1841,10 @@ this_id       : "term"
     function findAboveCursor(token) {
         
         //for codemirror
-        var crs = codeEditor.getCursor();
+        let crs = codeEditor.getCursor();
         //calculate required indent
-        var l_no = crs.line;
-        var line = "";
+        let l_no = crs.line;
+        let line = "";
         
         token = token.trim();
         
@@ -2002,11 +1871,11 @@ this_id       : "term"
     function insertGetRelatedRecords(){
         
         //find main loop and {$r = $heurist->getRecord($r)}
-        var l_count = codeEditor.lineCount();
-        var l_no = 0, k = -1;
+        let l_count = codeEditor.lineCount();
+        let l_no = 0, k = -1;
             
         while (l_no<l_count){
-            line = codeEditor.getLine(l_no);
+            let line = codeEditor.getLine(l_no);
             if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){
                 return;//already inserted
             }
@@ -2015,11 +1884,11 @@ this_id       : "term"
         
         l_no = 0;    
         while (l_no<l_count){
-            line = codeEditor.getLine(l_no);
+            let line = codeEditor.getLine(l_no);
             k = line.indexOf('$heurist->getRecord($r)}');
             if(k>=0){
                 
-                var s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
+                let s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
                 '{$Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
                 
                 codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
@@ -2037,11 +1906,11 @@ this_id       : "term"
     function insertAtCursor(myValue) {
 
         //for codemirror
-        var crs = codeEditor.getCursor();
+        let crs = codeEditor.getCursor();
         //calculate required indent
-        var l_no = crs.line;
-        var line = "";
-        var indent = 0;
+        let l_no = crs.line;
+        let line = "";
+        let indent = 0;
 
         while (line=="" && l_no>0){
             line = codeEditor.getLine(l_no);
@@ -2056,7 +1925,7 @@ this_id       : "term"
             }
         }
 
-        var off = new Array(indent + 1).join(' ');
+        let off = new Array(indent + 1).join(' ');
 
         myValue = "\n" + myValue;
         myValue = myValue.replace(/\n/g, "\n"+off);
@@ -2085,7 +1954,7 @@ this_id       : "term"
     //
     function insertAtCursor_fortextarea(myField, myValue, isApplyBreaks, cursorIndent) {
 
-        var scrollTop = myField.scrollTop;
+        let scrollTop = myField.scrollTop;
 
         //IE support
         if (document.selection) {
@@ -2095,8 +1964,8 @@ this_id       : "term"
         }
         //MOZILLA/NETSCAPE support
         else if (myField.selectionStart || myField.selectionStart == '0') {
-            var startPos = myField.selectionStart;
-            var endPos = myField.selectionEnd;
+            let startPos = myField.selectionStart;
+            let endPos = myField.selectionEnd;
             myField.value = myField.value.substring(0, startPos)
             + myValue
             + myField.value.substring(endPos, myField.value.length);
@@ -2128,15 +1997,15 @@ this_id       : "term"
         }
         else {
             oTextarea.setAttribute("wrap", "off");
-            var newArea = oTextarea.cloneNode(true);
+            let newArea = oTextarea.cloneNode(true);
             newArea.value = text; //oTextarea.value;
             oTextarea.parentNode.replaceChild(newArea, oTextarea);
             oTextarea = newArea;
         }
 
-        var strRawValue = text;// oTextarea.value;
+        let strRawValue = text;// oTextarea.value;
         oTextarea.value = "";
-        var k = text.indexOf("\\n");
+        let k = text.indexOf("\\n");
         while (k>=0){
             oTextarea.value += text.substr(0, k) + "\n"; // + text.substr(k+2);
             text = text.substr(k+2);
@@ -2160,7 +2029,7 @@ this_id       : "term"
     function _onResize(newwidth){
 
         if(newwidth>0){
-            var newval = newwidth>605?'36px':'75px';
+            let newval = newwidth>605?'36px':'75px';
             if(top_repcontainer!=newval){
                 top_repcontainer = newval;
                 if(!_iseditor){
@@ -2176,13 +2045,13 @@ this_id       : "term"
     function _saveOutput(){
         if( _currentQuery )
         {
-            var template_file = $('#selTemplates').val(); //current template
+            let template_file = $('#selTemplates').val(); //current template
             if(window.hWin.HEURIST4.util.isempty(template_file)) { return; }
 
-            var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
+            let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
             squery = squery.replace('"','%22');
             
-            var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+            let surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
                 squery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
                 
             $("#btnRepSave").hide();    
@@ -2194,16 +2063,16 @@ this_id       : "term"
     
     function _onReportPublish(){
 
-        var template_file = $('#selTemplates').val();
+        let template_file = $('#selTemplates').val();
         if(window.hWin.HEURIST4.util.isempty(template_file)) return;
         
-        var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
-        var squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
+        let mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        let squery = window.hWin.HEURIST4.query.composeHeuristQueryFromRequest( _currentQuery, true );
 
-        var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
+        let q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
         
         
-        var params = {mode:'smarty'};
+        let params = {mode:'smarty'};
         params.url_schedule = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
                                     + q + "&db="+window.hWin.HAPI4.database;
 
@@ -2221,7 +2090,7 @@ this_id       : "term"
 
 
     //public members
-    var that = {
+    let that = {
 
         
     
@@ -2255,7 +2124,7 @@ this_id       : "term"
 
         //NOT USED
         setQueryMode: function(val){
-            var isChanged = _sQueryMode != val;
+            let isChanged = _sQueryMode != val;
             _sQueryMode = val;
             //Hul.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
 
@@ -2318,11 +2187,6 @@ this_id       : "term"
             _saveOutput();
         },
 
-        //inserts selected variables
-        insertSelectedVars:function(varid, inloop, isif){
-            _insertSelectedVars(varid, inloop, isif);
-        },
-
         baseURL:  function (){
             return window.hWin.HAPI4.baseURL;
         },
@@ -2358,7 +2222,7 @@ this_id       : "term"
 $(function(){
 * this swallows backspace keys on any non-input element.
 * stops backspace -> back
-var rx = /INPUT|SELECT|TEXTAREA/i;
+let rx = /INPUT|SELECT|TEXTAREA/i;
 
 $(document).on("keydown keypress", function(e){
 if( e.which == 8 ){ // 8 == backspace

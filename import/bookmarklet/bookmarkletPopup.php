@@ -196,7 +196,7 @@ render: function() {
 		button = document.createElement("input");
 		button.type = "button";
 		button.value = "Bookmark as web page";
-		button.onclick = function() { Heurist.doBookmark(); };
+		button.onclick = function() { Heurist.doBookmark();};
 		td.appendChild(button);
 
         tr = t.appendChild(document.createElement("tr"));
@@ -332,7 +332,7 @@ getCoords: function(e) {
 	return pos;
 },
 
-urlcleaner: function(x) { return x.replace(/.C2.A0/gi,'\032'); },
+urlcleaner: function(x) { return x.replace(/.C2.A0/gi,'\032');},
 
 findFavicon: function() {
 	try {
@@ -374,7 +374,7 @@ doBookmark: function(rectype) {
 	if (! sel  &&  frames) {
 		for (i=0; i < frames.length; ++i) {
 			sel = findSelection(frames[i]);
-			if (sel) break;
+			if (sel) {break;}
 		}
 	}
 	var favicon = Heurist.findFavicon();

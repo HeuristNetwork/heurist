@@ -27,9 +27,9 @@
 
 ini_set('max_execution_time', '0');
 
-define('ADMIN_PWD_REQUIRED',1); 
+define('ADMIN_PWD_REQUIRED',1);
 define('OWNER_REQUIRED',1);
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -44,7 +44,7 @@ if(!@$_REQUEST['mail']){
     </head>
     <body class="popup">
             
-        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>  
+        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>  
         <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
         <form name="actionForm">
 <?php            
@@ -54,7 +54,7 @@ if(!@$_REQUEST['mail']){
 
     $mysqli = $system->get_mysqli();
     //1. find all database
-    $databases = mysql__getdatabases4($mysqli, false);   
+    $databases = mysql__getdatabases4($mysqli, false);
     
     $root = $system->getFileStoreRootFolder();
     
@@ -84,7 +84,7 @@ if(!@$_REQUEST['mail']){
             if(!(is_array($to_delete) && count($to_delete)>0)){
                 $to_delete = null;    
             }
-            //print 'Folders to be deleted '.print_r($to_delete, true);            
+            //print 'Folders to be deleted '.print_r($to_delete, true);
         }
         
         $rep.='<h3>ORPHANED FOLDERS in HEURIST_FILESTORE_DIR</h3>';
@@ -104,7 +104,7 @@ if(!@$_REQUEST['mail']){
             if($res){
                 $rep .= '<label>REMOVED: '.$db_name.'</label><br>';
             }else{
-                $rep .= '<label><input name="dbs[]" type="checkbox" value="'.$db_name.'">'.$db_name.'</label><br>';    
+                $rep .= '<label><input name="dbs[]" type="checkbox" value="'.$db_name.'">'.$db_name.'</label><br>';
             }
             
         }

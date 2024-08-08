@@ -26,7 +26,7 @@ require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
 header("Content-Type: application/xml");
 
 // Normally jsut outputs definitions, this will include users/groups
-$includeUgrps = @$_REQUEST["includeUgrps"];    // returns null if not set
+$includeUgrps = @$_REQUEST["includeUgrps"];// returns null if not set
 
 $sysinfo = $system->get_system();
 $db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
@@ -39,13 +39,13 @@ $rty_ID = @$_REQUEST["rty"];
 $dty_ID = @$_REQUEST["dty"];
 $trm_ID = @$_REQUEST["trm"];
 if($rty_ID!=null){
-    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));    
+    $rty_ID = intval(ConceptCode::getRecTypeLocalID($rty_ID));
 }
 if($dty_ID!=null){
-    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));    
+    $dty_ID = intval(ConceptCode::getDetailTypeLocalID($dty_ID));
 }
 if($trm_ID!=null){
-    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));    
+    $trm_ID = intval(ConceptCode::getTermLocalID($trm_ID));
 }
 $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 
@@ -115,19 +115,19 @@ if(!$is_subset || $trm_ID>0){
 // RECORD TYPES (this will be repeated for each of the tables)
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecTypes', $rty_ID);    
+    do_print_table2('defRecTypes', $rty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
 if(!$is_subset || $dty_ID>0){
 
-    do_print_table2('defDetailTypes', $dty_ID);    
+    do_print_table2('defDetailTypes', $dty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecStructure', $rty_ID);    
+    do_print_table2('defRecStructure', $rty_ID);
     
 }
 
@@ -207,7 +207,7 @@ do_print_table2('usrTags');
 
 }
 
-print "\n</hml_structure>"; // end of file
+print "\n</hml_structure>";// end of file
 
 
 //
@@ -234,9 +234,9 @@ function do_print_table2( $tname, $id=0 )
     
     if($id>0){
         if($prefix=='rst'){
-            $where = ' where rst_RecTypeID='.intval($id);       
+            $where = ' where rst_RecTypeID='.intval($id);
         }else{
-            $where = " where $id_field=".intval($id);       
+            $where = " where $id_field=".intval($id);
         }
     }
     
@@ -246,7 +246,7 @@ function do_print_table2( $tname, $id=0 )
 
     while ($row = $res->fetch_assoc()) { 
         
-        if($prefix=='rty' && !(@$row[$id_field]>0)) continue;
+        if($prefix=='rty' && !(@$row[$id_field]>0)) {continue;}
         
         print "<$prefix>";
         foreach($flds_list as $fld => $type){

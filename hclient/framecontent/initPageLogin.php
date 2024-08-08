@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once 'initPageMin.php'; //without client hapi
+require_once 'initPageMin.php';//without client hapi
 
 if(!@$_REQUEST['db']){
     $message = '<b>Required</b> database parameter >>> is not defined';
@@ -55,15 +55,16 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     <script>window.hWin = window;</script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
   
-    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>   
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>   
 <?php
-    include_once dirname(__FILE__).'/initPageCss.php'; 
+    include_once dirname(__FILE__).'/initPageCss.php';
     
     $dbname = @$_REQUEST['db'];
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
@@ -78,14 +79,17 @@ var database = '<?php echo htmlspecialchars($dbname);?>';
 function onHapiInit(success){   
     
     if(!success){    
-        window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side. '
-            +'Database '+database+', please consult Heurist developers');
+        window.hWin.HEURIST4.msg.showMsgErr({
+            message: 'Cannot initialize system on client side. '
+                    +`Database${database}, please consult Heurist developers`,
+            error_title: 'Unable to initialise Heurist'
+        });
             return;
     }
     
 <?php
      //returns total records in db and counts of active entries in dashboard  
-     list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
+     list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard();
      echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
      echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
      echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
@@ -107,7 +111,7 @@ function verify_credentials( show_warning ){
         }else if(requiredLevel==2){
            msg += ' as database onwer';
         //}else if(requiredLevel!=0){
-        //   msg = ''; 
+        //   msg = '';
         }
         if(msg!=''){
             var win_mappreview = window.parent.hWin;
@@ -116,13 +120,13 @@ function verify_credentials( show_warning ){
                 var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
                     {OK:
                     function(){
-                        //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                        //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg2.dialog( "close" );
-                        //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
+                        //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);
                         showLoginDialog(false, function( is_logged ) {
                             //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
                         }, win_mappreview, 'heurist-clearinghouse-login-dialog');
-                    }}); 
+                    }});
             }else{
                 //show login dialog at once
                 showLoginDialog(false, function(is_logged){
@@ -139,8 +143,8 @@ function verify_credentials( show_warning ){
 //init hapi    
 //
 $(document).ready(function() {
-    window.hWin.HAPI4 = new hAPI(database, onHapiInit);    
-});    
+    window.hWin.HAPI4 = new hAPI(database, onHapiInit);
+});
 </script>    
 </head>
 <body>

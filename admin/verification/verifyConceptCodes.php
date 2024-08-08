@@ -25,14 +25,14 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 	
-define('ADMIN_PWD_REQUIRED', 1); 
-define('PDIR','../../');  //need for proper path to js and css    
+define('ADMIN_PWD_REQUIRED', 1);
+define('PDIR','../../');//need for proper path to js and css    
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 ?>  
 
-<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>')</script>
+<script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
     
 <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
             <p>This list shows re-use of the same concept code within each database where this occurs. Re-use is an error, although it should have very little adverse effect on local operations.</p>
@@ -45,7 +45,7 @@ $mysqli = $system->get_mysqli();
     $query = 'show databases';
 
     $res = $mysqli->query($query);
-    if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+    if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
     $databases = array();
     while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
@@ -61,7 +61,7 @@ $mysqli = $system->get_mysqli();
         $terms = array();
         $is_found = false;
         
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name); //for snyk
+        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
 
         //RECORD TYPES
         
@@ -71,7 +71,7 @@ $mysqli = $system->get_mysqli();
             .' GROUP BY rty_OriginatingDBID, rty_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
 
@@ -82,8 +82,8 @@ $mysqli = $system->get_mysqli();
                 .' WHERE  rty_OriginatingDBID='.intval($row[0]).' AND rty_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY rty_OriginatingDBID, rty_IDInOriginatingDB';
                 
-               $res2 = $mysqli->query($query);               
-               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+               $res2 = $mysqli->query($query); 
+               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
                while (($row2 = $res2->fetch_row())) {
                       array_push($rec_types, array_map('htmlspecialchars',$row2));
                }
@@ -97,7 +97,7 @@ $mysqli = $system->get_mysqli();
             .' GROUP BY dty_OriginatingDBID, dty_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         $not_found = true;
         while (($row = $res->fetch_row())) {
@@ -109,8 +109,8 @@ $mysqli = $system->get_mysqli();
                 .' WHERE  dty_OriginatingDBID='.intval($row[0]).' AND dty_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY dty_OriginatingDBID, dty_IDInOriginatingDB';
                 
-               $res2 = $mysqli->query($query);               
-               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+               $res2 = $mysqli->query($query); 
+               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
                while (($row2 = $res2->fetch_row())) {
                       array_push($det_types, array_map('htmlspecialchars',$row2));
                }
@@ -124,7 +124,7 @@ $mysqli = $system->get_mysqli();
             .' GROUP BY trm_OriginatingDBID, trm_IDInOriginatingDB HAVING cnt>1';
         
         $res = $mysqli->query($query);
-        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+        if (!$res) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
         
         while (($row = $res->fetch_row())) {
 
@@ -135,15 +135,15 @@ $mysqli = $system->get_mysqli();
                 .' WHERE  trm_OriginatingDBID='.intval($row[0]).' AND trm_IDInOriginatingDB='.intval($row[1])
                 .' ORDER BY trm_OriginatingDBID, trm_IDInOriginatingDB';
                 
-               $res2 = $mysqli->query($query);               
-               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error);  return; }
+               $res2 = $mysqli->query($query); 
+               if (!$res2) {  print htmlspecialchars($query.'  '.$mysqli->error); return; }
                while (($row2 = $res2->fetch_row())) {
                       array_push($terms, array_map('htmlspecialchars',$row2));
                }
         }
         
         if($is_found){
-            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';    
+            print '<h4 style="margin:0;padding-top:20px">'.htmlspecialchars(substr($db_name,4)).'</h4><table style="font-size:12px">';
             if(is_array($rec_types) && count($rec_types)>0){
                 print '<tr><td colspan=4><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){

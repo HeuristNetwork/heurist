@@ -30,7 +30,7 @@ $includeUgrps=@$_REQUEST["includeUgrps"];	// returns null if not set
 
 $approvedDefsOnly=@$_REQUEST["approvedDefsOnly"];	// returns null if not set
 
-$isHTML = (@$_REQUEST["plain"]!=1); //no html
+$isHTML = (@$_REQUEST["plain"]!=1);//no html
 // TO DO: filter for reserved and approved definitions only if this is set
 
 
@@ -68,7 +68,7 @@ print "-- Installation = " . HEURIST_BASE_URL. "<br>\n";
 print "-- Database = " . HEURIST_DBNAME . "<br>\n";
 print "-- Program Version: ".HEURIST_VERSION."<br>\n";
 print "-- Database Version: ".$db_version; // ** Do not change format of this line ** !!! it is checked to make sure vesions match
-if($isHTML) print "<br><br>\n";
+if($isHTML) {print "<br><br>\n";}
 // Now output each of the definition tables as data for an insert statement. The headings are merely for documentation
 // Each block of data is between a >>StartData>> and >>EndData>> markers
 // This could perhaps be done more elegantly as JSON structures, but SQL inserts help to point up errors in fields
@@ -215,11 +215,11 @@ function do_print_table($desc, $tname, $where=null)
     global $mysqli, $isHTML, $startToken, $endToken;
     
     print "\n\n\n-- $desc \n";
-    if($isHTML) print "<p>";
+    if($isHTML) {print "<p>";}
 
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     if($tname=='defTermsLinks'){
-        array_shift($flds_list); //remove primary key field
+        array_shift($flds_list);//remove primary key field
     }
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
@@ -233,7 +233,7 @@ function do_print_table($desc, $tname, $where=null)
     $res = $mysqli->query($query);
     if($res){
 
-        if($isHTML) print "<p>";
+        if($isHTML) {print "<p>";}
         print "\n$startToken\n";
 
         //get table prefix             
@@ -244,7 +244,7 @@ function do_print_table($desc, $tname, $where=null)
             $vals = array();
             foreach($flds_list as $fld => $type){
 
-                if($prefix=='rty' && !($row[$id_field]>0)) continue;
+                if($prefix=='rty' && !($row[$id_field]>0)) {continue;}
 
                 $val = $row[$fld];
                 if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
@@ -265,7 +265,7 @@ function do_print_table($desc, $tname, $where=null)
             if ($_REQUEST['pretty']) {
                 print"<br>";
             }
-                    //print_row($row, $tname); 
+                    //print_row($row, $tname);
         }//while
         $res->close();
         print "$endToken\n";
@@ -274,6 +274,6 @@ function do_print_table($desc, $tname, $where=null)
     }
    
 
-    if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+    if($isHTML) {print "<p>&nbsp;<p>&nbsp;<p>";}
 }
 ?>

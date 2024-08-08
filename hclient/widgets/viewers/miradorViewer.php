@@ -62,7 +62,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
     $system = new System();
     if( ! $system->init($_REQUEST['db'], true, false) ){
         //get error and response
-        $system->error_exit_api(); //exit from script
+        $system->error_exit_api();//exit from script
     }
     //get baseURL
     $baseUrl = defined('HEURIST_SERVER_URL')?HEURIST_SERVER_URL:null; //HEURIST_BASE_URL;
@@ -93,8 +93,8 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 .' dtl_RecID='.$rec_ID.' AND dtl_DetailTypeID='.DT_URL;
                 $canvasUri = mysql__select_value($mysqli, $query);
                 
-                $rec_ID = intval($row[0]);  //record id with manifest
-                $_REQUEST['iiif'] = $row[1];      
+                $rec_ID = intval($row[0]);//record id with manifest
+                $_REQUEST['iiif'] = $row[1];
                 
             }
         }else if(defined('DT_URL')){
@@ -107,10 +107,10 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 .' AND dtl_DetailTypeID='.DT_URL
                 .' GROUP BY dtl_Value ORDER BY cnt DESC';
                 
-            $row = mysql__select_row($mysqli, $query); //get first row
+            $row = mysql__select_row($mysqli, $query);//get first row
 
             if(is_array($row) && @$row[0]!=null){
-                $canvasUri = $row[0];   
+                $canvasUri = $row[0];
             }
             
             if(@$_REQUEST['iiif']==null && @$_REQUEST['file']==null){
@@ -144,7 +144,7 @@ if($baseUrl==null){
         
 }
     $baseUrl = $baseUrl.'/';
-    $url = $baseUrl . $_SERVER['REQUEST_URI'];  
+    $url = $baseUrl . $_SERVER['REQUEST_URI'];
 
 if(@$_REQUEST['url']) { //direct url to manifest
 
@@ -164,7 +164,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
         exit('Need to define either query or file ID');
     }else{
         if(strpos('format=iiif',$url)===false){
-                $url = $url.'&format=iiif';    
+                $url = $url.'&format=iiif';
         }
     }
     //record_output creates manifest dynamically
@@ -190,7 +190,7 @@ $use_custom_mirador = file_exists(dirname(__FILE__).'/../../../external/mirador3
 <title>Heurist Mirador Viewer</title>
 <?php 
 if($use_custom_mirador){
-    print '<base href="../../../external/mirador3/"/>';    
+    print '<base href="../../../external/mirador3/"/>';
 }else{
 ?>
 <script src="https://unpkg.com/mirador@latest/dist/mirador.min.js"></script>
@@ -212,8 +212,8 @@ if (!preg_match('[\W]', $dbname)){
 <?php    
 }
 ?>
-    window.hideThumbs = <?php echo @$_REQUEST['iiif_image']?'true':'false';?>; 
-    window.sourceRecordId = <?php echo $rec_ID;?>; //manifest record
+    window.hideThumbs = <?php echo @$_REQUEST['iiif_image']?'true':'false';?>;
+    window.sourceRecordId = <?php echo $rec_ID;?>;//manifest record
     window.runManually = true;
 </script>
 <?php
@@ -230,7 +230,7 @@ if($use_custom_mirador){
     id: 'demo',
     windows: [{
       //canvasIndex: 2,  
-      canvasId: '<?php echo htmlspecialchars($canvasUri); ?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
+      canvasId: '<?php echo htmlspecialchars($canvasUri);?>',  //'https://fragmentarium.ms/metadata/iiif/F-hsd6/canvas/F-hsd6/fol_2r.jp2.json',
       imageToolsEnabled: true,
       imageToolsOpen: false,
       manifestId: window.manifestUrl,

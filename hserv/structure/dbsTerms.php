@@ -56,12 +56,6 @@ class DbsTerms
        $this->system = $system;
        $this->data = $data;
     }
-    //
-    // config getter
-    //
-    public function init(){
-        
-    }
 
     //
     // assign terms
@@ -153,7 +147,7 @@ class DbsTerms
                 
                 while ( $term[$idx_term_parent]>0 ) {
                     $term = $this->getTerm($term[$idx_term_parent]);
-                    //if(!$term) break;
+                    //if(!$term) {break;}
                     if($term[$idx_term_parent]>0){
                         array_unshift($labels, $term[$idx_term_label]);
                     }else{
@@ -162,7 +156,7 @@ class DbsTerms
                 }
                 return implode('.',$labels);
             }else{
-                return @$term[$idx_term_label]?$term[$idx_term_label]:'';    
+                return @$term[$idx_term_label]?$term[$idx_term_label]:'';
             }
         }else{
             return '';
@@ -214,7 +208,7 @@ class DbsTerms
             $term = $this->data['termsByDomainLookup'][$domain][$term_id];
         }else{
             //search in other domain too
-            $term = @$this->data['termsByDomainLookup'][$domain=='enum'?'relation':'enum'][$term_id];            
+            $term = @$this->data['termsByDomainLookup'][$domain=='enum'?'relation':'enum'][$term_id];
         }
         return $term;
     }
@@ -277,7 +271,7 @@ class DbsTerms
         if($mode==1){
             $res = array($parent_id=>array());
         }else{
-            $res = array();    
+            $res = array();
         }
         
         if($parent_id=='relation' || $parent_id=='enum'){
@@ -301,7 +295,7 @@ class DbsTerms
                     }
 
                     if($mode==1){ //tree
-                        $res[$parent_id][$trm_ID] = array(); 
+                        $res[$parent_id][$trm_ID] = array();
                     
                     }else if($mode==3){
                         if(in_array($trm_ID, $res)){ //already in set
@@ -309,7 +303,7 @@ class DbsTerms
                                 .' Recursive tree or duplication for term '.$trm_ID.' parent '.$parent_id);
                             continue;
                         }else{
-                            array_push($res, $trm_ID);    
+                            array_push($res, $trm_ID);
                         }
                     }else{
                         array_push($res, strtolower($this->getTermLabel($trm_ID)));
@@ -339,15 +333,15 @@ class DbsTerms
         $lvl_src = array('code'=>array(),'label'=>array());
         
         if($parent_id>0){
-            $children = $this->treeData($parent_id, 3); //ids
+            $children = $this->treeData($parent_id, 3);//ids
             if(count($children)>0){
                 $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
                 
                 foreach($children as $trmId){
                     if(@$this->data['termsByDomainLookup'][$domain][$trmId]){
-                        $code = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code])); //removeLastNum
-                        $label = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label])); //removeLastNum
+                        $code = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));//removeLastNum
+                        $label = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));//removeLastNum
                         $lvl_src['code'][] = $code;
                         $lvl_src['label'][] = $label;
                     }
@@ -408,7 +402,7 @@ class DbsTerms
             foreach($lvl as $trmId=>$children){
                 if($trmId==$parent_id){
                     
-                    if(!is_array(@$lvl[$trmId])) $lvl[$trmId] = array();
+                    if(!is_array(@$lvl[$trmId])) {$lvl[$trmId] = array();}
                     $lvl[$trmId][$new_term_id] = array();
                     
                     break;
@@ -420,7 +414,7 @@ class DbsTerms
 
         }else{
             //vocabulary
-            if(!is_array($lvl)) $lvl = array();
+            if(!is_array($lvl)) {$lvl = array();}
             $lvl[$new_term_id] = array();
         }
     }    
@@ -443,7 +437,7 @@ class DbsTerms
             }else if(is_array($children) && count($children)>0 ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
-                if($res) return $res;
+                if($res) {return $res;}
             }
         }
         return null; //not found
@@ -460,7 +454,7 @@ class DbsTerms
     //
     public function doDisambiguateTerms($term_import, $idx){
 
-        if(!$term_import || $term_import=="") return $term_import;
+        if(!$term_import || $term_import=="") {return $term_import;}
 
         $lvl_values = array();
         
@@ -496,7 +490,7 @@ class DbsTerms
     */
     public function doDisambiguateTerms2($term_value, $same_level_values){
         
-        if(!$term_value || $term_value=="") return $term_value;
+        if(!$term_value || $term_value=="") {return $term_value;}
 /*        
         $name = removeLastNum(trim($term_value));
         $found = 0;

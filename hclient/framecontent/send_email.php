@@ -18,8 +18,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-define('PDIR','../../');  //need for proper path to js and css    
-define('MANAGER_REQUIRED', 1);   
+define('PDIR','../../');//need for proper path to js and css    
+define('MANAGER_REQUIRED', 1);
 
 require_once 'initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
@@ -31,10 +31,10 @@ if(isset($_POST['data'])) {
     $data = json_decode($params['data']);
     $response = "";
 
-    $subject = htmlspecialchars(filter_var($data->subject));  // Email subject
+    $subject = htmlspecialchars(filter_var($data->subject));// Email subject
     foreach($data->emails as $email) {
         // Determine message & recipients
-        USanitize::purifyHTML($email->message);       // Email message
+        USanitize::purifyHTML($email->message);// Email message
         $recipients = $email->recipients; // One or more e-mail adresses
         foreach($recipients as $recipient) {
             // Check if the e-mail address is valid
@@ -69,7 +69,7 @@ if(isset($_POST['data'])) {
     <title>Bulk email sender</title>
 
     <!-- CSS -->
-    <?php include_once dirname(__FILE__).'/initPageCss.php'; ?>
+    <?php include_once dirname(__FILE__).'/initPageCss.php';?>
 
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/jquery-migrate-3.4.1.js"></script>
@@ -167,15 +167,15 @@ if(isset($_POST['data'])) {
 
     <!-- Javascript -->
     <script type="text/javascript">
-        var storage_key = "email"; // Key used to store data
-        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; // ID's of the dropdowns
-        var text_types = ["freetext", "blocktext"]; // Text only types for the dropdowns
-        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"]; // All types that can be selected from the dropdown
+        var storage_key = "email";// Key used to store data
+        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"];// ID's of the dropdowns
+        var text_types = ["freetext", "blocktext"];// Text only types for the dropdowns
+        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"];// All types that can be selected from the dropdown
         var definitions; // Record type field definitions
         var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
         var recordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids);
-        var records = recordset.getRecords(); // Array of record objects
-        var first_record = recordset.getFirstRecord(); // First record in the list, used to determine the Record Types
+        var records = recordset.getRecords();// Array of record objects
+        var first_record = recordset.getFirstRecord();// First record in the list, used to determine the Record Types
 
         // Retrieves an item from localStorage
         function getItem(name) {
@@ -210,7 +210,7 @@ if(isset($_POST['data'])) {
             var html = "<option value=\"-1\" disabled=\"disabled\" selected=\"selected\">Select...</option>";
             if(options.length > 0) {
                 for(var i=0; i<options.length; i++) {
-                    html += "<option value=\"" +options[i].value+ "\">" + options[i].name + "</option>"; // Add field to dropdown
+                    html += "<option value=\"" +options[i].value+ "\">" + options[i].name + "</option>";// Add field to dropdown
                 }
             }
             return html;
@@ -229,10 +229,10 @@ if(isset($_POST['data'])) {
 
             // Listen to dropdown hanges
             $(dropdowns[i]).on('change',function(e) {
-                var id = $(this).attr("id"); // Dropdown ID
-                var value = $(this).prop("selectedIndex"); // Selected dropdown index
-                putItem("#"+id, value); // Store data
-                redo(); // Message needs to be re-done
+                let id = $(this).attr("id");// Dropdown ID
+                let value = $(this).prop("selectedIndex");// Selected dropdown index
+                putItem("#"+id, value);// Store data
+                redo();// Message needs to be re-done
             });
         }
 
@@ -242,8 +242,8 @@ if(isset($_POST['data'])) {
             $("#selected-records").html("# of records selected: " + ids.length);
 
             // Determine record type of first record
-            //this.record = records.getFirstRecord(); // Reference to first record; 
-            var rectype = recordset.fld(first_record, 'rec_RecTypeID'); // Record type of first record
+            //this.record = records.getFirstRecord();// Reference to first record; 
+            var rectype = recordset.fld(first_record, 'rec_RecTypeID');// Record type of first record
             definitions = $Db.rst(rectype);
 
             // TEXT ONLY DROPDOWNS
@@ -261,25 +261,25 @@ if(isset($_POST['data'])) {
             // Setup subject field
             $("#subject").on("keyup", function(e) {
                 var text = $(this).val();
-                putItem("subject", text); // Store subject text
+                putItem("subject", text);// Store subject text
             });
-            $("#subject").val(getItem("subject")); // Set subject text
+            $("#subject").val(getItem("subject"));// Set subject text
 
             // Setup message field
             $("#message").on("keyup", function(e) {
                 var text = $(this).val();
-                putItem("message", text); // Store message text
+                putItem("message", text);// Store message text
             });
-            $("#message").val(getItem("message")); // Set message text
+            $("#message").val(getItem("message"));// Set message text
 
         }
 
         // Swaps the text area's
         function redo() {
             $("#prepare > span").text("Prepare emails");
-            $("#btn_redo").hide(); // Hide redo button
+            $("#btn_redo").hide();// Hide redo button
             $("#message-prepared").slideUp(500, function(e) {  // Hide prepared message
-                $("#message").slideDown(500);  // Show raw message
+                $("#message").slideDown(500);// Show raw message
             })
         }
 
@@ -287,7 +287,7 @@ if(isset($_POST['data'])) {
         function getValue(record, type, index) {
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
-                return record.d[index]; 
+                return record.d[index];
 
             }else if(type == "memo") {
                 alert("Memo");
@@ -317,7 +317,7 @@ if(isset($_POST['data'])) {
             var res = [];
             for(var i=0; i<dropdowns.length; i++) {
                 // Index selected in the dropdown
-                var index = $(dropdowns[i]).val();   // field type index
+                var index = $(dropdowns[i]).val();// field type index
                 if(index && index > 0) {
                      res.push(index);
                 }
@@ -331,16 +331,16 @@ if(isset($_POST['data'])) {
             // Replace hashtags by actual content
             for(var i=0; i<dropdowns.length; i++) {
                 // Index selected in the dropdown
-                var dty_ID = $(dropdowns[i]).val();   // field type index
+                var dty_ID = $(dropdowns[i]).val();// field type index
                 var value = "?";
                 if(dty_ID && dty_ID > 0) {
                     var field_type = $Db.dty(dty_ID, 'dty_Type');
-                    value = getValue(record, field_type, dty_ID); // Record value at the given index
+                    value = getValue(record, field_type, dty_ID);// Record value at the given index
                 }
 
                 // Regex
-                var regex = new RegExp(dropdowns[i], "ig"); // Replace #xxx case insensitive
-                message = message.replace(regex, value);    // Replace all occurences with @value
+                var regex = new RegExp(dropdowns[i], "ig");// Replace #xxx case insensitive
+                message = message.replace(regex, value);// Replace all occurences with @value
             }
             return message;
         }
@@ -390,19 +390,22 @@ if(isset($_POST['data'])) {
                     var email = {};
 
                     // Email
-                    var emailIndex = $("#email").val();  // Dropdown index
+                    var emailIndex = $("#email").val();// Dropdown index
 
                     if(emailIndex>0){
                         var emailType = $Db.dty(emailIndex, 'dty_Type');
-                        email.recipients = getValue(records[r], emailType, emailIndex);  // Determine e-mail address(es) [comma seperated]
+                        email.recipients = getValue(records[r], emailType, emailIndex);// Determine e-mail address(es) [comma seperated]
                         if(!top.HEURIST4.util.isArrayNotEmpty(email.recipients)) email.recipients = [];
 
                         // Message
-                        email.message = prepareMessage(rawMessage, records[r], definitions); // Determine message
+                        email.message = prepareMessage(rawMessage, records[r], definitions);// Determine message
                         data.emails.push(email);
                     }else{
-                         window.hWin.HEURIST4.msg.showMsgErr("Define email field. It is mandatory");
-                         return;
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: "Define email field. It is mandatory",
+                            status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                        });
+                        return;
                     }
                 }
 

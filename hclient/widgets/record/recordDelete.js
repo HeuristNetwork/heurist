@@ -40,7 +40,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     _initControls:function(){
         
-        var cnt_selected = this._currentRecordsetSelIds.length;
+        let cnt_selected = this._currentRecordsetSelIds.length;
         
         this.header_div = this.element.find('#div_header').css({'line-height':'21px'});
 
@@ -107,16 +107,16 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             //find mapdocument content
             this._findMapDocumentContent();
         }else{
-            var scope = this._currentRecordset.getSubSetByIds(this._currentRecordsetSelIds);
+            let scope = this._currentRecordset.getSubSetByIds(this._currentRecordsetSelIds);
             this.recordList.resultList('updateResultSet', scope, null); //render
         }
         
         
         
         //adjust height
-        var that = this;
+        let that = this;
         setTimeout(function(){
-            var h = that.header_div[0].scrollHeight;
+            let h = that.header_div[0].scrollHeight;
             if(h>33){
                 that.header_div.css({height: h});
                 that.recordList.css({top: (h-1)});
@@ -130,15 +130,15 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     _findMapDocumentContent: function(){
         
-        var mapdoc_id = this.options.map_document_id;
+        let mapdoc_id = this.options.map_document_id;
         
-        var RT_TLCMAP_DATASET = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'],
+        let RT_TLCMAP_DATASET = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'],
             RT_MAP_DOCUMENT = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],
             RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'],
             DT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'],
             DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
         
-            var request = {
+            let request = {
                         w: 'a',
                         detail: 'header',
                         source: 'map_document',
@@ -157,14 +157,14 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                                         ,"levels":[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]}];
             }
             
-            var that = this;
+            let that = this;
 
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        var resdata = new hRecordSet(response.data);
+                        let resdata = new HRecordSet(response.data);
                         
                         that.recordList.resultList('updateResultSet', resdata, null); //render
 
@@ -184,16 +184,16 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     _onLinkedCount:function(){
         
-            var cnt_selected = this._currentRecordsetSelIds.length;
-            var cnt_target = 0;
-            var cnt_source = 0;
-            var merged_ids = this._currentRecordsetSelIds;
+            let cnt_selected = this._currentRecordsetSelIds.length;
+            let cnt_target = 0;
+            let cnt_source = 0;
+            let merged_ids = this._currentRecordsetSelIds;
             
         //$merged_ids = array_unique(array_merge($res['reverse']['target'], $res['reverse']['source']), SORT_NUMERIC);
         
         if(cnt_source>0){
 
-            var ele = this.element.find('#div_4').show();
+            let ele = this.element.find('#div_4').show();
             
             if(cnt_selected==1){
                 msg = 'This record is';
@@ -227,7 +227,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         res[1].text = window.hWin.HR('Delete Records');
         return res;
     },    
@@ -237,20 +237,19 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     doAction: function( isconfirm, check_source ){
 
-        //var scope_val = 'current';
-        var scope_val = this.selectRecordScope.val();
+        let scope_val = this.selectRecordScope.val();
         if (scope_val=='') return;
         
-        var that = this;       
+        let that = this;       
             
         if(scope_val=='selected' && isconfirm!==true){
             
-            var recset = this.recordList.resultList('getRecordSet');           
-            var r1 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-            var r2 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
-            var cnt = 0;
+            let recset = this.recordList.resultList('getRecordSet');           
+            let r1 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+            let r2 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+            let cnt = 0;
             recset.each(function(recID, record){
-                var rt = this.fld(record, 'rec_RecTypeID');
+                let rt = this.fld(record, 'rec_RecTypeID');
                 if(rt==r1 || rt==r2){
                     cnt++;
                 }
@@ -279,7 +278,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true );
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             
@@ -293,9 +292,9 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             }
 
             //unique session id    
-            var session_id = Math.round((new Date()).getTime()/1000);
+            let session_id = Math.round((new Date()).getTime()/1000);
         
-            var request = {
+            let request = {
                 request_id : window.hWin.HEURIST4.util.random(),
                 ids        : scope.join(','),
                 session    : session_id
@@ -321,7 +320,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                             
                             if(response.data.source_links_count>0 && response.data.source_links){
                                 
-                                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>You are asking to delete '+scope.length+' records ('
 +'<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+scope.join(',')
 +'&nometadatadisplay=true" target="_blank">see list</a>)'
@@ -342,8 +341,8 @@ function(){
 },
 {title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
     
-  var btn = $dlg.parent().find('button:contains("Delete records")');
-  var chb = $dlg.find('input[type="checkbox"]').on('change',function(){
+  let btn = $dlg.parent().find('button:contains("Delete records")');
+  let chb = $dlg.find('input[type="checkbox"]').on('change',function(){
       window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
   })
   window.hWin.HEURIST4.util.setDisabled(btn, true);
@@ -356,7 +355,7 @@ function(){
                             
                             that.closeDialog();
                             
-                            var msg = 'Processed : '+response.data.processed + ' record'
+                            let msg = 'Processed : '+response.data.processed + ' record'
                                 + (response.data.processed>1?'s':'') +'. Deleted: '
                                 + response.data.deleted  + ' record'
                                 + (response.data.deleted>1?'s':'');

@@ -23,7 +23,7 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
     _initControls: function() {
         this._super();
 
-        var that = this;
+        let that = this;
         
         /*
         this.btn_add_record = this.element.find('#btn_add_record');
@@ -61,7 +61,7 @@ $.widget( "heurist.searchDefFileExtToMimetype", $.heurist.searchEntity, {
         
             this._super();
             
-            var request = {};
+            let request = {};
             
             if(this.input_search.val()!=''){
                 request['fxm_Extension'] = this.input_search.val();

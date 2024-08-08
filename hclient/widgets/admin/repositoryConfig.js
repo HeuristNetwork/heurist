@@ -73,9 +73,9 @@ $.widget( "heurist.repositoryConfig", {
     _init: function() {
         
 
-        var _services = ['Nakala','Flickr','Zenodo','Isidore','MediHAL','DSpace'];
+        let _services = ['Nakala','Flickr','Zenodo','Isidore','MediHAL','DSpace'];
         this._available_services = [];
-        for(var idx in _services){
+        for(let idx in _services){
             this._available_services.push({service:_services[idx].toLowerCase(),label:_services[idx]});
         }
         
@@ -84,7 +84,7 @@ $.widget( "heurist.repositoryConfig", {
             return;
         }
         
-        var that = this;
+        let that = this;
         
         this.element.addClass('ui-heurist-design');
         
@@ -126,7 +126,7 @@ $.widget( "heurist.repositoryConfig", {
     //
     _getActionButtons: function(){
 
-        var that = this;
+        let that = this;
 
         return [
             {
@@ -155,7 +155,7 @@ $.widget( "heurist.repositoryConfig", {
     //
     _initDialog: function(){
         
-        var options = this.options,
+        let options = this.options,
             btn_array = this._getActionButtons(), 
             position = null,
                 that = this;
@@ -167,14 +167,13 @@ $.widget( "heurist.repositoryConfig", {
         }
         
         if(position==null) position = { my: "center", at: "center", of: window };
-        var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
         if(options['width']>maxw) options['width'] = maxw*0.95;
-        var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
         if(options['height']>maxh) options['height'] = maxh*0.95;
         
-        var that = this;
         
-        var $dlg = this.element.dialog({
+        let $dlg = this.element.dialog({
             autoOpen: false ,
             //element: this.element[0],
             height: options['height'],
@@ -210,7 +209,7 @@ $.widget( "heurist.repositoryConfig", {
             this._as_dialog.dialog("open");
             
             if(this.options.helpContent){
-                var helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
+                let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);    
             }
             
@@ -241,7 +240,7 @@ $.widget( "heurist.repositoryConfig", {
     //
     _initControls:function(){
         
-        var that = this;
+        let that = this;
 
         //fill record type selector
         this.selectUserGroups = this.element.find('#sel_usergroup').css({'list-style-type': 'none'});
@@ -287,12 +286,12 @@ $.widget( "heurist.repositoryConfig", {
         // on change handler
         this._on(this.selectServiceType[0], {
             change: function(event, ui){
-                var service = that.selectServiceType.val(); // selected service
+                let service = that.selectServiceType.val(); // selected service
                 that._changeService( service ); // setup
             }
         });
 
-        ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
+        let ele = this.element.find('#btnAddService').button({ icon: "ui-icon-plus" }).css('left', '165px');
         this._on(ele, {click: this._addNewService});
         
         this.btnApply = this.element.find('#btnApplyCfg').button().css("margin-right", "10px");
@@ -347,7 +346,7 @@ $.widget( "heurist.repositoryConfig", {
     //
     getConfigurations: function(){
 
-        var that = this;
+        let that = this;
 
         window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'get'}, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
@@ -379,9 +378,9 @@ $.widget( "heurist.repositoryConfig", {
     //
     saveConfigrations: function(){
 
-        var that = this;
+        let that = this;
 
-        var request = {
+        let request = {
             'a': 'update',
             'delete': that.options.service_remove, //to be deleted                
             'edit': JSON.stringify(that.options.service_config)   //to be updted
@@ -412,11 +411,11 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _closeHandler: function(isSave=false, isMouseLeave=false, trigger){
 
-        var that = this;
+        let that = this;
 
-        var hasChanges = (this._is_modified || this._services_modified);
+        let hasChanges = (this._is_modified || this._services_modified);
 
-        var $dlg, buttons = {};
+        let $dlg, buttons = {};
 
         buttons['Save'] = function(){
             
@@ -437,8 +436,8 @@ console.log( JSON.stringify(that.options.service_config) );
 
         if(!isSave && trigger && !trigger.is('button') && hasChanges){
 
-            var wording = this._is_modified ? 'current configuration' : 'available services';
-            var button = this._is_modified ? '"Apply"' : '"Save"'
+            let wording = this._is_modified ? 'current configuration' : 'available services';
+            let button = this._is_modified ? '"Apply"' : '"Save"'
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('You have made changes to the '+wording+'. Click '+button+' otherwise all changes will be lost.', 
                 buttons, {title: 'Unsaved Changes', yes: 'Save', no: 'Ignore and Close'});
@@ -460,11 +459,11 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _getServiceSelectmenu: function(){
 
-        var options = [];
+        let options = [];
 
-        var values = {};
+        let values = {};
 
-        for(idx in this._available_services){
+        for(let idx in this._available_services){
 
             values = {
                 title: this._available_services[idx].label,
@@ -518,7 +517,7 @@ console.log( JSON.stringify(that.options.service_config) );
         // empty control variables
         this._fillConfigForm('new');
         
-        var ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
+        let ele = this._reloadServiceList_item( 'new', 'assign on right ...' );
     },
     
     //
@@ -545,7 +544,7 @@ console.log( JSON.stringify(that.options.service_config) );
                 $('input[data-field='+field+']').val(value);     
             });
 
-            var usr_ID = this._current_cfg.usr_ID;
+            let usr_ID = this._current_cfg.usr_ID;
             
             //select service and type
             if(cfg0.service) {
@@ -587,12 +586,12 @@ console.log( JSON.stringify(that.options.service_config) );
             
         }else{
             
-            var sName = 'select group or user';
-            var usr_ID = this._current_cfg.usr_ID;
+            let sName = 'select group or user';
+            let usr_ID = this._current_cfg.usr_ID;
             if(usr_ID>=0){
                 sName = window.hWin.HAPI4.SystemMgr.getUserNameLocal(usr_ID);    
             }
-            var sSrvName = 'select repository';
+            let sSrvName = 'select repository';
             if(this._current_cfg.label){
                 sSrvName = this._current_cfg.label
             }
@@ -618,13 +617,13 @@ console.log( JSON.stringify(that.options.service_config) );
                 this._is_modified =  (this._current_cfg.usr_ID != this.selectUserGroups.val()); 
                 if(!this._is_modified){
 
-                    var inputs = this.element.find('input[data-field]');
-                    var fields = {};
-                    var that = this;
+                    let inputs = this.element.find('input[data-field]');
+                    let fields = {};
+                    let that = this;
                     $.each(inputs, function(i, ele){ // get mapped fields
                 
-                        var field = $(ele).attr('data-field');
-                        var value = $(ele).val();
+                        let field = $(ele).attr('data-field');
+                        let value = $(ele).val();
                         
                         if(that._current_cfg.params[field]!=value){
 
@@ -692,9 +691,9 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _onUserGroupChange: function(){
      
-        var usr_ID = this.selectUserGroups.val();   
+        let usr_ID = this.selectUserGroups.val();   
         
-        var that = this;
+        let that = this;
         
         if(usr_ID>=0){
             this.element.find('#service_params').show();
@@ -706,7 +705,7 @@ console.log( JSON.stringify(that.options.service_config) );
         
         if(this._isNewCfg && this._current_cfg.label){
 
-            var sName = 'select group or user';
+            let sName = 'select group or user';
             if(usr_ID>=0){
                 sName = window.hWin.HAPI4.SystemMgr.getUserNameLocal(usr_ID);    
             }
@@ -724,28 +723,28 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _reloadServiceList: function(){
       
-        var that = this;
+        let that = this;
 
         this._off(this.serviceList.find('span[data-service-id]'),'click');
         this.serviceList.empty(); // empty list
 
-        for(idx in this.options.service_config){ // display all assigned services
+        for(let idx in this.options.service_config){ // display all assigned services
 
-            var cfg = this.options.service_config[idx];
+            let cfg = this.options.service_config[idx];
 
             if(window.hWin.HEURIST4.util.isempty(cfg)){
                 continue;
             }
 
-            var name = cfg.label;
+            let name = cfg.label;
             
-            for(j in this._available_services){
+            for(let j in this._available_services){
                 if(cfg.service == this._available_services[j].service){
                     name = this._available_services[j].label;
                 }
             }
 
-            var s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
+            let s = name + ' <span class="ui-icon ui-icon-arrowthick-1-e"></span> ' 
                     + window.hWin.HAPI4.SystemMgr.getUserNameLocal(cfg.usr_ID);
             s = s + '<span data-service-id="'+idx+'" style="float:right;padding-top: 5px" class="ui-icon ui-icon-circle-b-close"></span>';
 
@@ -755,20 +754,20 @@ console.log( JSON.stringify(that.options.service_config) );
         
         this.serviceList.find('li')
         .on( 'mouseenter', function(event){ // service list hover event
-            var ele = $(event.target);
+            let ele = $(event.target);
             if(!ele.is('li')) ele = ele.parent();
             ele.addClass('ui-state-hover');
         })
         .on( 'mouseleave', function(event){
-            var ele = $(event.target);
+            let ele = $(event.target);
             if(!ele.is('li')){ 
                 ele.removeClass('ui-state-hover'); // ensure that this element does not have the hover state
                 ele = ele.parent();
             }
             ele.removeClass('ui-state-hover');
         });
-        
-        var eles = this.serviceList.find('span[data-service-id]');
+
+        let eles = this.serviceList.find('span[data-service-id]');
         this._on(eles,{'click':function(event)
         { // remove service button
             that._removeConfig($(event.target).attr('data-service-id'));
@@ -783,7 +782,7 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _reloadServiceList_item: function( service_id, s ){
         
-            var s_active = '';
+            let s_active = '';
             if(service_id=='new' || (this._current_cfg && this._current_cfg.service_id==service_id)){
                 s_active = ' ui-state-active';
             }
@@ -799,8 +798,8 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _applyConfig: function(){
 
-        var usr_ID = this.selectUserGroups.val();
-        var service_name = this.selectServiceType.val();
+        let usr_ID = this.selectUserGroups.val();
+        let service_name = this.selectServiceType.val();
 
         if(window.hWin.HEURIST4.util.isempty(this._current_cfg)){
 
@@ -809,16 +808,16 @@ console.log( JSON.stringify(that.options.service_config) );
 
         }else if(usr_ID>=0 && !window.hWin.HEURIST4.util.isempty(service_name)){ // check if a service and table have been selected
 
-            var that = this;
-            var is_field_assigned = false;
+            let that = this;
+            let is_field_assigned = false;
 
-            var inputs = this.element.find('input[data-field]');
-            var fields = {};
-            var that = this;
+            let inputs = this.element.find('input[data-field]');
+            let fields = {};
+            
             $.each(inputs, function(i, ele){ // get mapped fields
         
-                var field = $(ele).attr('data-field');
-                var value = $(ele).val();
+                let field = $(ele).attr('data-field');
+                //let value = $(ele).val();
                 
                 fields[field] = $(ele).val();
                 if(fields[field]!=''){
@@ -834,7 +833,7 @@ console.log( JSON.stringify(that.options.service_config) );
                     this.options.service_config = {};    
                 } 
 
-                var t_name = service_name + '_' + usr_ID;
+                let t_name = service_name + '_' + usr_ID;
 
                 // save changes
 
@@ -872,7 +871,7 @@ console.log( JSON.stringify(that.options.service_config) );
     //
     _removeConfig: function(service_id){
 
-        var is_del = false;
+        let is_del = false;
         if(window.hWin.HEURIST4.util.isempty(service_id)) { // check if a service was provided
             if(this._isNewCfg){
                 this._isNewCfg = false;

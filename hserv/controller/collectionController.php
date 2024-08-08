@@ -26,13 +26,13 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once dirname(__FILE__).'/../../configIni.php'; // read in the configuration file
+require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
 require_once dirname(__FILE__).'/../consts.php';
 
 header('Content-type: text/javascript');
 
 $db = @$_REQUEST['db'];
-if(!$db) exit;
+if(!$db) {exit;}
 
 if(strpos($db, HEURIST_DB_PREFIX)===0){
     $dbname_full = $db;

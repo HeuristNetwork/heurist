@@ -30,7 +30,7 @@ if( !$system->init(@$_REQUEST['db']) ){
 
     if(@$_REQUEST['a'] == 'minmax' ){
 
-            $response = recordSearchMinMax( $system, $params ); //recordSearch.php
+            $response = recordSearchMinMax( $system, $params );//recordSearch.php
 
     }else if(@$_REQUEST['a'] == 'pointers' ){
 
@@ -104,9 +104,9 @@ function getWhereRecordIds($params){
     
     if(@$params['recordset']){
         if(is_array($params['recordset'])){
-            $recids = $params['recordset'];  
+            $recids = $params['recordset'];
         }else{
-            $recids = json_decode($params['recordset'], true);    
+            $recids = json_decode($params['recordset'], true);
         }
         //$recIDs = explode(',',$recids['recIDs']);
         $recIDs = prepareIds($recids['recIDs']);
@@ -188,7 +188,7 @@ function getCrossTab( $params){
     
     global $system;
     
-    $mysqli = $system->get_mysqli();    
+    $mysqli = $system->get_mysqli();
 
     $dt_page = @$params['dt_page'];
     if($dt_page){
@@ -207,7 +207,7 @@ function getCrossTab( $params){
     $issum = (($mode=="avg" || $mode=="sum") && intval(@$params['agg_field'])>0);
 
     if ($issum){
-        $mode = ($mode=='avg'?'avg':'sum').'(cast(d3.dtl_Value as decimal(20,2)))';  //.$params['agg_field'].")";
+        $mode = ($mode=='avg'?'avg':'sum').'(cast(d3.dtl_Value as decimal(20,2)))';//.$params['agg_field'].")";
     }else{
         $mode = "count(*)";
     }

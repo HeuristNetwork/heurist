@@ -46,7 +46,7 @@ abstract class DbEntityBase
 
 
     //names of multilang fields from $config by rst_MultiLang=1
-    protected $multilangFields = array(); 
+    protected $multilangFields = array();
     
     /*
         fields structure description from json (used in validataion and access)
@@ -92,7 +92,7 @@ abstract class DbEntityBase
     public function __construct( $system, $data=null ) {
        $this->system = $system;
 
-       $this->init(); //recreate table is it does not exist
+       $this->init();//recreate table is it does not exist
 
        $this->entityName = lcfirst(substr(get_class($this),2));
        
@@ -126,7 +126,7 @@ abstract class DbEntityBase
         }*/
 
         if(@$this->data['entity']){
-            $this->entityName = lcfirst(@$this->data['entity']);    
+            $this->entityName = lcfirst(@$this->data['entity']);
         }
         
         
@@ -148,11 +148,11 @@ abstract class DbEntityBase
            
            if(!$this->isvalid()){
                 $this->system->addError(HEURIST_SYSTEM_FATAL, 
-                    "Configuration file $entity_file is invalid. Cannot init instance on server");     
+                    "Configuration file $entity_file is invalid. Cannot init instance on server");
            }
            
         }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');     
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hserv/entity/');
         }
     }
     
@@ -170,7 +170,7 @@ abstract class DbEntityBase
         $this->records = null;
         
         if(!$this->isvalid()){
-           $this->_readConfig();    
+           $this->_readConfig();
            //rename generic ID or recID to valid primary field name for particular entity
            if(@$this->data[$this->primaryField]==null){
                 if(@$this->data['ID']>0) {
@@ -219,7 +219,7 @@ abstract class DbEntityBase
         }
         
         if(@$this->config['locale']!=$locale){
-            $this->_readConfigLocale($locale);     
+            $this->_readConfigLocale($locale);
         }
         
         return $this->config;
@@ -237,7 +237,7 @@ abstract class DbEntityBase
         
         $res = false;
         
-        $folder = $action['folder']; //folder
+        $folder = $action['folder'];//folder
         $operation = $action['operation'];
         $content = @$action['content'];
         $filename = @$action['file'];
@@ -253,7 +253,7 @@ abstract class DbEntityBase
             $res = false;
         }else{
         
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':''); 
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':'');
         
         if($operation=='list'){
             
@@ -271,12 +271,12 @@ abstract class DbEntityBase
                             }
                         }
                     }
-                    $res = folderContent($dirs, 'cfg');    
+                    $res = folderContent($dirs, 'cfg');
                 }else{
                     $res = array('count'=>0,'reccount'=>0,'order'=>array());
                 }
             }else{
-                $res = folderContent($path, 'cfg');    
+                $res = folderContent($path, 'cfg');
             }
             
         }else if($operation=='get'){
@@ -290,7 +290,7 @@ abstract class DbEntityBase
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
                 $res = false;
             }else{
-                $res = file_get_contents($path.$filename);    
+                $res = file_get_contents($path.$filename);
             }
             
         }else if($operation=='put'){
@@ -326,7 +326,7 @@ abstract class DbEntityBase
                         $this->system->addError(HEURIST_ERROR, $sMsg.$swarn);
                         $res = false;
                     }else{
-                        $res = file_put_contents($path.$filename, $content);    
+                        $res = file_put_contents($path.$filename, $content);
                         if($res!==false){
                             $res = $filename;
                         }
@@ -378,7 +378,7 @@ abstract class DbEntityBase
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
                 $res = false;
             }else{
-                $res = unlink($path.$filename);    
+                $res = unlink($path.$filename);
             }
 
         }
@@ -418,15 +418,18 @@ abstract class DbEntityBase
                 // get list of files by extension
                 // put data into file
                 // load date from file 
-                $res = $this->files( $this->data ); 
+                $res = $this->files( $this->data );
                 
             }else if(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
             }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
                 //special and batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
-                if($res){
-                    $this->_cleanDbDefCache();
+                if($res &&
+                    !(@$this->data['get_translations'] ||
+                    in_array($this->config['entityName'],'defRecTypes','defDetailTypes','defTerms','defRecTypes')))
+                {
+                        $this->_cleanDbDefCache();    
                 }
             }else {
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
@@ -483,7 +486,7 @@ abstract class DbEntityBase
         }
         
         //array of inserted or updated record IDs
-        $results = array(); 
+        $results = array();
         
         //start transaction
         $mysqli = $this->system->get_mysqli();
@@ -500,11 +503,11 @@ abstract class DbEntityBase
             $fieldvalues = $record;
             $values = array();
             foreach($this->fields as $fieldname=>$field_config){
-                if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) continue;
+                if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) {continue;}
                 $values[$fieldname] = $record[$fieldname];
                 
                 /*if(@$field_config['dty_Role']=='primary'){
-                    $primary_field_type = $field_config['dty_Type']; 
+                    $primary_field_type = $field_config['dty_Type'];
                 }*/
             }
 
@@ -529,7 +532,7 @@ abstract class DbEntityBase
                     //rollback
                     if($this->need_transaction){
                         $mysqli->rollback();
-                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                     }
                     $this->system->addError(HEURIST_INVALID_REQUEST, 
                         'Cannot save data in table '.$this->config['entityName'], $ret);
@@ -578,7 +581,7 @@ abstract class DbEntityBase
         if($this->need_transaction){
             //commit
             $mysqli->commit();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
             
             $this->_cleanDbDefCache();
         }
@@ -610,7 +613,7 @@ abstract class DbEntityBase
         if(count($this->recordIDs)>1){
             $recids_compare = ' in ('.implode(',', $this->recordIDs).')';
         }else{
-            $recids_compare = ' = '.$this->recordIDs[0];    
+            $recids_compare = ' = '.$this->recordIDs[0];
         }
         
         
@@ -704,16 +707,16 @@ abstract class DbEntityBase
     //
     protected function _validateValues(){
         
-        $fieldvalues = $this->data['fields'];  //current record
+        $fieldvalues = $this->data['fields'];//current record
         
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') continue;
+            if(@$field_config['dty_Role']=='virtual') {continue;}
                 
             $value = @$fieldvalues[$fieldname];
             
             //ulf_MimeExt is the only nonnumeric resource
             if(@$field_config['dty_Type']=='resource' && $fieldname!='ulf_MimeExt'){ 
-                if(intval($value)<1) $this->data['fields'][$fieldname] = null;
+                if(intval($value)<1) {$this->data['fields'][$fieldname] = null;}
             }
         }
         
@@ -733,16 +736,16 @@ abstract class DbEntityBase
         }else if (substr($table_prefix, -1) !== '_') {
             $table_prefix = $table_prefix.'_';
         }
-        $rec_ID = intval(@$fieldvalues[$this->primaryField]); // $table_prefix.'ID'
+        $rec_ID = intval(@$fieldvalues[$this->primaryField]);// $table_prefix.'ID'
         $isinsert = ($rec_ID<1);
             
         foreach($this->fields as $fieldname=>$field_config){
-            if(@$field_config['dty_Role']=='virtual') continue;
+            if(@$field_config['dty_Role']=='virtual') {continue;}
             
             if(array_key_exists($fieldname, $fieldvalues)){
-                $value = $fieldvalues[$fieldname];    
+                $value = $fieldvalues[$fieldname];
             }else{
-                if(!$isinsert) continue;
+                if(!$isinsert) {continue;}
                 $value = null;
             }
             
@@ -811,7 +814,7 @@ abstract class DbEntityBase
                 
                 $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
                 if($fld_loc && @$fld_loc['groupHeader']){
-                    $fields[$idx]['groupHeader'] = $fld_loc['groupHeader'];    
+                    $fields[$idx]['groupHeader'] = $fld_loc['groupHeader'];
                 }
                 
                 $this->_fieldsSetLocale($fields[$idx]['children'], $fields_locale);
@@ -820,10 +823,12 @@ abstract class DbEntityBase
                 
                 $fld_loc = $this->_getFieldByID($field['dtID'], $fields_locale);
                 if($fld_loc && @$fld_loc['dtFields']){
-                    if(@$fld_loc['dtFields']['rst_DisplayName'])
-                        $fields[$idx]['dtFields']['rst_DisplayName'] = $fld_loc['dtFields']['rst_DisplayName'];    
-                    if(@$fld_loc['dtFields']['rst_DisplayHelpText'])
-                        $fields[$idx]['dtFields']['rst_DisplayHelpText'] = $fld_loc['dtFields']['rst_DisplayHelpText'];    
+                    if(@$fld_loc['dtFields']['rst_DisplayName']){
+                        $fields[$idx]['dtFields']['rst_DisplayName'] = $fld_loc['dtFields']['rst_DisplayName'];
+                    }
+                    if(@$fld_loc['dtFields']['rst_DisplayHelpText']){
+                        $fields[$idx]['dtFields']['rst_DisplayHelpText'] = $fld_loc['dtFields']['rst_DisplayHelpText'];
+                    }
                 }
                 
                 
@@ -879,16 +884,16 @@ abstract class DbEntityBase
         }
         $lv = strlen($version);
         
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'; //destination
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';//destination
         
         if(strpos($tempfile,'~')===0){  
             //temp file is in the same folder as destination
             
             $directory = new \RecursiveDirectoryIterator($path);
-            $iterator = new \RecursiveIteratorIterator($directory);        
+            $iterator = new \RecursiveIteratorIterator($directory);
             
             foreach ($iterator as $filepath => $info) {  //rec. iteration need to copy all versions (thumb and full img)
-                  if(!$info->isFile()) continue;
+                  if(!$info->isFile()) {continue;}
                   
                   $filename = $info->getFilename();
                   $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
@@ -950,11 +955,11 @@ abstract class DbEntityBase
         
         $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
 
-        $directory = new \DirectoryIterator($path);  //RecursiveDirectoryIterator
-        $iterator = new \IteratorIterator($directory);  //Recursive      
+        $directory = new \DirectoryIterator($path);//RecursiveDirectoryIterator
+        $iterator = new \IteratorIterator($directory);//Recursive      
         
         foreach ($iterator as $filepath => $info) {
-              if(!$info->isFile()) continue;
+              if(!$info->isFile()) {continue;}
               
               $filename = $info->getFilename();
               $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
@@ -982,12 +987,12 @@ abstract class DbEntityBase
                 
                 $db_name = $recID;
                 if(strpos($recID,'hdb_')===0){
-                    $db_name = substr($recID,4);    
+                    $db_name = substr($recID,4);
                 }
                 $rec_id = 1;    
-                $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
+                $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';
             }else{
-                if($db_name==null) $db_name = HEURIST_DBNAME;
+                if($db_name==null) {$db_name = HEURIST_DBNAME;}
                 
                 $path = HEURIST_FILESTORE_ROOT.$db_name.'/entity/'.$entity_name.'/';
                 //$path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
@@ -996,9 +1001,9 @@ abstract class DbEntityBase
             if($recID>0){
         
                 if($version=='thumb' || $version=='thumbnail'){
-                    $filename = $path.'thumbnail/'.$recID.'.png'; 
+                    $filename = $path.'thumbnail/'.$recID.'.png';
                 }else if($version=='icon'){
-                    $filename = $path.'icon/'.$recID.'.png';    
+                    $filename = $path.'icon/'.$recID.'.png';
                 }else{
                     $filename = null;
                     $exts = $extension?array($extension):array('png','jpg','jpeg','jpe','jfif','gif');
@@ -1044,8 +1049,8 @@ abstract class DbEntityBase
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
             //number of keys equals to number of entries it means single record
             $this->records = array();
-            $this->records[0] = $this->data['fields']; 
-            //$this->recordIDs = $record[$this->primaryField];           
+            $this->records[0] = $this->data['fields'];
+            //$this->recordIDs = $record[$this->primaryField];
         }else{
              //this is 2dim array
             $this->records = $this->data['fields'];
@@ -1074,7 +1079,7 @@ abstract class DbEntityBase
                         if($lang!=null)
                         {
                             if(!@$this->translation[$idx]){
-                                $this->translation[$idx] = array();  
+                                $this->translation[$idx] = array();
                             } 
                             if(!@$this->translation[$idx][$fieldname]){
                                 $this->translation[$idx][$fieldname] = array();
@@ -1102,14 +1107,14 @@ abstract class DbEntityBase
     //
     public function search_title(){
 
-        $this->data['details'] = 'name'; 
+        $this->data['details'] = 'name';
 
-        $ret = $this->search(); 
+        $ret = $this->search();
         if($ret!==false){
             $res = array();
             foreach($ret['records'] as $record){
                 //$record[0]
-                $res[] = $record[1];    
+                $res[] = $record[1];
             }
             return $res;
         }else{
@@ -1130,7 +1135,7 @@ abstract class DbEntityBase
             if(!is_bool($res)){
                 $this->data = $res;
             }else{
-                if(!$res) return false;        
+                if(!$res) {return false;}        
             }        
 
             return true;        

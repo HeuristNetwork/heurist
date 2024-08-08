@@ -16,9 +16,9 @@
 */
 
 function hexportMenu( container ) {
-    var _className = "exportMenu",
-    _version   = "0.4",
-    dialog_options=null;
+    const _className = "exportMenu",
+    _version   = "0.4";
+    let dialog_options=null;
 
     function _init( container ){
 
@@ -86,11 +86,11 @@ function hexportMenu( container ) {
     function _initLinks(menu){
 
         $('.export-button').each(function(){
-            var ele = $(this);
+            let ele = $(this);
             
             //find url
-            var lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
-            var href = lnk.attr('href');
+            let lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
+            let href = lnk.attr('href');
             if(!window.hWin.HEURIST4.util.isempty(href)){
                 
                 if(href!='#'){
@@ -103,9 +103,9 @@ function hexportMenu( container ) {
                 
                 lnk.attr('href', href).on('click',
                     function(event){
-                        var save_as_file = true;
+                        let save_as_file = true;
                         
-                        var ele = $(event.target);
+                        let ele = $(event.target);
                         if(ele.is('span')){
                             save_as_file = false;
                             
@@ -115,7 +115,7 @@ function hexportMenu( container ) {
                             
                             ele = ele.parent();
                         }
-                        var action = ele.attr('data-action');
+                        let action = ele.attr('data-action');
                         if(action){
                             _menuActionHandler(event, action, ele.attr('data-logaction'), save_as_file);
                             return false;
@@ -142,11 +142,11 @@ function hexportMenu( container ) {
      
         menu.find('li[data-export-action]').on({click:function(event){
             
-            var ele = $(event.target);
+            let ele = $(event.target);
             if(!ele.is('li')){
                 ele = ele.parents('li');
             }
-            var action = ele.attr('data-export-action');
+            let action = ele.attr('data-export-action');
 
             _menuActionHandler(event, action, ele.attr('data-logaction'), true);
             
@@ -161,13 +161,13 @@ function hexportMenu( container ) {
     //    
     function _onPopupLink(event){
         
-        var action = $(event.target).attr('id');
+        let action = $(event.target).attr('id');
         
-        var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()},
+        let body = $(window.hWin.document).find('body');
+        let dim = {h:body.innerHeight(), w:body.innerWidth()},
         link = $(event.target);
 
-        var options = { title: link.html() };
+        let options = { title: link.html() };
 
         if (link.hasClass('small')){
             options.height=dim.h*0.6; options.width=dim.w*0.5;
@@ -190,11 +190,11 @@ function hexportMenu( container ) {
             options.width=dim.w*0.8;
         }
 
-        var url = link.attr('href');
+        let url = link.attr('href');
         
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
                 
-                var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+                let q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
                 if(!window.hWin.HEURIST4.util.isempty(q)) q = '&'+q;
                 if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
                     q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
@@ -222,7 +222,7 @@ function hexportMenu( container ) {
     // similar in resultListMenu
     //
     function isResultSetEmpty(){
-        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
+        let recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
             window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
             +'Please modify search/filter to return at least one result record.');
@@ -304,10 +304,10 @@ function hexportMenu( container ) {
         }
     
     
-        var q = "",
+        let q = "",
         layoutString,rtFilter,relFilter,ptrFilter;
         
-        var isEntireDb = false;
+        let isEntireDb = false;
         
         opts.isAll = (opts.isAll!==false);
         opts.multifile = (opts.multifile===true);
@@ -342,15 +342,16 @@ function hexportMenu( container ) {
 
         if(q!=''){
             
-            var script; 
-            var params = '';
-            if(true){
+            let script; 
+            let params = '';
+            const showOptionsDialog = true;
+            if(showOptionsDialog){
 
                 if(isEntireDb){
                     params =  'depth=0&linkmode=none';
                 }else {
                     if(opts.format!='iiif' && opts.questionResolved!==true){
-                        var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
 //+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
@@ -367,7 +368,7 @@ function hexportMenu( container ) {
                                 return;
                             }
                             
-                            var val = $expdlg.find('input[name="links"]:checked').val();
+                            let val = $expdlg.find('input[name="links"]:checked').val();
 
                             opts.linksMode = val;
                             opts.questionResolved=true; 
@@ -466,7 +467,7 @@ function hexportMenu( container ) {
             }
                 
 
-            var url = window.hWin.HAPI4.baseURL + script + 
+            let url = window.hWin.HAPI4.baseURL + script + 
             q + 
             "&a=1"+
             /*(layoutString ? "&" + layoutString : "") +
@@ -488,7 +489,7 @@ function hexportMenu( container ) {
     //
     function _exportKML(isAll, save_as_file){
 
-        var q = "";
+        let q = "";
         if(isAll){
 
             q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
@@ -509,7 +510,7 @@ function hexportMenu( container ) {
         }
 
         if(q!=''){
-            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            let url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
             if(save_as_file){
                 url = url + '&file=1';
             }
@@ -527,23 +528,23 @@ function hexportMenu( container ) {
     function _exportFeed(mode){
 
         if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-            var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+            let q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
 
             if(!window.hWin.HEURIST4.util.isempty(q)){
-                var w = window.hWin.HEURIST4.current_query_request.w;
+                let w = window.hWin.HEURIST4.current_query_request.w;
                 if(window.hWin.HEURIST4.util.isempty(w)) w = 'a';
                 if(mode=='rss') {
                     mode = '';
                 }else{
                     mode = '&feed='+mode;
                 }
-                var rules = '';
+                let rules = '';
                 if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
                     rules = '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
 
 
-                var url = window.hWin.HAPI4.baseURL + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
+                let url = window.hWin.HAPI4.baseURL + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
                 window.hWin.open(url, '_blank');
             }
         }
@@ -594,7 +595,7 @@ function hexportMenu( container ) {
     }
      
     //public members
-    var that = {
+    let that = {
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},

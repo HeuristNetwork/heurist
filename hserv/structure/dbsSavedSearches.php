@@ -78,10 +78,10 @@
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
 
-            //$groups = user_getWorkgroups($mysqli, $ugrID); 
+            //$groups = user_getWorkgroups($mysqli, $ugrID);
             //if( $groups && count($groups)>0){
             
-            $ugr_groups = $system->get_user_group_ids(null, true); //always get latest
+            $ugr_groups = $system->get_user_group_ids(null, true);//always get latest
             
             $current_User = $system->getCurrentUser();
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){
@@ -94,7 +94,7 @@
         }
         
         if(!$ugrID) {
-            $ugrID = '0,4'; //get saved searches for guest and websearches
+            $ugrID = '0,4';//get saved searches for guest and websearches
         }
         
         $ugrID = prepareIds($ugrID,true);
@@ -109,7 +109,7 @@
                 while ($row = $res->fetch_row()) {
                      $treedata = json_decode($row[0],true);
                      if($treedata!=null && is_array($treedata)){
-                        svsGetOrderFromTree($treedata, $order);    
+                        svsGetOrderFromTree($treedata, $order);
                      }
                      
                 }
@@ -132,7 +132,7 @@
             }
             $res->close();
             if($keep_order){
-                return array('order'=>$order, 'svs'=>$result);                
+                return array('order'=>$order, 'svs'=>$result);
             }else{
                 return $result;    
             }
@@ -167,7 +167,7 @@
     function svsCopy($system, $record){
         
         if (!(@$record['svs_ID']>0)){
-            $system->addError(HEURIST_INVALID_REQUEST, 'ID for saved search to be duplicated is not defined'); //for new 
+            $system->addError(HEURIST_INVALID_REQUEST, 'ID for saved search to be duplicated is not defined');//for new 
         }else{
             
             //refresh groups
@@ -185,12 +185,12 @@
                     'Cannot duplicate filter criteria. Current user must be member for group');
             }else{
                     //get new name
-                    $new_name = $row['svs_Name'].' (copy)'; //$mysqli->real_escape_string(
+                    $new_name = $row['svs_Name'].' (copy)';//$mysqli->real_escape_string(
             
                     $query = 'INSERT INTO `usrSavedSearches` '
                     .'(`svs_Name`,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL`)'
                     .' SELECT ?,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL` '
-                    .' FROM usrSavedSearches WHERE svs_ID = '.$record['svs_ID'];                    
+                    .' FROM usrSavedSearches WHERE svs_ID = '.$record['svs_ID'];
 
                     
                     $res= mysql__exec_param_query($mysqli, $query, array('s',$new_name));
@@ -220,9 +220,9 @@
     function svsSave($system, $record){
 
         if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
-            $system->addError(HEURIST_INVALID_REQUEST, 'Name not defined'); //for new 
+            $system->addError(HEURIST_INVALID_REQUEST, 'Name not defined');//for new 
         }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
-            $system->addError(HEURIST_INVALID_REQUEST, 'Query not defined'); //for new 
+            $system->addError(HEURIST_INVALID_REQUEST, 'Query not defined');//for new 
         }else{
             
             //refresh groups
@@ -240,7 +240,7 @@
                 }else if (@$record['svs_ID']>0){
                     $rec_IDs = array($record['svs_ID']);
                 }else{
-                    $rec_IDs = array(-1); //new   
+                    $rec_IDs = array(-1);//new   
                     $is_new = true;
                 }
                 
@@ -288,7 +288,7 @@
         }else{
             
             if(!$ugrID>0){
-                $ugrID = $system->get_user_id(); 
+                $ugrID = $system->get_user_id();
             }
 
             $rec_ids = prepareIds($rec_ids);
@@ -333,7 +333,7 @@
         $personal_data = array();
 
         $ugrID = $system->get_user_id();
-        $ugr_groups = $system->get_user_group_ids(null, true); //always get latest
+        $ugr_groups = $system->get_user_group_ids(null, true);//always get latest
         $lastID = null;
 
         foreach($groups as $id=>$treedata){
@@ -388,7 +388,7 @@
         $ugrID = $system->get_user_id();
 
         if($grpID!=null){
-            $groups = prepareIds($grpID, true);        
+            $groups = prepareIds($grpID, true);
         }else{
             //load personal treeviews - rules, my filters (all) and bookmarks
             $groups = $system->get_user_group_ids();

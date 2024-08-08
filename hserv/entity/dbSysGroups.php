@@ -23,7 +23,7 @@
 require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/../records/edit/recordModify.php'; //for recordDelete
+require_once dirname(__FILE__).'/../records/edit/recordModify.php';//for recordDelete
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 
@@ -58,17 +58,17 @@ class DbSysGroups extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('ugr_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('ugr_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         //find groups where this user is member or admin
         $pred = $this->searchMgr->getPredicate('ugl_UserID');
         if($pred!=null) {
 
                 $needRole = true;
-                $where2 = array();                                
+                $where2 = array();
                 array_push($where2, $pred);
                 $pred = $this->searchMgr->getPredicate('ugl_Role');
                 if($pred!=null) {
@@ -105,7 +105,7 @@ class DbSysGroups extends DbEntityBase
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Enabled';
             if($needRole) {
-                $this->data['details'] .= ',ugl_Role';   
+                $this->data['details'] .= ',ugl_Role';
             }
             $needCount = true;
             
@@ -215,7 +215,7 @@ class DbSysGroups extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
             $this->records[$idx]['ugr_Type'] = 'workgroup';
-            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s');//reset
             $this->records[$idx]['ugr_Password'] = 'PASSWORD NOT REQUIRED';
             $this->records[$idx]['ugr_eMail'] = 'EMAIL NOT SET FOR '.$this->records[$idx]['ugr_Name'];
             
@@ -266,7 +266,7 @@ class DbSysGroups extends DbEntityBase
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $admin_role);
                         
                         //$fname = HEURIST_FILESTORE_DIR.$this->system->get_user_id();
-                        //fileSave('X',$fname);  on save
+                        //fileSave('X',$fname); on save
                     }
                 }
             }
@@ -305,7 +305,7 @@ class DbSysGroups extends DbEntityBase
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
         if(is_array($rec_ids_to_delete) && count($rec_ids_to_delete)>0){
             $res = recordDelete($this->system, $rec_ids_to_delete, false);
-            if(@$res['status']!=HEURIST_OK) return false;
+            if(@$res['status']!=HEURIST_OK) {return false;}
         }
 
         $ret = true;
@@ -313,7 +313,7 @@ class DbSysGroups extends DbEntityBase
         //find affected users 
         $query = 'SELECT ugl_UserID FROM sysUsrGrpLinks'
             . ' WHERE ugl_GroupID in (' . implode(',', $this->recordIDs) . ')';
-        $affectedUserIds = mysql__select_list2($mysqli, $query);            
+        $affectedUserIds = mysql__select_list2($mysqli, $query);
         
         //remove from roles table
         $query = 'DELETE FROM sysUsrGrpLinks'
@@ -340,12 +340,18 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
             
-            //remove images for deleted groups
-            foreach($this->recordIDs as $grpID)  //affected group
-            {
-                $this->renameEntityImage('delete', intval($grpID));
+            if(is_array(@$affectedUserIds) && count($affectedUserIds)>0){
+                foreach($affectedUserIds as $usrID)  //affected users
+                {
+                    if($usrID!=$this->system->get_user_id()){
+                            $usrID = intval($usrID);
+                            $fname = $this->getEntityImagePath($usrID);
+                            if(file_exists($fname)){
+                                unlink($fname);
+                            }
+                    }
+                }
             }
-            
             //update user groups for current user
             //$this->system->updateSessionForUser( $this->system->get_user_id() );
             //@todo   $groups = reloadUserGroups(get_user_id());
@@ -353,7 +359,7 @@ class DbSysGroups extends DbEntityBase
         }else{
             $mysqli->rollback();
         }
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
     }
@@ -460,12 +466,12 @@ class DbSysGroups extends DbEntityBase
             foreach ($assignIDs as $usrID)
             if($usrID!=$this->system->get_user_id()){
                 $fname = HEURIST_FILESTORE_DIR.$usrID;
-                fileSave('X',$fname); //change role
+                fileSave('X',$fname);//change role
             }
             */
         }
               
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
         
         return $ret;
     }

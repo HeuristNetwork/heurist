@@ -38,7 +38,7 @@ class USystem {
         $host_params = array();
 
         $installDir = '';
-        $codeFolders = array('heurist','h6-alpha','h6-ao'); //need to cli and short url
+        $codeFolders = array('heurist','h6-alpha','h6-ao');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -51,9 +51,9 @@ class USystem {
             $isSecure = true;
 
             if($argv==null || !is_array($argv)){
-                $sDir = getcwd();  
+                $sDir = getcwd();
             }else{
-                $sDir = dirname(realpath($argv[0]));    
+                $sDir = dirname(realpath($argv[0]));
             }
 
 
@@ -111,11 +111,11 @@ class USystem {
             $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
             if(!$is_own_domain){
 
-            $rewrite_actions = 'website|web|hml|tpl|view|edit|adm'; //actions for redirection https://hist/heurist/[dbname]/web/
+            $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
 
             if(@$_SERVER["SCRIPT_NAME"] && 
                 (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
-                $_SERVER["SCRIPT_NAME"] .= '/';  //add last slash
+                $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
             }
 
             $matches = array();
@@ -125,11 +125,11 @@ class USystem {
             }else{
 
                 // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-                $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external'; // Upddate in 3 places if changed
+                $topdirs = 'admin|api|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external';// Upddate in 3 places if changed
 
-                $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
+                $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]);// remove "/top level dir" and everything that follows it.
                 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
-                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
+                    $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]);// strip away everything past the last slash "/index.php" if it's there
                 }
 
             }
@@ -147,7 +147,7 @@ class USystem {
                 $cntDir = count($iDir)-1;
                 for ($i=$cntDir; $i>=0; $i--){
                     if($iDir[$i]!='') {
-                        $iDir[$i] = 'heurist';    
+                        $iDir[$i] = 'heurist';
                         break;   
                     }
                 }
@@ -201,7 +201,7 @@ class USystem {
 
         if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){
             return 'It requires '.((int)($memoryNeeded/1024/1024)).
-            ' Mb.  Available '.((int)($mem_limit/1024/1024)).' Mb';           
+            ' Mb.  Available '.((int)($mem_limit/1024/1024)).' Mb';
         }else{
             return true;
         }
@@ -225,12 +225,13 @@ class USystem {
         }
 
         switch($last) {
-            case 'g':
-                $val *= 1024;
+            case 'g':  
+                $val *= 1073741824; break;
             case 'm':
-                $val *= 1024;
+                $val *= 1048576; break;
             case 'k':
                 $val *= 1024;
+            default;
         }
         //_fix_integer_overflow
         if ($val < 0) {
@@ -273,10 +274,10 @@ class USystem {
             // Check for version number
             preg_match("/Windows NT (\d+\.\d+)/i", $ua_string, $parts);
             if(count($parts) > 1){
-                if($parts[1] == 10.0){ $os .= " 10/11"; }
-                else if($parts[1] >= 6.4){ $os .= " 10"; }
-                else if($parts[1] >= 6.2){ $os .= " 8"; }
-                else if($parts[1] >= 6.1){ $os .= " 7"; }
+                if($parts[1] == 10.0){ $os .= " 10/11";}
+                else if($parts[1] >= 6.4){ $os .= " 10";}
+                else if($parts[1] >= 6.2){ $os .= " 8";}
+                else if($parts[1] >= 6.1){ $os .= " 7";}
             }
         }else if(preg_match("/CPU (iPhone )?OS/i", $ua_string)){
             $os = 'iOS';

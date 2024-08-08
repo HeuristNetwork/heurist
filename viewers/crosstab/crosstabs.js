@@ -23,6 +23,8 @@
 * @package     Heurist academic knowledge management system
 */
 
+/* global Chart */
+
 /*
 * Global variables
 */
@@ -40,30 +42,30 @@ var originalOutliers = [];
 */ 
 function CrosstabsAnalysis(_query, _query_domain) {
 
-    var _className = 'CrosstabsAnalysis';
+    const _className = 'CrosstabsAnalysis';
     
-    var _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
+    const _controllerURL = window.hWin.HAPI4.baseURL + 'viewers/crosstab/crosstabsController.php';
 
-    var MAX_FOR_AUTO_RETRIEVE = 6000;
+    const MAX_FOR_AUTO_RETRIEVE = 6000;
 
-    var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
+    let fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }
-    var records_resp;
-    var keepCount = 10;
-    var needServerRequest = true;
-    var suppressRetrieve = false;
-    var inProgress = false;
-    var query_main;
-    var query_domain;
+    let records_resp;
+    let keepCount = 10;
+    let needServerRequest = true;
+    let suppressRetrieve = false;
+    let inProgress = false;
+    let query_main;
+    let query_domain;
 
-    var $recTypeSelector;
+    let $recTypeSelector;
 
-    var _currentRecordset = null;
-    var _selectedRtyID = null;
+    let _currentRecordset = null;
+    let _selectedRtyID = null;
 
-    var configEntityWidget = null;
+    let configEntityWidget = null;
 
-    var _isPopupMode = false;
+    let _isPopupMode = false;
 
     function _init(_query, _query_domain)
     {
@@ -89,13 +91,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $('.showintervals')
         .on('click',function( event ) {
-            var $modal = determineModalType( $(this).attr('tt') );
+            let $modal = determineModalType( $(this).attr('tt') );
 
             $modal.modal('show');
         });
 
         //hide left panel(saved searches) and maximize analysis
-        //var _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+        //let _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
 
@@ -137,9 +139,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $recTypeSelector.hSelect("refresh");
         }
 
-        var allowedlist = ["enum", "integer", "float", "resource", "relationtype", "date"];//, "date", "freetext"]; //"resource",
+        let allowedlist = ["enum", "integer", "float", "resource", "relationtype", "date"];//, "date", "freetext"]; //"resource",
 
-        //var selObj = createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ');
+        //let selObj = createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ');
         //createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ');
 
@@ -147,7 +149,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .removeAttr("style")
                 .html('&nbsp;');
 
-        var selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ', null );
+        let selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ', null );
         window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ', null );
 
@@ -185,7 +187,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
      * return its value.
      */
     function determineModalType(name){
-        var modal = $('#'+name+'IntervalsModal');
+        let modal = $('#'+name+'IntervalsModal');
 
         return modal;
 
@@ -197,11 +199,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function showHideIntervals(name){
 
-        //var name = $(event.target).attr('id');
+        //let name = $(event.target).attr('id');
 
-        var ele = $('#'+name+'Intervals');
+        let ele = $('#'+name+'Intervals');
 
-        var isVisible = ele.is(':visible');
+        let isVisible = ele.is(':visible');
 
         if( isVisible ){
             ele.hide();
@@ -216,11 +218,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * remove all intervals for given type (page,col,row)
     */
     function clearIntervals(name){
-        var $headerModal = $('#'+name+'Header');
-        var $container = $('#'+name+'IntervalsBody');
-        var $tooltip = $('#'+name+'Tooltip')
-        var $editButton = $tooltip.find('button');
-        var $errorContainer = $('#errorContainer');
+        let $headerModal = $('#'+name+'Header');
+        let $container = $('#'+name+'IntervalsBody');
+        let $tooltip = $('#'+name+'Tooltip')
+        let $editButton = $tooltip.find('button');
+        let $errorContainer = $('#errorContainer');
 
         $headerModal.empty();
         $container.empty();
@@ -252,7 +254,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#aggSum').hide();
         $('#aggAvg').hide();
 
-        for(d=0;d<3;d++){
+        for(let d=0;d<3;d++){
             if(d==0) name = 'column'; 
             if(d==1) name = 'row';
             if(d==2) name = 'page';
@@ -266,7 +268,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3[name].type=="enum" || fields3[name].type=="resource" || fields3[name].type=="relationtype"){
                 if(fields3[name].intervals.length > 0){
                     renderIntervals(name, false);
-                    for(j=0;j<fields3[name].intervals.length;j++){
+                    for(let j=0;j<fields3[name].intervals.length;j++){
                         __addeditInterval( name, j, false);
                     }
                 }
@@ -296,7 +298,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(!name) name = 'column';
 
-        var detailid = fields[name];
+        let detailid = fields[name];
         $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(detailid);
 
         _resetIntervals_continue(name, detailid, false, function(){
@@ -320,8 +322,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function _resetIntervals(event){
         needServerRequest = true;
 
-        var detailid = event.target.value;
-        var name = $(event.target).attr('name');  //type
+        let detailid = event.target.value;
+        let name = $(event.target).attr('name');  //type
 
         _resetIntervals_continue(name, detailid, true);
     }
@@ -331,7 +333,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //
     function _resetIntervals_continue(name, detailid, notSaved, callback){
 
-        var $container = $('#'+name+'Intervals');
+        let $container = $('#'+name+'Intervals');
         $container.empty();
         fields3[name] = {field:0, fieldname:'', type:'', values:[], intervals:[], allownulls:false};
 
@@ -344,8 +346,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //get detail type
-        var detailtype = $Db.dty(detailid,'dty_Type');
-        var detailname = $Db.rst(_selectedRtyID, detailid, 'rst_DisplayName');
+        let detailtype = $Db.dty(detailid,'dty_Type');
+        let detailname = $Db.rst(_selectedRtyID, detailid, 'rst_DisplayName');
 
         $('#aggSum').hide();
         $('#aggAvg').hide();
@@ -363,14 +365,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#aggSum').show();
             $('#aggAvg').show();
 
-            var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
+            const request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
             window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var val0 = parseFloat(response.data.MIN);
-                        var valmax = parseFloat(response.data.MAX);
+                        let val0 = parseFloat(response.data.MIN);
+                        let valmax = parseFloat(response.data.MAX);
 
                         if(isNaN(val0) || isNaN(valmax)){
                             $container = clearIntervals(name);
@@ -396,7 +398,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else if(detailtype=="resource"){
 
             //get list of possible values for pointer detail type
-            var request = { a:'pointers', rt:_selectedRtyID , dt:detailid };
+            let request = { a:'pointers', rt:_selectedRtyID , dt:detailid };
 
             if(_currentRecordset!=null){
                 request['recordset'] = _currentRecordset;  //CSV
@@ -431,14 +433,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(detailtype=="date"){
             //get min and max for this detail in database
-            var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
+            const request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
             window.hWin.HEURIST4.util.sendRequest(_controllerURL, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var val0 = parseFloat(response.data.MIN);
-                        var valmax = parseFloat(response.data.MAX);
+                        let val0 = parseFloat(response.data.MIN);
+                        let valmax = parseFloat(response.data.MAX);
 
                         if(isNaN(val0) || isNaN(valmax)){
                             $container = clearIntervals(name);
@@ -487,20 +489,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 keepCount = 10;
             }
 
-            var val0 = fields3[name].values[0];
-            var valmax = fields3[name].values[1];
+            let val0 = fields3[name].values[0];
+            let valmax = fields3[name].values[1];
             fields3[name].intervals = [];
 
-            var delta = (valmax - val0)/count;
+            let delta = (valmax - val0)/count;
             if(fields3[name].type=="integer"){
                 delta = Math.round(delta);
                 if(Math.abs(delta)<1){
                     delta = delta<0?-1:1;
                 }
             }
-            var cnt = 0;
+            let cnt = 0;
             while (val0<valmax && cnt<count){
-                var val1 = (val0+delta>valmax)?valmax:val0+delta;
+                let val1 = (val0+delta>valmax)?valmax:val0+delta;
                 if(cnt==count-1 && val1!=valmax){
                     val1 = valmax;
                 }
@@ -512,27 +514,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(fields3[name].type=="resource"){
 
-            var pointers = fields3[name].values;
+            let pointers = fields3[name].values;
 
-            var mcnt = (count>0)?Math.min(pointers.length, count):pointers.length;
+            let mcnt = (count>0)?Math.min(pointers.length, count):pointers.length;
             fields3[name].intervals = [];
 
-            var i;
-            for (i=0; i<mcnt; i++){
+            for(let i=0; i<mcnt; i++){
                 fields3[name].intervals.push( {name:pointers[i].text, description:pointers[i].text, values:[ parseInt(pointers[i].id) ] });
             }
 
         }else if(fields3[name].type=="enum" || fields3[name].type=="relationtype"){
 
-            var vocab_id = $Db.dty(fields3[name].field, 'dty_JsonTermIDTree');
-            var termlist = $Db.trm_TreeData(vocab_id, 'select'); //{key: code: title:}
+            let vocab_id = $Db.dty(fields3[name].field, 'dty_JsonTermIDTree');
+            let termlist = $Db.trm_TreeData(vocab_id, 'select'); //{key: code: title:}
 
-            var mcnt = (count>0)?Math.min(termlist.length, count):termlist.length;
+            let mcnt = (count>0)?Math.min(termlist.length, count):termlist.length;
             fields3[name].values = [];
             fields3[name].intervals = [];
 
-            var i;
-            for (i=0; i<mcnt; i++){
+            for(let i=0; i<mcnt; i++){
                 fields3[name].values.push({text:termlist[i].title, id:termlist[i].key});
                 fields3[name].intervals.push( {name:termlist[i].title, description:termlist[i].title, values:[ termlist[i].key ] });
             }
@@ -548,20 +548,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 keepCount = 10;
             }
 
-            var val0 = fields3[name].values[0];
-            var valmax = fields3[name].values[1];
+            let val0 = fields3[name].values[0];
+            let valmax = fields3[name].values[1];
             fields3[name].intervals = [];
 
-            var delta = (valmax - val0)/count;
+            let delta = (valmax - val0)/count;
             if(fields3[name].type=="date"){
                 delta = Math.round(delta);
                 if(Math.abs(delta)<1){
                     delta = delta<0?-1:1;
                 }
             }
-            var cnt = 0;
+            let cnt = 0;
             while (val0<valmax && cnt<count){
-                var val1 = (val0+delta>valmax)?valmax:val0+delta;
+                let val1 = (val0+delta>valmax)?valmax:val0+delta;
                 if(cnt==count-1 && val1!=valmax){
                     val1 = valmax;
                 }
@@ -584,10 +584,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function renderIntervals(name, notSaved){
 
-        //var $container = $('#'+name+'Intervals');
-        var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
+        //let $container = $('#'+name+'Intervals');
+        let $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
         
-        var detailtype = fields3[name].type;
+        let detailtype = fields3[name].type;
 
         $modalDialogBody.empty();
 
@@ -613,7 +613,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
         if(fields3[name].values && fields3[name].values.length>0){
-            var totalVars = 0;  //Holds number of fields that have no style
+            let totalVars = 0;  //Holds number of fields that have no style
             //Remove previous error animation style
 
             $('#'+name+'_container').removeAttr('style');
@@ -640,16 +640,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype") {
 
-                var $rowDiv;        //First row within the modal.
-                var $leftColDiv;    //Left column of div 
-                var $rightColDiv;   //Right column of div
-                var $firstRowDiv;  
-                var $buttons;
-                var $bodyDiv;
-                var $addIntervalBtn;
-                var $btnDiv;
-                var $intervalHeadRow;
-                var $listDiv;
+                let $rowDiv;        //First row within the modal.
+                let $leftColDiv;    //Left column of div 
+                let $rightColDiv;   //Right column of div
+                let $firstRowDiv;  
+                let $buttons;
+                let $bodyDiv;
+                let $addIntervalBtn;
+                let $btnDiv;
+                let $intervalHeadRow;
+                let $listDiv;
 
                 $('#'+name+'Dialog').addClass('modal-xl');
                 $('#'+name+'Dialog').addClass('modal-dialog-width');
@@ -657,7 +657,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
                 //Creates entire element in modal
-                $intdiv = $(document.createElement('div'))
+                let $intdiv = $(document.createElement('div'))
                 .css({'padding':'0.4em'})
                 .attr('intid', 'b0' )
                 .addClass('container-fluid')
@@ -747,15 +747,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($intervalHeadRow);
 
                 
-                var idx;
-                var intervals = fields3[name].intervals;
+                let intervals = fields3[name].intervals;
 
                 if(notSaved){
                     $('#'+name+'IntCount').val(intervals.length)
 
-                    for (idx=0; idx<intervals.length; idx++){
+                    for (let idx=0; idx<intervals.length; idx++){
 
-                        var interval = intervals[idx];
+                        let interval = intervals[idx];
 
                         $intdiv = $(document.createElement('div'))
                         .addClass('intervalDiv list row pe-1 bg-light')
@@ -772,8 +771,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .css({'font-weight':'bold'} )
                         .dblclick(function(event){
                             //Collect the interval number of the clicked row
-                            var intervalElement = $(this).parent();
-                            var intervalPosition = intervalElement.attr('id').replace(name, '');
+                            let intervalElement = $(this).parent();
+                            let intervalPosition = intervalElement.attr('id').replace(name, '');
 
                             intervalPosition = parseInt(intervalPosition);
 
@@ -781,7 +780,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $(this).html('<input class="w-100" id="changeNameBox" value="'+fields3[name].intervals[intervalPosition].name+'">');
                             //When user clicks out of input box edit name
                             $('#changeNameBox').blur(function(){
-                                var nameChanged = $('#changeNameBox').val();
+                                let nameChanged = $('#changeNameBox').val();
                                 $(this).parent().html(nameChanged);
 
                                 fields3[name].intervals[intervalPosition].name = nameChanged;
@@ -791,11 +790,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .appendTo($intdiv);
 
                         if(intervals[idx].values.length > 1){
-                            var splitDescription = interval.description.split("+");
-                            var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+                            let splitDescription = interval.description.split("+");
+                            let listGroup = $('<ul class="list-group list-group-flush"></ul>');
                         
-                            for(x=0;x<(splitDescription.length-1); x++){
-                                var listItem = $('<li class="list-group-item p-0 bg-transparent">')
+                            for(let x=0;x<(splitDescription.length-1); x++){
+                                let listItem = $('<li class="list-group-item p-0 bg-transparent">')
                                 .html(splitDescription[x])
                                 .appendTo(listGroup);
                             }
@@ -813,7 +812,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
 
                         /*
-                        var editbuttons = '<div class="saved-search-edit">'+
+                        let editbuttons = '<div class="saved-search-edit">'+
                         '<img title="edit" src="' +window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif" '+
                         'onclick="{top.HEURIST.search.savedSearchEdit('+sid+');}">';
                         editbuttons += '<img  title="delete" src="'+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif" '+
@@ -873,7 +872,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .addClass('recordIcons')
                     .on('change',function(){
                         //Unchecks selectall checkbox if a value is unchecked.
-                        var checked = this.checked;
+                        let checked = this.checked;
                         //selects checkbox which are not disabled in edit mode
                         $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
                             this.checked = checked;
@@ -887,12 +886,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .appendTo($intdiv);
 
                     //Creates value checkboxes
-                    var i, j,
-                    termlist = fields3[name].values; //all terms or pointers
-                    for(i=0; i<termlist.length; i++)
+                    let termlist = fields3[name].values; //all terms or pointers
+                    for(let i=0; i<termlist.length; i++)
                     {
-                        var notused = true, isAllocated = false;
-                        /*for(j=0; j<intvalues.length; j++){
+                        let notused = true, isAllocated = false;
+                        /*for(let j=0; j<intvalues.length; j++){
                             if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
                                 if(idx==j){
                                     itself = true;  //itself
@@ -905,9 +903,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         */
 
                         //Check to see if the fields have already been allocated
-                        for(j=0;j<intervals.length;j++){
+                        for(let j=0;j<intervals.length;j++){
                             if(intervals[j].values.length > 1){
-                                for(k=0;k<intervals[j].values.length;k++){
+                                for(let k=0;k<intervals[j].values.length;k++){
                                     if(termlist[i].id == intervals[j].values[k]){
                                         isAllocated = true;
                                         break;
@@ -921,7 +919,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         if(notused){
 
-                            $intdiv = $(document.createElement('div'))
+                            let $intdiv = $(document.createElement('div'))
                             .addClass('intervalDiv list p-1 row')
                             .attr('intid', i )
                             .appendTo($leftColDiv);
@@ -960,12 +958,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         //Add arrows to fields that are already allocated (original values)
                         if(isAllocated){
-                            var $removeButton = $('<button></button>')
+                            let $removeButton = $('<button></button>')
                             .addClass('btn btn-outline-primary w-100 p-1')
                             .attr('valueid',termlist[i].id)
                             .on('click',function(){
                                 //Get the name of the value clicked to remove from group interval
-                                var clicked = $(this).attr('valueid');
+                                let clicked = $(this).attr('valueid');
 
                                 //Find checkbox with same valueid
                                 $('input[termid='+ clicked+']')
@@ -980,7 +978,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 //Remove div containing field.
                                 $(this).parents('div.list').remove();
                                 //Remove interval from rendered field.
-                                var index = findPositionInArray(name, parseInt(clicked))
+                                let index = findPositionInArray(name, parseInt(clicked))
                                 removeInterval(name, index,-1);
                             });
 
@@ -999,16 +997,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             }
             else if(detailtype=="float" || detailtype=="integer" || detailtype=="date"){
-                var $entireDiv;
-                var $resetRow;
-                var $resetRowBody;
-                var $roundingDiv;
-                var $roundingRowBody;
-                var $intervalsDiv;
-                var $intervalColumn;
-                var selectBox;
+                let $entireDiv;
+                let $resetRow;
+                let $resetRowBody;
+                let $roundingDiv;
+                let $roundingRowBody;
+                let $intervalsDiv;
+                let $intervalColumn;
+                let selectBox;
                 
-                var decimalPlaces = [0,1,2,3];
+                let decimalPlaces = [0,1,2,3];
 
                 //Change size of modal to accommodate and remove white space. These fields are not large.
                 $('#'+name+'Dialog').removeClass('modal-xl');
@@ -1018,7 +1016,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     + ' (Range: '+fields3[name].values[0]+' - ' +fields3[name].values[1]+')');
 
                 //Creates entire element in modal
-                $intdiv = $(document.createElement('div'))
+                let $intdiv = $(document.createElement('div'))
                 .css({'padding':'0.4em'})
                 .attr('intid', 'b0' )
                 .addClass('container-fluid')
@@ -1034,7 +1032,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($entireDiv);
                 
                 $resetRowBody = '<div class="row">'+
-                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Reset Intervals:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
+                    '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Bucket count:</label></div><div class="col-sm col-xs-12"><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></input></div></div></div>'+
                     '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (from):</label></div><div class="col-sm col-xs-12"><input id="minOutlier'+name+'" size="6" value="'+minMax[0]+'"></input></div></div></div>'+
                     '<div class="col-12 mb-2"><div class="row"><div class="col-sm-3 col-xs-12"><label>Range (to):</label></div><div class="col-sm col-xs-12"><input id="maxOutlier'+name+'" size="6" value="'+minMax[1]+'"></input></div></div></div>' +
                     '<div class="col-12 mb-2"><button class="btn btn-success w-100" id="numericApply"><i class="ui-icon ui-icon-circle-check"></i>Apply</button></div>' +
@@ -1044,10 +1042,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 
                 //Add click function to apply button.
                 $($resetRow).find('#numericApply').on('click',function(event){
-                    var isMinWithin = (parseInt($('#minOutlier'+name).val()) >= fields3[name].values[0] && parseInt($('#minOutlier'+name).val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
-                    var isMaxWithin = (parseInt($('#maxOutlier'+name).val()) <= fields3[name].values[1] && parseInt($('#maxOutlier'+name).val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
-                    var isMaxGreater = (parseInt($('#maxOutlier'+name).val()) < parseInt($('#minOutlier'+name).val())) ? true : false;
-                    var isMinGreater = (parseInt($('#minOutlier'+name).val()) > parseInt($('#maxOutlier'+name).val())) ? true : false;
+                    let isMinWithin = (parseInt($('#minOutlier'+name).val()) >= fields3[name].values[0] && parseInt($('#minOutlier'+name).val()) <= fields3[name].values[1]) ? true : false;    //If min within range.
+                    let isMaxWithin = (parseInt($('#maxOutlier'+name).val()) <= fields3[name].values[1] && parseInt($('#maxOutlier'+name).val()) >= fields3[name].values[0]) ? true : false;    //If man within range.
+                    let isMaxGreater = (parseInt($('#maxOutlier'+name).val()) < parseInt($('#minOutlier'+name).val())) ? true : false;
+                    let isMinGreater = (parseInt($('#minOutlier'+name).val()) > parseInt($('#maxOutlier'+name).val())) ? true : false;
 
                     if(isMinWithin && isMaxWithin && !isMaxGreater && !isMinGreater){
                         minMax[0] = $('#minOutlier'+name).val();
@@ -1055,7 +1053,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         calculateIntervals(name, parseInt($('#'+name+'IntCount').val()), true );
                     }
                     else{
-                        var errorMessage = "When entering the range of intervals to apply to a dataset, the from and to values must be between the range above."
+                        let errorMessage = "When entering the range of intervals to apply to a dataset, "
+                        + `the from and to values must be between the range ${fields3[name].values[0]} to ${fields3[name].values[1]}.`
                         + " The from value must also not exceed the to value and vice versa.";
 
                         createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
@@ -1082,7 +1081,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $($roundingRowBody).appendTo($roundingDiv);
 
                     //Append rounding numbers in select box
-                    for(j=0;j<decimalPlaces.length;j++){
+                    for(let j=0;j<decimalPlaces.length;j++){
                         selectBox = $roundingDiv.find('#roundingSelect');
 
                         //Make 1 decimal place default.
@@ -1095,7 +1094,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     selectBox.on('change',function(){
                         changeIntervalDecimal(name,$(this).val());
-                        var changedIntervals = fields3[name].intervals
+                        let changedIntervals = fields3[name].intervals
                         generateNumericIntervalsRows(name, changedIntervals, $intervalColumn, $(this).val())
                     });
                 }
@@ -1112,7 +1111,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($intervalsDiv);
 
                 //Create number rows of intervals
-                var idx;
                 //Create deep copy of object
                 intervalsNumeric = $.extend(true,{},fields3[name].intervals);
                 
@@ -1136,10 +1134,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         updateDescriptionName(name, int, decimalPlace);
         htmlElement.empty();
 
-        for(i=0;i<int.length;i++){
+        for(let i=0;i<int.length;i++){
 
-            var isOutlierMin = ((int[i].values[0] < Number($('#minOutlier'+name).val())) && ((int[i].values[1] < Number($('#minOutlier'+name).val())) || !(int[i].values[1] < Number($('#minOutlier').val())))) ? true : false;
-            var isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier'+name).val())) && ((int[i].values[0] > Number($('#maxOutlier'+name).val())) || !(int[i].values[0] > Number($('#maxOutlier').val())))) ? true : false;
+            let isOutlierMin = ((int[i].values[0] < Number($('#minOutlier'+name).val())) && ((int[i].values[1] < Number($('#minOutlier'+name).val())) || !(int[i].values[1] < Number($('#minOutlier').val())))) ? true : false;
+            let isOutlierMax = ((int[i].values[1] > Number($('#maxOutlier'+name).val())) && ((int[i].values[0] > Number($('#maxOutlier'+name).val())) || !(int[i].values[0] > Number($('#maxOutlier').val())))) ? true : false;
 
             if(!isOutlierMin && !isOutlierMax){
                 if((int[i].values[0] < Number($('#maxOutlier'+name).val())) && int[i].values[1] > Number($('#maxOutlier'+name).val())){
@@ -1148,8 +1146,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[i].values[1].toFixed(decimalPlace);
                 }
                 //Create the row div.
-                var $intRows = $(document.createElement('div'));
-                var betweenText = (fields3[name].type == 'date') ? 'to' : 'to <';
+                let $intRows = $(document.createElement('div'));
+                let betweenText = (fields3[name].type == 'date') ? 'to' : 'to <';
 
                 $intRows.addClass('row text-center pb-1')
                 .attr('id',name+i)
@@ -1161,27 +1159,27 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 $('<div class="col-4 pointer">').html(int[i].values[1].toFixed(decimalPlace))
                 .dblclick(function(){
-                    var intervalId = parseInt($(this).parent().attr('id').replace(name,''));
-                    var intervalValue = fields3[name].intervals[intervalId].values[1];
+                    let intervalId = parseInt($(this).parent().attr('id').replace(name,''));
+                    let intervalValue = fields3[name].intervals[intervalId].values[1];
 
                     $(this).html('<input type="number" class="w-100" id="changeValueBox" value="'+intervalValue+'">');
                     //When user clicks out of input box change the intervals value min and max
                     $('#changeValueBox').blur(function(){                    
                         //Change the max value for the intervals based on what the user has entered.
-                        for(k=0;k<fields3[name].intervals.length;k++){
+                        for(let k=0;k<fields3[name].intervals.length;k++){
                             if(k < intervalId){
                                 continue;
                             }
                             else{
-                                var newNumber = Number($('#changeValueBox').val());
+                                let newNumber = Number($('#changeValueBox').val());
 
                                 if((newNumber % 1) != 0 && fields3[name].type == 'date'){
-                                    var errorMessage = 'Cannot add decimal points to dates';
+                                    const errorMessage = 'Cannot add decimal points to dates';
                                     createErrorMessage($('#'+name+'IntervalsBody'), errorMessage);
                                     break;
                                 }
 
-                                var intervalK = (fields3[name].intervals.length == 1) ? 0 : (k-1);
+                                let intervalK = (fields3[name].intervals.length == 1) ? 0 : (k-1);
 
                                 if(intervalK == -1){
                                     intervalK = 0;
@@ -1206,12 +1204,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                     }
                                 }else if((newNumber < fields3[name].intervals[k].values[0]) && (newNumber <= fields3[name].values[1]) && newNumber >= fields3[name].intervals[intervalK].values[1]){
                                     fields3[name].intervals[k].values[0] = newNumber;
-                                    alreadyChanged = true;
+                                    //alreadyChanged = true;
                                     break;
                                 }
                                 else{
-                                    var errorMessage;
-                                    var text = (fields3[name].type == 'date') ? 'Date' : 'Number';
+                                    let errorMessage;
+                                    let text = (fields3[name].type == 'date') ? 'Date' : 'Number';
                                     if((newNumber > fields3[name].values[1]) && (newNumber >= fields3[name].intervals[k].values[0])){
                                         errorMessage = text+' cannot be greater than the max range.'
                                     }
@@ -1237,13 +1235,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($intRows);
             }
             else{
+                let clickedMinOutlier = false;
+                let clickedMaxOutlier = false;
                 if(isOutlierMin){
-                    var clickedMinOutlier = false;
-                    var clickedMaxOutlier = false;
                     //Creates separate div for outliers min
-                    var outlierNumber = Number($('#minOutlier'+name).val());
+                    let outlierNumber = Number($('#minOutlier'+name).val());
                     //Change array to incorporate outliers for min
-                    for(t=0;t<fields3[name].intervals.length;t++){
+                    for(let t=0;t<fields3[name].intervals.length;t++){
                         if(t==0){
                             fields3[name].intervals[t].values[0] = fields3[name].values[0];
                             fields3[name].intervals[t].values[1] = outlierNumber;
@@ -1274,8 +1272,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             continue;
                         }
                     }
-                    var $intRows = $(document.createElement('div'));
-                    var lessThanPrior = (fields3[name].type == 'date') ? 'Prior to ' : '<';
+                    let $intRows = $(document.createElement('div'));
+                    let lessThanPrior = (fields3[name].type == 'date') ? 'Prior to ' : '<';
 
                     $intRows.addClass('row text-center pb-1')
                     .appendTo(htmlElement);
@@ -1308,13 +1306,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
                 else if(isOutlierMax){
                     //Creates separate div for outliers min
-                    var outlierNumber = Number($('#maxOutlier'+name).val());
+                    let outlierNumber = Number($('#maxOutlier'+name).val());
                     fields3[name].intervals[i].values[1] = outlierNumber;
                     fields3[name].intervals[i].name = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
                     fields3[name].intervals[i].description = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
                     
                     //Change array to incorporate outliers for min
-                    for(t=0;t<fields3[name].intervals.length;t++){
+                    for(let t=0;t<fields3[name].intervals.length;t++){
                         if(t== fields3[name].intervals.length-1){
                             fields3[name].intervals[t].values[1] = fields3[name].values[1];
                             fields3[name].intervals[t].values[0] = outlierNumber;
@@ -1328,8 +1326,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             t-=1;
                         }
                     }
-                    var $intRows = $(document.createElement('div'));
-                    var greaterThanPrior = (fields3[name].type == 'date') ? 'After ' : '>';
+                    let $intRows = $(document.createElement('div'));
+                    let greaterThanPrior = (fields3[name].type == 'date') ? 'After ' : '>';
 
                     $intRows.addClass('row text-center pt-1')
                     .appendTo(htmlElement);
@@ -1372,8 +1370,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function updateDescriptionName(name, ints, decimalPlace){
 
-        for(i=0;i<ints.length;i++){
-            var intervalName = ints[i].values[0].toFixed(decimalPlace) + ' ~ ' + ints[i].values[1].toFixed(decimalPlace);
+        for(let i=0;i<ints.length;i++){
+            let intervalName = ints[i].values[0].toFixed(decimalPlace) + ' ~ ' + ints[i].values[1].toFixed(decimalPlace);
 
             fields3[name].intervals[i].name = intervalName;
             fields3[name].intervals[i].description = intervalName;
@@ -1391,10 +1389,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             fields3[name].intervals[groupidx].values.splice(idx,1);
 
             //Re-adjust description.
-            for(k=0;k<fields3[name].values.length;k++){
-                var string = (fields3[name].intervals[groupidx].values.length > 1) ? '+' : '';
+            for(let k=0;k<fields3[name].values.length;k++){
+                let string = (fields3[name].intervals[groupidx].values.length > 1) ? '+' : '';
                 
-                for(j=0;j<fields3[name].intervals[groupidx].values.length;j++){
+                for(let j=0;j<fields3[name].intervals[groupidx].values.length;j++){
                     if(parseInt(fields3[name].values[k].id) == fields3[name].intervals[groupidx].values[j]){
                         fields3[name].intervals[groupidx].description = fields3[name].values[k].text + string
                     }
@@ -1402,7 +1400,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             //Re-adjust value ids for each div.
-            var currentValues = $('#'+name+groupidx).find('div.groupList > :first-child');
+            let currentValues = $('#'+name+groupidx).find('div.groupList > :first-child');
             currentValues.each(function(i,ele){
                 $(ele).attr('id', i);
             });
@@ -1410,7 +1408,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //If last value in interval remove entire value.
             if(fields3[name].intervals[groupidx].values.length == 0){
                 fields3[name].intervals.splice(groupidx,1);
-                isIntervalRemoved = true;   //Used to help keep track of the removed variable.
+                //isIntervalRemoved = true;   //Used to help keep track of the removed variable.
             }
         }
         else{
@@ -1419,7 +1417,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //Re-adjust rowids
-        var currentRows = $('#rightColDiv'+name+' > .list').not('#templateInterval');
+        let currentRows = $('#rightColDiv'+name+' > .list').not('#templateInterval');
         currentRows.each(function(i, ele){
             $(ele).attr('id', name+i);
         });
@@ -1429,11 +1427,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     //Find the position of the value within the stored array
     function findPositionInArray(name, detailID){
-        var idx;
+        let idx;
 
-        for(i=0;i<fields3[name].intervals.length;i++){
+        for(let i=0;i<fields3[name].intervals.length;i++){
             if(fields3[name].intervals[i].values.length > 1){
-                for(j=0;j<fields3[name].intervals[i].values.length;j++){
+                for(let j=0;j<fields3[name].intervals[i].values.length;j++){
                     if(fields3[name].intervals[i].values[j]==detailID){
                         idx = j;
                         break;
@@ -1456,9 +1454,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function editInterval( name, idx){
 
-        var $editedRow = $('#'+name+idx);
+        let $editedRow = $('#'+name+idx);
 
-        var $newInterval = $(document.createElement('div'))
+        let $newInterval = $(document.createElement('div'))
             .addClass('intervalDiv list row pe-1')
             .attr('id','templateInterval')
             .insertBefore($('#addIntervalDiv'+name));
@@ -1513,11 +1511,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function __addeditInterval( name, idx, notSaved){
 
         if(notSaved){
-            var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
-            var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+            let isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+            let isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
             //Generate error message to prevent user from submitting an empty interval
             if(isAllChecked || isNotChecked){
-                var errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
+                let errorMessage = 'This new interval cannot be empty. If all available values are used, click the blue arrow to make it available.'
                 $('#applyButton').popover({
                     container : 'body',
                     placement : 'bottom',
@@ -1541,7 +1539,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $('#applyButton').popover('hide');
             }
 
-            var detailtype = fields3[name].type;
+            let detailtype = fields3[name].type;
 
             if(idx<0){
                 fields3[name].intervals.push( {name:'', description:'', values:[] });
@@ -1553,10 +1551,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             fields3[name].intervals[idx].name = "newInterval";
 
             if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-                var sels = $('input[name='+name+'Options]').filter(function(){
+                let sels = $('input[name='+name+'Options]').filter(function(){
                     return !this.disabled && this.checked;
                 });
-                var isMulti = (sels.length > 1) ? '+' : ''
+                let isMulti = (sels.length > 1) ? '+' : ''
                 $.each(sels, function(i, ele){
                     fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
                     fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
@@ -1575,9 +1573,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //Render new interval
-        var interval = fields3[name].intervals[idx];
+        let interval = fields3[name].intervals[idx];
 
-        $intdiv = $(document.createElement('div'))
+        let $intdiv = $(document.createElement('div'))
             .addClass('intervalDiv list row pe-1')
             .attr('id', name+idx )
             .insertBefore($('#addIntervalDiv'+name));
@@ -1592,15 +1590,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .css({'font-weight':'bold'} )
             .dblclick(function(event){
                 //Collect the interval number of the clicked row
-                var intervalElement = $(this).parent();
-                var intervalPosition = intervalElement.attr('id').replace(name, '');
+                let intervalElement = $(this).parent();
+                let intervalPosition = intervalElement.attr('id').replace(name, '');
 
                 intervalPosition = parseInt(intervalPosition);
 
                 $(this).html('<input class="w-100" id="changeNameBox" value="'+interval.name+'">');
                 //When user clicks out of input box edit name
                 $('#changeNameBox').blur(function(){
-                    var nameChanged = $('#changeNameBox').val();
+                    let nameChanged = $('#changeNameBox').val();
                     $(this).parent().html(nameChanged);
 
                     fields3[name].intervals[intervalPosition].name = nameChanged;
@@ -1619,11 +1617,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .append('<i class="ui-icon ui-icon-trash"></i>')
                     .on('click',function(){
                         //Remove interval and uncheck checkboxes
-                        var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                        let interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
 
-                        for(s=0;s<fields3[name].intervals[interval].values.length;s++)
+                        for(let s=0;s<fields3[name].intervals[interval].values.length;s++)
                         {
-                            var clicked = fields3[name].intervals[interval].values[s];
+                            let clicked = fields3[name].intervals[interval].values[s];
 
                             //Find checkbox with same valueid
                             $('input[termid='+ clicked+']')
@@ -1643,13 +1641,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 )
                 .appendTo($intdiv);
 
-                var splitDescription = interval.description.split("+");
+                let splitDescription = interval.description.split("+");
 
-                var listGroup = $('<div class="col p-1 border-2 border-top border-secondary groupings">')
+                let listGroup = $('<div class="col p-1 border-2 border-top border-secondary groupings">')
                 .appendTo($intdiv);
             
-                for(x=0;x<(splitDescription.length-1); x++){
-                    var listItem = $('<div class="row p-1 w-100 bg-transparent groupList">')
+                for(let x=0;x<(splitDescription.length-1); x++){
+                    let listItem = $('<div class="row p-1 w-100 bg-transparent groupList">')
                     .append('<div class="col-2 p-1" id="'+x+'">')
                     .append('<div class="col p-1 border-bottom border-dark description">'+splitDescription[x]+'</div>')
                     .appendTo(listGroup);
@@ -1661,11 +1659,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .addClass("btn btn-outline-success w-100 p-1 applyToGroup")
                 .on('click',function(){
 
-                    var isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
-                    var isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
+                    let isAllChecked = ($('input[name='+name+'Options]:checked:disabled').length == $('input[name='+name+'Options]').length) ? true : false;
+                    let isNotChecked = ($('input[name='+name+'Options]:checked:not(:disabled)').length == 0) ? true : false;
                     //Generate error message to prevent user from submitting an empty interval
                     if(isAllChecked || isNotChecked){
-                        var errorMessage = 'All values have been assigned. If you would like to add a value to this group, please click the blue arrow to de-assign.'
+                        let errorMessage = 'All values have been assigned. If you would like to add a value to this group, please click the blue arrow to de-assign.'
                         $(this).popover({
                             container : 'body',
                             placement : 'bottom',
@@ -1690,16 +1688,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     }
 
                     //Add new value to group
-                    var interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
-                    var newValue = [];
-                    var newDescription = [];
-                    var numberValues = fields3[name].intervals[interval].values.length;
+                    let interval = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                    let newValue = [];
+                    let newDescription = [];
+                    let numberValues = fields3[name].intervals[interval].values.length;
                     //Find all checkboxes that have been clicked.
-                    var sels = $('input[name='+name+'Options]').filter(function(){
+                    let sels = $('input[name='+name+'Options]').filter(function(){
                         return !this.disabled && this.checked;
                     });
                     //Add to the existing array.
-                    var isMulti = (sels.length > 1) ? '+' : ''
+                    let isMulti = (sels.length > 1) ? '+' : ''
                     $.each(sels, function(i, ele){
                         fields3[name].intervals[interval].values.push( parseInt($(ele).attr('termid')) );
                         fields3[name].intervals[interval].description = fields3[name].intervals[interval].description + $(ele).attr('termname')+isMulti;
@@ -1712,7 +1710,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     listGroup = $(this).parents('div.list');
                     listGroup = listGroup.find('div.groupings');
                     //Add new layer to group interface.
-                    for(i=0;i<newDescription.length;i++){
+                    for(let i=0;i<newDescription.length;i++){
                         //Add description
                         $('<div class="row p-1 w-100 bg-transparent groupList">')
                         .append('<div class="col-2 p-1" id="'+numberValues+'">')
@@ -1720,12 +1718,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         .appendTo(listGroup);
 
                         //Append remove button
-                        var $removeButton = $('<button></button>')
+                        let $removeButton = $('<button></button>')
                         .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',newValue[i])
                         .on('click',function(){
                             //Get the name of the value clicked to remove from group interval
-                            var clicked = $(this).attr('valueid');
+                            let clicked = $(this).attr('valueid');
 
                             //Find checkbox with same valueid
                             $('input[termid='+ clicked+']')
@@ -1738,10 +1736,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
 
                             //Remove interval from rendered field.
-                            var index = findPositionInArray(name, parseInt(clicked))
-                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            let index = findPositionInArray(name, parseInt(clicked))
+                            let groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
                             
-                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+                            let singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
 
                             if(singleIndex != -1){
                                 if(fields3[name].intervals[groupIndex].values.length > 1){
@@ -1754,14 +1752,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                     * This is done before it is deleted within the array.
                                     * Find entire row.
                                     */  
-                                    var rowElement = $('#'+name+singleIndex);
+                                    let rowElement = $('#'+name+singleIndex);
                                     //Find the only list element left
-                                    var listElement = rowElement.find('div.groupList').children();
-                                    var button = listElement.find('button');
+                                    let listElement = rowElement.find('div.groupList').children();
+                                    let button = listElement.find('button');
                                     //append to front of div
                                     button.appendTo(rowElement.find('div.arrowDiv'));
 
-                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    let nameOfLastInterval = listElement.parent().find('div.description').html();
                                     //remove all elements within this div
                                     listElement = listElement.parents('div.groupings');
                                     listElement.empty();
@@ -1795,13 +1793,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $($intdiv.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
 
                 //Create Remove Buttons
-                for(i=0;i<interval.values.length;i++){
-                    var $removeButton = $('<button></button>')
+                for(let i=0;i<interval.values.length;i++){
+                    let $removeButton = $('<button></button>')
                         .addClass('btn btn-outline-primary w-100 p-0 py-1')
                         .attr('valueid',interval.values[i])
                         .on('click',function(){
                             //Get the name of the value clicked to remove from group interval
-                            var clicked = $(this).attr('valueid');
+                            let clicked = $(this).attr('valueid');
 
                             //Find checkbox with same valueid
                             $('input[termid='+ clicked+']')
@@ -1814,10 +1812,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             }
 
                             //Remove interval from rendered field.
-                            var index = findPositionInArray(name, parseInt(clicked))
-                            var groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
+                            let index = findPositionInArray(name, parseInt(clicked))
+                            let groupIndex = parseInt($(this).parents('div.list').attr('id').replace(name,''));
                             
-                            var singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
+                            let singleIndex = (fields3[name].intervals[groupIndex].values.length == 1) ? -1 : groupIndex;
 
                             if(singleIndex != -1){
                                 if(fields3[name].intervals[groupIndex].values.length > 1){
@@ -1830,14 +1828,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                     * This is done before it is deleted within the array.
                                     * Find entire row.
                                     */  
-                                    var rowElement = $('#'+name+singleIndex);
+                                    let rowElement = $('#'+name+singleIndex);
                                     //Find the only list element left
-                                    var listElement = rowElement.find('div.groupList').children();
-                                    var button = listElement.find('button');
+                                    let listElement = rowElement.find('div.groupList').children();
+                                    let button = listElement.find('button');
                                     //append to front of div
                                     button.appendTo(rowElement.find('div.arrowDiv'));
 
-                                    var nameOfLastInterval = listElement.parent().find('div.description').html();
+                                    let nameOfLastInterval = listElement.parent().find('div.description').html();
                                     //remove all elements within this div
                                     listElement = listElement.parents('div.groupings');
                                     listElement.empty();
@@ -1871,12 +1869,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($intdiv);
                 
                 //Add remove button if a single value is added
-                var $removeButton = $('<button></button>')
+                let $removeButton = $('<button></button>')
                     .addClass('btn btn-outline-primary w-100 p-1')
                     .attr('valueid',interval.values[0])
                     .on('click',function(){
                         //Get the name of the value clicked to remove from group interval
-                        var clicked = $(this).attr('valueid');
+                        let clicked = $(this).attr('valueid');
 
                         //Find checkbox with same valueid
                         $('input[termid='+ clicked+']')
@@ -1889,7 +1887,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
 
                         //Remove interval from rendered field.
-                        var index = findPositionInArray(name, parseInt(clicked))
+                        let index = findPositionInArray(name, parseInt(clicked))
                         removeInterval(name, index, -1);
                         //Remove div containing field.
                         $(this).parents('div.list').remove();
@@ -1921,7 +1919,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#alert').remove();
         }
 
-        var alert = document.createElement('div');
+        let alert = document.createElement('div');
             $(alert).addClass('alert alert-warning alert-dismissible fade show')
             .attr('role', 'alert')
             .attr('id','alert')
@@ -1991,9 +1989,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#pmessage").html('Requesting...');
             _setMode(1); //progress
 
-            var session_id = Math.round((new Date()).getTime()/1000);
+            let session_id = Math.round((new Date()).getTime()/1000);
 
-            var request = { a:'crosstab',
+            let request = { a:'crosstab',
                     rt:_selectedRtyID ,
                     dt_row:fields3.row.field,
                     dt_rowtype:fields3.row.type,
@@ -2006,7 +2004,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 request['w'] = query_domain;
             }
 
-            params = '';
+            let params = '';
 
             if(fields3.page.field>0){
 
@@ -2041,7 +2039,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 request['dt_coltype'] = fields3.column.type;
             }
 
-            var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
+            let aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
             if(aggregationMode!="count" && $('#cbAggField').val()){
 
                 request['agg_mode'] = aggregationMode;
@@ -2052,7 +2050,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             inProgress = true;
-            var to = setTimeout(function(){
+            let to = setTimeout(function(){
                 to = 0;
                 _setMode(0); //results
                 inProgress = false;
@@ -2073,13 +2071,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         needServerRequest = false;
                         records_resp = response.data; 
 
-                        var showBlanks = $('#rbShowBlanks').is(':checked');
-                        var rowVal = $('#cbRows').val();
-                        var colVal = $('#cbColumns').val();
-                        var hasData = false;
+                        let showBlanks = $('#rbShowBlanks').is(':checked');
+                        let rowVal = $('#cbRows').val();
+                        let colVal = $('#cbColumns').val();
+                        let hasData = false;
 
                         if(!showBlanks && !window.hWin.HEURIST4.util.isempty(colVal) && !window.hWin.HEURIST4.util.isempty(rowVal)){
-                            for(var i = 1; i < records_resp.length; i++){ // idx 0 does not contain any relevant data, for this
+                            for(let i = 1; i < records_resp.length; i++){ // idx 0 does not contain any relevant data, for this
                                 if(records_resp[i][0]!=null && records_resp[i][1]!=null){
                                     hasData = true;
                                     break;
@@ -2121,9 +2119,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //Change the decimal places within the array
     function changeIntervalDecimal(name, option){
         $.extend(true, fields3[name].intervals, intervalsNumeric);
-        for(i=0;i<fields3[name].intervals.length;i++){
-            for(j=0;j<fields3[name].intervals[i].values.length;j++){
-                var num = fields3[name].intervals[i].values[j].toFixed(parseInt(option));
+        for(let i=0;i<fields3[name].intervals.length;i++){
+            for(let j=0;j<fields3[name].intervals[i].values.length;j++){
+                let num = fields3[name].intervals[i].values[j].toFixed(parseInt(option));
                 fields3[name].intervals[i].values[j] = Number(num);
             }
         }
@@ -2146,10 +2144,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
 
-        var pages = fields3.page.intervals;
-        var plen = pages.length;
+        let pages = fields3.page.intervals;
+        let plen = pages.length;
 
-        $divres = $('#divres');
+        let $divres = $('#divres');
         $divres.hide();
         $divres.empty();
         
@@ -2159,9 +2157,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#btnPrint').show();
         }
 
-        var date = new Date();
-        var showZeroBlankText = "";
-        var topText = 'DB: '+window.hWin.HAPI4.database+ ', ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
+        let date = new Date();
+        let showZeroBlankText = "";
+        let topText = 'DB: '+window.hWin.HAPI4.database+ ', ' + (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear());
 
         $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
         $divres.append('<span style="padding-left: 20px;"> '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
@@ -2184,7 +2182,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             topText += ',Query string: q='+query_main+'&w='+query_domain;
         }
 
-        var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
+        let aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
         if(aggregationMode!="count"){
             aggregationMode = (aggregationMode=="avg")?"Average":"Sum";
             aggregationMode = aggregationMode + ' of '+$("#cbAggField option:selected").text();
@@ -2201,7 +2199,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //Type of value displayed (count, average, sum)
         
         if(fields3['page'].intervals.length <=0){
-            var tableTitle = 'Table Displaying ';
+            let tableTitle = 'Table Displaying ';
             if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length <= 0) tableTitle += fields3['row'].fieldname;
             if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length > 0) tableTitle += fields3['row'].fieldname + ' and ' + fields3['column'].fieldname;
             tableTitle += ' ' + aggregationMode;
@@ -2212,8 +2210,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $divres.append('<div id="titleDisplay" style="margin-top: 10px;"><h2 class="crosstab-page" style="display: inline-block;" id="tableHeader">'+tableTitle+'</h2>'
                     + '<button class="btn btn-warning ms-2" id="titleEdit"><span class="ui-button-icon ui-icon ui-icon-pencil" ></span></button></div>');
             
-            $('#titleSubmit').on('click',function(){
-                var title = $('#tableTitle').val();
+            $('#titleSubmit').on('click',function(event){
+                let title = $('#tableTitle').val();
 
                 if($('#tableTitle').val().length <=0 || String($('#tableTitle').val()).trim() == ''){
                     $('#tableHeader').html(tableTitle);
@@ -2241,11 +2239,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             doRenderPage('', records_resp);
         }else{
 
-            var i, idx, curpage_val, curr_interval_idx=-1, page_interval_idx=-1;
-            var records = [];
+            let i, idx, curpage_val, curr_interval_idx=-1, page_interval_idx=-1;
+            let records = [];
 
             //create output array, calculate totals
-            var rlen = records_resp.length;
+            let rlen = records_resp.length;
             for (idx=0; idx<rlen; idx++) {
                 if(idx){
 
@@ -2253,11 +2251,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     if(curpage_val!=records_resp[idx][3])
                     {
 
-                        var pval = records_resp[idx][3]; //page value
+                        let pval = records_resp[idx][3]; //page value
                         curpage_val = pval;
 
                         page_interval_idx = -1;
-                        for (i=0; i<plen; i++){
+                        for(let i=0; i<plen; i++){
                             if( fitToInterval( fields3.page.type, pages[i].values, pval, 'page' ) ){
                                 page_interval_idx = i;
                                 break;
@@ -2287,7 +2285,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //Create datatable
         $(document).ready(function(){
-            var $d_table = $(".resultsTable").DataTable({
+            let $d_table = $(".resultsTable").DataTable({
                 "paging" : false,
                 "info" : false,
                 dom:"Bfrtip",
@@ -2297,16 +2295,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         extend: 'csv',
                         className: 'exportButtons',
                         filename: function(){
-                            var title = (fields3['page'].intervals.length <=0) ? $('#tableHeader').html() : fields3['page'].fieldname;
+                            let title = (fields3['page'].intervals.length <=0) ? $('#tableHeader').html() : fields3['page'].fieldname;
                             return title;
                         },
                         customize: function(csv){
-                            var extendedRow = '';
+                            let extendedRow = '';
 
                             if(($('#rbShowPercentRow').is(':checked') && !($('#rbShowPercentColumn').is(':checked'))) || (!($('#rbShowPercentRow').is(':checked')) && $('#rbShowPercentColumn').is(':checked'))){
                                 $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
                                     function(index, element){
-                                        var text = $(element).text();
+                                        let text = $(element).text();
                                         if(index == 0){
                                             extendedRow += '\n\t';
                                         }
@@ -2319,7 +2317,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             if($('#rbShowPercentRow').is(':checked') && $('#rbShowPercentColumn').is(':checked')){
                                 $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
                                     function(index, element){
-                                        var text = $(element).text();
+                                        let text = $(element).text();
                                         if(index == 0){
                                             extendedRow += '\n\t';
                                         }
@@ -2344,10 +2342,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             if(fields3['column'].intervals.length == 0) return;
 
                             pdfDocument.content[2].table.headerRows = 2;
-                            var firstHeaderRow = [];
+                            let firstHeaderRow = [];
                             $('#resultsTable').find('thead>tr:first-child>th').each(
                                 function(index, element){
-                                    var cols = element.getAttribute('colSpan');
+                                    let cols = element.getAttribute('colSpan');
                                     if(index == 0){
                                         firstHeaderRow.push({
                                             text: '',
@@ -2362,16 +2360,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                             colSpan: cols
                                         });
                                     }
-                                    for(var i= 0;i<cols-1;i++){
+                                    for(let i= 0;i<cols-1;i++){
                                         firstHeaderRow.push({});
                                     }
                                 });
 
                             if($('#rbShowPercentRow').is(':checked') || $('#rbShowPercentColumn').is(':checked')){
-                                var secondHeaderRow = [];
+                                let secondHeaderRow = [];
                                 $('#resultsTable').find('thead>tr:nth-child(2)>th').each(
                                     function(index, element){
-                                        var cols = element.getAttribute('colSpan');
+                                        let cols = element.getAttribute('colSpan');
                                         if(index == 0){
                                             secondHeaderRow.push({
                                                 text: '',
@@ -2386,7 +2384,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                                 colSpan: cols
                                             });
                                         }
-                                        for(var i= 0;i<cols-1;i++){
+                                        for(let i= 0;i<cols-1;i++){
                                             secondHeaderRow.push({});
                                         }
                                     });
@@ -2410,7 +2408,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         });
 
         //Create the pie chart
-        var pieCanvas = $('#pieResults');
+        let pieCanvas = $('#pieResults');
 
         let colorsList = [
             '#f08080',
@@ -2431,12 +2429,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //Extract label and data values for pie chart
         let labelsNames = extractData('row', true);
         let dataValues = extractData('row', false);
-
+        let config;
+        
         // Pie chart will only work for row variables.
         if(fields3['row'].intervals.length > 0 && fields3['column'].intervals.length <= 0 && fields3['page'].intervals.length <= 0){
             $('#pieResults').removeClass('d-none');
             $('#pieMessage').addClass('d-none');
-            var config = {
+            config = {
                 type: 'pie',
                 data: {
                     labels: labelsNames,
@@ -2469,8 +2468,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#pieMessage').removeClass('d-none');
             $('#pieResults').addClass('d-none');
             /*
-            var dataVals;
-            var config = {
+            let dataVals;
+            config = {
                 type: 'doughnut',
                 data: {
                     datasets: [{
@@ -2488,27 +2487,27 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             };;
 
-            for(t=0; t<dataValues.length;t++){
+            for(let t=0; t<dataValues.length;t++){
 
             }
             */
         }
         
 
-        var pieChart = new Chart(pieCanvas, config);
+        let pieChart = new Chart(pieCanvas, config);
         
         _setMode(2);//results
     }//_doRenders
 
     function extractData(name, isLabel){
-        var data = [];
+        let data = [];
         if(isLabel){
-            for(i=0;i<fields3[name].intervals.length;i++){
+            for(let i=0;i<fields3[name].intervals.length;i++){
                 data.push(fields3[name].intervals[i].name);
             }
         }
         else{
-            for(i=0;i<fields3[name].intervals.length;i++){
+            for(let i=0;i<fields3[name].intervals.length;i++){
                 data.push(fields3[name].intervals[i].output);
             }
         }
@@ -2525,38 +2524,37 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //     intervals:{name: , description:, values:[  ] }
 
         //parameters
-        var supressZero = $('#rbSupressZero').is(':checked');
-        var showValue = $('#rbShowValue').is(':checked');
-        var showTotalsRow = $('#rbShowTotals').is(':checked');//$('#rbShowTotalsRow').is(':checked');
-        var showTotalsColumn = $('#rbShowTotals').is(':checked'); //$('#rbShowTotalsColumn').is(':checked');
-        var showPercentageRow = $('#rbShowPercentRow').is(':checked');
-        var showPercentageColumn = $('#rbShowPercentColumn').is(':checked');
-        var supressBlankRow = !$('#rbShowBlanks').is(':checked');
-        var supressBlankColumn = supressBlankRow;
-        var supressBlankPage = false;
+        let supressZero = $('#rbSupressZero').is(':checked');
+        let showValue = $('#rbShowValue').is(':checked');
+        let showTotalsRow = $('#rbShowTotals').is(':checked');//$('#rbShowTotalsRow').is(':checked');
+        let showTotalsColumn = $('#rbShowTotals').is(':checked'); //$('#rbShowTotalsColumn').is(':checked');
+        let showPercentageRow = $('#rbShowPercentRow').is(':checked');
+        let showPercentageColumn = $('#rbShowPercentColumn').is(':checked');
+        let supressBlankRow = !$('#rbShowBlanks').is(':checked');
+        let supressBlankColumn = supressBlankRow;
+        let supressBlankPage = false;
 
-        var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
-        var isAVG = (aggregationMode === "avg");
+        let aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
+        let isAVG = (aggregationMode === "avg");
         if(isAVG){
             showPercentageRow = false;
             showPercentageColumn = false;
         }
 
-        //var $table = $('#tabres');
+        //let $table = $('#tabres');
         //$table.empty();
-        var idx,i,j;
 
-        var columns = fields3.column.intervals;
-        var rows = fields3.row.intervals;
+        let columns = fields3.column.intervals;
+        let rows = fields3.row.intervals;
 
-        var clen = columns.length;
-        var rlen = rows.length;
+        let clen = columns.length;
+        let rlen = rows.length;
 
-        var hasValues = false;
-        var grantotal = 0;
-        var colspan = 1;
-        var rowspan = 1;
-        var totalspan = 1;
+        let hasValues = false;
+        let grantotal = 0;
+        let colspan = 1;
+        let rowspan = 1;
+        let totalspan = 1;
 
         if((showPercentageRow || showPercentageColumn) && clen>0) rowspan++;
         if(showPercentageRow && clen>0) colspan++;
@@ -2564,7 +2562,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(showPercentageRow && showTotalsColumn) totalspan++;
         if(showPercentageColumn && showTotalsColumn) totalspan++;
 
-        var noColumns = (clen==0);
+        let noColumns = (clen==0);
         if(noColumns){
             clen = 1;
             columns = [];
@@ -2572,7 +2570,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //reset output array for rows  set all cells to 0
-        for (i=0; i<rlen; i++){  //by rows
+        for(let i=0; i<rlen; i++){  //by rows
 
             rows[i].output = [];
             rows[i].avgcount = [];
@@ -2585,34 +2583,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
             rows[i].isempty = true;
 
 
-            for (j=0; j<clen; j++){  //by cols
+            for(let j=0; j<clen; j++){  //by cols
                 rows[i].output.push(0);
                 rows[i].percent_col.push(0);
                 rows[i].percent_row.push(0);
                 rows[i].avgcount.push(0);
             }
         }
-        for (j=0; j<clen; j++){
+        for(let j=0; j<clen; j++){
             columns[j].total = 0;
             columns[j].percent = 0;
             columns[j].isempty = true;
         }
 
 
-        var currow_val=-1
-        var row_interval_idx=[]; //If a value contains more than one value type of the same variable it stores in this array, assisting output.
+        let currow_val=-1
+        let row_interval_idx=[]; //If a value contains more than one value type of the same variable it stores in this array, assisting output.
 
         //create output array, calculate totals
-        for (idx in records){
-            var count = 0;
+        for (let idx in records){
+            let count = 0;
             if(idx){
 
                 if(currow_val!=records[idx][0]){
-                    var rval = records[idx][0]; //row
+                    let rval = records[idx][0]; //row
                     currow_val = rval;
                     //find row interval it fits
                     row_interval_idx = [-1];
-                    for (i in rows){
+                    for(let i in rows){
                         if( fitToInterval( fields3.row.type, rows[i].values, rval, 'row') ){
                             //Some records may contain more than one value, this stores it in an array and generates based on this.
                             if(count<1){
@@ -2629,9 +2627,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(row_interval_idx[0]>=0)
                 {
                     if(noColumns){ //no columns
-                        var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
+                        let val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
                         //Iterate through each row_interval_idx to add the output of values that contain more than one.
-                        for(i=0;i<row_interval_idx.length; i++){
+                        for(let i=0;i<row_interval_idx.length; i++){
                             if(!isNaN(val) && rnd(val)!=0){
                                 rows[row_interval_idx[i]].output[0] = rows[row_interval_idx[i]].output[0] + rnd(val);
                                 rows[row_interval_idx[i]].avgcount[0] ++;
@@ -2643,11 +2641,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     }else{
 
-                        for (j=0; j<clen; j++){
+                        for(let j=0; j<clen; j++){
                             if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1], 'column' ) ){
-                                var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
+                                let val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
                                 //Iterate through each row_interval_idx to add the output of values that contain more than one.
-                                for(k=0;k<row_interval_idx.length; k++){
+                                for(let k=0;k<row_interval_idx.length; k++){
                                     if(!isNaN(val) && rnd(val)!=0){
                                         rows[row_interval_idx[k]].output[j] = rows[row_interval_idx[k]].output[j] + rnd(val);
                                         rows[row_interval_idx[k]].avgcount[j] ++;
@@ -2668,22 +2666,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //special calc fo average
         if(isAVG)
         {
-            for (i=0; i<rlen; i++){
+            for(let i=0; i<rlen; i++){
                 rows[i].total = 0;
             }
 
-            var cols_with_values_for_row = [];
-            for (i=0; i<rlen; i++){
+            let cols_with_values_for_row = [];
+            for(let i=0; i<rlen; i++){
                 cols_with_values_for_row.push(0);
             }
 
 
-            for (j=0; j<clen; j++){  //cols
+            for(let j=0; j<clen; j++){  //cols
                 columns[j].total = 0;
 
-                var rows_with_values = 0;
+                let rows_with_values = 0;
 
-                for (i=0; i<rlen; i++){  //rows
+                for(let i=0; i<rlen; i++){  //rows
                     if(rows[i].avgcount[j]>1){
                         rows[i].output[j] = rnd(rows[i].output[j]/rows[i].avgcount[j]);
                     }
@@ -2703,8 +2701,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             grantotal = 0;
-            var cnt_avg = 0;
-            for (i=0; i<rlen; i++){
+            let cnt_avg = 0;
+            for(let i=0; i<rlen; i++){
                 if(cols_with_values_for_row[i]>0){
                     rows[i].total = rnd(rows[i].total/cols_with_values_for_row[i]); //clen);
                 }
@@ -2720,21 +2718,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //
             if(noColumns){
                 if(grantotal!=0){
-                    for (i=0; i<rlen; i++){
+                    for(let i=0; i<rlen; i++){
                         rows[i].percent_row[0] =  rnd(rows[i].output[0]*100/grantotal);
                     }
                 }
             }else{
 
-                for (i=0; i<rlen; i++){
+                for(let i=0; i<rlen; i++){
                     grantotal = grantotal + rows[i].total;
                 }
 
                 //calculate percentage
                 if(showPercentageRow || showPercentageColumn){
 
-                    for (j=0; j<clen; j++){
-                        for (i=0; i<rlen; i++){
+                    for(let j=0; j<clen; j++){
+                        for(let i=0; i<rlen; i++){
 
 
                             if(rows[i].total!=0){
@@ -2755,23 +2753,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-        var s, notemtycolumns = 0;
+        let s, notemtycolumns = 0;
         //main render output   .css({'border':'1px solid black'})
-        var $table = $('<table>').attr('cellspacing','0');
+        let $table = $('<table>').attr('cellspacing','0');
         $table.attr("id", "resultsTable");
         $table.attr("class", "display cell-border resultsTable");
         $table.css('width', '0%');
         $table.css('margin', '0');
-        var $rowPercentageHeader;
-        var styleTypeHeader = "crosstab-header0";
+        let $rowPercentageHeader;
+        let styleTypeHeader = "crosstab-header0";
 
         //Must have a table header for DataTables to work correctly.
-        var $row = $('<thead>').appendTo($table);
+        let $row = $('<thead>').appendTo($table);
         
         if(!noColumns){
             styleTypeHeader = "crosstab-header1";
-            var rowHeader1 = $('<tr>');
-            for (j=0; j<clen; j++){
+            let rowHeader1 = $('<tr>');
+            for(let j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
@@ -2779,7 +2777,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $row.append(rowHeader1);
         }
 
-        var $rowHeader = $('<tr>');
+        let $rowHeader = $('<tr>');
         $rowHeader.append('<th class="'+styleTypeHeader+'" style="border-left:1px solid black" rowspan="'+rowspan+'">'+fields3.row.fieldname+'</th>');
     
         //$row.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
@@ -2794,7 +2792,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }else{ //If two variables are chosen
             //Appends column names of the second variable.
-            for (j=0; j<clen; j++){
+            for(let j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
                 $rowHeader.append('<th class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</th>');
                 //notemtycolumns++;
@@ -2808,7 +2806,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //If 'Row %' checkbox has been chosen only.
             if(showPercentageRow && !showPercentageColumn){
                 $rowPercentageHeader = $('<tr>');
-                for(t=0; t<clen;t++){
+                for(let t=0; t<clen;t++){
                     if(supressBlankColumn && columns[t].isempty) continue;
                     $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th>');
                 }
@@ -2820,7 +2818,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             else if(!showPercentageRow && showPercentageColumn){ //If 'Column %' checkbox has been chosen only.
                 $rowPercentageHeader = $('<tr>');
                 clen = columns.length;
-                for(var t=0; t<clen;t++){
+                for(let t=0; t<clen;t++){
                     if(supressBlankColumn && columns[t].isempty) continue;
                     $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Col%</th>');
                 }
@@ -2832,7 +2830,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             else if(showPercentageRow && showPercentageColumn){ //If both 'Column %' and 'Row %' have been chosen.
                 $rowPercentageHeader = $('<tr>');
                 clen = columns.length;
-                for (var j=0; j<clen; j++){
+                for(let j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
                     $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th><th class="percent">Col%</th>');
                 }
@@ -2852,14 +2850,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
         //Render row body
-        for (i=0; i<rlen; i++){
+        for(let i=0; i<rlen; i++){
 
             if(supressBlankRow && rows[i].isempty) continue;
 
             hasValues = true;
 
             $row = $('<tr>').appendTo($table);
-            $row.append('<td class="crosstab-header" style="text-align:left;">'+rows[i].name+'</td>');
+            $row.append(`<td class="crosstab-header" data-order="${i}" style="text-align:left;">${rows[i].name}</td>`);
 
             if(noColumns){
                 if(rows[i].output[0]!=0 || !supressZero){
@@ -2877,7 +2875,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             }else{
 
-                for (j=0; j<clen; j++){
+                for(let j=0; j<clen; j++){
 
                     if(supressBlankColumn && columns[j].isempty) continue;
 
@@ -2893,7 +2891,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         $row.append(s);
                     }else{
                         if(showPercentageRow || showPercentageColumn){
-                            for(var k=0; k<colspan; k++){
+                            for(let k=0; k<colspan; k++){
                                 $row.append('<td colspan="'+1+'">&nbsp;</td>');
                             }
                         }
@@ -2914,7 +2912,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         }
                         $row.append(s);
                     }else{
-                        for(var n=0;n<colspan; n++){
+                        for(let n=0;n<colspan; n++){
                             $row.append('<td>&nbsp;</td>'); //(showPercentageRow?2:1) ART2
                         }
                     }
@@ -2930,7 +2928,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(showTotalsColumn && grantotal!=0){
                 $row = $('<tfoot>').appendTo($table);
 
-                var $rowFooter = $('<tr>');
+                let $rowFooter = $('<tr>');
                 $rowFooter.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">totals</td>');
                 $rowFooter.append('<td class="crosstab-total">'+rnd(grantotal) +'</td>');
 
@@ -2946,10 +2944,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(showTotalsColumn){ //columns totals - last row in table
                 $row = $('<tfoot>').appendTo($table);
 
-                var $rowFooter1 = $('<tr>');
+                let $rowFooter1 = $('<tr>');
                 $rowFooter1.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">Totals</td>');
 
-                for (j=0; j<clen; j++){
+                for(let j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
 
                     if(columns[j].total!=0 || !supressZero){
@@ -2964,7 +2962,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         $rowFooter1.append(s);
                     }else{
-                        for(var l=0;l<colspan;l++){
+                        for(let l=0;l<colspan;l++){
                             $rowFooter1.append('<td class="total-percent">&nbsp;</td>');
                         }
                     }
@@ -2982,10 +2980,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $row.append('<td colspan="'+(notemtycolumns*colspan+1)+'">&nbsp;</td>');
                 $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+grantotal+'</td>');  //(showPercentageRow?2:1) ART2
             }
-
-            $row.append($rowFooter1);
-
         }
+
+        let $divres = $('#divres');
 
         if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
@@ -3002,12 +2999,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(type=="enum" || type=="resource" || type=="relationtype"){
             return (window.hWin.HEURIST4.util.findArrayIndex(val,values)>=0); // values.indexOf(val)
         }else{
-            if(val == fields3[name].values[1]){
-                return (val>=values[0] && val<=values[1]);    
-            }else{
-                val = parseFloat(val);
-                return (val>=values[0] && val<values[1]); 
-            }     
+            val = parseFloat(val);
+            return val == fields3[name].values[1] ? 
+                    val>=values[0] && val<=values[1] : val>=values[0] && val<values[1];
         }
     }
 
@@ -3024,7 +3018,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             // An error?
         }
 
-        var aggMode = $("input:radio[name=aggregationMode]:checked").val();
+        let aggMode = $("input:radio[name=aggregationMode]:checked").val();
         if ( aggMode == "count" ) {
 
             $('#cbAggField').attr('disabled','disabled');
@@ -3083,7 +3077,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //
     function _getSettings(){
 
-        var settings = {
+        let settings = {
             aggregationMode: $("input:radio[name=aggregationMode]:checked").val(),
             agg_field: $('#cbAggField').val(),
             supressZero: $('#rbSupressZero').is(':checked')?1:0,
@@ -3127,7 +3121,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     //
     //public members
     //
-    var that = {
+    let that = {
 
         getClass: function () {
             return _className;
@@ -3173,7 +3167,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             _currentRecordset = recordset;
 
             //change value of rectype selector
-            var rt = $recTypeSelector.val();
+            let rt = $recTypeSelector.val();
             if(!(rt>0) && recordset['first_rt']>0){
                 $recTypeSelector.val(recordset['first_rt']);
                 _onRectypeChange();

@@ -92,10 +92,10 @@ require_once dirname(__FILE__).'/../entity/dbSysImportFiles.php';
 require_once dirname(__FILE__).'/../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
 
-require_once dirname(__FILE__).'/../records/import/importParser.php'; //parse CSV, KML and save into import table
-require_once dirname(__FILE__).'/../records/import/importSession.php'; //work work with import session 
-require_once dirname(__FILE__).'/../records/import/importAction.php'; //work with import table: matching, assign id, performs validation and import
-require_once dirname(__FILE__).'/../records/import/importHeurist.php'; //work with Heurist exchange format
+require_once dirname(__FILE__).'/../records/import/importParser.php';//parse CSV, KML and save into import table
+require_once dirname(__FILE__).'/../records/import/importSession.php';//work work with import session 
+require_once dirname(__FILE__).'/../records/import/importAction.php';//work with import table: matching, assign id, performs validation and import
+require_once dirname(__FILE__).'/../records/import/importHeurist.php';//work with Heurist exchange format
 
 require_once dirname(__FILE__).'/../utilities/uArchive.php';
 
@@ -126,15 +126,15 @@ if(!$system->init(@$_REQUEST['db'])){
         $res = false;        
         
         if($action=='step0'){   
-            $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );  //it saves csv data in temp file  -returns array(filename)
+            $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );//it saves csv data in temp file  -returns array(filename)
             
         }else if($action=='step1'){   
             //file is uploaded with help fileupload widget and controller/fileUpload.php
-            $upload_file_name = @$_REQUEST["upload_file_name"]; 
+            $upload_file_name = @$_REQUEST["upload_file_name"];
             if($upload_file_name!=null){
-                $upload_file_name = USanitize::sanitizeFileName(basename($upload_file_name), false); //snyk SSRF
+                $upload_file_name = USanitize::sanitizeFileName(basename($upload_file_name), false);//snyk SSRF
                 //encode and invoke parse_prepare with limit
-                $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);  
+                $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);
             }
             
         }else if($action=='step2'){
@@ -146,7 +146,7 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='step3'){ // matching - assign record ids
         
-            $res = ImportAction::assignRecordIds($_REQUEST); 
+            $res = ImportAction::assignRecordIds($_REQUEST);
                     
         }else if($action=='step4'){ // validate import - check field values
         
@@ -158,7 +158,7 @@ if(!$system->init(@$_REQUEST['db'])){
         
         }else if(@$_REQUEST['content']){ //for import terms    
             
-            $res = ImportParser::simpleCsvParser($_REQUEST); 
+            $res = ImportParser::simpleCsvParser($_REQUEST);
             
         }else if($action=='set_primary_rectype'){
             
@@ -173,12 +173,12 @@ if(!$system->init(@$_REQUEST['db'])){
             $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
             
             if($table_name==null || $table_name==''){
-                $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');                  
+                $system->addError(HEURIST_INVALID_REQUEST, '"table" parameter is not defined');
                 $res = false;
                 
             }else
             if(@$_REQUEST['imp_ID']){
-                $res = ImportSession::getRecordsFromImportTable1($table_name, intval($_REQUEST['imp_ID']));    
+                $res = ImportSession::getRecordsFromImportTable1($table_name, intval($_REQUEST['imp_ID']));
             }else{
                 $res = ImportSession::getRecordsFromImportTable2($table_name, 
                             @$_REQUEST['id_field'],       
@@ -187,7 +187,7 @@ if(!$system->init(@$_REQUEST['db'])){
                             @$_REQUEST['offset'], 
                             @$_REQUEST['limit'],
                             @$_REQUEST['output']
-                            );    
+                            );
             }
             
             
@@ -213,11 +213,11 @@ if(!$system->init(@$_REQUEST['db'])){
                     $sz = $sz + fputcsv($fp, $row, ',', '"');
                     $cnt++;
                     
-                    //if($cnt>2) break;
+                    //if($cnt>2) {break;}
                 }
                 rewind($fp);
                 // read the entire line into a variable...
-                $data = fread($fp, $sz+1);            
+                $data = fread($fp, $sz+1);
                 fclose($fp);
             
                 $res = $data;
@@ -253,7 +253,7 @@ if(!$system->init(@$_REQUEST['db'])){
             }
             
         }else{
-            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");                
+            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;
         }
         
@@ -277,9 +277,9 @@ if(@$_REQUEST['output']=='csv'){
 
 
     if($_REQUEST['output']=='csv'){
-        header('Content-Type: text/plain;charset=UTF-8');    
+        header('Content-Type: text/plain;charset=UTF-8');
         header('Pragma: public');
-        header('Content-Disposition: attachment; filename="import.csv"'); //import_name
+        header('Content-Disposition: attachment; filename="import.csv"');//import_name
     }
     
     if($response['status']==HEURIST_OK){
@@ -296,14 +296,14 @@ if(@$_REQUEST['output']=='csv'){
 
 else if($need_compress){ //importDefintions returns complete set of new defintions - need to compress
     
-    ob_start(); 
+    ob_start();
     echo json_encode($response);
-    $output = gzencode(ob_get_contents(),6); 
-    ob_end_clean(); 
+    $output = gzencode(ob_get_contents(),6);
+    ob_end_clean();
     header('Content-Encoding: gzip');
     header('Content-type: application/json;charset=UTF-8');
     echo $output; 
-    unset($output);      
+    unset($output);
 }else{
     
     header('Content-type: application/json');

@@ -24,7 +24,7 @@ require_once dirname(__FILE__).'/../System.php';
 require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php'; //send email methods
+require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email methods
 
 
 class DbUsrSavedSearches extends DbEntityBase
@@ -54,14 +54,14 @@ class DbUsrSavedSearches extends DbEntityBase
         $from_table = array($this->config['tableName']);
         
         $pred = $this->searchMgr->getPredicate('svs_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('svs_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         //find filters belong to group
         $pred = $this->searchMgr->getPredicate('svs_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
         
         
         //compose SELECT it depends on param 'details' ------------------------
@@ -178,7 +178,7 @@ class DbUsrSavedSearches extends DbEntityBase
         
         //add specific field values
         foreach($this->records as $idx=>$record){
-            $this->records[$idx]['svs_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['svs_Modified'] = date('Y-m-d H:i:s');//reset
             
             $tbl = $this->config['tableName'];
             

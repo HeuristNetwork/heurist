@@ -55,15 +55,15 @@ class DbDefCalcFunctions extends DbEntityBase
         }
         
         //compose WHERE 
-        $where = array();    
+        $where = array();
         
         $pred = $this->searchMgr->getPredicate('cfn_ID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('cfn_Name');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {array_push($where, $pred);}
 
-        if(@$this->data['details']==null) $this->data['details'] = 'full';//default
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
                
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property
@@ -142,7 +142,7 @@ class DbDefCalcFunctions extends DbEntityBase
             return false;
         }
 
-        return parent::delete();        
+        return parent::delete();
     }
 
     
@@ -187,7 +187,7 @@ class DbDefCalcFunctions extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['cfn_Modified'] = date('Y-m-d H:i:s'); //reset
+            $this->records[$idx]['cfn_Modified'] = date('Y-m-d H:i:s');//reset
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['cfn_ID']>0));
         }

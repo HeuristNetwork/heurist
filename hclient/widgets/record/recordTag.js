@@ -39,7 +39,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         
         this.options.helpContent = 'recordTags.html';
         
-        var sMsg;
+        let sMsg;
         if(this.options.modes=='bookmark_url'){
             this.element.find('#div_fieldset').hide();
             sMsg = window.hWin.HR('recordTag_hint0');
@@ -58,7 +58,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         
         this._tagSelectionWidget = $('<div>').css({'width':'100%', padding: '0.2em'}).appendTo( this.element );
         
-        var that = this;
+        let that = this;
         
         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                 refreshtags:true, 
@@ -79,7 +79,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 }
         });
         
-        res = this._super();
+        let res = this._super();
         
         //'width':106,'min-width':96,
         this.element.find('fieldset > div > .header').css({'padding':'0 16 0 0'});
@@ -93,9 +93,9 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     },
     
     _getActionButtons: function(){
-        var res = this._super();
+        let res = this._super();
         
-        var that = this;
+        let that = this;
         
         
         if(this.options.modes.indexOf('bookmark_url')>=0){
@@ -141,7 +141,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     //
     doAction: function(mode){
         
-            var scope_val = this.selectRecordScope.val();
+            let scope_val = this.selectRecordScope.val();
             if(scope_val=='') return;
             
             if(mode!='assign') mode = 'remove';
@@ -152,7 +152,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 return;
             }
             
-            var scope = [], 
+            let scope = [], 
             rec_RecTypeID = 0;
             
             if(scope_val == 'selected'){
@@ -165,7 +165,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             }
             
         
-            var request = {
+            let request = {
                 'a'          : 'batch',
                 'entity'     : 'usrTags',
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -178,7 +178,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-            var that = this;                                                
+            let that = this;                                                
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
@@ -188,7 +188,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                             
                             that.closeDialog();
                             
-                            var msg = window.hWin.HR('Processed records')+': '+response.data.processed + '<br>';
+                            let msg = window.hWin.HR('Processed records')+': '+response.data.processed + '<br>';
                              
                              if(response.data.added==0 && response.data.removed==0) {
                                  msg += window.hWin.HR('No tags were affected');
@@ -216,7 +216,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
     _onRecordScopeChange: function () 
     {
-        var isdisabled = (this.options.modes.indexOf('bookmark_url')<0 && this.selectRecordScope.val()=='') 
+        let isdisabled = (this.options.modes.indexOf('bookmark_url')<0 && this.selectRecordScope.val()=='') 
                         || !(this._tags_selection.length>0);
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );

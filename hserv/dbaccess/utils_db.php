@@ -81,7 +81,7 @@
         try{
             $mysqli = mysqli_init();
             //debug mode mysqli_report(MYSQLI_REPORT_ALL);
-            mysqli_report(MYSQLI_REPORT_STRICT); //MYSQLI_REPORT_ERROR | 
+            mysqli_report(MYSQLI_REPORT_STRICT);//MYSQLI_REPORT_ERROR | 
             $mysqli->options(MYSQLI_OPT_LOCAL_INFILE, 1);
             $mysqli->real_connect($dbHost, $dbUsername, $dbPassword, null, $dbPort);
             
@@ -109,7 +109,7 @@
             
             list($database_name_full, $database_name) = mysql__get_names( $dbname );
             
-            $res = mysql__check_dbname($dbname);           
+            $res = mysql__check_dbname($dbname);
             if($res===true){
                 $success = $mysqli->select_db($database_name_full);
                 if(!$success){
@@ -127,10 +127,10 @@
                 return $res;
             }
 
-            //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
+            //$mysqli->query('SET CHARACTER SET utf8mb4');//utf8 is utf8mb3 by default
             //$mysqli->query('SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci');
             $mysqli->query('SET NAMES utf8mb4');
-            //$mysqli->query('SET SESSION MAX_EXECUTION_TIME=2000'); //60000 = 1 min
+            //$mysqli->query('SET SESSION MAX_EXECUTION_TIME=2000');//60000 = 1 min
         }
         return true;
     }
@@ -233,10 +233,10 @@
             
                 $where = 'hdb_'.$starts_with.'%';
             }else{
-                $where = ''; //invalid dbname   
+                $where = '';//invalid dbname   
             }
         }else{
-            $where = 'hdb_%';    
+            $where = 'hdb_%';
         }
         
         $query = "show databases where `database` like '".$mysqli->real_escape_string($where)."'";
@@ -248,7 +248,7 @@
             while ($row = $res->fetch_row()) {
                 $test = strpos($row[0], $prefix);
                 if ($test === 0) {
-                    $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);  //for snyk
+                    $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);//for snyk
                     if ($isFilter) {
                         $query2 = null;
                         if ($role == 'user') {
@@ -280,8 +280,8 @@
             $res->close();
         }//if
 
-        natcasesort($result); // case insensetive order
-        $result = array_values($result); // correct array indexes, for json object
+        natcasesort($result);// case insensetive order
+        $result = array_values($result);// correct array indexes, for json object
 
         return $result;
 
@@ -301,7 +301,7 @@
 /* determine our thread id */
 //$thread_id = $mysqli->thread_id;
 /* Kill connection */
-//$mysqli->kill($thread_id);                
+//$mysqli->kill($thread_id);
             }
         }
         
@@ -462,7 +462,7 @@
                 $result = array();
                 while ($row = $res->fetch_row()){
                     
-                    if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
+                    if($i_trim>0) {array_walk($row, 'trim_item', $i_trim);}
                     
                     if($mode==1){
                         $rec_id = array_shift($row);
@@ -484,10 +484,10 @@
     function mysql__get_table_columns($mysqli, $table){
 
         $res = $mysqli->query('DESCRIBE '.$table);
-        if (!$res) return NULL;
+        if (!$res) {return null;}
         $matches = array();
         if($res){
-            while (($row = $res->fetch_row())) array_push($matches, $row[0]);
+            while (($row = $res->fetch_row())) {array_push($matches, $row[0]);}
             
             $res->close();
         }
@@ -499,14 +499,14 @@
 //
     function mysql__duplicate_table_record($mysqli, $table, $idfield, $oldid, $newid){
 
-        $columns = mysql__get_table_columns($mysqli, $table);    
+        $columns = mysql__get_table_columns($mysqli, $table);
        
         //in our scheme first column is always id (primary key)
         array_shift($columns);
         
         $columns3 = array();
         foreach($columns as $idx=>$column){
-            $columns3[] = '`'.preg_replace('/[^a-zA-Z0-9_]/', "", $column).'`';  //for snyk
+            $columns3[] = '`'.preg_replace('/[^a-zA-Z0-9_]/', "", $column).'`';//for snyk
         }
         
         if($idfield!=null && $newid!=null){
@@ -525,7 +525,7 @@
         $columns3 = implode(',',$columns3);
         //
         $query = "INSERT INTO `$table` ($columns3) SELECT $columns2 FROM `$table`".$where;
-    //print $query.'<br>';    
+    //print $query.'<br>';
         
         $res = $mysqli->query($query);
         if(!$res){
@@ -595,12 +595,12 @@
 
         if(is_array($table_prefix)){ //fields
             
-            $fields = array();  
+            $fields = array();
             foreach($table_prefix as $fieldname=>$field_config){
-                if(@$field_config['dty_Role']=='virtual') continue;
+                if(@$field_config['dty_Role']=='virtual') {continue;}
                 if(@$field_config['dty_Role']=='primary'){
                     $primary_field = $fieldname;
-                    $primary_field_type = $field_config['dty_Type']; 
+                    $primary_field_type = $field_config['dty_Type'];
                 }
                 $fields[] = $fieldname;
             }
@@ -643,14 +643,14 @@
 
             if(is_array($table_prefix)){
                 
-                if(!in_array($fieldname, $fields)) continue;
+                if(!in_array($fieldname, $fields)) {continue;}
                 
             }else if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
                 //$fieldname = $table_prefix.$fieldname;
                 continue;
             }
 
-            $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);  //for snyk
+            $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);//for snyk
             
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
@@ -665,7 +665,7 @@
                 if($fieldname=='dtl_Geo'){
                     $query2 = $query2.'ST_GeomFromText(?), ';
                 }else{
-                    $query2 = $query2.'?, ';    
+                    $query2 = $query2.'?, ';
                 }
                 
             }else{
@@ -680,8 +680,8 @@
             }
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
-            if($fieldname == 'ulf_ObfuscatedFileID') $dtype = 's'; //exception
-            //else if($fieldname == 'dtl_Value') $dtype = 'b'; //exception
+            if($fieldname == 'ulf_ObfuscatedFileID') {$dtype = 's';}//exception
+            //else if($fieldname == 'dtl_Value') $dtype = 'b';//exception
             
             $params[0] = $params[0].$dtype;
             if($dtype=='i' && $value==''){
@@ -698,7 +698,7 @@
             $query = $query.' where '.$primary_field.'=?';
             
             if($primary_field_type=='integer'){
-                $params[0] = $params[0].'i';    
+                $params[0] = $params[0].'i';
             }else{
                 $params[0] = $params[0].'s';
             }
@@ -793,7 +793,7 @@
                         $result=true;
                     }
                 }
-                $stmt->close(); //affected_rows and insert_id will be reset after close
+                $stmt->close();//affected_rows and insert_id will be reset after close
             }else{
                 $result = $mysqli->error;
             }
@@ -811,7 +811,7 @@
         if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
         {
             $refs = array();
-            foreach ($arr as $key => $value) $refs[$key] = &$arr[$key];
+            foreach ($arr as $key => $value) {$refs[$key] = &$arr[$key];}
             return $refs;
         }
         return $arr;
@@ -878,7 +878,7 @@
                 /* remarked temporary to avoid security warnings */
                 $cmd = $cmd         //." --login-path=local "
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
-                ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1'; 
+                ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
                 
                 $shell_res = exec($cmd, $arr_out, $res2);
 
@@ -904,7 +904,7 @@
                 
                 $connected = mysql__usedatabase($mysqli2, $database_name_full);
                 if($connected!==true){
-                    $error = $connected[1]; //error message
+                    $error = $connected[1];//error message
                 }
                 
                 if($error==''){
@@ -928,7 +928,7 @@
             }else{ //3d party function that uses PDO
                 
                 if(!function_exists('execute_db_script')){
-                        include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php'; // used to load procedures/triggers
+                        include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php';// used to load procedures/triggers
                 }
                 if(db_script($database_name_full, $script_file, false)){
                         $res = true;
@@ -1039,7 +1039,7 @@
         $mysqli = $system->get_mysqli();
         
         $res = true;
-        $is_table_exist = hasTable($mysqli, 'recLinks');    
+        $is_table_exist = hasTable($mysqli, 'recLinks');
             
         if($is_forced || !$is_table_exist){
                 //recreate cache
@@ -1079,10 +1079,10 @@
         
         $mysqli = $system->get_mysqli();
         
-        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');        
+        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
         
         $isok = true;
-        $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');    
+        $is_table_exist = hasTable($mysqli, 'recDetailsDateIndex');
         
         $err_prefix = '';//'Update date index: ';
         $cnt = 0;
@@ -1140,14 +1140,14 @@
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE dty_Type="date"';
             $fld_dates = mysql__select_list2($mysqli, $query);
             $fld_dates = implode(',',prepareIds($fld_dates));
-            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
+            $query = 'SELECT count(dtl_ID) FROM recDetails  WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
             $cnt_dates = mysql__select_value($mysqli, $query);
             if($offset>0){
                 $cnt_dates = $cnt_dates - $offset;
             }
             
             $query = 'SELECT dtl_ID,dtl_RecID,dtl_DetailTypeID,dtl_Value FROM recDetails '
-            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')'; //' AND dtl_Value!=""';
+            .'WHERE dtl_DetailTypeID in ('.$fld_dates.')';//' AND dtl_Value!=""';
             if($offset>0){
                 $query = $query.' LIMIT '.$offset.', 18446744073709551615';
             }
@@ -1178,7 +1178,7 @@
                     $dtl_NewValue = '';
                     $error = '';
                     
-                    if(trim($dtl_Value)=='') continue;
+                    if(trim($dtl_Value)=='') {continue;}
                     
                     $iYear = intval($row[3]);
                     
@@ -1210,13 +1210,13 @@
                             $is_date_simple = $preparedDate->isValidSimple();
                             $dtl_NewValue_for_update = null;
                             if($is_date_simple){
-                                $dtl_NewValue = $preparedDate->getValue(true); //returns simple yyyy-mm-dd
+                                $dtl_NewValue = $preparedDate->getValue(true);//returns simple yyyy-mm-dd
                                 $dtl_NewValue_for_update = $dtl_NewValue;
                             }else{
                                 $v_json = $preparedDate->getValue();
                                 $dtl_NewValue_for_update = json_encode($v_json);
-                                $v_json['comment'] = ''; //to avoid issue with special charss
-                                $dtl_NewValue = json_encode($v_json); //$preparedDate->toJSON(); //json encoded string
+                                $v_json['comment'] = '';//to avoid issue with special charss
+                                $dtl_NewValue = json_encode($v_json);//$preparedDate->toJSON();//json encoded string
                             }
                             if($dtl_NewValue==null || $dtl_NewValue=='' || $dtl_NewValue=='null'){
                                 $error = 'Not valid date: '.$dtl_Value;
@@ -1224,9 +1224,9 @@
                             
             //3. Validate estMin and estMax from JSON
                             $query = 'SELECT getEstDate(\''.$dtl_NewValue  //$mysqli->real_escape_string(
-                                    .'\',0) as minD, getEstDate(\''.$dtl_NewValue.'\',1) as maxD'; //$mysqli->real_escape_string(
+                                    .'\',0) as minD, getEstDate(\''.$dtl_NewValue.'\',1) as maxD';//$mysqli->real_escape_string(
                             try{
-                                $res2 = $mysqli->query($query);            
+                                $res2 = $mysqli->query($query);
                             }catch(Exception $e){
                                 $res2 = false;
                             }
@@ -1271,7 +1271,7 @@
                                     
                                     
             //6. update recDetailsDateIndex should be updated by trigger
-                                    $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID); 
+                                    $mysqli->query('delete ignore from recDetailsDateIndex where rdi_DetailID='.$dtl_ID);
                                     
                                     $mindate = floatval($row2[0]);
                                     $maxdate = floatval($row2[1]);
@@ -1307,8 +1307,8 @@
                     
                     //keep log
                     if(!$is_date_simple || $error){
-//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );    
-                        if(!$is_date_simple) $cnt_to_json++;
+//file_put_contents($log_file, $dtl_ID.';'.$dtl_Value.';'.$dtl_NewValue.';'.$error."\n", FILE_APPEND );
+                        if(!$is_date_simple) {$cnt_to_json++;}
                         if($error){
                             $error = '<span style="color:red">'.$error.'</span>';
                             $cnt_err++;
@@ -1321,7 +1321,7 @@
                         
                     }
                     if(!$error){
-                        $cnt++;  
+                        $cnt++;
                         //if($offset>0 && $cnt % 50000 == 0){
                         //    print 'processed :'.$cnt;
                         //}
@@ -1336,7 +1336,7 @@
                             $system->addError(HEURIST_ACTION_BLOCKED, 'Database Verification has been terminated by user');
                             if($cnt_dates<150000){
                                 $mysqli->rollback();
-                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                             }
                             return false;
                         }
@@ -1352,14 +1352,14 @@
                     
                     
                     if($cnt_dates<150000){
-                        $mysqli->commit();  
+                        $mysqli->commit();
                     }
                 }else{
                     if($cnt_dates<150000){
                         $mysqli->rollback();
                     }
                 }
-                if( $cnt_dates<150000 && $keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if( $cnt_dates<150000 && $keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
             }
         }
@@ -1407,7 +1407,7 @@
         for($i = 0; $i < $inputStrLength; $i++) {
             $currentChar = mb_substr($inputStr, $i, 1, $encoding);
 
-            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);    
+            $translatedCharPos = mb_strpos($from, $currentChar, 0, $encoding);
             
             if($translatedCharPos === false) {
                 $translated .= $currentChar;
@@ -1429,9 +1429,9 @@
 
     //new trim  function
     function override_trim($string){
-        $str = preg_replace('/\xc2\xa0/', ' ', $str);  //non breakable space
-        $str = preg_replace("/\xEF\xBB\xBF/", "", $str); // BOM
-        //$str = preg_replace("/\s+/u", ' ', $str); //any spaces
+        $str = preg_replace('/\xc2\xa0/', ' ', $str);//non breakable space
+        $str = preg_replace("/\xEF\xBB\xBF/", "", $str);// BOM
+        //$str = preg_replace("/\s+/u", ' ', $str);//any spaces
         return __trim($str);
     }
 */
@@ -1452,7 +1452,7 @@
         $len = strlen($str);
         $k = strpos($str,"\xC2\xA0");
         if($k===0){
-            $str = substr($str,2);            
+            $str = substr($str,2);
             return super_trim($str);
         }else if($k===$len-2){
             $str = substr($str,0,$len-2);
@@ -1460,7 +1460,7 @@
         }
         $k = strpos($str,"\xEF\xBB\xBF");
         if($k===0){
-            $str = substr($str,3);            
+            $str = substr($str,3);
             return super_trim($str);
         }else if($k===$len-3){
             $str = substr($str,0,$len-3);
@@ -1469,14 +1469,14 @@
         
         return $str;
         
-        //return trim($str); //trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
+        //return trim($str);//trim($str, " \n\r\t\v\x00\xC2\xA0\xEF\xBB\xBF");
     }  
     
     //
     //
     //
     function  trim_lower_accent($item){
-        return mb_strtolower(stripAccents(super_trim($item))); //including &nbsp; and &xef; (BOM)
+        return mb_strtolower(stripAccents(super_trim($item)));//including &nbsp; and &xef; (BOM)
     }
 
     function  trim_lower_accent2(&$item, $key){
@@ -1484,7 +1484,7 @@
     }
 
     function mb_strcasecmp($str1, $str2, $encoding = null) {
-        if (null === $encoding) { $encoding = mb_internal_encoding(); }
+        if (null === $encoding) { $encoding = mb_internal_encoding();}
         return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
     }
     
@@ -1527,7 +1527,7 @@
             return $res;
             /*
             $ids = array_filter($ids, function ($v) {
-                 return (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) );
+                 return is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) ;
             });
             */
         }else{
@@ -1585,8 +1585,8 @@
     //
     function checkMaxLength2($dtl_Value){
         $dtl_Value = trim($dtl_Value);
-        $len  = strlen($dtl_Value);  //number of bytes
-        $len2 = mb_strlen($dtl_Value); //number of characters
+        $len  = strlen($dtl_Value);//number of bytes
+        $len2 = mb_strlen($dtl_Value);//number of characters
         $lim = ($len-$len2<200)?64000:32000; //32768;
         if($len>$lim){   //size in bytes more than allowed limit
             return $lim;
@@ -1675,7 +1675,7 @@
     //
     function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
         
-        if($session_id==null) return;
+        if($session_id==null) {return;}
         
         $res = null;
         $need_close = false;
@@ -1720,7 +1720,7 @@
             }
             //$mysqli->commit();
         }
-        if($need_close)  $mysqli->close();
+        if($need_close) {$mysqli->close();}
    
         return $res;
     }    
@@ -1733,9 +1733,9 @@
         
         $session_id = intval($session_id);
         
-        if($session_id==null || $session_id==0) return null;
+        if($session_id==null || $session_id==0) {return null;}
         
-        if(!defined('HEURIST_SCRATCH_DIR')) return null;
+        if(!defined('HEURIST_SCRATCH_DIR')) {return null;}
         
         $res = null;
         
@@ -1743,11 +1743,11 @@
         $is_exist = file_exists($session_file);
 
         if($value==='REMOVE'){
-            if($is_exist) fileDelete($session_file);
+            if($is_exist) {fileDelete($session_file);}
             $res = 'terminate';
         }else{
             //get    
-            if($is_exist) $res = file_get_contents($session_file);
+            if($is_exist) {$res = file_get_contents($session_file);}
             
             if($value!=null && $res!='terminate'){ //already terminated
                 file_put_contents($session_file, $value);
@@ -1764,7 +1764,7 @@
     //
     function updateDatabaseToLatest($system){
        
-        $sysValues = $system->get_system(null, true);        
+        $sysValues = $system->get_system(null, true);
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
@@ -1794,7 +1794,7 @@
                         $res = $importDef->doImport();
                     }
                     if($res){
-                        $report[] = 'Field 2-1098 "IIIF Annonation and 2-967 "Languages" imported';    
+                        $report[] = 'Field 2-1098 "IIIF Annonation and 2-967 "Languages" imported';
                     }
                 }
                 
@@ -1908,9 +1908,9 @@
 
         if($db_name==null){
             //$db_name = HEURIST_DBNAME_FULL;
-            $db_name = ''; //$query = ;
+            $db_name = '';//$query = ;
         }else{
-            $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);  //for snyk
+            $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
             $db_name = "`$db_name`.";
         }
     
@@ -1933,7 +1933,7 @@
             
             $res->close();
         }
-        return ($row_cnt>0);
+        return $row_cnt>0;
     }
 
     

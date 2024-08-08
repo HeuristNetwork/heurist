@@ -4,7 +4,7 @@
     * Entity SCRUD controller - web interface. It uses functions from entityScrudSrv.php
     * search, create, read, update and delete
     * 
-    * Application interface. See hRecordMgr in hapi.js
+    * Application interface. See HRecordMgr in hapi.js
     * Add/replace/delete details in batch
     *
     * @package     Heurist academic knowledge management system
@@ -60,7 +60,7 @@ if (@$argv) {
     
     $dbdef_cache = null;
     
-    $db_check_result = mysql__check_dbname( $dbname ); //validate db name
+    $db_check_result = mysql__check_dbname( $dbname );//validate db name
     
     if($db_check_result===true 
         && isset($defaultRootFileUploadURL)
@@ -68,7 +68,7 @@ if (@$argv) {
     {
             $path = $system->getFileStoreRootFolder().basename($dbname).'/entity/';
             if(is_dir($path) && file_exists($path)){
-                $dbdef_cache = $path.'dbdef_cache.json';    
+                $dbdef_cache = $path.'dbdef_cache.json';
             }
     }
     
@@ -92,7 +92,8 @@ if (@$argv) {
                     $_REQUEST['entity'] = 'all';
                     $file_time = filemtime($dbdef_cache);
                     
-                    if($file_time - intval($_REQUEST['timestamp']) < 5){
+                    if($file_time - intval($_REQUEST['timestamp']) < 10){
+                        //compare file time with time of db defs on client side
                         //defintions are up to date on client side
                         header('Content-type: application/json;charset=UTF-8');
                         print json_encode( array('uptodate'=>$file_time));
@@ -102,16 +103,16 @@ if (@$argv) {
                 }else{
                     //check file time and last update time of definitions
                     if($system->init($dbname)){
-                        $dbdef_mod = getDefinitionsModTime($system->get_mysqli()); //see utils_db
+                        $dbdef_mod = getDefinitionsModTime($system->get_mysqli());//see utils_db
                         
                         if($dbdef_mod!=null){
                             $db_time  = $dbdef_mod->getTimestamp();
                             $file_time = filemtime($dbdef_cache);
                             
-//error_log('DEBUG '.($db_time>$file_time).'  '.$dbdef_mod->format('Y-m-d h:i').' > '.date ('Y-m-d h:i UTC',$file_time).'  '.date_default_timezone_get());                            
+//error_log('DEBUG '.($db_time>$file_time).'  '.$dbdef_mod->format('Y-m-d h:i').' > '.date ('Y-m-d h:i UTC',$file_time).'  '.date_default_timezone_get()); 
                             
                             if($db_time>$file_time){ //db def cache is outdated
-                                  $_REQUEST['entity'] = 'force_all';                    
+                                  $_REQUEST['entity'] = 'force_all';
                                   $dbdef_cache_is_uptodate = false;
                             }    
                         }
@@ -119,8 +120,6 @@ if (@$argv) {
                     }else{
                         $system_init_failed = true;
                     }
-                    
-                    
                 }
                     
                 if($dbdef_cache_is_uptodate){    
@@ -163,10 +162,10 @@ if (@$argv) {
         && ($system->is_inited() || $system->init($dbname)))
     {
 
-        //USanitize::sanitizeRequest($_REQUEST);  it brokes json strings
-        USanitize::stripScriptTagInRequest($_REQUEST); //remove <script>
+        //USanitize::sanitizeRequest($_REQUEST); it brokes json strings
+        USanitize::stripScriptTagInRequest($_REQUEST);//remove <script>
     
-        $res = array();        
+        $res = array();
         $entities = array();
         
         if(@$_REQUEST['a']=='structure'){ 
@@ -175,16 +174,17 @@ if (@$argv) {
                 $_REQUEST['entity'] = 'all';
                 //remove cache
                 if($dbdef_cache!=null){
-                    $system->cleanDefCache(); //fileDelete($dbdef_cache);
+                    $system->cleanDefCache();//fileDelete($dbdef_cache);
                 }
             }else if(@$_REQUEST['entity']=='relevance'){
-                $_REQUEST['entity'] = 'all';    
+                $_REQUEST['entity'] = 'all';
             }
-            $res = entityRefreshDefs($system, @$_REQUEST['entity'], true); //, @$_REQUEST['recID']);
+            $res = entityRefreshDefs($system, @$_REQUEST['entity'], true);//, @$_REQUEST['recID']);
             
             //update dbdef cache
             if(@$_REQUEST['entity']=='all' && $res!==false && $dbdef_cache!=null){
-                $res['timestamp'] = time(); //update time for db def cache
+                $res['timestamp'] = time();//update time on client side
+                //update db defintion cache file
                 file_put_contents($dbdef_cache, json_encode($res));
             }
             
@@ -216,7 +216,7 @@ if (@$argv) {
             }else{
                 $code = 200;
             }
-            http_response_code($code);    
+            http_response_code($code);
         
             print json_encode($res);
         }
@@ -236,16 +236,16 @@ if (@$argv) {
                $res = json_encode($response, JSON_THROW_ON_ERROR);
 
                if(false && strlen($res)>20000){
-                   ob_start(); 
+                   ob_start();
                    echo json_encode($res);
-                   $output = gzencode(ob_get_contents(),6); 
-                   ob_end_clean(); 
+                   $output = gzencode(ob_get_contents(),6);
+                   ob_end_clean();
                    header('Content-Encoding: gzip');
                    echo $output; 
-                   unset($output); 
+                   unset($output);
                }else{
                    echo $res;     
-                   unset($res);     
+                   unset($res);
                }
     
     
@@ -264,7 +264,7 @@ if (@$argv) {
             
         }else{
             
-            $res = json_encode($response); //JSON_INVALID_UTF8_IGNORE 
+            $res = json_encode($response);//JSON_INVALID_UTF8_IGNORE 
             if(!$res){
                 
                 //
@@ -300,7 +300,7 @@ if (@$argv) {
         if(is_string($val)){
             $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);
             if($stripped_val!=$val){
-                throw new Exception(mb_convert_encoding($val,'UTF-8'));    
+                throw new Exception(mb_convert_encoding($val,'UTF-8'));
             }
         }
     }

@@ -16,6 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+/* global showSearchBuilder */
 
 $.widget( "heurist.ruleBuilder", {
 
@@ -41,7 +42,7 @@ $.widget( "heurist.ruleBuilder", {
     //
     _create: function() {
 
-       var that = this;
+       let that = this;
 
        this.element.addClass('rulebuilder');
 
@@ -54,7 +55,7 @@ $.widget( "heurist.ruleBuilder", {
        }
 
         //create list/combobox of source record types
-       var cont = $('<div>')
+       let cont = $('<div>')
             .css({'padding-top':(this.options.level==1?'10px':0),
                   'text-align':'left','width':'230px'}).appendTo(this.element);
 
@@ -165,8 +166,8 @@ $.widget( "heurist.ruleBuilder", {
     //
     _addChildRule: function(rules){
 
-        var new_level = this.options.level + 1;
-        var that = this;
+        let new_level = this.options.level + 1;
+        let that = this;
 
         $("<div>").uniqueId().ruleBuilder({level:new_level,
             rules: rules,
@@ -177,7 +178,7 @@ $.widget( "heurist.ruleBuilder", {
 
         //disable itself
         $.each(this.element.find("select"), function(index, value){
-            var ele = $(value);
+            let ele = $(value);
             if(ele.parent().parent()[0] == that.element[0]){
                 $(value).prop('disabled', true);
             }
@@ -197,48 +198,47 @@ $.widget( "heurist.ruleBuilder", {
         this.additional_filter.remove();
 
         this.div_btn2.remove();
-        if(this.div_btn) his.div_btn.remove();
+        if(this.div_btn) this.div_btn.remove();
     },
 
 
     //update relation and target selectors
     _onSelectRectype: function(event){
 
-        var rt_ID = this.select_source_rectype.val(); //event.target.value;
+        let rt_ID = this.select_source_rectype.val(); //event.target.value;
 
         //find all relation types
         // a. pointer fields
         // b. relation types for relmarkers
         // c. all recordtypes contrained in pointer and relmarkers fields
 
-        var source_rt_name = $Db.rty(rt_ID,'rty_Name');
+        let source_rt_name = $Db.rty(rt_ID,'rty_Name');
 
-        var rtyID, dtyID;
-        var vocab_id;
-        var arr_direct = {};
-        var arr_reverse = [];
-        var arr_rectypes = []; //all targets
+        let vocab_id;
+        let arr_direct = {};
+        let arr_reverse = [];
+        let arr_rectypes = []; //all targets
         
-        var all_structs = $Db.rst_idx2();
-        for (rty_ID in all_structs){
+        let all_structs = $Db.rst_idx2();
+        for (let rty_ID in all_structs){
             
-            var recset = all_structs[rty_ID];
+            let recset = all_structs[rty_ID];
             recset.each2(function(dtyID, record){
             
             //dtyID = record['rst_DetailTypeID'];
-            var fieldtype = $Db.dty(dtyID, 'dty_Type');
+            let fieldtype = $Db.dty(dtyID, 'dty_Type');
             
             if(fieldtype=='resource' || fieldtype=='relmarker'){
-                rtyID = record['rst_RecTypeID'];
+                const rtyID = record['rst_RecTypeID'];
                 
-                var constraints = $Db.dty(dtyID, 'dty_PtrTargetRectypeIDs');
+                let constraints = $Db.dty(dtyID, 'dty_PtrTargetRectypeIDs');
                 constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
                                 ? constraints.split(","):[];  // JSON.parse(temp)
                 vocab_id = 0;
                        
                 if(rtyID==rt_ID){
                     //direct
-                    name = record['rst_DisplayName'];
+                    let name = record['rst_DisplayName'];
                     name = window.hWin.HEURIST4.util.trim_IanGt(name);
                 
                     if(fieldtype=='relmarker'){
@@ -252,22 +252,22 @@ $.widget( "heurist.ruleBuilder", {
                     
                 }else if(constraints.indexOf(rt_ID)>=0){
                     
-                    rt_name = $Db.rty(rtyID, 'rty_Name');
+                    const rt_name = $Db.rty(rtyID, 'rty_Name');
                     //is it inversed
-                    name = $Db.dty(dtyID, 'dty_Name');
+                    let name = $Db.dty(dtyID, 'dty_Name');
                     name = window.hWin.HEURIST4.util.trim_IanGt(name);
                     
                     if(fieldtype=='relmarker'){
                         vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
                     }
                     
-                    var key = (dtyID+'r'+rtyID);
+                    let key = (dtyID+'r'+rtyID);
                     
                     /*
                     if(arr_reverse[key]){
                         //already exists - add rectype name
-                        var title = arr_reverse[key].title;
-                        var tlen = title.length; //text on dropdown already too long    
+                        let title = arr_reverse[key].title;
+                        let tlen = title.length; //text on dropdown already too long    
                         if(tlen<73){
                             if(tlen>=70){
                                 title = title.substr(0,70)+'...';
@@ -296,12 +296,12 @@ $.widget( "heurist.ruleBuilder", {
         // relation than links
         this._arr_fields = arr_direct;
         
-        var has_pointer = false;
-        var has_relation = false;
-        var arr_options = [];
-        var arr_link = [], arr_rels = [];
-        for(var dtyID in arr_direct){
-            var opt = {key:arr_direct[dtyID].key, title:arr_direct[dtyID].title};
+        let has_pointer = false;
+        let has_relation = false;
+        let arr_options = [];
+        let arr_link = [], arr_rels = [];
+        for(let dtyID in arr_direct){
+            let opt = {key:arr_direct[dtyID].key, title:arr_direct[dtyID].title};
             if(arr_direct[dtyID].terms>0){
                 has_relation = true;
                 arr_rels.push(opt);    
@@ -321,9 +321,9 @@ $.widget( "heurist.ruleBuilder", {
         
         arr_reverse.sort(function(a,b){return a.dtyID<b.dtyID?-1:1})
         
-        for(var i=0; i<arr_reverse.length; i++){
-            var item = arr_reverse[i];
-            var opt = {key:item.key, title:item.title};
+        for(let i=0; i<arr_reverse.length; i++){
+            let item = arr_reverse[i];
+            let opt = {key:item.key, title:item.title};
             if(item.terms>0){
                 has_relation = true;
                 arr_rels.push(opt);    
@@ -369,9 +369,9 @@ $.widget( "heurist.ruleBuilder", {
         this._onSelectFieldtype();
         
         //this._on( this.select_fields, { change: this._onSelectFieldtype });
-        var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
+        let sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
         sel.hSelect( "widget" ).css({'font-size':'0.9em','max-width':'200px'});
-        var that = this;
+        let that = this;
         this.select_fields = sel;
         sel.hSelect({change: function( event, data ) {
                         //that.select_fields.val(data.item.value);//change value for underlaying html select
@@ -392,12 +392,13 @@ $.widget( "heurist.ruleBuilder", {
     //
     _onSelectFieldtype: function(event){
 
-        var dt_ID_key = this.select_fields.val(); //event?event.target.value:'',
-        is_not_relation = true,
-        is_not_selected = true; //field is not defined/selected
+        let dt_ID_key = this.select_fields.val(), //event?event.target.value:''
+            is_not_relation = true,
+            is_not_selected = true; //field is not defined/selected
+
         if(dt_ID_key!='' && dt_ID_key!=0) {
             
-            var arr_field = this._findField(dt_ID_key);
+            let arr_field = this._findField(dt_ID_key);
 
             if(arr_field){
                 if(arr_field.terms){
@@ -405,7 +406,7 @@ $.widget( "heurist.ruleBuilder", {
                     //this.label_3.show();
                     this.select_reltype.css({'visibility':'visible'});
                     this.select_reltype.prop('disabled', false);
-                    var sel = window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
+                    let sel = window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
                                 {vocab_id:arr_field.terms, topOptions:'Any relationship type'});
                     sel.hSelect( "widget" ).css('font-size','0.9em');
                     this.select_reltype = sel;
@@ -448,11 +449,11 @@ $.widget( "heurist.ruleBuilder", {
     },
 
     _getTargetRt: function(){
-        var rt_target = '';
+        let rt_target = '';
         if(!window.hWin.HEURIST4.util.isempty(this.select_target_rectype.val())){
             rt_target = this.select_target_rectype.val();
         }else{
-            var opts = this.select_target_rectype.find("option");
+            let opts = this.select_target_rectype.find("option");
             if(opts.length==2){
                 rt_target = $(opts[1]).attr('value');
             }
@@ -465,23 +466,23 @@ $.widget( "heurist.ruleBuilder", {
     //   
     _getCodes: function(){
 
-        var rt_source   = this.select_source_rectype.val();
+        let rt_source   = this.select_source_rectype.val();
 
         if(!rt_source){
             return null;
         }
 
 
-        var dt_ID = this.select_fields.val();
-        var rel_term_id = this.select_reltype.val();
-        var filter = this.additional_filter.val();
+        let dt_ID = this.select_fields.val();
+        let rel_term_id = this.select_reltype.val();
+        let filter = this.additional_filter.val();
 
-        var rt_target = this._getTargetRt();
+        let rt_target = this._getTargetRt();
 
-        var linktype = 0;
+        let linktype = 0;
 
         if(!window.hWin.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
-            var fld = this._findField(dt_ID);
+            let fld = this._findField(dt_ID);
             if(rel_term_id=="pointer"){
                 rel_term_id = '';
                 linktype = (fld && fld.isreverse)?1:2; //link to/from
@@ -506,16 +507,16 @@ $.widget( "heurist.ruleBuilder", {
 
     _getQuery: function(codes){
 
-        var query = '';
+        let query = '';
 
         if(Array.isArray(codes) && codes.length==6){
 
-            var rt_source = codes[0];
-            var dt_ID     = codes[1];
-            var rel_type  = codes[2];
-            var rt_target = codes[3];
-            var filter    = codes[4];
-            var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
+            let rt_source = codes[0];
+            let dt_ID     = codes[1];
+            let rel_type  = codes[2];
+            let rt_target = codes[3];
+            let filter    = codes[4];
+            let linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
 
             if(!window.hWin.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
 
@@ -541,14 +542,14 @@ $.widget( "heurist.ruleBuilder", {
     _initRules: function(){
 
         if(this.options.rules){
-            var codes = this.options.rules.codes;
+            let codes = this.options.rules.codes;
             
-            var query = window.hWin.HEURIST4.util.isJSON(this.options.rules.query);
+            let query = window.hWin.HEURIST4.util.isJSON(this.options.rules.query);
             
             if(!codes && query){
                     
                 //parse query
-                var link, keys = Object.keys(query);
+                let link, keys = Object.keys(query);
                 
                 if(keys.length<1) return;
                 
@@ -567,13 +568,13 @@ $.widget( "heurist.ruleBuilder", {
                     return;
                 }
 
-                linkdata = query[link];
+                let linkdata = query[link];
                 
                 link = link.split(':');
                 
-                var linktype = 0;
-                var dty_ID = 0;
-                var trm_ID = 0;
+                let linktype = 0;
+                let dty_ID = 0;
+                let trm_ID = 0;
                                 
                 switch (link[0]) {
                     case 'links': linktype = 0; break;
@@ -588,8 +589,8 @@ $.widget( "heurist.ruleBuilder", {
                     dty_ID = link[1];
                 }
                 
-                var rt_source = '';
-                for(var i=0; i<linkdata.length; i++){
+                let rt_source = '';
+                for(let i=0; i<linkdata.length; i++){
                     if(linkdata[i]['t']){
                         rt_source = linkdata[i]['t'];
                     }else if(linkdata[i]['r']){
@@ -597,13 +598,13 @@ $.widget( "heurist.ruleBuilder", {
                     }
                 }
                 //extract filter - since 3d element
-                var filter = [];
-                for(var i=2; i<keys.length; i++){
+                let filter = [];
+                for(let i=2; i<keys.length; i++){
                     if(keys[i]=='plain'){
                         filter = query['plain'];
                         break;
                     }else{
-                        var token = {};
+                        let token = {};
                         token[keys[i]] = query[keys[i]];
                         filter.push(token);
                     }
@@ -620,12 +621,12 @@ $.widget( "heurist.ruleBuilder", {
             
             if(Array.isArray(codes) && codes.length==6){
 
-                var rt_source = codes[0];
-                var dt_ID     = codes[1];
-                var rel_type  = codes[2]; //empty string for pointer
-                var rt_target = codes[3];
-                var filter    = codes[4];
-                var linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
+                const rt_source = codes[0];
+                const dt_ID     = codes[1];
+                let rel_type  = codes[2]; //empty string for pointer
+                const rt_target = codes[3];
+                let filter    = codes[4];
+                let linktype  = codes[5]; //0-all,1-linkto,2-linkfrom,3-relto,4-relfrom
 
 
                 //assign values from codes to html elements
@@ -633,7 +634,7 @@ $.widget( "heurist.ruleBuilder", {
                 this._onSelectRectype();
 
                 
-                var sel_field = dt_ID;
+                let sel_field = dt_ID;
                 if(linktype==1 || linktype==3){
                     sel_field = sel_field + 'r';
                     if(rt_target>0){
@@ -668,7 +669,7 @@ $.widget( "heurist.ruleBuilder", {
                 this.additional_filter.val(filter);
 
                 //add and init subrules
-                var that = this;
+                let that = this;
                 if(Array.isArray(this.options.rules.levels))
                     $.each( this.options.rules.levels , function( index, value ) {
                         that._addChildRule(value);
@@ -697,18 +698,18 @@ $.widget( "heurist.ruleBuilder", {
         // rules:[ {query:query, codes:[], levels:[]}, ....  ]
 
         //refresh query
-        var codes = this._getCodes();
+        let codes = this._getCodes();
         if(codes==null){
             return null;
         }else{
-            var query = this._getQuery(codes);
+            let query = this._getQuery(codes);
 
-            var sub_rules = [];
+            let sub_rules = [];
 
             //loop all dependent
             $.each( this.element.children('.rulebuilder') , function( index, value ) {
 
-                var subrule = $(value).ruleBuilder("getRulesOld");
+                let subrule = $(value).ruleBuilder("getRulesOld");
                 if(subrule!=null)  sub_rules.push(subrule);
 
             });
@@ -731,20 +732,20 @@ $.widget( "heurist.ruleBuilder", {
         //codes [rt_source, dt_ID, rel_term_id, rt_target, filter, linktype];
 
         //refresh query
-        var codes = this._getCodes();
+        let codes = this._getCodes();
         if(codes==null){
             return null;
         }else{
-            //var query = this._getQuery(codes);
+            //let query = this._getQuery(codes);
             
-            var rt_source = parseInt(codes[0]),
+            const rt_source = parseInt(codes[0]),
                 dty_ID    = parseInt(codes[1]),
                 trm_ID    = parseInt(codes[2]),
                 rt_target = parseInt(codes[3]),
-                filter = codes[4],
                 linktype = codes[5];
+            let filter = codes[4];
 
-            var link = '';
+            let link = '';
             switch (linktype) {
                 case 0: link = 'links'; break;
                 case 1: link = 'lt'; break;
@@ -756,7 +757,7 @@ $.widget( "heurist.ruleBuilder", {
             if(linktype>0 && dty_ID>0){
                 link = link+':'+dty_ID;
             }
-            var query = (rt_target>0)?{"t":rt_target}:{};
+            let query = (rt_target>0)?{"t":rt_target}:{};
             query[link] = [{"t":rt_source}];
             
             //additional filter
@@ -768,8 +769,8 @@ $.widget( "heurist.ruleBuilder", {
                     if(!Array.isArray(filter)){
                         filter = [filter];
                     }
-                    for(var i=0; i<filter.length; i++){
-                        var key = Object.keys(filter[i]);
+                    for(let i=0; i<filter.length; i++){
+                        let key = Object.keys(filter[i]);
                         query[key[0]] = filter[i][key[0]];    
                     }
                     
@@ -782,12 +783,12 @@ $.widget( "heurist.ruleBuilder", {
                 query[link].push({"r":trm_ID});        
             }
 
-            var sub_rules = [];
+            let sub_rules = [];
 
             //loop all dependent
             $.each( this.element.children('.rulebuilder') , function( index, value ) {
 
-                var subrule = $(value).ruleBuilder("getRules");
+                let subrule = $(value).ruleBuilder("getRules");
                 if(subrule!=null)  sub_rules.push(subrule);
 
             });
