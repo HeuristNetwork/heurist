@@ -82,7 +82,7 @@ function HLayout(args) {
     function _putAppOnTop( widgetname ){
         
         let app = _appGetWidgetByName( widgetname );
-        if(Hul.isnull(app)) return;
+        if(window.hWin.HEURIST4.util.isnull(app)) return;
         
         let ele = $(app.widget);  //find panel with widget
         if( ele.hasClass('ui-tabs-panel') ){
@@ -98,7 +98,7 @@ function HLayout(args) {
     //
     function _putAppOnTopById( layout_id ){
         
-        if(Hul.isnull(layout_id)) return;
+        if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
         
         //var $container = $(_containerid);
         let ele = $('div[layout_id="'+layout_id+'"]');
@@ -379,7 +379,7 @@ function HLayout(args) {
                 if(lpane.size){
                     layout_opts[pos+'__size'] = lpane.size;
                 }
-                if(Hul.isnull(lpane.resizable) || lpane.resizable ){
+                if(window.hWin.HEURIST4.util.isnull(lpane.resizable) || lpane.resizable ){
                     if(lpane.minsize){
                         layout_opts[pos+'__minSize'] = lpane.minsize;
                     }
@@ -1265,7 +1265,7 @@ console.error('Cardinal layout widget does not have proper options');
         //var $container = $(containerid);
         
         //add style to header
-        if(!Hul.isempty(layout.cssfile)){
+        if(!window.hWin.HEURIST4.util.isempty(layout.cssfile)){
             
             if(!Array.isArray(layout.cssfile)){
                 layout.cssfile = [layout.cssfile];
@@ -1277,7 +1277,7 @@ console.error('Cardinal layout widget does not have proper options');
         }
         
 
-        if(Hul.isempty(layout.type) || layout.type=='cardinal'){
+        if(window.hWin.HEURIST4.util.isempty(layout.type) || layout.type=='cardinal'){
             
             $container.empty();
             _initLayoutCardinal(layout, $container);
@@ -1495,7 +1495,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         visibilityAppById: function ( layout_id, show_or_hide ){
             
-            if(Hul.isnull(layout_id)) return;
+            if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
             //var $container = $(_containerid);
             let ele = $('div[layout_id="'+layout_id+'"]');
             
