@@ -463,7 +463,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             let fields = this._editing.getValues(false);
             fields['no_validation'] = 1; //do not validate required fields
             this._saveEditAndClose( fields, _callback);           
-        }else if(window.hWin.HUL.isFunction(_callback)){
+        }else if(window.hWin.HEURIST4.util.isFunction(_callback)){
             _callback();
         }
         
@@ -3886,7 +3886,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 that._additionWasPerformed = true;
                             }
                             
-                            if(window.hWin.HUL.isFunction(afterAction)){
+                            if(window.hWin.HEURIST4.util.isFunction(afterAction)){
                                
                                afterAction.call(); 
                                 
@@ -4695,7 +4695,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         
         window.hWin.HAPI4.SystemMgr.user_log('editRec', this._currentEditID); // log action
         
-        if(window.hWin.HUL.isFunction(this.options.onInitEditForm)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onInitEditForm)){
             this.options.onInitEditForm.call();
         }
         

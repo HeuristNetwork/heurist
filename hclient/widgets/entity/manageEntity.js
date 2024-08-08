@@ -336,7 +336,7 @@ $.widget( "heurist.manageEntity", {
                     function(entity){
                         that.options.entity = entity;
                         if(that._initControls()){
-                            if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                                 that.options.onInitFinished.call(that);
                             }        
                         }
@@ -346,7 +346,7 @@ $.widget( "heurist.manageEntity", {
             //entity already defined or set via options
             this._entityName = this.options.entity['entityName'];
             if(that._initControls()){
-                if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call( that );
                 }        
             }
@@ -1001,7 +1001,7 @@ $.widget( "heurist.manageEntity", {
                 },
                 close:function(){
                     
-                    if(window.hWin.HUL.isFunction(that.options.onClose)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                         //that.options.onClose(that._currentEditRecordset);  
                         that.options.onClose.call(that, that.contextOnClose());
                     } 
@@ -1072,7 +1072,7 @@ $.widget( "heurist.manageEntity", {
                     {default_palette_class: that.options.default_palette_class});
             return false;   
         }
-        if(window.hWin.HUL.isFunction(that.saveUiPreferences))that.saveUiPreferences();
+        if(window.hWin.HEURIST4.util.isFunction(that.saveUiPreferences))that.saveUiPreferences();
         return true;
     },
     
@@ -1133,7 +1133,7 @@ $.widget( "heurist.manageEntity", {
             this.element.hide();
         }
         
-        if(!this.options.isdialog && window.hWin.HUL.isFunction(this.options.onClose)){
+        if(!this.options.isdialog && window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
             this.options.onClose.call(this, this.contextOnClose());
         } 
         
@@ -1239,7 +1239,7 @@ $.widget( "heurist.manageEntity", {
                 this._selectAndClose(); //it triggers onselect and closes dialog
             }else{
                 //todo? use this._trigger( "onselect", null, this._selection);
-                if(window.hWin.HUL.isFunction(this.options.onSelect)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                     this.options.onSelect.call( this, this._selection );
                 }
                 
@@ -1536,14 +1536,14 @@ $.widget( "heurist.manageEntity", {
                             
                             that._afterSaveEventHandler2( recID, fields );        
                             
-                            if(window.hWin.HUL.isFunction(afterAction)){
+                            if(window.hWin.HEURIST4.util.isFunction(afterAction)){
                                 afterAction.call(that, recID, fields);
                             }else{
                                 that._afterSaveEventHandler( recID, fields );        
                             }
                             
                         }else{
-                            if(window.hWin.HUL.isFunction(onErrorAction)){
+                            if(window.hWin.HEURIST4.util.isFunction(onErrorAction)){
                                 onErrorAction.call(that, response);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);    

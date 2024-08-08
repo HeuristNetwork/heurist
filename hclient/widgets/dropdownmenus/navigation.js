@@ -589,7 +589,7 @@ $.widget( "heurist.navigation", {
         }
 
         
-        if(window.hWin.HUL.isFunction(this.options.onInitComplete)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onInitComplete)){
             this.options.onInitComplete.call(this, this.first_not_empty_page_id);
         }
 
@@ -644,7 +644,7 @@ $.widget( "heurist.navigation", {
             return;
         }
         
-        if(!data.hasContent && !window.hWin.HUL.isFunction(this.options.onmenuselect)){
+        if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
             
         }else if(data.page_id>0){
@@ -702,7 +702,7 @@ $.widget( "heurist.navigation", {
 
         let that = this;
 
-        if(window.hWin.HUL.isFunction(that.options.onmenuselect)){
+        if(window.hWin.HEURIST4.util.isFunction(that.options.onmenuselect)){
 
             this.options.onmenuselect( data.page_id );
 
@@ -831,7 +831,7 @@ $.widget( "heurist.navigation", {
                                     
                                     layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
 
-                                    if(window.hWin.HUL.isFunction(that.options.aftermenuselect)){
+                                    if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
                                         /*setTimeout(function(){
                                         that.options.aftermenuselect( data.page_id );
@@ -860,7 +860,7 @@ $.widget( "heurist.navigation", {
                             
                             //OLD 2022-02-17 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                             
-                            if(window.hWin.HUL.isFunction(that.options.aftermenuselect)){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                 that.options.aftermenuselect( document, data.page_id );
                             }
                     });*/

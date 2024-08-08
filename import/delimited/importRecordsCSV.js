@@ -4627,7 +4627,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = newvalues.join(', ');
         }
 
-        if(window.hWin.HUL.isFunction(callback)){
+        if(window.hWin.HEURIST4.util.isFunction(callback)){
                 
             _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback);
             
@@ -4709,7 +4709,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             return;
         }
         
-        if(window.hWin.HUL.isFunction(callback)){
+        if(window.hWin.HEURIST4.util.isFunction(callback)){
             callback.call(this, _prepareddata, hasPeriod);
         }else{
             _importTerms($dlg, _prepareddata, false, hasPeriod);

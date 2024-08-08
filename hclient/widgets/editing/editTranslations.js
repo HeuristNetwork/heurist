@@ -382,7 +382,7 @@ $.widget( "heurist.editTranslations", {
                 
             });
         
-            if(window.hWin.HUL.isFunction(this.options.onclose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onclose)){
                 this.options.onclose.call(this, res);        
             }
                 

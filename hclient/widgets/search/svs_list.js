@@ -377,7 +377,7 @@ $.widget( "heurist.svs_list", {
         this._refresh();
         }*/
         if(key=='onclose_search' && this.search_faceted && 
-            window.hWin.HUL.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance'))
+            window.hWin.HEURIST4.util.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance'))
         {
             this.search_faceted.search_faceted('option', 'onclose', value);
         }else if(key=='allowed_UGrpID' || key=='hide_header'){
@@ -482,7 +482,7 @@ $.widget( "heurist.svs_list", {
                 
                 that._activateMenuAndTruncate( groupToSave );
                 
-                if(window.hWin.HUL.isFunction(callback)) callback.call(this);
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                 
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response, true);
@@ -1086,12 +1086,12 @@ $.widget( "heurist.svs_list", {
             delegate: ".hasmenu2",
             menu: arr_menu,
             open: function(){
-                if(window.hWin.HUL.isFunction(that.options.menu_locked)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                     that.options.menu_locked.call( this, true );
                 }
             },
             close: function(){
-                if(window.hWin.HUL.isFunction(that.options.menu_locked)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                     that.options.menu_locked.call( this, false );
                 }
             },
@@ -1450,7 +1450,7 @@ $.widget( "heurist.svs_list", {
                 mode: 'hide'       // dimm Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
             };
 
-            if(window.hWin.HUL.isFunction(that.options.handle_favourites)){ // add extra dragging handle for saving filters as a favourite
+            if(window.hWin.HEURIST4.util.isFunction(that.options.handle_favourites)){ // add extra dragging handle for saving filters as a favourite
 
                 fancytree_options['dnd']['draggable'] = {
                     helper: function(event){
@@ -1462,13 +1462,13 @@ $.widget( "heurist.svs_list", {
                                     .data('ftSourceNode', sNode);
                     },
                     start: function(event, ui){
-                        if(window.hWin.HUL.isFunction(that.options.menu_locked)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                             that.options.menu_locked.call( that, true );
                         }
                     },
                     stop: function(event, ui){
 
-                        if(window.hWin.HUL.isFunction(that.options.menu_locked)){ // wait 2.5 seconds to disable menu lock
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){ // wait 2.5 seconds to disable menu lock
                             setTimeout(function(){ that.options.menu_locked.call( that, false ); }, 2000);
                         }
 
@@ -1703,12 +1703,12 @@ $.widget( "heurist.svs_list", {
 
                 open: function(){
                     //prevent collapse heurist main menu 
-                    if(window.hWin.HUL.isFunction(that.options.menu_locked)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                         that.options.menu_locked.call( this, true );
                     }
                 },
                 close: function(){
-                    if(window.hWin.HUL.isFunction(that.options.menu_locked)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                         that.options.menu_locked.call( this, false );
                     }
                 },
@@ -1717,7 +1717,7 @@ $.widget( "heurist.svs_list", {
                     let node = $.ui.fancytree.getNode(ui.target);
                     tree.contextmenu("enableEntry", "paste", node.folder && !!CLIPBOARD);
 
-                    let showFavourite = window.hWin.HUL.isFunction(that.options.handle_favourites) && !node.folder && node.key && !node.data.url;
+                    let showFavourite = window.hWin.HEURIST4.util.isFunction(that.options.handle_favourites) && !node.folder && node.key && !node.data.url;
                     tree.contextmenu('enableEntry', 'favourite', showFavourite);
                     tree.contextmenu('showEntry', 'favourite', showFavourite);
 
@@ -2098,7 +2098,7 @@ $.widget( "heurist.svs_list", {
                         this.search_tree.hide();
                     
                         //function to be called on close faceted search
-                        if(window.hWin.HUL.isFunction(that.options.onclose_search)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onclose_search)){
                             noptions.onclose = that.options.onclose_search;
                         }else{
                             noptions.onclose = function(event){
@@ -2118,7 +2118,7 @@ $.widget( "heurist.svs_list", {
                             };
                         }
 
-                        if(!window.hWin.HUL.isFunction($('body')['search_faceted'])){
+                        if(!window.hWin.HEURIST4.util.isFunction($('body')['search_faceted'])){
                             $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/search_faceted.js', function() {
                                 that.doSearch( 0, qname, qsearch, ele );
                             });
@@ -2194,7 +2194,7 @@ $.widget( "heurist.svs_list", {
                 }
                 
             }
-            if(window.hWin.HUL.isFunction(this.options.onClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                 this.options.onClose( context_on_exit );
             }
         }
@@ -2370,7 +2370,7 @@ $.widget( "heurist.svs_list", {
             if(groupID && svs_ID>0){
                 that._activateMenuAndTruncate(groupID);
                 
-                if(window.hWin.HUL.isFunction(after_save_callback)){
+                if(window.hWin.HEURIST4.util.isFunction(after_save_callback)){
                     after_save_callback.call( this, svs_ID );
                 }
             }
@@ -2390,7 +2390,7 @@ $.widget( "heurist.svs_list", {
             if(null == this.edit_dialog){
                 this.edit_dialog = new hSvsEdit();
             }
-            let is_lock = window.hWin.HUL.isFunction(this.options.menu_locked);
+            let is_lock = window.hWin.HEURIST4.util.isFunction(this.options.menu_locked);
             if(is_lock) {
                 this.options.menu_locked.call( this, true );
                 setTimeout(function(){that.options.menu_locked.call( that, false );}, 300);

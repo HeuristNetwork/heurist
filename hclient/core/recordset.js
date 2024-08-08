@@ -1050,7 +1050,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return null;
         }
         
-        if(that.calcfields && window.hWin.HUL.isFunction(that.calcfields[fldname])){
+        if(that.calcfields && window.hWin.HEURIST4.util.isFunction(that.calcfields[fldname])){
             return that.calcfields[fldname].call(that, record, fldname);
         }
         

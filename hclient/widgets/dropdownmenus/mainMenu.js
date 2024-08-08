@@ -373,13 +373,13 @@ $.widget( "heurist.mainMenu", {
                             that.sMsgCmsPrivate = '';
                         }
                         
-                        if(window.hWin.HUL.isFunction(callback)) callback(that);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback(that);
                     }
                 });
         }else{
             this.cms_home_records_count = 0;
             this.cms_home_private_records_ids = 0;
-            if(window.hWin.HUL.isFunction(callback)) callback(this);
+            if(window.hWin.HEURIST4.util.isFunction(callback)) callback(this);
         }   
     },
     

@@ -86,7 +86,7 @@ $.widget( "heurist.search", {
 
             function __initEntityFilter(){
 
-                if(window.hWin.HUL.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
+                if(window.hWin.HEURIST4.util.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
                     this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
                     .css({'height':'auto','font-size':'1em'})
                     .appendTo( this.element );
@@ -94,7 +94,7 @@ $.widget( "heurist.search", {
 
                     $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/searchByEntity.js', 
                         function() {  //+'?t='+(new Date().getTime())
-                            if(window.hWin.HUL.isFunction($('body')['searchByEntity'])){
+                            if(window.hWin.HEURIST4.util.isFunction($('body')['searchByEntity'])){
                                 __initEntityFilter();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Widget searchByEntity not loaded. Verify your configuration');
@@ -1040,7 +1040,7 @@ $.widget( "heurist.search", {
             }
         }else{
 
-            if(!window.hWin.HUL.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
+            if(!window.hWin.HEURIST4.util.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
 
                 let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 let scripts = [ path+'searchBuilder.js', 

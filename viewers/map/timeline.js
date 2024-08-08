@@ -126,7 +126,7 @@ $.widget( "heurist.timeline", {
                         that.selected_rec_ids.push( itemid ); //record id
                     });
                     
-                    if(window.hWin.HUL.isFunction(that.options.onselect)){ //trigger global event
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
                         that.options.onselect.call(that, that.selected_rec_ids);    
                     }
     
@@ -477,7 +477,7 @@ $.widget( "heurist.timeline", {
         }
         
         
-        if(window.hWin.HUL.isFunction(this.options.onfilter)){ //trigger global event
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onfilter)){ //trigger global event
         
             if (!this.isApplyTimelineFilter || !this.vis_timeline.itemsData || !params) return;
             
@@ -626,7 +626,7 @@ $.widget( "heurist.timeline", {
                             that.isApplyTimelineFilter = newval;
                             if(newval){
                                 that._timelineApplyRangeOnMap( null );    
-                            }else if(window.hWin.HUL.isFunction(that.options.onfilter)){
+                            }else if(window.hWin.HEURIST4.util.isFunction(that.options.onfilter)){
                                 //set map elements visible
                                 that.options.onfilter.call(this, true);
                             }

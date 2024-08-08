@@ -510,7 +510,7 @@ $.widget( "heurist.mapping", {
             this._inited_basemap = true;
         }
             
-        if(window.hWin.HUL.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
                 this.options.oninit.call(this, this.element);
         }
     },
@@ -1171,7 +1171,7 @@ $.widget( "heurist.mapping", {
                             that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
 
                             that.setFeatureSelection([feature.properties.rec_ID]);
-                            if(window.hWin.HUL.isFunction(that.options.onselect)){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
                                 that.options.onselect.call(that, [feature.properties.rec_ID]);
                             }
                             //open popup
@@ -1458,9 +1458,9 @@ $.widget( "heurist.mapping", {
             if(affected_layer){
                 let bnd;
                 
-                if(window.hWin.HUL.isFunction(affected_layer.getBounds)){
+                if(window.hWin.HEURIST4.util.isFunction(affected_layer.getBounds)){
                     bnd = affected_layer.getBounds();
-                }else if(window.hWin.HUL.isFunction(affected_layer.options.getBounds)){
+                }else if(window.hWin.HEURIST4.util.isFunction(affected_layer.options.getBounds)){
                     bnd = affected_layer.options.getBounds();
                 }
                 if(bnd){
@@ -2583,7 +2583,7 @@ $.widget( "heurist.mapping", {
             //if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
             that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight without zoom
-            //if(window.hWin.HUL.isFunction(that.options.onselect)){
+            //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
             //    that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
             //}
             
@@ -3269,7 +3269,7 @@ $.widget( "heurist.mapping", {
                             }
 
                             /*
-                            if(window.hWin.HUL.isFunction(layer.getElement)){
+                            if(window.hWin.HEURIST4.util.isFunction(layer.getElement)){
                             var ele = layer.getElement();
                             if(ele) ele.style.display = vis_val;
                             }else{
@@ -3503,7 +3503,7 @@ $.widget( "heurist.mapping", {
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
                         that.setFeatureSelection(selected_rec_ids, true, true, false); //timeline select - highlight on map and zoom
-                        //if(window.hWin.HUL.isFunction(that.options.onselect)){ //trigger global event
+                        //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
                         //    that.options.onselect.call(that, selected_rec_ids);
                         //}
                     },                
@@ -3647,7 +3647,7 @@ $.widget( "heurist.mapping", {
                     if(val=='addmapdoc'){ //addmapdoc plugin
                         that.map_addmapdoc = L.control.addmapdoc({ position: 'topleft', mapwidget:that });
                     }else
-                    if(val=='help' && window.hWin.HUL.isFunction(L.control.help)){ //publish plugin
+                    if(val=='help' && window.hWin.HEURIST4.util.isFunction(L.control.help)){ //publish plugin
                         that.map_help = L.control.help({ position: 'topleft', mapwidget:that });
                     }else
                     if(val=='draw') //draw plugin
@@ -4083,7 +4083,7 @@ $.widget( "heurist.mapping", {
     // 2) inn map legend
     //
     onLayerStatus: function( layer_ID, status ){
-        if(window.hWin.HUL.isFunction(this.options.onlayerstatus)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onlayerstatus)){
             this.options.onlayerstatus.call(this, layer_ID, status);
         }
         
@@ -4643,7 +4643,7 @@ $.widget( "heurist.mapping", {
         if(this.currentDrawMode=='image'){
             
             that.nativemap.on('draw:editmove draw:editresize', function (e) {
-                   if(window.hWin.HUL.isFunction(that.options.ondrawend)){
+                   if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                        that.options.ondrawend.call(that, e);
                    }
             });     
@@ -4680,30 +4680,30 @@ $.widget( "heurist.mapping", {
             let layer = e.layer;
             that.drawnItems.addLayer(layer);
             layer.editing.enable();
-            if(window.hWin.HUL.isFunction(that.options.ondrawend)){
+            if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                 that.options.ondrawend.call(that, e);
             }
             __set_btn_title();
             
-            if(that.options.ondraw_save_on_addition && window.hWin.HUL.isFunction(that.options.ondraw_editsave)){
+            if(that.options.ondraw_save_on_addition && window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                 that.options.ondraw_editsave.call(that, e);
             }
             
         });        
         that.nativemap.on('draw:drawstart', function (e) {
-               if(window.hWin.HUL.isFunction(that.options.ondraw_addstart)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_addstart)){
                    that.options.ondraw_addstart.call(that, e);
                }
                __set_btn_title();
         });
         that.nativemap.on('draw:editstart', function (e) {
-               if(window.hWin.HUL.isFunction(that.options.ondraw_editstart)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editstart)){
                    that.options.ondraw_editstart.call(that, e);
                }
                __set_btn_title();
         });
         that.nativemap.on('draw:edited', function (e) {
-               if(window.hWin.HUL.isFunction(that.options.ondrawend)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                    that.options.ondrawend.call(that, e);
                }
                __set_btn_title();
@@ -4711,7 +4711,7 @@ $.widget( "heurist.mapping", {
         //on save event       
         that.nativemap.on(L.Draw.Event.DELETED, function (e) {
             //var layers = e.layers;
-           if(window.hWin.HUL.isFunction(that.options.ondraw_editsave)){
+           if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                that.options.ondraw_editsave.call(that, e);
            }
         });

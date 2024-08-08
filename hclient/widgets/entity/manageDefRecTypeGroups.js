@@ -334,7 +334,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 });
                 
             }else if(action=='trash'){
-                if(window.hWin.HUL.isFunction(this.options.onSelect)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                     let id = $Db.getTrashGroupId('rtg');
                     this.options.onSelect.call( this, [id] );
                 }

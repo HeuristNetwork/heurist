@@ -1208,16 +1208,16 @@ window.hWin.HEURIST4.ui = {
             
             let onSelectMenu, onOpenMenu, onCloseMenu;
             if(eventHandlers && $.isPlainObject(eventHandlers)){
-                if(window.hWin.HUL.isFunction(eventHandlers.onOpenMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onOpenMenu)){
                     onOpenMenu = eventHandlers.onOpenMenu;
                 }
-                if(window.hWin.HUL.isFunction(eventHandlers.onCloseMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onCloseMenu)){
                     onCloseMenu = eventHandlers.onCloseMenu;
                 }
-                if(window.hWin.HUL.isFunction(eventHandlers.onSelectMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onSelectMenu)){
                     onSelectMenu = eventHandlers.onSelectMenu;
                 }
-            }else if(eventHandlers && window.hWin.HUL.isFunction(eventHandlers)){
+            }else if(eventHandlers && window.hWin.HEURIST4.util.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
              
@@ -1229,7 +1229,7 @@ window.hWin.HEURIST4.ui = {
  
                         selObj.val((data && data.item)?data.item.value:data);//change value for underlaying html select
 
-                        if(onSelectMenu && window.hWin.HUL.isFunction(onSelectMenu)){
+                        if(onSelectMenu && window.hWin.HEURIST4.util.isFunction(onSelectMenu)){
                             onSelectMenu.call(this, event);
                         }else{
                             selObj.trigger('change');
@@ -1262,12 +1262,12 @@ window.hWin.HEURIST4.ui = {
                     
                     wmenu_div.css('zIndex',69999);
 
-                    if(onOpenMenu && window.hWin.HUL.isFunction(onOpenMenu)){
+                    if(onOpenMenu && window.hWin.HEURIST4.util.isFunction(onOpenMenu)){
                         onOpenMenu.call(this, event);
                     }
                 },
                 close: function(event, ui){
-                    if(onCloseMenu && window.hWin.HUL.isFunction(onCloseMenu)){
+                    if(onCloseMenu && window.hWin.HEURIST4.util.isFunction(onCloseMenu)){
                         onCloseMenu.call(this, event);
                     }
                 }
@@ -1682,7 +1682,7 @@ window.hWin.HEURIST4.ui = {
 
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== 'undefined' && window.hWin.HUL.isFunction(showLoginDialog)){  // already loaded in index.php
+            if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
                 //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
                 showLoginDialog(isforsed, callback);
             }else{
@@ -1826,7 +1826,7 @@ window.hWin.HEURIST4.ui = {
                     widget.addEditRecord(-1);
                 }
             },
-            //selectOnSave: window.hWin.HUL.isFunction(callback),
+            //selectOnSave: window.hWin.HEURIST4.util.isFunction(callback),
             //onselect: callback
         });
 
@@ -1890,7 +1890,7 @@ window.hWin.HEURIST4.ui = {
                     callback: popup_options.callback,
                     beforeClose: function(){
                         //access manageRecord within frame within this popup and call close prefs
-                        if($dosframe && window.hWin.HUL.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                        if($dosframe && window.hWin.HEURIST4.util.isFunction($dosframe[0].contentWindow.onBeforeClose)){
                                 $dosframe[0].contentWindow.onBeforeClose();
                         }
                     }
@@ -2015,7 +2015,7 @@ window.hWin.HEURIST4.ui = {
         
         if(isEdit){
             
-            if($window.hWin.HUL.isFunction(selector_function)){
+            if($window.hWin.HEURIST4.util.isFunction(selector_function)){
                 let triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
@@ -2253,7 +2253,7 @@ window.hWin.HEURIST4.ui = {
                     let recordset = new HRecordSet(response.data);
                     if(recordset.length()>0){
                         let record = recordset.getFirstRecord();
-                        if(window.hWin.HUL.isFunction(callback)){
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(recordset.fld(record,'rec_Title'));    
                         }
                     }
@@ -2460,7 +2460,7 @@ window.hWin.HEURIST4.ui = {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
-                        if(window.hWin.HUL.isFunction(callback)){
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(selObj);
                         }
                         
@@ -2483,7 +2483,7 @@ window.hWin.HEURIST4.ui = {
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         
-        if(window.hWin.HUL.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
+        if(window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             let manage_dlg;
             
@@ -2559,7 +2559,7 @@ window.hWin.HEURIST4.ui = {
     showPublishDialog: function( options ){
         
         //OK! script as been loaded
-        if( typeof HPublishDialog==='undefined' || !window.hWin.HUL.isFunction(HPublishDialog)){        
+        if( typeof HPublishDialog==='undefined' || !window.hWin.HEURIST4.util.isFunction(HPublishDialog)){        
             let that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
@@ -2629,7 +2629,7 @@ window.hWin.HEURIST4.ui = {
     //
     showImgFilterDialog: function(current_value, callback){
         //todo optionally load dynamically editing_exts.js
-        if(typeof imgFilter !== 'undefined' && window.hWin.HUL.isFunction(imgFilter)){  // already loaded
+        if(typeof imgFilter !== 'undefined' && window.hWin.HEURIST4.util.isFunction(imgFilter)){  // already loaded
             imgFilter( current_value, callback );    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
@@ -2643,7 +2643,7 @@ window.hWin.HEURIST4.ui = {
     //
     showEditThemeDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editTheme.js
-        if(typeof editTheme !== 'undefined' && window.hWin.HUL.isFunction(editTheme)){
+        if(typeof editTheme !== 'undefined' && window.hWin.HEURIST4.util.isFunction(editTheme)){
             editTheme(current_value, callback);    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editTheme.js', function(){
@@ -2710,7 +2710,7 @@ window.hWin.HEURIST4.ui = {
             options['actionName'] = actionName;
         }
         
-        if(window.hWin.HUL.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
+        if(window.hWin.HEURIST4.util.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
         
             let manage_dlg;
             
@@ -3054,10 +3054,10 @@ window.hWin.HEURIST4.ui = {
              window.hWin.HEURIST4.wait_terminated = false;
              window.hWin.HEURIST4.ui.wait_ms = ms;
           }
-          if(window.hWin.HUL.isFunction(cb)){
+          if(window.hWin.HEURIST4.util.isFunction(cb)){
              window.hWin.HEURIST4.wait_callback = cb;
           }
-          if(window.hWin.HUL.isFunction(window.hWin.HEURIST4.wait_callback)){
+          if(window.hWin.HEURIST4.util.isFunction(window.hWin.HEURIST4.wait_callback)){
 
              window.hWin.HEURIST4.ui.wait_timeout = setTimeout(
                   function(){
@@ -3328,7 +3328,7 @@ window.hWin.HEURIST4.ui = {
         });
 
         /* fancybox gallery
-        if($.fancybox && window.hWin.HUL.isFunction($.fancybox)){
+        if($.fancybox && window.hWin.HEURIST4.util.isFunction($.fancybox)){
         $.fancybox({selector : selector,
         loop:true, buttons: [
         "zoom",

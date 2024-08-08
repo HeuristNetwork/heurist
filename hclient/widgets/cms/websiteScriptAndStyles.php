@@ -826,7 +826,7 @@ function afterPageLoad(document, pageid, eventdata){
     if(DT_CMS_SCRIPT>0){
         var func_name = 'afterPageLoad'+pageid;
     
-        if(!window.hWin.HUL.isFunction(window[func_name])){
+        if(!window.hWin.HEURIST4.util.isFunction(window[func_name])){
             var script_code = page_cache[pageid][DT_CMS_SCRIPT];
             if(script_code && script_code !== false){ //false means it is already inited
             
@@ -843,7 +843,7 @@ function afterPageLoad(document, pageid, eventdata){
             }
         }
         
-        if(window.hWin.HUL.isFunction(window[func_name])){  //window[func_name] && 
+        if(window.hWin.HEURIST4.util.isFunction(window[func_name])){  //window[func_name] && 
             //script may have event listener that is triggered on page exit
             //disable it
             $( "#main-content" ).off( "onexitpage");
@@ -854,7 +854,7 @@ function afterPageLoad(document, pageid, eventdata){
     //execute custom javascript for home page =========================
     if(pageid!=home_page_record_id && is_execute_homepage_custom_javascript){
         var func_name = 'afterPageLoad'+home_page_record_id;
-        if(window.hWin.HUL.isFunction(window[func_name])){
+        if(window.hWin.HEURIST4.util.isFunction(window[func_name])){
             //script may have event listener that is triggered on page exit
             //disable it
             $( "#main-content" ).off( "onexitpage");

@@ -55,7 +55,7 @@ function prepareTemplateBlog(new_element_json, callback){
                             ele.options.rendererExpandDetails = template_name;
                         }
                       
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(this, new_element_json);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, new_element_json);
                     }
                     
                 });

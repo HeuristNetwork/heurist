@@ -898,7 +898,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     if(rdiv.length){
                         let rec_ID = rdiv.attr('recid');
                         rdiv.click();
-                    }else if(window.hWin.HUL.isFunction(this.options.onSelect)){
+                    }else if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                         this.options.onSelect.call( this, null );
                     }
                 }                    
@@ -1595,7 +1595,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 btns[0].click = function(){
                     if(that.defaultBeforeClose()){
-                        if(window.hWin.HUL.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             that.options.onClose.call(that, that.contextOnClose() );
                         } 
                     }
@@ -1632,7 +1632,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 btns[0].click = function(){
                     if(that.defaultBeforeClose()){
                         /*
-                        if(window.hWin.HUL.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             //currently selected vocavulary
                             that.options.onClose.call( this, that.options.trm_VocabularyID );
                         }
@@ -1683,7 +1683,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(this.options.create_one_term){
                     if(that.defaultBeforeClose()){
-                        if(window.hWin.HUL.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             that._currentEditID = null; 
                             that.closeDialog(true);
                             that.options.onClose.call(that, recID);
@@ -3298,7 +3298,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                                     //update on client side
                                     $Db.changeParentInIndex(correct_vocab_id, trm_ID, old_parent_id);
                                     $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
-                                    if(window.hWin.HUL.isFunction(callback)) callback.call(trm_ID);
+                                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(trm_ID);
                                 }else{
                                     onTermSaveError(response)
                                 }

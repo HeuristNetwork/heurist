@@ -628,7 +628,7 @@ $.widget( "heurist.resultList", {
         .appendTo( this.element );
         
         
-        if(window.hWin.HUL.isFunction(this.options.onScroll)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onScroll)){
             this._on(this.div_content, {'scroll':this.options.onScroll});
         }
                           
@@ -823,7 +823,7 @@ $.widget( "heurist.resultList", {
         }
         
         if(this.options.show_menu){
-            if(window.hWin.HUL.isFunction($('body').resultListMenu)){
+            if(window.hWin.HEURIST4.util.isFunction($('body').resultListMenu)){
 
                 this.div_actions = $('<div>').resultListMenu({
                         is_h6style: this.options.is_h6style,
@@ -925,7 +925,7 @@ $.widget( "heurist.resultList", {
             this.options.onScroll = value;
 
             this._off(this.div_content, 'scroll');
-            if(window.hWin.HUL.isFunction(value)){
+            if(window.hWin.HEURIST4.util.isFunction(value)){
                 this._on(this.div_content, {'scroll':value});
             }
                           
@@ -1271,7 +1271,7 @@ $.widget( "heurist.resultList", {
         }
         
         //show hide table header
-        if(window.hWin.HUL.isFunction(this.options.rendererHeader)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.rendererHeader)){
             
             let header_html = (this.options.view_mode=='list')
                     ?this.options.rendererHeader():'';
@@ -1616,7 +1616,7 @@ $.widget( "heurist.resultList", {
     _renderRecord_html: function(recordset, record){
 
         //call external/custom function to render
-        if(window.hWin.HUL.isFunction(this.options.renderer)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.renderer)){
             return this.options.renderer.call(this, recordset, record);
         }
 
@@ -1907,7 +1907,7 @@ $.widget( "heurist.resultList", {
     //
     _recordDivOnHover: function(event){
         
-        if(window.hWin.HUL.isFunction(this.options.renderer)) return;
+        if(window.hWin.HEURIST4.util.isFunction(this.options.renderer)) return;
     
         let $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
@@ -2182,7 +2182,7 @@ $.widget( "heurist.resultList", {
                     if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
 
                         window.hWin.HAPI4.currentRecordsetSelection = [selected_rec_ID];
-                        if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
+                        if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
                         
                         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
                             hide_scope: true,
@@ -2310,7 +2310,7 @@ $.widget( "heurist.resultList", {
 
         }
         
-        //window.hWin.HUL.isFunction(this.options.renderer) && 
+        //window.hWin.HEURIST4.util.isFunction(this.options.renderer) && 
         if((this.options.view_mode!='horizontal' && this.options.view_mode!='vertical')   // && this.options.view_mode!='icons_list'
             && this.options.recordview_onselect=='inline'
             && this.options.expandDetailsOnClick){ // && this.options.view_mode=='list'
@@ -2368,7 +2368,7 @@ $.widget( "heurist.resultList", {
                 
                 let rendererTemplate = null;
                 //expand selected recordDiv and draw record details inline
-                if(window.hWin.HUL.isFunction(this.options.rendererExpandDetails)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.rendererExpandDetails)){
                     rendererTemplate = this.options.rendererExpandDetails.call(this, this._currentRecordset, recID);
                 }else {
                     rendererTemplate = this.options.rendererExpandDetails?this.options.rendererExpandDetails:'default'; //use renderRecordData.php
@@ -2584,7 +2584,7 @@ $.widget( "heurist.resultList", {
             this._trigger( "onselect", null, selected_recs );
         }
         
-        if(window.hWin.HUL.isFunction(this.options.onSelect)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
             if(!this.options.eventbased){
                 selected_ids = this.getSelected( true );
             }
@@ -3306,7 +3306,7 @@ $.widget( "heurist.resultList", {
                 
         if(this.options.groupByField){
             //Object.keys(html_groups);
-            let hasRender = window.hWin.HUL.isFunction(this.options.rendererGroupHeader);
+            let hasRender = window.hWin.HEURIST4.util.isFunction(this.options.rendererGroupHeader);
 
             //
             if(this.options.groupOnlyOneVisible && 
@@ -3398,7 +3398,7 @@ $.widget( "heurist.resultList", {
         function ___ontooltip(callback){
 
             let s = '';
-            if(window.hWin.HUL.isFunction(that.options.onTooltip)){
+            if(window.hWin.HEURIST4.util.isFunction(that.options.onTooltip)){
                 s = that.options.onTooltip.call(this, callback); // pass content to callback, if a server call is required
             }else{
                 let ele = $( this );
@@ -3514,7 +3514,7 @@ $.widget( "heurist.resultList", {
             mouseover: this._recordDivOnHover,
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
-                if(!window.hWin.HUL.isFunction(this.options.renderer)){
+                if(!window.hWin.HEURIST4.util.isFunction(this.options.renderer)){
                     
                     if(window.hWin.HAPI4.has_access()){
                         
@@ -3585,7 +3585,7 @@ $.widget( "heurist.resultList", {
                     });
                     that._currentRecordset.setOrder(rec_order);
 
-                    if(window.hWin.HUL.isFunction(that.options.onSortStop)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onSortStop)){
                         that.options.onSortStop.call(that, this.div_content);    
                     }
                 }
@@ -3594,10 +3594,10 @@ $.widget( "heurist.resultList", {
             this.div_content.sortable(this.options.sortable_opts);
             //$allrecs.draggable({containment:this.div_content});    
         }
-        if(window.hWin.HUL.isFunction(this.options.draggable)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.draggable)){
             this.options.draggable.call();
         }
-        if(window.hWin.HUL.isFunction(this.options.droppable)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.droppable)){
             this.options.droppable.call();
         }
         
@@ -3616,7 +3616,7 @@ $.widget( "heurist.resultList", {
         this._trigger( "onpagerender", null, this );
         
         //@todo replace it to event listener in manageRecUploadedFiles as in manageSysGroups
-        if(window.hWin.HUL.isFunction(this.options.onPageRender)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }
 
@@ -3719,7 +3719,7 @@ $.widget( "heurist.resultList", {
 
             that.loadanimation(true);
 
-            if(window.hWin.HUL.isFunction(this.options.searchfull)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.searchfull)){
                 //call custom function 
                 this.options.searchfull.call(this, rec_toload, this.current_page, 
                     function(response){ 

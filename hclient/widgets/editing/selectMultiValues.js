@@ -160,7 +160,7 @@ $.widget( "heurist.selectMultiValues", {
                     res.push(currname);
                 });
                 
-                if(window.hWin.HUL.isFunction(that.options.onselect)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
                     that.options.onselect.call(that, res);           
                 }
                 that._as_dialog.dialog('close');

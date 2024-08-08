@@ -208,7 +208,7 @@ function hSvsEdit(args) {
     */
     function _showSearchFacetedWizard ( params ){
 
-        if(window.hWin.HUL.isFunction($('body').search_faceted_wiz)){ //already loaded
+        if(window.hWin.HEURIST4.util.isFunction($('body').search_faceted_wiz)){ //already loaded
             return showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', 
@@ -403,13 +403,13 @@ function hSvsEdit(args) {
                         dlg_options = {
                             is_h6style:true, 
                             close:function(){
-                                if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                                if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                     menu_locked.call( this, false, false); //unlock
                                 }
                             }
                             };
                     }
-                    if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                    if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                         menu_locked.call( this, true, false); //lock
                     }
                     
@@ -471,7 +471,7 @@ function hSvsEdit(args) {
                                 let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
                                 if(svs[0]==svs_name.val() && svs[2]==svs_ugrid && id!=svs_id.val()){ //Hul._NAME  _GRPID
                                     
-                                    if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                                    if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                         menu_locked.call( this, true, false); //unlock
                                     }
                                     
@@ -482,14 +482,14 @@ function hSvsEdit(args) {
                                             __doSave(false);
                                             $mdlg.dialog( "close" );
                                             
-                                            if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                                            if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                                 menu_locked.call( this, false, false); //unlock
                                             }
                                       }},
                                       {text:'Cancel', click: function(){ 
                                             $mdlg.dialog( "close" ); 
                                             svs_name.trigger('focus');
-                                            if(menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                                            if(menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                                 menu_locked.call( this, false, false); //unlock
                                             }
                                       }}
@@ -645,7 +645,7 @@ function hSvsEdit(args) {
                     ],
                     close: function() {
                         allFields.removeClass( "ui-state-error" );
-                        if(!isRules && menu_locked && window.hWin.HUL.isFunction(menu_locked)){
+                        if(!isRules && menu_locked && window.hWin.HEURIST4.util.isFunction(menu_locked)){
                                 menu_locked.call( this, 'close'); //is_locked, is_mouseleave    
                         }
                     },
@@ -666,7 +666,7 @@ function hSvsEdit(args) {
                 if(is_h6style){
                     $dlg.parent().addClass('ui-heurist-explore');
                 }
-                if(window.hWin.HUL.isFunction(menu_locked)){  //@todo add call on open rulebuilder
+                if(window.hWin.HEURIST4.util.isFunction(menu_locked)){  //@todo add call on open rulebuilder
                     $dlg.parent('.ui-dialog').on({
                         mouseover:function(){ 
                             let is_mod = _isModified();

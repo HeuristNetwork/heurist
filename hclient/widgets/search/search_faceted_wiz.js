@@ -450,7 +450,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this.adjustDimension();
         }
         
-        if(window.hWin.HUL.isFunction(this.options.menu_locked)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             
             this._on(this.element.parent('.ui-dialog'), {
                         mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
@@ -661,7 +661,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this._showStep(newstep);
 
-            if(window.hWin.HUL.isFunction(this.options.menu_locked)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
                 if(newstep>0)  //increase delay on mouse exit 
                     this.options.menu_locked.call( this, 'delay');
             }
@@ -1151,7 +1151,7 @@ $.widget( "heurist.search_faceted_wiz", {
             url = url + '&rty_ID=' + this.select_main_rectype.val();
         }
         
-        if(this.options.menu_locked && window.hWin.HUL.isFunction(this.options.menu_locked)){
+        if(this.options.menu_locked && window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             this.options.menu_locked.call( this, true, false); //lock
         }
         
@@ -1160,7 +1160,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     closeOnEscape:true, width:1200, height:600, 
                     title:'Ruleset Editor', 
                     close:function(){
-                            if(this.options.menu_locked && window.hWin.HUL.isFunction(this.options.menu_locked)){
+                            if(this.options.menu_locked && window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
                                 this.options.menu_locked.call( this, false, false); //unlock
                             }
                     },

@@ -471,7 +471,7 @@ function editCMS2(website_document){
                         _toolbar_Page.hide();
                         page_was_modified = false; 
                         $dlg.dialog('close'); 
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
@@ -507,7 +507,7 @@ function editCMS2(website_document){
         // Display cms editor button
         _ws_body.find('#btnOpenCMSeditor').show().html('website editor');
 
-        if(window.hWin.HUL.isFunction(options.close)){
+        if(window.hWin.HEURIST4.util.isFunction(options.close)){
             options.close.call();
         }
     }
@@ -2138,7 +2138,7 @@ function(value){
                         }
                         */
                         
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                     
                 }else{

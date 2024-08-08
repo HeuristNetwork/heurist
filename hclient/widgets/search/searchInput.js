@@ -293,7 +293,7 @@ $.widget( "heurist.searchInput", {
             }
         }else{
             
-            if(!window.hWin.HUL.isFunction($('body')['showSearchBuilder'])){ 
+            if(!window.hWin.HEURIST4.util.isFunction($('body')['showSearchBuilder'])){ 
             
                 let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 let scripts = [ path+'searchBuilder.js', 

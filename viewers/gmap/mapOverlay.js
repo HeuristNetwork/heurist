@@ -118,7 +118,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     
                     if(_isPublicSite()){
                         menu_mapdocuments.hide();
-                    }else if(window.hWin.HUL.isFunction(onload_callback)) {
+                    }else if(window.hWin.HEURIST4.util.isFunction(onload_callback)) {
                         onload_callback.call();
                     }
                     
@@ -1080,7 +1080,7 @@ map.data.addListener('mouseover', function(event) {
                             source.recordset.setMapEnabled( true );
                             _addRecordsetLayer(source, index);
                         }
-                        if( source.callback && window.hWin.HUL.isFunction(source.callback) ){
+                        if( source.callback && window.hWin.HEURIST4.util.isFunction(source.callback) ){
                             source.callback( recordset, original_recordset );     
                         }
 

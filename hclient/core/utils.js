@@ -188,7 +188,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
                 
                 //if(mode !== (ele.prop('disabled')=='disabled')){
                 
-                if( ($.heurist.hSelect !=="undefined") && window.hWin.HUL.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
+                if( ($.heurist.hSelect !=="undefined") && window.hWin.HEURIST4.util.isFunction($.heurist.hSelect) && ele.hSelect("instance")!=undefined){              
 
                     if (mode) {
                         ele.hSelect( "disable" );
@@ -859,7 +859,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
         if ($idown.length==0) {
             $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
         }
-        if (window.hWin.HUL.isFunction(callback)) {
+        if (window.hWin.HEURIST4.util.isFunction(callback)) {
             $idown.on('load', callback);   
         }
         $idown.attr('src',url);
@@ -906,7 +906,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
 
 
     isRecordSet: function(recordset){
-        return !window.hWin.HUL.isnull(recordset) && window.hWin.HUL.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+        return !window.hWin.HUL.isnull(recordset) && window.hWin.HEURIST4.util.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
     },
 
     random: function(){
@@ -1096,7 +1096,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
             compare = (a, b) => {
                 return a < b;
             };
-        }else if(!window.hWin.HUL.isFunction(compare)){
+        }else if(!window.hWin.HEURIST4.util.isFunction(compare)){
             return array;
         }
 

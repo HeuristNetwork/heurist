@@ -299,7 +299,7 @@ $.widget( "heurist.searchBuilder", {
             this.element.parent().addClass('ui-heurist-explore');
         }
         
-        if(window.hWin.HUL.isFunction(this.options.menu_locked)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             
             this._on(this.element.parent('.ui-dialog'), {
                         mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
@@ -1123,11 +1123,11 @@ $.widget( "heurist.searchBuilder", {
         }else{
             
             let canClose = true;
-            if(window.hWin.HUL.isFunction(this.options.beforeClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
             if(canClose){
-                if(window.hWin.HUL.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose();
                 }
             }
@@ -1500,7 +1500,7 @@ $.widget( "heurist.searchBuilder", {
             url = url + '&rty_ID=' + this.select_main_rectype.val();
         }
         
-        if(window.hWin.HUL.isFunction(this.options.menu_locked)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             this.options.menu_locked.call( this, true, false); //lock
         }
 
@@ -1509,7 +1509,7 @@ $.widget( "heurist.searchBuilder", {
             closeOnEscape:true, width:1200, height:600, 
             title:'Ruleset Editor', 
             close:function(){
-                if(window.hWin.HUL.isFunction(this.options.menu_locked)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
                     this.options.menu_locked.call( this, false, false); //unlock
                 }
             },

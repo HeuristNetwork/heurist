@@ -1430,7 +1430,7 @@ function updateSteppedLines(lines, type){
                 + `L ${d.source.x + 35} ${d.source.y -35} `
                 + `L ${d.source.x} ${d.source.y}`;
 
-            if(window.hWin.HUL.isFunction($(this).attr)){
+            if(window.hWin.HEURIST4.util.isFunction($(this).attr)){
                 $(this).attr("marker-mid", marker_type);
             }
 

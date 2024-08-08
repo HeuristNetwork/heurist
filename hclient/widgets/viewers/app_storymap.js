@@ -417,7 +417,7 @@ $.widget( "heurist.app_storymap", {
                 this._mapping = $('#'+this.options.map_widget_id);
             }
             
-            if(window.hWin.HUL.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
+            if(window.hWin.HEURIST4.util.isFunction(this._mapping.app_timemap) && this._mapping.app_timemap('instance')){
                 //widget inited
                 if(!this._mapping.app_timemap('isMapInited')){
                     this._mapping.app_timemap('option','onMapInit', function(){
@@ -884,7 +884,7 @@ $.widget( "heurist.app_storymap", {
 
         if(this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab') this._tabs.hide(); else this.element.find('#tabCtrl').hide();
         
-        if(trigger_event !== false && window.hWin.HUL.isFunction(this.options.onClearStory)){
+        if(trigger_event !== false && window.hWin.HEURIST4.util.isFunction(this.options.onClearStory)){
             this.options.onClearStory.call(this);
         }
     },
@@ -2162,7 +2162,7 @@ $.widget( "heurist.app_storymap", {
         }        
         
         
-        if(window.hWin.HUL.isFunction(this._animationResolve)){
+        if(window.hWin.HEURIST4.util.isFunction(this._animationResolve)){
             if(duration==0){
                 this._animationResolve();
             }else{
@@ -2170,9 +2170,9 @@ $.widget( "heurist.app_storymap", {
                 setTimeout(function(){
                         if(that._terminateAnimation===true || that._terminateAnimation==recID){
                             //animation terminated actionBounds
-                            if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
+                            if(window.hWin.HEURIST4.util.isFunction(that._animationReject)) that._animationReject();
                         }else{
-                            if (window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();
+                            if (window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();
                         }                
                     }, duration);                        
             }
@@ -2187,7 +2187,7 @@ $.widget( "heurist.app_storymap", {
             $.each(layers, function(i, layer){
                       layer.remove();
             });
-            if(window.hWin.HUL.isFunction(this._animationResolve)) this._animationResolve();
+            if(window.hWin.HEURIST4.util.isFunction(this._animationResolve)) this._animationResolve();
     },
 
     //
@@ -2200,7 +2200,7 @@ $.widget( "heurist.app_storymap", {
                       layer.addTo( nativemap )                    
                   }
             });
-            if(window.hWin.HUL.isFunction(this._animationResolve)) this._animationResolve();
+            if(window.hWin.HEURIST4.util.isFunction(this._animationResolve)) this._animationResolve();
     },
 
     //
@@ -2234,7 +2234,7 @@ $.widget( "heurist.app_storymap", {
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
                         //animation terminated actionFadeIn
-                        if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
+                        if(window.hWin.HEURIST4.util.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
                
@@ -2264,10 +2264,10 @@ $.widget( "heurist.app_storymap", {
                     if(opacityStep>0 && show_delay>0){
                         //delay after show
                         setTimeout(function(){
-                             if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();   
+                             if(window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();   
                         }, show_delay);
                     }else{
-                        if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();        
+                        if(window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();        
                     }
                     
                     
@@ -2308,7 +2308,7 @@ $.widget( "heurist.app_storymap", {
                     
                     if(that._terminateAnimation===true || that._terminateAnimation==recID){
                         //animation terminated actionGradient
-                        if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
+                        if(window.hWin.HEURIST4.util.isFunction(that._animationReject)) that._animationReject();
                         return false;
                     }
                     
@@ -2323,7 +2323,7 @@ $.widget( "heurist.app_storymap", {
                 color_step++;
                 setTimeout(__changeColor, delay);
             }else{
-                if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();    
+                if(window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();    
             }                
         }
         
@@ -2360,7 +2360,7 @@ $.widget( "heurist.app_storymap", {
                     //animation terminated actionBlink
                     clearInterval(interval);
                     interval = 0;
-                    if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
+                    if(window.hWin.HEURIST4.util.isFunction(that._animationReject)) that._animationReject();
                     is_terminated = true;
                     return false;
                 }else 
@@ -2376,7 +2376,7 @@ $.widget( "heurist.app_storymap", {
             if(count>steps){
                 clearInterval(interval);
                 interval = 0;
-                if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();    
+                if(window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();    
             }
         },delay);
         
@@ -2415,14 +2415,14 @@ $.widget( "heurist.app_storymap", {
                 
                 if(that._terminateAnimation===true || that._terminateAnimation==recID){
                     //animation terminated actionSetStyle
-                    if(window.hWin.HUL.isFunction(that._animationReject)) that._animationReject();
+                    if(window.hWin.HEURIST4.util.isFunction(that._animationReject)) that._animationReject();
                     return false;
                 }else
-                    if(window.hWin.HUL.isFunction(that._animationResolve)) that._animationResolve();            
+                    if(window.hWin.HEURIST4.util.isFunction(that._animationResolve)) that._animationResolve();            
                 }, delay);
             
         }else{
-            if(window.hWin.HUL.isFunction(this._animationResolve)) this._animationResolve();            
+            if(window.hWin.HEURIST4.util.isFunction(this._animationResolve)) this._animationResolve();            
         }
         
     },

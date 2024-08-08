@@ -505,7 +505,7 @@ function hLayoutMgr(){
         
         if (app && app.script && app.widgetname) { //widgetname - function name to init widget
 
-            if(window.hWin.HUL.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
+            if(window.hWin.HEURIST4.util.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
 
                 container[app.widgetname]( layout.options );   //call function
                 
@@ -514,7 +514,7 @@ function hLayoutMgr(){
             }else{
 
                 $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if(window.hWin.HUL.isFunction(container[app.widgetname])){
+                    if(window.hWin.HEURIST4.util.isFunction(container[app.widgetname])){
                         container[app.widgetname]( layout.options );   //call function
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');

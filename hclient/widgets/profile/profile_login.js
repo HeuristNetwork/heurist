@@ -41,7 +41,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             let allFields = $dlg.find('input');       
             allFields.val( "" ).removeClass( "ui-state-error" );
             
-            if(window.hWin.HUL.isFunction(callback)){
+            if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback(window.hWin.HAPI4.has_access());
             }else
             if( isforsed && !window.hWin.HAPI4.has_access() ){
@@ -657,7 +657,7 @@ function doRegister( parentwin, is_guest=false ){
     } 
     let $doc = $(parentwin.document['body']);
 
-    if(window.hWin.HUL.isFunction($doc.profile_edit)){
+    if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
 
         let profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
@@ -669,7 +669,7 @@ function doRegister( parentwin, is_guest=false ){
         
     }else{
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if(window.hWin.HUL.isFunction($doc.profile_edit)){
+            if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
                 doRegister( parentwin, is_guest );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
@@ -811,7 +811,7 @@ function doAuthentication(login_data, login_dialog)
                     return;
                 }
                 /*
-                if(window.hWin.HUL.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback(true);
                 }
                 */

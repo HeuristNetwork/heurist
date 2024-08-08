@@ -402,7 +402,7 @@ $.widget( "heurist.recordListExt", {
               this._refresh();
         }
         
-        if(window.hWin.HUL.isFunction(this.options.onLoadComplete)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onLoadComplete)){
             this.options.onLoadComplete.call(this);
         }
         
@@ -423,7 +423,7 @@ $.widget( "heurist.recordListExt", {
             let fdoc = this.dosframe[0].contentWindow.document;
             let smarty_template = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url);
             
-            if(this._is_publication && window.hWin.HUL.isFunction(initLinksAndImages))
+            if(this._is_publication && window.hWin.HEURIST4.util.isFunction(initLinksAndImages))
             {
                 //init "a href" for CMS pages
                 if(!window.hWin.HEURIST4){

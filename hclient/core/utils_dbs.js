@@ -2254,7 +2254,7 @@ window.hWin.HEURIST4.dbs = {
 
                     $Db.changeParentInIndex(new_parent_id, term_IDs, old_parent_id);
 
-                    if(window.hWin.HUL.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback.call();
                     }
 
@@ -2364,14 +2364,14 @@ window.hWin.HEURIST4.dbs = {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        if(window.hWin.HUL.isFunction(callback)) callback.call();
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
             });
 
         }else{
-            if(window.hWin.HUL.isFunction(callback)) callback.call();
+            if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
         }
     },
     
@@ -2402,7 +2402,7 @@ window.hWin.HEURIST4.dbs = {
                         $Db.rty(rty_ID, 'rty_RecCount', cnt);
                     });
                     
-                    if(window.hWin.HUL.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call();
                     }
         

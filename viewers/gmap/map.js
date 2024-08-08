@@ -1133,7 +1133,7 @@ if(_mapdata.limit_warning){
         //timemap is already inited
         if(that.map_control!=null){
 
-                if(window.hWin.HUL.isFunction($( document ).bubble)){
+                if(window.hWin.HEURIST4.util.isFunction($( document ).bubble)){
                     $( document ).bubble('closeAll');  //close all popups    
                 }
 

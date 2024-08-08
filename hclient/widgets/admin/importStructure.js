@@ -902,7 +902,7 @@ $.widget( "heurist.importStructure", {
             resizeStop: function(){ that._fixWidth(); },
             close:function(){
 
-                if(window.hWin.HUL.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                     //that.options.onClose(that._currentEditRecordset);  
                     that.options.onClose.call();
                 } 

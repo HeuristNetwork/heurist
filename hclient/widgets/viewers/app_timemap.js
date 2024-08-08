@@ -420,7 +420,7 @@ $.widget( "heurist.app_timemap", {
             this.is_map_inited = true;
             this.options.init_completed = true;
 
-            if(window.hWin.HUL.isFunction(this.options.onMapInit)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onMapInit)){
                 this.options.onMapInit.call();
             }
             

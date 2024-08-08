@@ -143,7 +143,7 @@ $.widget( "heurist.lookupConfig", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{
                     if(that._initControls()){
-                        if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -152,7 +152,7 @@ $.widget( "heurist.lookupConfig", {
             return;
         }else{
             if(that._initControls()){
-                if(window.hWin.HUL.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }
@@ -248,7 +248,7 @@ $.widget( "heurist.lookupConfig", {
                 that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
             },
             close:function(){
-                if(window.hWin.HUL.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                   //that.options.onClose(that._currentEditRecordset);  
                   that.options.onClose( that.options.service_config );
                 } 

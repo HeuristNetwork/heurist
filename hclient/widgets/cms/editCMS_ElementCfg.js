@@ -1018,14 +1018,14 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     click: function(){
                         $container.find('.btn-save-element').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
                         $container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close'); 
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 

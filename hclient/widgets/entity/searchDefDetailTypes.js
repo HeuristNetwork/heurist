@@ -150,7 +150,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.element.find('#input_field_type_div').hide();
             this.element.find('#input_sort_type_div').hide();
         }
-        if(window.hWin.HUL.isFunction(this.options.onInitCompleted)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
             this.startSearch();              

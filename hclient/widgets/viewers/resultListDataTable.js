@@ -441,7 +441,7 @@ this._dout('reload datatable '+this.options.serverSide);
                 //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
                 //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
                 
-                if(window.hWin.HUL.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+                if(window.hWin.HEURIST4.util.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
                     this.selConfigs = $('<div>').appendTo(sel_container);
                     
                     this.selConfigs.configEntity({

@@ -477,7 +477,7 @@ title: "Overview"
                 _refreshMainMenu( false ); //after Rename   
                 
                 
-                if(window.hWin.HUL.isFunction(callback)) callback.call();
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -527,7 +527,7 @@ title: "Overview"
             if($dlg_element && $dlg_element.dialog('instance') !== undefined){
                 $dlg_element.dialog( "close" );
             }
-            if(!window.hWin.HUL.isFunction(callback)){
+            if(!window.hWin.HEURIST4.util.isFunction(callback)){
                 callback = function(new_page_id){
                     window.hWin.current_page_id = new_page_id;
                     _refreshMainMenu(); //after addition of new page
@@ -689,7 +689,7 @@ title: "Overview"
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 //refresh treeview
-                if(window.hWin.HUL.isFunction(callback)) callback.call( this, menu_id );
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call( this, menu_id );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -717,7 +717,7 @@ title: "Overview"
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 //refresh treeview
-                                if(window.hWin.HUL.isFunction(callback)) callback.call();
+                                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -726,7 +726,7 @@ title: "Overview"
 //
                 }else{
                     //refresh treeview
-                    if(window.hWin.HUL.isFunction(callback)) callback.call();
+                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                 }
             }else{                                                     
                 window.hWin.HEURIST4.msg.showMsgErr(response);

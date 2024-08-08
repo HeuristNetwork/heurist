@@ -222,7 +222,7 @@ $.widget( "heurist.search_faceted", {
 
         let that = this;
         
-        if(!window.hWin.HUL.isFunction($('body')['editing_input'])){
+        if(!window.hWin.HEURIST4.util.isFunction($('body')['editing_input'])){
             $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editing_input.js', function() {
                 that._create();
             });
@@ -379,7 +379,7 @@ $.widget( "heurist.search_faceted", {
                         that._recalculateFacets(-1);       
                         that.refreshSubsetSign();
 
-                        if(window.hWin.HUL.isFunction(that.options.params.callback_on_search_finish) && recset){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.params.callback_on_search_finish) && recset){
                               that.options.params.callback_on_search_finish.call(this, recset.count_total());
                         }
                     }         
@@ -1419,7 +1419,7 @@ $.widget( "heurist.search_faceted", {
     ,doClose: function(){
         //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
-        if(window.hWin.HUL.isFunction(this.options.onclose)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onclose)){
             this.options.onclose(this);
         }
         if(!this.options.is_publication){

@@ -80,7 +80,7 @@ function hEditing(_options) {
         
         _initEditForm(_options.recstructure, _options.recdata);
         
-        if(window.hWin.HUL.isFunction(_options.oninit)){ //init completed
+        if(window.hWin.HEURIST4.util.isFunction(_options.oninit)){ //init completed
             _options.oninit.call(that);
         }
     }
@@ -760,7 +760,7 @@ function hEditing(_options) {
     }
     
     function _onChange(){
-        if(window.hWin.HUL.isFunction(onChangeCallBack)){
+        if(window.hWin.HEURIST4.util.isFunction(onChangeCallBack)){
             onChangeCallBack.call( this );    
         }
     }

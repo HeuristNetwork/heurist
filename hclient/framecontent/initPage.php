@@ -347,7 +347,7 @@ $isUpgrade = true;
                 window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
             }
 
-            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HUL.isFunction(onAboutInit)){
+            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                     onAboutInit();//init about dialog
             }
@@ -364,7 +364,7 @@ $isUpgrade = true;
             success = false;
         }
 
-        if(window.hWin.HUL.isFunction(onPageInit)){
+        if(window.hWin.HEURIST4.util.isFunction(onPageInit)){
             onPageInit(success);
         }
     }
@@ -393,7 +393,7 @@ $isUpgrade = true;
                             setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
                         }
 
-                        if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HUL.isFunction(callback)){
+                        if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(true);
                         }
                     }else{
@@ -401,7 +401,7 @@ $isUpgrade = true;
                             message: sMsg,
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
-                        if(window.hWin.HUL.isFunction(callback)){ callback(false);}
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
                     }
                     }
                 });

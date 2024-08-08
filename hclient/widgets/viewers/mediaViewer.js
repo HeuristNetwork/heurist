@@ -235,10 +235,10 @@ $.widget( "heurist.mediaViewer", {
                                 selector : 'a[data-myfancybox="fb-images"]', 
                                 loop:true};
             
-            if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && window.hWin.HUL.isFunction($.fancybox)
+            if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && window.hWin.HEURIST4.util.isFunction($.fancybox)
                     $('body').off('click.fb-start');
                     window.hWin.HAPI4.fancybox( fancy_opts );
-            }else if (window.hWin.HUL.isFunction($.fn.fancybox)){
+            }else if (window.hWin.HEURIST4.util.isFunction($.fn.fancybox)){
                     $('body').off('click.fb-start');
                     $.fn.fancybox( fancy_opts );
             }
@@ -463,7 +463,7 @@ $.widget( "heurist.mediaViewer", {
         
         if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );
-        }else if (window.hWin.HUL.isFunction($.fn.fancybox)){
+        }else if (window.hWin.HEURIST4.util.isFunction($.fn.fancybox)){
                 $.fn.fancybox( fancy_opts );
         }
         

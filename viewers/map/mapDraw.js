@@ -175,7 +175,7 @@
             }
         }
     }
-    if(wkt!='' && window.hWin.HUL.isFunction(callback)){
+    if(wkt!='' && window.hWin.HEURIST4.util.isFunction(callback)){
         callback.call(this, wkt);
     }
 }

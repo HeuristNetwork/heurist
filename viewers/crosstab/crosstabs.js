@@ -341,7 +341,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if ($Db.rst(_selectedRtyID, detailid)==null)
         {
             $container.hide();
-            if(window.hWin.HUL.isFunction(callback)) callback.call();
+            if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
             return;
         }
 
@@ -386,7 +386,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $('#bottomContainer').removeClass('d-none');
                         }
 
-                        if(window.hWin.HUL.isFunction(callback)) callback.call();
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -422,7 +422,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $('#bottomContainer').removeClass('d-none');
                         }
 
-                        if(window.hWin.HUL.isFunction(callback)) callback.call();
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -454,7 +454,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             $('#bottomContainer').removeClass('d-none');
                         }
 
-                        if(window.hWin.HUL.isFunction(callback)) callback.call();
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -468,7 +468,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-        if(window.hWin.HUL.isFunction(callback)) callback.call();
+        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
         $('#bottomContainer').removeClass('d-none');    //Show table results
         if(notSaved) renderIntervals(name, true);  //DisplayPopup
     }

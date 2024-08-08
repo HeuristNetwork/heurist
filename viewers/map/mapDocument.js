@@ -144,7 +144,7 @@ function hMapDocument( _options )
                         let resdata = new HRecordSet(response.data);
                         map_documents = resdata;
                         
-                        if(window.hWin.HUL.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
+                        if(window.hWin.HEURIST4.util.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -590,13 +590,13 @@ console.log(treedata);
                         });
                                 
                         
-                        if(window.hWin.HUL.isFunction(callback)){
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback.call(that, _getTreeData(mapdoc_id));
                         }
                         
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(that);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                     }
 
                 }
@@ -704,7 +704,7 @@ console.log(treedata);
             (_record['layer']).applyStyle(new_value);
             
            //callback to update ui in mapManager
-            if(window.hWin.HUL.isFunction(callback)){
+            if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback( new_title, new_style );
             }
         });        
@@ -1293,7 +1293,7 @@ console.log(treedata);
 
                 onClose:function(event){
 
-                    if(window.hWin.HUL.isFunction(callback)) callback.call(that);
+                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                 }
             };//popup_options
 
@@ -1400,12 +1400,12 @@ console.log(treedata);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
-                            if(window.hWin.HUL.isFunction(callback)) callback.call(that);
+                            if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                         });
                         
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if(window.hWin.HUL.isFunction(callback)) callback.call(that);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that);
                     }
             });
         },

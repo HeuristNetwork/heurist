@@ -345,7 +345,7 @@ function __editTheme_continue(){
                 _theme_editing_symbology.setModified(false);
                 edit_dialog.dialog('close');
                 
-                if(window.hWin.HUL.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                     callback.call(this, res);
                 }
 

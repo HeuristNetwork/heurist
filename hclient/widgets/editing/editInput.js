@@ -282,7 +282,7 @@ $.widget( "heurist.editing_input", {
 
                         if(is_translation){
 
-                            if(typeof translationSupport!=='undefined' && window.hWin.HUL.isFunction(translationSupport)){
+                            if(typeof translationSupport!=='undefined' && window.hWin.HEURIST4.util.isFunction(translationSupport)){
                                 translationSupport(this); //see editing_exts
                             }
                             
@@ -375,7 +375,7 @@ $.widget( "heurist.editing_input", {
                                 this._addInput(this.new_value);
                                 this._refresh();
                                 
-                                if(window.hWin.HUL.isFunction(this.options.onrecreate)){
+                                if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
                                     this.options.onrecreate.call(this);
                                 }
                             }
@@ -912,7 +912,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();
         
-        if(window.hWin.HUL.isFunction(this.options.change)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.change)){
             this.options.change.call( this );    
         }
     },
@@ -2029,7 +2029,7 @@ $.widget( "heurist.editing_input", {
 
                             }
 
-                            if(window.hWin.HUL.isFunction(that._external_relmarker.callback)){
+                            if(window.hWin.HEURIST4.util.isFunction(that._external_relmarker.callback)){
                                 that._external_relmarker.callback(context);
                             }
 
@@ -2305,7 +2305,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
             
             __show_select_function = null;
-            if(typeof browseRecords!=='undefined' && window.hWin.HUL.isFunction(browseRecords)){
+            if(typeof browseRecords!=='undefined' && window.hWin.HEURIST4.util.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
             
@@ -5247,7 +5247,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();            
         
-        if(window.hWin.HUL.isFunction(this.options.onrecreate)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
             this.options.onrecreate.call(this);
         }
         
@@ -5960,7 +5960,7 @@ $.widget( "heurist.editing_input", {
 
         function translateDate(date, from_calendar, to_calendar){
 
-            if(!window.hWin.HUL.isFunction($('body').calendarsPicker)){
+            if(!window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){
                 return date;
             }
 
@@ -5990,7 +5990,7 @@ $.widget( "heurist.editing_input", {
         var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
                         .val(defDate).insertAfter( $input );
 
-        if(window.hWin.HUL.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
+        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
             var calendar = $.calendars.instance('gregorian');
             var g_calendar = $.calendars.instance('gregorian');
@@ -6218,7 +6218,7 @@ $.widget( "heurist.editing_input", {
                             $input.trigger('change');
                         }
 
-                        if(window.hWin.HUL.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+                        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
                             var new_temporal = null;
                             var new_cal = null;

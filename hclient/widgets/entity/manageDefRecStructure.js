@@ -2474,14 +2474,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     closeDialog: function(is_force){
         
-        if(window.hWin.HUL.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
+        if(window.hWin.HEURIST4.util.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
 
 
         if(this.options.external_toolbar){
             //rts editor is opened from record editor
 
             if(is_force || this.defaultBeforeClose()){
-                if(window.hWin.HUL.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose.call();
                 } 
             }

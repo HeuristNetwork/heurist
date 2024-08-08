@@ -291,7 +291,7 @@ $.widget( "heurist.editing_input", {
 
                         if(is_translation){
 
-                            if(typeof translationSupport!=='undefined' && window.hWin.HUL.isFunction(translationSupport)){
+                            if(typeof translationSupport!=='undefined' && window.hWin.HEURIST4.util.isFunction(translationSupport)){
                                 translationSupport(this); //see editing_exts
                             }
                             
@@ -387,7 +387,7 @@ $.widget( "heurist.editing_input", {
                                 this._addInput(this.new_value);
                                 this._refresh();
                                 
-                                if(window.hWin.HUL.isFunction(this.options.onrecreate)){
+                                if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
                                     this.options.onrecreate.call(this);
                                 }
                             }
@@ -942,7 +942,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();
         
-        if(window.hWin.HUL.isFunction(this.options.change)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.change)){
             this.options.change.call( this );    
         }
     },
@@ -1428,7 +1428,7 @@ $.widget( "heurist.editing_input", {
 
                             }
 
-                            if(window.hWin.HUL.isFunction(that._external_relmarker.callback)){
+                            if(window.hWin.HEURIST4.util.isFunction(that._external_relmarker.callback)){
                                 that._external_relmarker.callback(context);
                             }
 
@@ -1704,7 +1704,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
             
             let __show_select_function = null;
-            if(typeof browseRecords!=='undefined' && window.hWin.HUL.isFunction(browseRecords)){
+            if(typeof browseRecords!=='undefined' && window.hWin.HEURIST4.util.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
             
@@ -3536,7 +3536,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();            
         
-        if(window.hWin.HUL.isFunction(this.options.onrecreate)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
             this.options.onrecreate.call(this);
         }
         

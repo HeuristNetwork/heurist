@@ -28,8 +28,6 @@ function HLayout(args) {
      const _className = "HLayout",
          _version   = "0.4";      
 
-    //let Hul = window.hWin.HEURIST4.util;
-
     let widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
          layouts = [],  //json description of layout
@@ -82,7 +80,7 @@ function HLayout(args) {
     function _putAppOnTop( widgetname ){
         
         let app = _appGetWidgetByName( widgetname );
-        if(Hul.isnull(app)) return;
+        if(window.hWin.HEURIST4.util.isnull(app)) return;
         
         let ele = $(app.widget);  //find panel with widget
         if( ele.hasClass('ui-tabs-panel') ){
@@ -98,7 +96,7 @@ function HLayout(args) {
     //
     function _putAppOnTopById( layout_id ){
         
-        if(Hul.isnull(layout_id)) return;
+        if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
         
         //var $container = $(_containerid);
         let ele = $('div[layout_id="'+layout_id+'"]');
@@ -130,7 +128,7 @@ function HLayout(args) {
             $container = $(_containerid); 
         }
      
-        //if(!window.hWin.HUL.isFunction($container.layout)) return;
+        //if(!window.hWin.HEURIST4.util.isFunction($container.layout)) return;
         if(!$container.hasClass('ui-layout-container')) {
             $container = $container.children().find('.ui-layout-container');
         }
@@ -379,7 +377,7 @@ function HLayout(args) {
                 if(lpane.size){
                     layout_opts[pos+'__size'] = lpane.size;
                 }
-                if(Hul.isnull(lpane.resizable) || lpane.resizable ){
+                if(window.hWin.HEURIST4.util.isnull(lpane.resizable) || lpane.resizable ){
                     if(lpane.minsize){
                         layout_opts[pos+'__minSize'] = lpane.minsize;
                     }
@@ -967,14 +965,14 @@ console.error('Cardinal layout widget does not have proper options');
 
             app.widget = $content;
 
-            if(window.hWin.HUL.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
+            if(window.hWin.HEURIST4.util.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
             
                 $content[app.widgetname]( options );
             }else{
                 //this is normal way of widget initialization
                 // script is loaded dynamically and init function is widget name
                 $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if(window.hWin.HUL.isFunction($content[app.widgetname])){
+                    if(window.hWin.HEURIST4.util.isFunction($content[app.widgetname])){
                         $content[app.widgetname]( options );   //call function
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
@@ -1265,7 +1263,7 @@ console.error('Cardinal layout widget does not have proper options');
         //var $container = $(containerid);
         
         //add style to header
-        if(!Hul.isempty(layout.cssfile)){
+        if(!window.hWin.HEURIST4.util.isempty(layout.cssfile)){
             
             if(!Array.isArray(layout.cssfile)){
                 layout.cssfile = [layout.cssfile];
@@ -1277,7 +1275,7 @@ console.error('Cardinal layout widget does not have proper options');
         }
         
 
-        if(Hul.isempty(layout.type) || layout.type=='cardinal'){
+        if(window.hWin.HEURIST4.util.isempty(layout.type) || layout.type=='cardinal'){
             
             $container.empty();
             _initLayoutCardinal(layout, $container);
@@ -1427,11 +1425,11 @@ console.error('Cardinal layout widget does not have proper options');
         //
         executeWidgetMethod: function( element_id, widgetname, method, params ){
             let app = window.hWin.document.getElementById(element_id);
-            if(app && window.hWin.HUL.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
+            if(app && window.hWin.HEURIST4.util.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
                 $(app)[widgetname](method, params);
             }else if(!app){
                 console.log('widget '+element_id+' not found');
-            }else if(!window.hWin.HUL.isFunction($(app)[widgetname])){
+            }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
                 console.log('widget '+widgetname+' not loaded');
             //}else {
             //    console.error('widget '+widgetname+' not inited');
@@ -1466,7 +1464,7 @@ console.error('Cardinal layout widget does not have proper options');
             if(layout){
                 _appInitAll(layout, $container); 
             }else{
-                if(window.hWin.HUL.isFunction(onInitComplete)){
+                if(window.hWin.HEURIST4.util.isFunction(onInitComplete)){
                         onInitComplete.call();
                 }
             }
@@ -1495,7 +1493,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         visibilityAppById: function ( layout_id, show_or_hide ){
             
-            if(Hul.isnull(layout_id)) return;
+            if(window.hWin.HEURIST4.util.isnull(layout_id)) return;
             //var $container = $(_containerid);
             let ele = $('div[layout_id="'+layout_id+'"]');
             

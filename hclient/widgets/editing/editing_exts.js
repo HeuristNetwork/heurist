@@ -558,7 +558,7 @@ function editSymbology(current_value, mode_edit, callback){
                 _editing_symbology.setModified(false);
                 edit_symb_dialog.dialog('close');
                 
-                if(window.hWin.HUL.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                     callback.call(this, res);
                 }
 
@@ -1438,7 +1438,7 @@ function browseRecords(_editing_input, $input){
                     if(is_empty){
                         window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
                         return;
-                    }else if(that.options.editing && window.hWin.HUL.isFunction(that.options.editing.getOptions().onaction)){
+                    }else if(that.options.editing && window.hWin.HEURIST4.util.isFunction(that.options.editing.getOptions().onaction)){
                         //quick save without validation
                         that.options.editing.getOptions().onaction(null, 'save_quick');
                     }
@@ -2093,10 +2093,10 @@ function browseTerms(_editing_input, $input, value){
 //
 function translationSupport(_input_or_values, is_text_area, callback){
 
-    if(!window.hWin.HUL.isFunction($('body')['editTranslations'])){
+    if(!window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
             function() {  //+'?t='+(new Date().getTime())
-                if(window.hWin.HUL.isFunction($('body')['editTranslations'])){
+                if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
@@ -2122,7 +2122,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
             fieldtype: fieldtype,
             onclose:function(res){
                 if(res){
-                    if(window.hWin.HUL.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call(this, res);
                     }else{
                         that.setValue(res);    

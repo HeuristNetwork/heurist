@@ -71,7 +71,7 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
-        //if ( !window.hWin.HUL.isFunction($('body').hMapPublish) ) return;
+        //if ( !window.hWin.HEURIST4.util.isFunction($('body').hMapPublish) ) return;
         
         let container = L.DomUtil.create('div','leaflet-bar');
 
@@ -502,7 +502,7 @@ function hMapManager( _options )
                 
         tree_container.empty();    
         
-        if(window.hWin.HUL.isFunction($('body').fancytree)){
+        if(window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
 
@@ -1538,7 +1538,7 @@ function hMapManager( _options )
 
             mapdoc_id = mapdoc_id.split(',');
             
-            if(window.hWin.HUL.isFunction($('body').fancytree)){
+            if(window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
             
                 let tree = mapdoc_treeview.fancytree("getTree");
                 let selected = 0;
@@ -1745,7 +1745,7 @@ function hMapManager( _options )
         //
         //
         filterListMapDocuments: function(visible_mapdocuments){
-            if(window.hWin.HUL.isFunction($('body').fancytree) 
+            if(window.hWin.HEURIST4.util.isFunction($('body').fancytree) 
                 && ((visible_mapdocuments===true)  //force
                 || options.visible_mapdocuments != visible_mapdocuments)){
                 
