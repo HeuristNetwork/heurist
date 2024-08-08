@@ -341,12 +341,6 @@ $isUpgrade = true;
             if(!window.hWin.HAPI4.sysinfo['layout']){
                 var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
 
-                if(window.hWin.HEURIST4.util.isempty(layoutid)){
-                    layoutid = "H6Default";
-                }
-                window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
-            }
-
             if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                     onAboutInit();//init about dialog

@@ -766,7 +766,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         + 'class="select_rectype_seq" data-seq-order="' + i + '">';
 
             let fields = hierarchy;
-            if(!$.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
+            if(!Array.isArray(hierarchy) && !window.hWin.HEURIST4.util.isempty(hierarchy)){
                 fields = hierarchy.split(',');
             }
 
@@ -805,7 +805,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         $(s).appendTo(ele1);
 
-        $('.select_rectype_seq').click(function(event){
+        $('.select_rectype_seq').on('click', function(event){
 
             let sp = $(event.target)
 
@@ -820,7 +820,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
 
         //select first in sequence
-        $('.select_rectype_seq[data-seq-order="'+initial_selection+'"]').click();    
+        $('.select_rectype_seq[data-seq-order="'+initial_selection+'"]').trigger('click');    
 
         _adjustTablePosition();
 
@@ -1886,13 +1886,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
             .text( is_all_checked?'Select none':'Select all');
 
-        $('.lnk_SelectAll').click(function(e){
+        $('.lnk_SelectAll').on('click', function(e){
             let cb = $(e.target);
             let was_checked = (cb.attr('data-checked')==1);
             $("input[id^='cbsa_dt_']").each(function(i,item){
                 let dt = $(item).attr('data-type');
                 if(dt=='remain' || dt=='processed')
-                    $(item).prop('checked',was_checked?0:1).change(); 
+                    $(item).prop('checked',was_checked?0:1).trigger('change'); 
             });
             $('.lnk_SelectAll').attr('data-checked',(was_checked?0:1) );
             $('.lnk_SelectAll').text(was_checked?'Select all':'Select none');
@@ -2507,7 +2507,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             let $checked_boxes = $("input[id^='cbsa_dt_']:checked"); // save checked boxes
                             _initFieldMapppingSelectors(); // recreate selects
 
-                            $checked_boxes.prop('checked', true).change(); // re-check boxes, they get reset by the above recreate
+                            $checked_boxes.prop('checked', true).trigger('change'); // re-check boxes, they get reset by the above recreate
                         }
                     });
                 }
@@ -3704,7 +3704,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             }
 
                             // auto check 'ignore errors', these errors can be picked up and fixed by verify integrity or manually
-                            $('#sa_ignore_errors').prop('checked', true).change();
+                            $('#sa_ignore_errors').prop('checked', true).trigger('change');
                         }else{
                             $('#btnShowWarnings').hide();
                         }

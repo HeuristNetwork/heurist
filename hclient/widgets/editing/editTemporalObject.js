@@ -743,7 +743,7 @@ let TemporalPopup = (function () {
         }); //end change calendar
 
         $('#selectCLD').val(calendar_type);
-        $('#selectCLD').change();
+        $('#selectCLD').trigger('change');
     }
 
 	function setupEras(){

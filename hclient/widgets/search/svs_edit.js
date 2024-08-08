@@ -345,7 +345,7 @@ function hSvsEdit(args) {
                 let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
                     try {
-                        facet_params = JSON.parse(svs[_QUERY]); //Hul._QUERY
+                        facet_params = JSON.parse(svs[1]); //Hul._QUERY
                     }catch (err) {
                         // TODo something about the exception here
                         window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");

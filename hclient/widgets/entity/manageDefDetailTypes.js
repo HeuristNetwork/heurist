@@ -852,7 +852,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         desc_field[0].val(this.options.newFieldName);
                     }
 
-                    name_field[0].change();
+                    name_field[0].trigger('change');
                 }
             }
         }

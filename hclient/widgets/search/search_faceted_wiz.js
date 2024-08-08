@@ -2465,7 +2465,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
 function showSearchFacetedWizard( params ){
 
-    if(!$.isFunction($('body').fancytree)){
+    if(!window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
 
         $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', 
                 function(){ showSearchFacetedWizard(params); } );

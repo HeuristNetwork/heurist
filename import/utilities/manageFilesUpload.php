@@ -455,7 +455,7 @@ if(!($max_size>0)) {$max_size = 0;}
                         }
 
                         // Open Index media files window
-                        setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').trigger('click'); }, 500);
+                        setTimeout(function(){ $(parent.document).find('li[data-action="menu-files-index"]').trigger('click');}, 500);
                     };
                     btns[window.hWin.HR('Exit without Indexing')] = function(){
                         

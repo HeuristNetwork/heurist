@@ -722,7 +722,7 @@ console.log(treedata);
             _recset.setFld(_record, DT_SYMBOLOGY, new_value);
             (_record['layer']).applyStyle(new_value);
 
-            if($.isFunction(callback)){
+            if(window.hWin.HEURIST4.util.isFunction(callback)){
                 callback(new_value);
             }
         });

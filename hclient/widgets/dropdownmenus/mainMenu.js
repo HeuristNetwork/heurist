@@ -2394,7 +2394,7 @@ $.widget( "heurist.mainMenu", {
     //
     _doRegister: function(){
         /*
-        if(false && !$.isFunction(doRegister)){  // already loaded in index.php
+        if(false && !window.hWin.HEURIST4.util.isFunction(doRegister)){  // already loaded in index.php
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
         }else{}
         */
@@ -2872,6 +2872,6 @@ $.widget( "heurist.mainMenu", {
 
         $dlg.find('input#rectypes-all').on('change', function(event){
             window.hWin.HEURIST4.util.setDisabled($dlg.find('button#rectypes-select, div#rectypes-list'), $(event.target).is(':checked'));
-        }).change();
+        }).trigger('change');
     }
 });

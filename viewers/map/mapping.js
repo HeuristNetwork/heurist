@@ -2917,7 +2917,7 @@ $.widget( "heurist.mapping", {
             this.zoomToSelection();        
         }
         
-        if($.isFunction(this.options.onselect)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onselect)){
             this.options.onselect.call(this, this.selected_rec_ids );
         }
         
@@ -4385,7 +4385,7 @@ $.widget( "heurist.mapping", {
 
         let bounds = this.drawnItems.getBounds();
 
-        if(window.hWin.HEURIST4.util.isFunction(callback)){//$.isFunction(callback)
+        if(window.hWin.HEURIST4.util.isFunction(callback)){//window.hWin.HEURIST4.util.isFunction(callback)
             this.nativemap.once('zoomend moveend', callback); // call once
         }
 
@@ -4710,7 +4710,6 @@ $.widget( "heurist.mapping", {
         });     
         //on save event       
         that.nativemap.on(L.Draw.Event.DELETED, function (e) {
-            //var layers = e.layers;
            if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                that.options.ondraw_editsave.call(that, e);
            }

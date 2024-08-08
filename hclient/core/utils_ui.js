@@ -473,9 +473,8 @@ window.hWin.HEURIST4.ui = {
         }
 
         if(!(Array.isArray(topOptions) ||
-             window.hWin.HEURIST4.util.isempty(topOptions) ||
-             topOptions===false))
-        {
+           window.hWin.HEURIST4.util.isempty(topOptions) ||
+           topOptions===false)){
             if(topOptions===true) topOptions = '  ';  // <blank>
             topOptions = [{key:'', title:topOptions}];
         }
@@ -813,7 +812,7 @@ window.hWin.HEURIST4.ui = {
         //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             
-            let rectype = Number(Array.isArray(rtyIDs))?rtyIDs[0]:rtyIDs;
+            let rectype = Number((Array.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
             details = $Db.rst(rectype);
             if(!details) return selObj; //structure not defined
@@ -2015,7 +2014,7 @@ window.hWin.HEURIST4.ui = {
         
         if(isEdit){
             
-            if($window.hWin.HEURIST4.util.isFunction(selector_function)){
+            if(window.hWin.HEURIST4.util.isFunction(selector_function)){
                 let triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
@@ -2440,7 +2439,7 @@ window.hWin.HEURIST4.ui = {
                                 }
                             }
 
-                            if(!!Array.isArray(topOptions)){
+                            if(!Array.isArray(topOptions)){
                                 if(topOptions==true){
                                     topOptions = [{key:'',title:window.hWin.HR('select...')}];
                                 }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){

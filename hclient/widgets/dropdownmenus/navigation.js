@@ -643,7 +643,6 @@ $.widget( "heurist.navigation", {
         }else if(!is_selectable && $target.parent().find('ul').length != 0){ // stop click if a submenu exists
             return;
         }
-        
         if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
             

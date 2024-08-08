@@ -140,7 +140,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
                             cur_val = cur_val.join(', ');
                         }
 
-                        $input.val(cur_val).change();
+                        $input.val(cur_val).trigger('change');
                     }
                 });
             }else{

@@ -2464,7 +2464,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         );
 
                         let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
-                            var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
+                            let params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
                             params['show_warn_about_relationship'] = false;
                             window.hWin.HAPI4.save_pref('prefs_'+that._entityName, params);     
 
@@ -5600,7 +5600,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                     continue;
                                 }
 
-                                if(window.hWin.HEURIST4.util.isArray(newval[i])){
+                                if(Array.isArray(newval[i])){
                                     for(let j = 0; j < newval[i].length; j++){
 
                                         let label = window.hWin.HEURIST4.util.isObject(newval[i][j]) ? newval[i][j]['label'] : newval[i][j];

@@ -229,21 +229,6 @@ $.widget( "heurist.mediaViewer", {
             this.mediacontent.show();
             
             this._initThumbnails('a[data-id]');
-
-            /*
-            let fancy_opts = { selectorParentEl: this.mediacontent, //$('body'), 
-                                selector : 'a[data-myfancybox="fb-images"]', 
-                                loop:true};
-            
-            if(window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ // && window.hWin.HEURIST4.util.isFunction($.fancybox)
-                    $('body').off('click.fb-start');
-                    window.hWin.HAPI4.fancybox( fancy_opts );
-            }else if (window.hWin.HEURIST4.util.isFunction($.fn.fancybox)){
-                    $('body').off('click.fb-start');
-                    $.fn.fancybox( fancy_opts );
-            }
-            */
-            
         }
     }
     

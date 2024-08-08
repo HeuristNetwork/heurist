@@ -4163,7 +4163,7 @@ $.widget( "heurist.editing_input", {
 
         function translateDate(date, from_calendar, to_calendar){
 
-            if(!$.isFunction($('body').calendarsPicker)){
+            if(!window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){
                 return date;
             }
 
@@ -4193,7 +4193,7 @@ $.widget( "heurist.editing_input", {
         let $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
                         .val(defDate).insertAfter( $input );
 
-        if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
+        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
             let temporal = null;
 
@@ -4523,7 +4523,7 @@ $.widget( "heurist.editing_input", {
                             $input.change();
                         }
 
-                        if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+                        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
                             let new_temporal = null;
                             let new_cal = null;

@@ -186,7 +186,7 @@ $.widget( "heurist.repositoryConfig", {
                 that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
             },
             close:function(){
-                if($.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                   //that.options.onClose(that._currentEditRecordset);  
                   that.options.onClose( that.options.service_config );
                 } 
@@ -363,7 +363,7 @@ $.widget( "heurist.repositoryConfig", {
             that._services_modified = false;
 
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }

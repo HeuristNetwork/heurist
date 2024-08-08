@@ -76,7 +76,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         }
         }}];
 
-        if(!$.isFunction(on_change)){
+        if(!window.hWin.HEURIST4.util.isFunction(on_change)){
             on_change = $.noop();
         }
         

@@ -598,6 +598,12 @@ $.widget( "heurist.svs_list", {
 
         let that = this;
 
+        //verify that all required libraries have been loaded
+        if(!window.hWin.HEURIST4.util.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
+            $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
+            return;
+        } 
+        
 /*        
         if( (!islogged || this.isPublished) && !window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //!(islogged || window.hWin.HAPI4.currentUser.ugr_SvsTreeData)){
         
@@ -2381,7 +2387,7 @@ $.widget( "heurist.svs_list", {
         };
 
         const svs_edit_js_loaded = true;
-        if( svs_edit_js_loaded ) { //}!window.hWin.HEURIST4.util.isnull(this.hSvsEdit) && $.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
+        if( svs_edit_js_loaded ) { //}!window.hWin.HEURIST4.util.isnull(this.hSvsEdit) && window.hWin.HEURIST4.util.isFunction(this.hSvsEdit)){ //already loaded     @todo - load dynamically
 
             if(window.hWin.HEURIST4.util.isnull(svsID) && window.hWin.HEURIST4.util.isempty(squery)){
                 squery = window.hWin.HEURIST4.util.cloneJSON(this.currentSearch);
