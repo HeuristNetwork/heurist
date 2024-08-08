@@ -114,7 +114,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
     //
     _initList: function(){
         
-        if($.isArray(this.options.allValues) && this.options.allValues.length>0){
+        if(Array.isArray(this.options.allValues) && this.options.allValues.length>0){
             
             this._showAsDialog();
             this._initTreeView( this.options.allValues );    
@@ -132,7 +132,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.options.allValues = response.data;
-                        if($.isArray(that.options.allValues) && that.options.allValues.length>0){
+                        if(Array.isArray(that.options.allValues) && that.options.allValues.length>0){
                             that._initList();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(that.options.emptyMessage));                

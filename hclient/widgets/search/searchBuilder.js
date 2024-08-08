@@ -299,7 +299,7 @@ $.widget( "heurist.searchBuilder", {
             this.element.parent().addClass('ui-heurist-explore');
         }
         
-        if($.isFunction(this.options.menu_locked)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             
             this._on(this.element.parent('.ui-dialog'), {
                         mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
@@ -608,7 +608,7 @@ $.widget( "heurist.searchBuilder", {
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
                 .attr('title', window.hWin.HR('Edit RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
+                .on('click', function( event ) {
                     that._editRules();
                 });
 
@@ -616,7 +616,7 @@ $.widget( "heurist.searchBuilder", {
                 .button({icons: {primary: "ui-icon-close"}, text:false})
                 .attr('title', window.hWin.HR('Clear RuleSet'))
                 .css({'height':'16px', 'width':'16px'})
-                .click(function( event ) {
+                .on('click', function( event ) {
                     that.rulesetSection.find('#svs_Rules').val('');
                 });
             }
@@ -1045,14 +1045,14 @@ $.widget( "heurist.searchBuilder", {
             that.current_tree_rectype_ids = rectypeIds.join(',');
 
 
-            $("#fsw_showreverse").change(function(event){
+            $("#fsw_showreverse").on('change', function(event){
                 that.showHideReverse();
             });
 
             //tree.options.filter.mode = "hide";
             //tree.options.filter.highlight = false;
             $("#fsw_showreverse").attr('checked', false);
-            $("#fsw_showreverse").change();
+            $("#fsw_showreverse").trigger('change');
 
             this._off($('[name="tree_order"]'), 'change');
             this._on($('[name="tree_order"]'), {
@@ -1124,11 +1124,11 @@ $.widget( "heurist.searchBuilder", {
         }else{
             
             let canClose = true;
-            if($.isFunction(this.options.beforeClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
             if(canClose){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose();
                 }
             }
@@ -1313,7 +1313,7 @@ $.widget( "heurist.searchBuilder", {
                                          && is_relationship) continue; //ignore t:1 for relationships
                             
                                 let not_found = true;
-                                if($.isArray(branch)){
+                                if(Array.isArray(branch)){
                                 
                                     $.each(branch,function(m,item){
                                        if(item['t']==codes[k]){
@@ -1366,7 +1366,7 @@ $.widget( "heurist.searchBuilder", {
                             $.each(branch, function(i,item){
                                 if(item[key]){
                                     //is_relationship = (linktype=='rt')||(linktype=='rf');
-                                    if(!$.isArray(item[key])){
+                                    if(!Array.isArray(item[key])){
                                         item[key] = [{ids:item[key]}];
                                     }
                                     branch = item[key];    
@@ -1501,7 +1501,7 @@ $.widget( "heurist.searchBuilder", {
             url = url + '&rty_ID=' + this.select_main_rectype.val();
         }
         
-        if($.isFunction(this.options.menu_locked)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
             this.options.menu_locked.call( this, true, false); //lock
         }
 
@@ -1510,7 +1510,7 @@ $.widget( "heurist.searchBuilder", {
             closeOnEscape:true, width:1200, height:600, 
             title:'Ruleset Editor', 
             close:function(){
-                if($.isFunction(this.options.menu_locked)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
                     this.options.menu_locked.call( this, false, false); //unlock
                 }
             },

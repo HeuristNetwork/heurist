@@ -143,7 +143,7 @@ $.widget( "heurist.lookupConfig", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -152,7 +152,7 @@ $.widget( "heurist.lookupConfig", {
             return;
         }else{
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }
@@ -248,7 +248,7 @@ $.widget( "heurist.lookupConfig", {
                 that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
             },
             close:function(){
-                if($.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                   //that.options.onClose(that._currentEditRecordset);  
                   that.options.onClose( that.options.service_config );
                 } 
@@ -416,7 +416,7 @@ $.widget( "heurist.lookupConfig", {
                 let service = that.selectServiceType.val();
                 let max = 0;
 
-                if(window.hWin.HEURIST4.util.isArray(that.example_results[service])){
+                if(Array.isArray(that.example_results[service])){
                     max = that.example_results[service].length - 1;
                 }else if(window.hWin.HEURIST4.util.isPlainObject(that.example_results[service])){
                     max = Object.keys(that.example_results[service]).length - 1;
@@ -1056,7 +1056,7 @@ $.widget( "heurist.lookupConfig", {
                                     cur_string = cur_obj;
                                 }
             
-                                if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                                if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
                                     creator_val += 'Missing author; ';
                                 }else{
                                     creator_val += cur_string + '; ';
@@ -1088,7 +1088,7 @@ $.widget( "heurist.lookupConfig", {
                                     cur_string = cur_obj;
                                 }
             
-                                if(!cur_string || $.isArray(cur_string) || $.isPlainObject(cur_string)){
+                                if(!cur_string || Array.isArray(cur_string) || $.isPlainObject(cur_string)){
                                     pub_val += 'Missing publisher; ';
                                 }else{
                                     pub_val += cur_string + '; ';
@@ -1123,7 +1123,7 @@ $.widget( "heurist.lookupConfig", {
 
                     if($.isPlainObject(value)){
                         value = window.hWin.HEURIST4.util.htmlEscape(Object.values(value).join(' '));
-                    }else if(window.hWin.HEURIST4.util.isArray(value) && value.length >= 1){
+                    }else if(Array.isArray(value) && value.length >= 1){
                         value = window.hWin.HEURIST4.util.htmlEscape(value.join('; '));
                     }else{
                         value = window.hWin.HEURIST4.util.htmlEscape(value?value:'');

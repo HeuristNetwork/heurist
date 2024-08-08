@@ -386,7 +386,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //clear record browse cache
                 if (window.hWin.HEURIST4.browseRecordTargets) {
                     let rtys = [];
-                    if ($.isArray(response.affectedRty)) {
+                    if (Array.isArray(response.affectedRty)) {
                         rtys = response.affectedRty;
                     } else if (typeof response.affectedRty === 'string') {
                         rtys = response.affectedRty.split(',');
@@ -794,7 +794,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (ugrp_ids >= 0) {
                     ugrp_ids = [ugrp_ids];
                 } else {
-                    ugrp_ids = (!$.isArray(ugrp_ids) ? ugrp_ids.split(',') : ugrp_ids);
+                    ugrp_ids = (!Array.isArray(ugrp_ids) ? ugrp_ids.split(',') : ugrp_ids);
                 }
 
                 //first try to take on client side
@@ -1222,7 +1222,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if (!rty_IDs) {
                     if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
                     return false;
-                } else if (!$.isArray(rty_IDs)) {
+                } else if (!Array.isArray(rty_IDs)) {
                     rty_IDs = [rty_IDs];
                 }
 
@@ -2148,7 +2148,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
 
                     let edata = entity_data[entityName];
-                    if (!$.isArray(recIDs)) recIDs = [recIDs];
+                    if (!Array.isArray(recIDs)) recIDs = [recIDs];
                     for (idx in recIDs) {
                         display_value.push(
                             edata.fld(edata.getById(recIDs[idx]), ecfg.titleField));
@@ -2335,7 +2335,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             if (ugs > 0) {
                 ugs = [ugs];
             } else {
-                ugs = $.isArray(ugs) ? ugs : ugs.split(',')
+                ugs = Array.isArray(ugs) ? ugs : ugs.split(',')
             }
 
             for (let idx in ugs) {
@@ -2432,12 +2432,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
             //window.hWin.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
 
-            if ($.isArray(value) && limit > 0) {
+            if (Array.isArray(value) && limit > 0) {
                 value = value.slice(0, limit);
 
                 let cur_value = window.hWin.HAPI4.get_prefs(name);
                 cur_value = (cur_value ? cur_value.split(',') : null);
-                if (!$.isArray(cur_value)) cur_value = [];
+                if (!Array.isArray(cur_value)) cur_value = [];
 
                 $.each(value, function (i, item) {
                     if ($.inArray(item, cur_value) === -1) cur_value.unshift(item);
@@ -2608,7 +2608,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 return def_val;
             }else if($.isPlainObject(values)){
                 return values[Object.keys(values)[0]];
-            }else if ($.isArray(values) && values.length>0){
+            }else if (Array.isArray(values) && values.length>0){
                 return  values[0];
             }else{
                 return  values;

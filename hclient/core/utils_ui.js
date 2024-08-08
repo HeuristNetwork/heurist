@@ -229,7 +229,7 @@ window.hWin.HEURIST4.ui = {
     //
     fillSelector: function(selObj, topOptions) {
         
-        if(window.hWin.HEURIST4.util.isArray(topOptions)){
+        if(Array.isArray(topOptions)){
             let idx,key,title,disabled,depth, border, selected, hidden;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
@@ -472,7 +472,7 @@ window.hWin.HEURIST4.ui = {
             options.splice(idx, 1); // remove Trash group
         }
 
-        if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
+        if(!(Array.isArray(topOptions) ||
            window.hWin.HEURIST4.util.isempty(topOptions) ||
            topOptions===false)){
             if(topOptions===true) topOptions = '  ';  // <blank>
@@ -538,7 +538,7 @@ window.hWin.HEURIST4.ui = {
 
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
 
-            if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
+            if(!Array.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
         }else if(!useGroups){ //all rectypes however plain list (not grouped)
@@ -812,7 +812,7 @@ window.hWin.HEURIST4.ui = {
         //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
             
-            let rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
+            let rectype = Number((Array.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
             details = $Db.rst(rectype);
             if(!details) return selObj; //structure not defined
@@ -1106,7 +1106,7 @@ window.hWin.HEURIST4.ui = {
                     }else{ //case 3
                         groupID = idx;
                         name = groups[groupID];    
-                        if($.isArray(name)) name = name[1] //backward  case 4
+                        if(Array.isArray(name)) name = name[1] //backward  case 4
                     }
                     
                     if(window.hWin.HEURIST4.util.findArrayIndex(groupID,addedontop)<0 
@@ -1207,16 +1207,16 @@ window.hWin.HEURIST4.ui = {
             
             let onSelectMenu, onOpenMenu, onCloseMenu;
             if(eventHandlers && $.isPlainObject(eventHandlers)){
-                if($.isFunction(eventHandlers.onOpenMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onOpenMenu)){
                     onOpenMenu = eventHandlers.onOpenMenu;
                 }
-                if($.isFunction(eventHandlers.onCloseMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onCloseMenu)){
                     onCloseMenu = eventHandlers.onCloseMenu;
                 }
-                if($.isFunction(eventHandlers.onSelectMenu)){
+                if(window.hWin.HEURIST4.util.isFunction(eventHandlers.onSelectMenu)){
                     onSelectMenu = eventHandlers.onSelectMenu;
                 }
-            }else if(eventHandlers && $.isFunction(eventHandlers)){
+            }else if(eventHandlers && window.hWin.HEURIST4.util.isFunction(eventHandlers)){
                 onOpenMenu = eventHandlers;
             }
              
@@ -1228,7 +1228,7 @@ window.hWin.HEURIST4.ui = {
  
                         selObj.val((data && data.item)?data.item.value:data);//change value for underlaying html select
 
-                        if(onSelectMenu && $.isFunction(onSelectMenu)){
+                        if(onSelectMenu && window.hWin.HEURIST4.util.isFunction(onSelectMenu)){
                             onSelectMenu.call(this, event);
                         }else{
                             selObj.trigger('change');
@@ -1261,12 +1261,12 @@ window.hWin.HEURIST4.ui = {
                     
                     wmenu_div.css('zIndex',69999);
 
-                    if(onOpenMenu && $.isFunction(onOpenMenu)){
+                    if(onOpenMenu && window.hWin.HEURIST4.util.isFunction(onOpenMenu)){
                         onOpenMenu.call(this, event);
                     }
                 },
                 close: function(event, ui){
-                    if(onCloseMenu && $.isFunction(onCloseMenu)){
+                    if(onCloseMenu && window.hWin.HEURIST4.util.isFunction(onCloseMenu)){
                         onCloseMenu.call(this, event);
                     }
                 }
@@ -1681,7 +1681,7 @@ window.hWin.HEURIST4.ui = {
 
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof showLoginDialog !== 'undefined' && $.isFunction(showLoginDialog)){  // already loaded in index.php
+            if(typeof showLoginDialog !== 'undefined' && window.hWin.HEURIST4.util.isFunction(showLoginDialog)){  // already loaded in index.php
                 //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
                 showLoginDialog(isforsed, callback);
             }else{
@@ -1825,7 +1825,7 @@ window.hWin.HEURIST4.ui = {
                     widget.addEditRecord(-1);
                 }
             },
-            //selectOnSave: $.isFunction(callback),
+            //selectOnSave: window.hWin.HEURIST4.util.isFunction(callback),
             //onselect: callback
         });
 
@@ -1889,7 +1889,7 @@ window.hWin.HEURIST4.ui = {
                     callback: popup_options.callback,
                     beforeClose: function(){
                         //access manageRecord within frame within this popup and call close prefs
-                        if($dosframe && $.isFunction($dosframe[0].contentWindow.onBeforeClose)){
+                        if($dosframe && window.hWin.HEURIST4.util.isFunction($dosframe[0].contentWindow.onBeforeClose)){
                                 $dosframe[0].contentWindow.onBeforeClose();
                         }
                     }
@@ -2014,7 +2014,7 @@ window.hWin.HEURIST4.ui = {
         
         if(isEdit){
             
-            if($.isFunction(selector_function)){
+            if(window.hWin.HEURIST4.util.isFunction(selector_function)){
                 let triangle_icon = ele.find('.ui-icon-triangle-1-e');
                 if(triangle_icon.length>0){
                    ele.find('.detail').css({'cursor':'hand'});
@@ -2027,7 +2027,7 @@ window.hWin.HEURIST4.ui = {
             ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icons:{primary:'ui-icon-circlesmall-close'}})
             .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
-            .click(function(event){
+            .on('click', function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You are about to delete link between records<br><br>Are you sure?',
                      function(){
@@ -2102,7 +2102,7 @@ window.hWin.HEURIST4.ui = {
             
             bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
                 'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
-            .click(function(event){
+            .on('click', function(event){
                 event.preventDefault();
                 
                 let recID = ele.attr('data-relID');
@@ -2164,7 +2164,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         /* 2017-08-11 no more link for edit linked record :(    
-        ele.find('a').click(function(event){
+        ele.find('a').on('click', function(event){
             event.preventDefault();
             var inpt = $(event.target);
             var recID = inpt.attr('data-recID');
@@ -2209,7 +2209,7 @@ window.hWin.HEURIST4.ui = {
                 
                 btn_edit
                     .attr('data-recID', info['rec_ID'])
-                    .click(function(event){
+                    .on('click', function(event){
            
             let recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')
@@ -2252,7 +2252,7 @@ window.hWin.HEURIST4.ui = {
                     let recordset = new HRecordSet(response.data);
                     if(recordset.length()>0){
                         let record = recordset.getFirstRecord();
-                        if($.isFunction(callback)){
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(recordset.fld(record,'rec_Title'));    
                         }
                     }
@@ -2439,7 +2439,7 @@ window.hWin.HEURIST4.ui = {
                                 }
                             }
 
-                            if(!window.hWin.HEURIST4.util.isArray(topOptions)){
+                            if(!Array.isArray(topOptions)){
                                 if(topOptions==true){
                                     topOptions = [{key:'',title:window.hWin.HR('select...')}];
                                 }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
@@ -2447,9 +2447,9 @@ window.hWin.HEURIST4.ui = {
                                     topOptions = [{key:'',title:topOptions}];
                                 }
                             }
-                            if(window.hWin.HEURIST4.util.isArray(topOptions) && window.hWin.HEURIST4.util.isArray(groups)){
+                            if(Array.isArray(topOptions) && Array.isArray(groups)){
                                 groups = topOptions.concat(groups);
-                            }else if(window.hWin.HEURIST4.util.isArray(topOptions)){
+                            }else if(Array.isArray(topOptions)){
                                 groups = topOptions;
                             }
 
@@ -2459,7 +2459,7 @@ window.hWin.HEURIST4.ui = {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
-                        if($.isFunction(callback)){
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(selObj);
                         }
                         
@@ -2482,7 +2482,7 @@ window.hWin.HEURIST4.ui = {
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
         
-        if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
+        if(window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             let manage_dlg;
             
@@ -2558,7 +2558,7 @@ window.hWin.HEURIST4.ui = {
     showPublishDialog: function( options ){
         
         //OK! script as been loaded
-        if( typeof HPublishDialog==='undefined' || !$.isFunction(HPublishDialog)){        
+        if( typeof HPublishDialog==='undefined' || !window.hWin.HEURIST4.util.isFunction(HPublishDialog)){        
             let that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/framecontent/publishDialog.js?t'
                         +window.hWin.HEURIST4.util.random(),  
@@ -2628,7 +2628,7 @@ window.hWin.HEURIST4.ui = {
     //
     showImgFilterDialog: function(current_value, callback){
         //todo optionally load dynamically editing_exts.js
-        if(typeof imgFilter !== 'undefined' && $.isFunction(imgFilter)){  // already loaded
+        if(typeof imgFilter !== 'undefined' && window.hWin.HEURIST4.util.isFunction(imgFilter)){  // already loaded
             imgFilter( current_value, callback );    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/imgFilter.js', function(){
@@ -2642,7 +2642,7 @@ window.hWin.HEURIST4.ui = {
     //
     showEditThemeDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editTheme.js
-        if(typeof editTheme !== 'undefined' && $.isFunction(editTheme)){
+        if(typeof editTheme !== 'undefined' && window.hWin.HEURIST4.util.isFunction(editTheme)){
             editTheme(current_value, callback);    
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editTheme.js', function(){
@@ -2709,7 +2709,7 @@ window.hWin.HEURIST4.ui = {
             options['actionName'] = actionName;
         }
         
-        if($.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
+        if(window.hWin.HEURIST4.util.isFunction(doc_body[widgetName])){ //OK! widget script js has been loaded
         
             let manage_dlg;
             
@@ -3053,10 +3053,10 @@ window.hWin.HEURIST4.ui = {
              window.hWin.HEURIST4.wait_terminated = false;
              window.hWin.HEURIST4.ui.wait_ms = ms;
           }
-          if($.isFunction(cb)){
+          if(window.hWin.HEURIST4.util.isFunction(cb)){
              window.hWin.HEURIST4.wait_callback = cb;
           }
-          if($.isFunction(window.hWin.HEURIST4.wait_callback)){
+          if(window.hWin.HEURIST4.util.isFunction(window.hWin.HEURIST4.wait_callback)){
 
              window.hWin.HEURIST4.ui.wait_timeout = setTimeout(
                   function(){
@@ -3327,7 +3327,7 @@ window.hWin.HEURIST4.ui = {
         });
 
         /* fancybox gallery
-        if($.fancybox && $.isFunction($.fancybox)){
+        if($.fancybox && window.hWin.HEURIST4.util.isFunction($.fancybox)){
         $.fancybox({selector : selector,
         loop:true, buttons: [
         "zoom",
@@ -3359,9 +3359,9 @@ window.hWin.HEURIST4.ui = {
         }
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = ($.isNumeric(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
-        style.opacity = ($.isNumeric(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
-        style.fillOpacity = ($.isNumeric(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
+        style.weight = (window.hWin.HEURIST4.util.isNumber(style.weight) && style.weight>=0) ?style.weight :def_style.weight;
+        style.opacity = (window.hWin.HEURIST4.util.isNumber(style.opacity) && style.opacity>=0) ?style.opacity :def_style.opacity;
+        style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(style.fillOpacity) && style.fillOpacity>=0) ?style.fillOpacity :def_style.fillOpacity;
         
         style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
         style.fill = window.hWin.HEURIST4.util.istrue(style.fill);

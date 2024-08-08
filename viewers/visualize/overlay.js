@@ -495,7 +495,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 }
 
                 if(!window.hWin.HEURIST4.util.isempty(ids)){ // display linked record types
-                    $('#records').find(ids).prop('checked', true).change();
+                    $('#records').find(ids).prop('checked', true).trigger('change');
                 }
 
             }).style('cursor', 'pointer');
@@ -814,7 +814,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                             .attr("class", "close node-action")
                             .attr("transform", `translate(${x_pos}, 7)`)
                             .on("mouseup", function(d) {
-                                $(".show-record[name='"+node_obj.name+"']").prop('checked', false).change();
+                                $(".show-record[name='"+node_obj.name+"']").prop('checked', false).trigger('change');
                             });
 
             // Close rectangle                                              

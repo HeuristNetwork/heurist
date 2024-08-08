@@ -86,7 +86,7 @@ $.widget( "heurist.search", {
 
             function __initEntityFilter(){
 
-                if($.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
+                if(window.hWin.HEURIST4.util.isFunction($('body')['searchByEntity'])){ //OK! widget script js has been loaded            
                     this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
                     .css({'height':'auto','font-size':'1em'})
                     .appendTo( this.element );
@@ -94,7 +94,7 @@ $.widget( "heurist.search", {
 
                     $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/searchByEntity.js', 
                         function() {  //+'?t='+(new Date().getTime())
-                            if($.isFunction($('body')['searchByEntity'])){
+                            if(window.hWin.HEURIST4.util.isFunction($('body')['searchByEntity'])){
                                 __initEntityFilter();
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Widget searchByEntity not loaded. Verify your configuration');
@@ -522,7 +522,7 @@ $.widget( "heurist.search", {
                     let btn_select_owner = this.btn_select_owner;
 
                     let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                    if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                    if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                         add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                     }
                     if(add_rec_prefs.length<5){ //visibility groups
@@ -739,7 +739,7 @@ $.widget( "heurist.search", {
                     that.btn_add_record.button({label: 'Add '+opt.text().trim()});
 
                     let prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                    if(!$.isArray(prefs) || prefs.length<4){
+                    if(!Array.isArray(prefs) || prefs.length<4){
                         prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
                     }else{
                         prefs[0] = selval; 
@@ -757,7 +757,7 @@ $.widget( "heurist.search", {
             }
 
             let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+            if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                 add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
             }
             if(add_rec_prefs.length<4){
@@ -864,7 +864,7 @@ $.widget( "heurist.search", {
                     //request is from some other widget (outside)
                     if(data.source!=that.element.attr('id')){
                         let qs;
-                        if($.isArray(data.q)){
+                        if(Array.isArray(data.q)){
                             qs = JSON.stringify(data.q);
                         }else{
                             qs = data.q;
@@ -1040,7 +1040,7 @@ $.widget( "heurist.search", {
             }
         }else{
 
-            if(!$.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
+            if(!window.hWin.HEURIST4.util.isFunction($('body')['showSearchBuilder'])){ //OK! widget script js has been loaded
 
                 let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 let scripts = [ path+'searchBuilder.js', 

@@ -429,10 +429,10 @@ $.widget( "heurist.mapping", {
         this._superApply( arguments );
         
         if(arguments && ((arguments[0] && arguments[0]['map_margins']) || arguments['map_margins']) ){
-            if($.isArray(this.options.map_margins.paddingTopLeft) && !(this.options.map_margins.paddingTopLeft instanceof L.Point)){
+            if(Array.isArray(this.options.map_margins.paddingTopLeft) && !(this.options.map_margins.paddingTopLeft instanceof L.Point)){
                 this.options.map_margins.paddingTopLeft = L.point(this.options.map_margins.paddingTopLeft);
             }
-            if($.isArray(this.options.map_margins.paddingBottomRight) && !(this.options.map_margins.paddingBottomRight instanceof L.Point)){
+            if(Array.isArray(this.options.map_margins.paddingBottomRight) && !(this.options.map_margins.paddingBottomRight instanceof L.Point)){
                 this.options.map_margins.paddingBottomRight = L.point(this.options.map_margins.paddingBottomRight);
             }
         }
@@ -510,7 +510,7 @@ $.widget( "heurist.mapping", {
             this._inited_basemap = true;
         }
             
-        if($.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.oninit) && this._inited_mapdocs && this._inited_basemap){
                 this.options.oninit.call(this, this.element);
         }
     },
@@ -1028,7 +1028,7 @@ $.widget( "heurist.mapping", {
             for (let k=0; k<gjson.features.length; k++){
                 this.projectGeoJson(gjson.features[k], to_pixels); //another collection or feature
             }
-        }else if($.isArray(gjson)){
+        }else if(Array.isArray(gjson)){
             for (let k=0; k<gjson.length; k++){
                 this.projectGeoJson(gjson[k], to_pixels); //another collection or feature
             }
@@ -1049,8 +1049,8 @@ $.widget( "heurist.mapping", {
 
                     
                     function _is_point(pnt){
-                            let isValid = ($.isArray(pnt) && pnt.length==2 && 
-                                $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                            let isValid = (Array.isArray(pnt) && pnt.length==2 && 
+                                window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
                             return isValid;
                     }                    
                     
@@ -1171,7 +1171,7 @@ $.widget( "heurist.mapping", {
                             that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
 
                             that.setFeatureSelection([feature.properties.rec_ID]);
-                            if($.isFunction(that.options.onselect)){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
                                 that.options.onselect.call(that, [feature.properties.rec_ID]);
                             }
                             //open popup
@@ -1416,7 +1416,7 @@ $.widget( "heurist.mapping", {
             if(bounds[i]){
 
                 if(!(bounds[i] instanceof L.LatLngBounds)){
-                    if($.isArray(bounds[i]) && bounds[i].length>1 ){
+                    if(Array.isArray(bounds[i]) && bounds[i].length>1 ){
                         bounds[i] = L.latLngBounds(bounds[i]);
                     }else{
                         continue;
@@ -1444,7 +1444,7 @@ $.widget( "heurist.mapping", {
     //
     getBounds: function(layer_ids){
         
-        if(!$.isArray(layer_ids)){
+        if(!Array.isArray(layer_ids)){
             layer_ids = [layer_ids];
         }
         
@@ -1458,9 +1458,9 @@ $.widget( "heurist.mapping", {
             if(affected_layer){
                 let bnd;
                 
-                if($.isFunction(affected_layer.getBounds)){
+                if(window.hWin.HEURIST4.util.isFunction(affected_layer.getBounds)){
                     bnd = affected_layer.getBounds();
-                }else if($.isFunction(affected_layer.options.getBounds)){
+                }else if(window.hWin.HEURIST4.util.isFunction(affected_layer.options.getBounds)){
                     bnd = affected_layer.options.getBounds();
                 }
                 if(bnd){
@@ -1686,7 +1686,7 @@ $.widget( "heurist.mapping", {
     zoomToBounds: function(bounds, fly_params){
         
             if(bounds && !(bounds instanceof L.LatLngBounds)){
-                if($.isArray(bounds) && bounds.length>1 ){
+                if(Array.isArray(bounds) && bounds.length>1 ){
                     bounds = L.latLngBounds(bounds);
                 }
             }
@@ -1750,7 +1750,7 @@ $.widget( "heurist.mapping", {
     getBoundsZooms: function(bounds){
 
         if(bounds && !(bounds instanceof L.LatLngBounds)){
-            if($.isArray(bounds) && bounds.length>1 ){
+            if(Array.isArray(bounds) && bounds.length>1 ){
                 bounds = L.latLngBounds(bounds);
             }
         }
@@ -2583,7 +2583,7 @@ $.widget( "heurist.mapping", {
             //if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
             that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight without zoom
-            //if($.isFunction(that.options.onselect)){
+            //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){
             //    that.options.onselect.call(that, [layer.feature.properties.rec_ID] );
             //}
             
@@ -2746,9 +2746,9 @@ $.widget( "heurist.mapping", {
                         dashArray: '',
                         fillOpacity:0.3, iconSize:18, stroke:true, fill:true};
             }
-            def_style.weight = ($.isNumeric(def_style.opacity) && def_style.weight>=0) ?def_style.weight :3;
-            def_style.opacity = ($.isNumeric(def_style.opacity) && def_style.opacity>=0) ?def_style.opacity :1;
-            def_style.fillOpacity = ($.isNumeric(def_style.fillOpacity) && def_style.fillOpacity>=0) ?def_style.fillOpacity :0.3;
+            def_style.weight = (window.hWin.HEURIST4.util.isNumber(def_style.opacity) && def_style.weight>=0) ?def_style.weight :3;
+            def_style.opacity = (window.hWin.HEURIST4.util.isNumber(def_style.opacity) && def_style.opacity>=0) ?def_style.opacity :1;
+            def_style.fillOpacity = (window.hWin.HEURIST4.util.isNumber(def_style.fillOpacity) && def_style.fillOpacity>=0) ?def_style.fillOpacity :0.3;
             def_style.fill = true;
             def_style.stroke = true;
             
@@ -2917,7 +2917,7 @@ $.widget( "heurist.mapping", {
             this.zoomToSelection();        
         }
         
-        if($.isFunction(this.options.onselect)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onselect)){
             this.options.onselect.call(this, this.selected_rec_ids );
         }
         
@@ -3269,7 +3269,7 @@ $.widget( "heurist.mapping", {
                             }
 
                             /*
-                            if($.isFunction(layer.getElement)){
+                            if(window.hWin.HEURIST4.util.isFunction(layer.getElement)){
                             var ele = layer.getElement();
                             if(ele) ele.style.display = vis_val;
                             }else{
@@ -3369,7 +3369,7 @@ $.widget( "heurist.mapping", {
             if(res === false){
             
                 res = [];
-                if(!$.isArray(val)){
+                if(!Array.isArray(val)){
                     if(!val) val = 'all';
                     val = val.toLowerCase();
                     res = val.split(',');
@@ -3503,7 +3503,7 @@ $.widget( "heurist.mapping", {
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
                         that.setFeatureSelection(selected_rec_ids, true, true, false); //timeline select - highlight on map and zoom
-                        //if($.isFunction(that.options.onselect)){ //trigger global event
+                        //if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
                         //    that.options.onselect.call(that, selected_rec_ids);
                         //s}
                     },                
@@ -3647,7 +3647,7 @@ $.widget( "heurist.mapping", {
                     if(val=='addmapdoc'){ //addmapdoc plugin
                         that.map_addmapdoc = L.control.addmapdoc({ position: 'topleft', mapwidget:that });
                     }else
-                    if(val=='help' && $.isFunction(L.control.help)){ //publish plugin
+                    if(val=='help' && window.hWin.HEURIST4.util.isFunction(L.control.help)){ //publish plugin
                         that.map_help = L.control.help({ position: 'topleft', mapwidget:that });
                     }else
                     if(val=='draw') //draw plugin
@@ -4083,7 +4083,7 @@ $.widget( "heurist.mapping", {
     // 2) inn map legend
     //
     onLayerStatus: function( layer_ID, status ){
-        if($.isFunction(this.options.onlayerstatus)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onlayerstatus)){
             this.options.onlayerstatus.call(this, layer_ID, status);
         }
         
@@ -4329,7 +4329,7 @@ $.widget( "heurist.mapping", {
                             }
                         }else{
                             //multipolygon
-                            if($.isArray(coords) && coords.length==1) coords = coords[0];
+                            if(Array.isArray(coords) && coords.length==1) coords = coords[0];
                             if(coords.length>0 && coords[0] instanceof L.LatLng ){
                                 if(__isRect( coords )){
                                     __addDrawItem(new L.Rectangle(coords));
@@ -4385,7 +4385,7 @@ $.widget( "heurist.mapping", {
 
         let bounds = this.drawnItems.getBounds();
 
-        if(window.hWin.HEURIST4.util.isFunction(callback)){//$.isFunction(callback)
+        if(window.hWin.HEURIST4.util.isFunction(callback)){//window.hWin.HEURIST4.util.isFunction(callback)
             this.nativemap.once('zoomend moveend', callback); // call once
         }
 
@@ -4643,7 +4643,7 @@ $.widget( "heurist.mapping", {
         if(this.currentDrawMode=='image'){
             
             that.nativemap.on('draw:editmove draw:editresize', function (e) {
-                   if($.isFunction(that.options.ondrawend)){
+                   if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                        that.options.ondrawend.call(that, e);
                    }
             });     
@@ -4680,30 +4680,30 @@ $.widget( "heurist.mapping", {
             let layer = e.layer;
             that.drawnItems.addLayer(layer);
             layer.editing.enable();
-            if($.isFunction(that.options.ondrawend)){
+            if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                 that.options.ondrawend.call(that, e);
             }
             __set_btn_title();
             
-            if(that.options.ondraw_save_on_addition && $.isFunction(that.options.ondraw_editsave)){
+            if(that.options.ondraw_save_on_addition && window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                 that.options.ondraw_editsave.call(that, e);
             }
             
         });        
         that.nativemap.on('draw:drawstart', function (e) {
-               if($.isFunction(that.options.ondraw_addstart)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_addstart)){
                    that.options.ondraw_addstart.call(that, e);
                }
                __set_btn_title();
         });
         that.nativemap.on('draw:editstart', function (e) {
-               if($.isFunction(that.options.ondraw_editstart)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editstart)){
                    that.options.ondraw_editstart.call(that, e);
                }
                __set_btn_title();
         });
         that.nativemap.on('draw:edited', function (e) {
-               if($.isFunction(that.options.ondrawend)){
+               if(window.hWin.HEURIST4.util.isFunction(that.options.ondrawend)){
                    that.options.ondrawend.call(that, e);
                }
                __set_btn_title();
@@ -4711,7 +4711,7 @@ $.widget( "heurist.mapping", {
         //on save event       
         that.nativemap.on(L.Draw.Event.DELETED, function (e) {
             //let layers = e.layers;
-           if($.isFunction(that.options.ondraw_editsave)){
+           if(window.hWin.HEURIST4.util.isFunction(that.options.ondraw_editsave)){
                that.options.ondraw_editsave.call(that, e);
            }
         });
@@ -4726,7 +4726,7 @@ $.widget( "heurist.mapping", {
     //
     injectLinks: function(links){
         
-        if(!$.isArray(links)){
+        if(!Array.isArray(links)){
             links = links.split("\n");
         }
         for(let i=0; i<links.length; i++){

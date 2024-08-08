@@ -441,7 +441,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                 let res = ele.editing_input('getValues'); 
                 if(res[0]=='group'){
                         ele1.show();
-                        if(is_first!==true) ele1.find('.entity_selector').click();
+                        if(is_first!==true) ele1.find('.entity_selector').trigger('click');
                 }else{
                         ele1.hide();
                 }

@@ -71,7 +71,7 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
-        //if ( !$.isFunction($('body').hMapPublish) ) return;
+        //if ( !window.hWin.HEURIST4.util.isFunction($('body').hMapPublish) ) return;
         
         let container = L.DomUtil.create('div','leaflet-bar');
 
@@ -258,7 +258,7 @@ function hMapManager( _options )
             .css({'margin-right':'5px','font-size':'0.97em'});
             
         /*  
-        if($.isArray(options.visible_panels) && options.visible_panels.indexOf('off')<0){
+        if(Array.isArray(options.visible_panels) && options.visible_panels.indexOf('off')<0){
             _onExpand(); //expand at once
         }else{
             that.updatePanelVisibility();  
@@ -289,7 +289,7 @@ function hMapManager( _options )
                 +'</span>')
                 .css({'line-height':'15px',height:'14px',width:'50px',background: 'none',float:'right'})
                 .click(_createNewMapDocument)
-                //.click(function(){that.filterListMapDocuments(true);})
+                //.on('click', function(){that.filterListMapDocuments(true);})
                 .appendTo($header);
                 
            //$header.addClass('with_supplementals');
@@ -346,7 +346,7 @@ function hMapManager( _options )
             if(typeof options.visible_basemaps === 'string'){
                 options.visible_basemaps = options.visible_basemaps.split(';');
             }
-            if(!$.isArray(options.visible_basemaps)){
+            if(!Array.isArray(options.visible_basemaps)){
                 options.visible_basemaps = [];
             }
 
@@ -502,7 +502,7 @@ function hMapManager( _options )
                 
         tree_container.empty();    
         
-        if($.isFunction($('body').fancytree)){
+        if(window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
 
@@ -894,7 +894,7 @@ function hMapManager( _options )
             $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
                 
                 
-            actionspan.find('.ui-icon').click(function(event){
+            actionspan.find('.ui-icon').on('click', function(event){
                 let ele = $(event.target);
                 let parent_span = ele.parents('span.fancytree-node');
                 
@@ -1344,7 +1344,7 @@ function hMapManager( _options )
         updatePanelVisibility: function(params)
         {
             if(params){
-                if($.isArray(params)){
+                if(Array.isArray(params)){
                     if(params.indexOf('all')>=0){ //default
                         params = {basemaps:0,mapdocs:0,search:1};
                     }else{
@@ -1536,7 +1536,7 @@ function hMapManager( _options )
 
             mapdoc_id = mapdoc_id.split(',');
             
-            if($.isFunction($('body').fancytree)){
+            if(window.hWin.HEURIST4.util.isFunction($('body').fancytree)){
             
                 let tree = mapdoc_treeview.fancytree("getTree");
                 let selected = 0;
@@ -1687,7 +1687,7 @@ function hMapManager( _options )
                     } 
             }
             
-            if($.isArray(_selection)){
+            if(Array.isArray(_selection)){
                 for(let i=0; i<_selection.length; i++){
                      __setVis(_selection[i]);
                 }
@@ -1743,7 +1743,7 @@ function hMapManager( _options )
         //
         //
         filterListMapDocuments: function(visible_mapdocuments){
-            if($.isFunction($('body').fancytree) 
+            if(window.hWin.HEURIST4.util.isFunction($('body').fancytree) 
                 && ((visible_mapdocuments===true)  //force
                 || options.visible_mapdocuments != visible_mapdocuments)){
                 

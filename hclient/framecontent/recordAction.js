@@ -83,7 +83,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         
         _fillSelectRecordScope();
         
-        $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
+        $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).on('click', function(){window.close();});
     }
 
     //
@@ -336,7 +336,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 +'<div class="header">'  // style="padding-left: 16px;"
                 +'<label for="cb_replace_all">Replace all values</label></div>'
                 +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
-                +'</div>').change(function(){
+                +'</div>').on('change', function(){
 
                     if ($(this).find('input').is(':checked')){
                         $('#cb_whole_value').parent().hide();   
@@ -376,7 +376,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _createInputElement('fld-1', window.hWin.HR('Remove value matching'));
 
             
-            $('#cb_remove_all').change(function(){ 
+            $('#cb_remove_all').on('change', function(){ 
                     if ($(this).is(':checked')){
                         $('#cb_whole_value').parent().hide();   
                         $('#fld-1').hide();
@@ -722,7 +722,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#div_parameters').show();
             $('#btn-ok').button('option','label',window.hWin.HR('Go'));
             //to reseet all selectors 
-            selectRecordScope.val('').change();
+            selectRecordScope.val('').trigger('change');
             return;
         }
 
@@ -1008,7 +1008,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                                 sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
                                 for(key in response['errors_list']){
                                     let text = response['errors_list'][key];
-                                    if(window.hWin.HEURIST4.util.isArray(text)){
+                                    if(Array.isArray(text)){
                                         text = text.join('<br>');
                                     }
                                     sResult += (key+': '+ text + '<br>');   
@@ -1043,7 +1043,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     function _check_field_repeatability(){
 
         let rty_ID = selectRecordScope.val();
-        if(!$.isNumeric(rty_ID)){ // multiple rectypes
+        if(!window.hWin.HEURIST4.util.isNumber(rty_ID)){ // multiple rectypes
             return false;
         }
 

@@ -36,25 +36,25 @@ function hImportDefDetailTypes(_dtg_ID = null) {
         let btnUploadFile = $('#btnUploadFile')
                     .css({'xwidth':'120px','font-size':'0.8em'})
                     .button({label: window.hWin.HR('Upload File')})
-                    .click(function(e) {
+                    .on('click', function(e) {
                             uploadWidget.click();
                         });
         let btnParseData = $('#btnParseData')
                     .css({'width':'120px'})
                     .button({label: window.hWin.HR('Analyse'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .click(function(e) {
+                    .on('click', function(e) {
                             _doParse();
                         });
         let btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
                     .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
-                    .click(function(e) { _doPost(); });
+                    .on('click', function(e) { _doPost(); });
                         
         $('#csv_header').change(_redrawPreviewTable);
 
         window.hWin.HEURIST4.ui.createDetailtypeGroupSelect($('#field_dtg')[0], [{key: 0, title: 'select detail type group...'}]);
-        $('#field_dtg').change(function(e){
+        $('#field_dtg').on('change', function(e){
             let label = $('#field_dtg').find(':selected').text();
 
             if($('#field_dtg').hSelect('instance') !== undefined){
@@ -113,12 +113,12 @@ function hImportDefDetailTypes(_dtg_ID = null) {
                 let inpt = this;
                 btnUploadFile.off('click');
                 btnUploadFile.on({click: function(){
-                            $(inpt).click();
+                            $(inpt).trigger('click');
                 }});                
             }
         });
 
-        $('.column_roles').change(function(e){ 
+        $('.column_roles').on('change', function(e){ 
 
             let ele = $(e.target);
             if(ele.val()>=0){

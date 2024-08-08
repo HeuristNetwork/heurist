@@ -292,7 +292,7 @@ $.widget( "heurist.editTranslations", {
                             that._btn_translate.hide();
                         }
                     })
-                    .change(function(){
+                    .on('change', function(){
                         that._was_changed=true;
                         if(!window.hWin.HEURIST4.util.isempty($(this).val()) && window.hWin.HAPI4.sysinfo.api_Translator){
                             that._btn_translate.show();
@@ -382,7 +382,7 @@ $.widget( "heurist.editTranslations", {
                 
             });
 
-            if($.isFunction(this.options.onclose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onclose)){
                 this.options.onclose.call(this, res);        
             }
                 

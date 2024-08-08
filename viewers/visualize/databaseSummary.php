@@ -150,7 +150,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
            
            function onPageInit(success){
                    if(!success) {return;}
-                   $("#expand").click();
+                   $("#expand").trigger('click');
             }
             
         </script>
@@ -265,7 +265,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         </div>
 
         <script>
-            $("#expand").click(function(e) {
+            $("#expand").on('click', function(e) {
                 // Show visualisation elements
                 $(this).remove();
                 //$(".show").slideToggle(500);
@@ -321,7 +321,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     }
                     
                     // Listen to 'show-record' checkbox changes
-                    $(".show-record").change(function(e) {
+                    $(".show-record").on('change', function(e) {
                         // Update record field 'checked' value in localstorage
                         var name = $(e.target).attr("name");
 
@@ -334,7 +334,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     });
 
                     // Listen to the 'show-all' checkbox
-                    $("#show-all").change(function() {
+                    $("#show-all").on('change', function() {
                         // Change all check boxes
                         var checked = $(this).prop('checked');
                         $(".show-record").prop("checked", checked);
@@ -350,7 +350,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     });
 
                     // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
-                    $('.group_chkbox').change(function(){
+                    $('.group_chkbox').on('change', function(){
 
                         var group_id = $(this).attr('data-id');
                         var checked = $(this).prop('checked');

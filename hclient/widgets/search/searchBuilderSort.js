@@ -102,7 +102,7 @@ $.widget( "heurist.searchBuilderSort", {
         .appendTo( this.sel_container );        
 
         this._on( this.remove_token, { click: function(){
-            if($.isFunction(this.options.onremove)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onremove)){
                 this.options.onremove.call(this);
             }    
         } });
@@ -115,7 +115,7 @@ $.widget( "heurist.searchBuilderSort", {
 
 
         this._on( this.select_order, { change: function(){
-                if($.isFunction(this.options.onchange))
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onchange))
                 {
                     this.options.onchange.call(this);
                 }
@@ -154,7 +154,7 @@ $.widget( "heurist.searchBuilderSort", {
                         {useHtmlSelect:false, selectedValue:'t'});                
             
             this._on( this.select_fields, { change: function(){
-                    if($.isFunction(this.options.onchange))
+                    if(window.hWin.HEURIST4.util.isFunction(this.options.onchange))
                     {
                         this.options.onchange.call(this);
                     }

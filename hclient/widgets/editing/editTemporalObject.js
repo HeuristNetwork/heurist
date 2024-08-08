@@ -250,7 +250,7 @@ let TemporalPopup = (function () {
         $('input[value="Cancel"]').button();
         
 
-        $('#fTPQ, #fTAQ').blur(_updateSimpleRange).change(function(){
+        $('#fTPQ, #fTAQ').blur(_updateSimpleRange).on('change', function(){
         	const tpq = $('#fTPQ').val();
         	const taq = $('#fTAQ').val();
         	if(!window.hWin.HEURIST4.util.isempty(tpq) && !window.hWin.HEURIST4.util.isempty(taq)){
@@ -689,7 +689,7 @@ let TemporalPopup = (function () {
         $('.withCalendarsPicker').calendarsPicker(calendar_options);
 
         //change current calendar
-        $('#selectCLD').change(function() {
+        $('#selectCLD').on('change', function() {
 
             let new_calendar = $(this).val();
             if(!new_calendar) return;
@@ -743,7 +743,7 @@ let TemporalPopup = (function () {
         }); //end change calendar
 
         $('#selectCLD').val(calendar_type);
-        $('#selectCLD').change();
+        $('#selectCLD').trigger('change');
     }
 
 	function setupEras(){

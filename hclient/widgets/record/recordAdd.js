@@ -65,7 +65,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             if(this.options.currentRecType==0){
                 //take from current user preferences
                 let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                     add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                 }
                 if(add_rec_prefs.length<5){ //visibility groups
@@ -284,7 +284,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             }
             
             let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if($.isArray(add_rec_prefs) && add_rec_prefs.length>0){
+            if(Array.isArray(add_rec_prefs) && add_rec_prefs.length>0){
                 let pref_rectype = add_rec_prefs[0];
                 this.element.find('#sel_recordtype').val(pref_rectype).hSelect('refresh');
             }
@@ -451,7 +451,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                   //$(e.target).text(); //send to parent
 
                   let prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                  if(!$.isArray(prefs) || prefs.length<4){
+                  if(!Array.isArray(prefs) || prefs.length<4){
                         prefs = [rty_ID, 0, 'viewable', '']; //default to everyone
                   }else{
                         prefs[0] = rty_ID; 
@@ -510,7 +510,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             }
             
             if( !window.hWin.HEURIST4.util.isempty( this.options.currentRecTags)){
-                if($.isArray(this.options.currentRecTags) && this.options.currentRecTags.length>0){
+                if(Array.isArray(this.options.currentRecTags) && this.options.currentRecTags.length>0){
                     this.options.currentRecTags = this.options.currentRecTags.join(',');
                 }
                 //encodeuricomponent

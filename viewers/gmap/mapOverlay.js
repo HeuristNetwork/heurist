@@ -118,7 +118,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     
                     if(_isPublicSite()){
                         menu_mapdocuments.hide();
-                    }else if($.isFunction(onload_callback)) {
+                    }else if(window.hWin.HEURIST4.util.isFunction(onload_callback)) {
                         onload_callback.call();
                     }
                     
@@ -343,7 +343,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             $('#map_extents').css('visibility','visible');
             selBookmarks.selectedIndex = 1;
-            $(selBookmarks).change();
+            $(selBookmarks).trigger('change');
 
             mapping.setTimeMapProperty('centerOnItems', false);    
             
@@ -374,7 +374,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     if(!map_container.is(':visible')) return;
                     clearInterval(checkVisible); //stop listener
 
-                    $(selBookmarks).change();
+                    $(selBookmarks).trigger('change');
                     //mapping.autoCenterAndZoom();
                     //mapping.zoomDataset()
                     //zoom to map document extent
@@ -541,7 +541,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         legenditem.find(".overlay-legend").change(_showHideOverlay);
 
             $('<div class="svs-contextmenu ui-icon ui-icon-close" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click', function(event){ 
                 //delete layer from map  
                 let overlay_id = $(this).attr("layerid");
                 _removeOverlayById( overlay_id );
@@ -550,7 +550,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             .appendTo(legenditem);
             
             $('<div class="svs-contextmenu ui-icon ui-icon-pencil" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click', function(event){ 
 
                 let overlayid = $(this).attr("layerid");
                 let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -564,7 +564,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
             
             $('<div class="svs-contextmenu ui-icon ui-icon-circle-zoomin" layerid="'+overlay_idx+'"></div>')
-            .click(function(event){ 
+            .on('click', function(event){ 
 
                 let overlayid = $(this).attr("layerid");
                 let overlay = overlays[overlayid]? overlays[overlayid] : overlays_not_in_doc[overlayid];
@@ -1080,7 +1080,7 @@ map.data.addListener('mouseover', function(event) {
                             source.recordset.setMapEnabled( true );
                             _addRecordsetLayer(source, index);
                         }
-                        if( source.callback && $.isFunction(source.callback) ){
+                        if( source.callback && window.hWin.HEURIST4.util.isFunction(source.callback) ){
                             source.callback( recordset, original_recordset );     
                         }
 
@@ -1728,7 +1728,7 @@ map.data.addListener('mouseover', function(event) {
         //$(legend).css('top','60px');
         
         // Legend collapse listener
-        $("#collapse").click(function(e) {
+        $("#collapse").on('click', function(e) {
             let tocollapse = ($(this).text() == "-");
             tocollapse ? $(this).text("+") : $(this).text("-");  // Update text to + or -
             

@@ -241,7 +241,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.recordAction, {
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 if(response.status && response.status != window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                }else if(window.hWin.HEURIST4.util.isArray(response) && response.length == 0){
+                }else if(Array.isArray(response) && response.length == 0){
                     that.recordList.resultList('updateResultSet', null);
                 }else{
                     that._onSearchResult(response);

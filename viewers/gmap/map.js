@@ -742,37 +742,37 @@ if(_mapdata.limit_warning){
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
             },text:false, label:window.hWin.HR("Zoom In")})
-            .click(function(){ __timelineZoom(-0.25); })
+            .on('click', function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
             },text:false, label:window.hWin.HR("Zoom Out")})
-            .click(function(){ __timelineZoom(0.5); })
+            .on('click', function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:window.hWin.HR("Zoom to All")})
-            .click(function(){ _timelineZoomToAll(); })
+            .on('click', function(){ _timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:window.hWin.HR("Zoom to selection")})
-            .click(function(){ __timelineZoomToSelection(); })
+            .on('click', function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:window.hWin.HR("Move to Start")})
-            .click(function(){ __timelineMoveToLeft(); })
+            .on('click', function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:window.hWin.HR("Move to End")})
-            .click(function(){ __timelineMoveToRight(); })
+            .on('click', function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-gear"
             },text:false, label:window.hWin.HR("Timeline options")})
-            .click(function(){ __timelineEditProperties(); })
+            .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
         $("<label>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);
@@ -819,7 +819,7 @@ if(_mapdata.limit_warning){
 
         //secondary: "ui-icon-triangle-1-s"
         $("<button>").button({icon:"ui-icon-tag",showLabel:false, label:window.hWin.HR("Label settings")})
-            .click(function(){
+            .on('click', function(){
                 $('.menu-or-popup').hide(); //hide other
 
                 let menu = $( menu_label_settings )
@@ -866,13 +866,13 @@ if(_mapdata.limit_warning){
         $("#btn_timeline_labels").button({icons: {
             primary: "ui-icon-tag"
             },text:false, label:window.hWin.HR("Show labels")})
-            .click(function(){ __timelineShowLabels(); })
+            .on('click', function(){ __timelineShowLabels(); })
             .appendTo(toolbar);
         */
         
         /*
         let el = $('<label style="padding:3px 4px;background:#DDDDDD"><input type="checkbox" checked>Stack</label>').appendTo(toolbar);
-        el.find('input').change(function(event){ 
+        el.find('input').on('change', function(event){ 
               _current_stack_setting = $(event.target).is(':checked');
               vis_timeline.setOptions({'stack':_current_stack_setting}); //(mode!=4)
 //              vis_timeline.redraw();
@@ -1154,7 +1154,7 @@ if(_mapdata.limit_warning){
         //timemap is already inited
         if(that.map_control!=null){
 
-                if($.isFunction($( document ).bubble)){
+                if(window.hWin.HEURIST4.util.isFunction($( document ).bubble)){
                     $( document ).bubble('closeAll');  //close all popups    
                 }
 
@@ -1412,7 +1412,7 @@ if(_mapdata.limit_warning){
 
                             }else{
 
-                                let placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                                let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
                                 for(let i=0;i<placemarks.length;i++){
                                     //let pos = placemarks[i].getPosition();
                                     //let pos = item.getNativePlacemark().getPosition();
@@ -1481,7 +1481,7 @@ if(_mapdata.limit_warning){
                 dataset.each(function(item){ //loop trough all items
                     if(item.placemark){
                         
-                        let placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                        let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
                         
                         for(let i=0;i<placemarks.length;i++){
                             if(!placemarks[i].points && placemarks[i] instanceof mxn.Marker){
@@ -1565,7 +1565,7 @@ if(_mapdata.limit_warning){
                 let lastSelectedItem = null;
                 let selected_placemark = null;
                 
-                if($.isArray(selected_placemarks) && selected_placemarks.length>0){
+                if(Array.isArray(selected_placemarks) && selected_placemarks.length>0){
                     $(selected_placemarks).each( function(i, pm){
                         if (pm.item.opts.recid == lastRecID){
                                 lastSelectedItem = pm.item;
@@ -1796,7 +1796,7 @@ if(_mapdata.limit_warning){
             if( selected_placemark ){
                 placemark = selected_placemark;
             }else {
-                let placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                let placemarks = (Array.isArray(item.placemark))?item.placemark:[item.placemark];
                 
                 for(let i=0;i<placemarks.length;i++){
                     if(placemarks[i] instanceof mxn.Marker){
@@ -1973,7 +1973,7 @@ if(_mapdata.limit_warning){
                     }
 
                     //marker.scrollIntoView();
-                    //setTimeout(function(){ $( marker ).click();}, 500);
+                    //setTimeout(function(){ $( marker ).trigger('click');}, 500);
 
                 }else if(item.event){    //reference to Simile timeline event   - NOT USED
 
@@ -1992,7 +1992,7 @@ if(_mapdata.limit_warning){
                             content:html
                     });*/
                     //show
-                    $( marker ).click();
+                    $( marker ).trigger('click');
 
                 }else{
                     //neither map nor time data
@@ -2007,7 +2007,7 @@ if(_mapdata.limit_warning){
                     .button({icons: {
                         primary: "ui-icon-pencil"
                         }, text:false})
-                     .click(function( event ) {
+                     .on('click', function( event ) {
                 event.preventDefault();
                 //@todo replce with new method => window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, true, null)
                 window.open(window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+item.opts.recid, "_new");

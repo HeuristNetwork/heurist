@@ -349,7 +349,7 @@ if($isLocalHost){
         {
             applyTheme();
 
-            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
+            if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                     onAboutInit();//init about dialog
             }
@@ -366,7 +366,7 @@ if($isLocalHost){
             success = false;
         }
 
-        if($.isFunction(onPageInit)){
+        if(window.hWin.HEURIST4.util.isFunction(onPageInit)){
             onPageInit(success);
         }
     }
@@ -395,7 +395,7 @@ if($isLocalHost){
                             setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
                         }
 
-                        if(!window.hWin.HEURIST4.util.isnull(callback) && $.isFunction(callback)){
+                        if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HEURIST4.util.isFunction(callback)){
                             callback(true);
                         }
                     }else{
@@ -403,7 +403,7 @@ if($isLocalHost){
                             message: sMsg,
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
-                        if($.isFunction(callback)){ callback(false);}
+                        if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
                     }
                     }
                 });

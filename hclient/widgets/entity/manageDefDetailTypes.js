@@ -852,7 +852,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         desc_field[0].val(this.options.newFieldName);
                     }
 
-                    name_field[0].change();
+                    name_field[0].trigger('change');
                 }
             }
         }
@@ -1026,7 +1026,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
             }
 
-            $(elements[0]).change(); //trigger
+            $(elements[0]).trigger('change'); //trigger
         }
 
         elements = this._editing.getInputs('dty_Name');
@@ -1045,7 +1045,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             //add extra click functionalities to save buttons
-            this._toolbar.find('#btnSaveExt').show().click(function(){
+            this._toolbar.find('#btnSaveExt').show().on('click', function(){
                 window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', 1);
             }); 
 

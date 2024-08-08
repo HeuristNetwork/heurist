@@ -433,7 +433,7 @@ $.widget( "heurist.searchByEntity", {
                 this[select_rectype].hSelect({
                         change: opts.onselect,
                         close: function(){
-                                if($.isFunction(that.options.menu_locked)){
+                                if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
                                     that.options.menu_locked.call( that, false ); //unlock
                                 }
                         }
@@ -488,7 +488,7 @@ $.widget( "heurist.searchByEntity", {
                     let ele = $(menu[0]);
                     ele.scrollTop(0);        
                    
-                    if(opts.useCheckboxes && $.isFunction(opts.onmarker)){
+                    if(opts.useCheckboxes && window.hWin.HEURIST4.util.isFunction(opts.onmarker)){
                         let spans = menu.find('span.rt-checkbox');
                         that._off(spans,'click');
                         that._on(spans,{'click':function(e){
@@ -497,7 +497,7 @@ $.widget( "heurist.searchByEntity", {
                                 window.hWin.HEURIST4.util.stopEvent(e);
                             }}});
                         /*
-                        menu.find('span.rt-checkbox').click(function(e){
+                        menu.find('span.rt-checkbox').on('click', function(e){
                             if($(event.target).is('span')){
                                 opts.onmarker.call(that, $(event.target) );
                                 window.hWin.HEURIST4.util.stopEvent(e);
@@ -510,7 +510,7 @@ $.widget( "heurist.searchByEntity", {
                 
                 if(this[select_rectype]){
                     
-                    if($.isFunction(this.options.menu_locked)){
+                    if(window.hWin.HEURIST4.util.isFunction(this.options.menu_locked)){
                         this.options.menu_locked.call( this, true); //lock
                     }
                     __openSelect();
@@ -533,7 +533,7 @@ $.widget( "heurist.searchByEntity", {
             
             window.hWin.HAPI4.RecordSearch.doSearch( this, request );
             
-            if($.isFunction(this.options.onClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                 this.options.onClose();
             }
     }

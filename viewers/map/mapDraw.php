@@ -117,7 +117,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 //initialize buttons
                 $('.save-button').button().on({click:getWktAndClose});
                 
-                $('#view-button').button().click(function(){
+                $('#view-button').button().on('click', function(){
                        mapping.mapping('getSetMapBounds', true);
                 });
                 $('#style-button').button().on({click:function(){
@@ -130,7 +130,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                        window.close();
                 }});
                 // paste geojson -> map
-                $('#load-geometry-button').button().click(function(){
+                $('#load-geometry-button').button().on('click', function(){
 
                     var titleYes = window.hWin.HR('Yes'),
                     titleNo = window.hWin.HR('No'),
@@ -176,17 +176,17 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
                 });
                 
-                $("#fix-x-coords").button().click(function(){
+                $("#fix-x-coords").button().on('click', function(){
                 
                 });
                 // load from map -> geojson
-                $('#get-geometry-button').button().click(function(){
+                $('#get-geometry-button').button().on('click', function(){
                     
                     $('#get-coordinates-helper').show();
                     $('#set-coordinates-helper').hide();
                     $('#geodata_textarea').css({top:'4em'});
                     
-                    $('#get-coord-wkt').change();
+                    $('#get-coord-wkt').trigger('change');
                     
                     var $dlg;
 

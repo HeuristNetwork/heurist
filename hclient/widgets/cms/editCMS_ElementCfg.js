@@ -143,7 +143,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
                     if(val[0]) item.find('input[data-type="flex-grow"]').val(val[0]);
                     if(val.length==3 && val[2]) item.find('input[data-type="flex-basis"]').val(val[2]);
 
-                    item.find('input').change(function(e){
+                    item.find('input').on('change', function(e){
                         let item = $(e.target).parent();//('div[data-flexitem]');
                         let k = item.attr('data-flexitem');
 
@@ -232,7 +232,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         //4c. button listeners
         cont.find('.margin-mode').button()
             .css({'font-size':'0.7em'})
-            .click(function(e){
+            .on('click', function(e){
             //show hide short and full margin/padding
             margin_mode_full = !margin_mode_full;
             _onMarginMode();
@@ -256,20 +256,20 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
 
         //save entire page (in background)
-        cont.find('.btn-save-page').button().css('border-radius','4px').click(function(){
+        cont.find('.btn-save-page').button().css('border-radius','4px').on('click', function(){
             __saveWidgetConfig();
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save_close'); //save and close
         });
 
-        cont.find('.btn-save-element').button().css('border-radius','4px').click(function(){
+        cont.find('.btn-save-element').button().css('border-radius','4px').on('click', function(){
             __saveWidgetConfig();
             //5. save in layout cfg
             _getCfgFromUI();
             main_callback.call(this, l_cfg, 'save'); //save only
             window.hWin.HEURIST4.util.setDisabled(cont.find('.btn-save-element'), true);
         });
-        cont.find('.btn-cancel').css('border-radius','4px').button().click(function(){
+        cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
             //6. restore old settings 
             element.removeAttr('style');
             if(element_cfg.css) element.css(element_cfg.css);
@@ -1016,16 +1016,16 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             let _buttons = [
                 {text:window.hWin.HR('Save'), 
                     click: function(){
-                        $container.find('.btn-save-element').click();
+                        $container.find('.btn-save-element').trigger('click');
                         $dlg.dialog('close');
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
                     click: function(){
-                        $container.find('.btn-cancel').click();
+                        $container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close'); 
-                        if($.isFunction(callback)) callback.call(this);
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 

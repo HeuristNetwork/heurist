@@ -54,7 +54,7 @@ window.hWin.HEURIST4.geo = {
 
         if (typeof(mdata) === "string" && !window.hWin.HEURIST4.util.isempty(mdata)){
             try{
-                mdata = $.parseJSON(mdata);
+                mdata = JSON.parse(mdata);
             }catch(e){
                 mdata = null;
             }
@@ -100,8 +100,8 @@ window.hWin.HEURIST4.geo = {
                     }else{
 
                         function _isvalid_pnt(pnt){
-                                let isValid = ($.isArray(pnt) && pnt.length==2 && 
-                                    $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]));
+                                let isValid = (Array.isArray(pnt) && pnt.length==2 && 
+                                    window.hWin.HEURIST4.util.isNumber(pnt[0]) && window.hWin.HEURIST4.util.isNumber(pnt[1]));
                                     //(_crs=='simple' || (Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0)));
                                 if(isValid && resdata._extent){
                                     if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
@@ -133,7 +133,7 @@ window.hWin.HEURIST4.geo = {
                             }else{
                                 let n;
                                 for (n=0; n<coords.length; n++){
-                                    if($.isArray(coords[n]))
+                                    if(Array.isArray(coords[n]))
                                         shapes = __extractCoords(shapes, coords[n], typeCode);
                                 }
                             }
@@ -172,7 +172,7 @@ window.hWin.HEURIST4.geo = {
                                 //multi
                                 let n;
                                 for (n=0; n<coords.length; n++){
-                                    if($.isArray(coords[n]))
+                                    if(Array.isArray(coords[n]))
                                         shapes = __extractCoords2(shapes, coords[n], typeCode);
                                 }
                             }
@@ -190,7 +190,7 @@ window.hWin.HEURIST4.geo = {
                                 if( geometry.type=="Point" || 
                                     geometry.type=="MultiPoint")
                                 {   
-                                    if($.isArray(shapes))
+                                    if(Array.isArray(shapes))
                                     for (let n=0; n<shapes.length; n++){
                                         resdata['Point'].push( [shapes[n]] );
                                     }
@@ -343,13 +343,13 @@ window.hWin.HEURIST4.geo = {
                         for (let i=0; i < len; ++i) {
                             
                             let placemark = gjson.coordinates[j][i];
-                            if(!$.isArray(placemark)){
+                            if(!Array.isArray(placemark)){
                                 placemark = gjson.coordinates;
                                 len2 = 0;
                                 len = 0;
                             }
-                            if($.isArray(placemark) && placemark.length==2 && 
-                                !$.isArray(placemark[0])){
+                            if(Array.isArray(placemark) && placemark.length==2 && 
+                                !Array.isArray(placemark[0])){
                                 placemark = gjson.coordinates[j];
                                 len = 0;
                             }
@@ -626,8 +626,8 @@ window.hWin.HEURIST4.geo = {
         let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
         $(extents).each(function(idx, item){
             
-            let isValid = ($.isArray(item) && item.length==2 && 
-                $.isNumeric(item[0][0]) && $.isNumeric(item[0][1]));
+            let isValid = (Array.isArray(item) && item.length==2 && 
+                window.hWin.HEURIST4.util.isNumber(item[0][0]) && window.hWin.HEURIST4.util.isNumber(item[0][1]));
                 //Math.abs(item[0][1])<=360.0 && Math.abs(item[0][0])<=90.0);
             
             if(isValid){
@@ -647,8 +647,8 @@ window.hWin.HEURIST4.geo = {
     //
     boundingBoxToWKT: function(extent){
 
-        let isValid = ($.isArray(extent) && extent.length==2 && 
-                $.isNumeric(extent[0][0]) && $.isNumeric(extent[0][1]));
+        let isValid = (Array.isArray(extent) && extent.length==2 && 
+                window.hWin.HEURIST4.util.isNumber(extent[0][0]) && window.hWin.HEURIST4.util.isNumber(extent[0][1]));
                 //&& Math.abs(extent[0][1])<=360.0 && Math.abs(extent[0][0])<=90.0
                 
         if(isValid){

@@ -171,7 +171,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                     /*$(item).button({icon:'ui-icon-pencil', iconPosition:"end"})
                     .css({'background':'gray !important', 'max-height':'1em'});*/
                 })
-                .click(function(event){
+                .on('click', function(event){
                     let group_ID = $(event.target).parents('.recordDiv').attr('recid');
 
                     let options = {select_mode: 'manager',

@@ -440,7 +440,7 @@ if(!$has_emails || empty($emails)) {
 
                         if($(e.target).is('div')){
 
-                            $(e.target).find('input').click();
+                            $(e.target).find('input').trigger('click');
                         }
                     });
 

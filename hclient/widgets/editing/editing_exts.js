@@ -88,7 +88,7 @@ function editSymbology(current_value, mode_edit, callback){
             
             if(current_value){
                 //detect base layer symbology
-                if($.isArray(current_value)){
+                if(Array.isArray(current_value)){
                     let thematicMap = [];
                     let baseSymb = {};
                     for(let i=0; i<current_value.length; i++){
@@ -558,7 +558,7 @@ function editSymbology(current_value, mode_edit, callback){
                 _editing_symbology.setModified(false);
                 edit_symb_dialog.dialog('close');
                 
-                if($.isFunction(callback)){
+                if(window.hWin.HEURIST4.util.isFunction(callback)){
                     callback.call(this, res);
                 }
 
@@ -583,7 +583,7 @@ function editSymbology(current_value, mode_edit, callback){
                 let $dlg, buttons = {};
                 buttons['Save'] = function(){ 
                     //that._saveEditAndClose(null, 'close'); 
-                    edit_symb_dialog.parent().find('#btnRecSave').click();
+                    edit_symb_dialog.parent().find('#btnRecSave').trigger('click');
                     $dlg.dialog('close'); 
                 }; 
                 buttons['Ignore and close'] = function(){ 
@@ -1100,7 +1100,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
                         window.hWin.HEURIST4.util.stopEvent(event);
                         event.stopImmediatePropagation();
 
-                        $($menu.find('.ui-menu-item:visible')[1]).click();
+                        $($menu.find('.ui-menu-item:visible')[1]).trigger('click');
                     }else if(is_tab && $menu.find('.ui-menu-item:visible').length > 1){ // focus first item
 
                         window.hWin.HEURIST4.util.stopEvent(event);
@@ -1438,7 +1438,7 @@ function browseRecords(_editing_input, $input){
                     if(is_empty){
                         window.hWin.HEURIST4.msg.showMsgFlash('To add child record you have to define some fields in parent record<br>(it is required to compose valid record title)', 2500);    
                         return;
-                    }else if(that.options.editing && $.isFunction(that.options.editing.getOptions().onaction)){
+                    }else if(that.options.editing && window.hWin.HEURIST4.util.isFunction(that.options.editing.getOptions().onaction)){
                         //quick save without validation
                         that.options.editing.getOptions().onaction(null, 'save_quick');
                     }
@@ -2093,10 +2093,10 @@ function browseTerms(_editing_input, $input, value){
 //
 function translationSupport(_input_or_values, is_text_area, callback){
 
-    if(!$.isFunction($('body')['editTranslations'])){
+    if(!window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
             function() {  //+'?t='+(new Date().getTime())
-                if($.isFunction($('body')['editTranslations'])){
+                if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
@@ -2107,7 +2107,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
         let that = _input_or_values;    
         let _dlg, values, fieldtype;
         
-        if($.isArray(that)){
+        if(Array.isArray(that)){
             values = that;
             _dlg = $('<div/>').hide().appendTo($('body'));
             fieldtype = is_text_area?'blocktext':'freetext';
@@ -2122,7 +2122,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
             fieldtype: fieldtype,
             onclose:function(res){
                 if(res){
-                    if($.isFunction(callback)){
+                    if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call(this, res);
                     }else{
                         that.setValue(res);    

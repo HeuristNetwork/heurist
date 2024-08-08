@@ -40,7 +40,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         let is_expand_rt_list = false;
         let is_only_rt = false;
         if(!window.hWin.HEURIST4.util.isempty(rt_list)){
-            if(!window.hWin.HEURIST4.util.isArray(rt_list)){
+            if(!Array.isArray(rt_list)){
                 rt_list = rt_list.split(',');
             }
             is_expand_rt_list = (rt_list.length>1 && rt_list.length<20);
@@ -101,7 +101,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             .button({label: window.hWin.HR('Add Record'), 
                         icon: is_browse?null:"ui-icon-plus"})
             .addClass('ui-button-action')
-            .click(function(e) {
+            .on('click', function(e) {
 
                 let search_val = that.element.find('#fill_in_data').val();
                 search_val = search_val == '' ? that.options.init_filter : search_val;

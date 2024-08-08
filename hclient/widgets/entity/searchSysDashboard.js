@@ -35,7 +35,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New Entry"), icon: "ui-icon-plus"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onadd" );
                 }); 
 
@@ -43,14 +43,14 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 .hide()
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Save New Order"), icon: "ui-icon-move-v"})
-                .click(function(e) {
+                .on('click', function(e) {
                     that._trigger( "onorder" );
                 }); 
 
         this.btn_set_mode = this.element.find('#btn_set_mode')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("View shortcuts")})
-                .click(function(e) {
+                .on('click', function(e) {
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
                         {show_as_ribbon:1, 
                          show_on_startup: 1 });     
@@ -62,7 +62,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.btn_close_mode = this.element.find('#btn_close_mode')
                 .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Hide shortcuts")})
-                .click(function(e) {
+                .on('click', function(e) {
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
                         {show_as_ribbon:1, 
                          show_on_startup:0 });     
@@ -73,7 +73,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.btn_show_on_startup = this.element.find('#btn_show_on_startup2')
                 .css({'min-width':'9m'})
                     .button({label: window.hWin.HR("Don't show again")})
-                .click(function(e) {
+                .on('click', function(e) {
                     
                     //don't show  dashboard on startup
                     let params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );

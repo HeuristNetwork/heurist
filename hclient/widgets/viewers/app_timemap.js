@@ -419,7 +419,7 @@ $.widget( "heurist.app_timemap", {
             this.is_map_inited = true;
             this.options.init_completed = true;
 
-            if($.isFunction(this.options.onMapInit)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onMapInit)){
                 this.options.onMapInit.call();
             }
             
@@ -458,7 +458,7 @@ $.widget( "heurist.app_timemap", {
                             _selection = that.options.recordset;
                             that.options.recordset = null;
                         }else {
-                            _selection = $.isArray(that.options.recordset)
+                            _selection = Array.isArray(that.options.recordset)
                                     ?that.options.recordset :that.options.recordset.getIds();
                             if(_selection.length==0) _selection = 'hide_all';
                         }

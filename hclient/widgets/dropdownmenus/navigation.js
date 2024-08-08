@@ -127,7 +127,7 @@ $.widget( "heurist.navigation", {
             this.options.menu_recIDs = [];
             ids = '';    
         } else {
-            if($.isArray(ids)) {ids = ids.join(',');}
+            if(Array.isArray(ids)) {ids = ids.join(',');}
             else if(window.hWin.HEURIST4.util.isNumber(ids)){
                 this.options.menu_recIDs = [ids];
             }else{
@@ -306,7 +306,7 @@ $.widget( "heurist.navigation", {
                 let menuIcon = resdata.fld(record, DT_THUMBNAIL);
                 let menuFormat = resdata.fld(record, DT_CMS_MENU_FORMAT);
 
-                if(window.hWin.HEURIST4.util.isArray(menuIcon)){ // remove empty indexes
+                if(Array.isArray(menuIcon)){ // remove empty indexes
                     menuIcon = menuIcon.filter((icon) => !window.hWin.HEURIST4.util.isempty(icon));
                 }
 
@@ -406,7 +406,7 @@ $.widget( "heurist.navigation", {
                 }
                 //has submenu
                 if(submenu){
-                    if(!$.isArray(submenu)) submenu = submenu.split(',');
+                    if(!Array.isArray(submenu)) submenu = submenu.split(',');
                     
                     if(submenu.length>0){ 
 
@@ -589,7 +589,7 @@ $.widget( "heurist.navigation", {
         }
 
         
-        if($.isFunction(this.options.onInitComplete)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onInitComplete)){
             this.options.onInitComplete.call(this, this.first_not_empty_page_id);
         }
 
@@ -644,7 +644,7 @@ $.widget( "heurist.navigation", {
             return;
         }
 
-        if(!data.hasContent && !$.isFunction(this.options.onmenuselect)){
+        if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
             
         }else if(data.page_id>0){
@@ -702,7 +702,7 @@ $.widget( "heurist.navigation", {
 
         let that = this;
 
-        if($.isFunction(that.options.onmenuselect)){
+        if(window.hWin.HEURIST4.util.isFunction(that.options.onmenuselect)){
 
             this.options.onmenuselect( data.page_id );
 
@@ -831,7 +831,7 @@ $.widget( "heurist.navigation", {
                                     
                                     layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $(page_target), that.options.supp_options ); 
 
-                                    if($.isFunction(that.options.aftermenuselect)){
+                                    if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
                                         /*setTimeout(function(){
                                         that.options.aftermenuselect( data.page_id );
@@ -860,7 +860,7 @@ $.widget( "heurist.navigation", {
                             
                             //OLD 2022-02-17 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                             
-                            if($.isFunction(that.options.aftermenuselect)){
+                            if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                 that.options.aftermenuselect( document, data.page_id );
                             }
                     });*/

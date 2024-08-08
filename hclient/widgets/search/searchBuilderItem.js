@@ -124,7 +124,7 @@ $.widget( "heurist.searchBuilderItem", {
                     +'<span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-selectmenu-text">Any field</span></span>')
                 .insertAfter(this.select_fields);
         this._on( this.select_fields_btn, { click: function(event){
-            if($.isFunction(this.options.onselect_field)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onselect_field)){
                 window.hWin.HEURIST4.util.stopEvent(event);
                 this.options.onselect_field.call(this);
                 //this._onSelectField();
@@ -140,7 +140,7 @@ $.widget( "heurist.searchBuilderItem", {
         .appendTo( this.sel_container );        
         
         this._on( this.remove_token, { click: function(){
-            if($.isFunction(this.options.onremove)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onremove)){
                 this.options.onremove.call(this);
             }    
         } });
@@ -329,7 +329,7 @@ $.widget( "heurist.searchBuilderItem", {
             change: function(){
                 that._manageConjunction();
                 
-                if($.isFunction(that.options.onchange))
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onchange))
                 {
                     that.options.onchange.call(this);
                 }
@@ -547,7 +547,7 @@ Whole value = EQUAL
 
         this._on( this.select_conjunction, { change: function(){
             this._manageConjunction();
-            if($.isFunction(this.options.onchange)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onchange)){
                     this.options.onchange.call(this);
             }
         }});
@@ -603,7 +603,7 @@ Whole value = EQUAL
                 this._predicate_input_ele.find('.heurist-helper1').text('');
             }
             
-            if($.isFunction(this.options.onchange)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.onchange)){
                     this.options.onchange.call(this);
             }
             

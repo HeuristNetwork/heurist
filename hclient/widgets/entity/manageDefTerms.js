@@ -898,7 +898,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     if(rdiv.length){
                         let rec_ID = rdiv.attr('recid');
                         rdiv.click();
-                    }else if($.isFunction(this.options.onSelect)){
+                    }else if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                         this.options.onSelect.call( this, null );
                     }
                 }                    
@@ -1595,7 +1595,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 btns[0].click = function(){
                     if(that.defaultBeforeClose()){
-                        if($.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             that.options.onClose.call(that, that.contextOnClose() );
                         } 
                     }
@@ -1632,7 +1632,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 btns[0].click = function(){
                     if(that.defaultBeforeClose()){
                         /*
-                        if($.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             //currently selected vocavulary
                             that.options.onClose.call( this, that.options.trm_VocabularyID );
                         }
@@ -1683,7 +1683,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(this.options.create_one_term){
                     if(that.defaultBeforeClose()){
-                        if($.isFunction(that.options.onClose)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                             that._currentEditID = null; 
                             that.closeDialog(true);
                             that.options.onClose.call(that, recID);
@@ -1829,11 +1829,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //request['trm_parentID'] = fields['trm_ParentTermID'];
         }
         
-        let lbl = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
+        let lbl = Array.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
 
         if(this._currentEditID == -1 && this.options.auxilary == 'vocabulary' && lbl.search(/vocab/i) == -1){ // add 'vocab' to the end of new vocabulary
             lbl += ' vocab';
-            if($.isArray(fields['trm_Label'])){
+            if(Array.isArray(fields['trm_Label'])){
                 fields['trm_Label'][0] = lbl;
             }else{
                 fields['trm_Label'] = lbl;
@@ -2758,7 +2758,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 let vocab_id  = trm_IDs[trm_IDs.length-1];
 
                                 if(that.options.select_mode!='manager'){
-                                    that.vocabularies_sel.val(vocab_id);//.change();
+                                    that.vocabularies_sel.val(vocab_id);//.trigger('change');
                                 }else{
                                     that.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
                                 }
@@ -2813,9 +2813,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             let vocab_id = fields['trm_ParentTermID'];
             if(vocab_id>0){
 
-                let lbl_orig = $.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
+                let lbl_orig = Array.isArray(fields['trm_Label'])?fields['trm_Label'][0]:fields['trm_Label'];
                 let lbl = lbl_orig.toLowerCase();
-                let code = $.isArray(fields['trm_Code'])?fields['trm_Code'][0]:fields['trm_Code'];
+                let code = Array.isArray(fields['trm_Code'])?fields['trm_Code'][0]:fields['trm_Code'];
 
                 // check if parent term has child with same label
                 if($Db.trm_HasChildWithLabel(vocab_id, lbl, trm_id)){ 
@@ -3298,7 +3298,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                                     //update on client side
                                     $Db.changeParentInIndex(correct_vocab_id, trm_ID, old_parent_id);
                                     $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
-                                    if($.isFunction(callback)) callback.call(trm_ID);
+                                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(trm_ID);
                                 }else{
                                     onTermSaveError(response)
                                 }
@@ -3351,7 +3351,7 @@ function showWarningAboutTermUsage(recID, refs){
         , null, {title:'Warning'},
         {default_palette_class: 'ui-heurist-design'});        
 
-    $dlg.find('a[data-dty_ID]').click(function(e){
+    $dlg.find('a[data-dty_ID]').on('click', function(e){
 
         let rg_options = {
             isdialog: true, 

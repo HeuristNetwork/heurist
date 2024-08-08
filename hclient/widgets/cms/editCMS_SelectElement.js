@@ -177,7 +177,7 @@ function editCMS_SelectElement( callback ){
                     }
                 });
 
-                sel.val('group').change();
+                sel.val('group').trigger('change');
                 selected_element = 'group';
 
             }

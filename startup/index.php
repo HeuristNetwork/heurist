@@ -196,8 +196,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         return false;
                     }});
                     
-                    $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).change(); _showStep(2);}});
-                    $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).change(); _showStep(2);}});
+                    $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).trigger('change'); _showStep(2);}});
+                    $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).trigger('change'); _showStep(2);}});
 
                     refreshCaptcha();
                     _showStep(2);

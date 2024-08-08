@@ -30,7 +30,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         this.options.default_palette_class = 'ui-heurist-admin';
         
-        if(!$.isArray(this.options.selection_ids)) this.options.selection_ids = [];
+        if(!Array.isArray(this.options.selection_ids)) this.options.selection_ids = [];
         
         //this.options.layout_mode = 'basic';
         this.options.use_cache = true;
@@ -943,7 +943,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             }});
             
             //delete button
-            ele.find('span').click(function(event){
+            ele.find('span').on('click', function(event){
                  let recID = Number($(event.target).attr('recid'));
                  let idx = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
                  that.options.selection_ids.splice(idx, 1);

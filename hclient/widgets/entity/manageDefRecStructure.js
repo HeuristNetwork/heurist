@@ -609,7 +609,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             });
 
             if(that._calculated_usages || $Db.rty(that.options.rty_ID, 'rty_RecCount') <= 50000){ // trigger usage calculations
-                that.element.find('#field_usage').click();
+                that.element.find('#field_usage').trigger('click');
             }
         }, delay);
     },
@@ -637,7 +637,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 
             let that = this;
 
-            actionspan.find('span').click(function(event){
+            actionspan.find('span').on('click', function(event){
                 let ele = $(event.target);
                 that._lockDefaultEdit = true;
                 //timeout need to activate current node    
@@ -2239,7 +2239,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }});
                 
             
-            this.defval_container.find('input[name="defvalType"][value="'+(is_increment?1:0)+'"]').prop('checked',true).change();
+            this.defval_container.find('input[name="defvalType"][value="'+(is_increment?1:0)+'"]').prop('checked',true).trigger('change');
             if(!is_increment){
                 this.defval_container.find('input.text').val( defval );
             }
@@ -2293,7 +2293,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }
         });
 
-        $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).change();
+        $ele.find('input[name="widthType"][value="'+(is_max ? 1 : 0)+'"]').prop('checked', true).trigger('change');
         if(!is_max){
             $ele.find('input.text').val(curr_width);
         }
@@ -2352,9 +2352,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _cleanTreeStructure: function(data){
         
-        if($.isArray(data)){
+        if(Array.isArray(data)){
             for(let i=0; i<data.length; i++){
-                if(data[i].folder || $.isArray(data[i].children)){
+                if(data[i].folder || Array.isArray(data[i].children)){
                     this._cleanTreeStructure( data[i].children );        
                 }else{
                     if(data[i].title) delete data[i].title;
@@ -2474,14 +2474,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     closeDialog: function(is_force){
         
-        if($.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
+        if(window.hWin.HEURIST4.util.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
 
 
         if(this.options.external_toolbar){
             //rts editor is opened from record editor
 
             if(is_force || this.defaultBeforeClose()){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose.call();
                 } 
             }
@@ -2917,7 +2917,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         //enable proceed button on checkbox mark    
         let btn = $dlg.parent().find('button:contains("Proceed")');
-        let chb = $dlg.find('input[type="checkbox"]').change(function(){
+        let chb = $dlg.find('input[type="checkbox"]').on('change', function(){
             window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
         })
         window.hWin.HEURIST4.util.setDisabled(btn, true);
@@ -3161,7 +3161,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             return;
         }
 
-        if(dty_IDs !== null && !window.hWin.HEURIST4.util.isArray(dty_IDs)){
+        if(dty_IDs !== null && !Array.isArray(dty_IDs)){
             dty_IDs = [ dty_IDs ];
         }
 
@@ -3436,7 +3436,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
                 $dlg.find('.target_name').text(name);
 
-                $dlg.find('input[name="shared_flds_only"]').prop('checked', false).change();
+                $dlg.find('input[name="shared_flds_only"]').prop('checked', false).trigger('change');
             },
             close: function(){
 

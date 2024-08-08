@@ -287,7 +287,7 @@ $.widget( "heurist.editing_input", {
 
                         if(is_translation){
 
-                            if(typeof translationSupport!=='undefined' && $.isFunction(translationSupport)){
+                            if(typeof translationSupport!=='undefined' && window.hWin.HEURIST4.util.isFunction(translationSupport)){
                                 translationSupport(this); //see editing_exts
                             }
                             
@@ -383,7 +383,7 @@ $.widget( "heurist.editing_input", {
                                 this._addInput(this.new_value);
                                 this._refresh();
                                 
-                                if($.isFunction(this.options.onrecreate)){
+                                if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
                                     this.options.onrecreate.call(this);
                                 }
                             }
@@ -493,7 +493,7 @@ $.widget( "heurist.editing_input", {
         //values are not defined - assign default value
         let values_to_set;
         
-        if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
+        if( !Array.isArray(this.options.values) ){
             let def_value = this.f('rst_DefaultValue');
             
             let isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
@@ -502,7 +502,7 @@ $.widget( "heurist.editing_input", {
                 // reset default value - default value for new record only
                 // do not assign default values in edit mode                
                 values_to_set = [''];        
-            }else if(window.hWin.HEURIST4.util.isArray(def_value)){
+            }else if(Array.isArray(def_value)){
                 //exclude duplication
                 values_to_set = window.hWin.HEURIST4.util.uniqueArray(def_value);//.unique();
             }else{
@@ -921,7 +921,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();
         
-        if($.isFunction(this.options.change)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.change)){
             this.options.change.call( this );    
         }
     },
@@ -968,7 +968,7 @@ $.widget( "heurist.editing_input", {
                 }    
             })
             .keyup(function(){that.onChange();})
-            .change(function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
 
             //IJ 2021-09-09 - from now dheight is max height in lines - otherwise the height is auto
@@ -1903,10 +1903,10 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
-            .change(function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
             
-            if($.isArray(this.configMode)){
+            if(Array.isArray(this.configMode)){
                 $input.prop('value', this.configMode[0]);
                 $input.prop('checked', (this.configMode.indexOf(value)==0) );
             }else{
@@ -1940,7 +1940,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
             let mode = null;
             
@@ -1966,7 +1966,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that.onChange();})
+            .on('change', function(){that.onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
@@ -2043,7 +2043,7 @@ $.widget( "heurist.editing_input", {
 
                             }
 
-                            if($.isFunction(that._external_relmarker.callback)){
+                            if(window.hWin.HEURIST4.util.isFunction(that._external_relmarker.callback)){
                                 that._external_relmarker.callback(context);
                             }
 
@@ -2319,7 +2319,7 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
             
             let __show_select_function = null;
-            if(typeof browseRecords!=='undefined' && $.isFunction(browseRecords)){
+            if(typeof browseRecords!=='undefined' && window.hWin.HEURIST4.util.isFunction(browseRecords)){
                 __show_select_function = browseRecords(that, $input);//see editing_exts
             }
             
@@ -2532,7 +2532,7 @@ $.widget( "heurist.editing_input", {
             .addClass('text ui-widget-content ui-corner-all')
             .val(value)
             .keyup(function(){that.onChange();})
-            .change(function(){
+            .on('change', function(){
                     that.onChange();
             })
             .appendTo( $inputdiv );
@@ -2643,10 +2643,10 @@ $.widget( "heurist.editing_input", {
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }
@@ -2676,7 +2676,7 @@ $.widget( "heurist.editing_input", {
                 });
 
                 $input.on('paste', function(e){
-                    if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                    if(!window.hWin.HEURIST4.util.isNumber(e.originalEvent.clipboardData.getData('text'))){
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
                         window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
@@ -2693,10 +2693,10 @@ $.widget( "heurist.editing_input", {
                     let max_val = this.f('rst_MaxValue');
                     let min_val = this.f('rst_MinValue');
     
-                    if($.isNumeric(min_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(min_val)){
                         $input.prop('min', min_val);
                     }
-                    if($.isNumeric(max_val)){
+                    if(window.hWin.HEURIST4.util.isNumber(max_val)){
                         $input.prop('max', max_val);
                     }
                 }
@@ -2724,7 +2724,7 @@ $.widget( "heurist.editing_input", {
     
                     this._on($help_controls.find('span.fake_link'), {
                         click: function(e){
-                            $input.val(e.target.textContent).change();
+                            $input.val(e.target.textContent).trigger('change');
                         }
                     });
                 }
@@ -3253,12 +3253,12 @@ $.widget( "heurist.editing_input", {
                                 .appendTo( $inputdiv );                            
 
                             $('<a href="#" title="Select from a library of images"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(function(){that.openIconLibrary()}).appendTo( ele );
+                                .on('click', function(){that.openIconLibrary()}).appendTo( ele );
 
                             $('<br><br>').appendTo( ele );
 
                             $('<a href="#" title="or upload a new image"><span class="ui-icon ui-icon-folder-open"/><span class="upload-file-text">Upload file</span></a>')
-                                .click(function(){ $input.click() }).appendTo( ele );
+                                .on('click', function(){ $input.click() }).appendTo( ele );
                         }
                             
                         //set input as file and hide
@@ -3513,7 +3513,7 @@ $.widget( "heurist.editing_input", {
                                 if(that.newvalues[$input.attr('id')]==false){
                                     that.newvalues[$input.attr('id')] = {};
                                 }
-                                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).change();
+                                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).trigger('change');
                             }
                         };
                         
@@ -3575,7 +3575,7 @@ $.widget( "heurist.editing_input", {
 
                             let ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
                             let vals = ele.editing_input('getValues');
-                            if($.isArray(vals) && vals.length>0){
+                            if(Array.isArray(vals) && vals.length>0){
                                 vals = vals[0];
                                 if(vals['ulf_ExternalFileReference']){
                                     wkt_params['imageurl'] = vals['ulf_ExternalFileReference'];
@@ -3618,7 +3618,7 @@ $.widget( "heurist.editing_input", {
                                                 +location.wkt;
                                     let geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
                                     if(that.options.is_faceted_search){
-                                        $input.val(geovalue.summary).change();
+                                        $input.val(geovalue.summary).trigger('change');
                                     }else{
                                         $input.val(geovalue.type+'  '+geovalue.summary);
                                         $input.change();
@@ -3685,7 +3685,7 @@ $.widget( "heurist.editing_input", {
 
                     let popele = $(pdiv);
 
-                    popele.find('input[class="bkm_points"]').click(function(e){
+                    popele.find('input[class="bkm_points"]').on('click', function(e){
                         let url = window.hWin.HAPI4.baseURL 
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
 
@@ -3719,8 +3719,8 @@ $.widget( "heurist.editing_input", {
 
                                     let points = geocode.split(/[\s,]+/);
 
-                                    $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).change();
-                                    $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).change();
+                                    $('input[id="bkm_long"]').val(points[0] + ',' + points[2]).trigger('change');
+                                    $('input[id="bkm_lat"]').val(points[1] + ',' + points[3]).trigger('change');
                                 }
                             }
                         } );
@@ -4726,7 +4726,7 @@ $.widget( "heurist.editing_input", {
         }else{    
             //related entity                 
             if(window.hWin.HEURIST4.util.isempty(value)) value = [];
-            value = $.isArray(value)?value
+            value = Array.isArray(value)?value
                 :((typeof  value==='string')?value.split(','):[value]);
                 
             if(value.length==0){
@@ -4875,7 +4875,7 @@ $.widget( "heurist.editing_input", {
             }
             else{
 
-                if (!$.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
+                if (!Array.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
                     //is it CS string - convert to array
                     allTerms = allTerms.split(',');
                 }
@@ -5206,7 +5206,7 @@ $.widget( "heurist.editing_input", {
         this.inputs = [];
         this.newvalues = {};
         
-        if(!$.isArray(values)) values = [values];
+        if(!Array.isArray(values)) values = [values];
 
         let isReadOnly = this.isReadonly();
         
@@ -5231,7 +5231,7 @@ $.widget( "heurist.editing_input", {
         
         this._setAutoWidth();            
         
-        if($.isFunction(this.options.onrecreate)){
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
             this.options.onrecreate.call(this);
         }
         
@@ -5261,7 +5261,7 @@ $.widget( "heurist.editing_input", {
             if($input.attr('radiogroup')>0){
                 res = $input.find('input:checked').val();
             }else if(this.detailType=='boolean'){
-                if($.isArray(this.configMode) && this.configMode.length==2) {
+                if(Array.isArray(this.configMode) && this.configMode.length==2) {
                     res = this.configMode[ $input.is(':checked')?0:1 ];
                 }else{
                     res = $input.is(':checked') ?$input.val() :0;        
@@ -5700,7 +5700,7 @@ $.widget( "heurist.editing_input", {
              $inputdiv.css('max-width', Math.round(2 + Math.min(80, Number(dwidth))) + "ex");
         }
                 
-        if($.isArray(value)){
+        if(Array.isArray(value)){
 
             disp_value = value[1]; //record title, relation description, filename, human readable date and geo
 
@@ -5872,7 +5872,7 @@ $.widget( "heurist.editing_input", {
     //
     _prepareIds: function(ptrset)
     {
-        if(!$.isArray(ptrset)){
+        if(!Array.isArray(ptrset)){
             if(window.hWin.HEURIST4.util.isempty(ptrset)){
                 ptrset = [];
             }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
@@ -5944,7 +5944,7 @@ $.widget( "heurist.editing_input", {
 
         function translateDate(date, from_calendar, to_calendar){
 
-            if(!$.isFunction($('body').calendarsPicker)){
+            if(!window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){
                 return date;
             }
 
@@ -5974,7 +5974,7 @@ $.widget( "heurist.editing_input", {
         let $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
                         .val(defDate).insertAfter( $input );
 
-        if($.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
+        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){ // third party extension for jQuery date picker, used for Record editing
 
             let temporal = null;
 
@@ -6304,7 +6304,7 @@ $.widget( "heurist.editing_input", {
                             $input.change();
                         }
 
-                        if($.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
+                        if(window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker) && $tinpt.hasClass('hasCalendarsPicker')){
 
                             let new_temporal = null;
                             let new_cal = null;
@@ -6407,7 +6407,7 @@ $.widget( "heurist.editing_input", {
                     
                     let inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
                             .addClass('text ui-widget-content ui-corner-all')
-                            .change(function(){
+                            .on('change', function(){
                                 that.onChange();
                             })
                             .insertAfter(edash);
@@ -6646,7 +6646,7 @@ $.widget( "heurist.editing_input", {
             let isChecked = (values && values.includes(trm_id)) ? true : false;
 
             let $btn = $('<input>', {'type': this.enum_buttons, 'title': trm_label, 'value': trm_id, 'data-id': trm_id, 'checked': isChecked, name: this.options.dtID})
-                .change(function(event){ 
+                .on('change', function(event){ 
 
                     let isNewVal = false;
                     let changed_val = $(event.target).val();

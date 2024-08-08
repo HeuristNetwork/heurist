@@ -50,7 +50,7 @@ window.hWin.HEURIST4.query = {
                     
                     let sq;
 
-                    if($.isArray(query_request.q) || $.isPlainObject(query_request.q)){
+                    if(Array.isArray(query_request.q) || $.isPlainObject(query_request.q)){
                         sq = JSON.stringify(query_request.q);
                     }else{
                         sq = query_request.q;
@@ -65,7 +65,7 @@ window.hWin.HEURIST4.query = {
                 
                 let rules = query_request.rules;
                 if(!window.hWin.HEURIST4.util.isempty(rules)){
-                    if($.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
+                    if(Array.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
                         rules = JSON.stringify(query_request.rules);
                     }
                     //@todo simplify rules array - rempove redundant info
@@ -109,7 +109,7 @@ window.hWin.HEURIST4.query = {
 
             if(!window.hWin.HEURIST4.util.isempty(params.q)){
 
-                if($.isArray(params.q) || $.isPlainObject(params.q)){
+                if(Array.isArray(params.q) || $.isPlainObject(params.q)){
                     query = JSON.stringify(params.q);
                 } else{
                     query = params.q;
@@ -121,7 +121,7 @@ window.hWin.HEURIST4.query = {
             if(!window.hWin.HEURIST4.util.isempty(rules)){
 
 
-                if($.isArray(params.rules) || $.isPlainObject(params.rules)){
+                if(Array.isArray(params.rules) || $.isPlainObject(params.rules)){
                     rules = JSON.stringify(params.rules);
                 } else{
                     rules = params.rules;
@@ -299,10 +299,10 @@ window.hWin.HEURIST4.query = {
             if(window.hWin.HEURIST4.util.isnull(query2) || $.isEmptyObject(query2)){
                 return query1;
             }
-            if(!$.isArray(query1)){
+            if(!Array.isArray(query1)){
                 query1 = [query1];
             }
-            if(!$.isArray(query2)){
+            if(!Array.isArray(query2)){
                 query2 = [query2];
             }
         
@@ -341,7 +341,7 @@ window.hWin.HEURIST4.query = {
                 let r = window.hWin.HEURIST4.util.isJSON(qsearch);
                 if(r!==false){
                     
-                    if(window.hWin.HEURIST4.util.isArray(r.rectypes)){
+                    if(Array.isArray(r.rectypes)){
                         r.type = 3; //'faceted';
                         r.w = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
                         r.domain = r.w;

@@ -126,7 +126,7 @@ $.widget( "heurist.timeline", {
                         that.selected_rec_ids.push( itemid ); //record id
                     });
                     
-                    if($.isFunction(that.options.onselect)){ //trigger global event
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onselect)){ //trigger global event
                         that.options.onselect.call(that, that.selected_rec_ids);    
                     }
     
@@ -477,7 +477,7 @@ $.widget( "heurist.timeline", {
         }
         
         
-        if($.isFunction(this.options.onfilter)){ //trigger global event
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onfilter)){ //trigger global event
         
             if (!this.isApplyTimelineFilter || !this.vis_timeline.itemsData || !params) return;
             
@@ -626,7 +626,7 @@ $.widget( "heurist.timeline", {
                             that.isApplyTimelineFilter = newval;
                             if(newval){
                                 that._timelineApplyRangeOnMap( null );    
-                            }else if($.isFunction(that.options.onfilter)){
+                            }else if(window.hWin.HEURIST4.util.isFunction(that.options.onfilter)){
                                 //set map elements visible
                                 that.options.onfilter.call(this, true);
                             }
@@ -650,37 +650,37 @@ $.widget( "heurist.timeline", {
         $("<button>").button({icons: {
             primary: "ui-icon-circle-plus"
             },text:false, label:window.hWin.HR("Zoom In")})
-            .click(function(){ __timelineZoom(-0.25); })
+            .on('click', function(){ __timelineZoom(-0.25); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-circle-minus"
             },text:false, label:window.hWin.HR("Zoom Out")})
-            .click(function(){ __timelineZoom(0.5); })
+            .on('click', function(){ __timelineZoom(0.5); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthick-2-e-w"
             },text:false, label:window.hWin.HR("Zoom to All")})
-            .click(function(){ that._timelineZoomToAll(); })
+            .on('click', function(){ that._timelineZoomToAll(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-s"
             },text:false, label:window.hWin.HR("Zoom to selection")})
-            .click(function(){ __timelineZoomToSelection(); })
+            .on('click', function(){ __timelineZoomToSelection(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-w"
             },text:false, label:window.hWin.HR("Move to Start")})
-            .click(function(){ __timelineMoveToLeft(); })
+            .on('click', function(){ __timelineMoveToLeft(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-arrowthickstop-1-e"
             },text:false, label:window.hWin.HR("Move to End")})
-            .click(function(){ __timelineMoveToRight(); })
+            .on('click', function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
         $("<button>").button({icons: {
             primary: "ui-icon-gear"
             },text:false, label:window.hWin.HR("Timeline options")})
-            .click(function(){ __timelineEditProperties(); })
+            .on('click', function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
         $("<label>").attr('id','lbl_timeline_filter')
             .text('').css('font-style','italic').appendTo(toolbar);

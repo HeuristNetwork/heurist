@@ -130,7 +130,7 @@ function HLayout(args) {
             $container = $(_containerid); 
         }
      
-        //if(!$.isFunction($container.layout)) return;
+        //if(!window.hWin.HEURIST4.util.isFunction($container.layout)) return;
         if(!$container.hasClass('ui-layout-container')) {
             $container = $container.children().find('.ui-layout-container');
         }
@@ -143,7 +143,7 @@ function HLayout(args) {
             myLayout = $container.layout();
         
         
-        if($.isArray(args)){
+        if(Array.isArray(args)){
             if(args.length<1) return;
             pane = args[0];
         }else{
@@ -967,14 +967,14 @@ console.error('Cardinal layout widget does not have proper options');
 
             app.widget = $content;
 
-            if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
+            if(window.hWin.HEURIST4.util.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
             
                 $content[app.widgetname]( options );
             }else{
                 //this is normal way of widget initialization
                 // script is loaded dynamically and init function is widget name
                 $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if($.isFunction($content[app.widgetname])){
+                    if(window.hWin.HEURIST4.util.isFunction($content[app.widgetname])){
                         $content[app.widgetname]( options );   //call function
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
@@ -1001,7 +1001,7 @@ console.error('Cardinal layout widget does not have proper options');
 
         if(!apps) return null;
 
-        if(! $.isArray(apps)){
+        if(! Array.isArray(apps)){
             apps = [apps];
         }
         if(tabcfg==null){
@@ -1267,7 +1267,7 @@ console.error('Cardinal layout widget does not have proper options');
         //add style to header
         if(!Hul.isempty(layout.cssfile)){
             
-            if(!$.isArray(layout.cssfile)){
+            if(!Array.isArray(layout.cssfile)){
                 layout.cssfile = [layout.cssfile];
             }
             for (let idx in layout.cssfile){
@@ -1350,7 +1350,7 @@ console.error('Cardinal layout widget does not have proper options');
                        
                        $('<span class="ui-icon ui-icon-close" title="Close this tab" '
                        +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
-                       .click(function(){ 
+                       .on('click', function(){ 
                             $(item).hide(); 
                             if($(tabb).tabs("option", "active")==1) $(tabb).tabs({active:0}); 
                        })
@@ -1427,11 +1427,11 @@ console.error('Cardinal layout widget does not have proper options');
         //
         executeWidgetMethod: function( element_id, widgetname, method, params ){
             let app = window.hWin.document.getElementById(element_id);
-            if(app && $.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
+            if(app && window.hWin.HEURIST4.util.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
                 $(app)[widgetname](method, params);
             }else if(!app){
                 console.log('widget '+element_id+' not found');
-            }else if(!$.isFunction($(app)[widgetname])){
+            }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
                 console.log('widget '+widgetname+' not loaded');
             //}else {
             //    console.error('widget '+widgetname+' not inited');
@@ -1466,7 +1466,7 @@ console.error('Cardinal layout widget does not have proper options');
             if(layout){
                 _appInitAll(layout, $container); 
             }else{
-                if($.isFunction(onInitComplete)){
+                if(window.hWin.HEURIST4.util.isFunction(onInitComplete)){
                         onInitComplete.call();
                 }
             }

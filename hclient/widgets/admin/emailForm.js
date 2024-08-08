@@ -127,7 +127,7 @@ $.widget( "heurist.emailForm", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{
                     if(that._initControls()){
-                        if($.isFunction(that.options.onInitFinished)){
+                        if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                             that.options.onInitFinished.call(that);
                         }        
                     }
@@ -136,7 +136,7 @@ $.widget( "heurist.emailForm", {
             return;
         }else{
             if(that._initControls()){
-                if($.isFunction(that.options.onInitFinished)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
                     that.options.onInitFinished.call(that);
                 }        
             }
@@ -277,7 +277,7 @@ $.widget( "heurist.emailForm", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
-                    if($.isFunction(that.options.onClose)){
+                    if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose( that._context_on_close );
                     } 
@@ -346,11 +346,11 @@ $.widget( "heurist.emailForm", {
         }else{
             
             let canClose = true;
-            if($.isFunction(this.options.beforeClose)){
+            if(window.hWin.HEURIST4.util.isFunction(this.options.beforeClose)){
                 canClose = this.options.beforeClose();
             }
             if(canClose){
-                if($.isFunction(this.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
                     this.options.onClose( this._context_on_close );
                 }
             }

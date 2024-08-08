@@ -190,7 +190,7 @@ $.widget( "heurist.importStructure", {
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
         //.css({'line-height': '0.9em'})
-        .click(function(){
+        .on('click', function(){
             that.panel_report.hide();
             that.panel_defs.show();
             
@@ -902,7 +902,7 @@ $.widget( "heurist.importStructure", {
             resizeStop: function(){ that._fixWidth(); },
             close:function(){
 
-                if($.isFunction(that.options.onClose)){
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
                     //that.options.onClose(that._currentEditRecordset);  
                     that.options.onClose.call();
                 } 
@@ -1002,7 +1002,7 @@ $.widget( "heurist.importStructure", {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    that.panel_report.find('#btn_close_panel_report').click();
+                    that.panel_report.find('#btn_close_panel_report').trigger('click');
 
                     if(type == 'all'){
                         that._processCloneResponse(response);
@@ -1382,13 +1382,13 @@ $.widget( "heurist.importStructure", {
 
         if(cur_acc == 2){ // trm
             this.panel_trm_list.find('.searchForm #input_search').val(search);
-            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).change(); // always show all
+            this.panel_trm_list.find('.searchForm #chb_show_already_in_db').prop('checked', true).trigger('change'); // always show all
         }else if(cur_acc == 1){ // dty
             this.panel_dty_list.find('.searchForm #input_search').val(search);
-            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).change(); // always hide those already in db
+            this.panel_dty_list.find('.searchForm #chb_show_already_in_db').prop('checked', false).trigger('change'); // always hide those already in db
         }else{ // rty
             this.panel_rty_list.find('.searchForm #input_search').val(search);
-            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).change();
+            this.panel_rty_list.find('.searchForm #chb_show_already_in_db').prop('checked', state).trigger('change');
         }
     },
 

@@ -413,7 +413,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister(false);
                     }); 
 
@@ -422,7 +422,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-upload"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                         that._uploadFileAndRegister( true );
                     }); 
                     
@@ -465,7 +465,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             let inpt = this;
                             that._edit_dialog.find('#btn_upload_file_repository').off('click');
                             that._edit_dialog.find('#btn_upload_file_repository').on({click: function(){
-                                $(inpt).click();
+                                $(inpt).trigger('click');
                             }});                
                         },
                         fail: function (e, response) {
@@ -520,7 +520,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     ,icons: {
                             primary: "ui-icon-grid"
                     }})
-                    .click(function(e) {
+                    .on('click', function(e) {
                          that._currentEditID = null;
                          that.editFormPopup.dialog('close');
                          if(that.options.edit_addrecordfirst){
@@ -537,7 +537,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     }})
                     .click((e) => {
                         if(that._edit_dialog.find('#external_repos').val() != ''){
-                            that._edit_dialog.find('#upload_file_repository').click();
+                            that._edit_dialog.find('#upload_file_repository').trigger('click');
                         }
                     });
                 
@@ -551,7 +551,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .click(function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_folder_dlg){
                                 that.select_folder_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
@@ -598,7 +598,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         ,icons: {
                                 primary: "ui-icon-grid"
                         }})
-                        .click(function(e) {
+                        .on('click', function(e) {
                             
                             if(!that.select_file_dlg){
                                 that.select_file_dlg = $('<div/>').hide().appendTo( that._edit_dialog );
@@ -1002,7 +1002,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     }], null);
                 that._editing_uploadfile.getContainer().hide(); //this form is hidden
                 let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
-                ele.find('.fileupload').click(); //open file select dialog
+                ele.find('.fileupload').trigger('click'); //open file select dialog
         }        
         
         if(!this._editing_uploadfile){ //form is not yet defined

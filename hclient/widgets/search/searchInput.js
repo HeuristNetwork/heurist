@@ -293,7 +293,7 @@ $.widget( "heurist.searchInput", {
             }
         }else{
             
-            if(!$.isFunction($('body')['showSearchBuilder'])){ 
+            if(!window.hWin.HEURIST4.util.isFunction($('body')['showSearchBuilder'])){ 
             
                 let path = window.hWin.HAPI4.baseURL + 'hclient/widgets/search/';
                 let scripts = [ path+'searchBuilder.js', 
@@ -367,7 +367,7 @@ $.widget( "heurist.searchInput", {
                 //request is from some other widget (outside)
                 if(data.source!=that.element.attr('id')){
                     let qs;
-                    if($.isArray(data.q)){
+                    if(Array.isArray(data.q)){
                         qs = JSON.stringify(data.q);
                     }else{
                         qs = data.q;

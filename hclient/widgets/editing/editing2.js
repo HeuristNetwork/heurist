@@ -80,7 +80,7 @@ function hEditing(_options) {
         
         _initEditForm(_options.recstructure, _options.recdata);
         
-        if($.isFunction(_options.oninit)){ //init completed
+        if(window.hWin.HEURIST4.util.isFunction(_options.oninit)){ //init completed
             _options.oninit.call(that);
         }
     }
@@ -122,7 +122,7 @@ function hEditing(_options) {
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 let val = recdata.values(record, ele.editing_input('option', 'dtID'));
-                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
+                if(!Array.isArray(val)) val = [val];
                 ele.editing_input('setValue', val );
             }
             
@@ -479,7 +479,7 @@ function hEditing(_options) {
                             }
 
                             if(!window.hWin.HEURIST4.util.isnull(val)){
-                                if(!window.hWin.HEURIST4.util.isArray(val)) val = [val];
+                                if(!Array.isArray(val)) val = [val];
                                 fields[idx].values = val;
                             }else{
                                 fields[idx].values = null; //[''];
@@ -760,7 +760,7 @@ function hEditing(_options) {
     }
     
     function _onChange(){
-        if($.isFunction(onChangeCallBack)){
+        if(window.hWin.HEURIST4.util.isFunction(onChangeCallBack)){
             onChangeCallBack.call( this );    
         }
     }
@@ -845,7 +845,7 @@ function hEditing(_options) {
     //
     function _displayValueErrors(fieldNames){
 
-        if(!window.hWin.HEURIST4.util.isArray(fieldNames)){
+        if(!Array.isArray(fieldNames)){
             fieldNames = fieldNames.split(',');
         }
 
@@ -938,7 +938,7 @@ function hEditing(_options) {
         setFieldValueByName:function(fieldName, value, is_changed){
             let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
-                ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
+                ele.editing_input('setValue', Array.isArray(value)?value:[value], (is_changed===false));
                 if(is_changed!==false){
                     ele.editing_input('isChanged', true);    
                     ele.editing_input('onChange');

@@ -323,7 +323,7 @@ function onPageInit(success)
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     //reload website by click on logo or title, opens first page with content
-    $("#main-logo,#custom-logo,#main-title").click(function(event){
+    $("#main-logo,#custom-logo,#main-title").on('click', function(event){
             
         var load_initially = home_page_record_id;
         <?php if($isEmptyHomePage){
@@ -704,7 +704,7 @@ function loadRecordContent(url_or_record_id, target){
                    container.height(frm.contentWindow.document.body.scrollHeight); 
                    initLinksAndImages($(frm.contentWindow.document.body));
                    
-                   container.find('button.keywords').click(function(){
+                   container.find('button.keywords').on('click', function(){
                         $('#main-recordview').hide();
                         $('#main-content').show();
                    });
@@ -830,7 +830,7 @@ function afterPageLoad(document, pageid, eventdata){
     if(DT_CMS_SCRIPT>0){
         var func_name = 'afterPageLoad'+pageid;
     
-        if(!$.isFunction(window[func_name])){
+        if(!window.hWin.HEURIST4.util.isFunction(window[func_name])){
             var script_code = page_cache[pageid][DT_CMS_SCRIPT];
             if(script_code && script_code !== false){ //false means it is already inited
             
@@ -847,7 +847,7 @@ function afterPageLoad(document, pageid, eventdata){
             }
         }
         
-        if($.isFunction(window[func_name])){  //window[func_name] && 
+        if(window.hWin.HEURIST4.util.isFunction(window[func_name])){  //window[func_name] && 
             //script may have event listener that is triggered on page exit
             //disable it
             $( "#main-content" ).off( "onexitpage");
@@ -858,7 +858,7 @@ function afterPageLoad(document, pageid, eventdata){
     //execute custom javascript for home page =========================
     if(pageid!=home_page_record_id && is_execute_homepage_custom_javascript){
         var func_name = 'afterPageLoad'+home_page_record_id;
-        if($.isFunction(window[func_name])){
+        if(window.hWin.HEURIST4.util.isFunction(window[func_name])){
             //script may have event listener that is triggered on page exit
             //disable it
             $( "#main-content" ).off( "onexitpage");
@@ -976,7 +976,7 @@ function afterPageLoad(document, pageid, eventdata){
                         eventdata.search_page = null
                         
                         if(e.type==window.hWin.HAPI4.Event.ON_REC_SELECT){
-                            if($.isArray(eventdata.selection) && eventdata.selection.length>0){
+                            if(Array.isArray(eventdata.selection) && eventdata.selection.length>0){
                                 //convert SELECT to SEARCHSTART
                                 eventdata = {detail:'ids', neadall:1, w:'a',
                                      q:'ids:'+eventdata.selection.join(','),
@@ -1073,7 +1073,7 @@ function initLinksAndImages($container, search_data){
                     $(link).attr('href', href);
                 }
                             
-                $(link).click(function(event){
+                $(link).on('click', function(event){
                     window.hWin.HEURIST4.util.stopEvent(event);
                     window.hWin.HAPI4.RecordSearch.doSearch(window.hWin,request);
                     return false;
@@ -1090,7 +1090,7 @@ function initLinksAndImages($container, search_data){
             ($(link).attr('target')!='_blank' || record_view_target!='')
            )
         {
-                $(link).click(function(event){
+                $(link).on('click', function(event){
                     
                     var link;
                     if($(event.target).is('a')){
@@ -1148,7 +1148,7 @@ function initLinksAndImages($container, search_data){
                 //    eventdata = {event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, q:query};
                 //}
                 
-                $(link).click(function(event){
+                $(link).on('click', function(event){
                     
                     var pageid = $(event.target).attr('data-pageid');
                     window.hWin.loadPageContent(pageid, eventdata);

@@ -270,7 +270,7 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
         let rt_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
-        if(!$.isArray(rt_constraints)){
+        if(!Array.isArray(rt_constraints)){
             if(window.hWin.HEURIST4.util.isempty(rt_constraints)){
                 rt_constraints = [];
             }else{
