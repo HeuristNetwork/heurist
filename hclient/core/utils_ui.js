@@ -2030,62 +2030,35 @@ window.hWin.HEURIST4.ui = {
             .on('click', function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You are about to delete link between records<br><br>Are you sure?',
-                     function(){
-                        
-                          let recID = ele.attr('data-relID');
-                         
-                          if(recID>0){  
-                              
-                              window.hWin.HAPI4.RecordMgr.remove({ids: recID}, 
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        
-                                          ele.trigger('remove');
-                                          ele.remove();
-                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'), 3000);
+                    function(){
 
-                                          if($(container).find('.link-div').length==0){
-                                                $(container).find('.add-rel-button').show();
-                                          }
-                                          
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr( response );
+                        let recID = ele.attr('data-relID');
+
+                        if(recID>0){
+
+                            window.hWin.HAPI4.RecordMgr.remove({ids: recID},
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+
+                                    ele.trigger('remove');
+                                    ele.remove();
+                                    window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'), 3000);
+
+                                    if($(container).find('.link-div').length==0){
+                                        $(container).find('.add-rel-button').show();
                                     }
-                                });
 
-                              /*  
-                              var url = window.hWin.HAPI4.baseURL + 'hapi/php/deleteRecord.php';
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                            });
 
-                              var request = {
-                                db: window.hWin.HAPI4.database,
-                                id: recID
-                              }
-                             
-                              window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
-                                  if(response){
-                                      if(response.error){
-                                          window.hWin.HEURIST4.msg.showMsgErr( response.error );
-                                      }else if(response.deleted>0){
-                                          //link is deleted - remove this element
-                                          ele.trigger('remove');
-                                          ele.remove();
-                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'));
-                                          
-                                          if($(container).find('.link-div').length==0){
-                                                $(container).find('.add-rel-button').show();
-                                          }
-                                      }
-                                  }
-                              });
-                              */
-                          
-                          }else{
-                              //remove link field
-                              
-                              //todo
-                          }
-                     },
-                     {title:'Warning',yes:'Proceed',no:'Cancel'});
+                        }else{
+                            // @todo - remove link field
+                        }
+                    },
+                    {title:'Warning',yes:'Proceed',no:'Cancel'}
+                );
             });
         }
         

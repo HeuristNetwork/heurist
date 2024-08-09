@@ -692,7 +692,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HAPI4.sysinfo['db_workset_count'] = response.data[2];
                             if (callback) callback();
                         } else {
-                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
             },
@@ -731,7 +731,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 //!!!! assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                             }
                         } else {
-                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         if (callback) {
                             callback(success);
@@ -1153,8 +1153,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             check_for_databases: function(data, callback){
                  
                 if(!data){
-                    window.hWin.HEURIST4.msg.showMsgErr('The list of databases to be checked is missing<br>'
-                    +'Please contact the Heurist team.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'The list of databases to be checked is missing<br>'
+                                +'Please contact the Heurist team.',
+                        status: window.hWin.ResponseStatus.INVALID_REQUEST
+                    });
                     return false;
                 }
                  
@@ -1175,7 +1178,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             get_time_diffs: function(data, callback){
 
                 if(!data || !data.early_date || !data.latest_date){
-                    window.hWin.HEURIST4.msg.showMsgErr('Both an earliest and latest date are required.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Both an earliest and latest date are required.',
+                        status: window.hWin.ResponseStatus.INVALID_REQUEST
+                    });
                     return false;
                 }
 

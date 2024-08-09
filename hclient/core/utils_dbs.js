@@ -2697,9 +2697,9 @@ window.hWin.HEURIST4.dbs = {
 
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }});
-
-
+                                }
+                            }
+                        );
 
                     }                            
                 }else{
