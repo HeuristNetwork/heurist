@@ -53,7 +53,7 @@ function getMediaFolders($mysqli) {
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
 //
-function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
+function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
     global $rep_counter, $rep_issues;
     
@@ -75,25 +75,10 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
         }else{
 
-            if(substr($dir, -1) != '/'){
-                $dir .= "/";
-            }
-
-            $dir = str_replace('\\','/',$dir);
-            if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                $orig = $dir;
-                chdir(HEURIST_FILESTORE_DIR);
-                $dir = realpath($dir);
-                if($dir!==false){
-                    $dir = str_replace('\\','/',$dir);
-                }
-                
-                if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                    if($is_report){
-                        print "<div style=\"color:red\">$orig is ignored. Folder must be in heurist filestore directory.</div>";
-                    }
-                    continue;
-                }
+            $dir = USanitize::sanitizePath($dir);
+            if(isPathInHeuristUploadFolder($dir, true)===false){
+                print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
+                continue;
             }
 
             if(substr($dir, -1) != '/'){
@@ -102,7 +87,9 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode) {
 
         }
 
-        if(in_array($dir, $system_folders)){
+        $is_allowed = is_array($allowed_system_folders) && !empty($allowed_system_folders) && in_array($dir, $allowed_system_folders);
+
+        if(!$is_allowed && in_array($dir, $system_folders)){
 
             if($is_report){
                 print "<div style=\"color:red\">Files are not scanned in system folder $dir</div>";
@@ -185,7 +172,6 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
 
             $filename_base = $filename;
             $filename = $dir.$filename;
-            $currfile = $filename;
             $flleinfo = pathinfo($filename);
             $recordNotes = null;
 
@@ -195,6 +181,16 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
                 if($imode==1){
                 
                     $file_id = fileGetByFileName( $system, $filename);//see recordFile.php
+
+                    if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
+                        //Check if this is just a thumbnail version of an image
+
+                        $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+
+                        if(in_array($temp_name, $reg_info['nonreg'])){
+                            continue;
+                        }
+                    }
 
                     if($file_id>0){
                         array_push($reg_info['reg'], $filename);

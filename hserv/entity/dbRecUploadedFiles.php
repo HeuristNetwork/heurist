@@ -1484,8 +1484,12 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $files = json_decode($this->data['files']);
             }else{ // manageRecUploadedFiles.js
 
+                if(!in_array('file_uploads', $dirs_and_exts['dirs'])){
+                    $dirs_and_exts['dirs'][] = 'file_uploads';
+                }
+
                 // Get non-registered files 
-                doHarvest($this->system, $dirs_and_exts, false, 1);
+                doHarvest($this->system, $dirs_and_exts, false, 1, ['file_uploads']);
                 $files = getRegInfoResult()['nonreg'];
             }
 
