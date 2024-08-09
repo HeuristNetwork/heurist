@@ -124,7 +124,11 @@ $.widget( "heurist.emailForm", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }else{
                     if(that._initControls()){
                         if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
@@ -167,7 +171,11 @@ $.widget( "heurist.emailForm", {
         if(!this._element_form.find('#captcha')) missed.push('captcha');
         
         if(missed.length>0){
-            window.hWin.HEURIST4.msg.showMsgErr('Email form must have the following html elements: '+missed.join(','));            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Email form must have the following html elements: ${missed.join(',')}`,
+                error_title: 'Missing required fields',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
         }
         
         window.hWin.HRA(this._element_form);//this.element
@@ -443,7 +451,11 @@ $.widget( "heurist.emailForm", {
 
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Invalid field values',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
         }
     },
     

@@ -1285,7 +1285,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
                 (Array.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
             {
-                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one top level menu item',
+                    error_title: 'Missing required setting'
+                });
                 return false;   
             }
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
@@ -1301,7 +1304,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             if(window.hWin.HEURIST4.util.isempty(storyFields) || 
                 (Array.isArray(storyFields)&& (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
             {
-                window.hWin.HEURIST4.msg.showMsgErr('Please set at least one story field');                     
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one story field',
+                    error_title: 'Missing story field'
+                });                     
                 return false;   
             }
         }
@@ -1444,10 +1450,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
 
             if(selval==1){
-                window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "tree" mode you have to select groups to be displayed',
+                    error_title: 'Missing required setting'
+                });
                 return false;
             }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
-                window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you must select either workgroups or filters individually');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "button" mode you must select either workgroups or filters individually',
+                    error_title: 'Missing required setting(s)'
+                });
                 return false;
             }
         }

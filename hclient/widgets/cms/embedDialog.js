@@ -133,7 +133,10 @@ $.widget( "heurist.embedDialog", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content'
+                    });
                 }else{
                     if(that._initControls()){
                         if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){

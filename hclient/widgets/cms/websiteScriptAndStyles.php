@@ -602,11 +602,11 @@ if($website_custom_css!=null){
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
                     function(response){
                       
-                       if(window.hWin.HEURIST4.util.isJSON(response)) {
-                           if(response['records'] && response['records'].length>0){
-                               var res = response['records'][0]['details'];
-                               var keys = Object.keys(res);
-                               for(var idx in keys){
+                        if(window.hWin.HEURIST4.util.isJSON(response)) {
+                            if(response['records'] && response['records'].length>0){
+                                var res = response['records'][0]['details'];
+                                var keys = Object.keys(res);
+                                for(var idx in keys){
                                     var key = keys[idx];
 
                                     if(key == DT_EXTENDED_DESCRIPTION){
@@ -617,22 +617,28 @@ if($website_custom_css!=null){
                                         //takes only first value
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
-                               }
-                               if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
+                                }
+                                if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
                                     res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
                                             window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
-                               }
+                                }
                                
-                               page_cache[pageid] = res; //assign to cache after load from server side
-                               __loadPageContent();
-                           }else if(pageid!=home_page_record_id){ //page not found - load home page by default
-                               loadPageContent(home_page_record_id);
-                           }else{
-                               window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+pageid+')');
-                           }
-                       }else {
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                       }
+                                page_cache[pageid] = res; //assign to cache after load from server side
+                                __loadPageContent();
+                            }else if(pageid!=home_page_record_id){ //page not found - load home page by default
+                                loadPageContent(home_page_record_id);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: `Web Page not found (record #${pageid})`,
+                                    error_title: 'Failed to load page'
+                                });
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: response,
+                                error_title: 'Webpage search failed'
+                            });
+                        }
                     });
                 
             }
@@ -1190,17 +1196,23 @@ function initLinksAndImages($container, search_data){
 function onHapiInit(success){   
     
     if(!success){    
-            window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            return;
+        window.hWin.HEURIST4.msg.showMsgErr({
+            message: 'Cannot initialize system on client side, please consult Heurist developers',
+            error_title: 'Unable to initialise Heurist'
+        });
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
+        return;
     }
     
     var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
                                                 window.hWin.HAPI4.sysinfo.db_version);
     if(res==-2){ //-2= db_version_req newer
-    window.hWin.HEURIST4.msg.showMsgErr('<h3>Old version database</h3>'
-+'<p>You are trying to load a website using a more recent version of Heurist than the one used for the database being accessed.</p>'
-+'<p>Please ask the owner of the database to open it in the latest version of Heurist which will apply the necessary updates.</p>');
+        window.hWin.HEURIST4.msg.showMsgErr({
+            message: '<h3>Old version database</h3>'
+                    +'<p>You are trying to load a website using a more recent version of Heurist than the one used for the database being accessed.</p>'
+                    +'<p>Please ask the owner of the database to open it in the latest version of Heurist which will apply the necessary updates.</p>',
+            error_title: 'Database is out-of-date'
+        });
         window.hWin.HEURIST4.msg.sendCoverallToBack();
         return;
     }

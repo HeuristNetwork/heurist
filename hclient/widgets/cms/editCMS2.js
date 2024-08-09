@@ -2120,11 +2120,16 @@ function(value){
                     if(response.data.errors==1){
                         let errs = response.data.errors_list;
                         let errMsg = errs[Object.keys(errs)[0]];
-                        window.hWin.HEURIST4.msg.showMsgErr( errMsg );
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: errMsg,
+                            error_title: 'Failed to save configuration'
+                        });
                     }else
                     if(response.data.noaccess==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
-                        
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'It appears you do not have enough rights (logout/in to refresh) to edit this record',
+                            status: window.hWin.ResponseStatus.REQUEST_DENIED
+                        });
                     }else{
                         _toolbar_Page.hide();
                         page_was_modified = false;

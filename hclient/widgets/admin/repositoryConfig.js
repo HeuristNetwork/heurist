@@ -80,7 +80,10 @@ $.widget( "heurist.repositoryConfig", {
         }
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
-            window.hWin.HEURIST4.msg.showMsgErr('There are no available services, or the configuration file was not found or is broken');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'There are no available services, or the configuration file was not found or is broken',
+                error_title: 'No external services'
+            });
             return;
         }
         
@@ -99,7 +102,11 @@ $.widget( "heurist.repositoryConfig", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }else{
                     that.getConfigurations();
                 }
