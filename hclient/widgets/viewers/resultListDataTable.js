@@ -291,6 +291,7 @@ that._dout('myOnShowEvent');
                     let cols = this.options.dataTableParams['columns'];
                     this.hidden_cols = [];
                     for(let i=0;i<cols.length;i++){
+                        /* custom rendereing is not use - remarked due a secirity reason - using eval
                         if(typeof cols[i]['render']==='string'){
                             let fooName = cols[i]['render']
                             if(typeof(eval(fooName))=='function'){ 
@@ -299,6 +300,8 @@ that._dout('myOnShowEvent');
                                 cols[i]['render'] = null;
                             }
                         }
+                        */
+                        cols[i]['render'] = null;
 
                         if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
                             this.hidden_cols.push(i);

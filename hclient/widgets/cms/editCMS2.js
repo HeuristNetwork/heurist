@@ -772,7 +772,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                     const org_href = href;
                     args.content = '';
 
-                    href += `_${Math.random()}`;
+                    href += `_${window.hWin.HEURIST4.util.random()}`;
 
                     tinymce.activeEditor.execCommand('mceInsertLink', false, href);
 

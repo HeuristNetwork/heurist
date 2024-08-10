@@ -251,7 +251,7 @@ $.widget( "heurist.mediaViewer", {
     //
     //
     ,_initThumbnails: function(selector){
-
+        
         let eles = this.mediacontent.find(selector);
         let that = this;
         
@@ -432,7 +432,7 @@ $.widget( "heurist.mediaViewer", {
                                 
                                 fileURL = fileURL  + '&mode=tag&fancybox=1';
                                 
-                                $alink.attr('data-href','javascript:;')
+                                $alink.attr('data-href','{}') //javascript:;
                                     .attr('data-src', fileURL)
                                     .attr('data-type', 'ajax')
                                     .attr('data-myfancybox','fb-images')
@@ -463,7 +463,7 @@ $.widget( "heurist.mediaViewer", {
         
         if(window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.fancybox){ 
                 window.hWin.HAPI4.fancybox( fancy_opts );
-        }else if (window.hWin.HEURIST4.util.isFunction($.fn.fancybox)){
+        }else if (typeof $.fn.fancybox === 'function'){ //  window.hWin.HEURIST4.util.isFunction
                 $.fn.fancybox( fancy_opts );
         }
         

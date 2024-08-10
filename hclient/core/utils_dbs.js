@@ -1815,7 +1815,7 @@ window.hWin.HEURIST4.dbs = {
         }else if(a_order == null || b_order == null){ // null is first
             return a_order == null;
         }else{ // branch order
-            return eval(a_order - b_order);
+            return (a_order - b_order);
         }
     },
 

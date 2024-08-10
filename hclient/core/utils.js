@@ -917,7 +917,17 @@ window.hWin.HEURIST4.util = {
 
     random: function(){
         //Math.round(new Date().getTime() + (Math.random() * 100));
-        return Math.floor((Math.random() * 10000) + 1);
+        //return Math.floor((Math.random() * 10000) + 1);
+        if(window.crypto){
+            const typedArray = new Uint8Array(10);
+            const randomValues = window.crypto.getRandomValues(typedArray);
+            return randomValues.join('').substr(0,15);        
+        }else{
+            return ''+Math.floor(Date.now() * Math.random())
+            //const arng = new alea(new Date().getTime());
+            //return Math.ceil( arng.quick() * 99999999 ); //1~87  
+        }
+        
     },
 
     //scan all frames of current window and return object by name

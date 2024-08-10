@@ -2552,7 +2552,7 @@ $.widget( "heurist.mapping", {
 
                 that.main_popup.update();
 
-                if(resizable === 'false' || resizable === false){
+                if(resizable == 'false' || resizable === false){
 
                     $popup_ele.find('.leaflet-popup-content-wrapper').resizable({
                         ghost: true,

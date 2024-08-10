@@ -1818,7 +1818,7 @@ $.widget( "heurist.search_faceted", {
             //first call
             field_index = -1;  
             
-            this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
+            this._request_id =  window.hWin.HEURIST4.util.random();
         
             this._terminateFacetCalculation = false;
             this.btn_terminate.show();

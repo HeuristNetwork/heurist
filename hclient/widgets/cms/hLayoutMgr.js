@@ -277,8 +277,8 @@ function hLayoutMgr(){
          
             // assign id for new content and widgety divs
             // it is saved in configuration
-            let uid = ''+Math.floor(Math.random() * 10000);
-            //Math.floor(Math.random() * Date.now())
+            let uid = ''+window.hWin.HEURIST4.util.random();
+
             do{
                 if(layout.appid){
                     layout.dom_id = 'cms-widget-' + uid;

@@ -1605,14 +1605,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
         facets = [];
 
-        function __getRandomInt() {
-            let min = 0;
-            let max =  100000;
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-        }
-
         let old_facets = this.options.params.facets;
 
         if(sharedFields){ // retrieve shared fields, replace record type id at start of code
@@ -1699,7 +1691,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     if(old_facet!=null){
 
                         let new_facet = {
-                            'var': __getRandomInt(), //unique identificator
+                            'var': window.hWin.HEURIST4.util.random(), //unique identificator
                             code:node.data.code,
                             title: old_facet.title,
                             help: old_facet.help,
@@ -1727,7 +1719,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }else{
 
                         facets.push( {
-                            'var': __getRandomInt(),
+                            'var': window.hWin.HEURIST4.util.random(),
                             code:node.data.code,
                             title:'{NEW}', //(node.data.name?node.data.name:node.title),
                             groupby: null,

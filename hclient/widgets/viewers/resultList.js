@@ -199,7 +199,7 @@ $.widget( "heurist.resultList", {
     _cached_linked_images: {}, // cache of images linked to the record
     
     //to refresh icon after structure edit
-    _icon_timer_suffix: ('&t='+Math.round(Math.random()*100000)),
+    _icon_timer_suffix: ('&t='+window.hWin.HEURIST4.util.random()),
     
     // the constructor
     _create: function() {
@@ -509,7 +509,7 @@ $.widget( "heurist.resultList", {
                 if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE)
                 {
                     //update record type icon
-                    that._icon_timer_suffix = ('&t='+Math.round(Math.random()*100000));
+                    that._icon_timer_suffix = ('&t='+window.hWin.HEURIST4.util.random());
                     that._renderPage(that.current_page);
                 }
                 

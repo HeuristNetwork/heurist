@@ -75,7 +75,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     relmarker_values: [],
     
     //to refresh icon after structure edit
-    _icon_timer_suffix: ('&t='+Math.round(Math.random()*100000)),
+    _icon_timer_suffix: ('&t='+window.hWin.HEURIST4.util.random()),
 
     // Record history
     _record_history: null,
@@ -2268,7 +2268,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 height: 820,
                 onClose: function(){
                     //refresh icon, title, mask
-                    that._icon_timer_suffix = '&t='+Math.round(Math.random()*100000);
+                    that._icon_timer_suffix = ('&t='+window.hWin.HEURIST4.util.random());
                     
                     that._initEditForm_step3(that._currentEditID);
                 }
