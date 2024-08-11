@@ -1884,7 +1884,7 @@ function(value){
  'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
  'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1171&q=80'];
  
-            let k = Math.floor(Math.random() * 4);
+            let k = Math.floor(Math.random() * 4); //select one of 4 banners in example set
             
             new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',

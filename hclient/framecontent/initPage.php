@@ -262,7 +262,6 @@ if($isLocalHost){
 
  
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
