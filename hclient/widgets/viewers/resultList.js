@@ -1676,8 +1676,8 @@ $.widget( "heurist.resultList", {
         let html_pwdrem = '';
         let p_reminder = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(p_reminder){
-            html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
-            p_reminder = ' pwd="'+p_reminder+'" ';
+            html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_p_reminder" style="display:inline;left:14px;font-size:0.99em"></span>';
+            p_reminder = ' data-reminder="'+p_reminder+'" ';
         }else{
             p_reminder = '';
         }
@@ -2090,9 +2090,9 @@ $.widget( "heurist.resultList", {
             //return;
         }
 
-        let ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
+        let ispwdreminder = $target.hasClass('rec_p_reminder'); //this is password reminder click
         if (ispwdreminder){
-            let pwd = $rdiv.attr('pwd');
+            let pwd = $rdiv.attr('data-reminder');
             let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HEURIST4.util.htmlEscape(pwd),
                     null, window.hWin.HR('Password reminder'), 
                 {my: "left top", at: "left bottom", of: $target, modal:false}
