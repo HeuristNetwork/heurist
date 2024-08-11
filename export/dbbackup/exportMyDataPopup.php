@@ -972,7 +972,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date,
                             'lang' => null,
                             'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#title'
+                            'propertyUri' => NAKALA_REPO.'terms#title'
                         );
 
                         $usr = $system->getCurrentUser();
