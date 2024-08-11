@@ -4243,7 +4243,7 @@ $.widget( "heurist.mapping", {
         
         //remove heurist prefix with type
         let typeCode;
-        let matches = wkt.match(/\??(\S+)\s+(.*)/);
+        let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
         if (! matches) {
             return;
         }

@@ -694,7 +694,7 @@ window.hWin.HEURIST4.geo = {
 
         if(window.hWin.HEURIST4.util.isempty(typeCode)){
 
-            let matches = wkt.match(/\??(\S+)\s+(.*)/);
+            let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
             if (! matches) {
                 return;
             }
@@ -750,7 +750,7 @@ window.hWin.HEURIST4.geo = {
     getParsedWkt: function(wkt, checkWkt=false){
 
         if(checkWkt){
-            let matches = wkt.match(/\??(\S+)\s+(.*)/);
+            let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
 
             if(!matches){
                 return '';
@@ -772,7 +772,7 @@ window.hWin.HEURIST4.geo = {
     wktValueToDescription:function(wkt, simple_polygon = false){
 
         let decPoints = 7; //5
-        let matches = wkt.match(/\??(\S+)\s+(.*)/);
+        let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
         if (! matches) {
             return { type:'', summary:''};
         }

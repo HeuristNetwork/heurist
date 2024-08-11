@@ -1455,7 +1455,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             wkt = decodeURIComponent(document.location.search);
         }
         
-        /*let matches = wkt.match(/\??(\S+)\s+(.*)/);
+        /*let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
         if (! matches) {
             return;
         }
@@ -1511,7 +1511,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             val = decodeURIComponent(document.location.search);
         }
 
-        let matches = val.match(/\??(\S+)\s+(.*)/);
+        let matches = val.match(/\??(\S{1,2})\s+(.*)/);
         if (! matches) {
             return;
         }
@@ -1523,7 +1523,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         switch (type) {
             case "p":
                 mode = google.maps.drawing.OverlayType.MARKER
-                matches = value.match(/POINT\s?\((\S+)\s+(\S+)\)/i);
+                matches = value.match(/POINT\s?\((\S{1,20})\s+(\S{1,20})\)/i);
                 sCoords = matches[2]+' '+matches[1];
                 break;
             case "r":  //rectangle
@@ -1558,7 +1558,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
 
                     for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+                        let match_matches = matches[j].match(/(\S{1,20})\s+(\S{1,20})(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
 
@@ -1572,7 +1572,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
 
                     for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+                        let match_matches = matches[j].match(/(\S{1,20})\s+(\S{1,20})(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
                 }
