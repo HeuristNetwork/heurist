@@ -1673,10 +1673,10 @@ $.widget( "heurist.resultList", {
             
         }
         // Show a key icon and popup if there is a password reminder string
-        let html_pwdrem = '';
+        let html_p_reminder = '';
         let p_reminder = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(p_reminder){
-            html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_p_reminder" style="display:inline;left:14px;font-size:0.99em"></span>';
+            html_p_reminder =  '<span class="logged-in-only ui-icon ui-icon-key rec_p_reminder" style="display:inline;left:14px;font-size:0.99em"></span>';
             p_reminder = ' data-reminder="'+p_reminder+'" ';
         }else{
             p_reminder = '';
@@ -1781,7 +1781,7 @@ $.widget( "heurist.resultList", {
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
         +     '<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
         +     html_owner
-        +     html_pwdrem
+        +     html_p_reminder
         + '</div>'
 
 

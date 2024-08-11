@@ -989,14 +989,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             'value' => $date,
                             'lang' => null,
                             'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#created'
+                            'propertyUri' => NAKALA_REPO.'terms#created'
                         );
 
                         $params['meta']['type'] = array(
                             'value' => 'http://purl.org/coar/resource_type/c_ddb1',
                             'lang' => null,
                             'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                            'propertyUri' => 'http://nakala.fr/terms#type'
+                            'propertyUri' => NAKALA_REPO.'terms#type'
                         );
 
                         if(array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])){
@@ -1004,7 +1004,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 'value' => $_REQUEST['license'],
                                 'lang' => null,
                                 'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                                'propertyUri' => 'http://nakala.fr/terms#license'
+                                'propertyUri' => NAKALA_REPO.'terms#license'
                             );
                         }
 

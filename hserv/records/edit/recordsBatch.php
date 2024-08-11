@@ -2634,14 +2634,14 @@ public methods
                 'value' => null,
                 'lang' => null,
                 'typeUri' => null,
-                'propertyUri' => 'http://nakala.fr/terms#creator'
+                'propertyUri' => NAKALA_REPO.'terms#creator'
             );
             // Provided by user - used for all files
             $meta_values['license'] = array(
                 'value' => $this->data['license'],
                 'lang' => null,
                 'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                'propertyUri' => 'http://nakala.fr/terms#license'
+                'propertyUri' => NAKALA_REPO.'terms#license'
             );
 
             $api_key = $credentials[$service_id]['params']['writeApiKey'];//$this->system->get_system('sys_NakalaKey');
@@ -2700,7 +2700,7 @@ public methods
                         'value' => $file_dtl[0],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#title'
+                        'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
                     $file_type = $file_dtl[2];
@@ -2728,7 +2728,7 @@ public methods
                         'value' => $file_type,
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                        'propertyUri' => 'http://nakala.fr/terms#type'
+                        'propertyUri' => NAKALA_REPO.'terms#type'
                     );
 
                     // Current Heurist user
@@ -2744,7 +2744,7 @@ public methods
                         'value' => $file_dtl[5],//date('Y-m-d', $file_dtl[5]),
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#created'
+                        'propertyUri' => NAKALA_REPO.'terms#created'
                     );
 
                     $rtn = uploadFileToNakala($this->system,   //upload in batch

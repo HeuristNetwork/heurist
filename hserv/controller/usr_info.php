@@ -766,7 +766,7 @@
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#title'
+                        'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
                     if(empty($req_params['meta']['creator']['authorId'])){
@@ -774,7 +774,7 @@
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
-                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                            'propertyUri' => NAKALA_REPO.'terms#creator'
                         );
 
                         if(array_key_exists('givenname', $req_params['meta']['creator']) || array_key_exists('surname', $req_params['meta']['creator'])){
@@ -798,7 +798,7 @@
                     }else{
                         $params['meta']['creator'] = array(
                             'value' => @$req_params['meta']['creator'],
-                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                            'propertyUri' => NAKALA_REPO.'terms#creator'
                         );
                     }
 
@@ -807,14 +807,14 @@
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
                             'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#created'
+                            'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }else{
                         $params['meta']['created'] = array(
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
-                            'propertyUri' => 'http://nakala.fr/terms#created'
+                            'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }
 
@@ -822,14 +822,14 @@
                         'value' => @$req_params['meta']['type'],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                        'propertyUri' => 'http://nakala.fr/terms#type'
+                        'propertyUri' => NAKALA_REPO.'terms#type'
                     );
 
                     $params['meta']['license'] = array(
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#license'
+                        'propertyUri' => NAKALA_REPO.'terms#license'
                     );
 
                     // User API Key
