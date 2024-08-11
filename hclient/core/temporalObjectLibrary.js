@@ -184,8 +184,8 @@ function Temporal (strInitTemporal) {
     //    
         _deviationToText: function ($value, $prefix){
         
-            if($value){
-                let dvp = $value.match(/(\d+)Y/);
+            if($value){ 
+                let dvp = $value.match(/(\d{1,10})Y/);
                 if(dvp && dvp[1])
                     return $prefix + dvp[1]+' years';
             }
@@ -1362,7 +1362,7 @@ TDate.parse = function () {
 
     let temp = str.replace(/(GMT|UTC)/,"");   //remove  GMT or UTC marker
     temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
-    temp = temp.replace(/\s*\([^\)]+\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)
+    temp = temp.replace(/\s*\([^\)]{1,50}\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)
     temp = temp.replace(/\s*(sun|mon|tues?|wed(nes)?|thur?s?|fri)(day)?\.?,?\s*/i,"");  //remove any day indicators
     temp = temp.replace(/([012]?\d)\s*(th|rd|nd|st)(\s*of)?/i,"$1d");
     temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space

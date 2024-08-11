@@ -1523,7 +1523,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         switch (type) {
             case "p":
                 mode = google.maps.drawing.OverlayType.MARKER
-                matches = value.match(/POINT\s?\((\S{1,20})\s+(\S{1,20})\)/i);
+                matches = value.match(/POINT\s?\((\S{1,25})\s+(\S{1,25})\)/i);
                 sCoords = matches[2]+' '+matches[1];
                 break;
             case "r":  //rectangle
@@ -1541,7 +1541,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             case "c":  //circle
             {
                 mode = google.maps.drawing.OverlayType.CIRCLE
-                matches = value.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+                matches = value.match(/LINESTRING\s?\((\S{1,25})\s+(\S{1,25}),\s*(\S{1,25})\s+\S{1,25},\s*\S{1,25}\s+\S{1,25},\s*\S{1,25}\s+\S{1,25}\)/i);
 
                 let radius = _getDistance({lat:parseFloat(matches[2]), lng:parseFloat(matches[1])}, 
                     {lat:parseFloat(matches[2]), lng:parseFloat(matches[3])}) ;
@@ -1555,10 +1555,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 mode = google.maps.drawing.OverlayType.POLYLINE
                 matches = value.match(/LINESTRING\s?\((.+)\)/i);
                 if (matches){
-                    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+                    matches = matches[1].match(/\S{1,25}\s+\S{1,25}(?:,|$)/g);
 
                     for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S{1,20})\s+(\S{1,20})(?:,|$)/);
+                        let match_matches = matches[j].match(/(\S{1,25})\s+(\S{1,25})(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
 
@@ -1572,7 +1572,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
 
                     for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S{1,20})\s+(\S{1,20})(?:,|$)/);
+                        let match_matches = matches[j].match(/(\S{1,25})\s+(\S{1,25})(?:,|$)/);
                         sCoords = sCoords + parseFloat(match_matches[2]) + ' ' + parseFloat(match_matches[1]) + '\n';
                     }
                 }

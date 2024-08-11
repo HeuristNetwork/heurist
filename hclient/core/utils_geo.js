@@ -421,7 +421,7 @@ window.hWin.HEURIST4.geo = {
 
             case "c":  //circle
             case "circle":
-                matches = wkt.match(/LINESTRING\s?\((\S+)\s+(\S+),\s*(\S+)\s+\S+,\s*\S+\s+\S+,\s*\S+\s+\S+\)/i);
+                matches = wkt.match(/LINESTRING\s?\((\S{1,25})\s+(\S{1,25}),\s*(\S{1,25})\s+\S{1,25},\s*\S{1,25}\s+\S{1,25},\s*\S{1,25}\s+\S{1,25}\)/i);
                 break;
 
             case "l":  //polyline
@@ -429,7 +429,7 @@ window.hWin.HEURIST4.geo = {
             case "path":
                 matches = wkt.match(/LINESTRING\s?\((.+)\)/i);
                 if (matches){
-                    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+                    matches = matches[1].match(/\S{1,25}\s+\S{1,25}(?:,|$)/g);
                 }
                 break;
 
@@ -439,7 +439,7 @@ window.hWin.HEURIST4.geo = {
             case "polygon":
                 matches = wkt.match(/POLYGON\s?\(\((.+)\)\)/i);
                 if (matches) {
-                    matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
+                    matches = matches[1].match(/\S{1,25}\s+\S{1,25}(?:,|$)/g);
                 }
                 
                 break;
@@ -555,7 +555,7 @@ window.hWin.HEURIST4.geo = {
 
                     let minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
                     for (let j=0; j < matches.length; ++j) {
-                        let match_matches = matches[j].match(/(\S+)\s+(\S+)(?:,|$)/);
+                        let match_matches = matches[j].match(/(\S{1,25})\s+(\S{1,25})(?:,|$)/);
 
                         const point = {lat:parseFloat(match_matches[2]), lon:parseFloat(match_matches[1])};
 
