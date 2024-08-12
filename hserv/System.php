@@ -103,52 +103,51 @@ class System {
 
         //dbutils?
         $connection_ok = $this->init_db_connection();
-        if($connection_ok!==false){
-                //connection OK
+        if(!$connection_ok){
+           return false; 
+        }
+        
+        //connection OK
 
-                if($this->dbname_full){
-                        if(!defined('HEURIST_DBNAME')){ //init once for first system - preferable use methods
-                            define('HEURIST_DBNAME', $this->dbname);
-                            define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                        }
-                }
+        if($this->dbname_full && !defined('HEURIST_DBNAME')){
+            //init once for first system - preferable use methods
+            define('HEURIST_DBNAME', $this->dbname);
+            define('HEURIST_DBNAME_FULL', $this->dbname_full);
+        }
 
-                if($init_session_and_constants){
-
-                    if(!$this->start_my_session()){
-                        return false;
-                    }
-
-                    if($this->dbname_full){
-
-                        if(!$this->initPathConstants()){
-                            return false;
-                        }
-
-
-                        // attempt to get release version
-                        $this->version_release = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? "alpha" : "stable";
-
-                        $this->_executeScriptOncePerDay();
-
-                        $this->login_verify( false );//load user info from session on system init
-                        if($this->get_user_id()>0){
-                            //set current user for stored procedures (log purposes)
-                            $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
-                        }
-
-                        //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
-                        $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
-                    }
-                }
-
+        if(!$init_session_and_constants){
             $this->is_inited = true;
-
-
             return true;
-        }else{
+        }
+
+        if(!$this->start_my_session()){
             return false;
         }
+
+        if($this->dbname_full){
+
+            if(!$this->initPathConstants()){
+                return false;
+            }
+
+            // attempt to get release version
+            $this->version_release = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? "alpha" : "stable";
+
+            $this->_executeScriptOncePerDay();
+
+            $this->login_verify( false );//load user info from session on system init
+            if($this->get_user_id()>0){
+                //set current user for stored procedures (log purposes)
+                $this->mysqli->query('set @logged_in_user_id = '.intval($this->get_user_id()));
+            }
+
+            //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
+            $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
+        }
+                
+
+        $this->is_inited = true;
+        return true;
 
     }
 
@@ -227,6 +226,15 @@ class System {
     }
 
     //
+    // define constant with value - if not defined
+    //
+    public function defineConstant2($const_name, $value) {
+        if(!defined($const_name)){
+            define($const_name, $value);
+        }
+    }
+    
+    //
     // init the only constant
     //
     public function defineConstant($const_name, $reset=false) {
@@ -254,53 +262,53 @@ class System {
     private function getWebServiceConfigs(){
 
         //read service_mapping.json from setting folder
-        $config_res = null;
-
         $config_file = dirname(__FILE__).'/controller/record_lookup_config.json';
 
-        if(file_exists($config_file)){
+        if(!file_exists($config_file)){
+            return null;   
+        }
 
-           $json = file_get_contents($config_file);
+        $json = file_get_contents($config_file);
 
-           $config = json_decode($json, true);
-           if(is_array($config)){
+        $config = json_decode($json, true);
+        if(!is_array($config)){
+            return null;   
+        }
 
-               $config_res = array();
+        $config_res = array();
 
-               foreach($config as $idx=>$cfg){
+        foreach($config as $idx=>$cfg){
 
-                   //$allowed_dbs = @$cfg['database'];
-                   //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
+            //$allowed_dbs = @$cfg['database'];
+            //if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
 
-                       $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                       //if($rty_ID>0){
+            $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
+            //if($rty_ID>0){
 
-                            $cfg['rty_ID'] = $rty_ID;
+            $cfg['rty_ID'] = $rty_ID;
 
-                            foreach($cfg['fields'] as $field=>$code){
+            foreach($cfg['fields'] as $field=>$code){
 
-                                $extra = '_';
+                $extra = '_';
 
-                                if(strpos($code, '_') !== false){
-                                    $parts = explode('_', $code);
-                                    $code = $parts[0];
-                                    $extra .= $parts[1];
-                                }
+                if(strpos($code, '_') !== false){
+                    $parts = explode('_', $code);
+                    $code = $parts[0];
+                    $extra .= $parts[1];
+                }
 
-                                $dty_ID = ConceptCode::getDetailTypeLocalID($code);
+                $dty_ID = ConceptCode::getDetailTypeLocalID($code);
 
-                                if($dty_ID != null && $extra != '_'){
-                                    $dty_ID .= $extra;
-                                }
+                if($dty_ID != null && $extra != '_'){
+                    $dty_ID .= $extra;
+                }
 
-                                $cfg['fields'][$field] = $dty_ID;
-                            }
+                $cfg['fields'][$field] = $dty_ID;
+            }
 
-                            $config_res[] = $cfg;
-                       //}
-                   //}
-               }
-           }
+            $config_res[] = $cfg;
+            //}
+            //}
         }
 
         return $config_res;
@@ -576,26 +584,25 @@ class System {
         }
 
         foreach ($folders as $folder_name=>$folder){
-            if(!$is_for_backup || @$folder[3]===true){
 
-                if($is_for_backup==2 && $folder_name=='documentation_and_templates') {continue;}
+            if($is_for_backup && !@$folder[3]){ continue; }
 
-                if($is_for_backup==2){
-                    $folder_name = realpath($dbfolder.$folder_name);
-                    if($folder_name!==false){
-                        $folder_name = str_replace('\\', '/', $folder_name);
-                    }
-                }else{
-                    $folder_name = $dbfolder.$folder_name;
-                }
+            if($is_for_backup==2 && $folder_name=='documentation_and_templates') {continue;}
 
-                if($folder_name!==false){
-                    array_push($system_folders, $folder_name.'/');
-                }
+            if($is_for_backup==2){
+                $folder_name = realpath($dbfolder.$folder_name);
+            }else{
+                $folder_name = $dbfolder.$folder_name;
             }
-        }
 
-        if($is_for_backup==2){
+            if($folder_name!==false){
+                $folder_name = str_replace('\\', '/', $folder_name);
+                array_push($system_folders, $folder_name.'/');
+            }
+            
+        }//for
+
+        if($is_for_backup==2){ //delete backup
             $folder_name = realpath($dbfolder.'file_uploads');
             if($folder_name!==false){
                 array_push($system_folders, str_replace('\\', '/', $folder_name).'/');
@@ -653,35 +660,19 @@ class System {
 
         $upload_root = $this->getFileStoreRootFolder();
 
-        //path is defined in configIni
-        if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+        if (!(isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="")) {
 
-            if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $upload_root );
-            }
-
-            if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
-            }
-
-        }
-        else{
             //path is not configured in ini - set dafault values
-
             $install_path = 'HEURIST/';//$this->getInstallPath();
             $dir_Filestore = "HEURIST_FILESTORE/";
-
-            if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $upload_root);
-            }
-
-            if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
-            }
 
             $defaultRootFileUploadURL = HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore;
         }
 
+        $this->defineConstant2('HEURIST_FILESTORE_ROOT', $upload_root);
+        $this->defineConstant2('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
+
+        
         $check = folderExists(HEURIST_FILESTORE_DIR, true);
         if($check<0){
 
@@ -729,17 +720,18 @@ class System {
                 $warn = folderCreate2($dir, $folder[1], $allowWebAccess);
                 if($warn!=''){ //can't creat or not writeable
                     $warnings[] = $warn;
-                }else{
-                    //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
-                    if($folder[0]!=null){
-                        define('HEURIST_'.$folder[0].'_DIR', $dir);
-                        if($allowWebAccess){
-                            define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
-                        }
+                    continue;
+                }
+                
+                //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
+                if($folder[0]!=null){
+                    define('HEURIST_'.$folder[0].'_DIR', $dir);
+                    if($allowWebAccess){
+                        define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
                     }
                 }
-
-        }
+        }//for
+        
         if(count($warnings)>0){
             $this->addError(HEURIST_SYSTEM_FATAL, implode('',$warnings));
             return false;
