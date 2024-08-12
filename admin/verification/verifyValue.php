@@ -219,7 +219,7 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
            $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];
            //remove last point
            $allowed_labels[$term_id] = trim($allowed_labels[$term_id],'.');
-        }
+        }//for
 
         if($isStripAccents && is_array($allowed_labels)){
             array_walk($allowed_labels, 'trim_lower_accent2');
@@ -246,14 +246,13 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $label = array_pop($label);
     }*/
 
-    if(count($allowed_labels)>0){
-        $term_ID = array_search($label, $allowed_labels, true);
-        if(!($term_ID>0)){
-            $term_ID = array_search($label, $allowed_labels_plain, true);
-        }
-    }else{
-        return false;
-        //$term_ID = getTermByLabel($label);//see dbsData.php
+    if(empty($allowed_labels)){
+        return false;   
+    }
+    
+    $term_ID = array_search($label, $allowed_labels, true);
+    if(!($term_ID>0)){
+        $term_ID = array_search($label, $allowed_labels_plain, true);
     }
 
     return $term_ID;

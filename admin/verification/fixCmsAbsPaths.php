@@ -117,47 +117,52 @@ function __correctAbsPaths(){
 
 }
 
+function replaceAbsPath($absPath, &$text){
+
+        $cnt = 0;
+        $matches = array();
+
+        if(preg_match($absPath, $text, $matches)){
+
+            $res = preg_replace($absPath, './', $text);
+            if($res!=null && $text != $res){
+                $text = $res;
+                $cnt = $cnt + count($matches);
+            }
+
+            foreach ($matches as $fnd) {print $fnd.' &nbsp;&nbsp;&nbsp; ';}
+        }
+        return $cnt;
+}
+
+
 function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
 
-//print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
+    //print '<xmp>BEFORE '.$val.'</xmp><br><hr><br>';
 
-$paths0 = array('\/HEURIST', '\/html', '');
-$paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
+    $paths0 = array('\/HEURIST', '\/html', '');
+    $paths = array('heurist', 'h5-alpha', 'h5-ao', 'h5', 'h5-beta', 'h6-alpha', 'h6-ao', 'h6', 'h6-beta');
 
-$cnt = 0;
+    $cnt = 0;
 
-foreach ($servers as $srv) {
-    foreach ($paths0 as $path0) {
-        foreach ($paths as $path) {
-            $s = '/'.$srv.$path0.'\/'.$path.'\//i';
-
-            $matches = array();
-
-            if(preg_match($s, $val, $matches)){
-
-                $res = preg_replace($s, './', $val);
-                if($res!=null && $val != $res){
-                    $val = $res;
-                    $cnt = $cnt + count($matches);
-                }
-
-                foreach ($matches as $fnd) {print $fnd.' &nbsp;&nbsp;&nbsp; ';}
+    foreach ($servers as $srv) {
+        foreach ($paths0 as $path0) {
+            foreach ($paths as $path) {
+                $absPath = '/'.$srv.$path0.'\/'.$path.'\//i';
+                
+                $cnt = $cnt + replaceAbsPath($s, $val);
             }
         }
     }
-}
-//print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
+    //print '<xmp>AFTER '.$val.'</xmp><br><hr><br>';
 
-//report if anything has been fixed
-if($cnt > 0){
-    print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
-}
+    //report if anything has been fixed
+    if($cnt > 0){
+        print '<br>RecID: '.$recID.'. Replaced '.$cnt.' entries<br>';
+    }
 
-
-
-return $val;
-
+    return $val;
 }
 ?>
