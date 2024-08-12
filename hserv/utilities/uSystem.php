@@ -230,7 +230,7 @@ class USystem {
             case 'm':
                 $val *= 1048576; break;
             case 'k':
-                $val *= 1024;
+                $val *= 1024; break;
             default;
         }
         //_fix_integer_overflow

@@ -171,7 +171,7 @@ use Shapefile\ShapefileReader;
 
                     header('Content-Type: application/zip');
                     header($contentDispositionField);
-                    header('Content-Length: ' . filesize($file_zip_full));
+                    header(CONTENT_LENGTH . filesize($file_zip_full));
                     readfile($file_zip_full);
 
 
@@ -271,8 +271,8 @@ use Shapefile\ShapefileReader;
                     }
                     fclose($fd);
 
-                    header( 'Content-Type: application/json');
-                    //header('Content-Length: ' . strlen($output));
+                    header( CTYPE_JSON);
+                    //header(CONTENT_LENGTH . strlen($output));
                     unlink($tmp_destination);
 
                     echo $output;

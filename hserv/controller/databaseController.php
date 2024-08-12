@@ -197,7 +197,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
 
             $allow_action = false;
             $db_target = @$req_params['database']?$req_params['database']:$req_params['db'];
-            $db_target = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_target));//for snyk
+            $db_target = trim(preg_replace(REGEX_ALPHANUM, '', $db_target));//for snyk
 
             $create_archive = !array_key_exists('noarchive', $req_params);//for delete
 
@@ -266,7 +266,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                 $is_current_db  = true;
             }
 
-            $db_source = trim(preg_replace('/[^a-zA-Z0-9_]/', '', $db_source));//for snyk
+            $db_source = trim(preg_replace(REGEX_ALPHANUM, '', $db_source));//for snyk
 
             $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists
             if ($sErrorMsg!=null) {
@@ -467,10 +467,10 @@ function __composeDbName($system, $req_params){
 
     $uName = '';
     if(@$req_params['uname']){
-        $uName = trim(preg_replace('/[^a-zA-Z0-9_]/', '', @$req_params['uname'])).'_';//for snyk
+        $uName = trim(preg_replace(REGEX_ALPHANUM, '', @$req_params['uname'])).'_';//for snyk
         if ($uName == '_') {$uName='';};// don't double up underscore if no user prefix
     }
-    $dbName = trim(preg_replace('/[^a-zA-Z0-9_]/', '', @$req_params['dbname']));
+    $dbName = trim(preg_replace(REGEX_ALPHANUM, '', @$req_params['dbname']));
 
     if($dbName==''){
         $system->addError(HEURIST_INVALID_REQUEST, "Database name parameter is missing or incorrect");

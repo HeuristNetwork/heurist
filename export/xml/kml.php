@@ -84,7 +84,7 @@ if(!$islist){
             $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = "
                             . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".$dtKML);
 
-            print "<?xml version='1.0' encoding='UTF-8'?>\n";
+            print XML_HEADER."\n";
             print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
             print '<Document>';
 
@@ -100,7 +100,7 @@ if(!$islist){
     exit;
 }
 
-print "<?xml version='1.0' encoding='UTF-8'?>\n";
+print XML_HEADER."\n";
 print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
 print '<Document>';
 print '<name>Exported from Heurist</name>';

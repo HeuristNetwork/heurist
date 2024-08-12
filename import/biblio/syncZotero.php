@@ -282,7 +282,7 @@ foreach ($fh_data->children() as $f_gen){
                                         }
                                     }
 
-                                }else if(@$arr[H_ID])
+                                }elseif(@$arr[H_ID])
                                 {
                                     addMapping($arr, $zType, $rt_id, $org_rt_id);
                                 }
@@ -406,7 +406,7 @@ if($step=="1"){  //first step - info about current status
             $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
         }
         print $msg."</div>";
-    }else if(!$items){
+    }elseif(!$items){
         print "<div class='ui-state-error' style='padding:20px'>Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
         if($code==0){
             print "<div class='ui-state-error' style='padding:20px'>Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
@@ -500,7 +500,7 @@ if($step=="1"){  //first step - info about current status
                     "Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch));
 
             break;
-        }else if(count($zdata->children())<1){
+        }elseif(count($zdata->children())<1){
             print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
 
@@ -732,7 +732,7 @@ if($step=="1"){  //first step - info about current status
                             $details["t:".$detail_id] = array("0"=>$value);
                         }
 
-                    }else if(!($zkey == 'url' || $zkey=='key')){
+                    }elseif(!($zkey == 'url' || $zkey=='key')){
                             if(!in_array($itemtype.'.'.$zkey, $arr_notmapped)){
                                 array_push($arr_notmapped, $itemtype.'.'.$zkey);
                                 $cnt_notmapped++;
@@ -747,7 +747,7 @@ if($step=="1"){  //first step - info about current status
                     print '<div style="color:red">Warning: zotero id '.htmlspecialchars($zotero_itemid)
                         .': no data recorded in Zotero for this entry</div>';
 
-                }else if(count($details)<1){
+                }elseif(count($details)<1){
                     //no one zotero key has proper mapping to heurist fields
                     array_push($arr_empty, $zotero_itemid);
                     $cnt_empty++;
@@ -1007,7 +1007,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
         if(is_object($arr)){
             $label = $arr['value'];
             $code = $arr[H_ID];
-        }else if(is_array($arr)){
+        }elseif(is_array($arr)){
             $label = $arr[3][0];
             $code = $arr[2];
         }else{
@@ -1235,7 +1235,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
                 /*
                 try{
                     $t2 = new DateTime($value);
-                    $value = $t2->format('Y-m-d H:i:s');
+                    $value = $t2->format(DATE_8601);
                 } catch (Exception  $e){
                 }
                 */

@@ -1468,7 +1468,7 @@ class System {
                                             'The sessions folder has become inaccessible');
                         if($rv){
                             if (file_exists($fname)) {unlink($fname);}
-                            file_put_contents($fname, date_create('now')->format('Y-m-d H:i:s'));
+                            file_put_contents($fname, date_create('now')->format(DATE_8601));
                         }
                     }
 
@@ -1881,7 +1881,7 @@ class System {
         $IPv4 = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
         $IPv4 = empty($IPv4) ? 'Unknown' : $IPv4;
 
-        $info = array($user_id, $action, $now->format('Y-m-d H:i:s'), $user_agent['os'], $user_agent['browser'], $IPv4);
+        $info = array($user_id, $action, $now->format(DATE_8601), $user_agent['os'], $user_agent['browser'], $IPv4);
 
         if(is_array($suplementary)){
             $info = array_merge($info, $suplementary);

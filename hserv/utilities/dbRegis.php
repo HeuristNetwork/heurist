@@ -357,7 +357,7 @@ class DbRegis {
         if(!empty($serverURL) || !empty($dbTitle)){
             $record = array(
                 'rec_ID'=>$dbID,
-                'rec_Modified'=>date('Y-m-d H:i:s')
+                'rec_Modified'=>date(DATE_8601)
             );
 
             $err_msg = '';
@@ -603,7 +603,7 @@ class DbRegis {
             $record = array(
                     'rec_ID'=>0,  //($newid>0)?-$newid:0,
                     'rec_URL'=>$mysqli->real_escape_string($serverURL),
-                    'rec_Added'=>date('Y-m-d H:i:s'),
+                    'rec_Added'=>date(DATE_8601),
                     'rec_RecTypeID'=> $rty_ID_registered_database,
                     'rec_Title' => $defRecTitle,
                     'rec_AddedByImport'=>0,

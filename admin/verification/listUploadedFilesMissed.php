@@ -106,8 +106,8 @@ foreach ($databases as $idx=>$db_name){
     //mysql__usedatabase($mysqli, $db_name);
     list($db_full_name, $db_name) = mysql__get_names($db_name);// full name used for query, short hand used for filestore
 
-    $db_full_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_full_name);//for snyk
-    $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
+    $db_full_name = preg_replace(REGEX_ALPHANUM, "", $db_full_name);//for snyk
+    $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
     $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_full_name.'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';

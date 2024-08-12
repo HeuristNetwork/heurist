@@ -214,7 +214,7 @@ class DbSysImportFiles extends DbEntityBase
         foreach($row as $id => $session){
 
             $session = json_decode($session, true);
-            $table_name = preg_replace('/[^a-zA-Z0-9_]/', "", $session['import_table']);//for snyk
+            $table_name = preg_replace(REGEX_ALPHANUM, "", $session['import_table']);//for snyk
 
             $query = "drop table IF EXISTS `$table_name`";
 

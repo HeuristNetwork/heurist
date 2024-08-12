@@ -43,9 +43,9 @@ $rv = array('num'=>$_REQUEST['num']);
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     print json_encode( $system->getError() );
-}else if(!$system->has_access() ){
+}elseif(!$system->has_access() ){
     print json_encode( $system->addError(HEURIST_REQUEST_DENIED) );
-}else if ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
+}elseif ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
     print json_encode( $system->addError(HEURIST_INVALID_REQUEST), 'URL is not defined' );
 }else{
 

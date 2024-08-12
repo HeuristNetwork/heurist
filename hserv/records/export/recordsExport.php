@@ -455,7 +455,7 @@ IIIF;
                     <nodes>
         XML;
 
-        $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
+        $gephi_header = XML_HEADER.$gephi_header;
 
         fwrite($fd, $gephi_header);
     }
@@ -472,7 +472,7 @@ IIIF;
         fwrite($fd, "<records>\n");
 
     }else{
-        fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');
+        fwrite($fd, XML_HEADER.'<heurist><records>');
     }
 
     //CONTENT
@@ -899,7 +899,7 @@ XML;
 
 
         }else{
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
+            $xml = new SimpleXMLElement(XML_HEADER.'<record/>');
             self::_array_to_xml($record, $xml);
             //array_walk_recursive($record, array ($xml , 'addChild'));
             fwrite($fd, substr($xml->asXML(),38));//remove header
@@ -996,7 +996,7 @@ XML;
                     fwrite($fd, json_encode($terms));
                     fwrite($fd, ']}');
                 }else{
-                    $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
+                    $xml = new SimpleXMLElement(XML_HEADER.'<definitions/>');
                     self::_array_to_xml($rectypes, $xml);
                     self::_array_to_xml($detailtypes, $xml);
                     self::_array_to_xml($terms, $xml);
@@ -1025,7 +1025,7 @@ XML;
                     fwrite($fd, ',"database":'.json_encode($database_info));
                     fwrite($fd, '}}');
             }else{
-                $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
+                $xml = new SimpleXMLElement(XML_HEADER.'<database/>');
                 self::_array_to_xml($database_info, $xml);
                 fwrite($fd, substr($xml->asXML(),38));
                 fwrite($fd, '</heurist>');
@@ -1043,7 +1043,7 @@ XML;
 
         header('Content-Encoding: gzip');
         if($params['format']=='json' || $params['format']=='geojson'){
-            header( 'Content-Type: application/json');
+            header( CTYPE_JSON);
         }else{
             header( 'Content-Type: text/xml');
         }
@@ -1122,7 +1122,7 @@ XML;
 
             header('Content-Type: application/zip');
             header($contentDispositionField);
-            header('Content-Length: ' . self::get_file_size($file_zip_full));
+            header(CONTENT_LENGTH . self::get_file_size($file_zip_full));
             self::readfile($file_zip_full);
 
             // remove the zip archive and temp files
@@ -1160,7 +1160,7 @@ XML;
             }
 
             if($params['format']=='json' || $params['format']=='geojson' || $params['format']=='iiif'){
-                header( 'Content-Type: application/json');
+                header( CTYPE_JSON);
             }else{
                 header( 'Content-Type: text/xml');
             }
@@ -1174,7 +1174,7 @@ XML;
                 }
 
                 header('Content-Disposition: attachment; filename='.$filename);
-                header('Content-Length: ' . self::get_file_size($tmp_destination));
+                header(CONTENT_LENGTH . self::get_file_size($tmp_destination));
             }
 
             if(@$params['restapi']==1){

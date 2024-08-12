@@ -174,7 +174,7 @@
      */
     function queryElastic($curl, $address, $query) {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(CTYPE_JSON));
         curl_setopt($curl, CURLOPT_URL, $address);
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($query));
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);// Max 10 seconds connection time

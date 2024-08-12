@@ -32,11 +32,11 @@ if( !$system->init(@$_REQUEST['db']) ){
 
             $response = recordSearchMinMax( $system, $params );//recordSearch.php
 
-    }else if(@$_REQUEST['a'] == 'pointers' ){
+    }elseif(@$_REQUEST['a'] == 'pointers' ){
 
             $response = recordSearchDistinctPointers( $params );
 
-    }else if(@$_REQUEST['a'] == 'crosstab' ){
+    }elseif(@$_REQUEST['a'] == 'crosstab' ){
 
 ini_set('max_execution_time', '0');
 

@@ -179,7 +179,7 @@
 
                 if($search_params['q']==null){
                     //query was removed
-                    header( 'Content-Type: application/json');
+                    header( CTYPE_JSON);
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
@@ -233,7 +233,7 @@
                 //save int session and exit
                 user_setPreferences($system, array($dt_key=>$params['q']));
                 //returns OK
-                header( 'Content-Type: application/json');
+                header( CTYPE_JSON);
                 echo json_encode(array('status'=>HEURIST_OK));
                 exit;
             }
@@ -430,7 +430,7 @@ function downloadFileReferences($system, $ids){
     fclose($fd);
 
     if($len>0){
-        header('Content-Length: ' . $len);
+        header(CONTENT_LENGTH . $len);
     }
     exit($output);
 }

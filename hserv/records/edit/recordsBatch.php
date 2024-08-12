@@ -488,7 +488,7 @@ class RecordsBatch
             }
         }
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $dtl = Array('dtl_DetailTypeID'  => $dtyID,
                      'dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
@@ -790,7 +790,7 @@ class RecordsBatch
         $processedRecIDs = array();//success
         $sqlErrors = array();
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $dtl = Array('dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                      'rec_Modified'  => $now);
@@ -1066,7 +1066,7 @@ class RecordsBatch
         $limitedRecIDs = array();//it is not possible to delete requried fields
         $sqlErrors = array();
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $dtl = Array('dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                      'rec_Modified'  => $now);
@@ -1160,7 +1160,7 @@ class RecordsBatch
 
             if(@$this->data['subs']==1){
                 //this is not real delete - this is replacement of value part with empty string
-                $now = date('Y-m-d H:i:s');
+                $now = date(DATE_8601);
                 $dtl = Array('dtl_Modified'  => $now);
 
                 $sRegEx = "/".preg_quote($this->data['sVal'], "/")."/";
@@ -1262,7 +1262,7 @@ class RecordsBatch
         $processedRecIDs = array();//success
         $sqlErrors = array();
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $dtl = Array('dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                             'rec_Modified'  => $now,
@@ -1335,7 +1335,7 @@ class RecordsBatch
 
 
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $dtl = Array('dtl_DetailTypeID'  => $this->data['dtyID'],
                      'dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
@@ -1538,7 +1538,7 @@ class RecordsBatch
 
         $mysqli = $this->system->get_mysqli();
 
-        $date_mode = date('Y-m-d H:i:s');
+        $date_mode = date(DATE_8601);
 
         $tot_count = count($this->recIDs);
 
@@ -2188,7 +2188,7 @@ public methods
         }
 
         $mysqli = $this->system->get_mysqli();
-        $date_mode = date('Y-m-d H:i:s');// for tags, rec_modified and dtl_modified
+        $date_mode = date(DATE_8601);// for tags, rec_modified and dtl_modified
 
         $operation = intval($this->data['op']);// number corresponding to an operation below
         $doc = new DOMDocument; // for handling html text
@@ -2399,7 +2399,7 @@ public methods
         }
 
         $mysqli = $this->system->get_mysqli();
-        $date_mode = date('Y-m-d H:i:s');// for tags, rec_modified and dtl_modified
+        $date_mode = date(DATE_8601);// for tags, rec_modified and dtl_modified
 
         // Field details
         $dtyID = intval($this->data['dtyID']);
@@ -2564,7 +2564,7 @@ public methods
         }
 
         $mysqli = $this->system->get_mysqli();
-        $date_mode = date('Y-m-d H:i:s');
+        $date_mode = date(DATE_8601);
 
         $dtyID = $this->data['dtyID'];
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);

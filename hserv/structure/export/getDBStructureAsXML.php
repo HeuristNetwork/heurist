@@ -60,7 +60,7 @@ $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)
 
 
-print '<?xml version="1.0" encoding="UTF-8"?>';
+print XML_HEADER;
 print "\n\n<hml_structure>";
 
 // TODO: ADD OTHER XML HEADER INFORMATION *************

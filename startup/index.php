@@ -628,7 +628,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             window.hWin.HEURIST4.msg.showMsgErr(<?php echo json_encode($_REQUEST['error']);?>);
 
         <?php
-        }else if(isset($message) && !empty($message)){
+        }elseif(isset($message) && !empty($message)){
         ?>
 
             window.hWin.HEURIST4.msg.showMsgErr('<?php echo str_replace("'",'&#39;',$message);?>');

@@ -59,7 +59,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	if (@$_REQUEST['source'] == 'file') {
 		$src = file_get_contents($_FILES['file']['tmp_name']);
 		$srcname = $_FILES['file']['name'];
-	} else if (@$_REQUEST['source'] == 'url') {
+	} elseif (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
         $url = filter_input($_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'url', FILTER_VALIDATE_URL);
@@ -197,7 +197,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$nextmode = 'printurls';
 	}
 
-} else if (@$_REQUEST['link']) {
+} elseif (@$_REQUEST['link']) {
 	$urls = array();
 	$max_no = max(array_keys($_REQUEST['link']));
 
@@ -281,7 +281,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	}
 	if (@$bkmk_insert_count == 1){
 		$success = 'Added one bookmark';
-	}else if (@$bkmk_insert_count > 1){
+	}elseif (@$bkmk_insert_count > 1){
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
 	}
 	*/
@@ -565,7 +565,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
             return $res;
         }
 
-	} else if (! $user_rec_id) {
+	} elseif (! $user_rec_id) {
 
 		$rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
 		if ($rec_ids) {return $rec_ids;}

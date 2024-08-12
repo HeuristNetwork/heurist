@@ -110,7 +110,7 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
         //$rty_ID = mysql__select_value($mysqli, $query);
 
 
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
+        $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
         $query = "select dty_ID from `$db_name`.defDetailTypes where  dty_Type='freetext' AND dty_OriginatingDBID="
                     .$orig_db_id.' and dty_IDInOriginatingDB='.$orig_id;

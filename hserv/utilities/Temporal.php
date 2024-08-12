@@ -593,7 +593,7 @@ class Temporal {
                         $tStart->sub($i);
                     }
 
-                    $format = 'Y-m-d H:i:s';
+                    $format = DATE_8601;
                     $tEnd = Temporal::dateToISO($tEnd->format($format), 2, false);
                     $tStart = Temporal::dateToISO($tStart->format($format), 2, false);
                 }
@@ -837,7 +837,7 @@ class Temporal {
 
 
                     $t2 = new DateTime($value);
-                    $datestamp = $t2->format('Y-m-d H:i:s');
+                    $datestamp = $t2->format(DATE_8601);
                     $date = date_parse($datestamp);
 
                     if(is_array($date)){
@@ -889,7 +889,7 @@ class Temporal {
                     if($sdate=='today'){
                         $date = $t2->format('Y-m-d');
                     }elseif($sdate=='now'){
-                        $date = $t2->format('Y-m-d H:i:s');
+                        $date = $t2->format(DATE_8601);
                     }elseif($sdate=='yesterday'){
                         $t2->modify('-1 day');
                         $date = $t2->format('Y-m-d');//date('Y-m-d',strtotime("-1 days"));

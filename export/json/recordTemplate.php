@@ -210,7 +210,7 @@ $json .= "\n}}";
 
 $filename = 'Template_' . $_REQUEST['db'] . '_' . date("YmdHis") . '.json';
 
-header('Content-Type: application/json');
+header(CTYPE_JSON);
 header('Content-Disposition: attachment; filename="'.$filename.'";');
 //header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 

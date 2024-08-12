@@ -337,8 +337,8 @@ function recordAdd($system, $record, $return_id_only=false){
     $rec_temp = (@$record['FlagTemporary']?1:0);
     $rec_title = @$record['Title']==null?'':$record['Title'];
 
-    //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
-    $data_add = date('Y-m-d H:i:s');
+    //DateTime('now')->format(DATE_8601) is same as date(DATE_8601)
+    $data_add = date(DATE_8601);
 
     if(is_numeric(@$record['ID']) && @$record['ID']>0){
         //case: insert csv with predefined ID
@@ -661,7 +661,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         $query = 'UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,rec_FlagTemporary=? ';
 
-        $rec_mod = date('Y-m-d H:i:s');
+        $rec_mod = date(DATE_8601);
         $rec_temp = (@$record['FlagTemporary']==1)?1:0;
 
         //$stmt->bind_param('siisssi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_temp, $rec_url, $rec_spad);
@@ -1335,7 +1335,7 @@ function recordUpdateOwnerAccess($system, $params){
         $msg_termination = null;
         $tot_count = $cnt_allowed_recids;
 
-        $rec_mod = date('Y-m-d H:i:s');
+        $rec_mod = date(DATE_8601);
         $main_owner = null;
         if(!empty($owner_grps)){
             $main_owner = $owner_grps[0];
@@ -2666,7 +2666,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
                             if($sdate=='today'){
                                 $dtl_Value = date('Y-m-d');
                             }elseif($sdate=='now'){
-                                $dtl_Value = date('Y-m-d H:i:s');
+                                $dtl_Value = date(DATE_8601);
                             }elseif($sdate=='yesterday'){
                                 $dtl_Value = date('Y-m-d',strtotime("-1 days"));
                             }elseif($sdate=='tomorrow'){

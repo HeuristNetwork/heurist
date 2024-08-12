@@ -45,7 +45,7 @@
     $dbname = @$req_params['db'];
     $error = System::dbname_check($dbname);
 
-    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname);//for snyk
+    $dbname = preg_replace(REGEX_ALPHANUM, "", $dbname);//for snyk
 
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);

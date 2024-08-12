@@ -1473,7 +1473,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
                 $interval->format('%h')>0 || $interval->format('%i')>$range_minutes);
 
                 if($allowed){
-                    $line = $action.' '.$datetime2->format('Y-m-d H:i:s')."\n";
+                    $line = $action.' '.$datetime2->format(DATE_8601)."\n";
                     $replaced = true;
                 }else{
                     $not_allowed = true;
@@ -1495,7 +1495,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
         }
     }elseif($range_minutes>0) {
         $fp = fopen($progress_flag, 'w');
-        fwrite($fp, $action.' '. date_create('now')->format('Y-m-d H:i:s'));
+        fwrite($fp, $action.' '. date_create('now')->format(DATE_8601));
         fclose($fp);
     }
     return true;

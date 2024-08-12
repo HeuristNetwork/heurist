@@ -248,7 +248,7 @@
             while ($row = $res->fetch_row()) {
                 $test = strpos($row[0], $prefix);
                 if ($test === 0) {
-                    $database = preg_replace('/[^a-zA-Z0-9_]/', "", $row[0]);//for snyk
+                    $database = preg_replace(REGEX_ALPHANUM, "", $row[0]);//for snyk
                     if ($isFilter) {
                         $query2 = null;
                         if ($role == 'user') {
@@ -506,7 +506,7 @@
 
         $columns3 = array();
         foreach($columns as $idx=>$column){
-            $columns3[] = '`'.preg_replace('/[^a-zA-Z0-9_]/', "", $column).'`';//for snyk
+            $columns3[] = '`'.preg_replace(REGEX_ALPHANUM, "", $column).'`';//for snyk
         }
 
         if($idfield!=null && $newid!=null){
@@ -650,7 +650,7 @@
                 continue;
             }
 
-            $fieldname = preg_replace('/[^a-zA-Z0-9_]/', "", $fieldname);//for snyk
+            $fieldname = preg_replace(REGEX_ALPHANUM, "", $fieldname);//for snyk
 
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
@@ -1910,7 +1910,7 @@
             //$db_name = HEURIST_DBNAME_FULL;
             $db_name = '';//$query = ;
         }else{
-            $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
+            $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
             $db_name = "`$db_name`.";
         }
 

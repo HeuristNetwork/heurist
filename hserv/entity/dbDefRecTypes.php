@@ -394,7 +394,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['rty_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
         }

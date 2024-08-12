@@ -2765,15 +2765,15 @@ function recordSearch($system, $params, $relation_query=null)
                         || $row[$date_add_index]=='1000-01-01 00:00:00'){ //not defined
                             $row[$date_add_index] = '';
                         }else{
-                            $row[$date_add_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_add_index])
+                            $row[$date_add_index] = DateTime::createFromFormat(DATE_8601, $row[$date_add_index])
                             ->setTimezone(new DateTimeZone('UTC'))
-                            ->format('Y-m-d H:i:s');
+                            ->format(DATE_8601);
                         }
                     }
                     if($date_mod_index!==false) {
-                        $row[$date_mod_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_mod_index])
+                        $row[$date_mod_index] = DateTime::createFromFormat(DATE_8601, $row[$date_mod_index])
                         ->setTimezone(new DateTimeZone('UTC'))
-                        ->format('Y-m-d H:i:s');
+                        ->format(DATE_8601);
                     }
 
 

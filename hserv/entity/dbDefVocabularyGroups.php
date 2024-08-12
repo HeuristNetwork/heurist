@@ -177,7 +177,7 @@ class DbDefVocabularyGroups extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['vcg_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['vcg_Modified'] = date(DATE_8601);//reset
             $this->records[$idx]['vcg_Domain'] = ($this->records[$idx]['vcg_ID']==9
                         || @$this->records[$idx]['vcg_Domain']=='relation')?'relation':'enum';
 

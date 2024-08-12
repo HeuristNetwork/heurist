@@ -143,7 +143,7 @@ if(is_array($formats) && array_key_exists('formats', $formats)){
 
 $import_webfonts = null;
 $webfonts = $system->getDatabaseSetting('Webfonts');
-if(is_array($webfonts) && count($webfonts)>0){
+if(is_array($webfonts) && !empty($webfonts)){
     $import_webfonts = '';
     foreach($webfonts as $font_family => $src){
         $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
@@ -1059,7 +1059,7 @@ if(!empty($import_webfonts)){
 if(!empty($font_styles)){ // add extra format styles from TinyMCE insertion
     echo ' '.$font_styles.' ';
 }
-if(count($font_families)>0){
+if(!empty($font_families)){
     $font_families[] = 'sans-serif';
     echo ' body{font-family: '.implode(',',$font_families).'} ';
 }
@@ -1105,7 +1105,7 @@ if($is_production){
 
         <?php
 } //$is_map_popup
-else if(!$is_map_popup){
+elseif(!$is_map_popup){
 //    print '<div style="font-size:0.8em">';
 ?>
 <script>
@@ -1289,7 +1289,7 @@ function print_header_line($bib) {
 
     <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?php echo (USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS));?>
+                <?php echo USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS);?>
         </h2>
 
         <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
@@ -1396,21 +1396,23 @@ function print_private_details($bib) {
     }
     ?>
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
-        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
+        <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
                 href="<?= HEURIST_SERVER_URL ?>/heurist/?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link"
-            href="<?php echo $system->recordLink($bib['rec_ID']);?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>
+            href="<?php echo $system->recordLink($bib['rec_ID']);?>">HTML</a>
+                <?php echo $is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>';?>
+        </div>
     </div>
     <?php
 
-    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']);//get form database in server time
+    $add_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Added']);//get form database in server time
 
     //zero date not allowed by default since MySQL 5.7 default date changed to 1000
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
-        $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'));//convert to UTC
+        $add_date = htmlspecialchars($add_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $add_date.'", "lt0")</script> local)';
 
@@ -1418,9 +1420,9 @@ function print_private_details($bib) {
         $add_date = false;
     }
 
-    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']);//get form database in server time
+    $mod_date = DateTime::createFromFormat(DATE_8601, $bib['rec_Modified']);//get form database in server time
     if($mod_date){
-        $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'));//convert to UTC
+        $mod_date = htmlspecialchars($mod_date->setTimezone(new DateTimeZone('UTC'))->format(DATE_8601));//convert to UTC
         $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $mod_date.'", "lt1")</script> local)';
     }else{
@@ -1446,7 +1448,7 @@ function print_private_details($bib) {
     }
 
 
-    if ( $workgroup_name || count($kwds) || @$bib['bkm_ID']) {
+    if ( $workgroup_name || !empty($kwds) || @$bib['bkm_ID']) {
         if ( $workgroup_name) {
             ?>
             <div class=detailRow>
@@ -1539,7 +1541,7 @@ function print_personal_details($bkmk) {
                     if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
                     print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/magglass_12x11.gif"></a>';
                 }
-                if (count($tags)) {
+                if (!empty($tags)) {
                     print "<br>\n";
                 }
             }
@@ -1596,7 +1598,7 @@ function print_public_details($bib) {
 
     if($is_production || $is_map_popup){ // hide hidden fields in publication and map popups
         $detail_visibility_conditions .= ' AND IFNULL(rst_NonOwnerVisibility,"")!="hidden" AND IFNULL(rst_RequirementType,"")!="forbidden" AND IFNULL(dtl_HideFromPublic, 0)!=1';
-    }else if(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
+    }elseif(!$system->is_admin() && !in_array($rec_owner, $ACCESSABLE_OWNER_IDS)){
         // hide forbidden fields from all except owners an admins
         $detail_visibility_conditions .= ' AND IFNULL(rst_RequirementType,"")!="forbidden"';//ifnull needed for non-standard fields
     }
@@ -1773,7 +1775,7 @@ function print_public_details($bib) {
                      $fileinfo = $ruf_entity->registerURL($bd['val'], false, $bd['dtl_ID']);
                 }else{
                     $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']);//see recordFile.php
-                    if(is_array($listpaths) && count($listpaths)>0){
+                    if(is_array($listpaths) && !empty($listpaths)){
                         $fileinfo = $listpaths[0];//
                     }
                 }
@@ -1838,10 +1840,11 @@ function print_public_details($bib) {
             }
             else {
                 if (preg_match('/^https?:/', $bd['val'])) {
-                    if (strlen($bd['val']) > 100)
+                    if (strlen($bd['val']) > 100){
                         $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
-                    else
+                    }else{
                         $trim_url = $bd['val'];
+                    }
                     $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
                 } elseif($bd['dtl_Geo']){
 
@@ -1852,7 +1855,7 @@ function print_public_details($bib) {
                     {
                         list($match, $minX, $minY, $maxX, $maxY) = $poly;
 
-                    }else if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $bd["bd_geo_envelope"], $matches)){
+                    }elseif(preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $bd["bd_geo_envelope"], $matches)){
                         $minX = floatval($matches[1]);
                         $minY = floatval($matches[2]);
                     }elseif($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",
@@ -1877,12 +1880,12 @@ function print_public_details($bib) {
                         default: $type = "Collection";
                     }
 
-                    if ($type == "Point")
+                    if ($type == "Point"){
                         $bd["val"] = "<b>Point</b> ".($minX!=null?round($minX,7).", ".round($minY,7):'');
-                    else
+                    }else{
                         $bd['val'] = "<b>$type</b> X ".($minX!=null?round($minX,7).", ".round($maxX,7).
                         " Y ".round($minY,7).", ".round($maxY,7):'');
-
+                    }
                     $geoimage =
                     "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
                     ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(mapViewer){mapViewer.hide();}}' "
@@ -1969,12 +1972,12 @@ function print_public_details($bib) {
     }else{
         print '<div class="thumbnail">';
     }
-        $has_thumbs = (count($thumbs)>0);
+        $has_thumbs = (!empty($thumbs));
 
     $several_media = count($thumbs);
     $added_linked_media_cont = false;
 
-    if($hide_images != 2) // use/hide all thumbnails
+    if($hide_images != 2){ // use/hide all thumbnails
         foreach ($thumbs as $k => $thumb) {
 
             if(strpos($thumb['orig_name'],'_iiif')===0 || $thumb['mode_3d_viewer'] != '' ){
@@ -2019,7 +2022,7 @@ function print_public_details($bib) {
                     print '<a href="#" onclick="displayImages(true);">'
                     .'<span class="ui-icon ui-icon-menu" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;all images</a><br><br>';
                 }
-                if(count($thumbs)>0 && !$isAudioVideo){
+                if(!empty($thumbs) && !$isAudioVideo){
                     print '<a href="#" data-id="'.htmlspecialchars($thumb['nonce']).'" class="mediaViewer_link">'
                     .'<span class="ui-icon ui-icon-fullscreen" style="font-size:1.2em;display:inline-block;vertical-align: middle;"></span>&nbsp;full screen</a><br><br>';
                 }
@@ -2132,7 +2135,7 @@ function print_public_details($bib) {
             }
 
         }//for
-
+    }
     print '</div><!--CLOSE ALL thumbnails-->';
 
 //<div id="div_public_data" style="float:left; echo (($has_thumbs)?'max-width:900px':'')">
@@ -2253,7 +2256,7 @@ function print_public_details($bib) {
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
 
-        if(is_array($group_details) && count($group_details) > 0){
+        if(is_array($group_details) && !empty($group_details)){
             echo '<script>createRecordGroups(', json_encode($group_details, JSON_FORCE_OBJECT), ');handleCMSContent();</script>';
         }
 
@@ -2346,7 +2349,7 @@ function print_relation_details($bib) {
 
 			$field_name = false;
 
-			if($relfields_details && count($relfields_details) > 0){
+			if($relfields_details && !empty($relfields_details)){
 
 				for($i = 0; $i < count($relfields_details); $i++){
 
@@ -2435,7 +2438,7 @@ function print_relation_details($bib) {
 
 			$field_name = false;
 
-			if($relfields_details && count($relfields_details) > 0){
+			if($relfields_details && !empty($relfields_details)){
 
 				for($i = 0; $i < count($relfields_details); $i++){
 
@@ -2537,7 +2540,7 @@ function print_linked_details($bib, $link_cnt)
     */
 
     $ignored_ids = '';
-    if(count($already_linked_ids) > 0){
+    if(!empty($already_linked_ids)){
         $ignored_ids = ' AND rl_SourceID NOT IN ('.implode(',', $already_linked_ids).')';
     }
 
@@ -2608,15 +2611,16 @@ function print_linked_details($bib, $link_cnt)
 function print_text_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
-        if (! $result["success"] && count($cmts) == 0) {return;}
+        if (! $result["success"] && empty($cmts)) {return;}
 
         $content = "";
         $woot = @$result["woot"];
-        if(is_array($woot) && is_array($woot["chunks"]))
-        foreach ($woot["chunks"] as $chunk) {
-            $content .= $chunk["text"] . " ";
+        if(is_array($woot) && is_array($woot["chunks"])){
+            foreach ($woot["chunks"] as $chunk) {
+                $content .= $chunk["text"] . " ";
+            }
         }
-        if (strlen($content) == 0 && count($cmts) == 0) {return;}
+        if (strlen($content) == 0 && empty($cmts)) {return;}
 
 
         print '<div class=detailRowHeader>Text';
@@ -2715,7 +2719,7 @@ function print_woot_precis($content,$bib) {
 
 
 function print_threaded_comments($cmts) {
-        if (count($cmts) == 0) {return;}
+        if (empty($cmts)) {return;}
         ?>
         <div class=detailRow>
             <div class=detailType>Thread Comments</div>
@@ -2779,7 +2783,7 @@ function orderComments($cmts) {
     foreach ( $orderedCmtIds as $id) {
         array_push($ret, array( 'id' => $id, 'level' => $cmts[$id]['level']));
     }
-    if (count($orderErrCmts)) {$orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);}
+    if (!empty($orderErrCmts)) {$orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);}
     return $ret;
 }
 
@@ -2812,7 +2816,7 @@ function linkifyValue($value){
 
     preg_match_all('/((?:https?|ftps?|mailto))(\S)+/', $new_value, $url_matches);// only urls that contain a protocol [http|https|ftp|mailto]
 
-    if(is_array($url_matches) && count($url_matches[0]) > 0){
+    if(is_array($url_matches) && !empty($url_matches[0])){
 
         foreach($url_matches[0] as $url){
             if(mb_strpos($url, '<br>')){ // remove from first br onwards, in case

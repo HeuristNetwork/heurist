@@ -829,7 +829,7 @@ private static function prepareDateField($field, $csv_dateformat){
 
         try{
             $t2 = new DateTime($field);
-            $t3 = $t2->format('Y-m-d H:i:s');
+            $t3 = $t2->format(DATE_8601);
             $field = $t3;
         } catch (Exception  $e){
             //print $field.' => NOT SUPPORTED<br>';

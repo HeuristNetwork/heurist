@@ -135,7 +135,7 @@ protected function _outputHeader(){
                 <nodes>
 XML;
 
-    $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
+    $gephi_header = XML_HEADER.$gephi_header;
 
     fwrite($this->fd, $gephi_header);
 

@@ -283,8 +283,8 @@
 
         $response = json_encode($response);
 
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($response));
+        header(CTYPE_JSON);
+        header(CONTENT_LENGTH . strlen($response));
         exit($response);
     }
 
@@ -338,8 +338,8 @@
         }
         $response = json_encode($response);
 
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($response));
+        header(CTYPE_JSON);
+        header(CONTENT_LENGTH . strlen($response));
         exit($response);
     }
 
@@ -1085,8 +1085,8 @@
     }
 
 	// Return response
-    header('Content-Type: application/json');
-    header('Content-Length: ' . strlen($remote_data));
+    header(CTYPE_JSON);
+    header(CONTENT_LENGTH . strlen($remote_data));
 
     echo $remote_data;
 

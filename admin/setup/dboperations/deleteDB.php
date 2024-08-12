@@ -44,7 +44,7 @@ if($sysadmin_pwd==null){
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 
-    $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete);//for snyk
+    $database_to_delete = preg_replace(REGEX_ALPHANUM, "", $database_to_delete);//for snyk
 
     if(array_key_exists('create_archive', $_REQUEST)){
         $create_arc = $_REQUEST['create_archive'];

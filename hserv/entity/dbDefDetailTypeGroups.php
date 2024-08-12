@@ -196,7 +196,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['dtg_Modified'] = date(DATE_8601);//reset
 
             if(!(@$this->records[$idx]['dtg_Order']>0)){
                 $this->records[$idx]['dtg_Order'] = 2;

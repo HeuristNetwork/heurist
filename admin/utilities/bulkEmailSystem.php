@@ -606,7 +606,7 @@ class SystemEmailExt {
 			$this->log .= htmlspecialchars("Values: {databases: {".$db_listed."}, email: $email, name: "
                         .$details['first_name']. " " .$details["last_name"]
 					    .", record_count: {".$records_listed."}, last_modified: {".$lastmod_listed."} },"
-					    ."Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg.'  , '.$email_from )
+					    ."Timestamp: " . date(DATE_8601) . ", Status: " . $status_msg.'  , '.$email_from )
 					    . '<br><br>';
 
 			$mailer->clearAddresses();// ensure that the current email is gone
@@ -770,7 +770,7 @@ class SystemEmailExt {
 			   . "&nbsp;&nbsp;Number of Users Emailed: $user_count <br>"
 			   . "&nbsp;&nbsp;Record Limit:$r_cnt <br>"
 			   . "&nbsp;&nbsp;Last Modified Filter: $lm <br>"
-			   . "}, <br> Timestamp: " . date("Y-m-d H:i:s") . ", Status: " . $status_msg
+			   . "}, <br> Timestamp: " . date(DATE_8601) . ", Status: " . $status_msg
 			   . ", <br> Email Subject: " . $email_subject
 			   . ", <br> Email Body: <br>" . $email_body;
 	    $main_size = strlen($main);	// Main part in bytes

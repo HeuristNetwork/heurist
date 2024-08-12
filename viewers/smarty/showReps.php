@@ -482,7 +482,7 @@ function executeSmartyTemplate($system, $params){
                     $outputfile = 'heurist_output.'.$outputmode;
                     header('Pragma: public');
                     header('Content-Disposition: attachment; filename="'.$outputfile.'"');
-                    //header('Content-Length: ' . strlen($tpl_res));
+                    //header(CONTENT_LENGTH . strlen($tpl_res));
                 }
             }
         }
@@ -998,7 +998,7 @@ function save_report_into_file($tpl_source){
                 if(!folderCreate($dirname, true)){
                     $errors = 'Failed to create folder for generated reports';
                 }
-            }else if(!file_exists($dirname)){
+            }elseif(!file_exists($dirname)){
                 $errors = "Output folder $dirname does not exist";
             }
 
@@ -1038,7 +1038,7 @@ function save_report_into_file($tpl_source){
                     if(unlink($res_file) === false){ // Delete old file
                         unlink($temp_file);// on error, remove temp file
                         $errors = "Can't delete old report file $res_file. Check permission for file";
-                    }else if(rename($temp_file, $res_file) === false){ // Rename temp file
+                    }elseif(rename($temp_file, $res_file) === false){ // Rename temp file
                         unlink($temp_file);// on error, remove temp file
                         $errors = "Can't rename temporary file $temp_file to $res_file. Check permissions";
                     }
@@ -1095,7 +1095,7 @@ function save_report_into_file($tpl_source){
 
                 header('Pragma: public');
                 header('Content-Disposition: attachment; filename="'.$output_name.'"');
-                header('Content-Length: ' . strlen($tpl_res));
+                header(CONTENT_LENGTH . strlen($tpl_res));
             }
 
             echo $tpl_res;
@@ -1478,9 +1478,9 @@ function cms_content_prepare($content){
                     $cnt = $cnt.'<br>'.$res;
                 }
             }
-        }else if(@$content['type']=='text'){
+        }elseif(@$content['type']=='text'){
             $cnt =  @$content['content'];
-        }else if(@$content['type']=='group' && is_array(@$content['children'])){
+        }elseif(@$content['type']=='group' && is_array(@$content['children'])){
             $convert_links = false;
             foreach($content['children'] as $grp){
                 $res = cms_content_prepare($grp);

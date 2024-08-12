@@ -506,7 +506,7 @@ class DbDefTerms extends DbEntityBase
 
             }
 
-            $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['trm_Modified'] = date(DATE_8601);//reset
             if(@$this->records[$idx]['trm_Domain']!='relation') {$this->records[$idx]['trm_Domain'] = 'enum';}
             if(!@$this->records[$idx]['trm_Status']) {$this->records[$idx]['trm_Status'] = 'open';}
             if(!(@$this->records[$idx]['trm_InverseTermID']>0)) {$this->records[$idx]['trm_InverseTermID'] = null;}

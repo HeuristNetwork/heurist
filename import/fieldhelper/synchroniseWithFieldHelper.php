@@ -489,7 +489,7 @@ $failed_exts = array();
 
                                     $old_md5 = $value;
 
-                                }else if(@$fieldhelper_to_heurist_map[$key]){
+                                }elseif(@$fieldhelper_to_heurist_map[$key]){
 
                                     $key2 = $fieldhelper_to_heurist_map[$key];
 
@@ -521,7 +521,7 @@ $failed_exts = array();
                                     }elseif($key2=="recordId"){
                                         $recordIds[] = $value;
                                         $el_heuristid[$value] = $el;
-                                    }else if(intval($key2)>0) {
+                                    }elseif(intval($key2)>0) {
                                         //add to details
                                         $details["t:".$key2] = array("1"=>$value);
                                     }// else field type not defined in this instance

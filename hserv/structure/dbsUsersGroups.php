@@ -482,7 +482,7 @@
 
             $dbprefix = '';
             if($database!=null){
-                $dbprefix = preg_replace('/[^a-zA-Z0-9_]/', "", $database);//for snyk
+                $dbprefix = preg_replace(REGEX_ALPHANUM, "", $database);//for snyk
                 $dbprefix = '`'.$dbprefix.'`.';
             }
 
@@ -957,7 +957,7 @@
                         .$mysqli->real_escape_string($ldb).'\'');
                 if(!$dbname) {continue;}
 
-                $ldb = preg_replace('/[^a-zA-Z0-9_]/', '', $ldb);//for snyk
+                $ldb = preg_replace(REGEX_ALPHANUM, '', $ldb);//for snyk
 
                 //2. find sys_UGrpsDatabase in linked database - this database must be in list
                 $linked_dbs2 = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');

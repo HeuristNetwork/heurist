@@ -348,7 +348,7 @@ $requestUri:
     exit;
 
 }
-else if(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha') && $requestUri[1]=='viewers'){
+elseif(count($requestUri)>2 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha') && $requestUri[1]=='viewers'){
     //Redirects to index page for viewers plugins
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
@@ -373,11 +373,11 @@ $database_id = 0;
 if(@$_REQUEST['recID'] || @$_REQUEST['recid']){
     $recid = @$_REQUEST['recid']?$_REQUEST['recid']:$_REQUEST['recID'];
 
-}else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
+}elseif (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
 
     if(@$_REQUEST['rty']) {$entity = 'rty';}
-    else if(@$_REQUEST['dty']) {$entity = 'dty';}
-    else if(@$_REQUEST['trm']) {$entity = 'trm';}
+    elseif(@$_REQUEST['dty']) {$entity = 'dty';}
+    elseif(@$_REQUEST['trm']) {$entity = 'trm';}
 
     $recid = filter_var($_REQUEST[$entity], FILTER_SANITIZE_STRING);
     $format = 'xml';
@@ -486,7 +486,7 @@ if($database_url!=null){ //redirect to resolver for another database
     //todo include resolver recordSearchReplacement
     $redirect = 'hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
 
-}else if(@$_REQUEST['db']){
+}elseif(@$_REQUEST['db']){
 
     if(in_array($format, array('xml','json','rdf','gephi','geojson','iiif'))){
 

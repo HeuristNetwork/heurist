@@ -858,6 +858,7 @@ class HQuery {
                             $sort_fields[] = $dty_ID;
                         }
                     }
+                    break;
                 default;
             }//switch
 

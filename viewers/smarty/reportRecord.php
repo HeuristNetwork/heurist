@@ -738,7 +738,7 @@ class ReportRecord {
                     }
                 }//for
             }
-        }else if (@$woot["errorType"]) {
+        }elseif (@$woot["errorType"]) {
             $res = "WootText: ".$woot["errorType"];
         }
 */
@@ -951,7 +951,7 @@ class ReportRecord {
 
                 if(array_key_exists($id, $res) && !empty($res[$id])){
                     $rtn[$id] = $res[$id];
-                }else if(array_key_exists($id, $def_values) && !empty($def_values[$id])){
+                }elseif(array_key_exists($id, $def_values) && !empty($def_values[$id])){
                     $rtn[$id] = $def_values[$id];
                 }else{
                     $rtn[$id] = '';

@@ -932,7 +932,7 @@ public static function validateImport($params) {
 
         $cnt_recs_insert_nonexist_id = 0;
 
-        $id_field = preg_replace('/[^a-zA-Z0-9_]/', "", $id_field);//for snyk
+        $id_field = preg_replace(REGEX_ALPHANUM, "", $id_field);//for snyk
 
         // validate selected record ID field
         // in case id field is not created on match step (it is from original set of columns)
@@ -1116,10 +1116,10 @@ public static function validateImport($params) {
             }
             /*
             if($field_name1){
-                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);//for snyk
+                $field_name1 = preg_replace(REGEX_ALPHANUM, "", $field_name1);//for snyk
             }
             if($field_name2){
-                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);//for snyk
+                $field_name2 = preg_replace(REGEX_ALPHANUM, "", $field_name2);//for snyk
             }*/
 
             //search for empty required fields in import table
@@ -1129,15 +1129,15 @@ public static function validateImport($params) {
                 }else{
                     array_push($query_reqs, $field_name1);
                     array_push($query_reqs, $field_name2);
-                    $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);//for snyk
-                    $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);//for snyk
+                    $field_name1 = preg_replace(REGEX_ALPHANUM, "", $field_name1);//for snyk
+                    $field_name2 = preg_replace(REGEX_ALPHANUM, "", $field_name2);//for snyk
                     array_push($query_reqs_where, "`$field_name1` is null or `$field_name1`=''");
                     array_push($query_reqs_where, "`$field_name2` is null or `$field_name2`=''");
                 }
             }
             if($field_name1 && $field_name2){
-                $field_name1 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name1);//for snyk
-                $field_name2 = preg_replace('/[^a-zA-Z0-9_]/', "", $field_name2);//for snyk
+                $field_name1 = preg_replace(REGEX_ALPHANUM, "", $field_name1);//for snyk
+                $field_name2 = preg_replace(REGEX_ALPHANUM, "", $field_name2);//for snyk
                 array_push($query_num, $field_name1);
                 array_push($query_num_where, "(NOT(`$field_name1` is null or `$field_name1`='' or `$field_name1`='NULL') and NOT(`$field_name1` REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
@@ -1152,7 +1152,7 @@ public static function validateImport($params) {
         if($ft_vals[$idx_fieldtype] == "geo"){
 
             //for geo fields take first
-            $geo_fields = array(preg_replace('/[^a-zA-Z0-9_]/', '', $field_name[0]));//WKT field
+            $geo_fields = array(preg_replace(REGEX_ALPHANUM, '', $field_name[0]));//WKT field
 
         }else
         if($ft_vals[$idx_reqtype] == "required"){
@@ -1167,7 +1167,7 @@ public static function validateImport($params) {
                 $squery = array();
                 foreach($field_name as $f_name){
 
-                    $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
+                    $f_name = preg_replace(REGEX_ALPHANUM, "", $f_name);//for snyk
 
                     if($ft_vals[$idx_fieldtype] == "resource"){ //|| $ft_vals[$idx_fieldtype] == "enum"){
                         //$squery = "not (".$field_name.">0)";
@@ -1198,7 +1198,7 @@ public static function validateImport($params) {
 
                 foreach($field_name as $f_name){
 
-                    $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
+                    $f_name = preg_replace(REGEX_ALPHANUM, "", $f_name);//for snyk
 
                     array_push($query_enum, $f_name);
                     $trm1 = "trm".count($query_enum);
@@ -1213,7 +1213,7 @@ public static function validateImport($params) {
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
 
-                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
+                $f_name = preg_replace(REGEX_ALPHANUM, "", $f_name);//for snyk
 
                 array_push($query_res, $f_name);
                 $trm1 = "rec".count($query_res);
@@ -1223,7 +1223,7 @@ public static function validateImport($params) {
             }elseif($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
-                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
+                $f_name = preg_replace(REGEX_ALPHANUM, "", $f_name);//for snyk
 
                 array_push($query_num, $f_name);
                 array_push($query_num_where, "(NOT($f_name is null or $f_name='' or $f_name='NULL') and NOT($f_name REGEXP ".$numeric_regex."))");
@@ -1233,7 +1233,7 @@ public static function validateImport($params) {
             }elseif($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
-                $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
+                $f_name = preg_replace(REGEX_ALPHANUM, "", $f_name);//for snyk
 
                 array_push($query_date, $f_name);
                 if($ft_vals[$idx_fieldtype] == "year"){
@@ -1267,7 +1267,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     if($id_field){ //validate only for defined records IDs
-        $id_field = preg_replace('/[^a-zA-Z0-9_]/', "", $id_field);//for snyk
+        $id_field = preg_replace(REGEX_ALPHANUM, "", $id_field);//for snyk
         if($ignore_insert){
             $only_for_specified_id = " (`$id_field` > 0) AND ";
         }else{
@@ -1297,7 +1297,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
         $k++;
 
-        $field = preg_replace('/[^a-zA-Z0-9_]/', "", $field);//for snyk
+        $field = preg_replace(REGEX_ALPHANUM, "", $field);//for snyk
 
         $wrong_records = self::getWrongRecords($query, $imp_session,
             "This field is required. It is recommended that a value must be supplied for every record. "
@@ -1524,7 +1524,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     if(is_array($geo_fields) && count($geo_fields)>0){
 
         foreach($geo_fields as $k=>$fld){ //for snyk
-            $geo_fields[$k] = preg_replace('/[^a-zA-Z0-9_]/', "", $fld);
+            $geo_fields[$k] = preg_replace(REGEX_ALPHANUM, "", $fld);
         }
 
         // northing, easting
@@ -1987,7 +1987,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
 
                              try{
                                 $t2 = new DateTime($r_value);
-                                $value = $t2->format('Y-m-d H:i:s');
+                                $value = $t2->format(DATE_8601);
                                 array_push($newvalue, $value);
                              } catch (Exception  $e){
                                 $is_error = true;
@@ -2000,7 +2000,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
                         if ($date["error_count"] == 0 && checkdate($date["month"], $date["day"], $date["year"]))
                         {
                             $value = strtotime($r_value);
-                            $value = date('Y-m-d H:i:s', $value);
+                            $value = date(DATE_8601, $value);
                             array_push($newvalue, $value);
                         }else{
                             $is_error = true;
@@ -2088,7 +2088,7 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
 
             if($test_geom!=null && !$test_geom->isEmpty()){
 
-                $field = preg_replace('/[^a-zA-Z0-9_]/', "", $field);//for snyk
+                $field = preg_replace(REGEX_ALPHANUM, "", $field);//for snyk
 
                 $maxw_query = 'SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE table_name = "'.$table.'" AND column_name = "'. $field .'"';
                 $field_max_width = mysql__select_value($mysqli, $maxw_query);
@@ -3046,7 +3046,7 @@ public static function performImport($params, $mode_output){
                                 if($value!='' && $value!='NULL') {
                                     if($fieldtype_type == "date") {
                                         //$value = strtotime($value);
-                                        //$value = date('Y-m-d H:i:s', $value);
+                                        //$value = date(DATE_8601, $value);
                                     }else{
                                         //replace \\r to\r \\n to \n
                                         $value = str_replace("\\r", "\r", $value);

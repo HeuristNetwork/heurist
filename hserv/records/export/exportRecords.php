@@ -309,7 +309,7 @@ public function output($data, $params){
     $format = @$params['format'];
     if($format==null) {$format = 'xml';}
     if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
-        $mimeType = 'Content-Type: application/json';
+        $mimeType = CTYPE_JSON;
     }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
         $mimeType = 'Content-Type: text/html';
     }else {
@@ -402,7 +402,7 @@ public function output($data, $params){
 
             header('Content-Type: application/zip');
             header($contentDispositionField);
-            header('Content-Length: ' . self::get_file_size($file_zip_full));
+            header(CONTENT_LENGTH . self::get_file_size($file_zip_full));
             self::readfile_by_chunks($file_zip_full);
 
             // remove the zip archive and temp files
@@ -450,7 +450,7 @@ public function output($data, $params){
                 }
 
                 header('Content-Disposition: attachment; filename='.$filename);
-                header('Content-Length: ' . self::get_file_size($this->tmp_destination));
+                header(CONTENT_LENGTH . self::get_file_size($this->tmp_destination));
             }
 
             if(@$params['restapi']){

@@ -1124,6 +1124,7 @@ class SortPhrase {
                 return array('rec_ID'.$scending, NULL);
             case 'rt': case 'type':
                 return array('rec_RecTypeID'.$scending, NULL);
+            default;
         }
     }
 }
@@ -3030,7 +3031,7 @@ class AfterPredicate extends Predicate {
             $timestamp = new DateTime($this->value);
 
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            $datestamp = $timestamp->format(DATE_8601);
 
             return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
 
@@ -3054,7 +3055,7 @@ class BeforePredicate extends Predicate {
             $timestamp = new DateTime($this->value);
 
             $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = $timestamp->format('Y-m-d H:i:s');
+            $datestamp = $timestamp->format(DATE_8601);
 
             return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
 

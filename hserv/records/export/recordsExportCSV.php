@@ -703,8 +703,7 @@ public static function output($data, $params){
                             // escape all line feed (\n) within text values, to avoid confusing the import
                             // freetext shouldn't have any, but just in case
                             foreach($values as $val){
-                                //$val = preg_replace("/\\r/", "\\r", $val);
-                                $vals[] = preg_replace("/\\n/", "\\n", $val);
+                                $vals[] = str_replace("\n", "\\n", $val);
                             }
                         }else{
                             $vals = $values;
@@ -1272,7 +1271,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename='.rawurlencode($csv_filename));
-        header('Content-Length: ' . $content_len);
+        header(CONTENT_LENGTH . $content_len);
         echo "\xEF\xBB\xBF";// Byte Order Mark
         exit($out);
 
@@ -1326,7 +1325,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
             header('Content-Type: application/zip');
             header('Content-Disposition: attachment; filename='.$zipname);
-            header('Content-Length: ' . filesize($destination));
+            header(CONTENT_LENGTH . filesize($destination));
             readfile($destination);
 
             // remove the zip archive
@@ -1338,7 +1337,7 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
             $out = implode(PHP_EOL, $error_log);
             header('Content-Type: text/csv');
             header('Content-Disposition: attachment; filename=log.txt');
-            header('Content-Length: ' . strlen($out));
+            header(CONTENT_LENGTH . strlen($out));
             exit($out);
 
         }

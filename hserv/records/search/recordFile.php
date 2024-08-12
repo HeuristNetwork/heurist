@@ -557,7 +557,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
-        header('Content-Length: ' . ($range_max>0?($range_max-$range_min+1):filesize($filename)));
+        header(CONTENT_LENGTH . ($range_max>0?($range_max-$range_min+1):filesize($filename)));
         @ob_clean();
         ob_end_flush();//flush();
 
@@ -676,7 +676,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
     header('Content-Type: application/zip');
     header($contentDispositionField);
-    header('Content-Length: ' . filesize($file_zip_full));
+    header(CONTENT_LENGTH . filesize($file_zip_full));
     readfile($file_zip_full);
 
 }

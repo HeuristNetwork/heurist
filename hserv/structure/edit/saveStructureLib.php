@@ -828,7 +828,7 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
                     }elseif($colName=='rst_PointerMode' && ($val=='' || $val==null)){
                         $val = 'addorbrowse';
                     }elseif($colName=='rst_Modified'){
-                        $val = date('Y-m-d H:i:s');
+                        $val = date(DATE_8601);
                     }
 
                     $parameters = addParam($parameters, $rstColumnNames[$colName], $val);

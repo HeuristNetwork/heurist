@@ -84,7 +84,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
             $res->close();
         }
 
-    }else if(is_numeric($rps_ID)){
+    }elseif(is_numeric($rps_ID)){
 	    //load one
 
 	    $row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);

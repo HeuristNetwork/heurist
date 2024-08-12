@@ -283,7 +283,7 @@ if(@$_REQUEST['output']=='csv'){
     }
 
     if($response['status']==HEURIST_OK){
-        header('Content-Length: ' . strlen($response['data']));
+        header(CONTENT_LENGTH . strlen($response['data']));
         print $response['data'];
 
     }else{

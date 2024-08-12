@@ -194,7 +194,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		foreach ($dbs as $db) {
 
-            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);
+            $db = preg_replace(REGEX_ALPHANUM, "", $db);
 
 			$query = "SELECT count(*)
 								FROM (
@@ -247,7 +247,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	foreach($dbs as $db){
 
-        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
+        $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
 
 		if($user_request == "owner"){ // Owners
 			$where_clause = "WHERE ugr.ugr_ID = 2";
@@ -315,7 +315,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$data = array();
 	foreach($dbs as $db){
         if(strpos($db,'hdb_')===0){
-            $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
+            $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
 		    $query = 'SELECT count(*) FROM `' . $db . '`.`Records` WHERE rec_FlagTemporary != 1';
 		    $res = $mysqli->query($query);
 		    if(!$res){
@@ -366,7 +366,7 @@ function getDatabaseDetails($mysqli, $db_list){
 	// Retrieve record count and last update (record or structure)
 	foreach ($db_list as $database) {
 
-        $database = preg_replace('/[^a-zA-Z0-9_]/', "", $database);
+        $database = preg_replace(REGEX_ALPHANUM, "", $database);
 
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 		// Get record count

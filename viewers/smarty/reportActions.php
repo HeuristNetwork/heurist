@@ -40,7 +40,7 @@ class ReportActions {
 
        if($_dir){
            $this->dir = $_dir;
-       }else if(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+       }elseif(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
             $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;
        }
     }
@@ -83,7 +83,7 @@ class ReportActions {
                                 .'. Local details not found '.print_r($res['details_not_found'],true));
                         }
 
-                    }else if(is_array($res) && @$res['template']) {
+                    }elseif(is_array($res) && @$res['template']) {
                         $name = substr($filename, 0, -4);
                         $filename_tpl = $name.'.tpl';
                         $template_body = $res['template'];
@@ -103,7 +103,7 @@ class ReportActions {
                     }
 
 
-                }else if(file_exists($this->dir.$filename) && $ext=="tpl" && $isnot_temp)
+                }elseif(file_exists($this->dir.$filename) && $ext=="tpl" && $isnot_temp)
                 {
                     //$path_parts['filename'] ));- does not work for nonlatin names
                     $name = substr($filename, 0, -4);
@@ -249,7 +249,7 @@ class ReportActions {
         //5. find starting with "f"
                         if(strpos($part, 'f')===0){
                             $prefix = 'f';
-                        }else if(strpos($part, '$f')===0){
+                        }elseif(strpos($part, '$f')===0){
                             $prefix = '$f';
                         }else{
                             $prefix = null;
@@ -392,7 +392,7 @@ class ReportActions {
                 if($path!==false){ //does not exist
                     $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);
                 }
-            }else if (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
+            }elseif (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
                     $filename = USanitize::sanitizePath($params['tmp_name']);
             }
 

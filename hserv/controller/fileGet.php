@@ -47,7 +47,7 @@ if(!$error){
 
         list($db_full, $db) = mysql__get_names( $db );
 
-        $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
+        $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
 
         $system = new System();//without db connection and session - just paths
         $system->initPathConstants($db);
@@ -251,7 +251,7 @@ function _download_file($filename, $content_type){
         ob_start();
         if($content_type) {header('Content-type: '.$content_type);}
         header('Pragma: public');
-        header('Content-Length: ' . filesize($filename));
+        header(CONTENT_LENGTH . filesize($filename));
         @ob_clean();
         flush();
         readfile($filename);

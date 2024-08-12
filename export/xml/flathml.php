@@ -186,11 +186,11 @@ if(!$intofile){
             }
 
             header('Content-Disposition: attachment; filename='.$filename);
-            //header('Content-Length: ' . strlen($content));
+            //header(CONTENT_LENGTH . strlen($content));
         }
 
     }
-    output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
+    output( XML_HEADER."\n" );
 }
 
 set_time_limit(0);//no limit
@@ -1204,7 +1204,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     if($intofile){
         $hunifile = fopen( HEURIST_HML_DIR.$record['rec_ID'].".xml", 'w');
-        output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
+        output( XML_HEADER."\n" );
 
         //add attributes
         $recAttr['xmlns'] = 'http:s//heuristnetwork.org';
@@ -1989,7 +1989,7 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
             // create HuNI manifest
             $huni_resources = fopen( HEURIST_HML_DIR."resources.xml","w");
-            fwrite( $huni_resources, "<?xml version='1.0' encoding='UTF-8'?>\n" );
+            fwrite( $huni_resources, XML_HEADER."\n" );
             fwrite( $huni_resources, '<resources recordCount="'.count($resout)."\">\n");
 
             // dbID set at start of script

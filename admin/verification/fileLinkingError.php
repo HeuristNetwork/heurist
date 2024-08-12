@@ -80,7 +80,7 @@ $mysqli = $system->get_mysqli();
 
         print "<h2>".htmlspecialchars($db)."</h2>";
 
-    $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
+    $db = preg_replace(REGEX_ALPHANUM, "", $db);//for snyk
 
     $query1 = "SELECT * from `$db`.recUploadedFiles";// get a list of all the files
     $res1 = $mysqli->query($query1);

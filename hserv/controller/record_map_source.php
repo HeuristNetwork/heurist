@@ -295,10 +295,10 @@
                             }
 
                             $json = json_encode($json);
-                            header('Content-Type: application/json');
+                            header(CTYPE_JSON);
                             //header('Content-Type: application/vnd.geo+json');
                             //header('Content-Disposition: attachment; filename=output.json');
-                            header('Content-Length: ' . strlen($json));
+                            header(CONTENT_LENGTH . strlen($json));
                             exit($json);
                     }else{
                         $system->error_exit_api('No coordinates retrieved from kml file', HEURIST_ERROR);
@@ -341,7 +341,7 @@
 
                     header('Content-Type: application/zip');
                     header($contentDispositionField);
-                    header('Content-Length: ' . filesize($file_zip_full));
+                    header(CONTENT_LENGTH . filesize($file_zip_full));
                     readfile($file_zip_full);
 
                 }else{
@@ -359,7 +359,7 @@
                             . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));
 
                     header($contentDispositionField);
-                    header('Content-Length: ' . strlen($file_content));
+                    header(CONTENT_LENGTH . strlen($file_content));
                     echo $file_content;
                 }
 

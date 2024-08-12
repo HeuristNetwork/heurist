@@ -248,7 +248,7 @@ class DbDefRecStructure extends DbEntityBase
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
 
-            $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['rst_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = $isInsert;
         }

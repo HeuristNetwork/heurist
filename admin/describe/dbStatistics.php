@@ -186,7 +186,7 @@ if($is_csv){
 
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . strlen($out));
+        header(CONTENT_LENGTH . strlen($out));
         exit($out);
         */
 
@@ -212,7 +212,7 @@ if($is_csv){
 
             header('Content-Type: application/zip');
             header('Content-Disposition: attachment; filename='.$zipname);
-            header('Content-Length: ' . filesize($destination));
+            header(CONTENT_LENGTH . filesize($destination));
             readfile($destination);
             // remove the zip archive
             unlink($destination);

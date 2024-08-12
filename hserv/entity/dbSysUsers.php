@@ -269,7 +269,7 @@ class DbSysUsers extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
             $this->records[$idx]['ugr_Type'] = 'user';
-            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['ugr_Modified'] = date(DATE_8601);//reset
 
             //add password by default
             if(@$this->records[$idx]['ugr_Password']==''){

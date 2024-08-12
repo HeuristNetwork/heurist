@@ -524,8 +524,8 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             case 'm':
                 $val *= 1048576; break;
             case 'k':
-                $val *= 1024;
-            ddefault;
+                $val *= 1024; break;
+            default;
         }
         return $this->fix_integer_overflow($val);
     }
@@ -1708,7 +1708,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $this->header('Content-Type: '.$this->get_file_type($file_path));
             $this->header('Content-Disposition: inline; filename="'.$file_name.'"');
         }
-        $this->header('Content-Length: '.$this->get_file_size($file_path));
+        $this->header(CONTENT_LENGTH.$this->get_file_size($file_path));
         $this->header('Last-Modified: '.gmdate('D, d M Y H:i:s T', filemtime($file_path)));
         $this->readfile($file_path);
     }

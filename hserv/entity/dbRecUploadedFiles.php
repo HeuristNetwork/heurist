@@ -518,7 +518,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             if($isinsert){
                 $this->records[$idx]['ulf_UploaderUGrpID'] = $this->system->get_user_id();
-                $this->records[$idx]['ulf_Added'] = date('Y-m-d H:i:s');
+                $this->records[$idx]['ulf_Added'] = date(DATE_8601);
             }else{
                 //do not change these params on update
                 if(@$this->records[$idx]['ulf_FilePath']=='') {unset($this->records[$idx]['ulf_FilePath']);}

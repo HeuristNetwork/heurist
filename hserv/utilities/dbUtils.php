@@ -327,7 +327,7 @@ class DbUtils {
                         $owner_user['ugr_LastName'],
                         $owner_user['ugr_FirstName'],
                         $owner_user['ugr_eMail'],
-                    date_create('now')->format('Y-m-d H:i:s'));
+                    date_create('now')->format(DATE_8601));
                     fputcsv($fp, $row);
                     fclose($fp);
                 }

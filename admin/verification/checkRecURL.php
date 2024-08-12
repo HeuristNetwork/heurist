@@ -88,7 +88,7 @@ if(!$is_included){
 
 function __updateRecords_lastverified($mysqli){
     global $passed_rec_ids;
-    $date = date('Y-m-d H:i:s');
+    $date = date(DATE_8601);
     $query = 'UPDATE Records set rec_URLLastVerified="'.$date.'", rec_URLErrorMessage=null WHERE rec_ID in ('
             .implode(',',$passed_rec_ids) .')';
     $mysqli->query($query);
@@ -188,7 +188,7 @@ function checkURLs($system, $return_output, $verbose=false){
                     //$glb_curl_error
                 $upd_query = 'UPDATE Records set rec_URLLastVerified=?, rec_URLErrorMessage=? WHERE rec_ID='.$rec_id;
                 $cnt = mysql__exec_param_query($mysqli, $upd_query,
-                        array('ss', date('Y-m-d H:i:s'),
+                        array('ss', date(DATE_8601),
                         (isset($glb_curl_error)?substr($glb_curl_error,0,255):'')), true);
 
                 if($verbose){

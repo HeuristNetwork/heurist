@@ -70,7 +70,7 @@ $is_csv = (@$_REQUEST['html']!=1);
 
     foreach ($databases as $idx=>$db_name){
 
-        $db_name = preg_replace('/[^a-zA-Z0-9_]/', "", $db_name);//for snyk
+        $db_name = preg_replace(REGEX_ALPHANUM, "", $db_name);//for snyk
 
         $rec_types = array();
         $det_types = array();
@@ -166,7 +166,7 @@ $is_csv = (@$_REQUEST['html']!=1);
 
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . strlen($out));
+        header(CONTENT_LENGTH . strlen($out));
 
         echo $out;
     }

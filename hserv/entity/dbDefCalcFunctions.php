@@ -187,7 +187,7 @@ class DbDefCalcFunctions extends DbEntityBase
                 }
             }
 
-            $this->records[$idx]['cfn_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['cfn_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['cfn_ID']>0));
         }

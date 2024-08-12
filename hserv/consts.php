@@ -188,7 +188,14 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 //Expose all relationship vocabularies as options for term fields.
 define("HEURIST_UNITED_TERMS", true);
 
-define("NAKALA_REPO", 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
+
+//common constants
+define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
+define('DATE_8601', 'Y-m-d H:i:s');
+define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
+define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
+define('CTYPE_JSON', 'Content-Type: application/json');
+define('CONTENT_LENGTH', 'Content-Length: ');
 
 
 $glb_lang_codes = null;

@@ -1296,7 +1296,7 @@ HEADER;
         $replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
         $charlist = implode('',$invalidChars);
 
-        $now = date('Y-m-d H:i:s');
+        $now = date(DATE_8601);
         $prevInvalidRecId = 0;
         $is_finished = true;
         $is_error = false;

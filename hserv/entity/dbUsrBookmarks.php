@@ -156,7 +156,7 @@ class DbUsrBookmarks extends DbEntityBase
             if($isinsert || !$this->records[$idx]['bkm_Added']){
                 $this->records[$idx]['bkm_Added'] = date('Y/m/d H:i:s');
             }
-            $this->records[$idx]['bkm_Modified'] = date('Y-m-d H:i:s');//reset
+            $this->records[$idx]['bkm_Modified'] = date(DATE_8601);//reset
         }
 
         return $ret;
