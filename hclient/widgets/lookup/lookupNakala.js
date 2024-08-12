@@ -526,7 +526,10 @@ $.widget( "heurist.lookupNakala", $.heurist.recordAction, {
             this.recordList.resultList('updateResultSet', null);
         }else if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
         }
     }
 });

@@ -355,7 +355,10 @@ $.widget( "heurist.lookupMPCE", $.heurist.recordAction, {
                         // something is wrong with the record
 
                         msgToConsole('keywordLookup() Error: Selected Record is Invalid', record, 1);
-                        window.hWin.HEURIST4.msg.showMsgErr('The selected keyword is invalid');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'The selected keyword is invalid',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
 
                         return;
                     }
