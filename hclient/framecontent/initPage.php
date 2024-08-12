@@ -62,7 +62,7 @@ if(defined('IS_INDEX_PAGE')){
     //verify database version against minimal required
     $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
 
-    if($subsubVer==null){
+    if($subsubVer===null){
         $message = $system->getErrorMsg();
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;

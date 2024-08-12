@@ -20,113 +20,84 @@ function updateDatabseTo_v3($system, $dbname=null){
         if($dbname){
             mysql__usedatabase($mysqli, $dbname);
         }
-
+        
+        
         $report = array();
 
-        //create new tables
-        if(!hasTable($mysqli, 'usrRecPermissions')){
-
-            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
-                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
-                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
-                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
-                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
-                  ."PRIMARY KEY  (rcp_ID)"
-                .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
-                return false;
+        try{
+            //create new tables
+            $query = <<<EXP
+CREATE TABLE IF NOT EXISTS `usrRecPermissions` (
+`rcp_ID` int unsigned NOT NULL auto_increment COMMENT 'Primary table key',
+`rcp_UGrpID` smallint unsigned NOT NULL COMMENT 'ID of group',
+`rcp_RecID` int unsigned NOT NULL COMMENT 'The record to which permission is linked',
+`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
+PRIMARY KEY  (rcp_ID)) ENGINE=InnoDB COMMENT='Permissions for groups to records'
+EXP;
+            list($is_success,$report[]) = createTable($system, 'usrRecPermissions',$query);
+            if(!$is_success){
+                $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
+                $res = $mysqli->query($query);
             }
-            $report[] = 'usrRecPermissions created';
-        }else{
-            $report[] = 'usrRecPermissions already exists';
-            $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
-            $res = $mysqli->query($query);
-        }
+            
+            $query = <<<EXP
+CREATE TABLE sysDashboard (
+  dsh_ID tinyint unsigned NOT NULL auto_increment,
+  dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',
+  dsh_Label varchar(64) COMMENT 'The short text which will describe this function in the shortcuts',
+  dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',
+  dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',
+  dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the databar (eg. no point in showing searches if nothing to search)',
+  dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',
+  dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',
+  PRIMARY KEY  (dsh_ID)
+) ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
+EXP;
+            list($is_success,$report[]) = createTable($system, 'sysDashboard',$query);
+            
+            $query = <<<EXP
+CREATE TABLE usrWorkingSubsets (
+  wss_ID mediumint unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',
+  wss_RecID int unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',
+  wss_OwnerUGrpID smallint unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',
+  PRIMARY KEY  (wss_ID),
+  KEY wss_RecID (wss_RecID),
+  KEY wss_OwnerUGrpID (wss_OwnerUGrpID)
+) ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
+EXP;
+            list($is_success,$report[]) = createTable($system, 'usrWorkingSubsets',$query);
 
-        //create new tables
-        if(!hasTable($mysqli, 'sysDashboard')){
-
-$query = 'CREATE TABLE sysDashboard ('
-  .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
-  ."dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',"
-  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function in the shortcuts',"
-  ."dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',"
-  ."dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',"
-  ."dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',"
-  ."dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',"
-  ."dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',"
-  ."PRIMARY KEY  (dsh_ID)"
-.") ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create sysDashboard', $mysqli->error);
-                return false;
-            }
-            $report[] = 'sysDashboard created';
-        }else{
-            $report[] = 'sysDashboard already exists';
-        }
-
-        //create new tables
-        if(!hasTable($mysqli, 'usrWorkingSubsets')){
-
-$query = 'CREATE TABLE usrWorkingSubsets ( '
-  ."wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',"
-  ."wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',"
-  ."wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',"
-  ."PRIMARY KEY  (wss_ID),"
-  .'KEY wss_RecID (wss_RecID),'
-  .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)'
-.") ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrWorkingSubsets', $mysqli->error);
-                return false;
-            }
-            $report[] = 'usrWorkingSubsets created';
-        }else{
-            $report[] = 'usrWorkingSubsets already exists';
-        }
-
-
-        if(!hasTable($mysqli, 'defVocabularyGroups')){
-
-$query = "CREATE TABLE defVocabularyGroups (
-  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
+            $query = <<<EXP
+CREATE TABLE defVocabularyGroups (
+  vcg_ID tinyint unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
   vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
   vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Normal vocabularies are termed enum, relational are for relationship types but can also be used as normal vocabularies',
-  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Order tinyint unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
   vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
   vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
   PRIMARY KEY  (vcg_ID),
   UNIQUE KEY vcg_Name (vcg_Name)
-) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create defVocabularyGroups', $mysqli->error);
-                return false;
+) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
+EXP;
+            list($is_success,$report[]) = createTable($system, 'defVocabularyGroups',$query);
+            
+            if($is_success){
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
+                $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
             }
-
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
-
-            $report[] = 'defVocabularyGroups created';
-        }else{
-            $report[] = 'defVocabularyGroups already exists';
+        
+        
+        }catch(Exception $exception){
+            return false;
         }
+
 
         //--------------------------- FIELDS -----------------------------------
 

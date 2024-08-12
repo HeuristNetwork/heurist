@@ -1874,6 +1874,24 @@
         }
     }
 
+    function createTable($system, $table_name, $query){
+    
+        $mysqli = $system->get_mysqli();
+    
+        if(!hasTable($mysqli, $table_name)){
+            $res = false;
+            //$res = $mysqli->query($query);
+            if(!$res){
+                $msg = "Cannot create $table_name";
+                $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
+                throw new Exception($msg);
+            }
+            $res = array(true, "$table_name created");
+        }else{
+            $res = array(false, "$table_name already exists");
+        }
+        return $res;
+    }
 
     /**
     * Returns true if table exists in database
