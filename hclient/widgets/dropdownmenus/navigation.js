@@ -813,7 +813,7 @@ $.widget( "heurist.navigation", {
                     window.hWin.HAPI4.RecordMgr.search_new(server_request,
                         function(response){
                           
-                           if(window.hWin.HEURIST4.util.isJSON(response)) {
+                            if(window.hWin.HEURIST4.util.isJSON(response)) {
                                 if(response['records'] && response['records'].length>0){
                                     let res = response['records'][0]['details'];
                                     let keys = Object.keys(res);
@@ -838,11 +838,14 @@ $.widget( "heurist.navigation", {
                                         },2000);*/
                                     }
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Web Page not found (record #'+data.page_id+')');
+                                    window.hWin.HEURIST4.msg.showMsgErr({
+                                        message: `Web Page not found (record #${data.page_id})`,
+                                        error_title: 'Failed to load page'
+                                    });
                                 }
-                           }else {
+                            }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
-                           }
+                            }
                         });                
                 
 

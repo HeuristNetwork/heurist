@@ -973,11 +973,12 @@ $.widget( "heurist.mainMenu", {
                             missing = RT_CMS_MENU > 0 && missing == '' ? 'CMS Menu-Page (Concept-ID: 99-52)' : RT_CMS_MENU > 0 ? missing + ' and CMS Menu-Page (Concept-ID: 99-52)' : missing;
                             missing += (RT_CMS_HOME <= 0 && RT_CMS_MENU <= 0 ? ' record types' : ' record type');
 
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                                'Your database is missing the ' + missing + '.<br>'
-                                +'These record types can be downloaded from the Heurist_Bibliographic database (# 6) using Design > Browse templates.<br>'
-                                +'You will need to refresh your window after downloading the record type(s) for the additions to take affect.'
-                            );
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: `Your database is missing the ${missing}.<br>`
+                                        +'These record types can be downloaded from the Heurist_Bibliographic database (# 6) using Design > Browse templates.<br>'
+                                        +'You will need to refresh your window after downloading the record type(s) for the additions to take affect.',
+                                error_title: 'Missing required record types'
+                            });
                             return;
                         }
 
