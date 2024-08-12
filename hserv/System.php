@@ -1730,45 +1730,40 @@ f
     public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false){
         global $passwordForDatabaseAccess;
 
-        if($username && ($password || $skip_pwd_check)){
-
-            if($skip_pwd_check
-                || (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess)>15 && $passwordForDatabaseAccess==$password)
-              )
-            {
-                $user_id = is_numeric($username)?intval($username):2;
-                $user = user_getById($this->mysqli, $user_id);
-                $skip_pwd_check = true;
-            }else{
-                $user = user_getByField($this->mysqli, 'ugr_Name', $username);//dbsUsersGroups.php
-            }
-
-            if($user){
-
-                if(!$is_guest && $user['ugr_Enabled'] == 'n'){
-
-                    $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
-                    return false;
-
-                }elseif (  $skip_pwd_check || hash_equals(crypt($password, $user['ugr_Password']), $user['ugr_Password']) ) {
-
-                    $this->doLoginSession($user['ugr_ID'], $session_type);
-
-                    return true;
-                }else{
-                    $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
-                    return false;
-                }
-
-            }else{
-                $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
-                return false;
-            }
-
-        }else{
+        if(!($username && ($password || $skip_pwd_check))){
             $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");//INVALID_REQUEST
             return false;
         }
+
+        if($skip_pwd_check
+            || (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess)>15 && $passwordForDatabaseAccess==$password)
+          )
+        {
+            $user_id = is_numeric($username)?intval($username):2;
+            $user = user_getById($this->mysqli, $user_id);
+            $skip_pwd_check = true;
+        }else{
+            $user = user_getByField($this->mysqli, 'ugr_Name', $username);//dbsUsersGroups.php
+        }
+
+        if(!$user){
+            $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
+            
+        }elseif (!$is_guest && $user['ugr_Enabled'] == 'n'){
+
+            $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
+
+        }elseif ($skip_pwd_check || hash_equals(crypt($password, $user['ugr_Password']), $user['ugr_Password']) ) {
+
+            $this->doLoginSession($user['ugr_ID'], $session_type);
+
+            return true;
+        }else{
+            $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
+        }
+
+        return false;
+    
     }
 
     //
