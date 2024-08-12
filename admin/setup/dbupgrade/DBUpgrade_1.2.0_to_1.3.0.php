@@ -296,7 +296,7 @@ function fillTermsLinks( $mysqli ){
             $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
             .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
 
-    $report[] = 'Terms links are filled';
+            $report[] = 'Terms links are filled';
 
 
             //clear individual term selection for relationtype (this is the only field (#6))
@@ -344,15 +344,18 @@ function fillTermsLinks( $mysqli ){
 
                     $id_orig = 0;
                     if($row[5]==3){  //dty_OriginatingDBID
-                        if($row[6]==1079) {$id_orig = 6255;}  //dty_IDInOriginatingDB
-                        elseif($row[6]==1080) {$id_orig = 6256;}
-                        elseif($row[6]==1087) {$id_orig = 6257;}
-                        elseif($row[6]==1088) {$id_orig = 6258;}
-
-                        if($id_orig>0){
-                            $values['trm_OriginatingDBID'] = 2;
-                            $values['trm_IDInOriginatingDB'] = $id_orig;
+                        
+                        switch($row[6]){
+                            case 1079: $id_orig = 6255; break;
+                            case 1080: $id_orig = 6256; break;
+                            case 1087: $id_orig = 6257; break;
+                            case 1088: $id_orig = 6258; break;
+                            default;
                         }
+                    }
+                    if($id_orig>0){
+                        $values['trm_OriginatingDBID'] = 2;
+                        $values['trm_IDInOriginatingDB'] = $id_orig;
                     }
 
                     //add new vocabulary
