@@ -677,24 +677,8 @@ function exclusion_list(){
     $fname_ = dirname(__FILE__)."/../../../databases_not_to_purge.txt";
     //$fname_ = '/var/www/html/HEURIST/databases_not_to_purge.txt';
     $fname = realpath($fname_);
-    if($fname!==false && file_exists($fname)){
-        //ini_set('auto_detect_line_endings', 'true');
-        $handle = @fopen($fname, "r");
-        while (!feof($handle)) {
-            $line = trim(fgets($handle, 100));
-            //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
-            if(strpos($line,'#')!==false){
-                $line = trim(strstr($line,'#',true));
-                if($line=='') {continue;}
-            }
-            $res[] = $line;
-        }
-        fclose($handle);
-        if($arg_no_action){
-            print '<br>Exclusion list:<br>';
-            print implode('<br>', $res).'<br><br>';
-        }
-    }else{
+    if($fname==false || !file_exists($fname)){
+        
         $sMsg = 'The file with purge exclustion list (databases_not_to_purge.txt) '
             .'was not found and please create it. '.($fname?$fname:$fname_);
         if($arg_no_action){
@@ -703,6 +687,26 @@ function exclusion_list(){
         sendEmail(HEURIST_MAIL_TO_ADMIN, 'Purge exclustion list not found', $sMsg);
         return false;
     }
+    
+    //ini_set('auto_detect_line_endings', 'true');
+    $handle = @fopen($fname, "r");
+    while (!feof($handle)) {
+        $line = trim(fgets($handle, 100));
+        //if($line=='' || substr($line,0,1)=='#') {continue;} //remark
+        if(strpos($line,'#')!==false){
+            $line = trim(strstr($line,'#',true));
+        }
+        if($line=='') {continue;}
+        
+        $res[] = $line;
+    }
+    fclose($handle);
+    if($arg_no_action){
+        print '<br>Exclusion list:<br>';
+        print implode('<br>', $res).'<br><br>';
+    }
+    
+    
     return $res;
 }
 

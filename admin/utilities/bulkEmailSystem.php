@@ -411,46 +411,44 @@ class SystemEmailExt {
 
 		  		$date_obj = new DateTime($row[0]);
 		  		$date = $date_obj->format("Y-m-d");
+                $this->records[$db] = array($count, $date);// save results
+                
+                continue;
+		  	} 
 
-		  	} else {
+		  	// Get newest edit to definitions
+		  	$query = "SELECT max(newest)
+					  FROM (
+					   SELECT max(dty_Modified) AS newest FROM $db.defDetailTypes
+					   UNION ALL
+					   SELECT max(dtg_Modified) AS newest FROM $db.defDetailTypeGroups
+					   UNION ALL
+					   SELECT max(rst_Modified) AS newest FROM $db.defRecStructure
+					   UNION ALL
+					   SELECT max(rty_Modified) AS newest FROM $db.defRecTypes
+					   UNION ALL
+					   SELECT max(rtg_Modified) AS newest FROM $db.defRecTypeGroups
+					   UNION ALL
+					   SELECT max(trm_Modified) AS newest FROM $db.defTerms
+					   UNION ALL
+					   SELECT max(vcg_Modified) AS newest FROM $db.defVocabularyGroups
+					  ) as maximum";
 
-		  		$res->close();
+			$res = $mysqli->query($query);
 
-		  		// Get newest edit to definitions
-		  		$query = "SELECT max(newest)
-						  FROM (
-						   SELECT max(dty_Modified) AS newest FROM $db.defDetailTypes
-						   UNION ALL
-						   SELECT max(dtg_Modified) AS newest FROM $db.defDetailTypeGroups
-						   UNION ALL
-						   SELECT max(rst_Modified) AS newest FROM $db.defRecStructure
-						   UNION ALL
-						   SELECT max(rty_Modified) AS newest FROM $db.defRecTypes
-						   UNION ALL
-						   SELECT max(rtg_Modified) AS newest FROM $db.defRecTypeGroups
-						   UNION ALL
-						   SELECT max(trm_Modified) AS newest FROM $db.defTerms
-						   UNION ALL
-						   SELECT max(vcg_Modified) AS newest FROM $db.defVocabularyGroups
-						  ) as maximum";
+			if (!$res) {
+				$this->set_error('Query Error: Unable to retrieve a last modified record from '
+                            .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
+				return -2;
+			}
 
-				$res = $mysqli->query($query);
-
-				if (!$res) {
-
-					$this->set_error('Query Error: Unable to retrieve a last modified record from '
-                                .htmlspecialchars($db).' database<br>Error => ' .htmlspecialchars($mysqli->error));
-					return -2;
-				}
-
-				if ($row = $res->fetch_row()) {
-					$date_obj = new DateTime($row[0]);
-					$date = $date_obj->format("Y-m-d");
-				}
-		  	}
+			if ($row = $res->fetch_row()) {
+				$date_obj = new DateTime($row[0]);
+				$date = $date_obj->format("Y-m-d");
+			}
 
 		  	$this->records[$db] = array($count, $date);// save results
-		}
+		}//foreach ($dbs as $db)
 
 		return 0;
 	}
@@ -869,46 +867,46 @@ class SystemEmailExt {
 			return -1;
 		}
 
-		if (isset($this->receipt) && !empty($this->receipt)) {
+		if (!isset($this->receipt) || empty($this->receipt)) {
+            return 0;   
+        }
 
-			// Save receipt to note record
-			$data = recordAdd($system, array("RecTypeID"=>$note_rectype_id), true);
-			if (!empty($data["data"]) && is_numeric($data["data"])) {
+		// Save receipt to note record
+		$data = recordAdd($system, array("RecTypeID"=>$note_rectype_id), true);
+		if (!empty($data["data"]) && is_numeric($data["data"])) {
 
-				$rec_id = $data["data"];
+			$rec_id = $data["data"];
 
-                $title = isset($this->email_subject) ? $this->email_subject :'Heurist System Email Receipt';
-                $title .= '  ['.$this->emails_sent_count.']  ';
-                if(isset($this->error_msg) && $this->error_msg!=''){
-                    $title = 'ERROR. '.$title;
-                }
+            $title = isset($this->email_subject) ? $this->email_subject :'Heurist System Email Receipt';
+            $title .= '  ['.$this->emails_sent_count.']  ';
+            if(isset($this->error_msg) && $this->error_msg!=''){
+                $title = 'ERROR. '.$title;
+            }
 
-				$details = array($title_detailtype_id=>$title,
-                                 $date_detailtype_id=>"now",
-                                 $summary_detailtype_id=>$this->get_receipt(), //content
-                                 "rec_ID"=>$rec_id);
+			$details = array($title_detailtype_id=>$title,
+                             $date_detailtype_id=>"now",
+                             $summary_detailtype_id=>$this->get_receipt(), //content
+                             "rec_ID"=>$rec_id);
 
-				// Proceed with saving
-				$rtn = recordSave($system, array("ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details));
+			// Proceed with saving
+			$rtn = recordSave($system, array("ID"=>$rec_id, "RecTypeID"=>$note_rectype_id, "details"=>$details));
 
-				if ($rtn["status"] === HEURIST_OK && $rtn["data"] == $rec_id) {
+			if ($rtn["status"] === HEURIST_OK && $rtn["data"] == $rec_id) {
 
-					return $rtn;
-				} else {
-
-					$this->set_error("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), TRUE));
-					return -1;
-				}
+				return $rtn;
 			} else {
 
-				$this->set_error("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
-				$system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => " .$data["message"]);
+				$this->set_error("An error has occurred with adding the new Notes record for the receipt, Error => " . print_r($system->getError(), TRUE));
 				return -1;
 			}
+		} else {
+
+			$this->set_error("Unable to create Note record for receipt, Error => " . htmlspecialchars($data["message"]));
+			$system->addError(HEURIST_ERROR, "Bulk Email System: Unable to create Note record for receipt, Error => " .$data["message"]);
+			return -1;
 		}
 
-		return 0;
-	}
+	}//export_receipt
 }
 
 /*

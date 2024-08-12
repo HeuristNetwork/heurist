@@ -264,28 +264,26 @@ function getTermsWithIssues($mysqli){
 
             $prev_lbl = removeLastNum($trm['trm_Label']);
             $prev_id = $trm_ID;
-        }else{
-
-            $lbl = removeLastNum($trm['trm_Label']);
-            if($lbl==$prev_lbl){
-                if($prev_id>0){
-                    $dupes[] = $prev_id; //$TL[$prev_id]['trm_Label'];
-                    $prev_id = 0;
-                }
-                $dupes[] = $trm_ID;
-            }else{
-                $prev_lbl = $lbl;
-                $prev_id = $trm_ID;
-            }
+            continue;
         }
 
-    }
+        $lbl = removeLastNum($trm['trm_Label']);
+        if($lbl!=$prev_lbl){
+            $prev_lbl = $lbl;
+            $prev_id = $trm_ID;
+            continue;            
+            
+        }
+        
+        if($prev_id>0){
+            $dupes[] = $prev_id; //$TL[$prev_id]['trm_Label'];
+            $prev_id = 0;
+        }
+        $dupes[] = $trm_ID;
+    }//foreach
     if(count($dupes)>0 && $parent_id>0){
         $all_dupes[$parent_id] = $dupes;
     }
-
-
-
 
     return array(
         'trm_missed_parents'=>$missed_parents,
