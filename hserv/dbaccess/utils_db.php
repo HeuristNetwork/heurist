@@ -1892,6 +1892,38 @@
         }
         return $res;
     }
+    
+    function alterTable($system, $table_name, $field_name, $query, $modify_if_exists = false){
+    
+        $mysqli = $system->get_mysqli();
+        
+        $column_exists = hasColumn($mysqli, $table_name, $field_name);
+        
+        $rep1 = 'add';
+        $rep2 = 'added';
+        
+        if($column_exists && $modify_if_exists){
+            $query = str_replace('ADD COLUMN','CHANGE COLUMN',$query);
+            $column_exists = false;
+            $rep1 = 'alter';
+            $rep2 = 'altered';
+        }
+        
+        if(!$column_exists){ //column not defined
+            $res = $mysqli->query($query);
+            if(!$res){
+                $msg = "Can not $rep1 field $field_name to $table_name";
+                $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
+                throw new Exception($msg);
+            }
+            $res = array(true, "$table_name: $field_name $rep2");
+        }else{
+            $res = array(false, "$table_name: $field_name already exists");
+        }
+    
+        return $res;
+    }
+    
 
     /**
     * Returns true if table exists in database

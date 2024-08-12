@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS `usrRecPermissions` (
 `rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
 PRIMARY KEY  (rcp_ID)) ENGINE=InnoDB COMMENT='Permissions for groups to records'
 EXP;
-            list($is_success,$report[]) = createTable($system, 'usrRecPermissions',$query);
-            if(!$is_success){
+            list($is_created,$report[]) = createTable($system, 'usrRecPermissions',$query);
+            if(!$is_created){
                 $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
                 $res = $mysqli->query($query);
             }
@@ -53,7 +53,7 @@ CREATE TABLE sysDashboard (
   PRIMARY KEY  (dsh_ID)
 ) ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
 EXP;
-            list($is_success,$report[]) = createTable($system, 'sysDashboard',$query);
+            list($is_created,$report[]) = createTable($system, 'sysDashboard',$query);
             
             $query = <<<EXP
 CREATE TABLE usrWorkingSubsets (
@@ -65,7 +65,7 @@ CREATE TABLE usrWorkingSubsets (
   KEY wss_OwnerUGrpID (wss_OwnerUGrpID)
 ) ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
 EXP;
-            list($is_success,$report[]) = createTable($system, 'usrWorkingSubsets',$query);
+            list($is_created,$report[]) = createTable($system, 'usrWorkingSubsets',$query);
 
             $query = <<<EXP
 CREATE TABLE defVocabularyGroups (
@@ -79,9 +79,9 @@ CREATE TABLE defVocabularyGroups (
   UNIQUE KEY vcg_Name (vcg_Name)
 ) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
 EXP;
-            list($is_success,$report[]) = createTable($system, 'defVocabularyGroups',$query);
+            list($is_created,$report[]) = createTable($system, 'defVocabularyGroups',$query);
             
-            if($is_success){
+            if($is_created){
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
@@ -93,228 +93,92 @@ EXP;
                 $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
             }
         
+
+            $query = <<<EXP
+CREATE TABLE defTermsLinks (
+  trl_ID mediumint unsigned NOT NULL auto_increment COMMENT 'Primary key for vocabulary-terms hierarchy',
+  trl_ParentID smallint unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
+  trl_TermID smallint unsigned NOT NULL COMMENT 'The ID of the child term',
+  PRIMARY KEY  (trl_ID),
+  UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
+) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms';
+EXP;
+            list($needFillTermsLinks, $report[]) = createTable($system, 'defTermsLinks',$query);
+        
+        //--------------------------- FIELDS -----------------------------------
+
+            list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_TreatAsPlaceRefForMapping', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'");
+
+            list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_ExternalReferenceLookups', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'");
+
+            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_NavigationTree', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'", true);
+            
+            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Preferences', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'", true);
+
+            list($is_added,$report[]) = alterTable($system, 'usrBookmarks', 'bkm_Notes', "ALTER TABLE `usrBookmarks` ADD COLUMN `bkm_Notes` mediumtext COMMENT 'Personal notes'");
+
+            list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_DefaultValue', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'", true);
+
+            list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_SemanticReferenceURL', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_SemanticReferenceURL` VARCHAR(250) default NULL COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' AFTER `rst_LocallyModified`");
+
+            list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_TermsAsButtons', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_TermsAsButtons` TinyInt DEFAULT '0' COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' AFTER `rst_SemanticReferenceURL`");
+
+            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_SemanticReferenceURL', "ALTER TABLE `defTerms` ADD COLUMN `trm_SemanticReferenceURL` VARCHAR(250) default NULL COMMENT 'The URI to a semantic definition or web page describing the term' AFTER `trm_Code`");
+
+            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_Label', "ALTER TABLE `defTerms` ADD COLUMN `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank'", true);
+
+            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);
+
+            list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_VocabularyGroupID', "ALTER TABLE `defTerms` ADD COLUMN `trm_VocabularyGroupID` smallint unsigned NULL default '0' COMMENT ' group to which this term belongs, if a top level term (vocabulary)");
+            
+            if($is_added){
+                
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
+
+                //Semantic web
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=2 where trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (5668,5520,5805,5792,6091,5445,5842,6177,6214)');
+                //Place
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=3 where (trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (509,506)) OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5039');
+                //People,  events, biography
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=4 where (trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (5389,500,501,507,496,497,5432,505,511,513))'
+                .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5065)'
+                .' OR (trm_OriginatingDBID=9 AND trm_IDInOriginatingDB=3297)'
+                .' OR (trm_OriginatingDBID=1161 AND trm_IDInOriginatingDB=5419)');
+                //Bibliographic, copyright
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=5 where (trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB=503)'
+                .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5024,5021,5012,5099))'
+                .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB=5986)');
+                //Spatial
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=6 where (trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (512,5362,5440,510,546,551))'
+                .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5087,5080,5091,5073,5080,5028,5083,5077))'
+                .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB IN (3659,3339))');
+                //Categorisation and flags
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=7 where (trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (508,498,530))'
+                .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5030,3440))'
+                .' OR (trm_OriginatingDBID=99 AND trm_IDInOriginatingDB=5445)'
+                .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB=3339)'
+                .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB IN (6002,5993))');
+                //Internal
+                $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=8 where trm_OriginatingDBID=2 AND '
+                .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
+
+
+                $report[] = 'defTerms: trm_VocabularyGroupID filled';                
+            }
+
         
         }catch(Exception $exception){
             return false;
         }
 
 
-        //--------------------------- FIELDS -----------------------------------
-
-        if(!hasColumn($mysqli, 'sysIdentification', 'sys_TreatAsPlaceRefForMapping')){ //column not defined
-            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
-            $res = $mysqli->query($query);
-            $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
-        }else{
-            $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping already exists';
-        }
-
-        if(!hasColumn($mysqli, 'sysIdentification', 'sys_ExternalReferenceLookups')){ //column not defined
-            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
-            $res = $mysqli->query($query);
-            $report[] = 'sysIdentification: sys_ExternalReferenceLookups added';
-        }else{
-            $report[] = 'sysIdentification: sys_ExternalReferenceLookups already exists';
-        }
-
-
-        //verify that required column exists in sysUGrps
-        $is_exists = hasColumn($mysqli, 'sysUGrps', 'ugr_NavigationTree');
-
-        //alter table
-        $query = "ALTER TABLE `sysUGrps` ".($is_exists?'MODIFY':'ADD')
-            ." `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
-
-        $res = $mysqli->query($query);
-        if(!$res){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
-            return false;
-        }
-        $report[] = 'sysUGrps: ugr_NavigationTree '.($is_exists?'modified':'added');
-
-        //----------------------------
-        $is_exists = hasColumn($mysqli, 'sysUGrps', 'ugr_Preferences');
-
-        $query = "ALTER TABLE `sysUGrps` ".($is_exists?'MODIFY':'ADD')
-                ." `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
-        $res = $mysqli->query($query);
-        if(!$res){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
-            return false;
-        }
-        $report[] = 'sysUGrps: ugr_Preferences '.($is_exists?'modified':'added');
-
-
-        //----------------------------
-        if(hasColumn($mysqli, 'usrBookmarks', 'bkm_Notes')){
-            $report[] = 'usrBookmarks: bkm_Notes already exists';
-        }else{
-            //alter table
-            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` mediumtext COMMENT 'Personal notes'";
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
-                return false;
-            }
-            $report[] = 'usrBookmarks: bkm_Notes added';
-        }
-
-        //----------------------------
-        $is_exists = hasColumn($mysqli, 'defRecStructure', 'rst_DefaultValue');
-
-        $query = "ALTER TABLE `defRecStructure` ".($is_exists?'MODIFY':'ADD')
-                ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
-        $res = $mysqli->query($query);
-        if(!$res){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_DefaultValue', $mysqli->error);
-            return false;
-        }
-        $report[] = 'defRecStructure: rst_DefaultValue '.($is_exists?'modified':'added');
-
-
-        if(hasColumn($mysqli, 'defRecStructure', 'rst_SemanticReferenceURL')){
-            $report[] = 'defRecStructure: rst_SemanticReferenceURL already exists';
-        }else{
-            //alter table
-            $query = "ALTER TABLE `defRecStructure` ADD `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
-            ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
-            .' AFTER `rst_LocallyModified`';
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defRecStructure: rst_SemanticReferenceURL added';
-        }
-
-        if(hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
-            $report[] = 'defRecStructure: rst_TermsAsButtons already exists';
-        }else{
-            //alter table
-            $query = "ALTER TABLE `defRecStructure` ADD `rst_TermsAsButtons` TinyInt( 1 ) DEFAULT '0' "
-            ." COMMENT 'If 1, term list fields are represented as buttons (if single value) or checkboxes (if repeat values)' "
-            .' AFTER `rst_SemanticReferenceURL`';
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_TermsAsButtons', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defRecStructure: rst_TermsAsButtons added';
-        }
-
-        //----------------------------
-
-        if(hasColumn($mysqli, 'defTerms', 'trm_SemanticReferenceURL')){
-            $report[] = 'defTerms: trm_SemanticReferenceURL already exists';
-        }else{
-            //alter table
-            $query = "ALTER TABLE `defTerms` ADD `trm_SemanticReferenceURL` VARCHAR( 250 ) NULL "
-            ." COMMENT 'The URI to a semantic definition or web page describing the term' "
-            .' AFTER `trm_Code`';
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_SemanticReferenceURL', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defTerms: trm_SemanticReferenceURL added';
-        }
-
-        //----------------------------
-
-        if(hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
-            $report[] = 'defTerms: trm_Label already varchar(250)';
-        }else{
-
-            $query = "ALTER TABLE `defTerms` "
-            ."CHANGE COLUMN `trm_Label` `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank' ,"
-            ."CHANGE COLUMN `trm_NameInOriginatingDB` `trm_NameInOriginatingDB` VARCHAR(250) NULL DEFAULT NULL COMMENT 'Name (label) for this term in originating database'" ;
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to change trm_Label and trm_NameInOriginatingDB', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defTerms: trm_Label and trm_NameInOriginatingDB set to varchar(250)';
-        }
-
-        //----------------------------
-
-        if(hasColumn($mysqli, 'defTerms', 'trm_VocabularyGroupID')){
-            $report[] = 'defTerms: trm_VocabularyGroupID already exists';
-        }else{
-
-            $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
-                    return false;
-            }
-            $report[] = 'defTerms: trm_VocabularyGroupID added';
-
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
-
-            //Semantic web
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=2 where trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (5668,5520,5805,5792,6091,5445,5842,6177,6214)');
-            //Place
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=3 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (509,506)) OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5039');
-            //People,  events, biography
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=4 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (5389,500,501,507,496,497,5432,505,511,513))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5065)'
-            .' OR (trm_OriginatingDBID=9 AND trm_IDInOriginatingDB=3297)'
-            .' OR (trm_OriginatingDBID=1161 AND trm_IDInOriginatingDB=5419)');
-            //Bibliographic, copyright
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=5 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB=503)'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5024,5021,5012,5099))'
-            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB=5986)');
-            //Spatial
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=6 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (512,5362,5440,510,546,551))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5087,5080,5091,5073,5080,5028,5083,5077))'
-            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB IN (3659,3339))');
-            //Categorisation and flags
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=7 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (508,498,530))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5030,3440))'
-            .' OR (trm_OriginatingDBID=99 AND trm_IDInOriginatingDB=5445)'
-            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB=3339)'
-            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB IN (6002,5993))');
-            //Internal
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=8 where trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
-
-
-            $report[] = 'defTerms: trm_VocabularyGroupID filled';
-        }
-
         //-----------------------------
-        $needCreateTermsLinks = !hasTable($mysqli, 'defTermsLinks');
-        if($needCreateTermsLinks){
-
-$query = "CREATE TABLE defTermsLinks (
-  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
-  trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
-  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
-  PRIMARY KEY  (trl_ID),
-  UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
-) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms'";
-
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create defTermsLinks', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defTermsLinks created';
-
-        }else{
-            $report[] = 'defTermsLinks already exists';
-        }
-
-
         $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
         $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
         begin
@@ -343,7 +207,7 @@ $query = "CREATE TABLE defTermsLinks (
 
         $report[] = 'defTerms triggers updated';
 
-        if($needCreateTermsLinks){
+        if($needFillTermsLinks){
             // fill values
             $res = fillTermsLinks( $mysqli );
 
