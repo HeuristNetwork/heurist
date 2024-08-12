@@ -285,7 +285,7 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 //
 // to reduce cognitive complexity 
 //
-function createTermsLink( $mysqli, $row ){
+function createTermsLink( $mysqli, $row, $db_regid ){
  
     $domain = ($row[4]=='enum')?'enum':'relation';
     $name = $row[0].' - selection';
@@ -307,7 +307,7 @@ function createTermsLink( $mysqli, $row ){
     $values = array(
                 'trm_Label'=>$name,
                 'trm_Domain'=>$domain,
-                'trm_VocabularyGroupID'=>$vocab_group);
+                'trm_VocabularyGroupID'=>7);
 
     $id_orig = 0;
     if($row[5]==3){  //dty_OriginatingDBID
@@ -373,7 +373,6 @@ function fillTermsLinks( $mysqli ){
             $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree="" WHERE dty_Type="relationtype"';//for dty_ID=6
             $mysqli->query($query);
 
-            $vocab_group = 7;//
             $is_first = true;
 
             //converts custom-selected term tree to vocab with references
@@ -392,7 +391,7 @@ function fillTermsLinks( $mysqli ){
                     $is_first = false;
                 }
                 
-                $rep = createTermsLink($mysqli, $row);
+                $rep = createTermsLink($mysqli, $row, $db_regid);
                 if($rep!=null) {$report[] = $rep;}
             }//while
 

@@ -585,10 +585,11 @@ class System {
 
         foreach ($folders as $folder_name=>$folder){
 
-            if($is_for_backup && !@$folder[3]){ continue; }
+            if(($is_for_backup && !@$folder[3])
+                ||
+               ($is_for_backup==2 && $folder_name=='documentation_and_templates')) { continue; }
 
-            if($is_for_backup==2 && $folder_name=='documentation_and_templates') {continue;}
-
+              
             if($is_for_backup==2){
                 $folder_name = realpath($dbfolder.$folder_name);
             }else{
@@ -599,7 +600,6 @@ class System {
                 $folder_name = str_replace('\\', '/', $folder_name);
                 array_push($system_folders, $folder_name.'/');
             }
-            
         }//for
 
         if($is_for_backup==2){ //delete backup
@@ -610,11 +610,13 @@ class System {
         }
 
         //special case - these folders can be defined in sysIdentification and be outisde database folder
-        if(!$is_for_backup){
-            if(defined('HEURIST_XSL_TEMPLATES_DIR')) {array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);}
-            if(defined('HEURIST_HTML_DIR')) {array_push($system_folders, HEURIST_HTML_DIR);}
-            if(defined('HEURIST_HML_DIR')) {array_push($system_folders, HEURIST_HML_DIR);}
+        if($is_for_backup){
+            return $system_folders;
         }
+        
+        if(defined('HEURIST_XSL_TEMPLATES_DIR')) {array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);}
+        if(defined('HEURIST_HTML_DIR')) {array_push($system_folders, HEURIST_HTML_DIR);}
+        if(defined('HEURIST_HML_DIR')) {array_push($system_folders, HEURIST_HML_DIR);}
 
         return $system_folders;
     }
@@ -643,6 +645,7 @@ class System {
         return $dbfolder;
     }
 
+    
     //
     // $dbname - shortname (without prefix)
     //
@@ -710,26 +713,24 @@ class System {
         $warnings = array();
 
         foreach ($folders as $folder_name=>$folder){
+            
+            if($folder[0]=='' || $folder[0]==null) { continue; }
 
-                if($folder[0]=='') {continue;}
+            $allowWebAccess = (@$folder[2]===true);
 
-                $allowWebAccess = (@$folder[2]===true);
+            $dir = HEURIST_FILESTORE_DIR.$folder_name.'/';
 
-                $dir = HEURIST_FILESTORE_DIR.$folder_name.'/';
-
-                $warn = folderCreate2($dir, $folder[1], $allowWebAccess);
-                if($warn!=''){ //can't creat or not writeable
-                    $warnings[] = $warn;
-                    continue;
-                }
-                
-                //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
-                if($folder[0]!=null){
-                    define('HEURIST_'.$folder[0].'_DIR', $dir);
-                    if($allowWebAccess){
-                        define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
-                    }
-                }
+            $warn = folderCreate2($dir, $folder[1], $allowWebAccess);
+            if($warn!=''){ //can't creat or not writeable
+                $warnings[] = $warn;
+                continue;
+            }
+            
+            //it defines constants HEURIST_[FOLDER]_DIR and HEURIST_[FOLDER]_URL
+            define('HEURIST_'.$folder[0].'_DIR', $dir);
+            if($allowWebAccess){
+                define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
+            }
         }//for
         
         if(count($warnings)>0){
@@ -978,20 +979,12 @@ class System {
             return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
         }
     }
-
-    /**
-    * keep error message (for further use with getError)
-    */
-    public function addError($status, $message='', $sysmsg=null, $title=null) {
-
-        if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
-            $sysmsg = $this->get_user_id();
-        }
-
-        if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND &&
-        $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
-
-
+    
+    //
+    //
+    //
+    private function _treatSeriousError($status, $message, $sysmsg, $title) {
+        
             $now = new DateTime('now', new DateTimeZone('UTC'));
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
@@ -1035,9 +1028,27 @@ class System {
             if(!$mysql_gone_away_error){
                 $message = "Heurist was unable to process this request.<br><strong>$message</strong><br>";
             }
+            
+            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);    
+    }
+    
+
+    /**
+    * keep error message (for further use with getError)
+    */
+    public function addError($status, $message='', $sysmsg=null, $title=null) {
+
+        if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
+            $sysmsg = $this->get_user_id();
         }
 
-        $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
+        if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND &&
+           $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
+            $this->_treatSeriousError($status, $message, $sysmsg, $title);
+        }else{
+            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);    
+        }
+        
         return $this->errors;
     }
 
@@ -1064,30 +1075,33 @@ class System {
     //
     public function getTotalRecordsAndDashboard(){
 
+        if( !$this->mysqli ){ return array(0,0,0); }
+
+
         $db_total_records = 0;
         $db_has_active_dashboard = 0;
         $db_workset_count = 0;
+f
+        $db_total_records = mysql__select_value($this->mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
+        $db_total_records = ($db_total_records>0)?$db_total_records:0;
 
-        if( $this->mysqli ){
-             $db_total_records = mysql__select_value($this->mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
-             $db_total_records = ($db_total_records>0)?$db_total_records:0;
+        if($this->has_access())
+        {
+            $query = 'select count(*) from sysDashboard where dsh_Enabled="y"';
+            if($db_total_records<1){
+                $query = $query.'AND dsh_ShowIfNoRecords="y"';
+            }
+            $db_has_active_dashboard = mysql__select_value($this->mysqli, $query);
+            $db_has_active_dashboard = ($db_has_active_dashboard>0)?$db_has_active_dashboard:0;
 
-             if($this->has_access()){
-                 $query = 'select count(*) from sysDashboard where dsh_Enabled="y"';
-                 if($db_total_records<1){
-                      $query = $query.'AND dsh_ShowIfNoRecords="y"';
-                 }
-                 $db_has_active_dashboard = mysql__select_value($this->mysqli, $query);
-                 $db_has_active_dashboard = ($db_has_active_dashboard>0)?$db_has_active_dashboard:0;
-
-                 $curr_user_id = $this->get_user_id();
-                 if($curr_user_id>0){
-                    $query = 'select count(*) from usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id;
-                    $db_workset_count = mysql__select_value($this->mysqli, $query);
-                    $db_workset_count = ($db_workset_count>0)?$db_workset_count:0;
-                 }
-             }
+            $curr_user_id = $this->get_user_id();
+            if($curr_user_id>0){
+                $query = 'select count(*) from usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id;
+                $db_workset_count = mysql__select_value($this->mysqli, $query);
+                $db_workset_count = ($db_workset_count>0)?$db_workset_count:0;
+            }
         }
+
         return array($db_total_records, $db_has_active_dashboard, $db_workset_count);
     }
 
@@ -1134,28 +1148,44 @@ class System {
 
         try{
 
-        //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
-        $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
-        if(!$host_logo || !file_exists($host_logo)){
-            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
-        }
-        $host_url = null;
-        if($host_logo!==false &&  file_exists($host_logo)){
-            $host_logo = HEURIST_BASE_URL.'?logo=host';
-            $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
-            if($host_url!==false && file_exists($host_url)){
-                $host_url = file_get_contents($host_url);
-            }else{
-                $host_url = null;
+            //host organization logo and url (specified in root installation folder next to heuristConfigIni.php)
+            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
+            if(!$host_logo || !file_exists($host_logo)){
+                $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.png");
             }
-        }else{
-            $host_logo = null;
-        }
+            $host_url = null;
+            if($host_logo!==false &&  file_exists($host_logo)){
+                $host_logo = HEURIST_BASE_URL.'?logo=host';
+                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
+                if($host_url!==false && file_exists($host_url)){
+                    $host_url = file_get_contents($host_url);
+                }else{
+                    $host_url = null;
+                }
+            }else{
+                $host_logo = null;
+            }
+            
+            if(!$this->mysqli){
+                return array(
+                    "currentUser"=>null,
+                    "sysinfo"=>array(
+                        "help"=>HEURIST_HELP,
+                        "version"=>HEURIST_VERSION,
+                        "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
+                        "baseURL"=>HEURIST_BASE_URL,
+                        "referenceServerURL"=>HEURIST_INDEX_BASE_URL),
+                        'host_logo'=>$host_logo,
+                        'host_url'=>$host_url,
+                        'saml_service_provides'=>$saml_service_provides,
+                        'hideStandardLogin' => $hideStandardLogin,
+                        'common_languages'=>$common_languages,
+                        'use_redirect' => @$useRewriteRulesForRecordLink
+                );
+            }
 
-        //current user reset - reload actual info from database
-        $this->login_verify( true, $is_guest_allowed );
-
-        if($this->mysqli){
+            //current user reset - reload actual info from database
+            $this->login_verify( true, $is_guest_allowed );
 
             $dbowner = user_getDbOwner($this->mysqli);//info about user #2
 
@@ -1244,27 +1274,6 @@ class System {
             }
 
             recreateRecLinks( $this, false );//see utils_db
-
-        }else{
-
-            $res = array(
-                "currentUser"=>null,
-                "sysinfo"=>array(
-                    "help"=>HEURIST_HELP,
-                    "version"=>HEURIST_VERSION,
-                    "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                    "baseURL"=>HEURIST_BASE_URL,
-                    "referenceServerURL"=>HEURIST_INDEX_BASE_URL),
-                    'host_logo'=>$host_logo,
-                    'host_url'=>$host_url,
-                    'saml_service_provides'=>$saml_service_provides,
-                    'hideStandardLogin' => $hideStandardLogin,
-                    'common_languages'=>$common_languages,
-                    'use_redirect' => @$useRewriteRulesForRecordLink
-            );
-
-        }
-
 
         }catch( Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
