@@ -283,6 +283,76 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 }
 
 //
+// to reduce cognitive complexity 
+//
+function createTermsLink( $mysqli, $row ){
+ 
+    $domain = ($row[4]=='enum')?'enum':'relation';
+    $name = $row[0].' - selection';
+
+    $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
+    if($cnt>0){
+       $name = $name . '  ' . $cnt;
+    }
+
+    $report[] = htmlspecialchars($row[3].'  '.$name);
+
+    //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+
+    $terms = json_decode(@$row[1], true);
+    if(!$terms){
+        return 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);
+    }
+
+    $values = array(
+                'trm_Label'=>$name,
+                'trm_Domain'=>$domain,
+                'trm_VocabularyGroupID'=>$vocab_group);
+
+    $id_orig = 0;
+    if($row[5]==3){  //dty_OriginatingDBID
+        
+        switch($row[6]){
+            case 1079: $id_orig = 6255; break;
+            case 1080: $id_orig = 6256; break;
+            case 1087: $id_orig = 6257; break;
+            case 1088: $id_orig = 6258; break;
+            default;
+        }
+    }
+    if($id_orig>0){
+        $values['trm_OriginatingDBID'] = 2;
+        $values['trm_IDInOriginatingDB'] = $id_orig;
+    }
+
+    //add new vocabulary
+    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
+
+    if($db_regid>0 && $id_orig==0){
+        $values = array();
+        $values['trm_ID'] = $vocab_id;
+        $values['trm_OriginatingDBID'] = $db_regid;
+        $values['trm_IDInOriginatingDB'] = $vocab_id;
+        mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
+    }
+
+
+    //parent->term_id
+    $terms_links = _prepare_terms($vocab_id, $terms);
+
+    foreach ($terms_links as $line){
+        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.intval($line[0]).','.intval($line[1]).')');
+    }
+
+    //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree,
+    $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
+                .intval($vocab_id).' WHERE dty_ID='.intval($row[3]);
+    $mysqli->query($query);
+    
+    return null;
+}
+
+//
 //
 //
 function fillTermsLinks( $mysqli ){
@@ -321,70 +391,9 @@ function fillTermsLinks( $mysqli ){
                     $report[] = 'Create vocabularies with references for "custom selections terms"';
                     $is_first = false;
                 }
-
-                $domain = ($row[4]=='enum')?'enum':'relation';
-                $name = $row[0].' - selection';
-
-                $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
-                if($cnt>0){
-                   $name = $name . '  ' . $cnt;
-                }
-
-                $report[] = htmlspecialchars($row[3].'  '.$name);
-
-                //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
-
-                $terms = json_decode(@$row[1], true);
-                if(!$terms){
-                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);
-                    continue;                    
-                }
-
-                    $values = array(
-                                'trm_Label'=>$name,
-                                'trm_Domain'=>$domain,
-                                'trm_VocabularyGroupID'=>$vocab_group);
-
-                    $id_orig = 0;
-                    if($row[5]==3){  //dty_OriginatingDBID
-                        
-                        switch($row[6]){
-                            case 1079: $id_orig = 6255; break;
-                            case 1080: $id_orig = 6256; break;
-                            case 1087: $id_orig = 6257; break;
-                            case 1088: $id_orig = 6258; break;
-                            default;
-                        }
-                    }
-                    if($id_orig>0){
-                        $values['trm_OriginatingDBID'] = 2;
-                        $values['trm_IDInOriginatingDB'] = $id_orig;
-                    }
-
-                    //add new vocabulary
-                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
-
-                    if($db_regid>0 && $id_orig==0){
-                        $values = array();
-                        $values['trm_ID'] = $vocab_id;
-                        $values['trm_OriginatingDBID'] = $db_regid;
-                        $values['trm_IDInOriginatingDB'] = $vocab_id;
-                        mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
-                    }
-
-
-                    //parent->term_id
-                    $terms_links = _prepare_terms($vocab_id, $terms);
-
-                    foreach ($terms_links as $line){
-                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.intval($line[0]).','.intval($line[1]).')');
-                    }
-
-                    //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree,
-                    $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
-                                .intval($vocab_id).' WHERE dty_ID='.intval($row[3]);
-                    $mysqli->query($query);
                 
+                $rep = createTermsLink($mysqli, $row);
+                if($rep!=null) {$report[] = $rep;}
             }//while
 
     return $report;
