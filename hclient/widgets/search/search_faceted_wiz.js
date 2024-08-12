@@ -1229,7 +1229,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 let fields = treedata[0]['children'][2]['children'];
 
                 let idx = 0;
-                while(idx < fields.length)
+                while(idx < fields.length){
                     /*
                     if(fields[idx].type == 'separator'){ // remove separators
                         fields.splice(idx, 1);
