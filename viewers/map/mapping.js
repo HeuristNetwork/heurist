@@ -110,7 +110,7 @@ Thematic mapping
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global L, hMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter */
+/* global L, HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter */
 
 $.widget( "heurist.mapping", {
 
@@ -402,7 +402,7 @@ $.widget( "heurist.mapping", {
         $(this.map_scale._container).css({'margin-left': '20px', 'margin-bottom': '20px'});
         
         //content for legend
-        this.mapManager = new hMapManager(
+        this.mapManager = new HMapManager(
             { container:this.map_legend._container, 
               mapwidget:this.element, 
               is_ui_main:is_ui_main
@@ -500,7 +500,7 @@ $.widget( "heurist.mapping", {
     //that.onInitComplete();
     //
     // triggers options.oninit event handler
-    //    it is invoked on completion of hMapManager initialization - map is inited and all mapdocuments are loaded
+    //    it is invoked on completion of HMapManager initialization - map is inited and all mapdocuments are loaded
     //
     onInitComplete:function(mode_complete){
 
@@ -621,7 +621,7 @@ $.widget( "heurist.mapping", {
         if( record_id==0 || this.basemap_layer_id==record_id) return; //base map is not changed
 
         //continuousWorld
-        this.basemap_layer = hMapLayer2({record_id:record_id, mapwidget:this.element});
+        this.basemap_layer = HMapLayer2({record_id:record_id, mapwidget:this.element});
         this.basemap_layer_id = record_id;
     
         var cnt = 0;

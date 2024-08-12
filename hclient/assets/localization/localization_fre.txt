@@ -249,14 +249,14 @@
 #Utilities#Outils
 #menu-profile-files#Gérer les fichiers
 #menu-profile-preferences#Mes préférences
-#menu-structure-verify#Vérifier l'intégrité
+#menu-database-verify#Vérifier l'intégrité
 #menu-structure-duplicates#Chercher les doublons
 #menu-manage-rectitles#Actualiser titres construits
 #menu-manage-calcfields#Actualiser champs calculés
 #menu-interact-log#Log d'intéraction
 #menu-profile-files-hint#Gérer les fichiers importés et enregistrer des ressources distantes
 #menu-profile-preferences-hint#Menu des préférences d'environnement
-#menu-structure-verify-hint#Recherche des erreurs dans la structure de la base de données (types d'enregistrement non valides, erreurs de champs ou de termes, etc.) et des enregistrements qui ont une structure ou des valeurs incorrectes (liens non valides, données manquantes, etc.).
+#menu-database-verify-hint#Recherche des erreurs dans la structure de la base de données (types d'enregistrement non valides, erreurs de champs ou de termes, etc.) et des enregistrements qui ont une structure ou des valeurs incorrectes (liens non valides, données manquantes, etc.).
 #menu-structure-duplicates-hint#Recherche floue permettant d'identifier des enregistrements potentiellement en double
 #menu-manage-rectitles-hint#Met à jour les titres de l'ensemble des enregistrements
 #menu-interact-log-hint#Télécharger le log d'interaction

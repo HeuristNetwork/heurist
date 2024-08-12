@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global hEditing */
+/* global HEditing */
 
 //
 // METHODS
@@ -1182,7 +1182,9 @@ $.widget( "heurist.manageEntity", {
     },
     
     saveUiPreferences:function(){
-        
+        if(this.usrPreferences){
+            window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
+        }
     },
 
     //
@@ -1696,7 +1698,7 @@ $.widget( "heurist.manageEntity", {
     
     /*
     addEditRecord
-    _initEditForm_step1  - it creates hEditing object and warns about save previous data
+    _initEditForm_step1  - it creates HEditing object and warns about save previous data
     _initEditForm_step2  - init buttons for toolbar for inline or open edit form in popup 
     _initEditForm_step3 -  search for full record data (if required)
     _initEditForm_step4 -  prepare record data and initEditForm and fill summary panel (for RECORDS only) for edit form 
@@ -1706,7 +1708,7 @@ $.widget( "heurist.manageEntity", {
     
     //  -----------------------------------------------------
     //
-    //  it creates hEditing object and warns about save previous data
+    //  it creates HEditing object and warns about save previous data
     //
     _initEditForm_step1: function(recID){
         
@@ -1715,7 +1717,7 @@ $.widget( "heurist.manageEntity", {
         let that = this;
         
         if(!this._editing){
-            this._editing = new hEditing({entity:this.options.entity, container:this.editForm, 
+            this._editing = new HEditing({entity:this.options.entity, container:this.editForm, 
                 className: this.options.editClassName,
                 
                 //callback function to allows save action from edit form object

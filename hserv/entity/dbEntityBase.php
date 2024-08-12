@@ -427,7 +427,7 @@ abstract class DbEntityBase
                 $res = $this->batch_action();
                 if($res &&
                     !(@$this->data['get_translations'] ||
-                    in_array($this->config['entityName'],'defRecTypes','defDetailTypes','defTerms','defRecTypes')))
+                    in_array($this->config['entityName'],array('defRecTypes','defDetailTypes','defTerms','defRecTypes'))))
                 {
                         $this->_cleanDbDefCache();    
                 }

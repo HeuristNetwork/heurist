@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global google, Utm, hMapLayer, stringifyWKT */
+/* global google, Utm, HMapLayer, stringifyWKT */
 
 
 function hMappingDraw(_mapdiv_id, _initial_wkt) {
@@ -1618,7 +1618,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     let recordset = new HRecordSet(response.data);
                     let record = recordset.getFirstRecord();
-                    _current_overlay = new hMapLayer({gmap:gmap, recordset:recordset});
+                    _current_overlay = new HMapLayer({gmap:gmap, recordset:recordset});
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }

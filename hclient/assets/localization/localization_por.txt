@@ -87,14 +87,14 @@
 #Utilities#Utilidades
 #menu-profile-files#Gerir ficheiros
 #menu-profile-preferences#As minhas preferências
-#menu-structure-verify#Verificar a integridade
+#menu-database-verify#Verificar a integridade
 #menu-structure-duplicates#Encontrar registos duplicados
 #menu-manage-rectitles#Reconstruir os títulos de registos
 #menu-manage-calcfields#Reconstruir os campos calculados
 #menu-interact-log#Registo de interação
 #menu-profile-files-hint#Gerir os ficheiros carregados e os recursos de média remoto
 #menu-profile-preferences-hint#Mostrar as preferências relativas a comportamentos relacionados com esta base de dados
-#menu-structure-verify-hint#Encontrar erros na estrutura da base de dados (códigos de registo inválidos, códigos de campo e de termo) e registos com estrutura incorreta ou valores inconsistentes (ponteiro inválido, dados em falta, etc.)
+#menu-database-verify-hint#Encontrar erros na estrutura da base de dados (códigos de registo inválidos, códigos de campo e de termo) e registos com estrutura incorreta ou valores inconsistentes (ponteiro inválido, dados em falta, etc.)
 #menu-structure-duplicates-hint#Pesquisa difusa para identificar registos que podem conter dados duplicados
 #menu-manage-rectitles-hint#Reconstrui os títulos construídos de registos listados nos resultados de pesquisa, para todos os registos
 #menu-interact-log-hint#Descarregue registo de interação

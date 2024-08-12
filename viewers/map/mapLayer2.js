@@ -22,7 +22,7 @@
 /**
 *  Represents the layer on map
 */
-function hMapLayer2( _options ) {
+function HMapLayer2( _options ) {
     const _className = "MapLayer",
     _version   = "0.4";
 

@@ -89,12 +89,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 "searchsysdashboardonorder": function() { this.saveNewOrder() },
                 "searchsysdashboardonclose": function() { this.closeDialog() },
                 "searchsysdashboardoninit": function(){
-                    
+
+        /* this feature is disabled
         //this.show_longer_description = this.searchForm.find('#show_longer_description');
         this.show_on_startup = this.searchForm.find('#show_on_startup');
         this.show_as_ribbon = this.searchForm.find('#show_as_ribbon');
         //this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
-
+        this._on(this.show_on_startup, {change:this.saveUiPreferences});
+        this._on(this.show_as_ribbon, {change:this.saveUiPreferences});
+        //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
+        */
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
             .on('change', function(){
@@ -102,11 +106,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
                 that.saveUiPreferences();
         });*/
-        
-        this._on(this.show_on_startup, {change:this.saveUiPreferences});
-        this._on(this.show_as_ribbon, {change:this.saveUiPreferences});
-        
-        //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
         
         this._setMode(this.options.isViewMode);
         
@@ -303,10 +302,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 //that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
             });
             
+            /* this feature is disabled
             this.show_on_startup.prop('checked', (this.usrPreferences.show_on_startup==1));// || this.usrPreferences.show_as_ribbon==1
             this.show_as_ribbon.prop('checked', this.usrPreferences.show_as_ribbon==1);
-            
             //window.hWin.HEURIST4.util.setDisabled(this.show_on_startup, (this.usrPreferences.show_as_ribbon==1));
+            */
 
         }
         /*
@@ -644,31 +644,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 });
 
             }
-    },
+    }
     
-    
-    //
-    getUiPreferences:function(){
-        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-        return this.usrPreferences;
-    },
-    
-    //    
-    saveUiPreferences:function(){
-       /* 
-       this.usrPreferences = {viewmode: 'thumbs'};
-
-       this.usrPreferences['show_as_ribbon']  = (this.show_as_ribbon.is(':checked'))?1:0;
-       if(this.usrPreferences['show_as_ribbon']){
-            this.usrPreferences['show_on_startup'] = 1;
-            this.show_on_startup.prop('checked',true);    
-       }
-       this.usrPreferences['show_on_startup'] = (this.options.isViewMode? true : this.show_on_startup.is(':checked'))?1:0;
-       window.hWin.HEURIST4.util.setDisabled(this.show_on_startup, this.usrPreferences['show_as_ribbon']);
-       
-       window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);     
-       */
-    },
-    
-
 });

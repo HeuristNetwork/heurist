@@ -645,15 +645,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 //load list of field types
                 this._initStep2_FieldTreeView(rectypeIds, tree_mode);
 
-            }  if(this.step==2 && newstep==3){  //set individual facets
+            }else if(this.step==2 && newstep==3){  //set individual facets
 
                 if(!this._initStep3_FacetsSettings()){
                     return;
                 }
-            }
-
-            //skip step
-            if(this.step==2 && newstep==1){
+            }else if(this.step==2 && newstep==1){
+                //skip step
                 newstep = 0;
             }else if(this.step==4 && newstep==3){
                 //newstep=2;
@@ -1230,11 +1228,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 //treedata[0]['children'][2]['children'] = treedata[0]['children'][2]['children'].filter(field => dtys_to_keep.includes(field.dtyID_local));
                 let fields = treedata[0]['children'][2]['children'];
 
-                for(let idx = 0; idx < fields.length; idx ++){
+                let idx = 0;
+                while(idx < fields.length)
                     /*
                     if(fields[idx].type == 'separator'){ // remove separators
                         fields.splice(idx, 1);
-                        --idx;
                         continue;
                     }
                     */
@@ -1242,14 +1240,15 @@ $.widget( "heurist.search_faceted_wiz", {
                     let dty_id = fields[idx].dtyID_local;
                     if(!dtys_to_keep.includes(dty_id)){
                         fields.splice(idx, 1);
-                        --idx;
                         continue;
                     }
 
-                    let org_name = fields[idx].name;
-                    let fld_name = $Db.dty(dty_id, 'dty_Name');
+                    const org_name = fields[idx].name;
+                    const fld_name = $Db.dty(dty_id, 'dty_Name');
                     fields[idx].name = fld_name;
                     fields[idx].title = fields[idx].title.replace(org_name, fld_name);
+                    
+                    idx++;
                 }
 
                 treedata[0]['children'][2]['children'] = fields;

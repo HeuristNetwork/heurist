@@ -278,7 +278,6 @@ $.widget( "heurist.embedDialog", {
                             return false;   
                         }
                         */
-                        //that.saveUiPreferences();
                         return true;
                     };
             }

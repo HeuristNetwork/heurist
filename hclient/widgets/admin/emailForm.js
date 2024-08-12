@@ -260,7 +260,6 @@ $.widget( "heurist.emailForm", {
             if(!options.beforeClose){
                     options.beforeClose = function(){
                         //show warning on close
-                        //that.saveUiPreferences();
                         return true;
                     };
             }

@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hEditing(_options) {
+function HEditing(_options) {
      const _className = "Editing",
          _version   = "0.4";
 

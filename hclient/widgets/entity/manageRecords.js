@@ -1848,7 +1848,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }    
             case 4:   //scrtachpad
             {
-                //find field in hEditing
+                //find field in HEditing
                 let ele = that._editing.getFieldByName('rec_ScratchPad');
                 ele.editing_input('option',{showclear_button:false, show_header:false});
                 ele[0].parentNode.removeChild(ele[0]);                

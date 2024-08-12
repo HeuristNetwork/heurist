@@ -210,14 +210,14 @@
 #Utilities#Утилиты
 #menu-profile-files#Управление файлами
 #menu-profile-preferences#Настройки профиля
-#menu-structure-verify#Проверка целостности данных
+#menu-database-verify#Проверка целостности данных
 #menu-structure-duplicates#Найти повторения
 #menu-manage-rectitles#Обновить заголовки
 #menu-manage-calcfields#Обновить вычисляемые поля
 #menu-interact-log#Interaction log
 #menu-profile-files-hint#Управление загружеными файлами и удаленными медиа ресурсами
 #menu-profile-preferences-hint#Показать и редактировать настройки профиля
-#menu-structure-verify-hint#Найти ошибки в структуре базы (неправильные типы записей, полей и словарей) и записи с неправильной структурой и ошибными данными (ссылки, пропущеные данные итп)
+#menu-database-verify-hint#Найти ошибки в структуре базы (неправильные типы записей, полей и словарей) и записи с неправильной структурой и ошибными данными (ссылки, пропущеные данные итп)
 #menu-structure-duplicates-hint#Нечеткий поиск для определения записей которые могут содержать идентичные данные
 #menu-manage-rectitles-hint#Обновить заголовки для всех записей
 #menu-interact-log-hint#Download the interaction log

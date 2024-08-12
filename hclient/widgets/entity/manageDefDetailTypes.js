@@ -2070,12 +2070,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return this.usrPreferences;
     },
     
-    //    
-    saveUiPreferences:function(){
-        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
-   
-        return true;
-    },
+    //saveUiPreferences:function() { this._super(); }, 
    
     //
     // show warning

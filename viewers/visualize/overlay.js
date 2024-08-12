@@ -19,6 +19,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+//global variables
+var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
+
 // Functions to handle node and relationship overlays
  
 /**
@@ -38,12 +41,12 @@ function truncateText(text, maxLength) {
 /** Finds all outgoing links from a clicked record */
 function getRecordOverlayData(record) {
 
-    var maxLength = getSetting(setting_textlength);
-    var rectypeLength = 20;
-    var array = [];
+    let maxLength = getSetting(setting_textlength);
+    let rectypeLength = 20;
+    let array = [];
 
     // Header
-    var header = {text: truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
+    let header = {text: truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
                   count: record.count, rtyid: record.id,
                   size: "9px", weight: "bold", height: 15, enter: true, image:record.image}; 
 
@@ -52,16 +55,16 @@ function getRecordOverlayData(record) {
     }
     array.push(header);
 
-    var fontSize = getSetting(setting_fontsize, 12);
-    var xpos = 17;
+    let fontSize = getSetting(setting_fontsize, 12);
+    let xpos = 17;
 
     // Going through the current displayed data
-    var data = settings.getData.call(this, settings.data);
+    let data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0) {
-        var map = {};
-        for(var i = 0; i < data.links.length; i++) {
-            var link = data.links[i];
-            var isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
+        let map = {};
+        for(let i = 0; i < data.links.length; i++) {
+            let link = data.links[i];
+            let isRequired = (settings.isDatabaseStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required') ? 'y' : 'n';
 
             if(link.relation.name == null && link.relation.type == 'resource'){
                 link.relation.name = $Db.rst(link.source.rty_ID, link.relation.id, 'rst_DisplayName'); 
@@ -77,7 +80,7 @@ function getRecordOverlayData(record) {
 
                 if(!settings.isDatabaseStructure){
                     // Relation
-                    var relation = {text: "➜ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), size: "8px", height: 11, subheader:1, xpos:xpos, multiline:true};
+                    let relation = {text: "➜ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), size: "8px", height: 11, subheader:1, xpos:xpos, multiline:true};
                     if(settings.showCounts) {
                         relation.text += ", n=" + link.targetcount;                      
                     }
@@ -98,7 +101,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength) + " ↔ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), 
+                let relation = {text: truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength) + " ↔ " + truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength), 
                         size: "8px", height: fontSize, xpos:xpos, multiline:true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
@@ -112,8 +115,8 @@ function getRecordOverlayData(record) {
         }
 
         // Convert map to array
-        for(key in map) {
-            var details = {text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
+        for(let key in map) {
+            let details = {text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
                     style:"italic", height: fontSize, enter: true, subheader:1};
 
             if(map[key]['require_type'] != null){
@@ -134,7 +137,7 @@ function getRecordOverlayData(record) {
             }
 
             array.push(details); // Heading
-            for(text in map[key]) {
+            for(let text in map[key]) {
                 array.push(map[key][text]);
             }
         }
@@ -145,12 +148,12 @@ function getRecordOverlayData(record) {
 
 /** get info about particular relation */
 function getRelationOverlayData(line) {
-    var array = [];
-    var maxLength = 60;
+    let array = [];
+    let maxLength = 60;
 
     // Header
-    var header1 = truncateText(window.hWin.HEURIST4.util.stripTags(line.source.name), maxLength);
-    var header2 = truncateText(window.hWin.HEURIST4.util.stripTags(line.target.name), maxLength);
+    let header1 = truncateText(window.hWin.HEURIST4.util.stripTags(line.source.name), maxLength);
+    let header2 = truncateText(window.hWin.HEURIST4.util.stripTags(line.target.name), maxLength);
     if(header1.length+header2.length > maxLength) {
         array.push({text: header1 + " >", size: "11px", style: "bold"});
         array.push({text: header2, size: "11px", style: "bold", enter: true});
@@ -158,17 +161,17 @@ function getRelationOverlayData(line) {
         array.push({text: header1+" > "+header2, size: "11px", style: "bold", enter: true}); 
     }
 
-    var data = settings.getData.call(this, settings.data);
+    let data = settings.getData.call(this, settings.data);
     if(data && data.links.length > 0 && $('#expand-links').is(':not(:Checked)')){
 
-        for (var i = 0; i < data.links.length; i++){
-            var link = data.links[i];
+        for (let i = 0; i < data.links.length; i++){
+            let link = data.links[i];
 
-            var count = (!settings.isDatabaseStructure && link.targetcount <= 1) ? '' : ', n=' + link.targetcount;
+            let count = (!settings.isDatabaseStructure && link.targetcount <= 1) ? '' : ', n=' + link.targetcount;
 
             // Show information for all links, with same source and target ids
             if(link.source.id == line.source.id && link.target.id == line.target.id){
-                var relation = {type: link.relation.type, cnt: link.targetcount, 
+                let relation = {type: link.relation.type, cnt: link.targetcount, 
                         text: truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength) + count, size: "10px", dir: "to"};
 
                 array.push(relation);
@@ -187,7 +190,7 @@ function getRelationOverlayData(line) {
 
             // Reverse Links, information about links that are sourced from the target
             if(link.source.id == line.target.id && link.target.id == line.source.id){
-                var relation = {type: link.relation.type, cnt: link.targetcount, 
+                let relation = {type: link.relation.type, cnt: link.targetcount, 
                         text: truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength) + count, size: "10px", dir: "from"};
 
                 array.push(relation);
@@ -209,7 +212,7 @@ function getRelationOverlayData(line) {
         let count = (!settings.isDatabaseStructure && line.targetcount <= 1) ? '' : ', n=' + line.targetcount;
 
         // Show information for this link only
-        var relation = {type: line.relation.type, cnt: line.targetcount, text: 
+        let relation = {type: line.relation.type, cnt: line.targetcount, text: 
                 truncateText(window.hWin.HEURIST4.util.stripTags(line.relation.name), maxLength) + count, size: "10px", subheader:0};
 
         array.push(relation);
@@ -226,28 +229,28 @@ function getRelationOverlayData(line) {
 function addMissingFields(node_info){
 
     // Setup basic info
-    var rty_id = node_info[0].rtyid; //record type id
-    var records = $Db.rst(rty_id); //list of fields
+    let rty_id = node_info[0].rtyid; //record type id
+    let records = $Db.rst(rty_id); //list of fields
 
     if(records == null){
         return node_info;
     }
 
-    var record = records.getRecords();
-    var order = records.getOrder(); //order and number of fields
-    var count = order.length;
+    let record = records.getRecords();
+    let order = records.getOrder(); //order and number of fields
+    let count = order.length;
 
     //additional settings
-    var xpos = 17;
-    var maxLength = getSetting(setting_textlength);
-    var fontSize = getSetting(setting_fontsize, 12);
+    let xpos = 17;
+    let maxLength = getSetting(setting_textlength);
+    let fontSize = getSetting(setting_fontsize, 12);
 
-    var new_fields = [];
+    let new_fields = [];
 
-    for(var i = 0; i < count; i++){
+    for(let i = 0; i < count; i++){
 
-        var field = record[order[i]];
-        var alreadyListed = false;
+        let field = record[order[i]];
+        let alreadyListed = false;
 
         // only record pointer or relamrkers
         if($Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'resource' && $Db.dty(field['rst_DetailTypeID'], 'dty_Type') != 'relmarker'){
@@ -259,7 +262,7 @@ function addMissingFields(node_info){
         }
 
         // check if field is already listed
-        for(var j = 1; j < node_info.length; j++){
+        for(let j = 1; j < node_info.length; j++){
 
             if(node_info[j]['dtyid'] == field['rst_DetailTypeID']){
                 alreadyListed = true;
@@ -285,8 +288,6 @@ function addMissingFields(node_info){
     return node_info;
 }
 
-var drag_link_source_id, drag_link_target_id, drag_link_line, drag_link_timer; 
-
 /**
 * Creates an overlay over the node / on the location that the user has clicked on.
 * 
@@ -306,7 +307,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         info = node_obj;
     }
     
-    var iconSize = 16;
+    const iconSize = 16;
     let is_admin = window.hWin.HAPI4.is_admin();
     
     var overlay = null;

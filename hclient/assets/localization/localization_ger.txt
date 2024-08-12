@@ -87,14 +87,14 @@
 #Utilities#Dienstprogramme
 #menu-profile-files#Dateien verwalten
 #menu-profile-preferences#Einstellungen
-#menu-structure-verify#Integrität überprüfen
+#menu-database-verify#Integrität überprüfen
 #menu-structure-duplicates#Doppelte Datensäzte suchen
 #menu-manage-rectitles#Titel der Datensätze wieder zuweisen
 #menu-manage-calcfields#Rebuild calculation fields
 #menu-interact-log#Interaction log
 #menu-profile-files-hint#Hochgeladene Dateien und externe Medienquellen verwalten.
 #menu-profile-preferences-hint#Einstellungen dieser Datenbank ändern.
-#menu-structure-verify-hint#Fehler in der Datenbankstruktur und individuellen Datensätzen (z.B. falsch formatierte Daten) suchen.
+#menu-database-verify-hint#Fehler in der Datenbankstruktur und individuellen Datensätzen (z.B. falsch formatierte Daten) suchen.
 #menu-structure-duplicates-hint#Ungenaue Suche für Datensätze mit Dopplungen.
 #menu-manage-rectitles-hint#Die rekonstruierten Titel der Datensätze wieder zuweisen.
 #menu-interact-log-hint#Download the interaction log

@@ -824,23 +824,18 @@ $.widget( "heurist.editing_input", {
 
         }else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
 
-            let $input;
-
             $(this.inputs[0]).val(''); // Set first value to empty
 
             if(this.inputs.length > 1){
-
                 for (let i = 1; i < this.inputs.length; i++) {
                     
-                    $input = $(this.inputs[i]);
+                    let $input = $(this.inputs[i]);
 
                     this._off($input, 'change');
 
                     $input.parents('.input-div').remove();
-
-                    that.inputs.splice(i,1);
-                    i--;
                 }
+                that.inputs = array(that.inputs[0]);
             }
 
             $(this.inputs[0]).parents('.input-div').find('input[type="checkbox"]').prop('checked', false);
@@ -1556,7 +1551,7 @@ $.widget( "heurist.editing_input", {
                             //show now
                             if(sel_action == 'codeeditor'){
                                 codeEditor.showEditor();
-                            }if(sel_action == 'wysiwyg'){
+                            }else if(sel_action == 'wysiwyg'){
                                 __showEditor(true); //show tinymce editor
                             }else if(sel_action == 'text'){
                                 $input.show();

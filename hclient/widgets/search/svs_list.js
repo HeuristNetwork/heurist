@@ -2406,7 +2406,7 @@ $.widget( "heurist.svs_list", {
             }
 
             if(null == this.edit_dialog){
-                this.edit_dialog = new hSvsEdit();
+                this.edit_dialog = new HSvsEdit();
             }
             let is_lock = window.hWin.HEURIST4.util.isFunction(this.options.menu_locked);
             if(is_lock) {

@@ -2951,7 +2951,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
             window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         }
-        return true;
     },
     
     //

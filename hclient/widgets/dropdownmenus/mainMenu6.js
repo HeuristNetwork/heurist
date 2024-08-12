@@ -1776,7 +1776,7 @@ $.widget( "heurist.mainMenu6", {
         let that = this;
 
         if(this.edit_svs_dialog==null){
-            this.edit_svs_dialog = new hSvsEdit();    
+            this.edit_svs_dialog = new HSvsEdit();    
         }
         
         if(!(left_position>0)){
