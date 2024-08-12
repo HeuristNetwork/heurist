@@ -257,7 +257,7 @@ if(!$error){
                             }
                         }
 
-                        header('Content-type: application/json;charset=UTF-8');
+                        header(CTYPE_JSON);
                         $response = array('status'=>HEURIST_OK, 'data'=>$external_url);
                         print json_encode($response);
 

@@ -194,8 +194,9 @@ define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud secur
 define('DATE_8601', 'Y-m-d H:i:s');
 define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
 define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
-define('CTYPE_JSON', 'Content-Type: application/json');
+define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
 define('CONTENT_LENGTH', 'Content-Length: ');
+define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
 
 
 $glb_lang_codes = null;

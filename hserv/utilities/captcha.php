@@ -62,7 +62,7 @@ if(@$_REQUEST['img']){ //IMAGE CAPTCHA
 
     if(array_key_exists('json',$_REQUEST)){ //returns both session id and value
         $value = array('id'=>session_id(),'value'=>$value);
-        header('Content-type: application/json;charset=UTF-8');
+        header(CTYPE_JSON);
         print json_encode($value);
     }else{
         print $value;

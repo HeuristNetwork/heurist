@@ -95,7 +95,7 @@ if (@$argv) {
                     if($file_time - intval($_REQUEST['timestamp']) < 10){
                         //compare file time with time of db defs on client side
                         //defintions are up to date on client side
-                        header('Content-type: application/json;charset=UTF-8');
+                        header(CTYPE_JSON);
                         print json_encode( array('uptodate'=>$file_time));
                         exit;
                         //otherwise download dbdef cache
@@ -203,8 +203,8 @@ if (@$argv) {
             $system->error_exit_api();
 
         }else{
-            header("Access-Control-Allow-Origin: *");
-            header('Content-type: application/json;charset=UTF-8');
+            header(HEADER_CORS_POLICY);
+            header(CTYPE_JSON);
 
             //$req = $entity->getData();
             $req = array();
@@ -221,7 +221,7 @@ if (@$argv) {
             print json_encode($res);
         }
     }else{
-        header('Content-type: application/json;charset=UTF-8');
+        header(CTYPE_JSON);
 
         if( is_bool($res) && !$res ){
             $response = $system->getError();

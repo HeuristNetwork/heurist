@@ -181,7 +181,7 @@ if($filename){ //download from scratch (for csv import)
             if($default_mode==3){ //check
 
                 $response = array('status'=>HEURIST_OK, 'data'=>'ok');
-                header('Content-type: application/json;charset=UTF-8');
+                header(CTYPE_JSON);
                 print json_encode($response);
 
             }else{
@@ -201,7 +201,7 @@ if($filename){ //download from scratch (for csv import)
         }elseif($default_mode==3){ //check existance
 
                 $response = array('status'=>HEURIST_OK, 'data'=>'not found');
-                header('Content-type: application/json;charset=UTF-8');
+                header(CTYPE_JSON);
                 print json_encode($response);
 
         }else{

@@ -61,7 +61,7 @@
     $system->dbclose();
 
     if($res) {
-        header("Access-Control-Allow-Origin: *");
+        header(HEADER_CORS_POLICY);
         $system->setResponseHeader();
         print $res;
     }else{

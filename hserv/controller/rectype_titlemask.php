@@ -96,6 +96,6 @@ if( $system->init(@$_REQUEST['db']) ){
 }
 
 // Returning result as JSON
-header('Content-type: application/json;charset=UTF-8');
+header(CTYPE_JSON);
 print json_encode($response);
 ?>

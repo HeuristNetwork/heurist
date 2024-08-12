@@ -895,7 +895,7 @@ class System {
 
         $this->dbclose();
 
-        header('Content-type: application/json;charset=UTF-8');
+        header(CTYPE_JSON);
         if($message){
             if($error_code==null){
                 $error_code = HEURIST_INVALID_REQUEST;
@@ -926,8 +926,8 @@ class System {
 
 
         if($is_api){
-            header("Access-Control-Allow-Origin: *");
-            header('Content-type: application/json;charset=UTF-8');
+            header(HEADER_CORS_POLICY);
+            header(CTYPE_JSON);
 
             $status = @$response['status'];
             if($status==HEURIST_INVALID_REQUEST){
@@ -945,7 +945,7 @@ class System {
 
             http_response_code($code);
         }else{
-            header('Content-type: application/json;charset=UTF-8');
+            header(CTYPE_JSON);
         }
 
         print json_encode( $response );
@@ -2174,7 +2174,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         */
 
         if(!$content_type){
-            header('Content-type: application/json;charset=UTF-8');
+            header(CTYPE_JSON);
         }else{
             header('Content-type: '.$content_type);
         }

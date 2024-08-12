@@ -414,7 +414,7 @@ public function output($data, $params){
             //$content = file_get_contents($this->tmp_destination);
 
             if(@$params['restapi']){
-                //header("Access-Control-Allow-Origin: *");
+                //header(HEADER_CORS_POLICY);
                 //header("Access-Control-Allow-Methods: POST, GET");
 
                 // Allow from any origin
@@ -435,7 +435,7 @@ public function output($data, $params){
                         header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
                     exit(0);*/
                 }else{
-                    //2024-02-23 header("Access-Control-Allow-Origin: *");
+                    //2024-02-23 header(HEADER_CORS_POLICY);
                 }
             }
 

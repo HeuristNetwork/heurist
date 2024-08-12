@@ -202,8 +202,8 @@ exit;
 
 function exitWithError($message, $code){
 
-    header("Access-Control-Allow-Origin: *");
-    header('Content-type: application/json;charset=UTF-8');//'text/javascript');
+    header(HEADER_CORS_POLICY);
+    header(CTYPE_JSON);//'text/javascript');
 
     http_response_code($code);
     print json_encode(array("status"=>'invalid', "message"=>$message));

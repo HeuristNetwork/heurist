@@ -536,7 +536,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             header('Content-type: binary/download');
         }
         if($mimeType!="video/mp4"){
-            header('access-control-allow-origin: *');
+            header(HEADER_CORS_POLICY);
             header('access-control-allow-credentials: true');
         }
 
@@ -1062,7 +1062,7 @@ function fileGetMetadata($fileinfo){
     $res['size_KB'] = $fileinfo['ulf_FileSizeKB'];
     $res['description'] = $fileinfo['ulf_Description'];
 
-    header('Content-type: application/json;charset=UTF-8');
+    header(CTYPE_JSON);
     $response = array('status'=>HEURIST_OK, 'data'=>$res);
     print json_encode($response);
 }

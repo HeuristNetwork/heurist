@@ -26,7 +26,7 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 //header("Access-Control-Allow-Origin: *");
-header('Content-type: application/json;charset=UTF-8');
+header('CTYPE_JSON');
 
 $system = new System();
 

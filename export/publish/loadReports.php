@@ -33,7 +33,7 @@ if(!$system->has_access()){
    $system->error_exit( 'To perform this action you must be logged in',  HEURIST_REQUEST_DENIED);
 }
 
-header('Content-type: application/json;charset=UTF-8');
+header(CTYPE_JSON);
 
 $sys_usrReportSchedule_ColumnNames = array(
     "rps_ID"=>"i",

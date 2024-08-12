@@ -301,7 +301,7 @@ elseif($need_compress){ //importDefintions returns complete set of new defintion
     $output = gzencode(ob_get_contents(),6);
     ob_end_clean();
     header('Content-Encoding: gzip');
-    header('Content-type: application/json;charset=UTF-8');
+    header(CTYPE_JSON);
     echo $output;
     unset($output);
 }else{
