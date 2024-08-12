@@ -335,7 +335,10 @@ function fillTermsLinks( $mysqli ){
                 //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
 
                 $terms = json_decode(@$row[1], true);
-                if($terms){
+                if(!$terms){
+                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);
+                    continue;                    
+                }
 
                     $values = array(
                                 'trm_Label'=>$name,
@@ -381,11 +384,8 @@ function fillTermsLinks( $mysqli ){
                     $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
                                 .intval($vocab_id).' WHERE dty_ID='.intval($row[3]);
                     $mysqli->query($query);
-
-                }else{
-                    $report[] = 'Set vocabulary manually. Term tree not defined or corrupted: '.htmlspecialchars(@$row[1]);
-                }
-            }
+                
+            }//while
 
     return $report;
 }
