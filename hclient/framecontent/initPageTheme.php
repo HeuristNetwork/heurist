@@ -65,7 +65,7 @@ if(isset($site_colors) && $site_colors!=null){
 define('CLR_WHITE','#ffffff');
 define('CLR_BORDER', '#95A7B7');
 define('CLR_ACTIVE', '#212121');
-define('CLR_GRAY', '#999999');
+define('CLR_LIGHTGRAY', '#999999');
 define('CLR_GRAY', '#555555');
 define('CLR_DARKGRAY', '#333333');
 
