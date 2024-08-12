@@ -228,9 +228,11 @@ $.widget("heurist.lookupESTC_editions", $.heurist.recordAction, {
                         let recordset = new HRecordSet(response.data);
                         let record = recordset.getFirstRecord();
                         if(!record || !record.d){
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                            'We are having trouble performing your request on the ESTC server. '
-                            +'Impossible obtain details for selected record '+sel_Rec_ID);
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: 'We are having trouble performing your request on the ESTC server. '
+                                        +`Impossible obtain details for selected record ${sel_Rec_ID}`,
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
                         }else{
                             let recset = that.recordList.resultList('getRecordSet');
                             recset.addRecord2(sel_Rec_ID, record);

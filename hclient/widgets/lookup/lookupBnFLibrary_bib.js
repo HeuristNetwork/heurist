@@ -499,15 +499,16 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                 val = JSON.stringify(val);
             }
 
-            window.hWin.HEURIST4.msg.showMsgErr(
-                'An error has occurred with mapping values to their respective fields,<br>'
-                + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
-                + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
-                + 'Invalid field details:<br>'
-                + 'Response field - "' + field_name + '"<br>'
-                + 'Record field - "' + $Db.rst(that.options.mapping.rty_ID, dty_id, 'rst_DisplayName') + '" (<em>' + $Db.dty(dty_id, 'dty_Type') + '</em>)<br>'
-                + 'Value to insert - "' + val + '"<br>'
-            );
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'An error has occurred with mapping values to their respective fields,<br>'
+                        + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
+                        + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
+                        + 'Invalid field details:<br>'
+                        + `Response field - "${field_name}"<br>`
+                        + `Record field - "${$Db.rst(that.options.mapping.rty_ID, dty_id, 'rst_DisplayName')}" (<em>${$Db.dty(dty_id, 'dty_Type')}</em>)<br>`
+                        + `Value to insert - "${val}"<br>`,
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
         }, 20000); // set timeout to 20 seconds
 
         // get selected recordset
@@ -932,7 +933,10 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
 
         if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
         }else{
             this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }

@@ -698,7 +698,10 @@ $.widget( "heurist.lookupOpentheso", $.heurist.recordAction, {
 
         if(is_wrong_data){
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
         }
 
         this.tabs_container.tabs('option', 'active', 1); // switch to results tab
