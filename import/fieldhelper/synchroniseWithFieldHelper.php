@@ -32,7 +32,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
@@ -41,20 +41,20 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/uSanitize.php';
 
 require_once dirname(__FILE__).'/../../hserv/structure/import/dbsImport.php';
-        
+
 $system->defineConstants();
 
 if(!defined('RT_MEDIA_RECORD')){
-    
+
     $isOK = false;
-    
+
     $importDef = new DbsImport( $system );
-    if($importDef->doPrepare(  array('defType'=>'rectype', 
+    if($importDef->doPrepare(  array('defType'=>'rectype',
                 'conceptCode'=>$rtDefines['RT_MEDIA_RECORD'] ) ))
     {
         $isOK = $importDef->doImport();
     }
-    
+
     if(!$isOK){
             $system->addErrorMsg('Cannot download record type "Digital Media item" required by the function you have requested. ');
             include_once ERROR_REDIR;
@@ -119,12 +119,12 @@ $failed_exts = array();
 <!--
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
--->        
+-->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
-        
+
     </head>
     <body class="popup">
 
@@ -134,29 +134,29 @@ $failed_exts = array();
                 document.getElementById("progress"+divid).innerHTML = (total==0)?"": (" <div style=\"color:green\"> Processed "
                     +processed+" of "+total+". Added records: "+added+"</div>");
             }
-			
+
             function sysIdentificationPopup() {
                 window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
-                return false; 
+                return false;
             }
         </script>
 
         <h2>ADVANCED USERS</h2>
 
         <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
-        
+
         This function creates/reads XML manifest files (as defined by FieldHelper http://fieldhelper.org) in the folders (and their descendants) listed in Design > Properties and writes the metadata as Digital Media records in the database, with pointers back to the files described by the manifests. New files are added to existing manifests.
-        
+
          <p>
             The database may already contain Digital Media records; records are added for new files, existing records are unaffected.
          </p><p>
-            Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any adminstrtors who have access to the backend), or be owned and writable by apache or www-data (as appropriate). 
-         </p>   
+            Note (in case of need): If you get the message that your folders are not writeable, ask your system adminstrator to adjust the permissions on the HEURIST_FILESTORE directory and its descendants. The folders in the filestore must be writeable by the PHP system - normally they should belong to and be writable by the group heurist (which should be set up to include apache and any adminstrtors who have access to the backend), or be owned and writable by apache or www-data (as appropriate).
+         </p>
          <p>
             Files should be uploaded through Import > Upload media files (limited normally to 30M) or by direct sftp access to the server for larger files (available to system administrators only).
          </p>
          <?php
-        
+
         $notfound = array();
         foreach ($fieldhelper_to_heurist_map as $key=>$id){
             if(is_numeric($id) && $id==0){
@@ -187,10 +187,10 @@ $failed_exts = array();
                 "only available to the database creator/owner (user #2)</div>";
 
             }else{
-                
+
                 $mediaFolders = $system->get_system('sys_MediaFolders');
                 $mediaExts = $system->get_system('sys_MediaExtensions');
-                
+
                 if($mediaFolders==null || $mediaFolders==''){
                     $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
                     folderCreate( $mediaFolders, true );
@@ -200,7 +200,7 @@ $failed_exts = array();
                 //sanitize folder names
                 $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
                 $mediaFolders = implode(';', $dirs);
-                
+
                 // The defined list of file extensions for FieldHelper indexing.
                 if($mediaExts==null || $mediaExts==''){
                     $mediaExts = HEURIST_ALLOWED_EXT;
@@ -212,7 +212,7 @@ $failed_exts = array();
                 <p><a href='#' onclick="sysIdentificationPopup();"
                     title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
                     Click here to set media folders (database file directory descendants scanned by default)</a>
-                </p>                
+                </p>
 <?php
 
                 if (!($mediaFolders=="" || count($dirs) == 0)) {
@@ -245,15 +245,15 @@ $failed_exts = array();
             set_time_limit(0);//no limit
 
             doHarvestFieldHelper($dirs);
-			
+
             if(count($failed_exts) > 0) {
-    
+
                 $invalid_ext = implode(', ', $failed_exts);
 
-                print "<br><div style='color: red;'>The following file types, which were encountered during media indexing, 
-                        are not currently being indexed as media files: $invalid_ext</div><br><br><div>You may wish to add some 
-                        of these types in the 
-                        <span onclick='sysIdentificationPopup();' style='text-decoration:underline;cursor:pointer;color:blue;'>Design > Properties</span> 
+                print "<br><div style='color: red;'>The following file types, which were encountered during media indexing,
+                        are not currently being indexed as media files: $invalid_ext</div><br><br><div>You may wish to add some
+                        of these types in the
+                        <span onclick='sysIdentificationPopup();' style='text-decoration:underline;cursor:pointer;color:blue;'>Design > Properties</span>
                         function and run indexing again.</div><br>";
             }
 
@@ -284,8 +284,8 @@ $failed_exts = array();
                             print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
                             continue;
                     }
-                    
-/*                    
+
+/*
                     $dir = str_replace('\\','/',$dir);
                     if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                         $orig = $dir;
@@ -302,16 +302,16 @@ $failed_exts = array();
                             if(strpos($dir, '/misc/heur-filestore/')===0){
                                 $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
                             }
-                            
+
                             $dir = str_replace('\\','/',$dir);
                         }
-                        
+
                         if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
                             print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
                             continue;
                         }
                     }
-*/                    
+*/
 
                     if(substr($dir, -1) != '/'){
                         $dir .= "/";
@@ -372,7 +372,7 @@ $failed_exts = array();
             $rep_issues = $rep_issues."<br>Error save record for file:".$currfile.". ".$message;
         }
 
-        
+
         function extendMediaExts($versions){
             global $mediaExts;
 
@@ -384,7 +384,7 @@ $failed_exts = array();
                 }
             }
         }
-        
+
 
         /**
         *
@@ -397,7 +397,7 @@ $failed_exts = array();
 
             global $system, $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
             $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT, $failed_exts;
-            
+
             //add extension versions
             extendMediaExts(array('jpg','jpeg','jfif','jpe'));
             extendMediaExts(array('tif','tiff'));
@@ -504,10 +504,10 @@ $failed_exts = array();
                                         }
                                         $key3 = $fieldhelper_to_heurist_map['file_path'];
                                         if($key3>0){
-                                            
+
                                             $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
                                             $details["t:".$key3] = array("1"=>$relative_path);//change to relative path
-                                            
+
                                         }
 
                                     }else if($key2=="lat"){
@@ -621,13 +621,13 @@ $failed_exts = array();
                                 $record['URL'] = $recordURL;
                                 $record['ScratchPad'] = null;
                                 $record['details'] = $details;
-                                
+
                                 $out = recordSave($system, $record);//see recordModify.php
 
                                 if ( @$out['status'] != HEURIST_OK ) {
                                     print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
                                     htmlspecialchars($out["message"])."</span></div>";
-                                    
+
                                 }else{
                                     if($new_md5==null){
                                         $new_md5 = md5_file($filename);
@@ -737,9 +737,9 @@ XML;
                     {
 
                         $details = array();
-        
+
                         $file_id = fileRegister($system, $filename);//see recordFile.php
-                            
+
                         if($file_id>0){
                             $details["t:".$fileDT] = array("1"=>$file_id);
                             $recordNotes = readEXIF($filename);
@@ -772,10 +772,10 @@ XML;
                         if($key>0){
 
                             $targetPath = $flleinfo['dirname'];
-                            
+
                             $rel_path = getRelativePath(HEURIST_FILESTORE_DIR, $targetPath);//getRelativePath2($targetPath);
                             $details["t:".$key] = array("1"=>  $rel_path);
-                            
+
                             /*print "<div>".HEURIST_FILESTORE_DIR."</div>";
                             print "<div>file path :".$targetPath."</div>";
                             print "<div>relative path :".strpos($targetPath, HEURIST_FILESTORE_DIR)."--".$rel_path."</div>";
@@ -801,7 +801,7 @@ XML;
                         $record['URL'] = null;
                         $record['ScratchPad'] = $recordNotes;
                         $record['details'] = $details;
-                        
+
                         $out = recordSave($system, $record);//see recordModify.php
 
                         $f_item = $f_items->addChild("item");
@@ -820,8 +820,8 @@ XML;
                         $f_item->addChild("md5", $new_md5);
                         $f_item->addChild("filesize", filesize($filename));
 
-                        
-                        if ( @$out['status'] != HEURIST_OK ) {                        
+
+                        if ( @$out['status'] != HEURIST_OK ) {
                             print '<div>File: <i>'.htmlspecialchars($filename_base)
                             .'</i> <span style="color:red">Error: '.htmlspecialchars($out["message"])."</span></div>";
                         }else{
@@ -830,7 +830,7 @@ XML;
                             $cnt_added++;
                         }
 
-                        
+
                         $rep_processed_dir++;
                     }//check ext
 

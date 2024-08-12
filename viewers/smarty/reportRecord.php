@@ -28,22 +28,22 @@ public methods
    getRecord - returns full info for given record ID in heurist smarty format (including visibility for current user)
    getRelatedRecords
    getLinkedRecords
-   
+
    recordIsVisible - returns true if record is visible for current user
 
-   getRecords - returns records ids for given query 
+   getRecords - returns records ids for given query
    getRecordsAggr - returns aggregation values
-   
+
    getFileField - returns the specific field for uploaded media (record's file) info
 
-   baseURL - returns HEURIST_BASE_URL 
+   baseURL - returns HEURIST_BASE_URL
    getSysInfo
-   
+
    getTranslation - returns translation for given entity + id
-   
+
 */
 class ReportRecord {
-    
+
        protected $loaded_recs; //cache
 
        protected $rty_Names;
@@ -51,12 +51,12 @@ class ReportRecord {
        protected $dtTerms = null;
        protected $dbsTerms;
        protected $system;
-    
+
        protected $translations; //cache for translated db definitions (terms,...)
-    
+
     public function __construct() {
-       global $system; 
-       
+       global $system;
+
        $this->system = $system;
        $this->rty_Names = dbs_GetRectypeNames($system->get_mysqli());
        $this->dty_Types = dbs_GetDetailTypes($system, null, 4);
@@ -69,7 +69,7 @@ class ReportRecord {
         $this->translations = array(
             'trm' => array()
         );
-    }    
+    }
 
     //
     // returns value of heurist constants for Record and Detail types
@@ -81,11 +81,11 @@ class ReportRecord {
             if(strpos($name,'RT_')===0 || strpos($name,'DT_')===0){
                 if($this->system->defineConstant($name)) {return constant($name);}
             }
-            
-            return null;  
+
+            return null;
         }
     }
-    
+
     public function baseURL(){
         return HEURIST_BASE_URL;
     }
@@ -94,20 +94,20 @@ class ReportRecord {
     //
     //
     public function getSysInfo($param){
-        
+
         $res = null;
         $mysqli = $this->system->get_mysqli();
-        
+
         if($param=='db_total_records'){
-            
+
             $res = mysql__select_value($mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
 
         }else if($param=='db_rty_counts'){
 
             $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
-            
+
         }else if($param=='lang'){
-            
+
             $res = $_REQUEST['lang'];
             if (!$res) {
                 $res = $this->system->user_GetPreference('layout_language', '');
@@ -115,16 +115,16 @@ class ReportRecord {
 
             $res = getLangCode3($res);
         }else if($param=='user'){
-            
+
             $usr=$this->system->getCurrentUser();
             unset($usr['ugr_Preferences']);
             return $usr;
         }
 
-        
+
         return $res;
     }
-    
+
     //
     //
     //
@@ -132,7 +132,7 @@ class ReportRecord {
         return  $this->rty_Names[$rty_ID];
     }
 
-    
+
     //
     // Returns local code for given concept code
     //
@@ -147,7 +147,7 @@ class ReportRecord {
     public function trm_id($conceptCode, $smarty_obj=null) {
         return ConceptCode::getTermLocalID($conceptCode);
     }
-    
+
     //
     // this method is used in smarty template in main loop to access record info by record ID
     //
@@ -158,44 +158,44 @@ class ReportRecord {
         }else{
             $rec_ID = $rec;
         }
-        
+
 
         if(@$this->loaded_recs[$rec_ID]){ //already loaded
             return $this->loaded_recs[$rec_ID];
         }
 
         $rec = recordSearchByID($this->system, $rec_ID);//from recordSearch.php
-        
+
         if($rec){
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);//for current user only
             if(is_array($rec['rec_Tags'])) {$rec['rec_Tags'] = implode(',',$rec['rec_Tags']);}
-            
+
             $rec['rec_IsVisible'] = $this->recordIsVisible($rec);//for current user only
         }
-        
+
         $res1 = $this->getRecordForSmarty($rec);
-        
+
         return $res1;
     }
-    
+
     //
     // returns true if record is visible for current user
     //
     public function recordIsVisible($rec)
     {
-        
+
         if(@$rec['rec_FlagTemporary']==1) {return false;}
-        
+
         $currentUser = $this->system->getCurrentUser();
-        
+
         $res = true;
-        
+
         if($currentUser['ugr_ID']!=2) //db owner
         {
             if($rec['rec_NonOwnerVisibility']=='hidden'){
                 $res = false;
             }else if($currentUser['ugr_ID']>0 && $rec['rec_NonOwnerVisibility']=='viewable'){
-                
+
                 $wg_ids = array();
                 if(@$currentUser['ugr_Groups']){
                         $wg_ids = array_keys($currentUser['ugr_Groups']);
@@ -203,11 +203,11 @@ class ReportRecord {
                 }else{
                         $wg_ids = $this->system->get_user_group_ids();
                 }
-                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup    
-                
+                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
+
                 if(is_array($wg_ids) && count($wg_ids)>0){
                     if(!in_array($rec['rec_OwnerUGrpID'],$wg_ids)){
-                        
+
                         $query = 'select rcp_UGrpID from usrRecPermissions where rcp_RecID='.$rec['rec_ID'];
                         $allowed_groups = mysql__select_list2($this->system->get_mysqli(), $query);
                         if(count($allowed_groups)>0 && count(array_intersect($allowed_groups, $wg_ids)==0)){
@@ -215,39 +215,39 @@ class ReportRecord {
                         }
                     }
                 }
-            
+
             }
         }
-        
-        return $res; 
-        
+
+        return $res;
+
     }
-    
+
     //
     // retuns array of related record with additional header values
-    //                            recRelationID  
+    //                            recRelationID
     //                            recRelationType
     //                            recRelationNotes
     //                            recRelationStartDate
     //                            recRelationEndDate
     //
     public function getRelatedRecords($rec, $smarty_obj=null){
-        
-        
+
+
             if(is_array($rec) && $rec['recID']){
                 $rec_ID = $rec['recID'];
             }else{
                 $rec_ID = $rec;
             }
-            
-        
+
+
             $relRT = ($this->system->defineConstant('RT_RELATION')?RT_RELATION:0);
             $relSrcDT = ($this->system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
             $relTrgDT = ($this->system->defineConstant('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
             $res = array();
             $rel_records = array();
-            
+
             /* find related records */
             if($rec_ID>0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
 
@@ -269,17 +269,17 @@ class ReportRecord {
                             $bd = fetch_relation_details($reln['dtl_RecID'], false);
                             array_push($rel_records, $bd);
                         }
-                        
+
                         foreach ($rel_records as $key => $value){
                             if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
-                                
-                                
+
+
                                 $record = $this->getRecord($value['RelatedRecID']['rec_ID']);//related record
-                                                            
-                                
+
+
                                 //add specific variables from relationship record (rty_ID=1)
                                 $record["recRelationID"] = $value['recID'];
-                                
+
                                 $record["recRelationType"] = $value['RelTerm'];
 
                                 if(array_key_exists('Notes', $value)){
@@ -291,20 +291,20 @@ class ReportRecord {
                                 if(array_key_exists('EndDate', $value)){
                                     $record["recRelationEndDate"] = Temporal::toHumanReadable($value['EndDate']);
                                 }
-                                
+
                                 array_push($res, $record);
                             }
                         }
-                        
+
                     }
-                    
+
                     $from_res->close();
                     $to_res->close();
                 }
             }
             return $res;
     }
-    
+
     //
     // $rec - record id or record array - record to find records linked to or from this record
     // $rty_ID - record type or array of record type to filter output
@@ -312,17 +312,17 @@ class ReportRecord {
     // returns array of record IDs devided to 2 arrays "linkedto" and "linkedfrom"
     //
     public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
-        
+
             if(is_array($rec) && $rec['recID']){
                 $rec_ID = $rec['recID'];
             }else{
                 $rec_ID = $rec;
             }
-            
+
             $where = ' WHERE ';
-            
+
             if($rty_ID!=null){
-                if(is_int($rty_ID) && $rty_ID>0) 
+                if(is_int($rty_ID) && $rty_ID>0)
                 {
                     $where = ', Records WHERE linkID=rec_ID and rec_RecTypeID='.$rty_ID.' AND ';
                 }else{
@@ -336,12 +336,12 @@ class ReportRecord {
                     }
                 }
             }
-            
+
             $mysqli = $this->system->get_mysqli();
-        
+
             $to_records = array();
             $from_records = array();
-            
+
             if($direction==null || $direction=='linkedto'){
                 // get linked records where current record is source
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
@@ -355,15 +355,15 @@ class ReportRecord {
                 $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
-                    
+
                 $from_records = mysql__select_list2($mysqli, $to_query);
             }
-            
+
             $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
-          
+
             return $res;
     }
-    
+
     //
     // convert record array to array to be assigned to smarty variable
     //
@@ -375,15 +375,15 @@ class ReportRecord {
         else
         {
             $recordID = $rec['rec_ID'];
-            
+
             if(@$this->loaded_recs[$recordID]){
                 return $this->loaded_recs[$recordID];
             }
-            
-            
+
+
             $record = array();
             $recTypeID = null;
-            
+
             $lang = $this->getSysInfo('lang');
 
             //$record["recOrder"] = $order;
@@ -401,16 +401,16 @@ class ReportRecord {
                         $recTypeID = $value;
                         $record['recTypeID'] = $recTypeID;
                         $record['recTypeName'] = $this->rty_Names[$recTypeID];
-                    }else if ($key=='rec_Tags'){ 
-                        
+                    }else if ($key=='rec_Tags'){
+
                         $record['rec_Tags'] = $value;
-                        
+
                     }else if ($key=='rec_ID'){ //load tags and woottext once per record
 
-                        $record['recWootText'] = $this->getWootText($value);//htmlspecialchars(, ENT_QUOTES, 'UTF-8');//@todo load dynamically 
-                        
+                        $record['recWootText'] = $this->getWootText($value);//htmlspecialchars(, ENT_QUOTES, 'UTF-8');//@todo load dynamically
+
                     }else if ($key == 'rec_ScratchPad'){
-                        
+
                         //$record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
                     }
 
@@ -428,13 +428,13 @@ class ReportRecord {
 
                 }
             }
-            
+
             if(count($this->loaded_recs)>2500){
                 unset($this->loaded_recs);
                 $this->loaded_recs = array();//reset to avoid memory overflow
             }
-            
-            $this->loaded_recs[$recordID] = $record; 
+
+            $this->loaded_recs[$recordID] = $record;
 
             return $record;
         }
@@ -498,7 +498,7 @@ class ReportRecord {
                 switch ($detailType) {
                         case 'enum':
                         case 'relationtype':
-                        
+
                             if($this->dtTerms==null){
                                 $this->dtTerms = dbs_GetTerms($this->system);
                                 $this->dbsTerms = new DbsTerms($this->system, $this->dtTerms);
@@ -518,7 +518,7 @@ class ReportRecord {
 
 
                             foreach ($dtValue as $key => $value){
-                                
+
                                 $term = $this->dbsTerms->getTerm($value);
                                 if($term){
 
@@ -527,27 +527,27 @@ class ReportRecord {
 
                                     $term_label = $this->getTranslation('trm', $value, 'trm_Label', $lang);
                                     $term_desc = $this->getTranslation('trm', $value, 'trm_Description', $lang);
-                                    
+
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
                                     $res_code = $this->_add_term_val($res_code, $term[ $fi['trm_Code'] ]);
-                                    
+
                                     $res_label_full = $this->_add_term_val($res_label_full, $term_full);
                                     $res_label = $this->_add_term_val($res_label, $term_label);//$term[ $fi['trm_Label'] ]);
                                     $res_desc = $this->_add_term_val($res_desc, $term_desc);//$term[ $fi['trm_Description'] ]);
 
                                     //NOTE id and label are for backward
                                     //original value
-                                    array_push($res, array("id"=>$value, "internalid"=>$value, 
-                                        "code"=>$term[ $fi['trm_Code'] ], 
-                                        "label"=>$term_label, 
-                                        "term"=>$term_full, 
+                                    array_push($res, array("id"=>$value, "internalid"=>$value,
+                                        "code"=>$term[ $fi['trm_Code'] ],
+                                        "label"=>$term_label,
+                                        "term"=>$term_full,
                                         "conceptid"=>$term[ $fi['trm_ConceptID'] ],
-                                        "desc"=>$term_desc 
+                                        "desc"=>$term_desc
                                     ));
                                 }
                             }
-                            $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code, 
+                            $res_united = array("id"=>$res_id, "internalid"=>$res_id, "code"=>$res_code,
                                 "term"=>$res_label_full, "label"=>$res_label, "conceptid"=>$res_cid, "desc"=>$res_desc
                             );
 
@@ -586,12 +586,12 @@ class ReportRecord {
                             $origvalues = array();
 
                             foreach ($dtValue as $key => $value){
-                                
+
                                 $external_url = @$value['file']['ulf_ExternalFileReference'];
                                 if($external_url && strpos($external_url,'http://')!==0){
-                                    array_push($res, $external_url);//external 
+                                    array_push($res, $external_url);//external
 
-                                }else 
+                                }else
                                 if(@$value['file']['ulf_ObfuscatedFileID']){
                                     //local
                                     array_push($res, HEURIST_BASE_URL."?db=".$this->system->dbname()
@@ -599,7 +599,7 @@ class ReportRecord {
                                 }
                                 //keep reference to record id
                                 $value['file']['rec_ID'] = $recID;
-                                
+
                                 //original value keeps the whole 'file' array
                                 array_push($origvalues, $value['file']);
                             }
@@ -622,7 +622,7 @@ class ReportRecord {
                                 $dtname2 = $dtname."_originalvalue";
                                 $value['geo']['recid'] = $recID;
                                 $arres = array_merge($arres, array($dtname2=>$value['geo']));
-                                
+
                                 $geom = geoPHP::load($value['geo']['wkt'], 'wkt');
                                 if(!$geom->isEmpty()){
                                     $geojson_adapter = new GeoJSON();
@@ -631,7 +631,7 @@ class ReportRecord {
                                 if(!$json) {$json = array();}
                                 $dtname2 = $dtname."_geojson";
                                 $arres = array_merge($arres, array($dtname2=>$json));
-                                
+
 
                                 $res = $value['geo']['wkt'];
                                 break; //only one geo location at the moment
@@ -657,22 +657,22 @@ class ReportRecord {
 
                             $res = array();
                             if(count($dtValue)>0){
-                            
+
                             foreach ($dtValue as $key => $value){
                                 $recordID = $value['id'];
                                 array_push($res, $recordID);
                             }
-                            
+
                             if($issingle){
                                 $res = array( $dtname =>$res[0] );
                             }else{
                                 $res = array( $dtname =>$res[0], $dtname."s" =>$res );
                             }
-                            
-                            
+
+
                             }
                             break;
-                            
+
                         default:
                             // repeated basic detail types
                             $res = "";
@@ -683,14 +683,14 @@ class ReportRecord {
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
                             }
-                            
+
                             if(count($dtValue)>1 && ($detailType=='freetext' || $detailType=='blocktext')){
                                 $translated_value = getCurrentTranslation($dtValue, $lang);
                                 if($translated_value!=null){
-                                    $res = $translated_value;   
+                                    $res = $translated_value;
                                 }
                             }
-                            
+
                             if(strlen($res)==0){ //no valid value
                                 $res = null;
                             }else{
@@ -745,19 +745,19 @@ class ReportRecord {
 
         return $res;
     }
-    
+
     //
-    // returns record ids for given query 
+    // returns record ids for given query
     //
     public function getRecords($query, $current_rec=null){
-        
+
         $rec_ID = 0;
         if(is_array($current_rec) && $current_rec['recID']){
             $rec_ID = $current_rec['recID'];
         }else{
             $rec_ID = $current_rec;
         }
-        
+
         if($rec_ID>0){
             //replace placeholder [ID] in query to current query id
             if(is_array($query)){
@@ -771,46 +771,46 @@ class ReportRecord {
                 return null;
             }
         }
-        
+
         $params = array('detail'=>'ids', 'q'=>$query, 'needall'=>1);
-        
+
         $response = recordSearch($this->system, $params);
-        
+
         if(@$response['status']==HEURIST_OK){
             return $response['data']['records'];
         }else{
             return null;
         }
-        
+
     }
-    
+
     //
     // returns aggregation values
-    // $query_or_ids - heurist query or ids list 
+    // $query_or_ids - heurist query or ids list
     // $functions - array of pairs (field_id, avg|count|sum)
     //
     public function getRecordsAggr($functions, $query_or_ids, $current_rec=null){
-        
+
         $ids = prepareIds($query_or_ids);
         if(count($ids)<1){
             $ids = $this->getRecords( $query_or_ids, $current_rec );
         }
-        
+
         //calculate aggregation values
         $select = array();
         $from = array('Records ');
         $result = array();
         $idx = 0;
-        
+
         if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
         }
-        
+
         foreach($functions as $idx2 =>$func){
-            
+
             $dty_ID = @$func[0];
             $func = @$func[1];
-            
+
             if($func=='avg' || $func=='sum' || $func=='count'){
                 if($dty_ID>0){
                     array_push($select, $func.'(d'.$idx.'.dtl_Value)' );
@@ -824,22 +824,22 @@ class ReportRecord {
                 $idx++;
             }
         }
-        
+
         if(count($select)>0){
-            
+
             if(!$ids || count($ids)<1){
                 $ids = array(0);
             }
-            
+
             //@todo make chunks if count($ids)>10000?
             $query = 'SELECT '.implode(',',$select)
                         .' FROM '.implode(' ',$from)
                         .' WHERE rec_ID IN ('.implode(',',$ids).')';
-            
+
             $res = mysql__select_row($this->system->get_mysqli(), $query);
-            
+
             if($res!=null){
-                
+
                 if(count($res)==1){
                     return $res[0];
                 }else{
@@ -852,27 +852,27 @@ class ReportRecord {
             }
 
         }
-        return null;    
-        
+        return null;
+
     }
 
     /**
     * returns translation for given entity + id
-    * 
+    *
     * @param mixed $entity - trm, rty, dty
-    * @param mixed $ids - 
+    * @param mixed $ids -
     * @param mixed $field - name of field
     * @param null $language_code
     */
     public function getTranslation($entity, $ids, $field=null, $language_code=null){
-        
+
         if($language_code==null){
             $language_code = $this->getSysInfo('lang');
         }
 
         $language_code = getLangCode3($language_code);
 
-        
+
         $rtn = array();
         $def_values = array();
 
@@ -888,13 +888,13 @@ class ReportRecord {
 
         $cache = $this->translations[$entity][$language_code];
 
-        
+
         if($entity == 'trm'){
             $field = (strpos(strtolower($field), 'desc') === false) ? 'trm_Label' : 'trm_Description';// grab label by default
         }else{
             $field = $entity.'_Name';
         }
-        
+
         if(count($cache) > 0){ // check cache first
             foreach ($ids as $idx => $id) {
                 if(array_key_exists($id, $cache) && @$cache[$id][$field]){
@@ -907,9 +907,9 @@ class ReportRecord {
         if(count($ids) == 0){
             return count($rtn) == 1 ? array_shift($rtn) : $rtn;
         }else {
-            
+
             $ids = prepareIds($ids);
-            
+
             if(count($ids) == 1){
                 $id_clause = ' ='.intval($ids[0]);
             }else{
@@ -937,9 +937,9 @@ class ReportRecord {
         }
 
         if($id_clause != ''){
-            
+
             $mysqli = $this->system->get_mysqli();
-            
+
             $field = $mysqli->real_escape_string($field);
             $language_code = $mysqli->real_escape_string($language_code);
 
@@ -948,7 +948,7 @@ class ReportRecord {
             $res = mysql__select_assoc2($mysqli, $query);
 
             foreach ($ids as $id) {
-                    
+
                 if(array_key_exists($id, $res) && !empty($res[$id])){
                     $rtn[$id] = $res[$id];
                 }else if(array_key_exists($id, $def_values) && !empty($def_values[$id])){
@@ -965,10 +965,10 @@ class ReportRecord {
 
         return count($rtn) == 1 ? array_shift($rtn) : $rtn;
     }
-    
+
     /**
     * returns the specific field for uploaded media (record's file) info
-    * 
+    *
     * @param mixed $file_details
     * @param mixed $field
     * @return null[]
@@ -1022,7 +1022,7 @@ class ReportRecord {
         $results = array();
 
         if(!is_array($file_details) && is_string($file_details)){
-            
+
             $files = explode(',', $file_details);
 
             foreach ($files as $f_url) {
@@ -1064,6 +1064,6 @@ class ReportRecord {
 
         return count($results) == 1 ? $results[0] : $results;
     }
-    
+
 }
 ?>

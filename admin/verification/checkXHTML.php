@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -31,7 +31,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -52,13 +52,13 @@ if($res){
 		<title>Check Wysiwyg Texts</title>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 	</head>
-    
+
     <body class="popup">
         <div class="banner"><h2>Check Wysiwyg Texts</h2></div>
-        
+
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr></div>
-        
+
             <table class="wysiwygCheckTable">
                 <?php
 
@@ -119,7 +119,7 @@ if($res){
 
                 ?>
             </table>
-            
+
             <p>&nbsp;</p>
             <p>
             [end of check]

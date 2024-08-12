@@ -208,17 +208,17 @@ function getRecordDetails($system, $record) {
                 /* SOURCE */
             }else if(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
                 // Source URL
-                
+
                 if($fileID){
 
                     if(!(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
-                        $external_url = HEURIST_TILESTACKS_URL.$external_url;                 
-                    }   
-                    
+                        $external_url = HEURIST_TILESTACKS_URL.$external_url;
+                    }
+
                     $record->sourceURL = $external_url;
-                    
+
                 }else{
-                    $record->sourceURL = $value;    
+                    $record->sourceURL = $value;
                 }
 
             }else if(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
@@ -240,7 +240,7 @@ function getRecordDetails($system, $record) {
 
                 /* LOCATION */
             }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
-                //marker icon url 
+                //marker icon url
                 $record->iconMarker = $fileID; //getFileURL($system, $fileID);
 
             }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
@@ -264,11 +264,11 @@ function getRecordDetails($system, $record) {
                 $record->color_id = $value;
                 $record->color_code = $color->code;
                 if($color->code) {
-                    $record->color = $color->code;   
+                    $record->color = $color->code;
                 }
-                /* alas timemap understands color only as hex or rgb 
+                /* alas timemap understands color only as hex or rgb
                 else{
-                $record->color = $color->label;   
+                $record->color = $color->label;
                 }*/
 
             } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {

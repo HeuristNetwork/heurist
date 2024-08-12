@@ -22,17 +22,17 @@
 */
 
 // See configIni.php for further documentation
- 
+
 // This file should be placed in the parent directory of Heurist, normally /var/www/html/HEURIST
-// and renamed heuristConfigIni.php, the values in this file will then overide those given (if any) 
-// in the configIni.php file in each copy of Heurist on the server 
+// and renamed heuristConfigIni.php, the values in this file will then overide those given (if any)
+// in the configIni.php file in each copy of Heurist on the server
 
 // In practice the configIni.php file does NOT specify most of the values, since heuristConfigIni.php
-// provides all copies with shared values. 
+// provides all copies with shared values.
 
 // The installation script automatically moves this file along with other relevant files to /var/www/html/HEURIST
 
-// **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent) 
+// **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent)
 //      as this will have no effect (it is the copy in ..../HEURIST/ which is used)
 
 if (!@$serverName) {$serverName = null;} // override default taken from request header SERVER_NAME
@@ -64,7 +64,7 @@ if (!@$bugEmail) {$bugEmail = "info@HeuristNetwork.org";}
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
 // [ADMINSTRATOR ACCESS PASSWORDS]
-// A simple challenge password > 14 characters for creation of new databases. 
+// A simple challenge password > 14 characters for creation of new databases.
 // If left blank - normal condition - any logged in user can create a new database
 if (!@$passwordForDatabaseCreation) {$passwordForDatabaseCreation="";}// normally blank = any logged in user can create
 
@@ -75,7 +75,7 @@ if (!@$passwordForDatabaseDeletion) {$passwordForDatabaseDeletion="";}// db owne
 if (!@$passwordForReservedChanges) {$passwordForReservedChanges="";}// if blank, no-one can modify reserved fields, otherwise challenge for password
 
 
-// [THUMBNAILING SERVICE] 
+// [THUMBNAILING SERVICE]
 
 // URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
 // appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
@@ -141,14 +141,14 @@ $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','DUT','G
 
 // Tiered system: Change this if running on a system with MySQL running on a separate server from the web application
 // MySQL script execution:  see https://dev.mysql.com/doc/refman/8.0/en/mysql-config-editor.html for info
-// Determines how to execute mysql scripts, notably mysqldump. 
+// Determines how to execute mysql scripts, notably mysqldump.
 // On a multi-tier server you need to use the 0 option to use the PDO library (bigdump), which may fail on some (large) databases
 // On a single tier server, use the 2 option which uses the standard mysqldump program via the shell, which is faster and less likely to fail
 // 0: use 3d party PDO library (bigdump), 2: call mysql via shell (default)
 $dbScriptMode = 2;
 //Determines how to  dump database - 0: use 3d party PDO mysqldump (for multi-tier), 2 - call mysqldump via shell (default, single tier system)
 $dbDumpMode = 2;
- 
+
 // path to mysql executables
 $dbMySQLpath = '/usr/bin/mysql';
 $dbMySQLDump = '/usr/bin/mysqldump';
@@ -163,7 +163,7 @@ if (!@$indexServerPort) {$indexServerPort = "9200";}
 
 // [SECURITY LOCKDOWNS]
 
-// set to -1 to block creation of new websites with a message to contact sysadmin 
+// set to -1 to block creation of new websites with a message to contact sysadmin
 $allowCMSCreation = 1;
 
 // On some servers severe restrictions can be activated. They may prevent sending to server json, html or js code snippets
@@ -175,7 +175,7 @@ if (!@$needEncodeRecordDetails) {$needEncodeRecordDetails = 0; }
 
 // [LEGACY FIXES]
 
-// Add paths to any servers previously used (since 2020), in the form https://server.domain,http://server.domain, … 
+// Add paths to any servers previously used (since 2020), in the form https://server.domain,http://server.domain, …
 // which may have been incorporated in web pages and which should be replaced by local relative paths
 // These paths are used in conjunction with Admin > Server management > Fix absolute paths in web page content
 // if (!@$absolutePathsToRemoveFromWebPages) $absolutePathsToRemoveFromWebPages = array('https://heuristplus.sydney.edu.au');

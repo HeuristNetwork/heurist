@@ -1,8 +1,8 @@
 <?php
 
     /**
-    * db access to defRecTypes table 
-    * 
+    * db access to defRecTypes table
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -32,27 +32,27 @@ class DbDefRecTypes extends DbEntityBase
 
     /**
     *  search users
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
 
         if(parent::search()===false){
-            return false;   
-        }        
+            return false;
+        }
 
         $calculatedFields = null;
-        
+
         $needCount = false; //find usage by records
         $needCheck = false;
 
-        //compose WHERE 
+        //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);
 
@@ -94,7 +94,7 @@ class DbDefRecTypes extends DbEntityBase
             .'rty_Status,rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists,rty_RecTypeGroupID,rty_ReferenceURL,'
             .'rty_ShowURLOnEditForm,rty_ShowDescriptionOnEditForm,rty_Modified';
 
-            $needCount = false; //now we calculate counts beforehand and use $calculatedFields to add column rty_RecCount 
+            $needCount = false; //now we calculate counts beforehand and use $calculatedFields to add column rty_RecCount
 
             $usr_ID = $this->system->get_user_id();
 
@@ -107,23 +107,23 @@ class DbDefRecTypes extends DbEntityBase
                 $this->where_for_count[0] = '';
                 $this->where_for_count[1] = 'AND (not r0.rec_FlagTemporary)';
             }
-            
+
             $query2 = 'SELECT rec_RecTypeID,count(*) FROM Records WHERE (not rec_FlagTemporary) GROUP BY rec_RecTypeID';
             $this->rty_counts = mysql__select_assoc2($this->system->get_mysqli(), $query2);
-            
-        
+
+
             $calculatedFields = function ($fields, $row=null) {
 
                 if($row==null){
                     array_push($fields, 'rty_CanonicalTitleMask');
                     array_push($fields, 'rty_RecCount');
-                    return $fields;   
+                    return $fields;
                 }else{
 
                     $idx = array_search('rty_TitleMask', $fields);
                     if($idx!==false){
                         $fileid = $row[$idx];
-                        
+
                         $mask_concept_codes = $row[$idx];
                         array_push($row, $mask_concept_codes);//keep
                         //convert to human readable
@@ -131,10 +131,10 @@ class DbDefRecTypes extends DbEntityBase
                     }else{
                         array_push($row, '');
                     }
-                    
+
                     $idx = array_search('rty_RecCount', $fields);
                     if($idx!==false){
-                        
+
                             if(@$this->rty_counts[$row[0]]>0){
                                 $cnt = $this->rty_counts[$row[0]];
                             }else{
@@ -144,13 +144,13 @@ class DbDefRecTypes extends DbEntityBase
                     }else{
                         array_push($row, '');
                     }
-                    
+
 
                     return $row;
                 }
             };
 
-            
+
         }else{
             $needCheck = true;
         }
@@ -181,7 +181,7 @@ class DbDefRecTypes extends DbEntityBase
                     array_push($order, 'rty_ID '.($value>0?'ASC':'DESC'));
                 }
             }
-        }  
+        }
 
 
         if($needCount){ //find count of records by rectype
@@ -195,7 +195,7 @@ class DbDefRecTypes extends DbEntityBase
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $query2 = $query2 . $conds[0];
                 $where2 = $where2 . ' AND '.$conds[1];
-            }else{  
+            }else{
                 $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
             }
 
@@ -215,7 +215,7 @@ class DbDefRecTypes extends DbEntityBase
         if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
         }
-        
+
         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
@@ -230,24 +230,24 @@ class DbDefRecTypes extends DbEntityBase
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
-        if(count($this->recordIDs)==0){             
+        if(count($this->recordIDs)==0){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record type identificator');
             return false;
-        }        
-        if(count($this->recordIDs)>1){             
+        }
+        if(count($this->recordIDs)>1){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove record types in batch');
             return false;
-        }        
-        
+        }
+
         $rtyID = $this->recordIDs[0];
-        
+
         $mysqli = $this->system->get_mysqli();
-        
+
         $query = 'SELECT dty_ID, dty_Name FROM defDetailTypes where FIND_IN_SET('.$rtyID.', dty_PtrTargetRectypeIDs)>0';
-        
+
         $fields = mysql__select_assoc2($mysqli, $query);
         $dtCount = count($fields);
-        
+
         if ($dtCount>0) { // there are fields that use this rectype, need to return error and the dty_IDs
                 $errMsg = "You cannot delete record type $rtyID. "
                             ." It is referenced in $dtCount base field defintions "
@@ -256,14 +256,14 @@ class DbDefRecTypes extends DbEntityBase
                     $errMsg = $errMsg.("<li>".$dty_ID."&nbsp;".$dty_Name."</li>");
                 }
                 $errMsg= $errMsg."</ul></div>";
-                
+
                 $this->system->addError(HEURIST_ACTION_BLOCKED, $errMsg);
                 return false;
         }
-        
+
         //-----------
         $query = 'SELECT sys_TreatAsPlaceRefForMapping FROM sysIdentification where 1';
-        
+
         $val = mysql__select_value($mysqli, $query);
         if($val!=null && $val!=''){
                 $places = explode(',', $val);
@@ -273,20 +273,20 @@ class DbDefRecTypes extends DbEntityBase
                     return false;
                 }
         }
-        
+
         //--------------
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
         $dtCount = mysql__select_value($mysqli, $query);
-        
+
         if($dtCount>0){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
                 "You cannot delete record type $rtyID as it has existing data records");
             return false;
         }
-        
+
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
-        
+
         //delete temporary records
         $res = true;
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
@@ -300,15 +300,15 @@ class DbDefRecTypes extends DbEntityBase
         $ret = $mysqli->query($query);
         $affected = $mysqli->affected_rows;
         if(!$ret){
-            $this->system->addError(HEURIST_DB_ERROR, 
+            $this->system->addError(HEURIST_DB_ERROR,
                     "Cannot delete from table defRecStructure", $mysqli->error);
             $res = false;
         }else if($affected===0){
             //$this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
             //$res = false;
         }
-       
-        
+
+
         if($res){
             $res = parent::delete(true);
         }
@@ -321,36 +321,36 @@ class DbDefRecTypes extends DbEntityBase
 
         return $res;
     }
- 
-    
+
+
     //
     // validate permission for edit record type
     // for delete and assign see appropriate methods
-    //    
+    //
     protected function _validatePermission(){
-        
+
         if(!$this->system->is_admin() &&
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-            
-            $this->system->addError(HEURIST_REQUEST_DENIED, 
+
+            $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You are not admin and can\'t edit record types. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
         }
-        
+
         return true;
     }
-    
+
     //
     //
-    //    
+    //
     protected function prepareRecords(){
-    
+
         $ret = parent::prepareRecords();
 
         //@todo captcha validation for registration
         $mysqli = $this->system->get_mysqli();
-        
+
         //add specific field values
         foreach($this->records as $idx=>$record){
 
@@ -372,7 +372,7 @@ class DbDefRecTypes extends DbEntityBase
 
             if(!(@$this->records[$idx]['rty_ID']>0)){
                 $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
-                
+
                 if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                     $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
                 }
@@ -380,48 +380,48 @@ class DbDefRecTypes extends DbEntityBase
                     $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
                 }
             }else{
-                
-                if (array_key_exists('rty_IDInOriginatingDB',$this->records[$idx]) 
-                     && $this->records[$idx]['rty_IDInOriginatingDB']==''){ 
-                         
+
+                if (array_key_exists('rty_IDInOriginatingDB',$this->records[$idx])
+                     && $this->records[$idx]['rty_IDInOriginatingDB']==''){
+
                     $this->records[$idx]['rty_IDInOriginatingDB'] = null;
                     unset($this->records[$idx]['rty_IDInOriginatingDB']);
                 }
-                
-                if(array_key_exists('rty_LocallyModified',$this->records[$idx])){ 
+
+                if(array_key_exists('rty_LocallyModified',$this->records[$idx])){
                     $this->records[$idx]['rty_LocallyModified'] = null;
                     unset($this->records[$idx]['rty_LocallyModified']);
                 }
             }
-            
+
             $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s');//reset
-            
+
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
         }
-        
-        return $ret;
-        
-    }    
 
-    //      
+        return $ret;
+
+    }
+
+    //
     //
     //
     public function save(){
 
 
         $ret = parent::save();
-       
+
         if($ret!==false){
-            
+
             $dbID = $this->system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) {$dbID = 0;}
-            
+
             $mysqli = $this->system->get_mysqli();
-            
+
             foreach($this->records as $idx=>$record){
                 $rty_ID = @$record['rty_ID'];
                 if($rty_ID>0 && in_array($rty_ID, $ret)){
-                    
+
                     $query = null;
                     if($record['is_new']){
                         //1. if new add default set of fields TODO!
@@ -429,20 +429,20 @@ class DbDefRecTypes extends DbEntityBase
                             //add default set of detail types
                             addDefaultFieldForNewRecordType($rtyID, $newfields);
                         }*/
-                        
+
                         //2. set dbid or update modified locally
                         $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                                 .', rty_NameInOriginatingDB=rty_Name'
                                 .', rty_IDInOriginatingDB='.$rty_ID
                                 .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.$rty_ID;
-                                   
+
                     }else{
                         $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)'
                                 . ' WHERE rty_ID = '.$rty_ID;
                     }
                     $res = $mysqli->query($query);
-                    
-                        
+
+
                     //3. update titlemask - from names to ids
                     $mask = @$record['rty_TitleMask'];
                     if($mask){
@@ -454,32 +454,32 @@ class DbDefRecTypes extends DbEntityBase
 
                             $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
                             if(!is_numeric($res)){
-                                $this->system->addError(HEURIST_DB_ERROR, 
+                                $this->system->addError(HEURIST_DB_ERROR,
                                     'SQL error updating title mask for record type '.$rty_ID, $res);
                             }
                     }
-            
-            
+
+
                     //4. treat thumbnail
                     $thumb_file_name = @$record['rty_Thumb'];
                     //rename it to recID.png and copy to entity/defRecTypes
                     if($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $rty_ID, 'thumbnail');
                     }
-                    
+
                     //treat icon
                     $icon_file_name = @$record['rty_Icon'];
                     //rename it to recID.png and copy to entity/defRecTypes
                     if($icon_file_name){
                         parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
                     }
-                    
+
                 }
             }
-        }        
+        }
         return $ret;
-    }  
-    
+    }
+
     //
     // batch action for rectypes
     // 1) import rectype from another db - @todo
@@ -577,24 +577,24 @@ class DbDefRecTypes extends DbEntityBase
         if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
         return $ret;
-    }    
-    
+    }
+
     //
     // returns where conditions for record ownership/visibility
     //
     private function _getRecordOwnerConditions($ugr_ID){
-        
+
         $from = '';
         $wg_ids = array();
-        
+
         $where2 = '';
         $where2_conj = '';
         if($ugr_ID!=2){ //by default always exclude "hidden" for not database owner
-        
+
                 if($ugr_ID>0){
-                    
+
                     $currentUser = $this->system->getCurrentUser();
-                    
+
                     if($currentUser['ugr_ID']==$ugr_ID){
                         if(@$currentUser['ugr_Groups']){
                             $wg_ids = array_keys($currentUser['ugr_Groups']);
@@ -604,52 +604,52 @@ class DbDefRecTypes extends DbEntityBase
                         }
                     }
                 }
-                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup    
-        
+                array_push($wg_ids, 0);// be sure to include the generic everybody workgroup
+
                     //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
-                
+
                 $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
                 if ($ugr_ID>0){ //logged in
-                    
+
                         //if there is entry for record in usrRecPermissions current user must be member of allowed groups
                         $from = ' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
-                        
+
                         $where2 = $where2
                             .' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
                             .join(',', $wg_ids).')))';
                 }
-                    
+
                 $where2_conj = ' or ';
         }else{
-            $wg_ids = array();//all groups for admin    
-        }        
+            $wg_ids = array();//all groups for admin
+        }
         if($ugr_ID>0 && is_array($wg_ids) && count($wg_ids)>0){
             $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
         return array($from, '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2);
     }
-    
+
     //
     //
     //
     public function counts(){
 
         $res = null;
-                
+
         if(@$this->data['mode']=='record_count')
         {
-            
+
             $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = '';
-/*        
-        LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID  
+/*
+        LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID
 WHERE
- (not r0.rec_FlagTemporary) and ( (r0.rec_NonOwnerVisibility in ("public","pending")) 
- or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (14,0))) 
- or r0.rec_OwnerUGrpID in (14,0) ) GROUP BY r0.rec_RecTypeID            
+ (not r0.rec_FlagTemporary) and ( (r0.rec_NonOwnerVisibility in ("public","pending"))
+ or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (14,0)))
+ or r0.rec_OwnerUGrpID in (14,0) ) GROUP BY r0.rec_RecTypeID
             $query = 'SELECT d.rty_ID, count(r0.rec_ID) FROM defRecTypes d ';
             $where = ' LEFT OUTER JOIN Records r0 ON r0.rec_RectypeID=d.rty_ID AND ';
-*/              
+*/
             if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
                 $query = $query . $conds[0];
@@ -660,16 +660,16 @@ WHERE
             if(@$this->data['rty_ID']>0){
                 $where = $where . ' AND (r0.rec_RecTypeID='.$this->data['rty_ID'].')';
             }
-            
+
             $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID';// ORDER BY cnt DESC
-          
+
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
-           
+
         }else if(@$this->data['mode']=='cms_record_count'){
-            
+
             $this->system->defineConstant('RT_CMS_HOME');
             $this->system->defineConstant('RT_CMS_MENU');
-            
+
             $query = 'SELECT count(r0.rec_ID) as cnt FROM Records r0 ';
             $where = 'WHERE (r0.rec_RecTypeID='.RT_CMS_HOME.') ';
 
@@ -680,28 +680,28 @@ WHERE
             }else{
                 $conds = array('', ' AND (not r0.rec_FlagTemporary)');
             }
-           
+
             $res = mysql__select_value($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);//total count
-            
+
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
 
             $res2 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
             if($res2==null) {$res2 = array();}
-            
+
             $query = 'SELECT r0.rec_ID FROM Records r0 ';
             $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
                                 .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
 
             $res3 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
             if($res3==null) {$res3 = array();}
-            
-            $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
+
+            $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3),
                 'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);
-            
+
         }
-        
+
         return $res;
     }
 }

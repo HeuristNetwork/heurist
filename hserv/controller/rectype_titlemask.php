@@ -3,7 +3,7 @@
 /**
 * Controller for operations with record type title mask
 * See records/edit/recordTitleMask.php
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -28,7 +28,7 @@ parameters
 
 rty_id - record type id to check
 mask - title mask, if not defined we get current mask if check=0
-rec_id - execute mask for this record 
+rec_id - execute mask for this record
 
 check 0 - execute for given record id
       1 - validate mask
@@ -40,24 +40,24 @@ check 0 - execute for given record id
 // Initialize a System object that uses the requested database
 $system = new System();
 if( $system->init(@$_REQUEST['db']) ){
-            
+
             $rectypeID = @$_REQUEST['rty_id'];
             $mask = @$_REQUEST['mask'];
             $check_mode = @$_REQUEST["check"];
-            
+
             $invalid_mask = null;
             $response = null;
 
             if($check_mode==2){ //get coded mask
-                
+
                 $res = TitleMask::execute($mask, $rectypeID, 1, null, ERROR_REP_MSG);
                 if (is_array($res)) {
                     $invalid_mask =$res[0];
                 }else{
                     $response = $res;
                 }
-                
-            }else 
+
+            }else
             if($check_mode==3){ //to human readable
 
                 $res = TitleMask::execute($mask, $rectypeID, 2, null, ERROR_REP_MSG);
@@ -67,10 +67,10 @@ if( $system->init(@$_REQUEST['db']) ){
                 }else{
                     $response = $res;
                 }
-                
+
             }else
             if($check_mode==1){ //verify text title mask
-            
+
                 $check = TitleMask::check($mask, $rectypeID, true);
 
                 if (!empty($check)) { //empty means titlemask is valid
@@ -78,20 +78,20 @@ if( $system->init(@$_REQUEST['db']) ){
                 }else{
                     $response = null;
                 }
-                
+
             }else{
-                
+
                 $recID = @$_REQUEST['rec_id'];
                 $new_title = TitleMask::execute($mask, $rectypeID, 3, $recID, ERROR_REP_WARN);//convert to coded and fill values
                 $response =  $new_title;
-                
+
             }
-    
+
     $system->dbclose();
-    
+
     $response = array("status"=>HEURIST_OK, 'data'=>$response, 'message'=>$invalid_mask );
-            
-}else{   
+
+}else{
     $response = $system->getError();
 }
 

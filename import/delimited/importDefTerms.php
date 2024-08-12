@@ -18,7 +18,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
 define('LOGIN_REQUIRED',1);
 define('PDIR','../../');
 
@@ -38,8 +38,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     var importDefTerms = new hImportDefTerms(trm_ID, vcg_ID, isTranslation);
                 }
             }
-        
-        
+
+
         </script>
         <style>
             body{
@@ -62,7 +62,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 font-size: 1em;
             }
 
-            div.top-div, 
+            div.top-div,
 			div.bottom-div{
 				display: flex;
 				align-content: center;
@@ -86,7 +86,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 				flex: 0 1 200px;
 			}
         </style>
-        
+
     </head>
 
     <!-- HTML -->
@@ -100,28 +100,28 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
       <div style="padding-top:4px">
         <h2 style="display: inline-block;margin:0">or</h2>
         <div id="btnUploadFile">Upload File</div>
-        <div style="float:right">encoding: 
+        <div style="float:right">encoding:
             <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
             </select>
        </div>
-    </div>          
-    <div class="heurist-helper1" style="padding-top: 9px;">
-Separate term hierarchy levels with a period ( . ) eg. "History.Medieval.Late". 
-<br>If supplying optional standard code, description and semantic URI, 
-separate term and each of these values with comma or tab.
-    </div>                                    
-                    
     </div>
-    <textarea id="sourceContent" rows="15" cols="0" 
+    <div class="heurist-helper1" style="padding-top: 9px;">
+Separate term hierarchy levels with a period ( . ) eg. "History.Medieval.Late".
+<br>If supplying optional standard code, description and semantic URI,
+separate term and each of these values with comma or tab.
+    </div>
+
+    </div>
+    <textarea id="sourceContent" rows="15" cols="0"
     style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
-    
-    
+
+
 </div>
 <div id="divStep2">
     <div style="height:10em;">
         <p><b>Step 2</b></p>
         <div>
-            <input id="csv_header" 
+            <input id="csv_header"
                 style="margin:0 0.5em 0 0"
                 class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
             <label for="csv_header">Labels in line 1</label>
@@ -162,15 +162,15 @@ separate term and each of these values with comma or tab.
                 <label for="term_separator">Sub-term separator:</label>
                 <input id="term_separator" class="text ui-widget-content ui-corner-all" style="width: 25px;margin-left: 8px;">
             </div>
-    </fieldset>            
+    </fieldset>
 </div>
-<div id="divStep3"> 
+<div id="divStep3">
     <div style="height:6em;">
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(Term label is required)</p>
     </div>
     <fieldset style="padding-top:1em;" class="trm_import"><legend style="display:none"></legend>
-           
+
             <div>
                 <span style="color:red">Term (Label)</span><br>
                 <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
@@ -191,7 +191,7 @@ separate term and each of these values with comma or tab.
                 <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-    </fieldset> 
+    </fieldset>
 
     <fieldset style="padding-top:1em;display:none" class="trm_translation">
             <legend>Define field for reference</legend>
@@ -205,7 +205,7 @@ separate term and each of these values with comma or tab.
                 <select id="field_ref_id" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-            
+
             <br><span>Define fields with translated values</span>
             <div>
                 <span>Term (Label)</span><br>
@@ -217,9 +217,9 @@ separate term and each of these values with comma or tab.
                 <select id="field_trn_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-    </fieldset> 
-    
-    
+    </fieldset>
+
+
     <div style="padding-left:5px;height:5em">
         <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>

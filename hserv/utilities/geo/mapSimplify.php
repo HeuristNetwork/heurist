@@ -134,15 +134,15 @@ class Simplify {
 //
 //
 function simplifyCoordinates(&$orig_points){
-    
+
     if(count($orig_points)>1000){
-        
+
         //invert
         $points = array();
         foreach ($orig_points as $point) {
             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
         }
-        
+
         $tolerance = 0.01;// 0.002;
         $crn = 0; //count of run
         $points2 = $points;
@@ -158,7 +158,7 @@ function simplifyCoordinates(&$orig_points){
                 array_push($orig_points, array($point['x'], $point['y']) );
             }
         }
-        
+
     }
 }
 ?>

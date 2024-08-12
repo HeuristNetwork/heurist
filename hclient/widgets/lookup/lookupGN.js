@@ -255,7 +255,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             return;
         }
 
-        let sURL = 'http://api.geonames.org/';
+        let sURL = 'http'+'://api.geonames.org/';
         let xml_response = 0;
 
         if(this.element.find('#inpt_id').val()!=''){

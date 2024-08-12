@@ -17,7 +17,7 @@
  * Smarty Heurist translation modifier plugin
  * Type:     modifier
  * Name:     returns translated value for given array of field values
- * Purpose:  
+ * Purpose:
  *
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney

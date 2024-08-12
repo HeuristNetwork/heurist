@@ -15,7 +15,7 @@
 */
 
 /**
-* encode polyline 
+* encode polyline
 *
 * @author      Kim Jackson
 * @copyright   (C) 2005-2023 University of Sydney
@@ -35,7 +35,7 @@
 // visible at all zoom levels. forceEndpoints is
 // optional with a default value of true. Probably
 // should stay true regardless.
- 
+
 
 $numLevels = 21;
 $zoomFactor = 3;

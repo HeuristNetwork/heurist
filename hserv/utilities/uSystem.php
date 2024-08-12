@@ -1,7 +1,7 @@
 <?php
 /**
 * Library to obtain system and php config value
-* 
+*
 * getHostParams
 * isMemoryAllowed
 * getConfigBytes
@@ -26,9 +26,9 @@ class USystem {
 
     /**
     * Return host doain, server url and installion folder
-    * 
-    * @param mixed 
-    * 
+    *
+    * @param mixed
+    *
     * @return array (domain,server_url,install_dir)
     */
     public static function getHostParams( $argv=null )
@@ -66,13 +66,13 @@ class USystem {
                 if(in_array($iDir[$i], $codeFolders)) {
                     $installDir = '/'.$iDir[$i].'/';
                     $path = array_slice($iDir, 0, $i);
-                    break;   
+                    break;
                 }
             }
 
             $installDir_pro = '/heurist/';
             $host_params['heurist_dir'] = implode('/',$path).'/';
-            
+
             $host_params['server_name'] = $serverName;
 
             //echo "Install dir      $installDir \n";
@@ -84,9 +84,9 @@ class USystem {
             $always_detect = true;
             if ($always_detect){ //always detect dynamically  !@$serverName) {
                 if(@$_SERVER["SERVER_NAME"]){
-                    
-                    $host_params['server_name'] = $_SERVER["SERVER_NAME"] . 
-                    ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443") 
+
+                    $host_params['server_name'] = $_SERVER["SERVER_NAME"] .
+                    ((is_numeric(@$_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80" && $_SERVER["SERVER_PORT"] != "443")
                         ? ":" . $_SERVER["SERVER_PORT"] : "");
                     $host_params['domain'] = $_SERVER["SERVER_NAME"];
                 }else{
@@ -106,14 +106,14 @@ class USystem {
             elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' || !empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] == 'on') {
                 $isSecure = true;
             }
-            
+
             $installDir = '/heurist';
             $is_own_domain = (strpos($_SERVER["SERVER_NAME"],'.huma-num.fr')>0 && $_SERVER["SERVER_NAME"]!='heurist.huma-num.fr');
             if(!$is_own_domain){
 
             $rewrite_actions = 'website|web|hml|tpl|view|edit|adm';//actions for redirection https://hist/heurist/[dbname]/web/
 
-            if(@$_SERVER["SCRIPT_NAME"] && 
+            if(@$_SERVER["SCRIPT_NAME"] &&
                 (substr($_SERVER["SCRIPT_NAME"], -4 ) === '/web' || substr($_SERVER["SCRIPT_NAME"], -8 ) === '/website')){
                 $_SERVER["SCRIPT_NAME"] .= '/';//add last slash
             }
@@ -133,11 +133,11 @@ class USystem {
                 }
 
             }
-            
+
             }
 
             // this should be the path difference between document root $_SERVER["DOCUMENT_ROOT"] and heurist code root
-            if ($installDir == @$_SERVER["SCRIPT_NAME"]) { 
+            if ($installDir == @$_SERVER["SCRIPT_NAME"]) {
                 $installDir = '/';
                 $installDir_pro = '/';
             }else{
@@ -148,7 +148,7 @@ class USystem {
                 for ($i=$cntDir; $i>=0; $i--){
                     if($iDir[$i]!='') {
                         $iDir[$i] = 'heurist';
-                        break;   
+                        break;
                     }
                 }
                 $installDir_pro = implode('/', $iDir);
@@ -163,10 +163,10 @@ class USystem {
                         if($installDir_pro!=$installDir){
                             $test_file = @$_SERVER["DOCUMENT_ROOT"].$installDir_pro.'configIni.php';
                             if(!file_exists($test_file)){
-                                $installDir_pro = $installDir;        
+                                $installDir_pro = $installDir;
                             }
                         }
-                        break; 
+                        break;
                     }
                     if($i==count($codeFolders)){
                         exit('Sorry, it is not possible to detect heurist installation folder. '
@@ -178,7 +178,7 @@ class USystem {
             }
 
 
-        }    
+        }
 
         $host_params['server_url'] = ($isSecure ? 'https' : 'http') . "://" . $host_params['server_name'];
         $host_params['install_dir'] = $installDir;
@@ -191,7 +191,7 @@ class USystem {
 
     /**
     * Returns true if specified bytes can be loaded into memory
-    *     
+    *
     * @param mixed $memoryNeeded
     */
     public static function isMemoryAllowed( $memoryNeeded ){
@@ -209,7 +209,7 @@ class USystem {
 
     /**
     * Return amount of bytes for given php config variable
-    *     
+    *
     * @param mixed $php_var
     */
     public static function getConfigBytes( $php_var, $val=null ){
@@ -225,7 +225,7 @@ class USystem {
         }
 
         switch($last) {
-            case 'g':  
+            case 'g':
                 $val *= 1073741824; break;
             case 'm':
                 $val *= 1048576; break;
@@ -242,7 +242,7 @@ class USystem {
 
     /**
      * Return array of processed user agent details
-     * 
+     *
      * @return array [os, browser]
      */
     public static function getUserAgent(){

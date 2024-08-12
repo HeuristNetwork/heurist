@@ -33,46 +33,46 @@
         $response = $system->getError();
 
     }else {
-        
+
         set_time_limit(0);
-        
+
         $dbRecDetails = new RecordsBatch($system, $_REQUEST);
 
-         
+
         if(is_array(@$_REQUEST['actions'])){
-        
+
             $res = $dbRecDetails->multiAction();
-        
-        }else         
+
+        }else
         if(@$_REQUEST['a'] == 'add'){
 
             $res = $dbRecDetails->detailsAdd();
 
-        }else if(@$_REQUEST['a'] == 'replace'){ 
-        
+        }else if(@$_REQUEST['a'] == 'replace'){
+
             $res = $dbRecDetails->detailsReplace();
 
-        }else if(@$_REQUEST['a'] == 'addreplace'){ 
-        
+        }else if(@$_REQUEST['a'] == 'addreplace'){
+
                 $res = $dbRecDetails->detailsReplace();
                 if(is_array($res) && @$res['passed']==1 && @$res['undefined']==1){
                     //detail not found - add new one
                     $res = $dbRecDetails->detailsAdd();
                 }
-            
+
         }else if(@$_REQUEST['a'] == 'delete'){
 
             $res = $dbRecDetails->detailsDelete();
 
         }else if(@$_REQUEST['a'] == 'add_reverse_pointer_for_child'){
-            
+
             $res = $dbRecDetails->addRevercePointerForChild();
-            
+
         }else if(@$_REQUEST['a'] == 'add_links_by_matching'){
-            
+
             $res = $dbRecDetails->createRecordLinksByMatching();
-            
-            
+
+
         }else if(@$_REQUEST['a'] == 'rectype_change'){
 
             $res = $dbRecDetails->changeRecordTypeInBatch();
@@ -84,8 +84,8 @@
         }else if(@$_REQUEST['a'] == 'url_to_file'){
 
             $res = $dbRecDetails->changeUrlToFileInBatch();
-            
-        }else if(@$_REQUEST['a'] == 'local_to_repository'){ 
+
+        }else if(@$_REQUEST['a'] == 'local_to_repository'){
             // load several  files (linked to set of records) ext.repository - from recordAction
             // see also upload_file_nakala in usr_info
             $res = $dbRecDetails->uploadFileToRepository();
@@ -93,7 +93,7 @@
         }else if(@$_REQUEST['a'] == 'reset_thumbs'){
 
             $res = $dbRecDetails->resetThumbnails();
-            
+
         }else if(@$_REQUEST['a'] == 'create_sub_records'){
 
             $res = $dbRecDetails->createSubRecords();
@@ -110,19 +110,19 @@
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         }
-        
+
         $dbRecDetails->removeSession();
-        
+
         $system->dbclose();
     }
 
-    
+
     if( is_bool($res) && !$res ){
         $response = $system->getError();
     }else{
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
-    
+
     $system->setResponseHeader();//UTF-8?? apparently need to remove
     print json_encode($response);
     exit;

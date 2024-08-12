@@ -17,7 +17,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
 
     $src_maj = intval( $row['sys_dbVersion'] );
     $src_min = intval( $row['sys_dbSubVersion'] );
-    
+
     $upgrade_success = true;
 
     if($src_min>=$trg_min){
@@ -91,6 +91,6 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
     }
     if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
-    return $upgrade_success; 
-}  
+    return $upgrade_success;
+}
 ?>

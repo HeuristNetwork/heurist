@@ -269,7 +269,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
             return;
         }
 
-        let sURL = 'http://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI;
+        let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI;
 
         if(this.element.find('#inpt_postalcode').val()!=''){
             sURL += '&postalcode=' + this.element.find('#inpt_postalcode').val(); 

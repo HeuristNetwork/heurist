@@ -37,9 +37,9 @@ if( @$_REQUEST['isalive']==1){
     }
     //print $is_inited?'ok':'error:'.$system->getErrorMsg();
     exit;
-    
+
 }else
-//redirection for CMS 
+//redirection for CMS
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
 
     $recid = 0;
@@ -57,14 +57,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         $recid = intval($recid);
     }
-    
-    
+
+
     if(@$_REQUEST['fmt']){
         $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
     }elseif(@$_REQUEST['format']){
         $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
     }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
-    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ) 
+    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) )
     {
         $format = 'website';
 
@@ -95,14 +95,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (@$_REQUEST['ent']){
 
-    //to avoid "Open Redirect" security warning    
+    //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    
+
     header('Location: hserv/controller/api.php?'.$query_string);
     return;
-    
-}else 
+
+}else
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
@@ -115,7 +115,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
 }else if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
           array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
-              
+
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
@@ -128,14 +128,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';
     }
-        
-    //to avoid "Open Redirect" security warning    
+
+    //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    
+
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
-    
+
 }else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
     $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
@@ -191,7 +191,7 @@ if($isLocalHost){
     print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
 }else{
     print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
-}   
+}
 ?>
 
 <!-- it is needed in preference dialog -->
@@ -247,7 +247,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
 
-<!-- edit entity -->        
+<!-- edit entity -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectMultiValues.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFolders.js"></script>
@@ -324,7 +324,7 @@ number of widgets. Currently it is commented out of the code in layout_default.j
 if($isLocalHost){
     ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
-    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>        
+    <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>
     <?php
 }else{
     ?>
@@ -332,7 +332,7 @@ if($isLocalHost){
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.js"></script>        
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.21/b-1.6.2/b-html5-1.6.2/datatables.min.js"></script>
     <?php
 }
 ?>
@@ -352,15 +352,15 @@ if($isLocalHost){
             }
         });
 
-<?php        
+<?php
 /*
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
     print 'window.hWin.HAPI4.postparams='.json_encode($req_params).';';
     print 'console.log(window.hWin.HAPI4.postparams)';
-}     
+}
 */
-?>     
+?>
 
         //
         // cfg_widgets and cfg_layouts are defined in layout_default.js
@@ -374,7 +374,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
 
 
         <?php
-        //returns total records in db and counts of active entries in dashboard  
+        //returns total records in db and counts of active entries in dashboard
         list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard();
         echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
         echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
@@ -384,7 +384,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         var lt = window.hWin.HAPI4.sysinfo['layout'];
 
         window.hWin.HAPI4.is_publish_mode = (lt=='WebSearch');
-        
+
         if(lt=='WebSearch'){
             $('#layout_panes').css({'height':'100%',width:'100%',position:'absolute'});
             $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
@@ -441,21 +441,21 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         }
 
         if(!window.hWin.HAPI4.is_publish_mode)
-        {                
+        {
 
             if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                //version is old 
+                //version is old
                 return;
             }
-            
-            
+
+
             var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
             if(editRecID>0){
                 //edit record
                 window.hWin.HEURIST4.ui.openRecordEdit(editRecID, null);
             }else
                 if(window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search) ||
-                    (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
+                    (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) &&
                         window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
                 {
                     //add new record from bookmarklet  - see recordEdit.php as alternative, it opens record editor in separate window
@@ -579,19 +579,19 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
 
         <p style="padding:10px">Please <?php echo CONTACT_HEURIST_TEAM;?> for further information or to express an interest in a tablet version</p>
-    </div> 
+    </div>
 
     <div id="heurist-safari-warning" style="display:none;">
         <p style="padding:10px">
-            Heurist is not fully supported in Safari. 
-            Sorry, we no longer support Apple's Safari browser which was discontinued on Windows over a decade ago due to the appearance of widely used free cross-platform browsers such as Chrome and Firefox. 
+            Heurist is not fully supported in Safari.
+            Sorry, we no longer support Apple's Safari browser which was discontinued on Windows over a decade ago due to the appearance of widely used free cross-platform browsers such as Chrome and Firefox.
         </p>
 
         <p style="padding:10px">
             Please download Chrome or Firefox to use with Heurist (and perhaps with your other applications).
         </p>
-    </div> 
-    
+    </div>
+
     <div id="heurist-dialog">
     </div>
 

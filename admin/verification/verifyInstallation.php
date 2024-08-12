@@ -40,7 +40,7 @@ if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         <title>Verify Heurist installation</title>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        
+
         <link rel="stylesheet" type="text/css" href="../../h4styles.css" />
         <style type="text/css">
             h3, h3 span {
@@ -79,12 +79,12 @@ if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         <div id="page-inner" style="padding-left: 6px;">
             This function verifies the presence of required PHP extensions.
             <!--
-            and the location and writeability of folders required by the software.<br> 
+            and the location and writeability of folders required by the software.<br>
             It assumes that all instances of Heurist are located in subdirectories
             in a common location (generally /var/www/html/HEURIST)<br>
             and point to the same Heurist filestore (generally .../HEURIST/HEURIST_FILESTORE,
             which is often a simlink to the real storage location).<br>
-            TODO: Checks should include: external javascript functions; help system; root file upload directory; index.html in parent. <br> 
+            TODO: Checks should include: external javascript functions; help system; root file upload directory; index.html in parent. <br>
             -->
 
             <br><br><h3>If running within Heurist please run this using the latest instance on your server</h3><br>
@@ -118,14 +118,14 @@ if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
 
             if (extension_loaded("pdo_sqlite")) {print "pdo_sqlite ok<br>";} else {print "pdo_sqlite MISSING, optional, required for FAIMS<br>";}
             if (extension_loaded("exif")) {print "exif ok<br>";} else {print "exif MISSING, optional, required for image file indexing<br>";}
-            
+
             if (extension_loaded("imagick")) {print "imagick ok<br>";} else {print "imagick MISSING, optional, required for image webcache and pdf thumbnails<br>";}
 
             print "<br><br><h3>All loaded extensions:</h3><br>";
             // TODO: write lsit of loaded extensions out neatly rather than dumping the array
             print_r(get_loaded_extensions());
-            
-            
+
+
             print "<br><hr><br><h3>MySQL database server</h3><br>";
             $mysqli = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);
             if ( is_array($mysqli) ){
@@ -141,7 +141,7 @@ if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
             ?>
 
             <br><hr><br><h3>Paths</h3><br>
-            <?php    
+            <?php
                 print $defaultRootFileUploadPath.'<br>';
                 print $defaultRootFileUploadURL;
             ?>

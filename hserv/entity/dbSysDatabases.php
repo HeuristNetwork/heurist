@@ -2,7 +2,7 @@
 
     /**
     * db access to Heurist_DBs_index.sysIdentifications and sysUsers tables
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -25,11 +25,11 @@ require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
 
 
-class DbSysDatabases extends DbEntityBase 
+class DbSysDatabases extends DbEntityBase
 {
     /**
     *  search user or/and groups
-    * 
+    *
     *  sysUGrps.ugr_ID
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
@@ -39,18 +39,18 @@ class DbSysDatabases extends DbEntityBase
     *  sysUsrGrpLinks.ugl_GroupID
     *  sysUsrGrpLinks.ugl_Role
     *  (omit table name)
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
 
-        //compose WHERE 
+        //compose WHERE
         $where = array();
         $current_user_email = null;
 
@@ -103,6 +103,6 @@ class DbSysDatabases extends DbEntityBase
     public function save(){
         //virtual method
     }
-    
+
 }
 ?>

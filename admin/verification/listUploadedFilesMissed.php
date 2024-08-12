@@ -1,7 +1,7 @@
 <?php
 
 /**
-* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php: 
+* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php:
 * Lists missed files that are listed in recUploadedFiles
 *
 * @package     Heurist academic knowledge management system
@@ -29,31 +29,31 @@ $has_broken_url = false;
 if($is_included){
 
     print '<div style="padding:10px"><h3 id="recordfiles_missed_msg">Check missed registered files</h3><br>';
-    
+
 }else{
     define('PDIR','../../');
-    
+
     require_once dirname(__FILE__).'/../../hserv/System.php';
-    
+
     $sysadmin_pwd = System::getAdminPwd();
-    
+
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         print $system->getError()['message'];
         return;
     }
-    
+
     if( @$_REQUEST['all']==1 ){
         if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
         ?>
-        
+
         <form action="listUploadedFilesMissed.php" method="POST">
             <div style="padding:20px 0px">
                 Only an administrator (server manager) can carry out this action.<br>
                 This action requires a special system administrator password (not a normal login password)
             </div>
-        
+
             <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
             <input type="password" name="pwd" autocomplete="off" />
             <input type="hidden" name="db" value="<?php  echo htmlspecialchars($_REQUEST['db']);?>"/>
@@ -69,7 +69,7 @@ if($is_included){
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
         exit;
     }
-?>    
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -82,7 +82,7 @@ if($is_included){
             <h3>Missed registered files</h3>
         </div>
         <div id="page-inner">
-<?php    
+<?php
 }
 
 $mysqli = $system->get_mysqli();
@@ -111,9 +111,9 @@ foreach ($databases as $idx=>$db_name){
 
     $query2 = 'SELECT ulf_FilePath, ulf_FileName FROM `'.$db_full_name.'`.recUploadedFiles '
                     .'WHERE ulf_FileName is not null ORDER BY ulf_FilePath';
-                    
+
     $res2 = $mysqli->query($query2);
-    
+
     if($res2){
 
         while ($row = $res2->fetch_assoc()) {
@@ -134,21 +134,21 @@ foreach ($databases as $idx=>$db_name){
                 }
                 $total_count++;
             }
-            
+
         }//while
-        
+
         $res2->close();
-        
+
     }else{
         print htmlspecialchars($db_name).' Cannot execute query. Error: '.$mysqli->error;
     }
 
 }//for databases
 
-if(!(is_array($missed) && count($missed)>0)){        
+if(!(is_array($missed) && count($missed)>0)){
     echo '<div><h3 class="res-valid">OK: All records have valid URL</h3></div>';
 }else{
-    
+
     print 'Summary:<br>';
     foreach($missed_folders as $key=>$cnt){
         print $key.",".intval($cnt).'<br>';
@@ -159,16 +159,16 @@ if(!(is_array($missed) && count($missed)>0)){
     foreach($missed as $data){
         print htmlspecialchars(implode(',',$data)).'<br>';
     }
-    
+
     print '<div style="padding-top:20px;color:red">There are <b>'.count($missed).' of '.$total_count
          .'</b> registered files are missed</div>';
     //print '<div><a href="#">Download report as CSV</a></div>';
 }
 
-if(!$is_included){    
+if(!$is_included){
     print '</div></body></html>';
 }else{
-    
+
     if($has_broken_url){
         echo '<script>$(".recordfiles_missed").css("background-color", "#E60000");</script>';
     }else{

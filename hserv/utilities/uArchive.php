@@ -1,19 +1,19 @@
 <?php
 /**
-* uArchive.php 
-* 
+* uArchive.php
+*
 *   zip
 *   unzip
 *   unzipFlat
-*   
+*
 *   createBz2
 *   extractBz2 - if bz2 archive contains the only file
-* 
+*
 * At the moment we have 3 places where we use archives
 * DbUtils::databaseDrop  - optionally archive the entire dbfolder+sql dump into single archive
 * Safeguard archive/upload to repository - creates 3 archives a) with individual set of folder (depends on user preferences)+dump b) sql dump c) hml
 * Purge inactive databases.  Uses DbUtils::databaseDrop and optionally creates 2 archives with sysArchive and Import tables
-* 
+*
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -80,7 +80,7 @@ class UArchive {
                     foreach ($only_these_folders as $idx=>$folder) {
                         $folder = str_replace('\\', '/', $folder);
                         if(strpos( $folder, $source )!==0){
-                            $folder = $source."/".$folder;    
+                            $folder = $source."/".$folder;
                         }
                         $only_these_folders[$idx] = $folder;
                     }
@@ -88,7 +88,7 @@ class UArchive {
 
                 $entry_idx = 0;
                 $do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
-                
+
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -142,7 +142,7 @@ class UArchive {
                                 $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
                             }
                             $entry_idx++;
-                            
+
                             //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
                         }
                     }
@@ -165,19 +165,19 @@ class UArchive {
                     echo "<br>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
                 }
             }else{
-                return $verbose?($destination.' archive not created. Directory may be non-writeable or archive function is not installed on server'):false;    
+                return $verbose?($destination.' archive not created. Directory may be non-writeable or archive function is not installed on server'):false;
             }
             return true;
 
         } catch (Exception  $e){
             error_log( $e->getMessage() );
             return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.Exception::getMessage()):false;
-        }                            
+        }
     }
 
     /**
     * unzip given archive to destination folder
-    * 
+    *
     * @param mixed $system
     * @param mixed $zipfile
     * @param mixed $destination
@@ -187,26 +187,26 @@ class UArchive {
         if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
             throw new Exception('Archive file not found');
         }
-        
+
         $root_folder = $system->getFileStoreRootFolder();
         chdir($root_folder);
         $root_folder = realpath($root_folder);
 
         if (strpos($root_folder, '\\')!==false){
             $root_folder = str_replace('\\','/',$root_folder);
-        } 
-        
+        }
+
         //set current folder
-        chdir($destination);// relatively db root  or HEURIST_FILES_DIR??        
+        chdir($destination);// relatively db root  or HEURIST_FILES_DIR??
         $destination_dir = realpath($destination);
 
         if ($destination_dir !== false) {
             if (strpos($destination_dir, '\\')!==false){
                 $destination_dir = str_replace('\\','/',$destination_dir);
-            } 
+            }
             if( substr($destination_dir, -1, 1) != '/' ){
                 $destination_dir = $destination_dir.'/';
-            }  
+            }
             if (strpos($destination_dir, $root_folder) !== 0) {
                 //HEURIST_SCRATCH_DIR
                 //HEURIST_TILESTACKS_DIR
@@ -268,12 +268,12 @@ class UArchive {
             }
             $zip->close();
         }
-        
+
         return $fileCount;
 
     }
     //
-    // flatten zip archive - extract without structures 
+    // flatten zip archive - extract without structures
     // returns list of files
     //
     public static function unzipFlat($zipfile, $destination){
@@ -281,18 +281,18 @@ class UArchive {
         if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
 
             $res = array();
-            $zip = new ZipArchive; 
-            if ( $zip->open( $zipfile ) === true) 
-            { 
-                for ( $i=0; $i < $zip->numFiles; $i++ ) 
-                { 
+            $zip = new ZipArchive;
+            if ( $zip->open( $zipfile ) === true)
+            {
+                for ( $i=0; $i < $zip->numFiles; $i++ )
+                {
                     $entry = $zip->getNameIndex($i);
-                    if ( substr( $entry, -1 ) == '/' ) {continue;} // skip directories 
+                    if ( substr( $entry, -1 ) == '/' ) {continue;} // skip directories
 
                     $fp = $zip->getStream( $entry );
                     if (!$fp ) {
                         throw new Exception('Unable to extract the file.');
-                    }else{                
+                    }else{
                         $filename = $destination.USanitize::sanitizeFileName(basename($entry));//snyk SSRF
                         $ofp = fopen($filename, 'w' );
                         while ( ! feof( $fp ) ) {
@@ -304,13 +304,13 @@ class UArchive {
 
                         $res[] = $filename;
                     }
-                } 
+                }
 
                 $zip->close();
                 return $res;
-            } 
+            }
             else {
-                return false; 
+                return false;
             }
         }else{
             return false;
@@ -361,7 +361,7 @@ class UArchive {
                     foreach ($only_these_folders as $idx=>$folder) {
                         $folder = str_replace('\\', '/', $folder);
                         if(strpos( $folder, $source )!==0){
-                            $folder = $source."/".$folder;    
+                            $folder = $source."/".$folder;
                         }
                         $only_these_folders[$idx] = $folder;
                     }
@@ -369,7 +369,7 @@ class UArchive {
 
                 $entry_idx = 0;
                 //$do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
-                
+
                 $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
@@ -421,7 +421,7 @@ class UArchive {
                             //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
                             //}
                             $entry_idx++;
-                            
+
                             $numFiles++;
 
                             //$phar->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
@@ -449,11 +449,11 @@ class UArchive {
             }
 
             $res = self::bzip2($destination, $destination.'.bz2');
-            
+
             if($res!==true){
                 return $verbose?$res:false;
             }
-            
+
             //$phar->compress(Phar::BZ2); it does not work for large data
 
             if(file_exists($destination.'.bz2')){ //
@@ -467,7 +467,7 @@ class UArchive {
                     echo "<br>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
                 }
             }else{
-                return $verbose?($destination.'.bz2 archive not created Directory may be non-writeable or archive function is not installed on server'):false;    
+                return $verbose?($destination.'.bz2 archive not created Directory may be non-writeable or archive function is not installed on server'):false;
             }
 
             return true;
@@ -475,12 +475,12 @@ class UArchive {
         } catch (Exception  $e){
             error_log( $e->getMessage() );
             return $verbose? ('Cannot create archive '.htmlspecialchars($destination).' '.$e->getMessage()) :false;
-        }                     
+        }
     }
-    
+
     /**
      * @return true or error message
-     * @param string $in - filename to be compressed 
+     * @param string $in - filename to be compressed
      * @param string $out - name of archive if not set it renames $in with bz2 ext and place in the same folder
      * @desc compressing the file with the bzip2-extension
     */
@@ -491,7 +491,7 @@ class UArchive {
         if (!file_exists ($in) || !is_readable ($in)){
             return 'Source file to be archived doesn\'t exists';
         }
-        
+
         if($out==null){
             $out = $in.'.bz2';
             if(file_exists($out)){
@@ -515,9 +515,9 @@ class UArchive {
         bzclose ($out_file);
 
         return true;
-    }    
-    
-    
+    }
+
+
     /**
      * @return bool
      * @param string $in

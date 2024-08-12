@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hserv/System.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
@@ -136,7 +136,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	}
 
 	while($db = $db_list->fetch_row()){
-        
+
         //check version - use >=1.3.0
         $query = 'SELECT sys_dbVersion, sys_dbSubVersion from '.$db[0].'.sysIdentification';
         $ver = mysql__select_row_assoc($mysqli, $query);
@@ -146,8 +146,8 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
             if($ver['sys_dbSubVersion']<3){
                 continue; //skip - old database
             }
-        }        
-        
+        }
+
 
 		// Ensure that the Heurist db has the required tables, ignore if they don't
         $query = "SHOW TABLES IN ".$db[0]." WHERE Tables_in_".$db[0]." = 'Records' OR Tables_in_".$db[0]." = 'recDetails' OR Tables_in_".$db[0]." = 'sysUGrps' OR Tables_in_".$db[0]." = 'sysUsrGrpLinks'";
@@ -188,15 +188,15 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
             default;
         }
 
-		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic 
-                    . " date_format(curdate(), '%Y-%m-%d') - INTERVAL " 
+		$lastmod_where = ($lastmod_unit!="ALL") ? "AND rec_Modified " . $lastmod_logic
+                    . " date_format(curdate(), '%Y-%m-%d') - INTERVAL "
                     . $lastmod_period . " " . $lastmod_unit . " " : "";
 
 		foreach ($dbs as $db) {
-            
+
             $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);
-            
-			$query = "SELECT count(*) 
+
+			$query = "SELECT count(*)
 								FROM (
 									SELECT *
 									FROM `$db`.Records AS rec
@@ -214,7 +214,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
                 if($row[0] > $count){
                     $data[] = $db;
                 }
-                
+
             }else{
 				$response = array("status"=>HEURIST_ERROR, "message"=>"Unable to filter Heurist databases based on provided filter.<br>", "error_msg"=>$mysqli->error, "request"=>$db_request);
 				$rtn = json_encode($response);
@@ -246,7 +246,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$email_list = array();
 
 	foreach($dbs as $db){
-        
+
         $db = preg_replace('/[^a-zA-Z0-9_]/', "", $db);//for snyk
 
 		if($user_request == "owner"){ // Owners
@@ -257,9 +257,9 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 			}else if($user_request == "admin"){ // Admins for ALL workgroups
 
-				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN 
-		  		 (SELECT ugr_ID 
-			   		  FROM `" . $db . "`.sysUGrps 
+				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN
+		  		 (SELECT ugr_ID
+			   		  FROM `" . $db . "`.sysUGrps
 			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
 
 		}else if($user_request == "user"){ // ALL users
@@ -273,25 +273,25 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 			exit;
 		}
 
-		$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail 
-						  FROM `" . $db . "`.sysUsrGrpLinks AS ugl  
+		$query = "SELECT DISTINCT ugr.ugr_FirstName, ugr.ugr_LastName, ugr.ugr_eMail
+						  FROM `" . $db . "`.sysUsrGrpLinks AS ugl
 						  INNER JOIN `" . $db . "`.sysUGrps AS ugr ON ugl.ugl_UserID = ugr.ugr_ID "
 						. $where_clause;
 
 		$res = $mysqli->query($query);
 		if(!$res){
             continue;
-/*            
+/*
 			$response = array("status"=>HEURIST_ERROR, "message"=>"Unable to retrieve user count for databases => $db<br>", "error_msg"=>$mysqli->error, "request"=>$user_request);
 			$rtn = json_encode($response);
 
 			print $rtn;
 			exit;
-*/            
+*/
 		}
 
 		while($row = $res->fetch_row()){
-			
+
 			if(!in_array($row[2], $email_list)){
 				$data += 1;
 				$email_list[] = $row[2];
@@ -304,7 +304,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 	$rtn = json_encode($response);
 
 	print $rtn;
-	
+
 } else if(isset($_REQUEST['rec_count']) && isset($_REQUEST['db_list'])){ // Get a count of records
 
 	$dbs = $_REQUEST['db_list'];
@@ -324,7 +324,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		    }
 
 		    while($row = $res->fetch_row()){
-			    $data[$db] = $row[0];	
+			    $data[$db] = $row[0];
 		    }
         }
 	}
@@ -367,7 +367,7 @@ function getDatabaseDetails($mysqli, $db_list){
 	foreach ($db_list as $database) {
 
         $database = preg_replace('/[^a-zA-Z0-9_]/', "", $database);
-			
+
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 		// Get record count
 		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
@@ -376,7 +376,7 @@ function getDatabaseDetails($mysqli, $db_list){
 			$db_data['rec_count'] = 0;
 		}else{
 			while($row = $res->fetch_row()){
-				$db_data['rec_count'] = $row[0];	
+				$db_data['rec_count'] = $row[0];
 			}
 		}
 

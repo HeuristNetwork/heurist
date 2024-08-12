@@ -34,14 +34,14 @@
         $req_params = filter_input_array(INPUT_POST);
     }else{
         $req_params = filter_input_array(INPUT_GET);
-    }    
-    
+    }
+
     //get list of registered database and master index db on the same server
     if(@$req_params['remote']){
-        
+
        $remoteURL = $req_params['remote'];
        preg_match("/db=([^&]*).*$/", $remoteURL, $match);
-        
+
        if(strpos($remoteURL, HEURIST_SERVER_URL)===0){ //same domain
 
             unset($req_params['remote']);
@@ -51,10 +51,10 @@
                      $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Cannot detect database parameter in registration URL');
                      $data = json_encode($data);
                 }else{
-           
+
                     //load structure from remote server
                     $splittedURL = explode('?', $remoteURL);
-                    
+
                     $remoteURL_original = $remoteURL;
                     //change hsapi to hserv when master index will be v6.5
                     $remoteURL = $splittedURL[0]
@@ -67,29 +67,29 @@
                     if (@$req_params['mode']) {$remoteURL = $remoteURL.'&mode='.$req_params['mode'];}
 
                     $data = loadRemoteURLContent($remoteURL);//load defitions from remote database
-                
+
                     if($data==false){
-                        
-                        //Server not found 
+
+                        //Server not found
                         //No response from server
                         $data = __getErrMsg($remoteURL_original, $glb_curl_code, $remoteURL.' '.$glb_curl_error);
                         $data = json_encode($data);
                     }else{
 //$defs = json_decode(gzdecode($data), true);
-                        
+
                         header('Content-Encoding: gzip');
                     }
                 }
-                
+
                 header('Content-type: application/json;charset=UTF-8');
-                echo $data; 
-                exit;                
+                echo $data;
+                exit;
                 //$response = json_decode($data, true);
                 //$is_remote = true;
-                
+
        }
     }
-    
+
 
     $mode = 0;
     $system = new System();
@@ -97,29 +97,29 @@
 
         //get error and response
         $response = $system->getError();
-        
+
         if($remoteURL!=null){
-            
+
             //cannot connect to registered database on the same server
             $response = __getErrMsg($remoteURL, $response['status'], $response['message']);
-            
+
         }
-        
-        
+
+
     }else{
-        
+
         if(@$req_params["import"]){ //this is import
             if(!$system->is_admin()){
                 $system->error_exit('To perform this action you must be logged in as '
                         .'Administrator of group \'Database Managers\'',
                         HEURIST_REQUEST_DENIED);
             }
-            
-            //combination of db and record type id eg. 1126-13            
+
+            //combination of db and record type id eg. 1126-13
             $code = @$req_params['code'];//this is not concept code - these are source database and rectype id in it
             //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
-         
-            $isOK = false;  
+
+            $isOK = false;
 ini_set('max_execution_time', 0);
             $importDef = new DbsImport( $system );
 
@@ -140,13 +140,13 @@ ini_set('max_execution_time', 0);
             }
             $response = $importDef->getReport(true);//with updated definitions and sysinfo
 
-            $response['status'] = HEURIST_OK;            
+            $response['status'] = HEURIST_OK;
 
             //
             // send error report about terms that were failed
-            //            
+            //
             if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
-                
+
                 $sText = 'Target database '.HEURIST_DBNAME;
                 $sText .= ("\n".'Source database '.intval(@$req_params["databaseID"]));
                 $sText .= ("\n".count($response['report']['broken_terms']).' terms were not imported.');
@@ -155,9 +155,9 @@ ini_set('max_execution_time', 0);
                     $sText .= ("\n reason: ".$response['report']['broken_terms_reason'][$idx]);
                 }
                 //$sText .= ('</ul>');
-                
+
                 sendEmail(HEURIST_MAIL_TO_BUG, 'Import terms report', $sText);
-                
+
                 $response['report']['broken_terms_reason'] = null;
             }
             if(@$response['report'] && $response['report']['rectypes']){
@@ -166,10 +166,10 @@ ini_set('max_execution_time', 0);
                 $sText .= ("<br>".'Source database '.intval(@$req_params["databaseID"]));
                 $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
                         .$response['report']['rectypes'].'</table>');
-                        
+
                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'Download templates', $sText, true);
             }
-            
+
 
         }else{
 
@@ -190,7 +190,7 @@ ini_set('max_execution_time', 0);
                 $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$req_params['mode']) );
             }
 
-            
+
             if (@$req_params['rectypes']) {
                 $ids = $req_params['rectypes']=='all'?null
                             :filter_var($req_params['rectypes'], FILTER_SANITIZE_STRING);
@@ -221,31 +221,31 @@ ini_set('max_execution_time', 0);
                     }
     */
             }else{
-                
+
                     $data["db_version"] =  $system->get_system('sys_dbVersion').'.'
                                         .$system->get_system('sys_dbSubVersion');
-                
+
                     $response = array("status"=>HEURIST_OK, "data"=> $data );
-            }   
-        
+            }
+
         }
 
         $system->dbclose();
-    }            
+    }
 
-    
+
     /*
     if ( extension_loaded('zlib') && (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) )
     {
             ob_start('ob_gzhandler');
-    }*/    
+    }*/
 /*
     ini_set("zlib.output_compression", '4096');
     ini_set("zlib.output_compression_level", '6');
     header('Content-type: text/javascript');
     print json_encode($response);
 */
-    
+
 ob_start();
 echo json_encode($response);
 $output = gzencode(ob_get_contents(),6);
@@ -253,7 +253,7 @@ ob_end_clean();
 
 $system->setResponseHeader();
 header('Content-Encoding: gzip');
-echo $output; 
+echo $output;
 unset($output);
 
 function __getErrMsg($remoteURL, $code, $err_msg){
@@ -265,7 +265,7 @@ function __getErrMsg($remoteURL, $code, $err_msg){
             }else{
                 $reason = 'This may be due to an error in the registration information recorded in the Heurist master index';
             }
-    
+
             $message = '<h3>Unable to obtain database structure information</h3>'
             .'<p>We are unable to contact the selected source database</p>'
             .'<p>URL: <a href="'.$remoteURL.'">'.$remoteURL.'</a></p>'
@@ -276,8 +276,8 @@ function __getErrMsg($remoteURL, $code, $err_msg){
             .'(login to their database and use Design > Register to correct the information), or ask the system administrator '
             .'of the server in question to correct the installation. If the server/database no-longer exists please '
             .CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
-            
+
             return array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
-    
+
 }
 ?>

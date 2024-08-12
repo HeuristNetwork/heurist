@@ -26,14 +26,14 @@
     */
 
 ini_set('max_execution_time', '0');
- 
+
 define('ADMIN_PWD_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 if(!@$_REQUEST['mail']){
-?>            
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -42,19 +42,19 @@ if(!@$_REQUEST['mail']){
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>
     <body class="popup">
-            
-        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>  
+
+        <script>window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>')</script>
         <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px">
                 <h2>List of databases with missing or non-writeable folders</h2>
-<?php            
+<?php
 }
 
     $mysqli = $system->get_mysqli();
-    
+
     //1. find all database
     $databases = mysql__getdatabases4($mysqli, false);
 
-/*    
+/*
     $query = 'show databases';
     $res = $mysqli->query($query);
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
@@ -68,52 +68,52 @@ if(!@$_REQUEST['mail']){
 */
 
     $root = $system->getFileStoreRootFolder();
-    
+
     $check_subfolders = true;
-    
+
     $folders = $system->getArrayOfSystemFolders();
-      
+
     $not_exists = array();
     $not_writeable = array();
     $not_exists2 = array();
     $not_writeable2 = array();
-    
+
     foreach ($databases as $idx=>$db_name){
 
         //list($database_name_full, $db_name) = mysql__get_names($db_name);
         $db_name = htmlspecialchars($db_name);
-            
+
         $dir = $root.$db_name.'/';
-        
+
         $check = folderExists($dir, true);
         if($check==-1){
             $not_exists[] = $db_name;
-        }else if($check<0){    
+        }else if($check<0){
             $not_writeable[] = $db_name;
         }else if($check_subfolders){
              //check subfolders
              foreach ($folders as $folder_name=>$folder){
-                 
+
                  if($folder[0]=='' || $folder[0]==null || $folder_name=='uploaded_tilestacks') {continue;}
-                 
+
                  $subdir = $dir.$folder_name.'/';
                  $check = folderExists($subdir, true);
                  if($check==-1){
                       $not_exists2[] = $subdir;
-                 }else if($check<0){    
+                 }else if($check<0){
                       $not_writeable2[] = $subdir;
                  }
              }
-             
+
         }
-            
+
     }//while  databases
-    
+
     $rep = '';
 
     if(count($not_exists)>0){
         $rep.='<h3>MISSED HEURIST_FILESTORE_DIR for databases:</h3>';
-        
+
         foreach ($not_exists as $db_name){
                 $rep.=$db_name.'<br>';
         }
@@ -121,7 +121,7 @@ if(!@$_REQUEST['mail']){
     }
     if(count($not_writeable)>0){
         $rep.='<h3>NOT WRITEABLE HEURIST_FILESTORE_DIR for databases:</h3>';
-        
+
         foreach ($not_writeable as $db_name){
                 $rep.=$db_name.'<br>';
         }
@@ -130,7 +130,7 @@ if(!@$_REQUEST['mail']){
 
     if(count($not_exists2)>0){
         $rep.='<h3>MISSED subfolders</h3>';
-        
+
         foreach ($not_exists2 as $dir){
             if(strpos($dir,'file_uploads')>0){
                 $rep.='<b>'.$dir.'</b><br>';
@@ -142,7 +142,7 @@ if(!@$_REQUEST['mail']){
     }
     if(count($not_writeable2)>0){
         $rep.='<h3>NOT WRITEABLE subfolders</h3>';
-        
+
         foreach ($not_writeable2 as $dir){
             if(strpos($dir,'file_uploads')>0){
                 $rep.='<b>'.$dir.'</b><br>';
@@ -153,20 +153,20 @@ if(!@$_REQUEST['mail']){
         $rep.='<hr>';
     }
 
-    
+
     $rep.='[end report]</div>';
-    
+
     if(@$_REQUEST['mail']){
-        
-        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'List of databases with missing/inaccessible folders', 
+
+        $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'List of databases with missing/inaccessible folders',
                                             $rep, true);
         exit;
     }else{
-        
+
         print $rep;
         print '</body></html>';
 
     }
-    
-   
+
+
 ?>

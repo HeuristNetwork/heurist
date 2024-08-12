@@ -4,7 +4,7 @@
 * getDBStructureAsXML.php: returns database definitions (rectypes, details etc.) as XML (HML)
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -128,7 +128,7 @@ if(!$is_subset || $dty_ID>0){
 if(!$is_subset || $rty_ID>0){
 
     do_print_table2('defRecStructure', $rty_ID);
-    
+
 }
 
 if(!$is_subset){
@@ -218,10 +218,10 @@ function do_print_table2( $tname, $id=0 )
     global $mysqli;
 
     $tname_tag = substr($tname,3);
-    
+
     print "\n\n<$tname_tag>";
 
-    
+
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
@@ -231,7 +231,7 @@ function do_print_table2( $tname, $id=0 )
     $id_field = $flds_names[0];
     $prefix = substr($id_field,0,3);
     $where = '';
-    
+
     if($id>0){
         if($prefix=='rst'){
             $where = ' where rst_RecTypeID='.intval($id);
@@ -239,18 +239,18 @@ function do_print_table2( $tname, $id=0 )
             $where = " where $id_field=".intval($id);
         }
     }
-    
-    
+
+
     $query = "select $flds from $tname".$where;
     $res = $mysqli->query($query);
 
-    while ($row = $res->fetch_assoc()) { 
-        
+    while ($row = $res->fetch_assoc()) {
+
         if($prefix=='rty' && !(@$row[$id_field]>0)) {continue;}
-        
+
         print "<$prefix>";
         foreach($flds_list as $fld => $type){
-            
+
             $val = $row[$fld];
             if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                 $val = htmlspecialchars($mysqli->real_escape_string($val));
@@ -264,7 +264,7 @@ function do_print_table2( $tname, $id=0 )
                 }
             }
             print "<$fld>$val</$fld>";
-        }   
+        }
         print "</$prefix>\n";
 
     }

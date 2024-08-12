@@ -77,21 +77,21 @@ $errorScriptExecution = null;
 //
 function execute_db_script($system, $database_name_full, $script_file, $message){
     global $errorScriptExecution;
-    
+
     if( db_script($database_name_full, $script_file, false) ){
         return true;
     }else{
         $system->addError(HEURIST_ERROR, $message, $errorScriptExecution);
         return false;
     }
-    
+
 }
 
 // Database configuration
 function db_script($db_name, $filename, $verbose = false){
-    
+
 global $error, $errorScriptExecution;
-    
+
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
@@ -161,9 +161,9 @@ if (!$verbose || $ajax){
 @set_time_limit(0);
 
 if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get")){
-  @date_default_timezone_set(@date_default_timezone_get());  
+  @date_default_timezone_set(@date_default_timezone_get());
 }
-  
+
 
 // Clean and strip anything we don't want from user's input [0.27b]
 
@@ -175,7 +175,7 @@ $file  = false;
 // Check PHP version
 
 if (!$error && !function_exists('version_compare'))
-{ 
+{
     error_echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
 
 }
@@ -183,7 +183,7 @@ if (!$error && !function_exists('version_compare'))
 // Check if mysql extension is available
 
 if (!$error && !function_exists('mysqli_connect_error'))
-{ 
+{
     error_echo ("<p class=\"error\">There is no mySQL extension available in your PHP installation. Sorry!</p>\n");
 }
 
@@ -193,11 +193,11 @@ do_action ('script_runs');
 // Connect to the database, set charset and execute pre-queries
 
 if (!$error && !TESTMODE)
-{ 
+{
     $mysqli = new mysqli($db_server,$db_username,$db_password);
     if (!$mysqli){
 
-        error_echo (  
+        error_echo (
             "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
             ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
 
@@ -205,7 +205,7 @@ if (!$error && !TESTMODE)
         $success = $mysqli->select_db($db_name);
 
         if (!$success)
-        { 
+        {
             error_echo(
                 "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
                 ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
@@ -216,13 +216,13 @@ if (!$error && !TESTMODE)
     if (!$error && $db_connection_charset!==''){
         $mysqli->query("SET NAMES $db_connection_charset");
     }
-        
+
 
     if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
     { reset($pre_query);
         foreach ($pre_query as $pre_query_value)
         {	if (!$mysqli->query($pre_query_value))
-            { 
+            {
                 error_echo(
                     "<p class=\"error\">Error with pre-query.</p>\n"
                     ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
@@ -233,7 +233,7 @@ if (!$error && !TESTMODE)
     }
 }
 else
-{ 
+{
     $mysqli = false;
 }
 
@@ -247,7 +247,7 @@ $param_foffset = 0;
 $param_totalqueries = 0;
 
 /* DISABLED snyk SSRF
-if (!$error && isset($_REQUEST["fn"])) 
+if (!$error && isset($_REQUEST["fn"]))
 {
     //    echo "<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n";
     $param_start = $_REQUEST["start"];
@@ -275,7 +275,7 @@ if (!$error && isset($param_start))
     $gzipmode=false;
 
     if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
-    {    
+    {
         error_echo(
             "<p class=\"error\">Can't open sql script file ".$curfilename."</p>");
             /*
@@ -291,14 +291,14 @@ if (!$error && isset($param_start))
         else {$filesize = gztell($file);} // Always zero, ignore
     }
     else
-    { 
+    {
         error_echo ("<p class=\"error\">Can't open sql script file $curfilename</p>\n");
     }
 
     // Stop if csv file is used, but $csv_insert_table is not set
 
     if (!$error && ($csv_insert_table == "") && (preg_match("/(\.csv)$/i",$curfilename)))
-    { 
+    {
         error_echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
     }
 }
@@ -333,7 +333,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
   {
     $query = "DELETE FROM `$csv_insert_table`";
     if (!TESTMODE && !$mysqli->query(trim($query)))
-    { 
+    {
         error_echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n"
             ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
             ."<p>MySQL: ".$mysqli->error."</p>\n");
@@ -382,7 +382,7 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 
       $dumpline = "";
       while (!feof($file) && substr ($dumpline, -1) != "\n" && substr ($dumpline, -1) != "\r")
-      { 
+      {
         if (!$gzipmode){
           $dumpline .= fgets($file, DATA_CHUNK_LENGTH);
         }else{
@@ -499,10 +499,10 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
         $len = intval(-1*strlen($delimiter));
         $query = substr(trim($query),0,$len);
 
-        if (!$mysqli->query($query)) //!TESTMODE && 
-        { 
+        if (!$mysqli->query($query)) //!TESTMODE &&
+        {
             $errorMsg = $mysqli->error;
-            
+
             if(strpos($errorMsg,'Cannot get geometry object')!==false){
                 error_log( $linenumber.'   '. trim($dumpline) );
             }else{
@@ -528,14 +528,14 @@ if (!$error && isset($param_start) && isset($param_foffset) && preg_match("/(\.(
 // Get the current file position
 
   if (!$error)
-  { 
+  {
     if (!$gzipmode){
       $foffset = ftell($file);
     }else{
       $foffset = gztell($file);
     }
     if (!$foffset)
-    { 
+    {
         error_echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
     }
   }
@@ -565,7 +565,7 @@ skin_open();
     $kbytes_done  = round($bytes_done/1024,2);
     $mbytes_this  = round($kbytes_this/1024,2);
     $mbytes_done  = round($kbytes_done/1024,2);
-    
+
     $filesize = intval($filesize);
 
     if (!$gzipmode)
@@ -632,7 +632,7 @@ skin_open();
       $error=true; // This is a semi-error telling the script is finished
     }
     else
-    { 
+    {
       if ($delaypersession!=0){
         echo "<p class=\"centr\">Now I'm <b>waiting $delaypersession milliseconds</b> before starting next session...</p>\n";
       }
@@ -666,7 +666,7 @@ else if ($file && $gzipmode) {gzclose($file);}
 
 // If error or finished put out the whole output from above and stop
 
-if ($verbose) //ART $error && 
+if ($verbose) //ART $error &&
 {
   $out1 = ob_get_contents();
   ob_end_clean();
@@ -689,11 +689,11 @@ if ($verbose) //ART $error &&
 // *******************************************************************************************
 
 function do_action($tag)
-{ 
+{
    global $plugin_actions;
 
   if (isset($plugin_actions[$tag]))
-  { 
+  {
     reset ($plugin_actions[$tag]);
     foreach ($plugin_actions[$tag] as $action){
       call_user_func_array($action, array());
@@ -719,11 +719,11 @@ function skin_close()
 
 function error_echo($msg){
     global $error, $errorScriptExecution;
-    
+
     error_log($msg);
-    
+
     $error = true;
-    
+
     $errorScriptExecution = $msg;
     //echo ($msg);
 }

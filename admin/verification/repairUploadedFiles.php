@@ -71,10 +71,10 @@ if(@$req_params['data']){
     //Remove non-registred files
     $files_to_remove = @$data['files_notreg'];
     if(is_array($files_to_remove)){
-        
+
         $res = array();
         foreach ($files_to_remove as $file) {
-            
+
             $realpath_file = isPathInHeuristUploadFolder($file);//snyk SSRF
 
             if($realpath_file!==false && file_exists($realpath_file)){
@@ -85,7 +85,7 @@ if(@$req_params['data']){
         print json_encode($response);
         exit;
     }
-    
+
     //------------------------------------------------------
     // remove registration for nonused entries in ulf
     $regs_to_remove = @$data['unused_file_local'];
@@ -96,16 +96,16 @@ if(@$req_params['data']){
 
         $mysqli->query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$regs_to_remove).')');
         if ( $mysqli->error ) {
-            $response = $system->addError(HEURIST_DB_ERROR, 
+            $response = $system->addError(HEURIST_DB_ERROR,
                 'Cannot delete entries from recUploadedFiles. mySQL error: '.$mysqli->error);
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $regs_to_remove);
-            
+
         }
         print json_encode($response);
         exit;
-    }    
-    
+    }
+
     /*
     foreach ($files as $file) {
         $ulf_ID = $file[0];
@@ -116,7 +116,7 @@ if(@$req_params['data']){
         $ids[] = $ulf_ID;
     }
     */
-    
+
     //------------------------------------------------------
     // remove missed files
     $file_ids = @$data['files_notfound'];
@@ -124,22 +124,22 @@ if(@$req_params['data']){
 
         $mysqli->query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
         if ($mysqli->error) {
-            $response = $system->addError(HEURIST_DB_ERROR, 
+            $response = $system->addError(HEURIST_DB_ERROR,
                 'Cannot delete entries from recDetails. mySQL error: '.$mysqli->error);
         }else{
             $mysqli->query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$file_ids).')');
             if ($mysqli->error) {
-                $response = $system->addError(HEURIST_DB_ERROR, 
+                $response = $system->addError(HEURIST_DB_ERROR,
                     'Cannot delete entries from recUploadedFiles. mySQL error: '.$mysqli->error);
             }else{
                 $response = array("status"=>HEURIST_OK, "data"=> $file_ids);
             }
         }
-        
+
         print json_encode($response);
         exit;
     }
-    
+
     print json_format($rv);
     $response = $system->addError(HEURIST_INVALID_REQUEST,
                                 'Wrong parameters. No data defined');

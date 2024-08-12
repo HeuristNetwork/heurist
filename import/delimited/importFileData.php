@@ -19,7 +19,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     define('LOGIN_REQUIRED',1);
     define('PDIR','../../');
 
@@ -53,8 +53,8 @@
         	{
         		font-size: 1em;
         	}
-			
-			div.top-div, 
+
+			div.top-div,
 			div.bottom-div{
 				display: flex;
 				align-content: center;
@@ -78,7 +78,7 @@
 				flex: 0 1 200px;
 			}
         </style>
-        
+
     </head>
 
     <!-- HTML -->
@@ -100,7 +100,7 @@
     					<h2 style="display: inline-block;margin:0">or</h2>
     					<div id="btnUploadFile">Upload File</div>
 
-    					<div style="float:right">encoding: 
+    					<div style="float:right">encoding:
     						<select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
     						</select>
     					</div>
@@ -108,7 +108,7 @@
 
     			</div>
 
-    			<textarea id="sourceContent" rows="25" cols="0" 
+    			<textarea id="sourceContent" rows="25" cols="0"
     			style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;margin-top: 10px;"></textarea>
 
     		</div>
@@ -118,7 +118,7 @@
     			<div style="height:10em;">
     				<p><b>Step 2</b></p>
     				<div>
-    					<input id="csv_header" 
+    					<input id="csv_header"
     					style="margin:0 0.5em 0 0"
     					class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
     					<label for="csv_header">Labels in line 1</label>
@@ -145,11 +145,11 @@
     					</select>
     				</div>
 
-			    </fieldset>            
+			    </fieldset>
 
 			</div>
 
-			<div id="divStep3"> 
+			<div id="divStep3">
 
 				<div style="height:1em;">
 					<p><b>Step 3</b></p>
@@ -195,7 +195,7 @@
 					</div>
 
 				</fieldset>
-				
+
 				<div style="margin: 5px">
 					<label>
 						<input type="radio" name="dtl_handling" value="1" class="text ui-widget-content ui-corner-all" checked="checked">

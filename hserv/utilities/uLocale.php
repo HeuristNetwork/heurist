@@ -2,11 +2,11 @@
 
     /**
     * Localization utilities
-    * 
+    *
     * getLangCode3 - validates lang code and returns upper case 3 letters code
     * extractLangPrefix - splits and extract language code and value from string code:value
     * getTranslation - for smarty modifier
-    * getCurrentTranslation - returns translated value for multivalue field 
+    * getCurrentTranslation - returns translated value for multivalue field
     * getExternalTranslation - translates given string to traget language via Deepl's API
     *
     * @package     Heurist academic knowledge management system
@@ -30,7 +30,7 @@
     //
     function initLangCodes(){
         global $glb_lang_codes, $glb_lang_codes_index;
-        
+
         if(!isset($glb_lang_codes)){
             $glb_lang_codes = json_decode(file_get_contents(HEURIST_DIR.'hclient/assets/language-codes-active-list.json'),true);
             foreach($glb_lang_codes as $codes){
@@ -38,7 +38,7 @@
             }
         }
     }
-    
+
     //
     // get 3 letters ISO code
     //
@@ -46,11 +46,11 @@
         global $glb_lang_codes, $glb_lang_codes_index;
 
         $res = null;
-        
-        if ($lang) { 
+
+        if ($lang) {
 
             initLangCodes();
-            
+
             $lang = strtoupper($lang);
             if(strlen($lang)==3){
                 $lang = strtoupper($lang);
@@ -61,7 +61,7 @@
                 $res = array_search($lang, $glb_lang_codes_index);
             }
 
-            /*            
+            /*
             $key = (strlen($lang)==2)?'a2':'a3';
             foreach($glb_lang_codes as $codes){
                 if(strcasecmp($codes[$key], $lang)===0){
@@ -69,9 +69,9 @@
                     break;
                 }
             }*/
-            
+
         }
-        
+
         return $res;
     }
 
@@ -83,11 +83,11 @@
         global $glb_lang_codes, $glb_lang_codes_index;
 
         $res = null;
-        
-        if ($lang) { 
+
+        if ($lang) {
 
             initLangCodes();
-            
+
             $lang = strtoupper($lang);
             if(strlen($lang)==3){
                 $lang = strtoupper($lang);
@@ -98,21 +98,21 @@
                 $res = array_search($lang, $glb_lang_codes_index) === false ? null : $lang;
             }
         }
-        
+
         return $res;
     }
-    
+
     //
     //  splits and extract language code and value from string code:value
     //  if $val is 2 chars code ISO639-1 - it will be converted to 3 chars ISO639-2
-    //    
+    //
     function extractLangPrefix($val){
-        
+
         //global $glb_lang_codes, $common_languages_for_translation;
         $lang = null;
-        
+
         if(is_string($val) && mb_strlen($val)>4){
-            
+
             $val = trim($val);
             $val_orig = $val;
             $tag_to_remove = null;
@@ -126,12 +126,12 @@
                 $tag_to_remove = strpos($val,'<p')===0?'</p>':'</span>';
                 $val = trim(strip_tags($val));
             }
-            
+
             if(substr($val,0,2)=='*:'){
                 $lang = 'ALL';
                 $pos = 2;
             }else{
-                
+
                 if($val[2]==':'){
                     $lang = substr($val,0,2);
                     $pos = 3;
@@ -139,14 +139,14 @@
                     $lang = substr($val,0,3);
                     $pos = 4;
                 }
-                
+
                 if($lang){
                     $lang = getLangCode3($lang);//validate
                 }
             }
 
             if($lang){ //lang detected
-                
+
                 //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
                 if($tag_to_remove == null){
                     $val = substr($val_orig, $pos);
@@ -154,35 +154,35 @@
                     //remove first p or span
                     $val = trim(substr(strstr($val_orig, $tag_to_remove), strlen($tag_to_remove)));
                 }
-                
+
             }else{
                 $val = $val_orig;
             }
-        } 
-        
+        }
+
         return array($lang, $val);
-    }    
-    
+    }
+
     //
     // For smarty modifier "translate"
     //
     function getTranslation($input, $lang, $field=null){
         global $smarty;
-        
+
         $res = null;
         $lang = getLangCode3($lang);
-        
+
         //detect if it is usual record or term
         if(is_array($input) && (@$input['term'] || (is_array(@$input[0]) && @$input[0]['term']))){
-            
+
             if($field==null) {$field = 'label';}
-            
+
             $trm = @$input[0]?$input[0]:$input;
-            
+
             if(isset($smarty)){
-                
+
                 //$heuristRec = @$smarty['tpl_vars']['heurist']['value'];
-                
+
                 $heuristRec = $smarty->getTemplateVars('heurist');
                 if($heuristRec){
                     return $heuristRec->getTranslation('trm', $trm['id'], $field, $lang);
@@ -190,32 +190,32 @@
             }
             return $trm[$field];
         }
-        
-        
+
+
         // this is record detail field;
         $res = getCurrentTranslation($input, $lang);
-        
+
         $ret = ($res==null)?$input:$res;
         return $ret;
     }
-    
+
     //
-    // It returns translated value for multivalue field 
+    // It returns translated value for multivalue field
     // if all values have language prefix (except default one)
     //
     function getCurrentTranslation($input, $lang){
-    
+
         $res = null;
-        
+
         if(is_array($input)){
-            
+
             $lang = getLangCode3($lang);
             $def = null;
             $fnd = null;
             $cnt = 0;
             //all values except one must be with lang: prefix
             foreach($input as $val){
-                
+
                 list($lang_, $val) = extractLangPrefix($val);
 
                 if ($lang_!=null && $lang_==$lang){
@@ -226,25 +226,25 @@
                 }else{
                     $cnt++;
                 }
-                
+
             } //foreach
             if($fnd && ($cnt>=count($input)-1)){
                 $res = $fnd;
             }else{
                 $res = $def;
             }
-            
+
         }else if(is_string($input)) {
             list($lang_, $res) = extractLangPrefix($input);//there is no localization
         }
-        
+
         return $res;
     }
 
     /**
      * Translate given string to traget language via Deepl's API
      *  A valid Deepl API key needs to be assigned to the variable $accessToken_DeepLAPI within heuristConfigIni.php
-     * 
+     *
      * @param object $system - Heurist's initialised system object
      * @param string $string - String to be translated
      * @param string $target_language - AR2 or AR3 of language being translated to
@@ -257,8 +257,8 @@
         initLangCodes();
 
         // Default list of languages - from https://www.deepl.com/docs-api/general/get-languages
-        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI', 
-                               'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL', 
+        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI',
+                               'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL',
                                'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
 
         // Retrieve from file, created by daily script
@@ -270,7 +270,7 @@
 
             $langs = json_decode($langs, TRUE);
             $deepl_languages = json_last_error() !== JSON_ERROR_NONE ? array() : $langs;
-            
+
             $deepl_languages = !empty($langs) ? $langs : $def_languages;
         }
 
@@ -332,7 +332,7 @@
         $handling_encoding = false;
         $handling_copyright = false;
 
-        
+
         // Add no translate flags where necessary
         /**
          * &[a-zA-Z]; html entity
@@ -381,12 +381,12 @@
          * pro => api.deepl.com
          */
         $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
-        
+
         // Handle source language
         if(!empty($source_language) && strlen($source_language) == 3){ // get ar2
             $source_language = $glb_lang_codes_index[$source_language];
         }
-        
+
         if(!empty($source_language) && in_array($source_language, $deepl_languages)){
             $k = array_search($source_language, $deepl_languages);
             $url .= '&source_lang=' . $deepl_languages[$k];

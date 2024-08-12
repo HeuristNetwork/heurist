@@ -3,7 +3,7 @@
 /**
 * Lookup third party web service to return data to client side recordLookups
 * It works as a proxy to avoid cross-origin issues
-* 
+*
 * Currently supporting services:
 * GeoName
 * TLCMap
@@ -11,7 +11,7 @@
 * Nomisma
 * Nakala
 * Opentheso
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -40,7 +40,7 @@
             'https://tlcmap.org/ghap/search?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
         ),
-        'geonames' => 'http://api.geonames.org/',
+        'geonames' => 'http'.'://api.geonames.org/',
 
         'bnflibrary_bib' => $BNF_BASE_URL,
         'bnflibrary_aut' => $BNF_BASE_URL,
@@ -117,7 +117,7 @@
     );
 
     // BnF xml namespace urls
-    $BNF_XML_RECORDS_NAMESPACE = 'http://www.loc.gov/zing/srw/';// srw
+    $BNF_XML_RECORDS_NAMESPACE = 'http'.'://www.loc.gov/zing/srw/';// srw
     $BNF_XML_DETAILS_NAMESPACE = 'info:lc/xmlns/marcxchange-v2';// mxc
 
     $is_estc = false;
@@ -166,10 +166,10 @@
 
     $remote_data = false;
     $url = '';
-    
+
     if($is_estc){
 
-        
+
         $is_allowed = (isset($ESTC_PermittedDBs) && strpos($ESTC_PermittedDBs, @$_REQUEST['org_db']) !== false && isset($ESTC_UserName) && isset($ESTC_Password));
         $def_err_msg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
@@ -188,9 +188,9 @@
 
                 if($is_logged_in){ // logged in, begin search
                     $system->getCurrentUserAndSysInfo(false);
-                    
+
                     if(array_key_exists('action', $params)){ // import record for LRC18C lookup
-    
+
                         if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                             require_once dirname(__FILE__).'/importController.php';
                             exit;
@@ -199,7 +199,7 @@
                             exit;
                         }
                     }
-    
+
                     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 
                     $response = recordSearch($system, $params);
@@ -215,8 +215,8 @@
                 .'hserv/controller/record_lookup.php?';
 
             if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
-                
-                $base_url = $ESTC_ServerURL 
+
+                $base_url = $ESTC_ServerURL
                     .'hserv/controller/record_lookup.php?';//record_output
                 $params2 = array();
                 $params2['action'] = 'record_output';
@@ -230,23 +230,23 @@
                 $url = $base_url.http_build_query($params2);// forward request to ESTC server
 
                 $is_inited = $system->init(@$params['db']);
-                
-                // save file that produced with record_output.php from source to temp file  
+
+                // save file that produced with record_output.php from source to temp file
                 $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_");
-                
+
                 $filesize = saveURLasFile($url, $heurist_path);// perform external request and save results to temp file
 
                 if($filesize>0 && file_exists($heurist_path)){
                     //read temp file, import record
-              
+
                     require_once dirname(__FILE__).'/../records/import/importHeurist.php';
-                    
+
                     $params2 = array(
                         'dbg' => ($is_debug?1:0),
                         'owner_id' => $system->get_user_id(),
                         'mapping_defs' => @$params['mapping']
                     );
-                    
+
                     $res = ImportHeurist::importRecords($heurist_path, $params2);
                     if(is_bool($res) && $res === false){
                         $response = $system->getError();
@@ -255,7 +255,7 @@
                     }
 
                     unlink($heurist_path);
-                    
+
                 }else{
                     $response = array('status' => HEURIST_ERROR, 'message' => 'Cannot download records from '.$params['source_db'].'. <br>'.$remote_path.' to '.$heurist_path.'<br><br>URL request: ' . $url);
                 }
@@ -327,7 +327,7 @@
                 case 'opentheso_get_collections':
                     $response = getOpenthesoCollections($system, $params['params']);
                     break;
-                
+
                 default:
                     $system->addError(HEURIST_INVALID_REQUEST, 'Invalid request for Opentheso metadata');
                     break;
@@ -344,7 +344,7 @@
     }
 
     // validate url and query
-    
+
     $url = filter_input(INPUT_POST, 'service', FILTER_VALIDATE_URL);
     //if(!$url){$url = filter_var($params['service'], FILTER_VALIDATE_URL);}
 
@@ -443,7 +443,7 @@
             $hasGeo = false;
             $remote_data = str_getcsv($remote_data, "\n");//parse the rows
             if(is_array($remote_data) && count($remote_data)>1){
-                
+
                 $header = str_getcsv(array_shift($remote_data));
                 $id = 1;
                 foreach($remote_data as &$line){
@@ -457,8 +457,8 @@
                             'geometry'=>array('type'=>'Point','coordinates'=>array($line['longitude'], $line['latitude'])));
                         $hasGeo = true;
                     }
-                } 
-                
+                }
+
                 if(!$hasGeo){
                     $system->error_exit_api('Service did not return data in an appropriate format', HEURIST_ACTION_BLOCKED);
                 }
@@ -467,7 +467,7 @@
             }else{
                     $system->error_exit_api('Service did not return any data', HEURIST_ERROR);
             }
-    
+
             $remote_data = json_encode($remote_data);
         }
     }else if(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
@@ -482,7 +482,7 @@
         }*/
 
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -540,7 +540,7 @@
                         }
                     }
                 }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
-                    
+
                     $value = '';
                     $is_valid = false;
                     $name = array();
@@ -616,7 +616,7 @@
                                 }
 
                                 break;
-                            
+
                             case '710':
                             case '711':
                             case '712':
@@ -640,9 +640,9 @@
                                 if($sf_code == 'a') { // Name
                                     $author['name'] = (string)$sf_ele[0];
                                 }
- 
+
                                 break;
- 
+
                             default:
                                 break;
                         }
@@ -662,7 +662,7 @@
 
                         $aut_idx ++;
                     }
-                    
+
                 }else if($df_tag == '010') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -696,7 +696,7 @@
                         }
                     }
                 }else if($df_tag == '327') { // Extended Description
-                    
+
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
 
@@ -718,7 +718,7 @@
     }else if(@$params['serviceType'] == 'bnflibrary_aut'){
 
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -762,7 +762,7 @@
                                 if($sf_code == 'a'){ // Surname
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }else if($sf_code == 'b'){ // First name
-    
+
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
                                     }else{
@@ -793,7 +793,7 @@
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
                                 }else if($sf_code == 't'){ // title
-                                    
+
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ' [' . (string)$sf_ele[0] . ']';
                                     }else{
@@ -802,7 +802,7 @@
                                 }
 
                                 break;
-                            
+
                             case '230': // MISSING - $b $h $k $m
 
                                 if($sf_code != 'a' && $sf_code != 'i'){
@@ -870,7 +870,7 @@
         $remote_data = json_encode($results);
     }else if(@$params['serviceType'] == 'bnf_recdump'){
         $results = array();
-        
+
         // Create xml object
         $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
 
@@ -917,9 +917,9 @@
             if(array_key_exists('totalResults', $remote_data)){
                 $results['count'] = $remote_data['totalResults'];
                 $results['records'] = array();
-    
+
                 if($remote_data['totalResults'] > 0){
-    
+
                     foreach ($remote_data['datas'] as $records) {
 
                         $id = @$records['identifier'];
@@ -942,7 +942,7 @@
                         $results['records'][$id]['source'] = array();
                         $results['records'][$id]['copyright'] = array();
                         $results['records'][$id]['provenance'] = array();
-                        
+
                         foreach ($records['metas'] as $metadata) {
 
                             if($metadata['value'] == null){
@@ -1018,7 +1018,7 @@
             $system->error_exit_api('Service did not return data in an handled format', HEURIST_ERROR);
         }
     }else if(@$params['serviceType'] == 'opentheso'){
-        
+
         $def_lang = $system->user_GetPreference('layout_language', 'fr');
         $def_lang = getLangCode2($def_lang);
         $def_lang = !$def_lang ? 'fr' : strtolower($def_lang);
@@ -1031,8 +1031,8 @@
         $code_idx = 'http://purl.org/dc/terms/identifier';
         $label_idx = 'http://www.w3.org/2004/02/skos/core#prefLabel';
 
-        $geopoint_idx = 'http://www.opengis.net/ont/geosparql#P625';
-        $valid_geopoint_type = 'http://www.opengis.net/ont/geosparql#wktLiteral';
+        $geopoint_idx = 'http'.'://www.opengis.net/ont/geosparql#P625';
+        $valid_geopoint_type = 'http'.'://www.opengis.net/ont/geosparql#wktLiteral';
         $notes_idx = 'http://www.w3.org/2004/02/skos/core#editorialNote';
 
         $results = array();
@@ -1089,8 +1089,8 @@
     header('Content-Length: ' . strlen($remote_data));
 
     echo $remote_data;
-    
-//------------------------------------------------------------------------------    
+
+//------------------------------------------------------------------------------
 
     function getOpenthesoThesauruses($system, $params){
 
@@ -1136,7 +1136,7 @@
 
     /**
      * Get list of thesauruses
-     * 
+     *
      * @param bool $is_refresh
      */
     function updateOpenthesoThesauruses($system, $params = array()){
@@ -1147,7 +1147,7 @@
         $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
 
         // Get existing data
-        $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
+        $data_old = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ?
                         file_get_contents($opentheso_file) : [];// retain original collection data
         $data_old = json_decode($data_old, TRUE);
         $data_old = json_last_error() !== JSON_ERROR_NONE || !is_array($data_old) ?
@@ -1171,7 +1171,7 @@
                 $data_rtn[$server] = array();
                 continue;
             }
-            
+
             $data_rtn[$server] = array();
 
             $thesauruses = loadRemoteURLContentWithRange("{$base_uri}thesaurus", null, true, 60);
@@ -1264,7 +1264,7 @@
         }
         fclose($fd);
 
-        $data = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ? 
+        $data = file_exists($opentheso_file) && filesize($opentheso_file) > 0 ?
                 file_get_contents($opentheso_file) : null;
 
         $data = $data !== null ? json_decode($data, TRUE) : null;
@@ -1412,7 +1412,7 @@
                     if(empty($records['metas'])){
                         continue;
                     }
-                    
+
                     foreach ($records['metas'] as $metadata) {
 
                         if($metadata['value'] == null){
@@ -1447,9 +1447,9 @@
                             if(!in_array($code, $handled_types)){
 
                                 if(strpos($code, 'c_') !== false){
-                                    
+
                                     $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code));
-                                    
+
                                     $escaped_code = str_replace("'", "&apos;", $escaped_code);
 
                                     $nodes = $datatypes_xml->xpath("//node[@id='$escaped_code']");

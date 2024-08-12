@@ -16,11 +16,11 @@
 
 /**
 * mapStatic.php
-* 
+*
 * return static google map image with feature either by record Id or by geovalue
-* 
+*
 * 2018-04-24 rewritten for H4. It uses geoPHP and Simplify to prepare coordinates for encoding
-* 
+*
 * used in smarty output and mapViewer.js
 *
 * @author      Artem Osmakov   <osmakov@gmail.com>
@@ -33,16 +33,16 @@
 */
     require_once dirname(__FILE__).'/../../hserv/System.php';
     require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-    
+
     require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapEncodePolyline.php";
     require_once dirname(__FILE__)."/../../hserv/utilities/geo/mapSimplify.php";
 
 	$mapobjects = array();
-    
+
     define('USE_GOOGLE', false);
-    
+
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
@@ -50,7 +50,7 @@
         header('Location: '.HEURIST_BASE_URL.'hclient/assets/notfound.png');
         exit;
     }
-    
+
 	if(false && @$_REQUEST['value'] && $_REQUEST['value']!='undefined'){
 
 		$val = $_REQUEST['value'];
@@ -58,15 +58,15 @@
 		$geoval = substr($val,strpos($val,' ')+1);
 
 		$geoobj = parseValueFromDb(0, $type, $geoval, null);
-        
+
 		if($geoobj){
 			$mapobjects = array("cntWithGeo"=>1, "geoObjects"=>array($geoobj) );
 		}
 
 	}else{
 		//$mapobjects = getMapObjects($_REQUEST);
-        
-        
+
+
         if(@$_REQUEST['id'] && !$_REQUEST['q']){
             $_REQUEST['q'] = 'ids:'.$_REQUEST['id'];
         }
@@ -74,11 +74,11 @@
         $_REQUEST['detail'] = 'timemap';
         //retrieve records
         $response = recordSearch($system, $_REQUEST);
-        
+
         if($response && $response['status'] == HEURIST_OK && $response['data'] && $response['data']['count']>0){
-            
+
             $geo_fieldtypes_ids = dbs_GetDetailTypes($system, array('geo'), 3);
-             
+
             $records = $response['data']['records'];
             foreach($records as $recID => $record){
                 if($record['d']){
@@ -96,7 +96,7 @@
                                         if (preg_match("/POLYGON\s?\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $as_wkt, $matches)) {
 
                                             array_push($mapobjects, array("type" => "rect",
-                                                "geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]), 
+                                                "geo" => array("x0" => floatval($matches[1]), "y0" => floatval($matches[2]),
                                                     "x1" => floatval($matches[5]), "y1" => floatval($matches[6]))));
 
                                         }
@@ -106,12 +106,12 @@
                                         if (preg_match("/LINESTRING\s?\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $as_wkt, $matches)) {
 
                                             array_push($mapobjects, array("type" => "circle",
-                                                "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]), 
+                                                "geo" => array("x" => floatval($matches[1]), "y" => floatval($matches[2]),
                                                     "radius" => floatval($matches[3] - $matches[1]))));
                                         }
                                         break;
 
-                                    default:                        
+                                    default:
 
                                         //'geoObjects' => array() $geoObject['geo']['points']
                                         //$geoObject['type']
@@ -134,7 +134,7 @@
                                                     }
                                                 }else if ($json['type']=='MultiPoint'){
                                                     array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
-                                                }else if ($json['type']=='MultiPolygon' 
+                                                }else if ($json['type']=='MultiPolygon'
                                                 || $json['type']=='MultiLineString'){
                                                     foreach($json['coordinates'] as $shape){
                                                         foreach($shape as $points){
@@ -159,15 +159,15 @@
 	}
 
 	if(is_array($mapobjects) && count($mapobjects)>0){
-        
+
         if(USE_GOOGLE){
-            
+
             if(@$_REQUEST['width'] && @$_REQUEST['height']){
                 $size = $_REQUEST['width']."x".$_REQUEST['height'];
             }else{
                 $size = "300x300";
             }
-            
+
 		    $url = "https://maps.google.com/maps/api/staticmap";
 		    $url = $url."?size=".$size."&sensor=false";
 
@@ -202,7 +202,7 @@
             }else{
                 $size = "300,300";
             }
-            
+
             $url = 'https://static-maps.yandex.ru/1.x/?size='.$size.'&l=map&lang=en_RU';
 
             if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
@@ -228,15 +228,15 @@
             */
         }
 
-        
-        
-        
+
+
+
 		//$url = $url."&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w";
 
 		$markers = "";
 		$path_all = "";
 		$poly_all = "";
-        
+
         $verties_cnt = 0;
         $shapes_cnt = 0;
 
@@ -272,7 +272,7 @@
                                 .$crd['x0'].','.$crd['y0'];
                 }
 
-            }else 
+            }else
             if($geoObject['type']=="circle"){
                 if(USE_GOOGLE){
                     $markers = $markers.$geoObject['geo']['y'].",".$geoObject['geo']['x']."|";
@@ -290,12 +290,12 @@
                     $points_to_encode = array();
 
                     if(count($points2)>1000){
-                    
+
                         $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }
-                        
+
                         $tolerance = 0.01;// 0.002;
                         $crn = 0; //count of run
                         $points2 = $points;
@@ -311,14 +311,14 @@
                             }
                         }
                     }else{
-                        
+
                         foreach ($points2 as $point) {
                             array_push($points_to_encode, array($point[1], $point[0]) );
                         }
                     }
-                    
+
                     if(count($points_to_encode)>1){
-                        
+
                         if($geoObject['type']=="polygon" || $geoObject['type']=="pl"){
                             array_push($points_to_encode, $points_to_encode[0]);//add last as first
                         }
@@ -336,7 +336,7 @@
                                 break; //total length of url is too long
                             }
                         }
-                        
+
                     }
 
 			}else if ($shapes_cnt<5 && $verties_cnt<97) { //limit 5 shapes and 100 vertcies
@@ -346,12 +346,12 @@
                     $points_to_encode = array();
 
                     if(count($points2)>100){
-                    
+
                         $points = array();
                         foreach ($geoObject['geo'] as $point) {
                             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                         }
-                        
+
                         $tolerance = 0.02;// 0.002;
                         $crn = 0; //count of run
                         $points2 = $points;
@@ -386,20 +386,20 @@
                         array_unshift($points_to_encode,'c:FF0000FF,f:0000FF40,w:3');
                     }
                     $points_to_encode = implode(',',$points_to_encode);
-                    
-                    
+
+
                     if($points_to_encode!=''){
-                        
+
                         if($poly_all!=''){
                             $poly_all = $poly_all.'~';
                         }
                         $poly_all = $poly_all.$points_to_encode;
-                        
+
                     }
-                
+
             }
 		}
-        
+
         if(USE_GOOGLE){
 
 		    if($markers!=''){
@@ -412,7 +412,7 @@
 		    if($poly_all!=''){
 			    $url = $url.$poly_all;
 		    }
-        
+
         }else{
             if($markers!=''){
                 $markers = '&pt='.$markers;

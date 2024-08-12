@@ -16,7 +16,7 @@
 * @version     4
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  
+* @subpackage
 */
 require_once dirname(__FILE__).'/../../System.php';
 
@@ -26,7 +26,7 @@ $system = new System();
 if( $system->init(@$_REQUEST['db']) ){
 
     if(!$system->is_admin()){
-        $system->addError(HEURIST_REQUEST_DENIED, 
+        $system->addError(HEURIST_REQUEST_DENIED,
             'To perform this action you must be logged in as Administrator of group \'Database Managers\'');
     }else if(!@$_REQUEST['rtyID']){
         $system->addError(HEURIST_INVALID_REQUEST, 'Sorry, record type to duplicate has not been defined');
@@ -49,15 +49,15 @@ if( $system->init(@$_REQUEST['db']) ){
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         $new_rt_id = $mysqli->insert_id;
-    
+
         $dbID = HEURIST_DBID;
         if(!($dbID>0)){ $dbID = 0;}
-        
+
         $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                     .', rty_NameInOriginatingDB=rty_Name'
                     .', rty_IDInOriginatingDB='.$new_rt_id.' WHERE rty_ID='.$new_rt_id;
         $res = $mysqli->query($query);
-        
+
 
         $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
         rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,
@@ -70,20 +70,20 @@ if( $system->init(@$_REQUEST['db']) ){
         rst_RecordMatchOrder, rst_CalcFunctionID, rst_RequirementType, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_OriginatingDBID, rst_IDInOriginatingDB,
         rst_MaxValues, rst_MinValues, rst_DisplayDetailTypeGroupID, rst_FilteredJsonTermIDTree, rst_PtrFilteredIDs,
         rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_OrderForThumbnailGeneration,
-        rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons 
+        rst_TermIDTreeNonSelectableIDs, rst_Modified, rst_LocallyModified, rst_SemanticReferenceURL, rst_TermsAsButtons
         from defRecStructure where rst_RecTypeID=$old_rt_id";
 
         $res = $mysqli->query($query);
-            
+
     }
 }
-    
-if($res){ 
+
+if($res){
     $rv['id'] = $new_rt_id;
     //2021-06-15 we don't use old format for defintions $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
     $response = array("status"=>HEURIST_OK, "data"=>$rv);
- 
-}else{   
+
+}else{
     $response = $system->getError();
 }
 

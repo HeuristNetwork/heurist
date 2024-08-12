@@ -8,7 +8,7 @@
         <meta name="description" content="<?php echo $meta_description;?>">
 
         <!-- 9 Oct 2019: The styles were commented out. Probably the stylesheets no longer contain
-        styles for the homepage - to check - as the page is largely unstyled, but the button styles 
+        styles for the homepage - to check - as the page is largely unstyled, but the button styles
         ARE used and work since removal of the comments - so why were these commented out? -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
@@ -24,13 +24,13 @@
             #page {left:10%; right:10%}
             .small {width:13px;margin:0 auto}
         </style-->
-        
+
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-    <?php             
-        include_once $websiteScriptAndStyles_php;  
+    <?php
+        include_once $websiteScriptAndStyles_php;
     ?>
     <style>
 body{
@@ -49,7 +49,7 @@ body{
 }
 #main-menu .ui-menu .ui-menu-item a:hover,
 #main-menu .ui-menu .ui-menu-item a.ui-state-active {
-    color:#0271bb !important;   
+    color:#0271bb !important;
     background: none;
     border:none !important;
 }
@@ -63,7 +63,7 @@ body{
 }
 
 .text{
-    width:100% !important;   
+    width:100% !important;
 }
 
 .text2{
@@ -108,8 +108,8 @@ body{
         </div>
 
         <div id="uhh-header-nav">
-          <!-- HEADER MENU -->  
-          <?php 
+          <!-- HEADER MENU -->
+          <?php
           //output bootstrap menu
           if($mainmenu_content!=null){
                 print $mainmenu_content;
@@ -119,10 +119,10 @@ body{
 
         <div class="page">
             <!-- HEURIST CMS PAGE CONTENT -->
-            <div id="main-content" 
-                style="padding:0 10px;"    
-                data-homepageid="<?php print $home_page_record_id;?>" 
-                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?> 
+            <div id="main-content"
+                style="padding:0 10px;"
+                data-homepageid="<?php print $home_page_record_id;?>"
+                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
                 data-viewonly="<?php print ($hasAccess)?0:1;?>">
             </div>
         </div>
@@ -139,7 +139,7 @@ body{
           "language":{},
           "sublogo":{},
           "mobilemenu":{"dom":""},
-          "nav":{}, 
+          "nav":{},
           "search":{}
         },
         "footer": {
@@ -149,6 +149,6 @@ body{
       "leichtesprache":"leichtesprache.html",
       "barrierefreiheit":"barrierefreiheit.html"
     }
-      }'>    
+      }'>
     </script>
 </html>

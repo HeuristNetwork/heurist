@@ -30,7 +30,7 @@ require_once 'initPage.php';
         if(success){
             var exportMenu = new hexportMenu( $('body') );
         }
-    }            
+    }
 </script>
 <style>
 .export-button{
@@ -59,17 +59,17 @@ require_once 'initPage.php';
 
         <div id="menu-export-csv" class="export-item">
             <button class="export-button">CSV</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_CSV"
                 data-action="menu-export-csv"
                 title="Export records as delimited text (comma/tab), applying record type">
                 Comma or tab-separated text file</a>
         </div>
         <br>
-        
+
         <div id="menu-export-hml-resultset" class="export-item">
             <button class="export-button">XML</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_HML"
                 data-action="menu-export-hml-resultset"
                 title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
@@ -78,28 +78,28 @@ require_once 'initPage.php';
 
         <div id="menu-export-json" class="export-item">
             <button class="export-button">JSON</button>
-            <a href="#" oncontextmenu="return false;" style="padding-right:20px" 
+            <a href="#" oncontextmenu="return false;" style="padding-right:20px"
                 data-logaction="exp_JSON"
                 data-action="menu-export-json"
                 title="Generate JSON for current set of search results (current query)">
                 <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
                 JSON</a>
-           <label style="font-size:smaller;"><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
+           <label style="font-size:smaller;"><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>
 
            <div class="prompt" style="font-style: italic;padding-left:110px;width:400px">
                 XML and JSon exported from a registered Heurist database can be imported directly into any other Heurist database even if the structure is different. Use this to migrate selected or complete data, including between different servers.
            </div>
-  
+
            <div class="prompt" id="divWarnAboutReg" style="font-style:italic; color:red; padding-left:110px; width:400px">
                 NOTE: This database has not been registered ( Design > Register ) and the file is not therefore importable except into an identically structured database
            </div>
-        
+
         </div>
 
         <br>
         <div id="menu-export-rdf" class="export-item">
             <button class="export-button">RDF (Experimental)</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_RDF"
                 data-action="menu-export-rdf"
                 title="Generate RDF (Resource Description Framework) for current set of search results (current query)">
@@ -110,20 +110,20 @@ require_once 'initPage.php';
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="json"/>json</label>&nbsp;
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="ntriples"/>ntriples</label>&nbsp;
                 <label style="font-size:smaller;"><input type="radio" name="serial_format" value="turtle" />turtle</label>
-                
-                <div class="prompt" style="padding-left:110px;width:400px">Include 
-                <label style="font-size:smaller;"><input type="checkbox" id="include_definition_label" checked/>&nbsp;record type label;</label>  
-                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_term_label" checked/>&nbsp;term label;</label>  
-                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_rec_title" checked/>&nbsp;record title;</label>  
-                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_file_info" checked/>&nbsp;file info;</label>  
+
+                <div class="prompt" style="padding-left:110px;width:400px">Include
+                <label style="font-size:smaller;"><input type="checkbox" id="include_definition_label" checked/>&nbsp;record type label;</label>
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_term_label" checked/>&nbsp;term label;</label>
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_rec_title" checked/>&nbsp;record title;</label>
+                <label style="font-size:smaller;"><input type="checkbox" id="include_resource_file_info" checked/>&nbsp;file info;</label>
                 </div>
         </div>
-        
-        
+
+
         <br>
         <div id="menu-export-geojson" class="export-item">
             <button class="export-button">GeoJSON</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_GeoJSON"
                 data-action="menu-export-geojson"
                 title="Generate GeoJSON-T for current set of search results (current query)">
@@ -134,10 +134,10 @@ require_once 'initPage.php';
                 <label style="font-size:smaller;"><input type="radio" name="detail_mode" value="1"/>Inline</label>&nbsp;
                 <label style="font-size:smaller;"><input type="radio" name="detail_mode" value="2" checked/>Full</label>
         </div>
-        
+
         <div id="menu-export-kml" class="export-item">
             <button class="export-button">KML</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_KML"
                 data-action="menu-export-kml"
                 title="Generate KML for current set of search results (current query + expansion)">
@@ -148,7 +148,7 @@ require_once 'initPage.php';
         <br>
         <div id="menu-export-gephi" class="export-item">
             <button class="export-button">GEPHI</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_GEPHI"  style="padding-right:30px"
                 data-action="menu-export-gephi"
                 title="Generate GEPHI for current set of search results (current query + expansion)">
@@ -159,7 +159,7 @@ require_once 'initPage.php';
 
         <div id="menu-export-iiif" class="export-item">
             <button class="export-button">IIIF</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_IIIF"  style="padding-right:30px"
                 data-action="menu-export-iiif"
                 title="Generate IIIF manifest">
@@ -167,10 +167,10 @@ require_once 'initPage.php';
                 <span class="ui-icon ui-icon-extlink export-popup mirador"></span><span class="export-popup mirador" style="padding-right:10px">open in Mirador</span>
                 IIIF</a>
         </div>
-        
+
         <div id="menu-export-hml-multifile" class="export-item">
             <button class="export-button">HuNI</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;"
                 data-logaction="exp_XMLHuNI"
                 data-action="menu-export-hml-multifile"
                 title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">

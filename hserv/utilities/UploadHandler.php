@@ -9,18 +9,18 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
- 
+
  /*
 // Set to 0 to use the GD library to scale and orient images,
 // set to 1 to use imagick (if installed, falls back to GD),
 // set to 2 to use the ImageMagick convert binary directly: via command line
 'image_library' => 1,
-            
+
  public create_scaled_image
     gd_create_scaled_image
     imagick_create_scaled_image
     imagemagick_create_scaled_image - DISABLED DUE SECURITY REASONS
- 
+
 */
 
 class UploadHandler
@@ -56,25 +56,25 @@ class UploadHandler
         'image_resize' => 'Failed to resize image',
         'file_name_too_big' => 'The maximum length for a file name is 255 bytes.'
     );
-    
-    
+
+
     protected $image_objects = array();
 
     public function __construct($options = null, $initialize = true, $error_messages = null) {
-	
+
         //ARTEM - take upload folder from request
         //$upload_thumb_dir = @$_REQUEST['upload_thumb_dir'];
         //$upload_thumb_url = @$_REQUEST['upload_thumb_url'];
-        
+
         $heurist_db = @$options['database'];
-        
+
         $error = System::dbname_check($heurist_db);
         if($error){
             //database not defined
             $this->header('HTTP/1.1 403 Forbidden');
-            return; 
+            return;
         }
-        
+
         $system = new System();
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
@@ -82,7 +82,7 @@ class UploadHandler
             $this->header('HTTP/1.1 403 Forbidden');
             return;
         }
-        
+
         $replace_edited_file = intval(@$_REQUEST['replace_edited_file']);//defined in form
         if(!($replace_edited_file>0 && $replace_edited_file<4)) {$replace_edited_file = false;}
         $unique_filename = (@$_REQUEST['unique_filename']!=='0');//defined in form
@@ -92,12 +92,12 @@ class UploadHandler
             if($options==null) {$options=array();}
 
             //get upload subfolder from parameters - this is subfolder of database upload folder
-            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form 
+            $upload_dir = @$_REQUEST['upload_subfolder'];//defined in form
             if(!$upload_dir){
                 $upload_dir = 'insitu/';
             }
-            
-            /*        
+
+            /*
                     //NOT ALLOWED
                     // by default into subfolder files next to script
                     $upload_dir = dirname($this->get_server_var('SCRIPT_FILENAME')).'/files/';
@@ -110,13 +110,13 @@ class UploadHandler
             if(substr($upload_dir, -1) != "/"){
                 $upload_dir = $upload_dir . "/";
             }
-            
+
             $options['upload_subfolder'] = $upload_dir;
             $upload_url = HEURIST_FILESTORE_URL.$upload_dir;
             $upload_dir = HEURIST_FILESTORE_DIR.$upload_dir;
-            
+
         }
-        
+
         $this->response = array();
         $this->options = array(
             'script_url' => $this->get_full_url().'/'.basename($this->get_server_var('SCRIPT_NAME')),
@@ -127,7 +127,7 @@ class UploadHandler
             'mkdir_mode' => 0755,
             'param_name' => 'files',
             'unique_filename' => $unique_filename, //generate unique name for every upload (by default)
-            'replace_edited_file' => $replace_edited_file, // if unique_filename is false, 
+            'replace_edited_file' => $replace_edited_file, // if unique_filename is false,
                                                            // 1 - overwrtie if modified
                                                            // 2 - create unique file if modified
                                                            // 3 - ignore if already file with such name already exist
@@ -173,10 +173,10 @@ class UploadHandler
             'inline_file_types' => '/\.(gif|jpe?g|png)$/i',
             // Defines which files (based on their names) are accepted for upload:
             'accept_file_types' => null, //'/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i', //  '/.+$/i',
-            
+
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-            // need to set this value - to catch oversize on client size 
+            // need to set this value - to catch oversize on client size
             // post_max_size will not be checked on server side: $_FILES will be empty
             'max_file_size' => null, //in bytes
             'min_file_size' => 1,
@@ -198,7 +198,7 @@ class UploadHandler
             // set to 2 to use the ImageMagick convert binary directly:
             'image_library' => 1,
             'scale_to_png' =>false,
-            
+
             // Uncomment the following to define an array of resource limits
             // for imagick:
             /*
@@ -259,7 +259,7 @@ class UploadHandler
         if ($options) {
             $this->options = $options + $this->options;
         }
-        
+
         //default value
         if(@$this->options['accept_file_types']){
             if(strpos($this->options['accept_file_types'],')$/i')===false){
@@ -268,12 +268,12 @@ class UploadHandler
         }else{
             $this->options['accept_file_types'] = '/\.('.str_replace(',','|',HEURIST_ALLOWED_EXT).')$/i';
         }
-        
-        
+
+
         if ($error_messages) {
             $this->error_messages = $error_messages + $this->error_messages;
         }
-/*  0519  it is not possible set upload_max_filesize via ini_set. they can be defined in .htaccess or user.ini per folder      
+/*  0519  it is not possible set upload_max_filesize via ini_set. they can be defined in .htaccess or user.ini per folder
         $max_size = $this->options['max_file_size'];
         if ($max_size) {
             $siz = 100*1024*1024;
@@ -281,14 +281,14 @@ class UploadHandler
             ini_set( 'upload_max_filesize', '10000000' );
 $siz = USystem::getConfigBytes('upload_max_filesize');
         }
-*/        
+*/
         if ($initialize) {
             $this->initialize();
         }
     }
 
     protected function initialize() {
-        
+
         switch ($this->get_server_var('REQUEST_METHOD')) {
             case 'OPTIONS':
             case 'HEAD':
@@ -324,9 +324,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
              ($_SERVER['SERVER_NAME'].
             ($https && $_SERVER['SERVER_PORT'] === 443 ||
             $_SERVER['SERVER_PORT'] === 80 ? '' : ':'.$_SERVER['SERVER_PORT']));
-    
+
     }
-    
+
     protected function get_full_url() {
         return $this->get_server_url().
             substr($_SERVER['SCRIPT_NAME'],0, strrpos($_SERVER['SCRIPT_NAME'], '/'));
@@ -354,22 +354,22 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 //$thi->secure_file_name($file_name)
                 $file_name = htmlspecialchars(basename($file_name));
                 $file_name = str_replace('&amp;','&',$file_name);
-                
+
                 return USanitize::sanitizePath($version_dir.$this->get_user_path().$file_name);//realpath
             }
             $version_path = $version.'/';
         }
-        
+
         if(empty($subfolder)){
             $subfolder = '';
         }else{ //}if(substr($subfolder,strlen($subfolder)-1,1){
             $subfolder = $subfolder.'/';
         }
-        
+
         //$thi->secure_file_name($filename)
         $file_name = htmlspecialchars(basename($file_name));
         $file_name = str_replace('&amp;','&',$file_name);
-        
+
         return USanitize::sanitizePath($this->options['upload_dir'].$this->get_user_path()
             .$subfolder.$version_path.$file_name);
     }
@@ -403,7 +403,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }else{
             $subfolder = $subfolder.'/';
         }
-        
+
         return $this->options['upload_url'].$this->get_user_path()
             .$subfolder.$version_path.rawurlencode($file_name);
     }
@@ -420,11 +420,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }else{
             $file->deleteUrl .= '&folder='.rawurlencode($this->options['upload_dir']);
         }
-        
+
         if (!empty($file->subfolder)) {
             $file->deleteUrl .= '&subfolder='.rawurlencode($file->subfolder);
         }
-        
+
         if ($file->deleteType !== 'DELETE') {
             $file->deleteUrl .= '&_method=DELETE';
         }
@@ -519,7 +519,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $val = substr($val,0,strlen($val)-1);
         }
         switch($last) {
-            case 'g':  
+            case 'g':
                 $val *= 1073741824; break;
             case 'm':
                 $val *= 1048576; break;
@@ -529,12 +529,12 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         return $this->fix_integer_overflow($val);
     }
-    
+
     //
     //
     //
     protected function safe_copy($from, $to) {
-       
+
         $from = USanitize::sanitizePath($from);
         $filename = basename($to);
         $to = dirname($to);
@@ -552,7 +552,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $file->error = $this->get_error_message($error);
             return false;
         }
-        
+
         //Artem Osmakov -  destination is limited to heurist file storage
         $upload_path = $this->get_upload_path($file->name, $file->subfolder);
 
@@ -564,14 +564,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $file->error = $this->get_error_message('only_heurist')
                 .' a)'.realpath($upload_path)
                     .' b)'.realpath(HEURIST_FILESTORE_DIR);
-            
+
             return false;
         }
-        
+
         $content_length = $this->fix_integer_overflow(
             (int)$this->get_server_var('CONTENT_LENGTH')
         );
-        
+
         $post_max_size = $this->get_config_bytes(ini_get('post_max_size'));
         if ($post_max_size && ($content_length > $post_max_size)) {
             $file->error = $this->get_error_message(1);
@@ -588,7 +588,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $file->error = $this->get_error_message('accept_file_types');
             return false;
         }
-        
+
         if ($uploaded_file && is_uploaded_file($uploaded_file)) {
             $file_size = $this->get_file_size($uploaded_file);
         } else {
@@ -598,13 +598,13 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if ($this->options['max_file_size'] && (
                 $file_size > $this->options['max_file_size'] ||
                 $file->size > $this->options['max_file_size'])
-            ) 
+            )
         {
             $file->error = $this->get_error_message('max_file_size');
             return false;
         }
-        
-        
+
+
         if ($this->options['min_file_size'] &&
             $file_size < $this->options['min_file_size']) {
             $file->error = $this->get_error_message('min_file_size');
@@ -681,9 +681,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     //
     protected function get_unique_filename($file_path, $name, $subfolder, $size, $type, $error,
             $index, $content_range) {
-                
-        if($this->options['unique_filename']){ //Artem Osmakov assign uniqie name to uploaded file 
-        
+
+        if($this->options['unique_filename']){ //Artem Osmakov assign uniqie name to uploaded file
+
             while(is_dir($this->get_upload_path($name, $subfolder))) {
                 $name = $this->upcount_name($name);//unique name for subfolder
             }
@@ -696,9 +696,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 }
                 $name = $this->upcount_name($name);//get name with counter
             }
-        
+
         }
-        
+
         return $name;
     }
 
@@ -752,10 +752,10 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
     protected function get_file_name($file_path, $name, $subfolder, $size, $type, $error,
             $index, $content_range) {
-                
+
         $name = $this->trim_file_name($file_path, $name, $size, $type, $error,
             $index, $content_range);
-            
+
         return $this->get_unique_filename(
             $file_path,
             $this->fix_file_extension($file_path, $name, $size, $type, $error,
@@ -771,7 +771,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
     protected function get_scaled_image_file_paths($file_name, $subfolder, $version) {
         $file_path = $this->get_upload_path($file_name, $subfolder);
-        
+
         if (!empty($version)) {
             $version_dir = $this->get_upload_path(null, $subfolder, $version);
             if (!is_dir($version_dir)) {
@@ -780,20 +780,20 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             // HEURIST_DIR/admin/setup/.htaccess_via_url
             $installDir = preg_replace("/\/(hserv)\/.*/", "", @$_SERVER["SCRIPT_NAME"]);
             $access_file = @$_SERVER["DOCUMENT_ROOT"].$installDir.'/admin/setup/.htaccess_via_url';
-            
+
             if(!file_exists($version_dir.'/.htaccess') && file_exists($access_file)){
                 //ARTEM: copy .htaccess file into thumbnail folder
                 $this->safe_copy($access_file, $version_dir.'/.htaccess');
                 //copy($access_file, $version_dir.'/.htaccess');
             }
-            
+
             $new_file_path = $version_dir.'/'.$file_name;
         } else {
             $version_dir = $this->get_upload_path(null, $subfolder);
-            
+
             $new_file_path = $file_path; //original
         }
-        
+
         //check that destination directory is writeable
         $s = '. This is generally due to ownership permissions on the folder';
         if(!file_exists($version_dir)){
@@ -801,7 +801,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }else if(!is_writable($version_dir)){
             return array(false, 'Unable to write into the target folder: '.$version_dir.$s);
         }
-        
+
         return array($file_path, $new_file_path);
     }
 
@@ -926,14 +926,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     //
     //
     protected function check_memory($file_path, $new_file_path, $type, $version) {
-    
+
         $isTooBig = UImage::checkMemoryForImage($file_path, $type);
-        
+
         if($isTooBig){
             if(empty($version)){
-                //do not read image 
+                //do not read image
                 if ($file_path !== $new_file_path) { //no resize
-                    //return 
+                    //return
                     $this->safe_copy($file_path, $new_file_path);
                 }
                 //return true;
@@ -943,12 +943,12 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 imagedestroy($img);
                 //return $res;
             }
-            
+
             return true;
         }
         return false;
-    }        
-    
+    }
+
     //
     // creates scaled image with native GD php functions
     //
@@ -956,22 +956,22 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         if (!function_exists('imagecreatetruecolor')) {
             return 'Function not found: imagecreatetruecolor';
         }
-        
+
         list($file_path, $new_file_path) =
             $this->get_scaled_image_file_paths($file_name, $subfolder, $version);
 
         /*if (function_exists('exif_thumbnail')) {
             $thumbimage = exif_thumbnail($file_name, $width, $height, $thumb_type);
         }*/
-            
+
         $type = substr(strrchr($file_name, '.'), 1);
         if(@$options['scale_to_png']==true && strtolower($type)!='png'){ //Artem Osmakov: scale to png only
             $new_file_path = str_replace('.'.$type,'.png', $new_file_path);
         }
-        
+
         $type = strtolower($type);
         $write_func = null;
-        
+
         switch ($type) {
             case 'jpg':
             case 'jpeg':
@@ -996,29 +996,29 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             default:
                 return 'Not supported image format ('.$type.')';
         }
-        
-        
+
+
         if($this->check_memory($file_path, $new_file_path, $type, $version)){
             return true;
         }
-        
+
         if(@$options['scale_to_png']==true){
                 $type = 'png';
                 $write_func = 'imagepng';
                 $image_quality = isset($options['png_quality']) ?
                     $options['png_quality'] : 9;
         }
-        
+
         $src_img = $this->gd_get_image_object(
             $file_path,
             $src_func,
             !empty($options['no_cache'])
         );
-        
+
         if(!$src_img){ //image is broken or extension does not fit to type
             return $this->get_error_message('image_broken');
         }
-        
+
         $image_oriented = false;
         if (!empty($options['auto_orient']) && $this->gd_orient_image(
                 $file_path,
@@ -1030,7 +1030,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 $src_func
             );
         }
-        
+
         $max_width = $img_width = imagesx($src_img);
         $max_height = $img_height = imagesy($src_img);
         if (!empty($options['max_width'])) {
@@ -1044,7 +1044,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $max_height / $img_height
         );
         if ($scale >= 1) {
-            
+
             if ($image_oriented) {
                 $ret = ($write_func!=null)?$write_func($src_img, $new_file_path, $image_quality):false;
                 return $ret;
@@ -1090,7 +1090,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $img_width,
             $img_height
         ) && ($write_func==null || $write_func($new_img, $new_file_path, $image_quality));
-        
+
         $this->gd_set_image_object($file_path, $new_img);
 
         return $success;
@@ -1154,41 +1154,41 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $image->setImageOrientation(\imagick::ORIENTATION_TOPLEFT);// 1
         return true;
     }
-                       
+
     protected function imagick_create_scaled_image($file_name, $subfolder, $version, $options) {
 
         list($file_path, $new_file_path) =
             $this->get_scaled_image_file_paths($file_name, $subfolder, $version);
-            
-           
+
+
         $type = substr(strrchr($file_name, '.'), 1);
         if(@$options['scale_to_png']==true && strtolower($type)!='png'){ //Artem Osmakov: scale to png only
             $new_file_path = str_replace('.'.$type,'.png', $new_file_path);
         }
-        
+
         if($this->check_memory($file_path, $new_file_path, $type, $version)){
             return true;
         }
-        
-            
+
+
         $err_msg = '';
         try{
-            
+
             $image = $this->imagick_get_image_object(
                 $file_path,
                 !empty($options['crop']) || !empty($options['no_cache'])
             );
-        
+
         } catch (\Exception $e) {
-            
+
             $image = null;
             $err_msg = '. System mesage: '.$e->getMessage();
         }
-        
+
         if(!$image){
             return $this->get_error_message('image_broken').$err_msg;
         }
-        
+
         if ($image->getImageFormat() === 'GIF') {
             // Handle animated GIFs:
             $images = $image->coalesceImages();
@@ -1212,7 +1212,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         if (!($image_oriented || $max_width < $img_width || $max_height < $img_height)) {
             if ($file_path !== $new_file_path) {
-                
+
                 return $this->safe_copy($file_path, $new_file_path);
             }
             return true;
@@ -1259,7 +1259,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         return $success && $image->writeImage($new_file_path);
     }
-    
+
     /* AO: USING SHELL DISABLED DUE SECURITY REASONS
     protected function imagemagick_create_scaled_image($file_name, $subfolder, $version, $options) {
         list($file_path, $new_file_path) =
@@ -1268,12 +1268,12 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             .(empty($options['max_height']) ? '' : 'X'.$options['max_height']);
         if (!$resize && empty($options['auto_orient'])) {
             if ($file_path !== $new_file_path) {
-                
+
                 return $this->safe_copy($file_path, $new_file_path);
             }
             return true;
         }
-        
+
         $cmd = $this->options['convert_bin'];
         if (!empty($this->options['convert_params'])) {
             $cmd .= ' '.$this->options['convert_params'];
@@ -1324,7 +1324,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     error_log($e->getMessage());
                 }
             }
-            
+
             /*  AO: USING SHELL DISABLED DUE SECURITY REASONS
             if ($this->options['image_library'] === 2) {
                 $cmd = $this->options['identify_bin'];
@@ -1377,15 +1377,15 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function handle_image_file($file_path, $file) {
         $failed_versions = array();
         foreach($this->options['image_versions'] as $version => $options) {
-            
+
             $check = $this->get_scaled_image_file_paths($file->name, $file->subfolder, $version);
             if(!$check[0]){
                 $file->error = $check[1];
                 break;
             }
-            
+
             $res = $this->create_scaled_image($file->name, $file->subfolder, $version, $options);
-            
+
             if ($res===true) {
                 if (!empty($version)) {
                     //Artem Osmakov: version extension can be differ
@@ -1410,7 +1410,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             }
         }
         if (count($failed_versions)>0) {
-            
+
             if(@$failed_versions['original']){
                 $file->error = $failed_versions['original'];
             }else{
@@ -1434,7 +1434,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     // $type - mimetype
     protected function handle_file_upload($uploaded_file, $name, $original_name, $subfolder, $size, $type, $error,
             $index = null, $content_range = null) {
-                
+
         $file = new \stdClass();
         $file->name = $this->get_file_name($uploaded_file, $name, $subfolder, $size, $type, $error,
             $index, $content_range);
@@ -1443,13 +1443,13 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $file->type = $type;
         $file->original_name = $original_name;
         $file->subfolder = $subfolder;
-        
+
         //check max allowed file name - 255 bytes
         if(strlen($file->name)>255){
             $file->error = $this->get_error_message('file_name_too_big');
             return $file;;
         }
-            
+
         if(!$this->options['unique_filename']){
             // Keep an existing filename if this is part of a chunked upload:
             $uploaded_bytes = $this->fix_integer_overflow((int)$content_range[1]);
@@ -1478,22 +1478,22 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     }
                     // 2 - create unique file if modified
                     if($this->options['replace_edited_file']==2){
-                        
+
                         $this->options['unique_filename'] = true;
-                        
+
                         $file->name = $this->get_file_name($uploaded_file, $name, $subfolder, $size, $type, $error,
                             $index, $content_range);
-                        
+
                         $this->options['unique_filename'] = false;
                     }
                     // 1 - overwrtie if modified (with same name and different checksum)
-                }  
+                }
             }
         }
-        
-        
-        
-        
+
+
+
+
         if ($this->validate($uploaded_file, $file, $error, $index)) {
             $this->handle_form_data($file, $index);
             $upload_dir = $this->get_upload_path('', $file->subfolder);
@@ -1525,14 +1525,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 );
                 */
             }
-            
+
             //file does not exist
             if(!is_file($file_path)){
                 $file->error = 'File is not uploaded';//$this->get_error_message('skip_same_name');
                 return $file;
             }
 
-            
+
             $file_size = $this->get_file_size($file_path, $append_file);
             if ($file_size === $file->size) {
                 $file->url = $this->get_download_url($file->name, $file->subfolder);
@@ -1608,7 +1608,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
     protected function get_singular_param_name() {
         return substr($this->options['param_name'], 0, -1);//files -> file
     }
-    
+
     //
     // Unfortunately Snyk security report doesn't see this code
     //
@@ -1627,11 +1627,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         return $filename;
     }
 
-    //@todo    
+    //@todo
     protected function get_subfolder_param() {
         return $this->get_query_param('subfolder');
     }
-    
+
     protected function get_file_names_params() {
         $params = $this->get_query_param($this->options['param_name']);
         if (!$params) {
@@ -1681,7 +1681,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         }
         $file_name = $this->get_file_name_param();
         $subfolder = $this->get_subfolder_param();
-        
+
         if (!$this->is_valid_file_object($file_name, $subfolder)) {
             $this->header('HTTP/1.1 404 Not Found');
             return;
@@ -1690,7 +1690,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $this->header(
                 $redirect_header.': '.$this->get_download_url(
                     $file_name,
-                    $subfolder, 
+                    $subfolder,
                     $this->get_version_param(),
                     true
                 )
@@ -1812,11 +1812,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             preg_split('/[^0-9]+/', $content_range_header) : null;
         $size =  $content_range ? $content_range[3] : null;
         $files = array();
-        
+
         if($this->options['newfilename']){ //Artem Osmakov: rename file on server
             $file_name = $this->options['newfilename'];
         }
-        
+
         if ($upload) {
             $prefix = '';
             if($file_name && strpos($file_name,'~')===0){
@@ -1826,9 +1826,9 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                 // param_name is an array identifier like "files[]",
                 // $upload is a multi-dimensional array:
                 foreach ($upload['tmp_name'] as $index => $value) {
-                    
-                    
-                    //Artem Osmakov - get subfolder name by replacing Ё to /     
+
+
+                    //Artem Osmakov - get subfolder name by replacing Ё to /
                     $file_name = ($file_name ? $file_name : $upload['name'][$index]);
                     //$file_name = USanitize::sanitizeFileName($file_name ? $file_name : $upload['name'][$index], false);
                     //if(strpos($file_name,'~')!==0){
@@ -1837,11 +1837,11 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     $subfolder_name = '';
                     if(strpos($file_name,'Ё')>0){
                         $file_name = str_replace('Ё','/',$file_name);
-                        
+
                         $pathinfo = pathinfo($file_name);
                         $subfolder_name = USanitize::sanitizePath($pathinfo['dirname']);
                         $file_name = $pathinfo['basename'];
-                        
+
                         $origial_filename = $file_name;
                         //$k = strrpos($file_name, "/");
                         //$subfolder_name = substr($file_name, 0, $k);
@@ -1849,14 +1849,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     }else{
                         $origial_filename = $upload['name'][$index];
                     }
-                    
+
 
                     $tmp_file = null;
                     if(isset($upload['tmp_name'][$index])){
                         // we can not sanitize it, other is_uploaded_file returns false
                         $tmp_file = USanitize::sanitizePath($upload['tmp_name'][$index], true);
                     }
-                    
+
                     $files[] = $this->handle_file_upload(
                         $tmp_file,
                         $file_name,
@@ -1868,7 +1868,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                         $index,
                         $content_range
                     );
-                    
+
                 }
             } else {
                 // param_name is a single object identifier like "file",
@@ -1879,14 +1879,14 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
                     // we can not sanitize it, other is_uploaded_file returns false
                     $tmp_file = USanitize::sanitizePath($upload['tmp_name'], true);
                 }
-                
-                
+
+
                 $files[] = $this->handle_file_upload(
                     $tmp_file,
                     //$prefix.USanitize::sanitizeFileName($file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null), false),
                     $file_name ? $file_name : (isset($upload['name']) ?$upload['name'] : null),
                     (isset($upload['name']) ? $upload['name'] : null), //original name
-                    '',        
+                    '',
                     $size ? $size : (isset($upload['size']) ?
                             $upload['size'] : $this->get_server_var('CONTENT_LENGTH')),
                     isset($upload['type']) ?
@@ -1908,7 +1908,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
             $file_names = array($this->get_file_name_param());
         }
         $subfolder = $this->get_subfolder_param();
-                                           
+
         $response = array();
         foreach($file_names as $file_name) {
             $file_path = $this->get_upload_path($file_name, $subfolder);

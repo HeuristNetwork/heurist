@@ -167,7 +167,7 @@ foreach($databases as $db){
                     $dty_id = $code_parts[$j];
 
                     $rty_id = strpos($rty_id, ',') !== false ? explode(',', $rty_id)[0] : $rty_id;
-                    
+
                     if(in_array($dty_id, $rec_meta)){ // uses record data field
 
                         // check rectype exists
@@ -207,8 +207,8 @@ foreach($databases as $db){
 
             $results[$db][$svs_ID] = "<div style='padding: 10px 5px;' data-type='$type' data-name='". $svs_Details['svs_Name'] ."'>"
                                         . "ID: <strong style='padding-right: 15px;'>$svs_ID</strong> "
-                                        . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>" 
-                                        . implode("<br>", $results[$db][$svs_ID]) 
+                                        . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>"
+                                        . implode("<br>", $results[$db][$svs_ID])
                                     ."</div>";
         }else if(array_key_exists($svs_ID, $results[$db])){
             unset($results[$db][$svs_ID]);
@@ -243,7 +243,7 @@ foreach($databases as $db){
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
 
         <script type="text/javascript">
-            
+
             window.onload = () => {
 
                 if(document.querySelector('#db_filter').length == 0){ // no additional setup necessary
@@ -252,7 +252,7 @@ foreach($databases as $db){
 
                 // Filter db name
                 document.querySelector('#db_filter').onkeyup = (event) => {
-                    
+
                     let filter = event.target.value;
 
                     document.querySelectorAll('[data-db]').forEach((ele) => {
@@ -269,7 +269,7 @@ foreach($databases as $db){
 
                 // Filter saved search name
                 document.querySelector('#ss_filter').onkeyup = (event) => {
-                    
+
                     let filter = event.target.value;
 
                     document.querySelectorAll('[data-name]').forEach((ele) => {
@@ -298,7 +298,7 @@ foreach($databases as $db){
                 if(chkboxes.length === 4){
 
                     chkboxes.forEach(
-                        ele => document.querySelectorAll(`[data-type="${ele.value}"]`).length === 0 ? 
+                        ele => document.querySelectorAll(`[data-type="${ele.value}"]`).length === 0 ?
                                     ele.parentNode.style.display = 'none' : ele.parentNode.style.display = 'inline'
                     );
                 }
@@ -306,17 +306,17 @@ foreach($databases as $db){
         </script>
 
     </head>
-    
+
     <body class="popup" style="overflow:auto">
 
-        <?php 
-        if(!empty($results)){ 
+        <?php
+        if(!empty($results)){
         ?>
 
         <div>
             <label style="padding-right: 10px;">Database name: <input type="text" id="db_filter"></label>
             <label style="padding-right: 20px;">Search name: <input type="text" id="ss_filter"></label>
-            Search type: 
+            Search type:
             <label><input type="checkbox" class="search_type" value="filter" checked="checked"> Filter</label>
             <label><input type="checkbox" class="search_type" value="facet" checked="checked"> Facet</label>
             <label><input type="checkbox" class="search_type" value="simple" checked="checked"> Simple</label>
@@ -327,9 +327,9 @@ foreach($databases as $db){
             echo implode('<hr>', $results);
         }else if(empty($databases)){
             echo "<h2>An error occurred with retrieving a list of available databases</h2>";
-        }else{ 
+        }else{
             echo "<h2>No issues found with any saved filters or facets</h2>";
-        } 
+        }
         ?>
 
     </body>

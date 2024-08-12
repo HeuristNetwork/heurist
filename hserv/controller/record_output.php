@@ -3,14 +3,14 @@
     * Application interface. See HRecordMgr in hapi.js
     * Record search and output in required format
     * used in recordExportCSV.js
-    * 
-    * 
+    *
+    *
     * parameters
     * db - heurist database
     * format = geojson|json|csv|kml|xml|hml|gephi|iiif
     * linkmode = direct, direct_links, none, all
     * prefs:{ format specific parameters }, }
-    * 
+    *
     * prefs for csv
                 csv_delimiter :','
                 csv_enclosure :'""
@@ -27,28 +27,28 @@
                 include_term_hierarchy
                 include_resource_titles
                 include_temporals
-    * 
-    * 
-    * 
+    *
+    *
+    *
     * prefs for json,xml
     *           zip  : 0|1  compress
     *           file : 0|1  output as file or ptintout
     *           defs : 0|1  include database definitions
     *           restapi: 0|1  not include db description and heurist header
-    * 
+    *
     * prefs for geojson, json
-    *   extended 0 as is (in heurist internal format), 
-    *            1 - interpretable, 
+    *   extended 0 as is (in heurist internal format),
+    *            1 - interpretable,
     *            2 - include concept code and labels
     *            3 - simple plain object for mediaViewer (only records with file fields are included)
     *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
-    *   simplify  true|false simplify  paths with more than 1000 vertices 
-    * 
+    *   simplify  true|false simplify  paths with more than 1000 vertices
+    *
     * datatable -   datatable session id
-    *               >1 and "q" is defined - save query request in session to result set returned, 
+    *               >1 and "q" is defined - save query request in session to result set returned,
     *               >1 and "q" not defined and "draw" is defined - takes query from session
     *                1 - use "q" parameter
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -78,18 +78,18 @@
     require_once dirname(__FILE__).'/../records/export/exportRecords.php';
     require_once dirname(__FILE__).'/../records/export/recordsExport.php';
     require_once dirname(__FILE__).'/../records/export/recordsExportCSV.php';
- 
+
     $response = array();
 
     if(@$_REQUEST['postdata']){
-        //in export csv all parameters send as json array in postdata 
+        //in export csv all parameters send as json array in postdata
         $params = json_decode($_REQUEST['postdata'], true);
     }else{
         $params = $_REQUEST;
     }
-    
+
     if(!isset($system) || $system==null){
-    
+
         $system = new System();
 
         if( ! $system->init(@$params['db']) ){
@@ -106,23 +106,23 @@
 
     if(!@$params['format']){
         $params['format'] = @$params['fmt'];
-    } 
+    }
     if(!@$params['format']){
         $params['format'] = 'json';
     }
-        
-    
-    
+
+
+
     $search_params = array();
     $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
-    
+
     if(@$params['format']=='gephi' || @$params['format']=='geojson'){
         $search_params['limit'] = (@$params['limit']>0)?intval($params['limit']):null;
     }else
     if(!(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
     }
-    
+
     //
     // search for single record by "recID", by set of "ids" or heurist query "q"
     //
@@ -133,7 +133,7 @@
     }else  if(@$params['iiif_image']){
         $params['format'] = 'iiif';
         $search_params['q'] = '*file @'.filter_var($params['iiif_image'],FILTER_SANITIZE_STRING);
-        
+
     }else{
         $search_params['q'] = @$params['q'];
     }
@@ -148,14 +148,14 @@
             $search_params['rulesonly'] = 1;
         }
     }
-    
+
 
     $is_csv = (@$params['format'] == 'csv');
     /*if(@$params['format']=='json' && @$params['detail']!=null){
         $search_params['detail'] = $params['detail'];
     }else */
     if(@$params['format']){
-        //search only ids - all 
+        //search only ids - all
         $search_params['detail'] = 'ids';
     }
 
@@ -164,26 +164,26 @@
         //$search_params['limit'] = 1;
         //$search_params['needall'] = 0;
     }else{
-        
+
 //    datatable -   datatable session id  - returns json suitable for datatable ui component
-//              >1 and "q" is defined - save query request in session to result set returned, 
+//              >1 and "q" is defined - save query request in session to result set returned,
 //              >1 and "q" not defined and "draw" is defined - takes ids/query from session
 //              1 - use "q" parameter
         if(@$params['format']=='json' && @$params['datatable']>1){
-            
+
             $dt_key = 'datatable'.$params['datatable'];
-            
+
             if(@$params['q']==null){
                 //restore query by id from session
                 $search_params['q'] = $system->user_GetPreference($dt_key);
-                
+
                 if($search_params['q']==null){
-                    //query was removed 
+                    //query was removed
                     header( 'Content-Type: application/json');
                     echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
                     exit;
                 }
-                
+
                 $search_by_type = '';
                 $search_by_field = '';
                 //search by record type
@@ -191,7 +191,7 @@
                     foreach($params['columns'] as $idx=>$column){
                         if($column['data']=='rec_RecTypeID' && @$column['search']['value']!=''){
                             $search_by_type = '{"t":"'.$column['search']['value'].'"},';
-                            break;                            
+                            break;
                         }
                     }
                 }
@@ -200,14 +200,14 @@
                 }
                 if($search_by_type!='' || $search_by_field!=''){
                     $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';
-                    
+
                     $search_params['detail'] = 'count';
                     $response = recordSearch($system, $search_params);//datatable search - reccount only
                     $search_params['detail'] = 'ids';
-                    
+
                     $params['recordsFiltered'] = $response['data']['count'];
                 }
-                
+
                 if(@$params['start']>0){
                     $search_params['offset'] = $params['start'];
                 }
@@ -215,7 +215,7 @@
                     $search_params['limit'] = $params['length'];
                     $search_params['needall'] = 0;
                 }
-                
+
             }else if(@$params['q']!=null){  //first request - save base filter
                 //remove all other "datatableXXX" keys from session
                 $dbname = $system->dbname_full();
@@ -224,7 +224,7 @@
                     if(is_array($keys)){
                         foreach ($keys as $key) {
                             if(strpos($key,'datatable')===0){
-                                $_SESSION[$dbname]['ugr_Preferences'][$key] = null;    
+                                $_SESSION[$dbname]['ugr_Preferences'][$key] = null;
                                 unset($_SESSION[$dbname]['ugr_Preferences'][$key]);
                             }
                         }
@@ -238,10 +238,10 @@
                 exit;
             }
         }
-       
+
         $response = recordSearch($system, $search_params);//search ids
     }
-        
+
     $system->defineConstant('DT_PARENT_ENTITY');
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
@@ -255,9 +255,9 @@
     $system->defineConstant('DT_MAP_BOOKMARK');
     $system->defineConstant('DT_ZOOM_KM_POINT');
     $system->defineConstant('DT_GEO_OBJECT');
-    
+
     $res = true;
-        
+
     if($is_csv){
 
         if(@$params['prefs']['csv_headeronly'])   //export record type template
@@ -266,20 +266,20 @@
         }else{
             RecordsExportCSV::output( $response, $params );
         }
-        
+
     }else{
-        
+
         if(@$params['vers']==2){
-            
+
             $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf');
             $idx = array_search(strtolower($params['format']),$allowed_formats);
-            
+
             if($idx===false || !($idx>0)){
-                $idx = 0;  
-            } 
-        
+                $idx = 0;
+            }
+
             $classname = 'exportRecords'.strtoupper($allowed_formats[$idx]);
-            
+
             spl_autoload_register(function ($class) {
                 $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
                 if (file_exists($file)) {
@@ -288,39 +288,39 @@
                 }
                 return false;
             });
-            
+
             $outputHandler = false;
-            
+
             if(class_exists($classname, true)){
                 $outputHandler = new $classname($system);
             }
-            
+
             if(!$outputHandler){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
                 return false;
             }else{
                 $res = $outputHandler->output( $response, $params );
             }
-        
+
         }else{
             //old version
             $res = RecordsExport::output( $response, $params );
         }
     }
-    
+
     if(!$res) {
         $system->error_exit_api();
     }
-    
+
     $system->dbclose();
-    
+
 
 /**
  * Write file references out into CSV format
- * 
+ *
  * @param string|array $ids File ids to include (comma separated string or array)
- * 
- * @return none 
+ *
+ * @return none
  *  Output CSV file containing file references, or error message
  */
 function downloadFileReferences($system, $ids){
@@ -351,24 +351,24 @@ function downloadFileReferences($system, $ids){
 
     // retrieve file details
     $mysqli = $system->get_mysqli();
-    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB, 
-                    ugr_Name, ulf_Added, ulf_Modified, ulf_OrigFileName, ulf_Caption, ulf_Copyright, ulf_Copyowner 
-                   FROM recUploadedFiles 
+    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB,
+                    ugr_Name, ulf_Added, ulf_Modified, ulf_OrigFileName, ulf_Caption, ulf_Copyright, ulf_Copyowner
+                   FROM recUploadedFiles
                    LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID' . $where_clause;
 
     $res_files = $mysqli->query($file_query);
-    
+
     $err_message = null;
     if (!$res_files) {
         $err_message = 'File record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');    
+        $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
         if($total_count_rows==0){
-            $err_message = 'Empty result set';     
+            $err_message = 'Empty result set';
         }
     }
-                   
+
     if($err_message!=null){
         fclose($fd);
 
@@ -404,7 +404,7 @@ function downloadFileReferences($system, $ids){
         [13] => Copyowner
     */
     while ($details = $res_files->fetch_row()){
-        
+
         $id = array_shift($details);
 
         $name = !empty($details[0]) ? $details[0] : $details[1];

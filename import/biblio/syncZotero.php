@@ -23,7 +23,7 @@
 ini_set('max_execution_time', '0');
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
@@ -38,15 +38,15 @@ define('H_ID','h-id');
 
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 if($dt_SourceRecordID==0){ //this field is critical - need to download it from heurist core defintions database
-    
+
     $isOK = false;
     $importDef = new DbsImport( $system );
-    if($importDef->doPrepare(  array('defType'=>'detailtype', 
+    if($importDef->doPrepare(  array('defType'=>'detailtype',
                 'conceptCode'=>$dtDefines['DT_ORIGINAL_RECORD_ID'] ) ))
     {
         $isOK = $importDef->doImport();
     }
-    
+
     if(!$isOK){
             $system->addErrorMsg('Cannot download field "Source record" required by the function you have requested. ');
             include_once ERROR_REDIR;
@@ -57,7 +57,7 @@ if($dt_SourceRecordID==0){ //this field is critical - need to download it from h
         include_once ERROR_REDIR;
         exit;
     }
-    
+
 }
 
 $HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
@@ -80,7 +80,7 @@ if(!file_exists($mapping_file) || !is_readable($mapping_file)){
 }
 
 $step = @$_REQUEST['step'];
-    
+
 $fh_data = simplexml_load_file($mapping_file);
 if($fh_data==null || is_string($fh_data)){
         $system->addError(HEURIST_ERROR, 'Sorry, configuration file import/biblio/zoteroMap.xml for Zotero '
@@ -98,7 +98,7 @@ if($fh_data==null || is_string($fh_data)){
         <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
- 
+
         <!-- Heurist -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
@@ -124,11 +124,11 @@ if($fh_data==null || is_string($fh_data)){
                 return true;
             }
             function open_sysIdentification(){
-               window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
+               window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification',
                     {onClose:function(){
                         location.reload();
                     }});
-               return false; 
+               return false;
             }
 
             function showMappingReport(){
@@ -148,24 +148,24 @@ if($fh_data==null || is_string($fh_data)){
     <body class="popup" style="margin-right:30px;overflow:auto">
 
         <?php
-        
+
         if($HEURIST_ZOTEROSYNC==''){
-        ?>            
+        ?>
                 <p class="ui-state-error" style="padding:20px;text-align:center">
                     Library key for Zotero synchronisation is not defined.<br><br>
                     <a href="#dbprop" onclick="open_sysIdentification()">
                     Click here to edit properties which determine Zotero connection</a>
-                </p>                
+                </p>
                 </body>
                 </html>
 
-        <?php            
+        <?php
             exit;
         }
 
         // 1) load config file from import/biblio/zoteroMap.xml.
         // This file maps Zotero names to Heurist codes according to context
-        
+
         $user_ID = null;
         $group_ID = null;
         $api_Key = null;
@@ -259,7 +259,7 @@ foreach ($fh_data->children() as $f_gen){
                     // find record type with such code (or concept code)
                     $org_rt_id = strval($arr[H_ID]);
                     $rt_id = ConceptCode::getRecTypeLocalID($arr[H_ID]);
-                    
+
                     printMappingReport_rt($arr, $rt_id);
 
                     if($rt_id != null){
@@ -448,7 +448,7 @@ if($step=="1"){  //first step - info about current status
     $cnt_ignored = 0;
     $arr_ignored = array();
     $arr_ignored_by_type = array();
-    
+
     //ignored zote entries since no keys are mapped
     $cnt_empty = 0;
     $arr_empty = array();
@@ -467,13 +467,13 @@ if($step=="1"){  //first step - info about current status
     $totalitems = intval($_REQUEST['cnt']);
     $new_recid = 0;
     $isFailure = false;
-    
+
     $is_echo = false;
-    
+
     $mysqli = $system->get_mysqli();
-    
+
     //$tmp_destination = HEURIST_SCRATCH_DIR.'zotero.xml';
-    //$fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file 
+    //$fd = fopen($tmp_destination, 'w');//less than 1MB in memory otherwise as temp file
 
     print '<br>Starting Zotero Library Sync for '. intval($totalitems) .' records...<br>';
 
@@ -488,14 +488,14 @@ if($step=="1"){  //first step - info about current status
         }
 
 //fwrite($fd, $items);
-        
+
         $zdata = simplexml_load_string($items);
 
         if($zdata===false){
             print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
 
-            $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Invalid XML Response', 
+            $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Invalid XML Response',
                     'Zotero Synchronisation has Encountered an Invalid XML Response',
                     "Error: zotero returns non valid xml response for range $start ~ ".intval($start+$fetch));
 
@@ -504,7 +504,7 @@ if($step=="1"){  //first step - info about current status
             print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".intval($start+$fetch)." </div>";
             $isFailure = true;
 
-            $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Empty Response', 
+            $system->addError(HEURIST_ERROR, 'Zotero Synchronisation, Empty Response',
                     'Zotero Synchronisation has encountered an Empty Response',
                     "Error: zotero returns empty response for range $start ~ ".intval($start+$fetch));
 
@@ -516,7 +516,7 @@ if($step=="1"){  //first step - info about current status
             if($entry->getName()=="entry"){
 
                 $zotero_itemid = strval(findXMLelement($entry, "zapi", "key"));
-                
+
                 // 2) get content of item if itemType is supported
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
                 $itemtitle = strval(findXMLelement($entry, null, "title"));
@@ -529,7 +529,7 @@ if($step=="1"){  //first step - info about current status
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
 
                     print "<br>Undefined Record type ".htmlspecialchars($itemtype.' '.$itemtitle)."<br>";
-				
+
                     #print " <br> Undefined Record type".$itemtype."  ".$itemtitle."<br>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
                     if(!@$arr_ignored_by_type[$itemtype]) {$arr_ignored_by_type[$itemtype] = 0;}
@@ -549,7 +549,7 @@ if($step=="1"){  //first step - info about current status
 
                 //if($zotero_itemid!='4SRQ8WRJ'){
                 //                    continue;
-                //}                
+                //}
                 // 3) try to search record in database by zotero id
                 $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID="
@@ -584,13 +584,13 @@ if($step=="1"){  //first step - info about current status
                 //find heurist record type mapped to zotero entry
                 $mapping_dt = $mapping_rt[$itemtype];
                 $recordType = $mapping_dt["h3rectype"];
-                
+
                 $is_empty_zotero_entry = true;
 
                 foreach ($content as $zkey => $value){
 
                     if(!$value) {continue;}
-                    
+
                     $is_empty_zotero_entry = false;
 
                     if($zkey == "creators"){
@@ -670,8 +670,8 @@ if($step=="1"){  //first step - info about current status
                     $key = @$mapping_dt[$zkey];
                     $resource_rt_id = null;
                     $resource_dt_id = null;
-                    
-//print '<br>'.$zkey.'  ->'.$key.'   '.$value;                   
+
+//print '<br>'.$zkey.'  ->'.$key.'   '.$value;
                     if($key){
 
                         if(is_array($key)){ //reference to record pointer
@@ -687,8 +687,8 @@ if($step=="1"){  //first step - info about current status
                                 array_push($arr_notfound, $msg);
                                 $cnt_notfound++;
                             }
-                            continue;  
-                        } 
+                            continue;
+                        }
 
                         $dt_type = $alldettypes['typedefs'][$detail_id]['commonFields'][$fi_dettype];
 
@@ -723,12 +723,12 @@ if($step=="1"){  //first step - info about current status
                             }
 
                         }else{
-                            
+
                             if($dt_type=='freetext' || $dt_type=='blocktext'){
                                 $value = html_entity_decode($value);
                                 //$val = htmlspecialchars_decode($val);
                             }
-                            
+
                             $details["t:".$detail_id] = array("0"=>$value);
                         }
 
@@ -741,12 +741,12 @@ if($step=="1"){  //first step - info about current status
                 }//for fields in content
 
                 $new_recid = null;
-                
+
                 if($is_empty_zotero_entry){
-                    
+
                     print '<div style="color:red">Warning: zotero id '.htmlspecialchars($zotero_itemid)
                         .': no data recorded in Zotero for this entry</div>';
-                    
+
                 }else if(count($details)<1){
                     //no one zotero key has proper mapping to heurist fields
                     array_push($arr_empty, $zotero_itemid);
@@ -791,10 +791,10 @@ if($step=="1"){  //first step - info about current status
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt['updated'])).'&nometadatadisplay=true">'
                     .count($cnt['updated']).'</a>':'0').'</td></tr>';
-                    
-            
+
+
     }
-    
+
     print '</table><div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt_added)).'&nometadatadisplay=true">'
@@ -803,11 +803,11 @@ if($step=="1"){  //first step - info about current status
                             .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
                             .htmlspecialchars(implode(',',$cnt_updated)).'&nometadatadisplay=true">'
                     .count($cnt_updated).'</a>':'0').'</div>';
-    
+
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
-	
+
 	$err_msg = 'Zotero Synching has encountered issues in Database: ' . HEURIST_DBNAME;
-    
+
     if($tot_erros>0){
         print '<div style="color:red">';
         if($cnt_ignored>0){
@@ -816,38 +816,38 @@ if($step=="1"){  //first step - info about current status
                 print '<tr><td>'.htmlspecialchars($itemtype).'</td><td>'.intval($cnt).'</td></tr>';
             }
             print '</table>';
-            
+
 			$err_msg = $err_msg . '\nZotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
         }
         if($cnt_empty>0){
             print '<br>Zotero entries ignored because there are no properly mapped keys: '.$cnt_empty;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).'</div>';
-			
+
 			$err_msg = $err_msg . '\nZotero entries ignored because there are no properly mapped key: '.$cnt_empty;
         }
         if($cnt_notfound>0){
             print '<br>Zotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).'</div>';
-			
+
 			$err_msg = $err_msg . '\nZotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
         }
         print '</div>';
-        
+
         print '<div style="color:black">';
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
             print "<div style ='padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
-            
+
             $err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
         }
         print '</div>';
-		
-        $system->addError('Zotero Synchronisation Warnings', 
+
+        $system->addError('Zotero Synchronisation Warnings',
                     'Zotero Synchronisation has reported ' . $tot_erros . ' warnings',
                     $err_msg);
-    
+
         print '<span><br>If you think the Zotero import needs updating or wish to provide additional information you can contact the '.CONTACT_HEURIST_TEAM.' here.</span>';
-        
+
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
             .' warnings reported: Please check the warnings listed. '
             .' We do not map all fields from Zotero as for most purposes these are fields of little use in your database.'
@@ -928,7 +928,7 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
 
     $extra_info = array();// [0] => Zotero rectype id, [1] => Zotero rectype name, [2] => field id, [3] => field name
     array_push($extra_info, $org_rt_id, $zType, $dt_code, $arr['value']);
-    
+
     //pointer mapping
     if(strpos($dt_code,".")>0){
 
@@ -942,7 +942,7 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
 
                 $mapping_errors[$dt_code] = str_replace("</td></tr>", "", $mapping_errors[$zType]).", ".$res."</td></tr>";
                 $warning_count ++;
-                
+
             }else{
                 $mapping_errors[$dt_code] = "<tr><td colspan='3'><strong>".$zType." (".$org_rt_id."):</strong></td><td colspan='4'>".$res."</td></tr>";
                 $warning_count ++;
@@ -956,7 +956,7 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
         if($dt_id != null){
             $mapping_dt[strval($arr['value'])] = $dt_id;
         }
-        
+
         printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);
     }
 }
@@ -966,11 +966,11 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
 //
 function printMappingReport_rt($arr, $rt_id){
     global $rectypes, $is_verbose, $mapping_errors, $successful_rows, $warning_count;
-    
+
     if($is_verbose){
 
         $table_class = (is_object($arr) && $rt_id != null) ? 'tbl-head' : 'tbl-row';
-        
+
         if(is_object($arr)){
             $zType = strval($arr['zType']);
             $code = $arr[H_ID];
@@ -980,9 +980,9 @@ function printMappingReport_rt($arr, $rt_id){
         }
 
         if($rt_id==null){ // NOT FOUND
-            
+
             $rt_id = strval($code);
-            
+
             if($zType == '->'){
                 return; // will get covered during resource field handling
             }else{
@@ -993,7 +993,7 @@ function printMappingReport_rt($arr, $rt_id){
             $successful_rows[] = "<tr class='".$table_class."'><td colspan='2'><strong>".$zType."</strong></td><td><strong>".$code."</strong></td>"
                                 ."<td><strong>&rArr;".$rectypes['names'][$rt_id]."</strong></td><td><strong>".$rt_id."</strong></td></tr>";
         }
-    }                    
+    }
 }
 
 //
@@ -1001,9 +1001,9 @@ function printMappingReport_rt($arr, $rt_id){
 //
 function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
     global $rectypes, $is_verbose, $mapping_errors, $transfer_errors, $successful_rows, $warning_count;
-    
+
     if($is_verbose){
-        
+
         if(is_object($arr)){
             $label = $arr['value'];
             $code = $arr[H_ID];
@@ -1027,7 +1027,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
 
             if(is_empty($extra_info[0])){
                 $extra_info[0] = $rt_id;
-            }            
+            }
             if($label == ''){
                 $dt_str = $extra_info[3][0]."(".$code.")";
             }else{
@@ -1088,19 +1088,19 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
     }
 
     $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
-    
+
     if($arr!=null){
         printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info);
     }else{
         printMappingReport_dt($dt_code, $rt_id, $dt_id, $extra_info);
     }
-    
+
     if($dt_id == null){
         return "Unable to find the detail type for id: ".$dt_code;
     }
 
     $res_rt_id = ConceptCode::getRecTypeLocalID($resource_rt_id);
-    
+
     printMappingReport_rt($resource_rt_id, $res_rt_id);
 
     if($res_rt_id == null){
@@ -1108,7 +1108,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
     }
 
     $res_dt_id = ConceptCode::getDetailTypeLocalID($resource_dt_id);
-    
+
     if($res_dt_id == null){
         printMappingReport_dt($resource_dt_id, $res_rt_id, $res_dt_id, $extra_info);
         return "Detail type for resource not recognised for id: ".$resource_dt_id;
@@ -1230,7 +1230,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
         }else{
             $value = $recdata;
             if($dt_id==DT_DATE){
-                
+
                 $value = Temporal::dateToISO($value, 1);
                 /*
                 try{
@@ -1391,9 +1391,9 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         $record['URL'] = $rec_URL;
         $record['ScratchPad'] = null;
         $record['details'] = $details;
-        
+
         $out = recordSave($system, $record, true, false, 0, $record_count);//see recordModify.php
-        
+
     if ( @$out['status'] != HEURIST_OK ) {
            print "<div style='color:red'> Error: ".htmlspecialchars($out["message"])."</div>";
     }else{

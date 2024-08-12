@@ -25,11 +25,11 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
-}    
+}
 
-//@todo move code from js to php 
-//@todo get rectype names and groups here 
-//@todo find possible bookmark id 
+//@todo move code from js to php
+//@todo get rectype names and groups here
+//@todo find possible bookmark id
 ?>
 var Heurist = {
 
@@ -356,7 +356,7 @@ findFavicon: function() {
 },
 
 //
-//  main method - add new record with extracted from page values 
+//  main method - add new record with extracted from page values
 //
 doBookmark: function(rectype) {
 	Heurist.close();
@@ -381,13 +381,13 @@ doBookmark: function(rectype) {
 
     //see index.php  window.hWin.HEURIST4.ui.openRecordEdit
 	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
-                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
-				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
+                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl))
+				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url))
 				+ (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '')
-				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '') 
-                + (rectype ? '&rec_rectype=' + rectype : '') 
+				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '')
+                + (rectype ? '&rec_rectype=' + rectype : '')
 				+ '&version=' + version);
-                
+
 	void(window.setTimeout('window.focus()',200));
 },
 
@@ -410,7 +410,7 @@ renderrectypeSelect: function(sel) {
 	    var grp = document.createElement("optgroup");
 		    grp.label = HEURIST_rectypes.groups[grpID].name;
 	    sel.appendChild(grp);
-        
+
 		for (i in HEURIST_rectypes.groups[grpID].showTypes) {
             if(i>=0){
                 var recID = HEURIST_rectypes.groups[grpID].showTypes[i];
@@ -418,7 +418,7 @@ renderrectypeSelect: function(sel) {
                 var opt = new Option(name, recID);
                 opt.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;'+name;
 			    sel.appendChild( opt );
-                
+
             }
 	    }
 	}

@@ -4,14 +4,14 @@
     * rebuildLuceneIndices.php: Rebuilds all Lucence (Elastic Search) indices for the database
     *
     * from admin menu
-    * 
+    *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0   
+    * @version     4.0
     */
 
     /*
@@ -22,7 +22,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    define('PDIR','../../');//need for proper path to js and css    
+    define('PDIR','../../');//need for proper path to js and css
 
     require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
     require_once dirname(__FILE__).'/../../hserv/records/indexing/elasticSearch.php';

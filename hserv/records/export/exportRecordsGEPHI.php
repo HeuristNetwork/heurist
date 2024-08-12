@@ -9,7 +9,7 @@
 
 /**
 * exportRecordsGEPHI.php - class to export records as GEPHI XML
-* 
+*
 * Controller is records_output
 *
 * @package     Heurist academic knowledge management system
@@ -24,41 +24,41 @@
 require_once 'exportRecords.php';
 
 /**
-* 
+*
 *  setSession - switch current datbase
 *  output - main method
-* 
+*
 */
 class ExportRecordsGEPHI extends ExportRecords {
-    
+
     //to store gephi links
     private $gephi_links_dest = null;
     private $fd_links = null;
     private $links_cnt = 0;
-    
+
     private $relmarker_fields = [];
 
 //
 //
 //
 protected function _outputPrepareFields($params){
-    
+
     $this->retrieve_detail_fields = !empty($params['columns']) ? prepareIds($params['columns']) : false;
     $this->retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
-    
+
 }
-    
+
 //
 //
-//  
+//
 protected function _outputHeader(){
-    
+
     $this->gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");
-    $this->fd_links = fopen($this->gephi_links_dest, 'w');//less than 1MB in memory otherwise as temp file 
+    $this->fd_links = fopen($this->gephi_links_dest, 'w');//less than 1MB in memory otherwise as temp file
     if (false === $this->fd_links) {
         $this->system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
         return false;
-    }   
+    }
 
     $t2 = new DateTime();
     $dt = $t2->format('Y-m-d');
@@ -138,7 +138,7 @@ XML;
     $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
     fwrite($this->fd, $gephi_header);
-    
+
     $this->links_cnt = 0;
 }
 
@@ -160,7 +160,7 @@ protected function _outputRecord($record){
         foreach($this->retrieve_detail_fields as $dty_ID){
 
             $att_id ++;
-            $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ? 
+            $values = array_key_exists($dty_ID, $record['details']) && is_array($record['details'][$dty_ID]) ?
                         $record['details'][$dty_ID] : null;
 
             if(empty($values)){
@@ -177,7 +177,7 @@ protected function _outputRecord($record){
         }
     }
             $gephi_node = <<<XML
-<node id="{$recID}" label="{$name}">                               
+<node id="{$recID}" label="{$name}">
     <attvalues>
         <attvalue for="0" value="{$name}"/>
         <attvalue for="1" value="{$image}"/>
@@ -188,9 +188,9 @@ protected function _outputRecord($record){
     </attvalues>
 </node>
 XML;
-  
+
     fwrite($this->fd, $gephi_node);
-    
+
     $links = recordSearchRelated($this->system, $recID, 0, false);
     if($links['status']==HEURIST_OK){
         if(@$links['data']['direct']){
@@ -204,37 +204,37 @@ XML;
     }
 
     return true;
-    
+
 }
 
 //
 //
 //
 protected function _outputFooter(){
-    
+
         fwrite($this->fd, '</nodes>');
-        
+
         //include links
         fwrite($this->fd, '<edges>'.file_get_contents($this->gephi_links_dest).'</edges>');
-        
+
         fwrite($this->fd, '</graph></gexf>');
-        
+
         fclose($this->fd_links);
-    
+
 }
 
 
 /**
 * returns xml string with gephi links
-* 
+*
 * @param mixed $this->records - array of record ids to limit output only for links in this array
 * @param mixed $links - array of relations produced by recordSearchRelated
 */
 private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
 
     if(self::$defDetailtypes==null){
-        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);  
-    } 
+        self::$defDetailtypes = dbs_GetDetailTypes($this->system, null, 2);
+    }
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
         self::$defTerms = new DbsTerms($this->system, self::$defTerms);
@@ -274,7 +274,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                     $relationID = $trmID;
                 }
 
-                $relationName  = htmlspecialchars($relationName); 
+                $relationName  = htmlspecialchars($relationName);
                 $links_cnt++;
 
                 $rel_values = '';
@@ -284,7 +284,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                     $record = recordSearchByID($this->system, intval($link->relationID), $this->relmarker_fields, 'rec_ID');
 
                     foreach($this->relmarker_fields as $dty_ID){
-                        
+
                         $att_id ++;
 
                         if(!array_key_exists($dty_ID, $record['details']) || empty($record['details'][$dty_ID])){
@@ -303,7 +303,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                 }
 
                 $edges = $edges.<<<XML
-<edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">                               
+<edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">
     <attvalues>
         <attvalue for="0" value="{$relationID}"/>
         <attvalue for="1" value="{$relationName}"/>
@@ -315,10 +315,10 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
 XML;
 
 
-            }   
+            }
         }//for
     }
-    return $edges;         
+    return $edges;
 }
 
 private function _processFieldData($dty_ID, &$values){
@@ -364,7 +364,7 @@ private function _processFieldData($dty_ID, &$values){
     }
 
     $values = is_array($values) ? implode('|', $values) : $values;
-} 
+}
 
 } //end class
 ?>

@@ -213,7 +213,7 @@ if($isHTML){
 function do_print_table($desc, $tname, $where=null)
 {
     global $mysqli, $isHTML, $startToken, $endToken;
-    
+
     print "\n\n\n-- $desc \n";
     if($isHTML) {print "<p>";}
 
@@ -225,22 +225,22 @@ function do_print_table($desc, $tname, $where=null)
     $flds = '`'.implode('`,`', $flds_names).'`';
     print "-- $flds \n";
     $query = "select $flds from $tname";
-    
+
     if($where!=null){
         $query = $query.$where;
     }
-    
+
     $res = $mysqli->query($query);
     if($res){
 
         if($isHTML) {print "<p>";}
         print "\n$startToken\n";
 
-        //get table prefix             
+        //get table prefix
         $id_field = $flds_names[0];
         $prefix = substr($id_field,0,3);
-        while ($row = $res->fetch_assoc()) { 
-            
+        while ($row = $res->fetch_assoc()) {
+
             $vals = array();
             foreach($flds_list as $fld => $type){
 
@@ -258,8 +258,8 @@ function do_print_table($desc, $tname, $where=null)
                         $val = $row[$id_field];
                     }
                 }
-                $vals[] = $val;   
-            }   
+                $vals[] = $val;
+            }
             print "('".implode("','",$vals)."'),";
 
             if ($_REQUEST['pretty']) {
@@ -272,7 +272,7 @@ function do_print_table($desc, $tname, $where=null)
     }else{
         print '-- '.$mysqli->error;
     }
-   
+
 
     if($isHTML) {print "<p>&nbsp;<p>&nbsp;<p>";}
 }

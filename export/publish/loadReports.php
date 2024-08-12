@@ -127,10 +127,10 @@ $mysqli = $system->get_mysqli();
         foreach ($data['report']['defs'] as $recID => $rt) {
             array_push($rv, updateReportSchedule($mysqli, $colNames, intval($recID), $rt));
         }
-        
+
         $response = array("status"=>HEURIST_OK, "data"=>$rv);
         print json_encode($response);
-        
+
     }else if($metod=="deletereport"){
 
         $recID  = @$_REQUEST['recID'];
@@ -251,7 +251,7 @@ exit;
 
                     $parameters[0] = $parameters[0].$sys_usrReportSchedule_ColumnNames[$colName];//take datatype from array
                     array_push($parameters, $val);
-                    
+
                     if($colName=='rps_Title'){
                         $rps_Title = $val;
                     }
@@ -266,18 +266,18 @@ exit;
                 }else{
                     $query = "update usrReportSchedule set ".$query." where rps_ID = $recID";
                 }
-                
+
                 //check duplication
                 $rid = mysql__select_value($mysqli, 'SELECT rps_ID FROM usrReportSchedule WHERE rps_ID!='
                     .$recID.' AND rps_Title="'.$rps_Title.'"');
                 if($rid>0){
-                    
+
                     $ret = 'Duplicate entry. There is already report with the same name.';
-                    
+
                 }else{
-                
-                
-                
+
+
+
                     //temporary alter the structure of table 2016-05-17 - remark it in one year
                     $res = $mysqli->query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
                     $struct = $res->fetch_assoc();
@@ -292,7 +292,7 @@ exit;
                         $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
                     } else {
                         if($isInsert){
-                            $ret = -$mysqli->insert_id;                
+                            $ret = -$mysqli->insert_id;
                         }else{
                             $ret = $recID;;
                         }

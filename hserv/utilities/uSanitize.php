@@ -1,21 +1,21 @@
 <?php
 /**
-* Sanitize library to make requests, urls, paths, filenames safe 
-* (SSRF and path traversal attacks) 
-* 
+* Sanitize library to make requests, urls, paths, filenames safe
+* (SSRF and path traversal attacks)
+*
 * sanitizeRequest - removes all tags from request variables
 * sanitizePath - removes /../
 * sanitizeURL
 * sanitizeString - strip_tags (except allowed) and htmlspecialchars
 * stripScriptTagInRequest - removes only script tags
-* 
+*
 * sanitizeFileName
 * fileNameBeautify (protected)
-* 
+*
 * getHTMLPurifier
 * purifyHTML - clean html with HTMLPurifier
-* 
-* errorLog - wraps around error_log to prevent log injection   
+*
+* errorLog - wraps around error_log to prevent log injection
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -33,7 +33,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 class USanitize {
-  
+
     private static $purifier = null;
 
     //
@@ -44,21 +44,21 @@ class USanitize {
         foreach($params as $k => $v)
         {
             if($v!=null){
-                
+
                 if(is_array($v) && count($v)>0){
                     USanitize::sanitizeRequest($v);
-                    
+
                 }else{
                     $v = trim($v);//so we are sure it is whitespace free at both ends
 
                     //sanitise string
                     $v = filter_var($v, FILTER_SANITIZE_STRING);
-               
+
                 }
                 $params[$k] = $v;
             }
         }
-        
+
     }
 
     //
@@ -101,11 +101,11 @@ class USanitize {
         if( is_dir($path) && substr($path, -1, 1) != '/' )  {
             $path = $path.'/';
         }
-        
+
         if($use_native_separator && DIRECTORY_SEPARATOR!='/'){
             $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
         }
-        
+
         return $path;
     }
 
@@ -134,17 +134,17 @@ class USanitize {
             }else if($allowed_tags===false){
                 $allowed_tags = null;
             }
-            
+
             $message = strip_tags($message, $allowed_tags);
             if($allowed_tags!=null){
                 // remove attributes except img.src and a.href a.target
                 //$message = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $message);//remove all attributes
-                
+
                 //$clean = preg_replace("/\n(<[^ai]([\w\d]+)?).+/i","\n$1>",$clean);
                 //$clean = preg_replace("/<a.+href='([:\w\d#\/\-\.]+)'.+/i","<a href=\"$1\">",$clean);
                 //$clean = preg_replace("/<img.+src='([\w\d_:?.\/%=\-]+)'.+/i","<img src=\"$1\">",$clean);
             }
-            
+
             $message = htmlspecialchars($message, ENT_NOQUOTES);
             if($allowed_tags!==false){
                 $message = str_replace('&lt;', '<', $message);
@@ -162,7 +162,7 @@ class USanitize {
         foreach($params as $k => $v)
         {
             if($v!=null){
-                
+
                 if(is_array($v) && count($v)>0){
                     USanitize::stripScriptTagInRequest($v);
                 }else{
@@ -170,7 +170,7 @@ class USanitize {
 
                     //remove script tag
                     $v = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $v);
-               
+
                 }
                 $params[$k] = $v;
             }
@@ -178,7 +178,7 @@ class USanitize {
     }
 
     //
-    // 
+    //
     //
     public static function getHTMLPurifier(){
 
@@ -187,7 +187,7 @@ class USanitize {
             $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
             $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
             $config->set('HTML.DefinitionRev', 1);
-            
+
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             //$config->set('Core.EscapeNonASCIICharacters', true);
             $config->set('CSS.AllowImportant', true);
@@ -213,18 +213,18 @@ class USanitize {
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
-            
+
             return new HTMLPurifier($config);
-        
+
     }
-    
+
     //
     // It is used in mail and cms
     //
     // $params - object or array to purify
-    //    
+    //
     public static function purifyHTML(&$params, $purifier = null){
-        
+
         if($purifier==null){
             if(self::$purifier==null){
                self::$purifier = USanitize::getHTMLPurifier();
@@ -233,11 +233,11 @@ class USanitize {
         }
 
         if(is_array($params)){
-        
+
             foreach($params as $k => $v)
             {
                 if($v!=null){
-                    
+
                     if(is_array($v) && count($v)>0){
                         USanitize::purifyHTML($v, $purifier);
                     }else{
@@ -305,10 +305,10 @@ class USanitize {
         $filename = trim($filename, '.-');
         return $filename;
     }
-    
+
     /**
     * Wraps around error_log to prevent log injection
-    * 
+    *
     * @param mixed $message
     */
     public static function errorLog($message){
@@ -320,7 +320,7 @@ class USanitize {
 
     /**
      * Removes leading, trailing and double (spaces and tabs only) spacing
-     * 
+     *
      * @param mixed $value
      * @return string
      */
@@ -341,6 +341,6 @@ class USanitize {
 
         return $value;
     }
-        
+
 }
 ?>

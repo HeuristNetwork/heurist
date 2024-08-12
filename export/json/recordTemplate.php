@@ -1,6 +1,6 @@
 <?php
 /**
-* recordTemplate.php: Exports record structure templates in JSON format, 
+* recordTemplate.php: Exports record structure templates in JSON format,
 *	or calls record_output.php to export actual records (if rectype_ids is not provided)
 *
 * @package     Heurist academic knowledge management system
@@ -46,78 +46,78 @@ if(@$_REQUEST['rectype_ids']=='y' || @$_REQUEST['rectype_ids']=='all'){ //all
     $rectype_ids = prepareIds(filter_var(@$_REQUEST['rectype_ids']));
 }
 
-print "REMOVE THIS HELP WHEN IMPORTING!!\nFor preparing an JSON file 
+print "REMOVE THIS HELP WHEN IMPORTING!!\nFor preparing an JSON file
 with Heurist schema which can be imported into a Heurist database.
 \n
-The file must indicate a source database in database=>id. 
-This is added automatically when JSON or this template is exported 
-from a registered Heurist database (it is set to 0 if the 
-database is not registered). 
+The file must indicate a source database in database=>id.
+This is added automatically when JSON or this template is exported
+from a registered Heurist database (it is set to 0 if the
+database is not registered).
 \n
-In the case of data from a non-Heurist source, the file should 
-indicate a database which contains definitions for all the 
-record types and fields to be imported. This can either be 
-the database from which this template is exported or zero or the 
-target database if all the necessary record types and fields 
+In the case of data from a non-Heurist source, the file should
+indicate a database which contains definitions for all the
+record types and fields to be imported. This can either be
+the database from which this template is exported or zero or the
+target database if all the necessary record types and fields
 exist in the target (either by being imported into it or through
-cloning from a suitable source). If definitions are missing Heurist 
+cloning from a suitable source). If definitions are missing Heurist
 will update the target database structure from the indicated source
-(if specified). If required definitions cannot be obtained, it will 
+(if specified). If required definitions cannot be obtained, it will
 report an error indicating the missing definitions.
 \n
-Values to be replaced are indicated with ALLCAPS, such as 
+Values to be replaced are indicated with ALLCAPS, such as
 WKT_VALUE (WellKnownText), NUMERIC, TRM_ID, DATE etc.
 \n
-RECORD_REFERENCE may be replaced with a numeric or alphanumeric 
-reference to another record, indicated by the id field. 
-Note that this reference will be replaced with an automatically 
-generated numeric Heurist record ID (H-ID), which will be different 
+RECORD_REFERENCE may be replaced with a numeric or alphanumeric
+reference to another record, indicated by the id field.
+Note that this reference will be replaced with an automatically
+generated numeric Heurist record ID (H-ID), which will be different
 from the reference supplied. The reference supplied will be recorded
 in a field Original ID.
 \n
-If you wish to specify existing Heurist records in the target 
-database as the target (value) of a Record Pointer field, specify 
+If you wish to specify existing Heurist records in the target
+database as the target (value) of a Record Pointer field, specify
 their Heurist record ID (H-ID) in the form H-ID-nnnn, where nnnn
-is the H-ID of the target record in the target database. Specifying 
-non-existent record IDs will throw an error. The record type of 
+is the H-ID of the target record in the target database. Specifying
+non-existent record IDs will throw an error. The record type of
 target records are not checked on import; pointers to records of
-the wrong type can be found later with Admin > Verify integrity. 
+the wrong type can be found later with Admin > Verify integrity.
 \n
-If you use an H-ID-nnnn format specification in the <id> tag of 
-a record, it will be regarded as an unknown alphanumeric identifier 
+If you use an H-ID-nnnn format specification in the <id> tag of
+a record, it will be regarded as an unknown alphanumeric identifier
 and will simply create a new record with a new H-ID.
 \n
-\"URL\" This record level tag specifies a special URL 
-attached directly to the record which is used to hyperlink 
-record lists and for which checking can be automated. 
-Primarily used for internet bookmarks.  
+\"URL\" This record level tag specifies a special URL
+attached directly to the record which is used to hyperlink
+record lists and for which checking can be automated.
+Primarily used for internet bookmarks.
 \n
 Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)
 \n
-termID= specifies any of the following, which are evaluated 
-in order: local ID, concept code, label or standard code.   
-If no match is found, the value will be added as a new term 
+termID= specifies any of the following, which are evaluated
+in order: local ID, concept code, label or standard code.
+If no match is found, the value will be added as a new term
 \n
-Relationship markers: these are indicated by \"RELATIONSHIP_RECORD\" in 
-the value. Relationship markers are special fields as they contain no data; 
-they are simply a marker in the data structure indicating the display 
-of relationship records which satisfy particular criteria (relationship type 
-and target entity type). They also trigger the creation of relationships 
+Relationship markers: these are indicated by \"RELATIONSHIP_RECORD\" in
+the value. Relationship markers are special fields as they contain no data;
+they are simply a marker in the data structure indicating the display
+of relationship records which satisfy particular criteria (relationship type
+and target entity type). They also trigger the creation of relationships
 with particular parameters during data entry.
 \n
-Relationships should therefore be imported by importing as records of 
-type RELATIONSHIP. They will appear in the marker fields when the data is 
-viewed. Leave at least one copy of each relationship marker field in the 
-file as this will trigger download of the field definition if it is not in 
-the target database. Only one copy of each relationship marker is needed to 
-trigger the download of the definition, duplicates can be deleted if there 
+Relationships should therefore be imported by importing as records of
+type RELATIONSHIP. They will appear in the marker fields when the data is
+viewed. Leave at least one copy of each relationship marker field in the
+file as this will trigger download of the field definition if it is not in
+the target database. Only one copy of each relationship marker is needed to
+trigger the download of the definition, duplicates can be deleted if there
 is a need to limit file size.
 \n
-The JSON file may (optionally) specify a Heurist database ID 
-with database=>id. If a database ID is specified, synchronisation 
-of definitions from that database will be performed before the data 
-are imported. Since imported files will normally use a template for 
-record types and fields exported from the target database, this is 
+The JSON file may (optionally) specify a Heurist database ID
+with database=>id. If a database ID is specified, synchronisation
+of definitions from that database will be performed before the data
+are imported. Since imported files will normally use a template for
+record types and fields exported from the target database, this is
 only useful for synchronising vocabularies and terms.\n\n";
 
 $import_help = "{"

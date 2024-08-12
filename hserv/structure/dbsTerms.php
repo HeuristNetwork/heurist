@@ -1,7 +1,7 @@
 <?php
    /**
-    * Manipulations with defTerms 
-    * 
+    * Manipulations with defTerms
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -18,7 +18,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     /*
     * Public methods
     *  findTermByConceptCode
@@ -39,19 +39,19 @@
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
     */
-    
+
 class DbsTerms
 {
-    protected $system;  
-    
-    /*  
+    protected $system;
+
+    /*
       loaded terms
-    */    
-    protected $data;  
-    
+    */
+    protected $data;
+
     //
     // constructor - load configuration from json file
-    //    
+    //
     public function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
@@ -61,9 +61,9 @@ class DbsTerms
     // assign terms
     //
     public function setTerms($data){
-        $this->data = $data; 
+        $this->data = $data;
     }
-    
+
     //
     //
     //
@@ -76,7 +76,7 @@ class DbsTerms
             }
             return $term_id;
         }
-        
+
         $idx_ccode = intval($this->data['fieldNamesToIndex']["trm_ConceptID"]);
 
         foreach ($this->data['termsByDomainLookup'][$domain] as $term_id => $def) {
@@ -86,9 +86,9 @@ class DbsTerms
         }
         return null;
     }
-   
+
     //
-    // parse term string (as json or comma separated) and validate it 
+    // parse term string (as json or comma separated) and validate it
     // if domain not defined - no validation
     //
     public function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
@@ -124,27 +124,27 @@ class DbsTerms
             $validTermIDs = $termIDs; //no validation - take all
         }
         return $validTermIDs;
-    }    
+    }
 
     //
     //
     //
     public function getTermLabel($term_id, $with_hierarchy=false) {
-    
+
         $term = $this->getTerm($term_id);
         if($term){
-            
+
             $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
-            
+
             if($with_hierarchy){
                 $labels = '';
                 $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
                 $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
-                
-                
+
+
                 $labels = array();
                 array_push($labels, $term[$idx_term_label]);
-                
+
                 while ( $term[$idx_term_parent]>0 ) {
                     $term = $this->getTerm($term[$idx_term_parent]);
                     //if(!$term) {break;}
@@ -161,7 +161,7 @@ class DbsTerms
         }else{
             return '';
         }
-        
+
     }
 
     //
@@ -176,8 +176,8 @@ class DbsTerms
             return '';
         }
     }
-    
-    
+
+
     //
     //
     //
@@ -191,19 +191,19 @@ class DbsTerms
     public function getTermConceptID($term_id) {
         return $this->getTermField($term_id, 'trm_ConceptID');
     }
-    
+
     //
     //
     //
     public function getTermReferenceURL($term_id) {
         return $this->getTermField($term_id, 'trm_SemanticReferenceURL');
     }
-    
+
     //
     //
     public function getTerm($term_id, $domain='enum') {
         $term = null;
-        
+
         if(@$this->data['termsByDomainLookup'][$domain][$term_id]!=null){
             $term = $this->data['termsByDomainLookup'][$domain][$term_id];
         }else{
@@ -217,22 +217,22 @@ class DbsTerms
     //
     //
     public function getTermByLabel($vocab_id, $label){
-        
+
         $all_terms = $this->treeData($vocab_id, 3);
-        
+
         $label = trim(mb_strtolower($label));
-        
+
         foreach($all_terms as $trm_id){
-            
+
             $label2 = mb_strtolower($this->getTermLabel($trm_id));
-            
+
             if($label2==$label){
                 return $trm_id;
             }
         }
         return null;
     }
-    
+
     //
     // get all vocabularies OR for given domain
     //
@@ -244,21 +244,21 @@ class DbsTerms
     // NOT USED
     //
     public function getSiblings($term_id, $domain) {
-        
+
         $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
         $term = $this->getTerm($term_id, $domain);
-        
+
         return $this->treeData($term[$idx_term_parent], 3);
     }
-    
+
 
     // $parent_id -  parent term
     // mode - 1, tree - returns treedata for fancytree
-    //        3, set  - array of ids 
-    //        4, labels - flat array of labels in lower case 
+    //        3, set  - array of ids
+    //        4, labels - flat array of labels in lower case
     //
     public function treeData($parent_id, $mode):array{
-        
+
         if($mode=='set'){
             $mode = 3;
         }else if($mode=='tree'){
@@ -266,14 +266,14 @@ class DbsTerms
         }else if($mode=='labels'){
             $mode = 4;
         }
-        
-        
+
+
         if($mode==1){
             $res = array($parent_id=>array());
         }else{
             $res = array();
         }
-        
+
         if($parent_id=='relation' || $parent_id=='enum'){
             //find all vocabulary with domain "relation"
             $vocab_ids = $this->getVocabs($parent_id);
@@ -282,12 +282,12 @@ class DbsTerms
                 $res = array_merge($res,$res2);
             }
         }else{
-        
+
             $children = @$this->data['trm_Links'][$parent_id];
             if(is_array($children) && count($children)>0){
 
                 foreach($children as $trm_ID){
-                    
+
                     if($trm_ID==$parent_id){
                         USanitize::errorLog('!!!!Database '.HEURIST_DBNAME
                             .' Recursive tree for term '.$trm_ID.' parent '.$parent_id);
@@ -296,7 +296,7 @@ class DbsTerms
 
                     if($mode==1){ //tree
                         $res[$parent_id][$trm_ID] = array();
-                    
+
                     }else if($mode==3){
                         if(in_array($trm_ID, $res)){ //already in set
                             USanitize::errorLog('!!!!Database '.HEURIST_DBNAME
@@ -308,13 +308,13 @@ class DbsTerms
                     }else{
                         array_push($res, strtolower($this->getTermLabel($trm_ID)));
                     }
-                    
+
                     $res2 = $this->treeData($trm_ID, $mode);
                     if(is_array($res2) && count($res2)>0){
-                        if($mode==1){ 
+                        if($mode==1){
                             //tree
                             $res[$trm_ID] = $res2;
-                        }else{ 
+                        }else{
                             //flat array
                             $res = array_merge($res,$res2);
                         }
@@ -324,20 +324,20 @@ class DbsTerms
         }
         return $res;
     }
-    
+
     //
     // get all labels and codes of children for given parent term
     //
     public function getSameLevelLabelsAndCodes($parent_id, $domain){
-        
+
         $lvl_src = array('code'=>array(),'label'=>array());
-        
+
         if($parent_id>0){
             $children = $this->treeData($parent_id, 3);//ids
             if(count($children)>0){
                 $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
-                
+
                 foreach($children as $trmId){
                     if(@$this->data['termsByDomainLookup'][$domain][$trmId]){
                         $code = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));//removeLastNum
@@ -348,13 +348,13 @@ class DbsTerms
                 }
             }
         }
-        
+
         return $lvl_src;
     }
 
     //
     //
-    //    
+    //
     public function isTermLinked($parent_id, $term_id){
 
         if(@$this->data['trm_Links'][$parent_id]){
@@ -362,14 +362,14 @@ class DbsTerms
         }
         return false;
     }
-        
+
     //
     //
     //
     public function addNewTermRef($parent_id, $new_term_id){
-        
+
         if(@$this->data['trm_Links'][$parent_id]){
-            
+
             if( !in_array($new_term_id, $this->data['trm_Links'][$parent_id] )){
                 $this->data['trm_Links'][$parent_id][] = $new_term_id;
             }
@@ -377,36 +377,36 @@ class DbsTerms
             $this->data['trm_Links'][$parent_id] = array($new_term_id);
         }
     }
-    
+
     //
     //
     //
     public function addNewTerm($new_term_id, $term_to_add){
-        
+
         $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
         $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
-        
+
         $domain = $term_to_add[$idx_term_domain];
         $parent_id = $term_to_add[$idx_term_parent];
-        
+
         $this->data['termsByDomainLookup'][$domain][$new_term_id] = $term_to_add;
         $this->addChild($this->data['treesByDomain'][$domain], $parent_id, $new_term_id);
         $this->addNewTermRef($parent_id, $new_term_id);
-        
+
     }
-    
+
     private function addChild(&$lvl, $parent_id, $new_term_id) {
 
         if($parent_id>0){
-           
+
             foreach($lvl as $trmId=>$children){
                 if($trmId==$parent_id){
-                    
+
                     if(!is_array(@$lvl[$trmId])) {$lvl[$trmId] = array();}
                     $lvl[$trmId][$new_term_id] = array();
-                    
+
                     break;
-                    
+
                 }else if(is_array($children) && count($children)>0){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
@@ -417,9 +417,9 @@ class DbsTerms
             if(!is_array($lvl)) {$lvl = array();}
             $lvl[$new_term_id] = array();
         }
-    }    
+    }
 
-    
+
     //
     //  Find vocabulary ID
     //
@@ -441,10 +441,10 @@ class DbsTerms
             }
         }
         return null; //not found
-    }    
-    
-    
-    
+    }
+
+
+
     // Disambiguate elements (including terms at the same level of a vocabulary) which have the same label but
     // different concept IDs, by adding 1, 2, 3 etc. to the end of the label.
     //
@@ -457,7 +457,7 @@ class DbsTerms
         if(!$term_import || $term_import=="") {return $term_import;}
 
         $lvl_values = array();
-        
+
         $domain = 'enum';
         $lvl_src = $this->data['treesByDomain'][$domain];
 
@@ -477,24 +477,24 @@ class DbsTerms
                 $lvl_values[] = $name1;
             }
         }
-        
-        
+
+
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
     }
-    
+
     /**
     * Avoid the same labels and codes on the same level
-    * 
-    * @param mixed $term_value - label or code 
+    *
+    * @param mixed $term_value - label or code
     * @param mixed $same_level_values - to compare with
     */
     public function doDisambiguateTerms2($term_value, $same_level_values){
-        
+
         if(!$term_value || $term_value=="") {return $term_value;}
-/*        
+/*
         $name = removeLastNum(trim($term_value));
         $found = 0;
-        
+
         if(count($same_level_values)>0)
         foreach ($same_level_values as $value){
                 $name1 = removeLastNum(trim($value));
@@ -505,18 +505,18 @@ class DbsTerms
         if($found>0){
                 $term_value = $name." ".($found+1);
         }
-*/        
+*/
         $name = removeLastNum(trim($term_value));
         $found = 1;
-        
+
         while (in_array($term_value, $same_level_values)){
             $term_value = $name.' '.$found;
             $found++;
         }
-        
-        
+
+
         return $term_value;
     }
 
-}  
+}
 ?>

@@ -17,7 +17,7 @@
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
-*/    
+*/
 require_once dirname(__FILE__).'/../../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -25,7 +25,7 @@ use PHPMailer\PHPMailer\Exception;
 
     //
     // Uses PHPMailer
-    //    
+    //
     function sendEmail($email_to, $email_title, $email_text, $is_html=false, $email_attachment=null)
     {
         return sendPHPMailer(null, null, $email_to, $email_title, $email_text, $email_attachment, $is_html);
@@ -35,55 +35,55 @@ use PHPMailer\PHPMailer\Exception;
     function endsWith($haystack, $needle) {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
-    }    
-    
+    }
+
     //
     //
     //
     function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment, $is_html){
-        
+
         global $system, $mailRelayPwd;
-        
+
         $replyTo = null;//$email_from;
         $replyToName = null;//$email_from_name;
 
         if(!$email_from) {$email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);}
         if(!$email_from_name) {$email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';}
-        
+
         if($is_html){
             USanitize::purifyHTML($email_text);
         }
-        
+
         if(is_array($email_text)){
             $email_text =  json_encode($email_text);
         }
-        
+
         if(!$email_to){
             if(isset($system)){
-                $system->addError(HEURIST_ACTION_BLOCKED, 
+                $system->addError(HEURIST_ACTION_BLOCKED,
                         'Cannot send email. Recipient email address is not defined');
             }
             return false;
         }else if(!is_array($email_to)){
             $email_to = array($email_to);
         }
-        
+
         //$is_html = (strpos("\n",$email_text)===false);
-       
+
         // strip all whitespaces
         $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
-        
-        if(isset($mailRelayPwd) && $mailRelayPwd!='' 
+
+        if(isset($mailRelayPwd) && $mailRelayPwd!=''
             && count($email_to)==1 && endsWith($email_to[0], '@gmail.com')){
-            
+
             $data = array('pwd' => $mailRelayPwd ,
-                          'from_name' => $replyToName,  
+                          'from_name' => $replyToName,
                           'from' => $replyTo,
                           'to' => implode(',',$email_to),  //cs list of recipients
                           'title' => $email_title,
                           'text' => $email_text,
                           'html' => 1);
-              
+
             $data_str = http_build_query($data);
 
             $ch =  curl_init("https://heuristref.net/HEURIST/mailRelay.php");
@@ -92,26 +92,26 @@ use PHPMailer\PHPMailer\Exception;
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $responce = curl_exec($ch);
             curl_close($ch);
-            
+
             return $responce==1;
         }
-        
-        
+
+
         //send an email with attachment
         $email = new PHPMailer();
-        
+
         /*
         $mail->IsSMTP();
-        $mail->SMTPAuth   = true; 
-        $mail->Port       = 25; 
+        $mail->SMTPAuth   = true;
+        $mail->Port       = 25;
         $mail->Host       = "xx.xxx.x.x";// SMTP server
         $mail->Username   = "myemail@mydomain.local";
         $mail->Password   = <myemailpassword>;
-        
+
         $mail->From = 'contacto@45norte.com';
         $mail->addReplyTo($_POST['inputEmail'], $_POST['inputName']);//recipient
         */
-        
+
         $email->CharSet = 'UTF-8';
         $email->Encoding = 'base64';
         $email->isHTML( $is_html );
@@ -138,7 +138,7 @@ use PHPMailer\PHPMailer\Exception;
                 $problem = (($email_address==null) || (trim($email_address)==='')) ? "is not defined" : "$email_address is invalid";
 
                 if(isset($system)){
-                    $system->addError(HEURIST_ACTION_BLOCKED, 
+                    $system->addError(HEURIST_ACTION_BLOCKED,
                         "Cannot send email. Recipient email address $problem.");
                 }
                 return false;
@@ -174,13 +174,13 @@ use PHPMailer\PHPMailer\Exception;
                 $email->addAttachment($email_attachment);// , 'new.jpg');
             }
         }
-       
+
         try{
             $email->send();
             return true;
         } catch (Exception $e) {
             if(isset($system)){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 
+                $system->addError(HEURIST_SYSTEM_CONFIG,
                     'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
                     , $email->ErrorInfo);
             }
@@ -188,14 +188,14 @@ use PHPMailer\PHPMailer\Exception;
         }
         return true;
     }
-    
-    // 
+
+    //
     // Uses php native mail function (used in send_email.php only)
-    //	
+    //
     function sendEmail_native($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
 
         $res = "ok";
-        
+
         $email_to = filter_var($email_to, FILTER_SANITIZE_EMAIL);
 
         if(!filter_var($email_to, FILTER_VALIDATE_EMAIL)){
@@ -213,7 +213,7 @@ use PHPMailer\PHPMailer\Exception;
                     .($email_title?"'".$email_title."'":'')
                     .". This may indicate that mail transport agent is not correctly configured on server."
                     ." Please ask your system administrator to correct the installation";
-                    
+
             if(!checkSmtp()){
                 return $errorMsg;
             }
@@ -282,5 +282,5 @@ use PHPMailer\PHPMailer\Exception;
       }
       return true;
     }
-    
+
 ?>

@@ -36,7 +36,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
 }else{
     $req_params = filter_input_array(INPUT_GET);
-}    
+}
 
 $is_not_inited = true;
 $db = @$req_params['db'];
@@ -49,25 +49,25 @@ if($system->init($db, true, false)){
     if(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
 
         $fileid = @$req_params['file']? $req_params['file'] :@$req_params['ulf_ID'];
-            
+
         //find file info
         $listpaths = fileGetFullInfo($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
             $fileinfo = $listpaths[0];//
             $fileExt = $fileinfo['ulf_MimeExt'];
             if ($fileExt=='nxs' || $fileExt=='nxz' || $fileExt=='ply'){
-                
+
                 $url = HEURIST_BASE_URL.'?db='.$db.'&file='.$fileid;
-                $is_not_inited = false;    
-                
+                $is_not_inited = false;
+
             }else{
                 $system->addError(HEURIST_ACTION_BLOCKED, 'Requested media is not NEXUS format');
             }
-                
+
         }else{
             $system->addError(HEURIST_NOT_FOUND, 'Requested file is not found. Check parameter "file"');
         }
-        
+
     }else{ // if(@$req_params['id']){
         $system->addError(HEURIST_INVALID_REQUEST, 'Parameter "file" is not defined');
     }
@@ -88,7 +88,7 @@ define('EDIR','../../../external/3DHOP/');
 <meta content="charset=UTF-8"/>
 <title>3DHOP - 3D Heritage Online Presenter</title>
 <!--STYLESHEET-->
-<link type="text/css" rel="stylesheet" href="<?php echo EDIR;?>stylesheet/3dhop.css"/>  
+<link type="text/css" rel="stylesheet" href="<?php echo EDIR;?>stylesheet/3dhop.css"/>
 <!--SPIDERGL-->
 <script type="text/javascript" src="<?php echo EDIR;?>js/spidergl.js"></script>
 <!--JQUERY-->
@@ -123,7 +123,7 @@ define('EDIR','../../../external/3DHOP/');
 <script type="text/javascript">
 var presenter = null;
 
-function setup3dhop() { 
+function setup3dhop() {
     presenter = new Presenter("draw-canvas");
 
     presenter.setScene({
@@ -133,7 +133,7 @@ function setup3dhop() {
         modelInstances : {
             "model_1" : { mesh : "mesh_1" }
         },
-        trackball: { 
+        trackball: {
             type : TurnTableTrackball,
             trackOptions : {
                 startPhi: 35.0,
@@ -151,7 +151,7 @@ function actionsToolbar(action) {
     if(action=='home') presenter.resetTrackball();
     else if(action=='zoomin') presenter.zoomIn();
     else if(action=='zoomout') presenter.zoomOut();
-    else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch();} 
+    else if(action=='light' || action=='light_on') { presenter.enableLightTrackball(!presenter.isLightTrackballEnabled()); lightSwitch();}
     else if(action=='full'  || action=='full_on') fullscreenSwitch();
 }
 

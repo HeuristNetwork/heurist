@@ -1,19 +1,19 @@
 <?php
 
     /**
-    * Application interface. 
+    * Application interface.
     * @see recordFindDuplicates.js for client side
     * @see recordDupes.php for actions
-    * 
+    *
     * parameters
     * db - heurist database
-    * a or action 
+    * a or action
     *   dupes
             mode - levenshtein or metaphone
-            rty_ID 
+            rty_ID
             fields - comma separated list or array of dty_IDs and header fields
-            distance  
-    * 
+            distance
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -44,11 +44,11 @@
         $response = $system->getError();
 
     }else {
-        
+
         set_time_limit(0);
 
         if(@$_REQUEST['a'] == 'dupes' || @$_REQUEST['action'] == 'dupes'){
-            
+
             if( @$_REQUEST['ignore'] ){
                 $response = RecordsDupes::setIgnoring( $_REQUEST );
             }else{
@@ -56,7 +56,7 @@
             }
 
             $system->dbclose();
-            
+
             if( is_bool($response) && !$response ){
                 $response = $system->getError();
                 //$system->error_exit_api();

@@ -17,7 +17,7 @@ action
 info
 register
 update
-delete  
+delete
 */
 
 require_once dirname(__FILE__).'/../System.php';
@@ -28,46 +28,46 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
     $res = false;
 
     $action = @$_REQUEST['action'];
-    
+
     $allow_action = true;
 
     $system = new System();//global system
-    
+
     //if db parameter is defined this is initial request
     //1. checks permission - must be dbowner or sysadmin password provided
     //2. adds dbowner credentials to request
     if(@$_REQUEST['db'] && $action!='url'){
-        
+
         $allow_action = false;
         if($system->init($_REQUEST['db'])){
 
             if($system->is_dbowner()){
-                $allow_action = true;         
+                $allow_action = true;
             }else{
                 //sysadmin protection
                 $allow_action = !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions);
             }
-            
-            if($allow_action){                
+
+            if($allow_action){
                 //get database owner credentials
                 $dbowner = user_getByField($system->get_mysqli(), 'ugr_ID', 2);
-                
+
                 $_REQUEST['usrPassword'] = $dbowner['ugr_Password'];
                 $_REQUEST['usrEmail']    = $dbowner['ugr_eMail'];
-                
+
                 if($action=='register'){
                     $_REQUEST['usrName']      = $dbowner['ugr_Name'];
                     $_REQUEST['usrFirstName'] = $dbowner['ugr_FirstName'];
                     $_REQUEST['usrLastName']  = $dbowner['ugr_LastName'];
                 }
-                
+
             }else{
-                $system->addError(HEURIST_REQUEST_DENIED, 
+                $system->addError(HEURIST_REQUEST_DENIED,
                             'To perform this action you must be logged in as Database Owner');
             }
         }
     }
-    
+
     if($allow_action){
         if($action=='info'){
             $res = DbRegis::registrationGet($_REQUEST);
@@ -79,7 +79,7 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
             $res = DbRegis::registrationDelete($_REQUEST);//returns ID or false
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, 'Action parameter is missing or incorrect');
-        }            
+        }
     }
 
 if(is_bool($res) && $res==false){
@@ -90,4 +90,4 @@ if(is_bool($res) && $res==false){
 
 header('Content-type: text/javascript');
 print json_encode($response);
-?>                  
+?>

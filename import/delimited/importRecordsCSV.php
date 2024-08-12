@@ -51,14 +51,14 @@ if(!$format){ $format='csv';}
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
-                    
+
                     importRecordsCSV = new hImportRecordsCSV(
-                                window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
+                                window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search),
                                 <?php echo $max_size; ?>, "<?php echo htmlspecialchars($format);?>" );
                 }
             }
-        
-        
+
+
         </script>
         <style type="text/css">
             .subh
@@ -69,7 +69,7 @@ if(!$format){ $format='csv';}
             }
             .tbpreview{
                 font-size:0.9em;
-                margin:10px;                
+                margin:10px;
             }
             .tbpreview, .tbpreview td
             {
@@ -108,10 +108,10 @@ if(!$format){ $format='csv';}
                 margin-bottom:1em;
             }
             .select_rectype_seq > .hid_temp, .select_rectype_seq > .rt_arrow{
-                display:none;    
+                display:none;
             }
             .select_rectype_seq:hover > .hid_temp, .select_rectype_seq:hover > .rt_arrow{
-                display:inline-block;    
+                display:inline-block;
             }
             h2{
                 font-size:1.2em;
@@ -143,7 +143,7 @@ if(!$format){ $format='csv';}
     <!-- HTML -->
     <body class="ui-heurist-bg-light ui-heurist-populate" style="overflow:hidden;min-height:400px;font-size:0.7em;">
 
-<!-- STEP 1 upload data/select session -->    
+<!-- STEP 1 upload data/select session -->
 <div style="width:100%; height:100%;padding:20px;min-width:670px;" id="divStep1">
 
     <!-- Existing session/setup -->
@@ -161,7 +161,7 @@ if(!$format){ $format='csv';}
     <br><span style="padding-left:134px;line-height:21px">
     <a href="#" id="btnClearAllSessions"
         title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
-                    style="margin-left: 10px;">Clear all files</a>        
+                    style="margin-left: 10px;">Clear all files</a>
     </span>
 
     <hr style="margin: 20px 0px;">
@@ -199,28 +199,28 @@ if(!$format){ $format='csv';}
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2" class="selectmenu-parent">
     <div class="ent_header" style="height:30em;padding-top:1em;">
-    
+
         <div id="btnBackToStart2"
                 style="margin-left:2em;"
                 title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                 Back to start</div>
 
-        <div id="file_name2" style="display: inline-block;"> 
-            <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span> 
+        <div id="file_name2" style="display: inline-block;">
+            <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>
             <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
         </div>
 
         <fieldset style="width:380px;"><legend style="display:none"></legend>
                 <div>
                     <div class="header" style="min-width: 50px;">Encoding:</div>
-                    <div class="input-cell">        
+                    <div class="input-cell">
                         <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;">
                         </select>
                     </div>
                 </div>
                 <div>
                     <div class="header" style="min-width: 50px;">Field separator:</div>
-                    <div class="input-cell">  
+                    <div class="input-cell">
                         <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="," selected>comma ,</option>
                                 <option value="tab">tab</option>
@@ -240,21 +240,21 @@ if(!$format){ $format='csv';}
                                 <option value="]">right bracket ]</option>
                                 <option value="/">slash /</option>
                                 <option value="\">backslash \</option>
-                        </select>                          
+                        </select>
                     </div>
                 </div>
                 <div>
                     <div class="header" style="min-width: 50px;">Fields enclosed in:</div>
-                    <div class="input-cell">   
+                    <div class="input-cell">
                         <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='2'>"</option><option value="1">'</option>
                             <option value="none">no enclosure</option>
-                        </select>                         
+                        </select>
                     </div>
                 </div>
                 <div>
                     <div class="header" style="min-width: 50px;">Line separator:</div>
-                    <div class="input-cell">        
+                    <div class="input-cell">
                         <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option value="auto">auto detect</option>
                             <option selected value="win">Windows</option>
@@ -265,7 +265,7 @@ if(!$format){ $format='csv';}
                 </div>
                 <div>
                     <div class="header" style="min-width: 50px;">Multivalue separator:</div>
-                    <div class="input-cell">        
+                    <div class="input-cell">
                         <select id="csv_mvsep" class="text ui-widget-content ui-corner-all" style="width:120px;">
                                 <option value="|" selected>pipe |</option>
                                 <option value=",">comma ,</option>
@@ -291,7 +291,7 @@ if(!$format){ $format='csv';}
                 </div>
                 <div>
                     <div class="header" style="min-width: 50px;">Date format:</div>
-                    <div class="input-cell">        
+                    <div class="input-cell">
                         <select id="csv_dateformat" class="text ui-widget-content ui-corner-all" style="width:120px;">
                             <option selected value='1'>dd/mm/yyyy</option><option value="2">mm/dd/yyyy</option></select>
                         </select>
@@ -301,30 +301,30 @@ if(!$format){ $format='csv';}
                         </div>
                     </div>
                 </div>
-                
-                
-                <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em" 
+
+
+                <div id="btnParseStep1" style="position:absolute;bottom:1em;left:2em"
                     title="By clicking on this button Heurist starts to analyse the header of uploaded CSV data according to your parse parameters, extracts column names and verifies encoding and tries to convert it to UTF8">Analyse data</div>
-        </fieldset>            
+        </fieldset>
         <div style="position:absolute;right:10px;left:440px;top:2.5em;bottom:0;">
                 <div class="ent_header" style="border:none;display:none" id="divFieldRolesHeader">
                     <h2>Specify identifier and date columns</h2><br>
                     <div style="font-weight:bold;padding-bottom:1em">
                         Identifier columns are those that contain a Heurist record ID.<br>
-                        They MUST contain "H-ID" somewhere in the column name.                    
+                        They MUST contain "H-ID" somewhere in the column name.
                     </div>
-                    
+
                 </div>
                 <div class="ent_content" id="divFieldRoles" style="top:6em;bottom:3.5em;padding: 0.2em 0.5em;border: 1px solid lightgray;">
-                    
+
                     <table class="tbfields" style="font-weight:bold"><caption></caption><thead><tr>
                                 <th style="width:150px">Column</th>
                                 <th style="width:50px">&nbsp;</th>
                                 <th style="width:50px;text-align:center">Heurist<br>Identifier</th>
                                 <th style="width:50px;text-align:center" class="date-column">Date</th>
                                 <th style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></th></tr></thead><tbody></tbody></table>
-                    
-                    
+
+
                 </div>
                 <div  class="ent_footer">
                     <div id="btnParseStep2" style="bottom:5px"
@@ -335,17 +335,17 @@ if(!$format){ $format='csv';}
                     </span>
                 </div>
         </div>
-        
+
     </div>
     <div class="ent_content_full" style="top:31em;padding:0.5em" id="divParsePreview">
-    
+
     </div>
 </div>
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3" class="selectmenu-parent">
 
     <div class="ent_header" style="height:362;border:none;padding:5 6 0 6;min-width:970px;margin-bottom:10px;">
-    
+
         <div style="position:absolute;left:0;right:6;padding-left:2em">
 
             <div style="max-width: 500;float:left;">
@@ -361,11 +361,11 @@ if(!$format){ $format='csv';}
                                 <!-- display:none; todo restore this feature -->
                 </div>
             </div>
-            <div id="file_name" style="display: inline-block;"> 
-                <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>  
+            <div id="file_name" style="display: inline-block;">
+                <span style="display: inline-block; position: relative; top: -3px;">Importing from:&nbsp;</span>
                 <h2 class="curr_file_name truncate" style="display: inline-block;max-width: 300px;">&nbsp;</h2>
             </div>
-            
+
             <div id="btnClearFile"  style="float: right;margin-right:80px;"
                 title="Clear the data for this uploaded file from the server">
                 Clear uploaded file</div>
@@ -376,8 +376,8 @@ if(!$format){ $format='csv';}
 
             <div id="helper1" class="heurist-helper1" style="float: right; padding:0.5em;">
                 Note: Data is retained between sessions until cleared
-            </div>    
-    
+            </div>
+
         </div>
 
         <div style="position: absolute;right: 81px;top: 50px;padding-left:50px;font-size:0.8em">
@@ -387,7 +387,7 @@ if(!$format){ $format='csv';}
                     Check this box to ignore record type. Target record type on the left is then only specified to allow selection of fields.
                     <br>Matching and updates will be applied across all record types for which the base field(s) apply.</label>
         </div>
-        
+
         <fieldset style="position: absolute;left: 0;right: 0;top:80px;"><legend style="display:none"></legend>
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
@@ -402,77 +402,77 @@ if(!$format){ $format='csv';}
                 <!-- div class="heurist-helper1" style="display: block;">
                     If a record type is not shown in the pulldown, check the 'Show' column in Database > Manage Structure
                 </div -->
-            </div> 
-        </div>                    
+            </div>
+        </div>
         </fieldset>
-        
+
         <img alt id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
         <img alt id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
-        <img alt id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
-        <img alt id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
-        
+        <img alt id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">
+        <img alt id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">
+
         <div style="padding:1em 0 1em 1em;position: absolute;top:145px;width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
             <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
             <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 120px">
-                
+
                 <h2 style="display:inline-block">step 1: MATCHING</h2>
-                
-                <div id="btnMatchingStart" class="normal" 
+
+                <div id="btnMatchingStart" class="normal"
                     title="Start matching operation. Matching sets this ID field for existing records and allows the creation of new records for unmatched rows">Match against existing records</div>
 
                 <div style="display:none" class="skip_step prompt">
                     Click on list of record types to skip steps
                 </div>
-<!--    
-                <div id="btnNextRecType1" style="display:none" class="skip_step" 
+<!--
+                <div id="btnNextRecType1" style="display:none" class="skip_step"
                     title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
--->                    
+-->
                 <div id="btnBackToMatching2" class="need_resolve" style="margin-right:35px"
                     title="Return to matching step to redefine mapping that may fix ambiguous matches">
                     Match Again</div>
                 <div id="btnResolveAmbiguous" class="need_resolve"
                     title="Show list of ambiguous matches, select the correct matching and continue import">
                     Resolve ambiguous matches</div>
-                
+
             </div>
-            
+
             <div  id="divActionsImport" style="display:none;" class="action_buttons step4 step5">
                 <div id="btnBackToMatching" style="margin-right:20px;display:inline-block;"
                     title="Return to matching step to redefine record IDs">
                     Match Again</div>
-                    
+
                 <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
                 <h2 class="step5" style="display:none;" id="head_step3">step 3: INSERT/UPDATE</h2>
-                    
-                <div id="btnNextRecType2" style="display:none" class="skip_step" 
+
+                <div id="btnNextRecType2" style="display:none" class="skip_step"
                     title="All input rows have been matched to existing records. This probably means that you are simply matching existing records and don't need to update them">
                     Skip update</div>
-                    
+
                 <div id="btnPrepareStart" class="step4 step5"
                     title="Verify that you map all required fields and that values in import table fit to constraints in Heurist database scheme">
                     Prepare Insert/Update</div>
                 <div id="btnImportStart" class="step4 step5"
                     title="Start real import data into Heurist database">
                     Start Insert/Update</div>
-                    
+
                 <div style="display:none" class="skip_step prompt">
                     Click on list of record types to skip steps
                 </div>
 
 
-            </div>            
+            </div>
         </div>
-<!-- radiogroup setting divs -->        
+<!-- radiogroup setting divs -->
 
         <div  id="divMatchingSetting" class="step3 step-ctrls" style="display:none">
             <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
 
-            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" 
+            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text"
                         onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match1" id="lbl_sa_match1" style="padding-right:3em">Use Heurist ID column</label>
 
-            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text" 
+            <input type="radio" name="sa_match" id="sa_match2" value="2" class="text"
                         onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match2">Skip matching (all new records)</label>
 
@@ -501,15 +501,15 @@ if(!$format){ $format='csv';}
 
             <input type="radio" checked name="sa_upd" id="sa_upd0" value="0" class="text">&nbsp;
             <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
-            
+
             <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
-            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
-            
+            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
+
             <a href="#imp3" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
                 <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
-            </a>           
-            
+            </a>
+
             <div style="padding-left: 20px; vertical-align: top; display: none;" id="divImport3">
 
                 <input type="radio" name="sa_upd" id="sa_upd22" value="22" class="text">&nbsp;
@@ -522,9 +522,9 @@ if(!$format){ $format='csv';}
                 <label for="sa_upd20"> Replace existing values with new values, retain existing value if no new value supplied</label>
 
             </div>
-            
-            
-<!--  VERSION pre 2020-06-08           
+
+
+<!--  VERSION pre 2020-06-08
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -534,17 +534,17 @@ if(!$format){ $format='csv';}
 
             <input type="radio" name="sa_upd" id="sa_upd2" value="2" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd2">Replace all existing value(s) for the fields specified below</label>
-            
+
                     <div style="padding-left: 60px; font-size: 0.9em; vertical-align: top; display: none;" id="divImport2">
                         <input type="radio" checked="" name="sa_upd2" id="sa_upd20" value="0" class="text">&nbsp;
                         <label for="sa_upd20" style="font-size:0.9em;">Retain existing if no new data supplied for record</label><br>
 
                         <input type="radio" name="sa_upd2" id="sa_upd21" value="1" class="text">&nbsp;
                         <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
-                    </div>            
--->                    
+                    </div>
+-->
         </div>
-<!-- end radiogroup setting divs -->     
+<!-- end radiogroup setting divs -->
 
         <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:31px">
             <table role="presentation" class="tbresults" style="display:inline-block">
@@ -554,7 +554,7 @@ if(!$format){ $format='csv';}
                                             <h2 id="mrr_big">Existing: 586  New: 100</h2>
                                         </td>
                                         <td rowspan="3">
-                                            <div id="prepareWarnings" 
+                                            <div id="prepareWarnings"
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Data errors: 0</h2>
                                                 <div id="btnShowWarnings" style="display:none"></div>
@@ -562,7 +562,7 @@ if(!$format){ $format='csv';}
                                             </div>
                                         </td>
                                         <td rowspan="3">
-                                            <div id="prepareErrors" 
+                                            <div id="prepareErrors"
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_error" style="display:inline-block;margin:0 10px;">Unrecognised terms: 0</h2>
                                                 <div id="btnShowErrors"></div>
@@ -593,11 +593,11 @@ if(!$format){ $format='csv';}
             </table>
 
         </div>
-   
-        
+
+
         <table class="tbmain" style="width:99%;position:absolute;bottom:0px;" cellspacing="0" cellpadding="2">
             <caption></caption>
-            <thead><tr> 
+            <thead><tr>
                 <th style="width:75px;">Use value<br><a href="#" class="lnk_SelectAll link_styling">Select all</a></th>
                 <th style="width:75px;">Unique&nbsp;<br>values</th>
                 <th style="width:300px;">Column</th>
@@ -611,7 +611,7 @@ if(!$format){ $format='csv';}
                     <a href="#" class="navigation" style="display: inline-block;"><span data-dest="last" class="ui-icon ui-icon-seek-end"/></a>
                 </th></tr>
             </thead>
-        </table>    
+        </table>
     </div>
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
     <div class="ent_content" style="bottom:0;top:339px;padding: 0em 0.5em;" id="divFieldMapping">
@@ -621,11 +621,11 @@ if(!$format){ $format='csv';}
                         <th width="75px">Unique&nbsp;<br>values</th>
                         <th width="300px">Column</th>
                         <th width="300px">Column to Field Mapping</th>
-                        <th></th></tr></thead> -->                                 
+                        <th></th></tr></thead> -->
                     <tbody>
-                    
+
                     </tbody>
-                </table>    
+                </table>
     </div>
     <div class="ent_footer" style="height:11em;padding: 0em 0.5em;display:none" id="divImportActions">
     </div>
@@ -654,7 +654,7 @@ if(!$format){ $format='csv';}
                 <div class="input-div">
                     <select id="sa_primary_rectype" class="text ui-widget-content ui-corner-all" style="width: 32ex;">
                     </select>
-                </div>              
+                </div>
                 <div class="heurist-helper1" style="display: block; padding-bottom: 1em;">
                     The primary record type is the one represented by each row of the input file. Additional record types may be imported  from selected columns prior to import of the primary, as determined by the dependencies below.
                 </div>
@@ -668,19 +668,19 @@ if(!$format){ $format='csv';}
                     <input type="radio" name="mode_view" value="1" id="mode_view1"><label for="mode_view1">Treeview</label>
                     </div>
                  </div>
-            </div>        
-        </div>                    
+            </div>
+        </div>
         <div>
             <div id="lbl_dependencies_preview" class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
                 Dependencies:
             </div>
             <div class="input-div">
-                <div id="dependencies_preview" xclass="ui-widget-content" 
+                <div id="dependencies_preview" xclass="ui-widget-content"
                     style="min-height:1.8em;background-color:white">
-                </div>    
-                
+                </div>
+
             </div>
-        </div>                    
+        </div>
         </fieldset>
 </div>
 

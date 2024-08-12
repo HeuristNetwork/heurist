@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -76,7 +76,7 @@ if(!$system->init(@$_REQUEST['db'])){
 		$rv['error']='URL could not be retrieved';
 	}
 
-    
+
     print json_encode(array('status'=>HEURIST_OK, 'data'=>$rv));
 }
 ?>

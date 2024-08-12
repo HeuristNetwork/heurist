@@ -3,7 +3,7 @@
 /**
 * List of system constants
 *
-* Many of them are defined with values set in congigIni.php 
+* Many of them are defined with values set in congigIni.php
 * (and respectively in ../heuristConfigIni.php)
 *
 * @package     Heurist academic knowledge management system
@@ -29,7 +29,7 @@ require_once dirname(__FILE__).'/utilities/uSystem.php';
 define('HEURIST_VERSION', $version);//code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.3.14");//minimal version of db for current version of code
 
-// The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database, 
+// The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database,
 
 // curated template databases and also code updates
 if(!@$heuristReferenceServer){
@@ -67,10 +67,10 @@ define('HEURIST_SERVER_NAME', @$host_params['server_name']);// server host name 
 
 if(@$_SERVER["REQUEST_URI"]) {define('HEURIST_CURRENT_URL', $host_params['server_url'] . $_SERVER["REQUEST_URI"]);}//NOT USED
 if(!defined('HEURIST_DIR')){
-  define('HEURIST_DIR', 
-    (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"]) 
-    . $host_params['install_dir']);//  eg. /var/www/html/HEURIST @todo - read simlink (realpath)  
-} 
+  define('HEURIST_DIR',
+    (@$host_params['heurist_dir']? $host_params['heurist_dir'] :@$_SERVER["DOCUMENT_ROOT"])
+    . $host_params['install_dir']);//  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
+}
 
 define('HEURIST_BASE_URL', $host_params['server_url'] . $host_params['install_dir']  );// eg. https://myheurist.net/heurist/
 
@@ -176,7 +176,7 @@ define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_IN
 define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
 define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
 
-define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN', 
+define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
     'It is also possible that drive space has been exhausted. '
             .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
             .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
@@ -188,7 +188,7 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 //Expose all relationship vocabularies as options for term fields.
 define("HEURIST_UNITED_TERMS", true);
 
-define("NAKALA_REPO", 'http'.'://nakala.fr/');
+define("NAKALA_REPO", 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
 
 
 $glb_lang_codes = null;
@@ -200,7 +200,7 @@ if(!isset($common_languages_for_translation)){
 
 //---------------------------------
 // used in Uploadhandler.php
-define('HEURIST_ALLOWED_EXT', 
+define('HEURIST_ALLOWED_EXT',
 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,'
 .'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,'
 .'ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,mtl,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim');
@@ -251,18 +251,18 @@ $rtDefines = array(
     'RT_PHOTOGRAPH' => array(3, 129),
     'RT_ARCHIVAL_RECORD' => array(3, 1000),
     'RT_ARCHIVAL_SERIES' => array(3, 1001),
-    
+
     // Spatial data
-    'RT_PLACE' => array(3, 1009), 
+    'RT_PLACE' => array(3, 1009),
     'RT_MAP_ANNOTATION' => array(2, 101),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
-    'RT_MAP_LAYER' => array(3, 1020),     
+    'RT_MAP_LAYER' => array(3, 1020),
 
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
-    'RT_TLCMAP_DATASET' => array(1271, 54),     
+    'RT_TLCMAP_DATASET' => array(1271, 54),
 
     'RT_IMAGE_SOURCE' => array(3, 1018),
     'RT_TILED_IMAGE_SOURCE' => array(2, 11), // added Ian 23/10/14 for consistency
@@ -270,8 +270,8 @@ $rtDefines = array(
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),
-    
-    'RT_CMS_HOME' => array(99, 51),  
+
+    'RT_CMS_HOME' => array(99, 51),
     'RT_CMS_MENU' => array(99, 52)
 );
 
@@ -302,19 +302,19 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINIMUM_ZOOM_LEVEL' => array(2, 32), //in basemap zoom levels (0-20)
     'DT_MAXIMUM_ZOOM_LEVEL' => array(2, 33),
     // zoom in km used for map documents (map zoom ranges) and layers (visibility range)
-    //note that minimum in km turns to maximum in native zoom  
-    'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km  
+    //note that minimum in km turns to maximum in native zoom
+    'DT_MAXIMUM_ZOOM' => array(3, 1085), //in UI this field acts as minimum zoom in km
     'DT_MINIMUM_ZOOM' => array(3, 1086), //in UI this field acts as maximum zoom out km
     'DT_LEGEND_OUT_ZOOM' => array(3, 1087), //hide or disable layer in legend if layer is out of zoom range
     'DT_IS_VISIBLE' => array(2, 1100),   //is layer initially visible on mapdocument initialization
-    
+
     'DT_SERVICE_URL' => array(2, 34),
     'DT_URL' => array(3, 1058),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
     'DT_ANNOTATION_INFO' => array(2, 1098), //for iiif and map annotations
-    
+
     //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
     'DT_FILE_TYPE' => array(2, 41),
@@ -324,8 +324,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_END_WORD' => array(2, 45),
     'DT_START_ELEMENT' => array(2, 46),
     'DT_END_ELEMENT' => array(2, 47),
-    'DT_LAYOUT_STRING' => array(2, 48),    
-    'DT_TRANSFORM_RESOURCE' => array(2, 50), 
+    'DT_LAYOUT_STRING' => array(2, 48),
+    'DT_TRANSFORM_RESOURCE' => array(2, 50),
     'DT_PROPERTY_VALUE' => array(2, 51),
     'DT_TOOL_TYPE' => array(2, 52),
     'DT_RECORD_TYPE' => array(2, 53),
@@ -355,7 +355,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_JOURNAL_REFERENCE' => array(3, 1034),
     'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
     'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
-    
+
     'DT_EXTERNAL_ID' => array(2, 581), //external non heurist record id
     // Spatial & mapping
     'DT_KML_FILE' => array(3, 1044),
@@ -381,12 +381,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_SHAPE_FILE' => array(3, 1069),
     'DT_DBF_FILE' => array(3, 1070),
     'DT_SHX_FILE' => array(3, 1071),
-    
+
     'DT_CRS' => array(2, 1092), // Coordinate Reference System
     'DT_WORLD_BASEMAP' => array(2, 1093),  // Need to use trm_Label for terms to get basemap name
 
     'DT_EXTRACTED_TEXT' => array(2, 652),  //for pdf parser
-    
+
     'DT_CMS_TOP_MENU' => array(99, 742),  //pointer  to top level menues in home page
     'DT_CMS_MENU' => array(99, 761),  //pointer to sub menu
     'DT_CMS_KEYWORDS' => array(99, 948),
@@ -397,8 +397,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_PAGETITLE' => array(99, 952),   //show page title above content
     'DT_CMS_TOPMENUSELECTABLE' => array(2, 938), // allow top menu to be selectable, if a submenu is present
     //'DT_CMS_BANNER' => array(99, 951),
-    //'DT_CMS_ALTLOGO' => array(2, 926),  
-    //'DT_CMS_ALTLOGO_URL' => array(2, 943),  
+    //'DT_CMS_ALTLOGO' => array(2, 926),
+    //'DT_CMS_ALTLOGO_URL' => array(2, 943),
     //'DT_CMS_ALT_TITLE' => array(3, 1009),
     'DT_CMS_SCRIPT' => array(2, 927),
     'DT_CMS_PAGETYPE' => array(2, 928), //menu (2-6253) or standalone (2-6254)
@@ -407,7 +407,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGES' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
-    
+
     'DT_WORKFLOW_STAGE' => array(2, 1080)
 
 );//TODO: add email magic numbers
@@ -426,7 +426,7 @@ $trmDefines = array(
     'TRM_NAME_ONLY' => array(2, 9634),
     'TRM_ICON_ONLY' => array(2, 9635),
     'TRM_NAME_AND_ICON' => array(2, 9636),
-    
+
     'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081),
     'TRM_LEGEND_OUT_ZOOM_DISABLED' => array(3, 5082)
 );
@@ -437,7 +437,7 @@ $trmDefines = array(
 function boot_error_handler($errno, $errstr, $errfile, $errline){
     if($errno==E_WARNING){ //E_PARSE E_NOTICE
             if(strpos($errstr,'Input variables')>0){
-        
+
                 $message = "$errstr $errfile:$errline";
                 error_log('Large INPUT: '.htmlspecialchars($message));
                 error_log(print_r(array_slice($_REQUEST, 0, 100),true));

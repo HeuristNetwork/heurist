@@ -1,8 +1,8 @@
 <?php
 
     /**
-    * db access to sysArchive table 
-    * 
+    * db access to sysArchive table
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -32,25 +32,25 @@ class DbSysArchive extends DbEntityBase
 
     /**
     *  search groups
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
 
         if(parent::search()===false){
-            return false;   
+            return false;
         }
 
         $needCheck = false;
         $is_ids_only = false;
 
-        //compose WHERE 
+        //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);
 
@@ -71,7 +71,7 @@ class DbSysArchive extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('arc_Table');
         if($pred!=null) {array_push($where, $pred);}
-        
+
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -86,11 +86,11 @@ class DbSysArchive extends DbEntityBase
         }else if(@$this->data['details']=='list')
         {
             $this->data['details'] = 'arc_ID, arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_TimeOfChange, arc_ContentType';
-            
+
         }else if(@$this->data['details']=='full')
         {
             $this->data['details'] = 'arc_ID, arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_TimeOfChange, arc_DataBeforeChange, arc_ContentType';
-            
+
         }else{
             $needCheck = true;
         }
@@ -106,13 +106,13 @@ class DbSysArchive extends DbEntityBase
         }
 
         //----- order by ------------
-        //compose ORDER BY 
+        //compose ORDER BY
         $order = array();
 
         $value = @$this->data['sort:arc_TimeOfChange'];
         if($value!=null){
             array_push($order, 'arc_TimeOfChange '.($value>0?'ASC':'DESC'));
-        }  
+        }
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
@@ -134,24 +134,24 @@ class DbSysArchive extends DbEntityBase
         if(@$this->data['convert']=='records_list'){
             $result = $this->convertToHeuristRecords($result, 'records_list');
         }
-        
-        
+
+
         return $result;
     }
-    
+
     //
     // extract data from arc_DataBeforeChange and converts resultset to Heurist records
-    //    
+    //
     private function convertToHeuristRecords($response, $details){
-        
+
         if(is_array($response) && $response['reccount']>0){
-            
+
             $rectypes = array();
             $records = array();
             $order = array();
             $csv_delimiter = "\t";
             $csv_enclosure = '|';//'@';
-            
+
             if($details=='records_list'){ //returns fields suitable for list only
                 //0,1,2,3,4,6,11,12
                 $fields = 'rec_ID,rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,'
@@ -163,12 +163,12 @@ class DbSysArchive extends DbEntityBase
                 .'rec_URLErrorMessage,rec_URLExtensionForMimeType,rec_Hash';
             }
             $fields = explode(',',$fields);
-            
+
             $idx_data = array_search('arc_DataBeforeChange', $response['fields']);
-            
-            
+
+
             foreach ($response['records'] as $arc_ID => $arcrow){
-                
+
                 $arc = $arcrow[$idx_data];
                 //$arc = substr(str_replace('","', "\t", $arc),1);
                 $arc = str_replace('NULL','""', $arc);
@@ -194,51 +194,51 @@ class DbSysArchive extends DbEntityBase
                     }
                     $rec = $rec2;
                 }*/
-                
+
                 $rec_ID = $arc_ID;
                 $rec_RecTypeID = $rec[6];
-                
+
                 array_push($order, $arc_ID);
-                
+
                 if($details=='records_list'){
-                    
+
                     $records[$arc_ID] = array($rec[0],$rec[1],$rec[2],$rec[3],$rec[4],$rec[6],$rec[11],$rec[12],
                                     $arc_ID,$arcrow[3],$arcrow[6],$arcrow[8]);
-                    
+
                 }else{
                     $records[$arc_ID] = $rec;
                 }
-                
+
                 if(!in_array($rec_RecTypeID, $rectypes)){
                     array_push($rectypes, $rec_RecTypeID);
                 }
             }
-            
-/*            
+
+/*
 "212","","2019-12-21 09:49:35","2019-12-22 13:26:23","Note2 [ Alice Lee Roosevelt Longworth, 21 Dec 2019 ]","", rt"3","2","0","0",ft"0",
 own"0","viewable",NULL,NULL,NULL,NULL
-*/            
-            
+*/
+
             $response['fields'] = $fields;
             $response['records'] = $records;
             $response['order'] = $order;
             $response['entityName']='Records';
             $response['rectypes'] = $rectypes;
-            
-            return $response;            
+
+            return $response;
         }else{
             return $response;
         }
-        
+
     }
-        
+
     //
-    // this table is updated via triggers only 
+    // this table is updated via triggers only
     //
     public function save(){
         return false;
-    }     
-    
+    }
+
     //
     // delete group
     //
@@ -248,7 +248,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
     /**
      * Batch functions
-     * 
+     *
      * Functions:
      *  get_record_history - retrieve record value changes, either added (oldest known value) or modified (any following value that's different)
      *  revert_record_history - rollback value history with values stored within the archive record
@@ -261,10 +261,10 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
         /**
          * Retrieve field value, raw value for comparison
-         * 
+         *
          * @param string $value - arc_DataBeforeChange, archived recDetails row
          * @param array $defStruct - record structure, used to check type
-         * 
+         *
          * @return array - [extracted value, detail type ID]
          */
         $__get_value = function($value, $defStruct){
@@ -310,10 +310,10 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
         /**
          * Perform extra processing, value to show the user
-         * 
+         *
          * @param mixed $value - field value, to be processed
          * @param string $type - field type
-         * 
+         *
          * @return mixed - processed value, for user display
          */
         $__process_value = function($value, $type) use ($mysqli){
@@ -395,7 +395,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                     $value = USanitize::sanitizeString($value);
 
                     break;
-                
+
                 default:
                     break;
             }
@@ -463,9 +463,9 @@ own"0","viewable",NULL,NULL,NULL,NULL
                                  "ORDER BY arc_ID";
 
                 $res_changes = mysql__select_param_query($mysqli, $query_changes, ['is', $rec_ID, $row_date[0]]);
-                                 
+
                 if(!$res_changes){
-                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at ' 
+                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at '
                                         . $row_date[0], $mysqli->error);
                     return false;
                 }
@@ -508,7 +508,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                     // Determine whether the value was added or modified
                     $dty_idx = count($cur_set[$dty_ID]) - 1;
-                    $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ? 
+                    $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ?
                                         $complete_history[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
 
                     if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip
@@ -592,7 +592,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                 // Determine whether the value was added or modified
                 $dty_idx = count($final_set[$dty_ID]) - 1;
-                $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ? 
+                $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ?
                                     $complete_history[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
 
                 if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip, add dtl_ID

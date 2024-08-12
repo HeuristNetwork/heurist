@@ -1,21 +1,21 @@
 <?php
 /**
-*             
-* Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_TermsAsButtons,rst_PointerMode,rst_NonOwnerVisibility),  
-                  recUploadedFiles(ulf_PreferredSource),   
-                  defTerms (trm_OrderInBranch), 
-                  recDetails(dtl_HideFromPublic), 
-                  sysIdentification(sys_NakalaKey), 
+*
+* Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_TermsAsButtons,rst_PointerMode,rst_NonOwnerVisibility),
+                  recUploadedFiles(ulf_PreferredSource),
+                  defTerms (trm_OrderInBranch),
+                  recDetails(dtl_HideFromPublic),
+                  sysIdentification(sys_NakalaKey),
                   sysUGrps(usr_ExternalAuthentication)
 * Add tables:     sysWorkflowRules,defTranslations,recDetailsDateIndex
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
-* 
+*
 */
 
     /*
@@ -25,22 +25,22 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
-    
+
+
     function updateDatabseTo_v1_3_12($system, $dbname=null){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
 
         $mysqli = $system->get_mysqli();
-        
+
         if($dbname){
             mysql__usedatabase($mysqli, $dbname);
         }
-        
+
         $sysValues = $system->get_system(null, true);//refresh
         $dbVer = $system->get_system('sys_dbVersion');
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
-        
+
         $report = array();
 
         if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub<13){
@@ -84,7 +84,7 @@
                     ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
                     .' AFTER `rst_LocallyModified`';
                     $res = $mysqli->query($query);
-                    
+
                     if(!$res){
                         $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_SemanticReferenceURL', $mysqli->error);
                         return false;
@@ -92,7 +92,7 @@
                     $report[] = 'defRecStructure:rst_SemanticReferenceURL added';
                 } else {
                     $report[] = 'defRecStructure:rst_SemanticReferenceURL already exists';
-                } 
+                }
 
                 if(!hasColumn($mysqli, 'defRecStructure', 'rst_TermsAsButtons')){
                     //alter table
@@ -107,7 +107,7 @@
                     $report[] = 'defRecStructure:rst_TermsAsButtons added';
                 } else {
                     $report[] = 'defRecStructure:rst_TermsAsButtons already exists';
-                } 
+                }
 
                 if(!hasColumn($mysqli, 'defTerms', 'trm_Label', null, 'varchar(250)')){
 
@@ -125,7 +125,7 @@
                     $report[] = 'defTerms:trm_Label modified';
                 } else {
                     $report[] = 'defTerms:trm_Label already 250 characters';
-                } 
+                }
             }
             if($dbVerSubSub<2){
 
@@ -213,7 +213,7 @@
                     $report[] = 'defTerms:trm_OrderInBranch added';
                 } else {
                     $report[] = 'defTerms:trm_OrderInBranch already exists';
-                } 
+                }
             }
 
             if($dbVerSubSub<7){
@@ -246,10 +246,10 @@
                     $report[] = 'defRecStructure:rst_NonOwnerVisibility modified';
                 } else {
                     $report[] = 'recDetails:dtl_HideFromPublic already exists';
-                } 
+                }
             }
-            
-            if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 && 
+
+            if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 &&
 
                 if(!hasColumn($mysqli, 'sysIdentification', 'sys_NakalaKey')){
                     $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'";
@@ -264,14 +264,14 @@
                     }else{
                         $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysIdentification to add sys_NakalaKey', $mysqli->error);
                         return false;
-                    }                    
+                    }
                     $report[] = 'sysIdentification:sys_NakalaKey added';
                 } else {
                     $report[] = 'sysIdentification:sys_NakalaKey already exists';
-                } 
+                }
             }
 
-            if(!hasTable($mysqli, 'defTranslations')){ //$dbVerSubSub<10 || 
+            if(!hasTable($mysqli, 'defTranslations')){ //$dbVerSubSub<10 ||
 
                 $mysqli->query('DROP TABLE IF EXISTS defTranslations;');
                 $mysqli->query("CREATE TABLE defTranslations (
@@ -288,7 +288,7 @@
                 $report[] = 'defTranslations created';
             } else {
                 $report[] = 'defTranslations already exists';
-            } 
+            }
 
             if(!hasColumn($mysqli, 'sysUGrps', 'usr_ExternalAuthentication')){ //$dbVerSubSub<11
                     //alter table
@@ -315,7 +315,7 @@
             if($dbVerSubSub<12){
                 $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
             }
-            
+
             /* date index created in upgradeDatabase.php
             if($dbVerSubSub<14){
                 if(!recreateRecDetailsDateIndex( $system, false, false )){
@@ -323,14 +323,14 @@
                 }
             }
             */
-            
+
 
             //import field 2-1080 Workflowstages
             if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
                 $importDef = new DbsImport( $system );
                 if($importDef->doPrepare(  array(
-                'defType'=>'detailtype', 
-                'databaseID'=>2, 
+                'defType'=>'detailtype',
+                'databaseID'=>2,
                 'conceptCode'=>'2-1080')))
                 {
                     $res = $importDef->doImport();
@@ -342,5 +342,5 @@
 
         }
         return $report;
-    }  
+    }
 ?>

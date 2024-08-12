@@ -24,7 +24,7 @@
 */
 
 define('OWNER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -41,12 +41,12 @@ $mysqli = $system->get_mysqli();
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-    
+
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-        
+
         <!-- CSS -->
         <?php include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';?>
-        
+
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -71,8 +71,8 @@ $mysqli = $system->get_mysqli();
 
     <body class="popup" style="overflow:auto">
 
-        <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>    
-    
+        <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>
+
         <div class="banner">
             <h2>Disk usage and quota</h2>
         </div>
@@ -80,21 +80,21 @@ $mysqli = $system->get_mysqli();
         $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
-            $quota = 1073741824; //1GB    
+            $quota = 1073741824; //1GB
         }
         $usage = filestoreGetUsageByScan($system);
-        
+
         $quota /= 1048576;
         $quota = round((float)$quota, 2);
 
         $usage /= 1048576;
         $usage = round((float)$usage, 2);
-        
+
         $dirs = filestoreGetUsageByFolders($system);
-        
+
         print '<p>Disk quota: '.$quota.' MB</p>';
         print 'Disk usage by folder<br><table><tr><th>folder</th><th>MB</th></tr>';
-        
+
         foreach ($dirs as $dir=>$size){
             if($size>0){
                 $size /= 1048576;
@@ -104,7 +104,7 @@ $mysqli = $system->get_mysqli();
         }//for
         print '</table>';
         print 'Total usage: <b>'.$usage.' MB</b><br><hr>';
-?>        
+?>
         <div class="banner">
             <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
@@ -120,58 +120,58 @@ $mysqli = $system->get_mysqli();
             <?php
 
     $files_duplicates = array();
-    $files_duplicates_all_ids = array();//not used 
+    $files_duplicates_all_ids = array();//not used
 
     $files_orphaned = array();
     $files_unused_local = array();
     $files_unused_remote = array();
 
-    
+
     $files_notfound = array();//missed files
     $files_path_to_correct = array();
     $external_count = 0;
     $local_count = 0;
-    
+
     $autoRepair = true;
-    
+
     if($autoRepair){
-        
+
     //search for duplicates
     //local
     $query2 = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles '
-                .'where ulf_FileName is not null GROUP BY ulf_FilePath, ulf_FileName HAVING cnt>1';//ulf_ID<1000 AND 
+                .'where ulf_FileName is not null GROUP BY ulf_FilePath, ulf_FileName HAVING cnt>1';//ulf_ID<1000 AND
     $res2 = $mysqli->query($query2);
-       
+
     if ($res2 && $res2->num_rows > 0) {
 
-            $fix_dupes = 0;    
-            //find id with duplicated path+filename 
+            $fix_dupes = 0;
+            //find id with duplicated path+filename
             while ($res = $res2->fetch_assoc()) {
-                
+
                 $query3 = 'SELECT ulf_ID FROM recUploadedFiles '
-                    .'where ulf_FilePath'.(@$res['ulf_FilePath']!=null 
+                    .'where ulf_FilePath'.(@$res['ulf_FilePath']!=null
                             ?('="'.$mysqli->real_escape_string($res['ulf_FilePath']).'"')
-                            :' IS NULL ') 
+                            :' IS NULL ')
                     .' and ulf_FileName="'.$mysqli->real_escape_string($res['ulf_FileName']).'" ORDER BY ulf_ID DESC';
                 $res3 = $mysqli->query($query3);
                 $dups_ids = array();
-                
+
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
                     //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
-                
+
                 if(count($dups_ids)<2) {continue;}
-                
+
                 if(@$res['ulf_FilePath']==null){
                     $res_fullpath = $res['ulf_FileName'];
                 }else{
                     $res_fullpath = resolveFilePath( $res['ulf_FilePath'].$res['ulf_FileName'] );//see recordFile.php
                 }
                 $files_duplicates[$res_fullpath] = $dups_ids;
-                
+
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
                 $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($max_ulf_id).' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
@@ -182,42 +182,42 @@ $mysqli = $system->get_mysqli();
                 $mysqli->query($del_query);
                 $fix_dupes = $fix_dupes + count($dups_ids);
             }
-            
+
         if($fix_dupes){
             print '<div>Autorepair: '.$fix_dupes.' multiple registrations removed for '.count($files_duplicates).' files. Pointed all details referencing them to the one retained</div>';
         }
-        
+
         $res2->close();
     }
-    
+
     //search for duplicated remotes
     $query2 = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles '
                 .'where ulf_ExternalFileReference is not null GROUP BY ulf_ExternalFileReference HAVING cnt>1';
     $res2 = $mysqli->query($query2);
-    
+
     if ($res2 && $res2->num_rows > 0) {
 
             $fix_dupes = 0;
             $fix_url = 0;
-            //find id with duplicated path+filename 
+            //find id with duplicated path+filename
             while ($roww = $res2->fetch_row()) {
                 $external_url = $roww[0];
                 $query3 = 'SELECT ulf_ID FROM recUploadedFiles where ulf_ExternalFileReference=?';
                 $res3 = mysql__select_param_query($mysqli, $query3, array('s', $external_url));
-                    
+
                 $dups_ids = array();
-                
+
                 while ($res4 = $res3->fetch_row()) {
                     array_push($files_duplicates_all_ids, $res4[0]);
                     $dups_ids[] = intval($res4[0]);
                     //array_push($dups_ids, intval($res4[0]));
                 }
                 $res3->close();
-                
+
                 if(count($dups_ids)<2) {continue;}
-                
+
                 $files_duplicates[$external_url] = $dups_ids;
-                
+
                 //FIX duplicates at once
                 $max_ulf_id = array_shift($dups_ids);
                 $dups_ids = prepareIds($dups_ids);//for stupid snyk
@@ -228,60 +228,60 @@ $mysqli = $system->get_mysqli();
                 $fix_dupes = $fix_dupes + count($dups_ids);
                 $fix_url++;
             }
-            
+
             if($fix_dupes){
                 print '<div>System info: cleared '.$fix_dupes.' duplicated registration for '.$fix_url.' URL</div>';
             }
             $res2->close();
     }
-    
-  
-    
+
+
+
     //search for duplicated files (identical files in different folders)
-    $query2 = 'SELECT ulf_OrigFileName, count(*) as cnt FROM recUploadedFiles ' 
+    $query2 = 'SELECT ulf_OrigFileName, count(*) as cnt FROM recUploadedFiles '
 .' where ulf_OrigFileName is not null and ulf_OrigFileName<>"_remote" and '   //@todo check preferred source
 .'ulf_OrigFileName NOT LIKE "_iiif%" and ulf_OrigFileName NOT LIKE "_tiled%" '
 .'GROUP BY ulf_OrigFileName HAVING cnt>1';//@todo check preferred source
     $res2 = $mysqli->query($query2);
-    
+
     if ($res2 && $res2->num_rows > 0) {
-    
+
 
             $cnt_dupes = 0;
             $cnt_unique = 0;
-            //find id with duplicated path+filename 
+            //find id with duplicated path+filename
             while ($res = $res2->fetch_row()) {
                 $query3 = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName  FROM recUploadedFiles '
                     .' where ulf_OrigFileName=?'
                     .' ORDER BY ulf_ID DESC';
-                
+
                 $res3 = mysql__select_param_query($mysqli, $query3, array('s', $res[0]));
-                
+
                 if(!$res3){
-                    //$this->system->addError(HEURIST_DB_ERROR, 'Unable to query recUploadedFiles for file ' 
+                    //$this->system->addError(HEURIST_DB_ERROR, 'Unable to query recUploadedFiles for file '
                     //                    . $res[0], $mysqli->error);
                     continue;
                 }
 
                 $dups_files = array();//id=>path,size,md,array(dup_ids)
-                
+
                 while ($res4 = $res3->fetch_assoc()) {
-                    
-                    //compare files 
+
+                    //compare files
                     if(@$res4['ulf_FilePath']==null){
                         $res_fullpath = $res4['ulf_FileName'];
                     }else{
                         $res_fullpath = resolveFilePath( $res4['ulf_FilePath'].$res4['ulf_FileName'] );//see recordFile.php
                     }
-                   
-                    
+
+
                     $f_size = filesize($res_fullpath);
                     $f_md5 = md5_file($res_fullpath);
                     $is_unique = true;
                     foreach ($dups_files as $id=>$file_a){
 
                         if ($file_a['size'] == $f_size && $file_a['md5'] == $f_md5){
-                            //files are the same    
+                            //files are the same
                             $is_unique = false;
                             $dups_files[$id]['dupes'][ $res4['ulf_ID'] ] = $res_fullpath;
                             //array_push($file_a['dupes'], array($res4['ulf_ID'] => $res_fullpath));
@@ -296,11 +296,11 @@ $mysqli = $system->get_mysqli();
                     }
                 }//while
                 $res3->close();
-  
+
                 //FIX duplicates at once
                 foreach ($dups_files as $ulf_ID=>$file_a){
                     if(is_array($file_a['dupes']) && count($file_a['dupes'])>0){
-                        
+
                         $dup_ids = implode(',',array_keys($file_a['dupes']));
                         $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='
                                 .$ulf_ID.' WHERE dtl_UploadedFileID in ('.$dup_ids.')';
@@ -311,7 +311,7 @@ $mysqli = $system->get_mysqli();
                         $mysqli->query($del_query);
                         $cnt_dupes = $cnt_dupes + count($file_a['dupes']);
                         $cnt_unique++;
-                        
+
                         /* report
                         foreach($file_a['dupes'] as $id=>$path){
                             print '<div>'.$id.' '.$path.'</div>';
@@ -320,21 +320,21 @@ $mysqli = $system->get_mysqli();
                         */
                     }
                 }//foreach
-                
+
             }//while
-            
+
         if($cnt_unique>0){
             print '<div>Autorepair: '.$cnt_dupes.' registration for identical files are removed in favour of '
                         .$cnt_unique.' unique ones. Pointed all details referencing them to the one retained</div>';
         }
-        
+
         $res2->close();
     }
-       
-    }//autoRepair
-   
 
-    $query1 = 'SELECT ulf_ID, ulf_ExternalFileReference, ulf_FilePath, ulf_FileName from recUploadedFiles';// where ulf_ID=5188 
+    }//autoRepair
+
+
+    $query1 = 'SELECT ulf_ID, ulf_ExternalFileReference, ulf_FilePath, ulf_FileName from recUploadedFiles';// where ulf_ID=5188
     $res1 = $mysqli->query($query1);
     if (!$res1 || $res1->num_rows == 0) {
         die ("<p><b>This database does not have uploaded files</b></p>");
@@ -342,40 +342,40 @@ $mysqli = $system->get_mysqli();
     else {
         print "<p><br>Number of files processed: ".$res1->num_rows."<br></p>";
     }
-    
+
     //
     //
     //
     while ( $res = $res1->fetch_assoc() ) {
 
             //if(in_array($res['ulf_ID'], $files_duplicates_all_ids)) {continue;}
-        
+
             //verify path
             $res['db_fullpath'] = null;
-        
+
             if(@$res['ulf_FilePath'] || @$res['ulf_FileName']){
 
                 $res['db_fullpath'] = $res['ulf_FilePath'].@$res['ulf_FileName'];
                 $res['res_fullpath'] = resolveFilePath(@$res['db_fullpath']);
             }
-            
-            //missed link from recDetails - orphaned files - file is not used in heurist records      
+
+            //missed link from recDetails - orphaned files - file is not used in heurist records
             $query2 = "SELECT dtl_RecID from recDetails where dtl_UploadedFileID=".intval($res['ulf_ID']);
             $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
                 if($res2->num_rows == 0) {
-                    
+
                     if(@$res['ulf_ExternalFileReference']!=null){
                         $files_unused_remote[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'],
                                             'ulf_ExternalFileReference'=>@$res['ulf_ExternalFileReference']);
                     }else{
-                        $files_unused_local[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+                        $files_unused_local[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'],
                                             'res_fullpath'=>@$res['res_fullpath'],
                                             'isfound'=>file_exists($res['res_fullpath'])?1:0);
                     }
-                    
-                    $files_orphaned[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+
+                    $files_orphaned[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'],
                                             'res_fullpath'=>@$res['res_fullpath'],
                                             'isfound'=>file_exists(@$res['res_fullpath'])?1:0,
                                             'ulf_ExternalFileReference'=>@$res['ulf_ExternalFileReference']);
@@ -385,22 +385,22 @@ $mysqli = $system->get_mysqli();
                 }
                 $res2->close();
             }
-            
+
             if( $res['db_fullpath']!=null && @$res['res_fullpath'] ){
-            
+
                 $is_local = (strpos($res['db_fullpath'],'http://')===false && strpos($res['db_fullpath'],'https://')===false);
-      
+
                 if($currentRecID==null){
-                    
+
                 }else
                 if ( $is_local && !file_exists($res['res_fullpath']) ){
                     //file not found
                     $files_notfound[$res['ulf_ID']] = array(
-                                    'ulf_ID'=>$res['ulf_ID'], 
+                                    'ulf_ID'=>$res['ulf_ID'],
                                     'db_fullpath'=>$res['db_fullpath'], //failed path
                                     'rec_ID'=>$currentRecID,
                                     'is_remote'=>!@$res['ulf_ExternalFileReference'] );
-                    
+
                 }else if($is_local) {
 
                     chdir(HEURIST_FILESTORE_DIR);// relatively db root
@@ -420,8 +420,8 @@ $mysqli = $system->get_mysqli();
                         if(strpos($fpath, '/misc/heur-filestore/')===0){
                             $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
                         }
-                        
-                        
+
+
                         //check that the relative path is correct
                         $path_parts = pathinfo($fpath);
                         if(!@$path_parts['dirname']){
@@ -436,15 +436,15 @@ $mysqli = $system->get_mysqli();
                     }else{
                         $dirname = 'xxx';
                     }
-                    
+
                     if(strpos($dirname, HEURIST_FILESTORE_DIR)===0){
-                        
-                    
+
+
                         $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);//db root folder
-                    
+
                         if($relative_path!=@$res['ulf_FilePath']){
-                            
-                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+
+                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'],
                                         'db_fullpath'=>$res['db_fullpath'],
                                         'res_fullpath'=>$fpath,
                                         'ulf_FilePath'=>@$res['ulf_FilePath'],
@@ -452,64 +452,64 @@ $mysqli = $system->get_mysqli();
                                         'filename'=>$filename
                                         );
                         }
-                    }                    
+                    }
                 }else{
-                            
-                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
+
+                            $files_path_to_correct[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'],
                                         'clear_remote'=>$res['db_fullpath']
                                         );
-                            
-                } 
+
+                }
             }
-            
+
     }//while
-    
+
     //AUTO FIX PATH at once
     foreach ($files_path_to_correct as $row){
-      
+
         $ulf_ID = $row['ulf_ID'];
         if(@$row['clear_remote']){ //remove url from ulf_FilePath
                 $query = 'update recUploadedFiles set ulf_ExternalFileReference=?'
                                 .', ulf_FilePath=NULL, ulf_FileName=NULL where ulf_ID = '.intval($ulf_ID);
 
                 mysql__exec_param_query($mysqli, $query, array('s', $row['clear_remote']));
-        
+
         }else{
                 $query = 'update recUploadedFiles set ulf_FilePath=?, ulf_FileName=? where ulf_ID = '.intval($ulf_ID);
 
                 mysql__exec_param_query($mysqli, $query, array('ss', $row['res_relative'], $row['filename']));
-        
+
         }
     }
     if(is_array($files_path_to_correct) && count($files_path_to_correct)>0){
             print '<div>Autorepair: corrected '.count($files_path_to_correct).' paths</div>';
             $files_path_to_correct = array();
     }
-    
-      
-            
+
+
+
     //check for non-registered files in mediafolders
     // $reg_info - global array to be filled in doHarvest
     $reg_info = array('reg'=>array(), 'nonreg'=>array());
     $dirs_and_exts = getMediaFolders( $mysqli );
     doHarvest($system, $dirs_and_exts, false, 1);
-    
+
     $files_notreg = $reg_info['nonreg'];
-    
+
     //count($files_duplicates)+
     $is_found = (count($files_unused_remote)+count($files_unused_local)+count($files_notfound)+count($files_notreg)>0);
-      
+
             if ($is_found) {
                 ?>
                 <script>
-                    
+
                     //NOT USED
                     function repairBrokenPaths(){
-                        
+
                         function _callbackRepair(context){
-                            
+
                             $('#in_porgress').hide();
-                            
+
                             if(window.hWin.HEURIST4.util.isnull(context) || window.hWin.HEURIST4.util.isnull(context['result'])){
                                 window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
@@ -523,31 +523,31 @@ $mysqli = $system->get_mysqli();
 
                         var dt2 = {"orphaned":[
                             <?php
-                            
+
                             $pref = '';
                             foreach ($files_orphaned as $row) { //to remove
                                 print $pref.'['.intval($row['ulf_ID']).','.intval($row['isfound']).']';
                                 $pref = ',';
                             }
-                            
+
                             print '],"notfound":[';
                             $pref = '';
                             //to remove from recDetails and recUplodedFiles
-                            foreach ($files_notfound as $row) { 
+                            foreach ($files_notfound as $row) {
                                 print $pref.intval($row['ulf_ID']);
                                 $pref = ',';
                             }
                             print '],"fixpath":[';
                             $pref = '';
-                            
+
                             foreach ($files_path_to_correct as $row) {
                                 print $pref.intval($row['ulf_ID']);
                                 $pref = ',';
                             }
                         ?>]};
-                        
+
                         var dt = {orphaned:[],fixpath:[],notfound:[]};
-                        if(document.getElementById('do_orphaned') 
+                        if(document.getElementById('do_orphaned')
                                 && document.getElementById('do_orphaned').checked){
                             dt['orphaned'] = dt2['orphaned'];
                         }
@@ -560,45 +560,45 @@ $mysqli = $system->get_mysqli();
                             if(document.getElementById('fnf'+dt2['notfound'][i]).checked)
                                     dt.notfound.push(dt2['notfound'][i]);
                         }
-                        
+
                         var str = JSON.stringify(dt);
 
                         var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callbackRepair;
                         var params = 'db='+window.hWin.HAPI4.database+'&data=' + encodeURIComponent(str);
-                        
+
                         $('#in_porgress').show();
                         window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
-                        
+
                         document.getElementById('page-inner').style.display = 'none';
                     }
-                    
+
                     //
                     // NOT USED
                     //
-/*                    
+/*
                     function removeUnlinkedFiles(){
-                        
+
                         function _callback(context){
                             document.getElementById('page-inner').style.display = 'block';
-                            
+
                             if(window.hWin.HEURIST4.util.isnull(context) || context['status']!='ok'){
                                 window.hWin.HEURIST4.msg.showMsgErr(context || context['message']);
                             }else{
-                                
+
                                 var ft = $('input.file_to_clear:checked');
                                 var i, j, cnt=0, fdeleted = context['data'];
-                                
+
                                 if($('input.file_to_clear').length==fdeleted.length){
                                     cnt = fdeleted.length;
                                     //all removed
                                     $('#nonreg').remove();
                                 }else{
-                                
+
                                     for (i=0; i<fdeleted.length; i++){
                                         for (j=0; j<ft.length; j++){
                                             if($(ft[j]).parent().text()==fdeleted[i]){
-                                                //remove div 
+                                                //remove div
                                                 $(ft[j]).parents('.msgline').remove();
                                                 cnt++;
                                                 break;
@@ -610,56 +610,56 @@ $mysqli = $system->get_mysqli();
                             }
                         }
 
-                        
+
                         var res = [];
                         $.each($('input.file_to_clear:checked'), function(idx, item){
                             var filename = $(item).parent().text();
                             res.push(filename);
                         });
-                        
+
                         if(res.length==0){
                             alert('Mark at least one file');
                             return;
                         }
-                        
+
                         var dt = {"unlinked":res};
                         var str = JSON.stringify(dt);
-                       
+
 
                         var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
                         var params = "db="+window.hWin.HAPI4.database+"&data=" + encodeURIComponent(str);
                         window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
-                        
+
                         document.getElementById('page-inner').style.display = 'none';
 
                     }
-*/                    
+*/
                     //
                     //
                     //
                     function doRepairAction(action_name){
-                        
+
                         function _callback(context){
                             document.getElementById('page-inner').style.display = 'block';//restore visibility
-                            
+
                             if(window.hWin.HEURIST4.util.isnull(context) || context['status']!='ok'){
                                 window.hWin.HEURIST4.msg.showMsgErr(context || context['message']);
                             }else{
-                                
+
                                 var ft = $('input.'+action_name+':checked');
                                 var i, j, cnt=0, fdeleted = context['data'];
-                                
+
                                 if($('input.'+action_name).length==fdeleted.length){
                                     cnt = fdeleted.length;
                                     //all removed - remove entire div
                                     $('#'+action_name).remove();
                                 }else{
-                                
+
                                     for (i=0; i<fdeleted.length; i++){
                                         for (j=0; j<ft.length; j++){
                                             if($(ft[j]).attr('data-id')==fdeleted[i]){
-                                                //remove div 
+                                                //remove div
                                                 $(ft[j]).parents('.msgline').remove();
                                                 cnt++;
                                                 break;
@@ -671,13 +671,13 @@ $mysqli = $system->get_mysqli();
                             }
                         }
 
-                        
+
                         var res = [];
                         $.each($('input.'+action_name+':checked'), function(idx, item){
                             var ulf_id = $(item).attr('data-id');//parent().text();
                             res.push(ulf_id);
                         });
-                        
+
                         if(res.length==0){
                             alert('Mark at least one file');
                             return;
@@ -686,27 +686,27 @@ $mysqli = $system->get_mysqli();
                             'Please repeat the operation for this number of files as many times as needed.');
                             return;
                         }
-                        
+
                         var dt = {}; dt[action_name] = res;
                         var str = JSON.stringify(dt);
-                       
+
 
                         var baseurl = window.hWin.HAPI4.baseURL + "admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-                        
+
                         //var params = "db="+window.hWin.HAPI4.database+"&data=" + encodeURIComponent(str);
                         //window.hWin.HEURIST4.ajax.getJsonData(baseurl, callback, params);
 
                         var request = {db:window.hWin.HAPI4.database, data:str};
                         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
-                        
+
                         document.getElementById('page-inner').style.display = 'none';//hide all
-                        
+
                     }//doRepairAction
                 <?php
                     $smsg='';
-                    
+
                 if($is_found){
 
                     $smsg = 'Go to: ';
@@ -730,26 +730,26 @@ $mysqli = $system->get_mysqli();
                     $smsg = $smsg.'<a href="#files_notreg" style="white-space: nowrap;padding-right:20px">Non-registered files</a>';
                 }
                 }
-                
+
                 print "document.getElementById('linkbar').innerHTML='".$smsg."'";
                 ?>
-                    
+
                 </script>
-                
+
                 <?php
                 if(is_array($files_unused_local) && count($files_unused_local)>0){
                 ?>
                 <div id="unused_file_local" style="padding-top:20px">
-                    <a name="unused_local"></a>    
+                    <a name="unused_local"></a>
                     <h3>Unused local files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_local);?> entries</div>
-                    <div>These files are not referenced by a File field in any record in the database. 
-                    <!-- Select all or some entries and click the button 
+                    <div>These files are not referenced by a File field in any record in the database.
+                    <!-- Select all or some entries and click the button
                     <button onclick="doRepairAction('unused_file_local')">Remove selected unused local files</button>
                     to remove registrations from the database. Files remain untouched
                     -->
-                    <br>Unfortunately these files cannot be removed because they may have 
-                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>Unfortunately these files cannot be removed because they may have
+                    <br>been referenced within text fields, which we do not check at present.
                     <br>If you need this function, please let us know.
                     </div>
                     <br>
@@ -763,15 +763,15 @@ $mysqli = $system->get_mysqli();
                             .'<b>'.intval($row['ulf_ID']).'</b> '.htmlspecialchars($row['res_fullpath']).( $row['isfound']?'':' ( file not found )' ).'</label></div>';
                                     //@$row['ulf_ExternalFileReference'];
                 }//for
-                
+
                 /*  24/12/23 - removed by Ian b/c too dangerous, see explanation below
                 if(is_array($files_unused_local) && count($files_unused_local)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_local\')">Remove selected unused local files</button></div>';
                 }
                 */
                 print '
-                    <br>Unfortunately these files cannot be removed because they may have 
-                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>Unfortunately these files cannot be removed because they may have
+                    <br>been referenced within text fields, which we do not check at present.
                     <br>If you need this function, please let us know.
                     <br><br><hr></div>';
                 }
@@ -779,20 +779,20 @@ $mysqli = $system->get_mysqli();
                 if(is_array($files_unused_remote) && count($files_unused_remote)>0){
                 ?>
                 <div id="unused_file_remote" style="padding-top:20px">
-                    <a name="unused_remote"></a>    
+                    <a name="unused_remote"></a>
                     <h3>Unused remote files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_remote);?> entries</div>
-                    <div>These URLs are not referenced by any record in the database. 
-                    Select all or some entries and click the button 
+                    <div>These URLs are not referenced by any record in the database.
+                    Select all or some entries and click the button
                     <!--
                     <button onclick="doRepairAction('unused_file_remote')">Remove selected unused URLs</button>
                     to remove registrations from the database.
                     -->
-                    <br>Unfortunately these references cannot be removed because they may have 
-                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>Unfortunately these references cannot be removed because they may have
+                    <br>been referenced within text fields, which we do not check at present.
                     <br>If you need this function, please let us know.
                 </div>
-                    
+
                     <br>
                     <label><input type=checkbox
                         onchange="{$('.unused_file_remote').prop('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all</label>
@@ -803,32 +803,32 @@ $mysqli = $system->get_mysqli();
                     print '<div class="msgline"><label><input type=checkbox class="unused_file_remote" data-id="'.intval($row['ulf_ID']).'">&nbsp;'
                             .'<b>'.intval($row['ulf_ID']).'</b> '.filter_var($row['ulf_ExternalFileReference'],FILTER_SANITIZE_URL).'</label></div>';
                 }//for
-                
+
                 /*
                 if(is_array($files_unused_remote) && count($files_unused_remote)>10){
                     print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unused URLs</button></div>';
                 }
                 */
-                
+
                 print '
-                    <br>Unfortunately these references cannot be removed because they may have 
-                    <br>been referenced within text fields, which we do not check at present. 
+                    <br>Unfortunately these references cannot be removed because they may have
+                    <br>been referenced within text fields, which we do not check at present.
                     <br>If you need this function, please let us know.
                     <br><br><hr></div>';
                 }//if
-                
+
                 //------------------------------------------
                 if(is_array($files_notfound) && count($files_notfound)>0){
                 ?>
                 <div id="files_notfound" style="padding-top:20px">
-                    <a name="files_notfound"></a>    
+                    <a name="files_notfound"></a>
                     <h3>Missing registered files </h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_notfound);?> entries</div>
                     <div>Path specified in database is wrong and file cannot be found.
-                    Select all or some entries and click the button 
+                    Select all or some entries and click the button
                     <button onclick="doRepairAction('files_notfound')">Remove entries for missing files</button>
                     to remove registrations from the database.</div>
-                    
+
                     <br>
                     <label><input type=checkbox
                         onchange="{$('.files_notfound').prop('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all</label>
@@ -843,21 +843,21 @@ $mysqli = $system->get_mysqli();
                     print '<div><br><button onclick="doRepairAction(\'files_notfound\')">Remove entries for missing files</button></div>';
                 }
                 print '<br><br><hr></div>';
-                }//if                
-                
+                }//if
+
                 //------------------------------------------
                 if(is_array($files_notreg) && count($files_notreg)>0){
                 ?>
                 <div id="files_notreg" style="padding-top:20px">
-                    <a name="files_notreg"></a>    
+                    <a name="files_notreg"></a>
                     <h3>Non-registered files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_notreg);?> entries</div>
                     <div>
                     Use Import > Index media to add these to the database as multimedia records. Or
-                    select all or some entries and click the button 
+                    select all or some entries and click the button
                     <button onclick="doRepairAction('files_notreg')">Remove non-registered files</button>
                     to delete files from system.</div>
-                    
+
                     <br>
                     <label><input type=checkbox
                         onchange="{$('.files_notreg').prop('checked', $(event.target).is(':checked'));}">&nbsp;Select/unselect all</label>
@@ -872,22 +872,22 @@ $mysqli = $system->get_mysqli();
                     print '<div><br><button onclick="doRepairAction(\'files_notreg\')">Remove non-registered files</button></div>';
                 }
                 print '<br><br><hr></div>';
-                }//if                
-                
+                }//if
+
                 //------------------------------------------
             }else{
                 print "<br><br><p><h3>All uploaded file entries are valid</h3></p>";
             }
-            ?>            
-    
-            
+            ?>
+
+
         </div>
 <script>
 /*
     var parent = $(window.parent.document);
     parent.find('#verification_output').css({width:'100%',height:'100%'}).show();
     parent.find('#in_porgress').hide();
-*/    
-</script>        
+*/
+</script>
     </body>
 </html>

@@ -18,7 +18,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 define('MANAGER_REQUIRED', 1);
 
 require_once 'initPageMin.php';
@@ -27,7 +27,7 @@ require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 // POST request
 if(isset($_POST['data'])) {
     $params = filter_input_array(INPUT_POST);
-    
+
     $data = json_decode($params['data']);
     $response = "";
 
@@ -89,7 +89,7 @@ if(isset($_POST['data'])) {
         }
 
     </style>
-  
+
 </head>
 
 <body class="ui-heurist-bg-light" onload="setup()">
@@ -189,8 +189,8 @@ if(isset($_POST['data'])) {
             // Determine options
             var options = [];
             // Go through each field for the first record type
-            definitions.each2(function(dty_ID, detail){ 
-                    
+            definitions.each2(function(dty_ID, detail){
+
                 var field_type = $Db.dty(dty_ID, 'dty_Type');
                 // Appropriate type check
                 if(types.indexOf(field_type) >= 0) { // Check if this field is allowed
@@ -239,7 +239,7 @@ if(isset($_POST['data'])) {
             $("#selected-records").html("# of records selected: " + ids.length);
 
             // Determine record type of first record
-            //this.record = records.getFirstRecord();// Reference to first record; 
+            //this.record = records.getFirstRecord();// Reference to first record;
             var rectype = recordset.fld(first_record, 'rec_RecTypeID');// Record type of first record
             definitions = $Db.rst(rectype);
 
@@ -321,8 +321,8 @@ if(isset($_POST['data'])) {
             }
             return res.join(',');
         }
-        
-        
+
+
         // Replaces the raw message text with fields in a record
         function prepareMessage(message, record, fields) {
             // Replace hashtags by actual content
@@ -353,7 +353,7 @@ if(isset($_POST['data'])) {
             if(details!='' && !this.record){ // && !this.record.d
                 //load details if required
                  var request = request = {q: 'ids:'+ids.join(','), w: 'all', detail:details };
-                 
+
                  window.hWin.HAPI4.RecordSearch.doSearchWithCallback( request, function( new_recordset )
                  {
                     if(new_recordset!=null){

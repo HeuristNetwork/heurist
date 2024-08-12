@@ -19,35 +19,35 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     /*
     * Simplify and converts from UTM to WGS
-    * 
+    *
     * $utm_zone = number of zone + hemisphere  40N or 20S
     */
     function geo_SimplifyAndConvert_JSON($json, $need_simplify, &$gPoint=null){
-        
+
         if($json['type']=='GeometryCollection'){
-            
+
             for($idx=0; $idx<count($json['geometries']); $idx++){
                 $json['geometries'][$idx] = geo_SimplifyAndConvert_JSON($json['geometries'][$idx], $need_simplify, $gPoint);
             }
-            
+
             return $json;
-            
-            
+
+
         }else if(count($json['coordinates'])>0){
 
             if($gPoint && ($json['type']=='Point')){
-                
+
                 $pnt = array($json['coordinates']);
                 geo_SimplifyAndConvert($pnt, false, $gPoint);
                 $json['coordinates'] = $pnt[0];
-                
+
             }else if($gPoint && ($json['type']=='MultiPoint')){
-                
+
                 geo_SimplifyAndConvert($json['coordinates'], false, $gPoint);
-                
+
             }else if($json['type']=='LineString'){
 
                 geo_SimplifyAndConvert($json['coordinates'], $need_simplify, $gPoint);
@@ -68,16 +68,16 @@
         }else{
             return array();
         }
-        
+
     }
-    
+
     //
     // simplify and/or convert
     //
     function geo_SimplifyAndConvert(&$orig_points, $need_simplify, &$gPoint=null){
-        
+
         if($need_simplify && count($orig_points)>1000){
-            
+
             //invert
             $points = array();
             foreach ($orig_points as $point) {
@@ -89,7 +89,7 @@
                     array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
                 }
             }
-            
+
             $tolerance = 0.01;// 0.002;
             $crn = 0; //count of run
             $points2 = $points;
@@ -105,9 +105,9 @@
                     array_push($orig_points, array($point['x'], $point['y']) );
                 }
             }
-            
+
         }else if($gPoint!=null){
-            
+
             foreach ($orig_points as $idx=>$point) {
                 $gPoint->setUTM($point[0], $point[1]);
                 $gPoint->convertTMtoLL();
@@ -115,34 +115,34 @@
             }
         }
     }
-    
-    
+
+
     /*
     * Correct wrong longitude values: abs(lng)>180
     */
     function geo_CorrectLng_JSON($json){
-        
+
         if($json['type']=='GeometryCollection'){
-            
+
             for($idx=0; $idx<count($json['geometries']); $idx++){
                 $json['geometries'][$idx] = geo_CorrectLng_JSON($json['geometries'][$idx]);
             }
-            
+
             return $json;
-            
-            
+
+
         }else if(count($json['coordinates'])>0){
 
             if($json['type']=='Point'){
-                
+
                 $pnt = array($json['coordinates']);
                 geo_CorrectLng($pnt);
                 $json['coordinates'] = $pnt[0];
-                
+
             }else if($json['type']=='MultiPoint'){
-                
+
                 geo_CorrectLng($json['coordinates']);
-                
+
             }else if($json['type']=='LineString'){
 
                 geo_CorrectLng($json['coordinates']);
@@ -163,9 +163,9 @@
         }else{
             return array();
         }
-        
+
     }
-    
+
     function geo_CorrectLng(&$orig_points){
 
         //invert
@@ -174,16 +174,16 @@
 
             $lng = $point[0];
             $lng2 = $point[0];
-            
+
             $k = intdiv($lng, 360);
-            
+
             $lng = ($lng - $k*360);
-            
+
             if(abs($lng)>180){
                 if($k==0) {$k = ($lng<0)?-1:1;}
                 $lng = $lng - $k*360;
             }
-            
+
             //-181 => 179
             //182 => -178
             //  -478.4214470 => -118.4215610,
@@ -193,6 +193,6 @@
 
             $orig_points[$idx] = array($lng, $point['1']);
         }
-    }    
-    
+    }
+
 ?>

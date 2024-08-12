@@ -1,15 +1,15 @@
 <?php
-  
+
     $rep_counter = null;
     $rep_issues = null;
     $reg_info = array('reg'=>array(),'nonreg'=>array());
-  
+
 
 //
 // return folders and extents to index
 //
 function getMediaFolders($mysqli) {
-    
+
     // Find out which folders to parse for XML manifests - specified for FieldHelper indexing in Advanced Properties
     $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
     $row1 = mysql__select_row($mysqli, $query1);
@@ -20,7 +20,7 @@ function getMediaFolders($mysqli) {
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
     $mediaFolders = $row1[0];
-    
+
     if($mediaFolders==null || $mediaFolders == ''){
         $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
         folderCreate( $mediaFolders, true );
@@ -30,21 +30,21 @@ function getMediaFolders($mysqli) {
     //sanitize folder names
     $dirs = array_map(array('USanitize', 'sanitizePath'), $dirs);
     //$mediaFolders = implode(';', $dirs);
-    
+
     // The defined list of file extensions for FieldHelper indexing.
     if($row1[1]==null){
         $mediaExts = HEURIST_ALLOWED_EXT;
     }else{
         $mediaExts = $row1[1];// user gets to define from scratch so they can restrict what's indexed
     }
-    
+
     $mediaExts = explode(',', $mediaExts);
 
     if (count($dirs) == 0) {
         $dirs = array(HEURIST_FILESTORE_DIR);// default to the data folder for this database
         //print "<p><b>It seems that there are no media folders specified for this database</b>";
     }
-                
+
     return array('dirs'=>$dirs, 'exts'=>$mediaExts);
 
 }
@@ -56,14 +56,14 @@ function getMediaFolders($mysqli) {
 function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
     global $rep_counter, $rep_issues;
-    
+
     $system_folders = $system->getSystemFolders();
-    
+
     if(@$dirs_and_exts['error']){
         print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
         return;
     }
-    
+
     $dirs = $dirs_and_exts['dirs'];
     $mediaExts = $dirs_and_exts['exts'];
 
@@ -127,7 +127,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                 }
 
                 if(count($subdirs)>0){
- 
+
                     doHarvest($system, array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
                     if($is_report) {flush();}
                 }
@@ -138,13 +138,13 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
             }
         }
     }
-} //doHarvest 
+} //doHarvest
 
 //
 // @todo - move code here from syncWithFieldHelper
 /*
 function doHarvestInDir($dir) {
-    
+
 }
 */
 
@@ -155,18 +155,18 @@ function getRegInfoResult(){
 
 //
 // return arrays registered and non-registered files
-// $imode 
+// $imode
 // 0 - all
 // 1 - reg and unreg separately
 //
 function getFilesInDir($system, $dir, $mediaExts, $imode) {
-    
+
     global $reg_info;
-    
+
     $all_files = scandir($dir);
     $registered = array();
     $non_registered = array();
-    
+
     foreach ($all_files as $filename){
         if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
@@ -179,7 +179,7 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
             if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
             {
                 if($imode==1){
-                
+
                     $file_id = fileGetByFileName( $system, $filename);//see recordFile.php
 
                     if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
@@ -197,13 +197,13 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
                     }else{
                         array_push($reg_info['nonreg'], $filename);
                     }
-                
+
                 }else{
                     array_push($reg_info, $filename);
                 }
             }
-            
-            
+
+
         }
     }  //for all_files
 }

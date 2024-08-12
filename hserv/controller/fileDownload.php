@@ -3,29 +3,29 @@
 /**
 * fileDownload.php : Download (or proxy) files that are registered in Heurist database (recUploadedFiles)
 * Usually it is callled via redirection from index.php (if there is parameter file, thumb or url)
-* 
+*
 * for entity images (rt icons, user, group images) see fileGet.php
 *
 * db
 * thumb - obfuscated file id - returns existing thumbnail or resized image
 * file - obfuscated file id - uses fileGetFullInfo to get path to file or URL
-* 
-* mode  
+*
+* mode
 *   page - return
-*   tag - returns html wrap iframe with embed player, video, audio or img tag 
+*   tag - returns html wrap iframe with embed player, video, audio or img tag
 *   size - returns width and height (for images only!)
 *   url - rerurns url for uploaded_tilestacks
 * size - width and height for html tag
 * embedplayer - for player
-* 
+*
 * Notes about thumbnails
-*    for uploaded file - thumbnail is created in 
-*           hserv/utilities/UploadHandler.php create_scaled_image() 
+*    for uploaded file - thumbnail is created in
+*           hserv/utilities/UploadHandler.php create_scaled_image()
 *           on time of uploading and after registration it is copied to our filethumbs folder
 *    for remote file - thumbnail is created on first request fileDownload.php?thumb=  recordFile.php fileCreateThumbnail
 *    if record has an rec_URL, the thumbnail is created with UImage::makeURLScreenshot
-* 
-* 
+*
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -55,21 +55,21 @@ $db = @$req_params['db'];
 $error = System::dbname_check($db);
 
 if(!$error){
-    
+
     $system = new System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
-    if($fileid!=null){ 
-        
+    if($fileid!=null){
+
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id
-            
+
             $force_recreate = (@$req_params['refresh']==1);
 
             if($system->initPathConstants($db)){
 
                 $thumbfile = HEURIST_THUMB_DIR.basename('ulf_'.$fileid.'.png');
-                
+
                 if(!$force_recreate && file_exists($thumbfile)){
-                    
+
                     if(defined('HEURIST_THUMB_URL')){
                         //rawurlencode - required for security reports only
                         $turl = HEURIST_THUMB_URL.basename('ulf_'.rawurlencode($fileid).'.png');
@@ -77,7 +77,7 @@ if(!$error){
                     }else{
                         downloadFile('image/png', $thumbfile);
                     }
-                    
+
                 }else{
                     //recreate thumbnail and output it
                     $system->init($db);
@@ -91,7 +91,7 @@ if(!$error){
 
         $fileid = @$req_params['file']? $req_params['file'] :intval(@$req_params['ulf_ID']);
         $size = @$req_params['size'];
-        
+
         if(is_numeric($fileid)){
             //Obfuscated id is allowed only
             exit;
@@ -101,11 +101,11 @@ if(!$error){
             //Obfuscated id is allowed only
             exit;
         }
-        
+
         if(!$system->init($db, true, false)){
             exit;
         }
-        
+
         $system->initPathConstants($db);
 
         //find
@@ -124,22 +124,22 @@ if(!$error){
             if($fileParams!=null && !empty($fileParams)){
                 $fileParams = json_decode($fileParams, true);
             }
-                
-            
+
+
             $params = null;
-            
+
             if( @$req_params['mode']=='page')     //return full page with embed player
             {
                 $mode_3d_viewer = detect3D_byExt($fileExt);
-                
+
                 if($mode_3d_viewer!=''){
-                    
+
                     $url = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$db.'&file='.$fileid;
                     header('Location: '.$url);
-                    
+
                 }else{
                     $url = HEURIST_BASE_URL.'?mode=tag&db='.basename($db).'&file='.$fileid.'&size='.$size;
-                
+
                     ?>
                     <!DOCTYPE>
                     <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -148,15 +148,15 @@ if(!$error){
                             <base href="<?php echo HEURIST_BASE_URL;?>">
                         </head>
                         <body>
-                           <?php 
+                           <?php
                              print file_get_contents($url);//execute this script to get html tag for player
                            ?>
                         </body>
                     </html>
                     <?php
                 }
-                    
-            }else    
+
+            }else
             if( @$req_params['mode']=='tag'){
 
                 //request may have special parameters for audio/video players
@@ -165,7 +165,7 @@ if(!$error){
                 }else{
                     $params = null;
                 }
-                
+
                 print fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url);
             }
             else  //just download file from heurist server or redirect to original remote url
@@ -173,18 +173,18 @@ if(!$error){
 
                 $filepath = resolveFilePath( $filepath );
                 $filepath = isPathInHeuristUploadFolder($filepath);//snyk SSRF
-                
+
                 if( @$req_params['mode']=='metaonly'){ //get width and height for image file
 
                     fileGetMetadata($fileinfo);
 
                 }else if(@$req_params['metadata']){//download zip file: registered file and file with links to html and xml
-                
+
                     downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
-                
+
                 }else
                 if(file_exists($filepath) && !is_dir($filepath)){
-                    
+
                     //fix issue if original name does not have ext
                     if(@$req_params['embedplayer']!=1){
                         $finfo = pathinfo($originalFileName);
@@ -195,11 +195,11 @@ if(!$error){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];
                             }else if($fileExt){
                                 if($fileExt=='jpe'){ $fileExt = 'jpg';}
-                                $originalFileName = $originalFileName.'.'.$fileExt;   
+                                $originalFileName = $originalFileName.'.'.$fileExt;
                             }
-                        }    
+                        }
                     }
-                    
+
                     $is_download = (@$req_params['download']==1);
 
                     if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
@@ -212,21 +212,21 @@ if(!$error){
 
                             $cache_url = getWebImageCache($system, $fileinfo);
                             if($cache_url){
-                                $direct_url = $cache_url;    
+                                $direct_url = $cache_url;
                             }
                         }
-                        
+
                         header('Location: '.$direct_url);
-                        
-                    }else if(!$is_download 
+
+                    }else if(!$is_download
                         && ($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'))
                     {
-                        
+
                         //for 3D viewer - direct url to file
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
-                        
+
                         header('Location: '.$direct_url);
-                        
+
                     }else {
                         //see recordFile.php
                         downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
@@ -234,11 +234,11 @@ if(!$error){
                 }
                 else if($external_url){
                     if(@$req_params['mode']=='url'){
-           
-                        //if it does not start with http - this is relative path             
+
+                        //if it does not start with http - this is relative path
                         if(strpos($originalFileName,'_tiled')===0 ||
                           !(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
-                            
+
                             $path = USanitize::sanitizePath( $external_url );
                             //check presence of mbtiles file within folder
                             $path = HEURIST_TILESTACKS_DIR.$path;
@@ -249,47 +249,47 @@ if(!$error){
                                     $filename = pathinfo($filename);
                                     $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
                                 }else{
-                                    $external_url = HEURIST_TILESTACKS_URL.$external_url;  //$path;    
+                                    $external_url = HEURIST_TILESTACKS_URL.$external_url;  //$path;
                                 }
                             }else if (file_exists($path)) {
                                 $filename = pathinfo($path);
                                 $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$filename['filename'];
                             }
-                        }                        
-                        
+                        }
+
                         header('Content-type: application/json;charset=UTF-8');
                         $response = array('status'=>HEURIST_OK, 'data'=>$external_url);
                         print json_encode($response);
-                        
+
                     }else
                     if(strpos($originalFileName,'_tiled')===0){
-                        
+
                         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
-                        
+
                         if(file_exists($thumbfile)){
                             downloadFile('image/png', $thumbfile);
                         }else{
                             fileCreateThumbnail( $system, $fileid, true );
                         }
-                        
-                        
+
+
                     }else{
-                        //modify $external_url or perform authorization to external repository here 
+                        //modify $external_url or perform authorization to external repository here
                         // @todo
                         //if(is_array($fileParams) && @$fileParams['repository']){
                         //    $service_id = $fileParams['repository'];
                         //    $credentials = user_getRepositoryCredentials2($system, $service_id);
                         //    if($credentials!=null){
-                        //           @$credentials[$service_id]['params']['writeApiKey']    
+                        //           @$credentials[$service_id]['params']['writeApiKey']
                         //           @$credentials[$service_id]['params']['readApiKey']
                         //    }
                         //}
-                        
-                        
-                        header('Location: '.$external_url);//redirect to URL (external)    
+
+
+                        header('Location: '.$external_url);//redirect to URL (external)
                     }
-                    
-                    
+
+
                 }else{
                     //File not found
                     $placeholder = '../../hclient/assets/200x200-missed2.png';
@@ -301,7 +301,7 @@ if(!$error){
             $placeholder = '../../hclient/assets/200x200-missed.png';
             header('Location: '.$placeholder);
         }
-        
+
         $system->dbclose();
 
     }

@@ -24,7 +24,7 @@
     require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
     $response = array();
-    
+
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
 
@@ -36,11 +36,11 @@
         $mysqli = $system->get_mysqli();
 
         if ( $system->get_user_id()<1 && !(@$_REQUEST['a']=='s' && @$_REQUEST['Captcha']) ) {
-            
+
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
         }else{
-            
+
             $action = @$_REQUEST['a'];// || @$_REQUEST['action'];
 
             // call function from db_record library
@@ -72,7 +72,7 @@
                 if(array_key_exists('records', $_REQUEST)){
 
                     foreach ($_REQUEST['records'] as $key => $record) {
-                        
+
                         $response = recordSave($system, $record);
 
                         if(!$response || $response['status'] != HEURIST_OK){
@@ -102,10 +102,10 @@
             } else if ($action=="increment"){
 
                 $response = recordGetIncrementedValue($system, $_REQUEST);
-                
+
             } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
-                
+
                 $mysqli = $system->get_mysqli();
                 $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
                 if($keep_autocommit===true) {$mysqli->autocommit(FALSE);}
@@ -126,13 +126,13 @@
                 $response = $system->addError(HEURIST_INVALID_REQUEST);
             }
         }
-        
+
         $system->dbclose();
     }
-    
+
 if($response==false){
     $response = $system->getError();
-}    
+}
 
 // Return the response object as JSON
 //header('Content-type: application/json;charset=UTF-8');

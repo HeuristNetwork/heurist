@@ -66,9 +66,9 @@ if(!$islist){
     if(array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")
     {
         //kml is stored in uploaded file
-        $kml_file = mysql__select_value($mysqli, 
+        $kml_file = mysql__select_value($mysqli,
             'select concat(ulf_FilePath,ulf_FileName) as fullPath from recDetails '
-            .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = ' 
+            .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = '
             . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = "
             .$dtFile." OR dtl_DetailTypeID = ".$dtKMLfile.")");
 
@@ -77,11 +77,11 @@ if(!$islist){
             $kml_file = resolveFilePath($kml_file);
             if(file_exists($kml_file)){
                 print file_get_contents($kml_file);
-            }   
-                
+            }
+
         }else{
             //kml snippet
-            $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = " 
+            $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = "
                             . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".$dtKML);
 
             print "<?xml version='1.0' encoding='UTF-8'?>\n";
@@ -123,10 +123,10 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     //for kml
     $squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
-    
+
     $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".intval($dtKMLfile)
             .($dtFile>0?" or (dtl_DetailTypeID = ".intval($dtFile)." AND ulf_MimeExt='kml'))":")");
-            
+
     $detTable2 = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
     $isSearchKml = ($dtKMLfile>0 || $dtFile>0);
@@ -136,7 +136,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
             $_REQUEST['detail'] = 'ids';// return ids only
 
             $result = recordSearch($system, $_REQUEST);//see recordSearch.php
-        
+
             if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
                 $error_msg = $system->getError();
                 $error_msg = $error_msg[0]['message'];
@@ -187,7 +187,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($wkt_reccount>0){
             while ($row = $res->fetch_row()) {
                 $kml = null;
-                
+
                 if($row[5]){
                     $wkt = $row[5];
                     $geom = geoPHP::load($wkt,'wkt');
@@ -197,14 +197,14 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
                         //timestap or timespan
                         if($row[6] || $row[7] || $row[8]){
-                            
+
                             if($row[7] || $row[8]){
-                                
+
                                 if(!$row[7]) {$row[7] = $row[8];}
-                                
+
                                 //create timespan from two temporal objects
                                 $dt = Temporal::mergeTemporals($row[7], $row[8]);
-                                
+
                             }else if($row[6]){
                                 $dt = new Temporal($row[6]);
                             }
@@ -238,7 +238,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         if($kml_reccount>0){
             while ($file_data = $res2->fetch_row()) {
                 if ($file_data[3]) {
-                    
+
                     $file_id = intval($file_data[0]);
 
                     print '<NetworkLink>';

@@ -41,7 +41,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
-        
+
         <link rel="stylesheet" type="text/css" href="../../style.css">
     </head>
     <body style="padding:44px;">
@@ -102,7 +102,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
             echo $row[0]."<br>";
             }*/
-            
+
             $need_debug_info = false;
 
             if($need_debug_info){
@@ -179,7 +179,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 if($row){
 
                     $dtyId = intval($row[0]);
-                    
+
                     print  "DT ".intval($dtyId)."  ".htmlspecialchars($row[1])."  =>".htmlspecialchars($attrID)."<br>";
 
                     $dtyName = $row[1];

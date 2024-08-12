@@ -15,7 +15,7 @@
 
 /**
 * BACKWARD capabilities for old versions. It has been replaced with DbRegis::registrationGet
-* 
+*
 * getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Reference Index
 *
 * this script may be inited via http, otherwise it is included and $database_id already defined
@@ -31,9 +31,9 @@
 require_once dirname(__FILE__).'/../../../hserv/System.php';
 
 $isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);//this is reference server
-if($isOutSideRequest){ //this is request from outside - redirect to master index    
+if($isOutSideRequest){ //this is request from outside - redirect to master index
 
-    $reg_url = HEURIST_INDEX_BASE_URL 
+    $reg_url = HEURIST_INDEX_BASE_URL
     .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
     .'&remote=1&id='.$database_id;
 
@@ -51,7 +51,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         $data = json_decode($data, true);
 
         // Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
-        // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found 
+        // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found
         if(@$data['error_msg']){
             $error_msg = $data['error_msg'];
         }else if(!@$data['rec_URL']){
@@ -68,12 +68,12 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $system2 = new System();
     $system2->init(HEURIST_INDEX_DATABASE, true, false);//init without paths and consts
 
-    if(@$_REQUEST['remote']){ 
+    if(@$_REQUEST['remote']){
         $database_id = @$_REQUEST["id"];
     }
     $rec = array();
     if($database_id>0){
-        
+
         ConceptCode::setSystem($system2);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);
 
@@ -81,13 +81,13 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             'select rec_Title, rec_URL from Records where rec_RecTypeID='
             .$rty_ID_registered_database.' and rec_ID='  //1-22
             .$database_id);
-            
+
         if ($rec!=null){
             $database_url = @$rec['rec_URL'];
             if($database_url==null || $database_url==''){
                 $error_msg = 'Database URL is not set in Heurist_Reference_Index database for database ID#'.$database_id;
             }
-                
+
         }else{
             $err = $system2->get_mysqli()->error;
             if(err){

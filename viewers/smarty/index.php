@@ -20,7 +20,7 @@
 */
 if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     array_key_exists('icon',$_REQUEST)){
-              
+
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
@@ -29,11 +29,11 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
         //download file, thumb or remote url for recUploadedFiles
         $script_name = '../../hserv/controller/fileDownload.php';
     }
-        
+
 }else{
     $script_name = 'showReps.php';
-}        
-//to avoid "Open Redirect" security warning    
+}
+//to avoid "Open Redirect" security warning
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 

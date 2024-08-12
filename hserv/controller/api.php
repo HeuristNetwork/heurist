@@ -7,7 +7,7 @@ RewriteEngine On
 RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
 
 */
-  
+
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 
 
@@ -27,7 +27,7 @@ if(@$_REQUEST['method']){
     }
     if($method == 'PATCH'){
         $method = 'PUT';
-    } 
+    }
 }
 
 //$requestUri[1] = "api"
@@ -53,8 +53,8 @@ $entities = array(
 'annotations'=>'Annotations', //for iiif annotation server
 'iiif'=>'iiif', //for iiif presenatation v3 (only GET allowed)
 );
-//records 
-    //controlles:    
+//records
+    //controlles:
     //record_batch - batch actions for records
     //record_search
     //record_edit
@@ -79,7 +79,7 @@ if(count($requestUri)>0){
     $requestUri = $params;
 }
 
-if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){ 
+if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
     //takes all parameters from $_REQUEST
 
     //try to detect entity as parameter
@@ -88,15 +88,15 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
     }else{
         exitWithError('API Not Found', 400);
     }
-    
+
 }else if(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
-    
+
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $_REQUEST['db'], $requestUri[2], @$requestUri[3]);
     }else{
         exitWithError('API Not Found', 400);
     }
-    
+
 }else if(@$requestUri[2]!=null){
     $_REQUEST['db'] = $requestUri[2];
 }
@@ -125,11 +125,11 @@ if($method=='save' || $method=='add'){
         unset($_REQUEST['fields']['db']);
     }
 }else{
-    
+
     if(@$_REQUEST['limit']==null || $_REQUEST['limit']>100 || $_REQUEST['limit']<1){
         $_REQUEST['limit']=100;
     }
-    
+
 }
 
 // throw new RuntimeException('Unauthorized - authentication failed', 401);
@@ -139,25 +139,25 @@ if (@$requestUri[3]=='iiif') {
         $_REQUEST['resource'] = @$requestUri[4];
         $_REQUEST['id'] = @$requestUri[5];
         $_REQUEST['restapi'] = 1; //set http response code
-        
+
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
         exitWithError('Method Not Allowed', 405);
     }
-    
-    
+
+
 }else if (@$entities[@$requestUri[3]]=='System') {
-    
+
     include_once '../System.php';
-    
+
     $system = new System();
     if( ! $system->init($_REQUEST['db']) ){
         //get error and response
         $system->error_exit_api();//exit from script
     }
-    
+
     if($requestUri[3]==='login'){
-        
+
         if(!$system->doLogin(filter_var(@$_REQUEST['fields']['login'], FILTER_SANITIZE_STRING),
                              @$_REQUEST['fields']['password'], 'shared'))
         {
@@ -168,11 +168,11 @@ if (@$requestUri[3]=='iiif') {
                     $time = time() + 24*60*60;     //day
                     $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https, true );
         }
-        
+
     }else if($requestUri[3]==='logout'){
         $system->doLogout();
     }
-    
+
     $system->dbclose();
 }
 else
@@ -184,7 +184,7 @@ else
 
     if(@$requestUri[4]!=null){
       $_REQUEST['recID'] = $requestUri[4];
-    } 
+    }
 
     if($_REQUEST['entity']=='Records'){
         if($method=='search'){
@@ -201,10 +201,10 @@ exit;
 //echo json_encode($data);
 
 function exitWithError($message, $code){
-    
+
     header("Access-Control-Allow-Origin: *");
     header('Content-type: application/json;charset=UTF-8');//'text/javascript');
-    
+
     http_response_code($code);
     print json_encode(array("status"=>'invalid', "message"=>$message));
     exit;
@@ -213,7 +213,7 @@ function exitWithError($message, $code){
 function getAction($method){
     if($method=='GET'){
         return 'search';
-    }else if($method=='POST'){ // add new 
+    }else if($method=='POST'){ // add new
         return 'add';
     }else if($method=='PUT'){ // replace
         return 'save';
@@ -221,6 +221,6 @@ function getAction($method){
         return 'delete';
     }else{
         return null;
-    }       
+    }
 }
 ?>

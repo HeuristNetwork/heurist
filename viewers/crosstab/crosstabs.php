@@ -50,11 +50,11 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 
     // Callback function on page initialization - see initPage.php
     function onPageInit(success) {
-        
+
         const urlParams = new URLSearchParams(window.location.search);
 
         var query_main = '';
-                
+
         if(urlParams.has('q')){
             query_main = decodeURIComponent(urlParams.get('q'));
         }
@@ -229,7 +229,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                         </div>
                                         <div id="rowWarning" class="align-items-center">&nbsp;</div>
                                     </div>
-                                    
+
                                     <div id="column_container">
                                         <div class="align-items-center" id="columnVars" style="margin-bottom: 5px;">
 
@@ -251,7 +251,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                         </div>
                                         <div id="columnWarning" class="align-items-center">&nbsp;</div>
                                     </div>
-                                    
+
                                     <div id="page_container">
                                         <div class="align-items-center" id="pageVars" style="margin-bottom: 5px;">
 
@@ -267,7 +267,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                                                     <button type="button" tt='page' class="btn btn-warning showintervals" disabled>
                                                         <span class="ui-icon ui-icon-pencil"></span>
                                                     </button>
-                                                </span> 
+                                                </span>
                                             </div>
 
                                         </div>
@@ -307,7 +307,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                             <div id="divres" class="output-content" style="display:none;">
                             </div>
                         </div>
-                        
+
                         <!--Pie Chart goes here!!! -->
                         <div class="tab-pane fade d-flex justify-content-center bg-white" id="pie" role="tabpanel" aria-labelledby="pie-tab" style="padding: 10px;">
                             <div class="alert alert-info d-none" role="alert" id="pieMessage">
@@ -338,7 +338,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="rowIntervalsBody">
-                
+
                 </div>
             </div>
         </div>
@@ -352,7 +352,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="columnIntervalsBody">
-                
+
                 </div>
             </div>
         </div>
@@ -366,7 +366,7 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="pageIntervalsBody">
-                
+
                 </div>
             </div>
         </div>
