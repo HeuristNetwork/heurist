@@ -324,7 +324,10 @@ $.widget( "heurist.resultListMenu", {
                     let menu_id = $(this).attr('id');
                     let item = $(this).find('a');
                     item.text(window.hWin.HR( menu_id ));
-                    item.attr('title',window.hWin.HR( menu_id+'_hint'));
+                    const hint = window.hWin.HR( menu_id+'-hint');
+                    if(hint!=(menu_id+'-hint')){
+                        item.attr('title',hint);    
+                    }
                 });
                 
                 that['menu_'+name].find('li').css('padding-left',0);

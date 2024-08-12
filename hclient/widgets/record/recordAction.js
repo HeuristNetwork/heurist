@@ -402,17 +402,12 @@ $.widget( "heurist.recordAction", {
             rectype_Ids = this._currentRecordset.getRectypes();
         }
         
-        for (let rty in rectype_Ids){
-            if(rty>=0){
-                rty = rectype_Ids[rty];
-                
+        rectype_Ids.forEach(rty => {
                 let name = $Db.rty(rty,'rty_Plural');
                 if(!name) name = $Db.rty(rty,'rty_Name');
                 
-                window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                        window.hWin.HR('only:')+' '+name);
-            }
-        }
+                window.hWin.HEURIST4.ui.addoption(selScope,rty,window.hWin.HR('only:')+' '+name);
+        });
 
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        

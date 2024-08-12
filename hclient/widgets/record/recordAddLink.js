@@ -259,9 +259,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 }
             }
             
-            for (let rty in rectype_Ids){
-                if(rty>=0){
-                    rty = rectype_Ids[rty];
+            rectype_Ids.forEach(rty => {
                     //need unique value - otherwise jquery selectmenu fails to recognize
                     let opt = new Option($Db.rty(rty,'rty_Plural'), 's'+rty); 
                     $(opt).attr('data-select', 1);
@@ -271,8 +269,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     }else{
                         selScope.appendChild(opt);
                     }
-                }
-            }
+            });
             
         } //hasSelection
        

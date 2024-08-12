@@ -188,7 +188,7 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 //Expose all relationship vocabularies as options for term fields.
 define("HEURIST_UNITED_TERMS", true);
 
-define("NAKALA_REPO", 'http://nakala.fr/');
+define("NAKALA_REPO", 'http'.'://nakala.fr/');
 
 
 $glb_lang_codes = null;
