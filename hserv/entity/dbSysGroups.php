@@ -92,16 +92,16 @@ class DbSysGroups extends DbEntityBase
             $this->data['details'] = 'ugr_ID';
             $is_ids_only = true;
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name';
 
-        }else if(@$this->data['details']=='count'){
+        }elseif(@$this->data['details']=='count'){
 
             $this->data['details'] = 'ugr_ID';
             $needCount = true;
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Enabled';
             if($needRole) {

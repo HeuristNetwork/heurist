@@ -650,11 +650,11 @@ public static function output($data, $params){
                                     }
                                 }
                             }
-                        }else if($dt_type=='geo'){
+                        }elseif($dt_type=='geo'){
                             foreach($values as $val){
                                 $vals[] = $val['geo']['wkt'];
                             }
-                        }else if($dt_type=='file'){
+                        }elseif($dt_type=='file'){
                             foreach($values as $val){
 
                                 $vals[] = 'ulf_' . $val['file']['ulf_ObfuscatedFileID'];
@@ -664,7 +664,7 @@ public static function output($data, $params){
 
                                 if(!empty($val['file']['fullPath'])){
                                     $file_paths[] = $val['file']['fullPath'];
-                                }else if(!empty($val['file']['ulf_ExternalFileReference'])){
+                                }elseif(!empty($val['file']['ulf_ExternalFileReference'])){
                                     $file_paths[] = $val['file']['ulf_ExternalFileReference'];//'_remote'
                                 }else{
                                     $file_paths[] = '';
@@ -678,14 +678,14 @@ public static function output($data, $params){
                                     }
                                 }
                             }
-                        }else if($dt_type=='date'){
+                        }elseif($dt_type=='date'){
                             foreach($values as $val){
                                 $vals[] = Temporal::toHumanReadable(trim($val));
                                 if($include_temporals){
                                     $date_temporals[] = trim($val);
                                 }
                             }
-                        }else if($dt_type=='enum' || $dt_type=='relationtype'){
+                        }elseif($dt_type=='enum' || $dt_type=='relationtype'){
 
                             if(!empty($defTerms) && is_array($values) && count($values)>0){
                                 foreach($values as $val){
@@ -699,7 +699,7 @@ public static function output($data, $params){
                                 $enum_code[] = '';
                             }
                             $vals = $values;
-                        }else if($dt_type == 'freetext' && $dt_type == 'blocktext'){
+                        }elseif($dt_type == 'freetext' && $dt_type == 'blocktext'){
                             // escape all line feed (\n) within text values, to avoid confusing the import
                             // freetext shouldn't have any, but just in case
                             foreach($values as $val){
@@ -722,30 +722,30 @@ public static function output($data, $params){
                             $enum_label[] = '';
                             $enum_code[] = '';
 
-                        }else if($include_resource_titles && $dt_type=='resource'){
+                        }elseif($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
-                        }else if($dt_type=='file'){
+                        }elseif($dt_type=='file'){
                             $file_ids[] = '';
                             $file_names[] = '';
                             $file_paths[] = '';
                             if($include_file_url){
                                 $file_urls[] = '';
                             }
-                        }else if($dt_type=='date' && $include_temporals){
+                        }elseif($dt_type=='date' && $include_temporals){
                             $date_temporals[] = '';
                         }
                     }
 
                 }
 
-            }else if ($dt_id=='rec_Tags'){
+            }elseif($dt_id=='rec_Tags'){
 
                 $value = recordSearchPersonalTags(self::$system, $recID);
                 $value = ($value===null)?'':implode($csv_mvsep, $value);
 
-            }else if ($dt_id=='rec_RecTypeName'){
+            }elseif($dt_id=='rec_RecTypeName'){
                 $value = self::$defRecTypes['names'][$rty_ID];
-            }else if ($dt_id=='rec_ID'){
+            }elseif($dt_id=='rec_ID'){
                 $value = @$record[$dt_id];
                 $rec_url_base = HEURIST_BASE_URL_PRO . '?db=' . HEURIST_DBNAME . '&recID=' . $value;
                 if($include_record_url_html){ // html
@@ -785,9 +785,9 @@ public static function output($data, $params){
 
                 if (count($resource_titles)>0){
                     $record_row[] = implode($csv_mvsep,$resource_titles);
-                }else if (count($file_urls)>0){
+                }elseif (count($file_urls)>0){
                     $record_row[] = implode($csv_mvsep,$file_urls);
-                }else if (count($record_urls)>0){
+                }elseif (count($record_urls)>0){
                     $record_row[] = implode($csv_delimiter,$record_urls);// two separate columns
                 }
 

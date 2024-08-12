@@ -116,7 +116,7 @@ class Simplify {
                 $x = $p2['x'];
                 $y = $p2['y'];
 
-            } else if ($t > 0) {
+            } elseif($t > 0) {
                 $x += $dx * $t;
                 $y += $dy * $t;
             }

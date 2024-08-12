@@ -473,7 +473,8 @@ if(!($max_size>0)) {$max_size = 0;}
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files',
                         yes:window.hWin.HR('Index Media Files'), no:window.hWin.HR('Exit without Indexing')});
-                } else if ($(event.target).is('button')){
+                } else 
+                if ($(event.target).is('button')){
                         $('#btnCancel').trigger('click');
                         setTimeout(function(){ window.close();}, 100);
                 }

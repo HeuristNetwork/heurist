@@ -107,15 +107,15 @@ class DbSysImportFiles extends DbEntityBase
 
             $this->data['details'] = 'sif_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'sif_ID,sif_TempDataTable';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'sif_ID,sif_TempDataTable,sif_ProcessingInfo';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fields );
         }else{

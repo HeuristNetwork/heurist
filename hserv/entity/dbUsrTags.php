@@ -87,15 +87,15 @@ class DbUsrTags extends DbEntityBase
 
             $this->data['details'] = 'tag_ID';
 
-        }else if(@$this->data['details']=='label'){
+        }elseif(@$this->data['details']=='label'){
 
             $this->data['details'] = 'tag_ID,tag_Text';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'tag_ID,tag_Text,tag_UGrpID';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'tag_ID,tag_Text,tag_Description,tag_Modified,tag_UGrpID';
             $needCount = true;
@@ -369,7 +369,7 @@ class DbUsrTags extends DbEntityBase
             }
             $res_tag_removed = $mysqli->affected_rows;
 
-        }else if($mode=='remove'){
+        }elseif($mode=='remove'){
 
             // detach/remove all assignments for given records
             $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'

@@ -208,7 +208,7 @@ public static function findDupes( $params ){
             }
 
 
-        }else if (strpos($v,'rec_')===0){
+        }elseif (strpos($v,'rec_')===0){
 
             if($v=='rec_AddedBy'){
 
@@ -247,7 +247,7 @@ public static function findDupes( $params ){
                     $search_where[] = '('.$v.'=?)';
                     $search_params = $search_params.'s';
                  }
-             }else if(self::$distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
+             }elseif(self::$distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
                     $compare_fields[] = $detail_fields2[$v];
              }else{
                     $exact_fields[] = $detail_fields[$v];
@@ -364,11 +364,11 @@ public static function findDupes( $params ){
     // total and pecentage
     self::$limit_cnt = @$params['limit_cnt'];
     if(!(self::$limit_cnt>0)) {self::$limit_cnt = 1000;}
-    else if(self::$limit_cnt>3000) {self::$limit_cnt = 3000;}
+    elseif(self::$limit_cnt>3000) {self::$limit_cnt = 3000;}
 
     $limit_pc = @$params['limit_cnt'];
     if(!($limit_pc>0)) {$limit_pc = 30;}
-    else if($limit_pc>50) {$limit_pc = 50;}
+    elseif($limit_pc>50) {$limit_pc = 50;}
 
 
     self::$progress_session_id = @$params['session'];
@@ -416,7 +416,7 @@ public static function findDupes( $params ){
                        $is_reset = true;
                        $cache_cnt = 0;
 
-                    }else if($startgroup>0){
+                    }elseif($startgroup>0){
                         //strcasecmp()
                         $str1 = mb_strtolower(mb_substr($row[1], 0, $startgroup));
                         if($str1!=$curr_c1){
@@ -505,7 +505,7 @@ public static function findDupes( $params ){
                     $dist = ceil($len1*self::$distance/100);
                     if($dist==0){
                         $dist = 1;
-                    }else if($dist>10){
+                    }elseif($dist>10){
                         $dist = 10;
                     }
 
@@ -650,7 +650,7 @@ private static function _searchInCache(){
             $dist = ceil($len1*self::$distance/100);//difference % set in client side
             if($dist==0){
                 $dist = 1;
-            }else if($dist>10){
+            }elseif($dist>10){
                 $dist = 10;
             }
 

@@ -262,7 +262,7 @@ class DbsImport {
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($this->cloning_template){
             $def_ids[] = 'all';
-        }else if($this->prime_defType=='term'){
+        }elseif($this->prime_defType=='term'){
 
             if(is_array($local_ids) && count($local_ids)>0){
                 foreach($local_ids as $local_id){
@@ -378,7 +378,7 @@ class DbsImport {
                 $this->_findDependentRecordTypesByFieldId($rty_id);
             }
 
-        }else if($this->prime_defType=='term'){ // terms only
+        }elseif($this->prime_defType=='term'){ // terms only
 
             foreach($def_ids as $def_id){
                 $this->_getTopMostVocabulary($def_id, 'enum');
@@ -402,7 +402,7 @@ class DbsImport {
                 }
 
 
-            } else if($this->prime_defType=='detailtype'){
+            } elseif($this->prime_defType=='detailtype'){
 
                 foreach($def_ids as $def_id){
                     $this->_findDependentRecordTypesByFieldId($def_id);
@@ -527,7 +527,7 @@ class DbsImport {
             $mysqli->rollback();
             $mysqli->close();
             return false;
-        }else if(count($this->def_translations['terms']) > 0){
+        }elseif(count($this->def_translations['terms']) > 0){
             $this->_importTranslations('terms');
         }
 
@@ -1235,7 +1235,7 @@ $mysqli->commit();
         $defs = null;
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defs = @$database_defs['rectypes']['typedefs'][$localID];
-        }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+        }elseif($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
             $defs = @$database_defs['detailtypes']['typedefs'][$localID];
         }
 
@@ -1266,7 +1266,7 @@ $mysqli->commit();
                 return $defs = $this->source_defs[$defType][$source_id];//via mapping
             }
 
-        }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+        }elseif($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
 
             $defType = 'detailtypes';
 
@@ -1281,7 +1281,7 @@ $mysqli->commit();
             }
 
 
-        }else if($defType=='enum' || $defType=='relationtype'){
+        }elseif($defType=='enum' || $defType=='relationtype'){
 
             //$defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
 
@@ -1328,14 +1328,14 @@ $mysqli->commit();
             $fieldName = 'rty_ConceptID';
             $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
 
-        }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+        }elseif($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
             $defType = 'detailtypes';
             $defs = $database_defs[$defType]['typedefs'];
 
             $fieldName = 'dty_ConceptID';
             $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
 
-        }else if($defType=='enum' || $defType=='relationtype'){
+        }elseif($defType=='enum' || $defType=='relationtype'){
 
 //            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
 
@@ -1705,7 +1705,7 @@ $mysqli->commit();
             if(!$term_import[$idx_ccode]){
                 if($term_import[$idx_origin_dbid]>0 && $term_import[$idx_origin_id]>0){
 
-                }else if($term_id<999999){
+                }elseif($term_id<999999){
                     $term_import[$idx_origin_dbid] = $this->source_db_reg_id;
                     $term_import[$idx_origin_id] = $term_id;
                 }
@@ -1852,7 +1852,7 @@ $mysqli->commit();
                         //new term - add to codes and labels
                         $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
                         $lvl_src['label'][] = $this->targetTerms->getTermLabel($new_id);
-                    } else if($new_id<0){
+                    } elseif($new_id<0){
                         //this term aready exists in target - add it as reference to this vocabulary
                     }else {
                         return false;
@@ -2181,10 +2181,10 @@ $mysqli->commit();
 
             $resp['report']['updated']['rectype'] = $this->rectypes_upddated;
             $resp['report']['added']['rectype'] = $this->rectypes_added;
-        }else if($this->prime_defType == 'term'){
+        }elseif($this->prime_defType == 'term'){
             $resp['report']['updated'] = $this->terms_updated;
             $resp['report']['added'] = $this->terms_added;
-        }else if($this->prime_defType == 'detailtype'){
+        }elseif($this->prime_defType == 'detailtype'){
             $resp['report']['updated'] = $this->detailtypes_updated;
             $resp['report']['added'] = $this->detailtypes_added;
         }else{
@@ -2263,11 +2263,11 @@ $mysqli->commit();
 
                     if($dty_cCode=='3-1079'){
                         $vocab_id = 6255;
-                    }else if($dty_cCode=='3-1080'){
+                    }elseif($dty_cCode=='3-1080'){
                         $vocab_id = 6256;
-                    }else if($dty_cCode=='3-1087'){
+                    }elseif($dty_cCode=='3-1087'){
                         $vocab_id = 6257;
-                    }else if($dty_cCode=='3-1088'){
+                    }elseif($dty_cCode=='3-1088'){
                         $vocab_id = 6258;
                     }else{
                         $vocab_id = 0;

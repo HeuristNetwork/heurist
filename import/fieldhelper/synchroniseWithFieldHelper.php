@@ -323,7 +323,7 @@ $failed_exts = array();
 
                     print '<div style="color:red">Files are not scanned in system folder '.htmlspecialchars($dir).'</div>';
 
-                }else if($dir && file_exists($dir) && is_dir($dir))
+                }elseif($dir && file_exists($dir) && is_dir($dir))
                 {
 
 
@@ -339,7 +339,7 @@ $failed_exts = array();
                             if(!($filename=="." || $filename=="..")){
                                 if(is_dir($dir.$filename)){
                                     array_push($subdirs, $dir.$filename."/");
-                                }else if($isfirst){ //if($filename == "fieldhelper.xml"){
+                                }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                                     $isfirst = false;
                                     if($dir == HEURIST_FILESTORE_DIR){
                                         print '<div style="color:red">Files are not scanned in root upload folder '.htmlspecialchars($dir).'</div>';
@@ -355,7 +355,7 @@ $failed_exts = array();
                             flush();
                         }
                     }
-                }else if ($dir) {
+                }elseif($dir) {
                     print '<div style="color:red">Folder was not found: '.htmlspecialchars($dir).'</div>';
                 }
             }
@@ -510,15 +510,15 @@ $failed_exts = array();
 
                                         }
 
-                                    }else if($key2=="lat"){
+                                    }elseif($key2=="lat"){
 
                                         $lat = floatval($value);
 
-                                    }else if($key2=="lon"){
+                                    }elseif($key2=="lon"){
 
                                         $lon = floatval($value);
 
-                                    }else if($key2=="recordId"){
+                                    }elseif($key2=="recordId"){
                                         $recordIds[] = $value;
                                         $el_heuristid[$value] = $el;
                                     }else if(intval($key2)>0) {

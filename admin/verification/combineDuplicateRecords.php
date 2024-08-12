@@ -338,7 +338,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                             if ($rg['dtl_Geo']) {
                                                 $rd_temp = $rg['dtl_Geo'];
                                             }
-                                            else if ($rg['trm_Label']){
+                                            elseif($rg['trm_Label']){
                                                 $rd_temp = $rg['trm_Label']." (".$rg['dtl_Value'].")";
                                                 //$temp = $rg['dtl_Value'];//trm_ID
                                             }
@@ -466,11 +466,11 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                                         //print $m_detail['dtl_Geo'].'  '.$d_detail['dtl_Geo'];
                                                         array_push($removeIndices,$i);
                                                     }
-                                                }else if ($m_detail['dtl_UploadedFileID']) {
+                                                }elseif($m_detail['dtl_UploadedFileID']) {
                                                     if(trim($d_detail['dtl_UploadedFileID']) == trim($m_detail['dtl_UploadedFileID'])){
                                                         array_push($removeIndices,$i);
                                                     }
-                                                }else if ($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])){
+                                                }elseif($m_detail['dtl_Value'] && trim($d_detail['dtl_Value']) == trim($m_detail['dtl_Value'])){
                                                         //mark this detail for removal
                                                         array_push($removeIndices,$i);
                                                 }
@@ -612,7 +612,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
 
             if ($rg['dtl_Geo']) {
                 $detail_val = $rg['dtl_Geo'];
-            } else if ($rg['trm_Label']){
+            } elseif($rg['trm_Label']){
                 $detail_val = $rg['trm_Label']." (".$rg['dtl_Value'].")";
                 //$temp = $rg['dtl_Value'];//trm_ID
             }else{
@@ -661,14 +661,14 @@ function detail_str($rd_type, $rd_val)
             }
             return $rv;
         }
-        else if($rd_val>0) {
+        elseif($rd_val>0) {
             $title =  mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID ='.$rd_val);
             return '<a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rd_val
                 .'">'.$title.'</a>';
         }
     }
     /*
-    else if ($rd_type == 158) {
+    elseif($rd_type == 158) {
     if (is_array($rd_val[0])) {
     foreach ($rd_val as $val)
     $rv[] = $val['per_citeas'];
@@ -679,7 +679,7 @@ function detail_str($rd_type, $rd_val)
     }
     }
     */
-    else if (in_array($rd_type, array_keys($enum_bdts))) {
+    elseif (in_array($rd_type, array_keys($enum_bdts))) {
         if(is_integer($rd_val)){
             $res = mysql__select_value($mysqli, 'select trm_Label from defTerms where trm_ID ='.$rd_val);
             if($res){
@@ -747,7 +747,7 @@ function do_fix_dupe()
             foreach($value as $idx => $val){
                 if(intval($val)>0) {$prepared_values[] = intval($val);}
             }
-        }else if(intval($value)>0){
+        }elseif(intval($value)>0){
             $prepared_values[] = intval($value);
         }
         if(count($prepared_values)>0){

@@ -67,7 +67,7 @@ foreach($databases as $db){
 
         if(json_last_error() !== JSON_ERROR_NONE && empty($query_str)){
             $results[$db][$svs_ID][] = "Query is in unknown format, " . htmlspecialchars($svs_Query);
-        }else if(is_array($query_obj) && !array_key_exists('facets', $query_obj) && !array_key_exists('q', $query_obj)){
+        }elseif(is_array($query_obj) && !array_key_exists('facets', $query_obj) && !array_key_exists('q', $query_obj)){
             $results[$db][$svs_ID][] = "Unknown formatting for saved search";
         }
 
@@ -101,7 +101,7 @@ foreach($databases as $db){
 
             $type = !empty($query_str) ? 'simple' : 'filter';
 
-        }else if($is_filter_facet && array_key_exists('facet', $query_obj)){ // is facet, check facets=>[]=>code
+        }elseif($is_filter_facet && array_key_exists('facet', $query_obj)){ // is facet, check facets=>[]=>code
 
             foreach($query_obj['facet'] as $facet){
 
@@ -210,7 +210,7 @@ foreach($databases as $db){
                                         . "Name: <strong>" . $svs_Details['svs_Name'] . "</strong><br>"
                                         . implode("<br>", $results[$db][$svs_ID])
                                     ."</div>";
-        }else if(array_key_exists($svs_ID, $results[$db])){
+        }elseif(array_key_exists($svs_ID, $results[$db])){
             unset($results[$db][$svs_ID]);
         }
     }
@@ -325,7 +325,7 @@ foreach($databases as $db){
 
         <?php
             echo implode('<hr>', $results);
-        }else if(empty($databases)){
+        }elseif(empty($databases)){
             echo "<h2>An error occurred with retrieving a list of available databases</h2>";
         }else{
             echo "<h2>No issues found with any saved filters or facets</h2>";

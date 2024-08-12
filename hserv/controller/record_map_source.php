@@ -163,7 +163,7 @@
                 if($input_format=='kml' || $ext=='.kmz' || $ext=='.kml'){
                     $input_format = 'kml';
                     //$input_format = 'csv';
-                }else if($ext=='.tsv'){
+                }elseif($ext=='.tsv'){
                     $input_format = 'csv';
                     $parser_parms['csv_delimiter'] = 'tab';
                 }
@@ -274,11 +274,11 @@
 
                                         simplifyCoordinates($json['coordinates']);//see mapSimplify.php
 
-                                    } else if($json['type']=='Polygon'){
+                                    } elseif($json['type']=='Polygon'){
                                         for($idx=0; $idx<count($json['coordinates']); $idx++){
                                             simplifyCoordinates($json['coordinates'][$idx]);
                                         }
-                                    } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                                    } elseif ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                                     {
                                         for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
                                             for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
@@ -348,9 +348,9 @@
 
                     if($input_format=='kml'){
                         header('Content-Type: application/vnd.google-earth.kml+xml');
-                    }else if($input_format=='csv'){
+                    }elseif($input_format=='csv'){
                         header('Content-Type: text/csv');
-                    }else if($input_format=='dbf'){
+                    }elseif($input_format=='dbf'){
                         header('Content-Type: application/x-dbase');
                     }
                     $originalFileName = $originalFileName.$input_format;

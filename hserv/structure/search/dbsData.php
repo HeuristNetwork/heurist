@@ -491,7 +491,7 @@ function dbs_GetRectypeConstraint($system) {
         }
         if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {//first instance of this recType as bytarget target, create structure
             $cnstrnts[$srcID]['byTarget'][$trgID] = array($trmID => array('limit' => $max, "notes" => $notes));
-        } else if (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
+        } elseif (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
             $cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit' => $max, "notes" => $notes);
         }
         if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {//new target for term lookup
@@ -1389,7 +1389,7 @@ function dbs_GetRectypeConstraint($system) {
             }
             $res = mysql__select_list($mysqli, 'defDetailTypes', 'dty_ID', $where_exp);
             return $res;
-        }else if($imode==4){ //dty_ID => dty_Type
+        }elseif($imode==4){ //dty_ID => dty_Type
 
             $query = 'SELECT dty_ID, dty_Type FROM defDetailTypes';
             if($where_exp!=null && $where_exp != ''){

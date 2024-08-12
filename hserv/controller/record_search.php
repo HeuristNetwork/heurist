@@ -103,7 +103,7 @@
                         str_replace( '^^/', '../', urldecode($req_params['count_query']))),true);
         }
 
-    }else if(@$req_params['details_encoded']==2){
+    }elseif(@$req_params['details_encoded']==2){
 
         if(@$req_params['q']){
             $req_params['q'] = urldecode($req_params['q']);
@@ -121,19 +121,19 @@
         //get error and response
         $response = $system->getError();
 
-    }else if(@$req_params['a'] == 'minmax'){
+    }elseif(@$req_params['a'] == 'minmax'){
 
         $response = recordSearchMinMax($system, $req_params);
 
-    }else if(@$req_params['a'] == 'count_details'){
+    }elseif(@$req_params['a'] == 'count_details'){
 
         $response = recordSearchDistinctValue($system, $req_params);
 
-    }else if(@$req_params['a'] == 'count_matches'){
+    }elseif(@$req_params['a'] == 'count_matches'){
 
         $response = recordSearchMatchedValues($system, $req_params);
 
-    }else if(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
+    }elseif(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
 
         $params = array();
 
@@ -141,20 +141,20 @@
 
         $response = recordSearchFacets($system, $params);
 
-    }else if(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
+    }elseif(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 
         $response = getDateHistogramData($system, $req_params['range'], $req_params['interval'],
                     @$req_params['recids'], @$req_params['dtyid'], @$req_params['format'], @$req_params['is_between']==1);
 
-    }else if(@$req_params['a'] == 'related'){
+    }elseif(@$req_params['a'] == 'related'){
 
         $response = recordSearchRelated($system, $req_params['ids'], @$req_params['direction']);
 
-    }else if(@$req_params['a'] == 'links_count'){
+    }elseif(@$req_params['a'] == 'links_count'){
 
         $response = recordLinkedCount($system, @$req_params['source_ID'], @$req_params['target_ID'], @$req_params['dty_ID']);
 
-    }else if(@$req_params['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
+    }elseif(@$req_params['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
 
         $system->defineConstants();
 
@@ -163,7 +163,7 @@
 
             $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');
 
-        }else if(!($system->defineConstant('DT_CMS_MENU') &&
+        }elseif(!($system->defineConstant('DT_CMS_MENU') &&
                    $system->defineConstant('DT_CMS_TOP_MENU'))){
 
             $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu pointer" not defined in this database');
@@ -175,12 +175,12 @@
         }
 
     /* not implemented
-    }else if(@$req_params['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
+    }elseif(@$req_params['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
 
         $resids = array();
         $response = recordSearchMapDocItems($system, $req_params['ids'], $resids);
     */
-    }else if(@$req_params['a'] == 'links_details'){
+    }elseif(@$req_params['a'] == 'links_details'){
 
         $ids = prepareIds($req_params['ids']);
         $response = array();
@@ -194,7 +194,7 @@
         $response = array('status'=>HEURIST_OK, 'data'=> $response);
 
 
-    }else if(@$req_params['a'] == 'get_linked_media'){
+    }elseif(@$req_params['a'] == 'get_linked_media'){
 
         $ids = prepareIds($req_params['ids']);
         $response = array();

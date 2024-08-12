@@ -106,7 +106,7 @@ class DbUsrRecPermissions extends DbEntityBase
 
             $this->data['details'] = 'rcp_ID';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fields );
         }else{
@@ -291,7 +291,7 @@ class DbUsrRecPermissions extends DbEntityBase
                  return false;
             }
 
-        }else if(!@$this->data['rcp_UGrpID']){ //array of group ids
+        }elseif(!@$this->data['rcp_UGrpID']){ //array of group ids
 
             $group_ids_to_delete = prepareIds($this->data['rcp_UGrpID']);
 

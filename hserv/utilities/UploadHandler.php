@@ -798,7 +798,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $s = '. This is generally due to ownership permissions on the folder';
         if(!file_exists($version_dir)){
             return array(false, 'Can not create target folder: '.$version_dir.$s);
-        }else if(!is_writable($version_dir)){
+        }elseif(!is_writable($version_dir)){
             return array(false, 'Unable to write into the target folder: '.$version_dir.$s);
         }
 

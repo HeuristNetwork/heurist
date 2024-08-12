@@ -132,9 +132,9 @@
                                                     foreach($json['coordinates'] as $points){
                                                         array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
                                                     }
-                                                }else if ($json['type']=='MultiPoint'){
+                                                }elseif($json['type']=='MultiPoint'){
                                                     array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
-                                                }else if ($json['type']=='MultiPolygon'
+                                                }elseif($json['type']=='MultiPolygon'
                                                 || $json['type']=='MultiLineString'){
                                                     foreach($json['coordinates'] as $shape){
                                                         foreach($shape as $points){
@@ -250,7 +250,7 @@
                 }
                 $verties_cnt++;
             }
-            else if($geoObject['type']=="rect"){
+            elseif($geoObject['type']=="rect"){
 
                 $crd = $geoObject['geo'];
                 if(USE_GOOGLE){
@@ -339,7 +339,7 @@
 
                     }
 
-			}else if ($shapes_cnt<5 && $verties_cnt<97) { //limit 5 shapes and 100 vertcies
+			}elseif($shapes_cnt<5 && $verties_cnt<97) { //limit 5 shapes and 100 vertcies
 
                     $points = array();
                     $points2 = $geoObject['geo'];

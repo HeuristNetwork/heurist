@@ -87,11 +87,11 @@ class DbDefFileExtToMimetype extends DbEntityBase
 
             $this->data['details'] = 'fxm_Extension';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'fxm_Extension,fxm_MimeType';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', array_keys($this->fields) );
         }

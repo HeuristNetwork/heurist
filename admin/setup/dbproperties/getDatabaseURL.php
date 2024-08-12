@@ -54,7 +54,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         // Artem: cannot connect to Master Reference Database, Records table is corrupted, $database_id is not found
         if(@$data['error_msg']){
             $error_msg = $data['error_msg'];
-        }else if(!@$data['rec_URL']){
+        }elseif(!@$data['rec_URL']){
             $error_msg = "Heurist Reference Index returns incorrect data for registered database # ".$database_id.
             " The page may contain an invalid database reference (0 indicates no reference has been set)";
         }else{

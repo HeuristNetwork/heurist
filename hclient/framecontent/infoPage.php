@@ -42,7 +42,7 @@ if(!isset($message)){
                 $message = $message.$message['sysmsg'];
             }
         }
-    }else if( @$_REQUEST['message'] ){
+    }elseif( @$_REQUEST['message'] ){
         $message = $_REQUEST['message'];
         $is_error = false;
     }else{

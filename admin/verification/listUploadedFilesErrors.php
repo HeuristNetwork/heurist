@@ -401,7 +401,7 @@ $mysqli = $system->get_mysqli();
                                     'rec_ID'=>$currentRecID,
                                     'is_remote'=>!@$res['ulf_ExternalFileReference'] );
 
-                }else if($is_local) {
+                }elseif($is_local) {
 
                     chdir(HEURIST_FILESTORE_DIR);// relatively db root
 

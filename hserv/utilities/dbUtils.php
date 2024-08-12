@@ -453,9 +453,9 @@ class DbUtils {
                         if(is_array($val) && count($val)>0){
                             $tables = $val;
                         }
-                    }else if($val===true){
+                    }elseif($val===true){
                         $options = $options .' --'.$opt;
-                    }else if($val!==false){
+                    }elseif($val!==false){
                         $options = $options .' --'.$opt.'='.$val;
                     }
                 }
@@ -508,7 +508,7 @@ class DbUtils {
                     //echo "- $message\n\n";
 
                     return false;
-                }else if($verbose){
+                }elseif($verbose){
                     echo 'MySQL Dump completed<br>';
                 }
 
@@ -802,7 +802,7 @@ class DbUtils {
                     if($check_exist_or_unique==1){
                         $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' aready exists. Try different name.';
                     }
-                }else if($check_exist_or_unique==2){
+                }elseif($check_exist_or_unique==2){
                         $error_msg = 'Database with name '.htmlspecialchars($database_name_full).' does not exists.';
                 }
             }
@@ -828,13 +828,13 @@ class DbUtils {
         $source = intval($archive_folder);
         if($source==2){
             $lib_path = '/srv/BACKUP/';
-        }else if($source==3){
+        }elseif($source==3){
             if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                 $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
             }else{
                 $lib_path = '/srv/BACKUP/ARCHIVE/';
             }
-        }else if($source==4){
+        }elseif($source==4){
             $lib_path = $upload_root.'DBS_TO_RESTORE/';
         }else{
             //default
@@ -1019,9 +1019,9 @@ class DbUtils {
             if($res!==true){
                 $res[1] = 'Cannot create database tables. '.$res[1];
                 self::$system->addErrorArr($res);
-            }else if($level<2){
+            }elseif($level<2){
                 return true;
-            }else if(self::databaseCreateConstraintsAndTriggers($database_name_full)){
+            }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
                 return true;
             }
         }
@@ -1342,7 +1342,7 @@ class DbUtils {
                         if(strtolower($table)=='usrrecpermissions'){
                             $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
                             if(!($cnt>0)) {continue;}
-                        }else if($table=='sysUGrps'){
+                        }elseif($table=='sysUGrps'){
                             $cnt = mysql__select_value($mysqli, "SELECT count(*) FROM `". $db_source ."`.sysUGrps WHERE ugr_Enabled != 'n' AND ugr_Enabled != 'y'");
 
                             if(is_numeric($cnt) && $cnt > 0){
@@ -1521,7 +1521,7 @@ class DbUtils {
             folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source."/entity",
                         HEURIST_FILESTORE_ROOT.$db_target."/entity" );
 
-        }else if(!folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source, HEURIST_FILESTORE_ROOT.$db_target )){
+        }elseif(!folderRecurseCopy( HEURIST_FILESTORE_ROOT.$db_source, HEURIST_FILESTORE_ROOT.$db_target )){
                 folderDelete($database_folder);
                 self::$system->addError(HEURIST_ACTION_BLOCKED,
                     'Sorry, we were not able to copy file directories for cloning  database.');

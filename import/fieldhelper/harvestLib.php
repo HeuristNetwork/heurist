@@ -95,7 +95,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                 print "<div style=\"color:red\">Files are not scanned in system folder $dir</div>";
             }
 
-        }else if($dir && file_exists($dir) && is_dir($dir))
+        }elseif($dir && file_exists($dir) && is_dir($dir))
         {
 
             $files = scandir($dir);
@@ -113,7 +113,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                             if(!in_array($subdir, $system_folders)){
                                     array_push($subdirs, $subdir);
                             }
-                        }else if($isfirst){ //if($filename == "fieldhelper.xml"){
+                        }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                             $isfirst = false;
                             if($dir == HEURIST_FILESTORE_DIR){
                                 if($is_report){
@@ -132,7 +132,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                     if($is_report) {flush();}
                 }
             }
-        }else if ($dir) {
+        }elseif($dir) {
             if($is_report){
                 print "<div style=\"color:red\">Folder was not found: $dir</div>";
             }

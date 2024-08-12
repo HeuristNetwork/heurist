@@ -70,7 +70,7 @@ class DbUsrBookmarks extends DbEntityBase
 
             $this->data['details'] = 'bkm_ID';
 
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'bkm_ID,bkm_UGrpID,bkm_RecID,bkm_Rating,bkm_PwdReminder,bkm_Notes';
 

@@ -74,7 +74,7 @@ if(@$_REQUEST['u']){
     if ($res && $res[1] > 0) { //already bookmarked
         $params = array('recID'=>$res[1]);
         //print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
-    }else if (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
+    }elseif (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
 //----- 2. find similar url - show disambiguation dialog -----------------------------------------
 
         //redirect to disambiguation
@@ -158,7 +158,7 @@ if(@$_REQUEST['u']){
         if(!($params['rec_rectype']>0)){
            if(defined('RT_INTERNET_BOOKMARK')) {
                 $params['rec_rectype']  = RT_INTERNET_BOOKMARK;
-           }else if(defined('RT_NOTE')) {
+           }elseif(defined('RT_NOTE')) {
                $params['rec_rectype']  = RT_NOTE;
            }
         }
@@ -172,7 +172,7 @@ else{
     if($rec_rectype!=null){
         $rec_rectype = ConceptCode::getRecTypeLocalID($rec_rectype);
         $params['rec_rectype'] = $rec_rectype;
-    }else if(intval(@$_REQUEST['recID'])>0){
+    }elseif(intval(@$_REQUEST['recID'])>0){
         $params['recID'] = intval($_REQUEST['recID']);
     }
 }

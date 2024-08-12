@@ -110,10 +110,10 @@ protected function _outputPrepareFields($params){
 
                 if($col_name=='rec_Tags'){
                     $need_tags = true;
-                }else if($rt_id==0){
+                }elseif($rt_id==0){
                     if(strpos($col_name,'rec_')===0){
                         array_push($this->retrieve_header_fields, $col_name);
-                    }else if(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
+                    }elseif(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
                         array_push($this->retrieve_detail_fields, substr($col_name, 2));
                     }else{
                         if($col_name === 'typename'){
@@ -147,7 +147,7 @@ protected function _outputPrepareFields($params){
 
         $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);
 
-    }else if($this->extended_mode==3){ //for media viewer
+    }elseif($this->extended_mode==3){ //for media viewer
 
         $this->retrieve_detail_fields = array('file');
         $this->retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
@@ -192,11 +192,11 @@ protected function _outputHeader(){
                      .($this->records_cnt_filtered>0?$this->records_cnt_filtered:$this->records_cnt)
                      .',"data":[');
 
-    }else if($this->datatable_session_id==1){
+    }elseif($this->datatable_session_id==1){
 
             fwrite($this->fd, '{"data": [');
 
-    }else if($this->is_restapi==1){
+    }elseif($this->is_restapi==1){
 
         if(count($this->records)==1){
             //fwrite($this->fd, '');
@@ -224,12 +224,12 @@ protected function _outputRecord($record){
 
         fwrite($this->fd, $this->comma.json_encode($feature));
 
-    }else if($this->extended_mode>0 && $this->extended_mode<3){ //with concept codes and labels
+    }elseif($this->extended_mode>0 && $this->extended_mode<3){ //with concept codes and labels
 
         $feature = $this->_getJsonFeature($record, $this->extended_mode);
         fwrite($this->fd, $this->comma.json_encode($feature));
 
-    }else if($this->extended_mode==3){
+    }elseif($this->extended_mode==3){
 
         $feature = self::_getMediaViewerData($record);
         if($feature){
@@ -278,7 +278,7 @@ protected function _outputFooter(){
 
         fwrite($this->fd, ']}');
 
-    }else if($this->is_restapi==1){
+    }elseif($this->is_restapi==1){
 
         if(count($this->records)==1){
             //fwrite($this->fd, '');
@@ -343,30 +343,30 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
         if ($column=='tags' || $column=='rec_Tags'){
             $value = recordSearchPersonalTags($this->system, $record['rec_ID']);
             $res[$col_name] = ($value==null)?'':implode(' | ', $value);
-        }else if(strpos($column,'rec_')===0){
+        }elseif(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];
-        }else if($column=='ids'){
+        }elseif($column=='ids'){
             $res[$col_name] = $record['rec_ID'];
-        }else if($column=='typeid'){
+        }elseif($column=='typeid'){
             $res[$col_name] = $record['rec_RecTypeID'];
-        }else if($column=='typename'){
+        }elseif($column=='typename'){
             if(self::$defRecTypes==null){
                 self::$defRecTypes = dbs_GetRectypeStructures($this->system, null, 0);
             }
             $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];
-        }else if($column=='added'){
+        }elseif($column=='added'){
             $res[$col_name] = $record['rec_Added'];
-        }else if($column=='modified'){
+        }elseif($column=='modified'){
             $res[$col_name] = $record['rec_Modified'];
-        }else if($column=='addedby'){
+        }elseif($column=='addedby'){
             $res[$col_name] = $record['rec_AddedBy'];
-        }else if($column=='url'){
+        }elseif($column=='url'){
             $res[$col_name] = $record['rec_URL'];
-        }else if($column=='notes'){
+        }elseif($column=='notes'){
             $res[$col_name] = $record['rec_ScratchPad'];
-        }else if($column=='owner'){
+        }elseif($column=='owner'){
             $res[$col_name] = $record['rec_OwnerUGrpID'];
-        }else if($column=='visibility'){
+        }elseif($column=='visibility'){
             $res[$col_name] = $record['rec_NonOwnerVisibility'];
         }else{
             $res[$col_name] = '';//placeholder
@@ -447,19 +447,19 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
                     }
                     $field_value = $record['rec_Title'];//$link_rec_Id Record ID replaced with Record Title
 
-                }else if ($field_type=='file'){
+                }elseif($field_type=='file'){
 
                     $field_value = $field_value['file']['ulf_ObfuscatedFileID'];
 
-                }else if ($field_type=='geo'){
+                }elseif($field_type=='geo'){
 
                     $field_value = @$field_value['geo']['wkt'];
 
-                }else if (($field_type=='enum' || $field_type=='relationtype')){
+                }elseif (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
 
-                }else if ($this->datatable_session_id > 0 && $field_type=='date'){
+                }elseif($this->datatable_session_id > 0 && $field_type=='date'){
 
                     $temporal = new Temporal($field_value);
                     $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
@@ -598,10 +598,10 @@ private static function _getMediaViewerData($record){
 
             if(strpos($mimeType,"video/")===0){
                 $resource_type = 'Video';
-            }else if(strpos($mimeType,"audio/")===0){
+            }elseif(strpos($mimeType,"audio/")===0){
                 if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
-            }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
                 $resource_type = 'Image';
             }
 

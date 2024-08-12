@@ -64,7 +64,7 @@ use PHPMailer\PHPMailer\Exception;
                         'Cannot send email. Recipient email address is not defined');
             }
             return false;
-        }else if(!is_array($email_to)){
+        }elseif(!is_array($email_to)){
             $email_to = array($email_to);
         }
 
@@ -202,7 +202,7 @@ use PHPMailer\PHPMailer\Exception;
 
             $problem = (($email_to==null) || (trim($email_to)==='')) ? "is not defined" : "$email_to is invalid";
             $res = "Mail send failed. Recipient email address $problem.";
-        }else if(!$email_text){
+        }elseif(!$email_text){
             $res = "Mail send failed. Message text is not defined.";
         }else {
 
@@ -239,7 +239,7 @@ use PHPMailer\PHPMailer\Exception;
                     $email_header = $email_header." charset=utf-8\r\n";
                     $email_title = '=?utf-8?B?'.base64_encode($email_title).'?=';
                 }
-            }else if($is_utf8){
+            }elseif($is_utf8){
                 $email_header = $email_header."\r\nContent-Type: text/plain; charset=utf-8\r\n";
                 $email_title = '=?utf-8?B?'.base64_encode($email_title).'?=';
             }

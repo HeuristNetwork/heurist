@@ -144,7 +144,7 @@ protected function _outputPrepare($data, $params){
 
     if(@$data['memory_warning']){ //memory overflow in recordSearch
         $this->records = array();//@todo
-    }else if(!(@$data['reccount']>0)){   //empty response
+    }elseif(!(@$data['reccount']>0)){   //empty response
         $this->records = array();
     }else{
         $this->records = $data['records'];
@@ -187,9 +187,9 @@ protected function _outputPrepare($data, $params){
 
         if($params['linkmode']=='none'){
             $max_depth = 0;
-        }else if($params['linkmode']=='direct'){
+        }elseif($params['linkmode']=='direct'){
             $direction = 1; //direct only
-        }else if($params['linkmode']=='direct_links'){
+        }elseif($params['linkmode']=='direct_links'){
             $direction = 1; //direct only
             $no_relationships = true;
         }
@@ -233,7 +233,7 @@ protected function _outputPrepareFields($params){
 
                 if(is_numeric($col_name) && $col_name>0){
                     array_push($this->retrieve_detail_fields, $col_name);
-                }else if(strpos($col_name,'rec_')===0){
+                }elseif(strpos($col_name,'rec_')===0){
                     array_push($this->retrieve_header_fields, $col_name);
                 }
 
@@ -310,7 +310,7 @@ public function output($data, $params){
     if($format==null) {$format = 'xml';}
     if($format=='json' || $format=='geojson' || $format=='iiif' || @$params['serial_format']=='json'){
         $mimeType = 'Content-Type: application/json';
-    }else if(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
+    }elseif(@$params['serial_format']=='ntriples' || @$params['serial_format']=='turtle'){ //$format=='rdf'
         $mimeType = 'Content-Type: text/html';
     }else {
         $mimeType = 'Content-Type: text/xml';
@@ -425,7 +425,7 @@ public function output($data, $params){
                     header('Access-Control-Allow-Credentials: true');
                     header('Access-Control-Max-Age: 5');// default value 5 sec
                     //header('Access-Control-Max-Age: 86400');// cache for 1 day
-                /*}else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+                /*}elseif($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
                     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
                         // may also be using PUT, PATCH, HEAD etc

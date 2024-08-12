@@ -160,11 +160,11 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //$message = $login_warning
     //include_once ERROR_REDIR;
     exit;
-}else if(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
+}elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
     include_once ERROR_REDIR;
     exit;
-}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
+}elseif(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
     include_once ERROR_REDIR;
     exit;

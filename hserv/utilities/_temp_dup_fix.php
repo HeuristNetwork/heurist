@@ -28,7 +28,7 @@ $isSystemInited = $system->init(@$_REQUEST['db'], true);
 if( !$isSystemInited ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
     $err = $system->getError();
     $error_msg = @$err['message'];
-}else if(!$system->has_access()){
+}elseif(!$system->has_access()){
     $error_msg = 'You must be logged in';
 }
 if(isset($error_msg)){

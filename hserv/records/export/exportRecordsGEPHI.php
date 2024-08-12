@@ -269,7 +269,7 @@ private function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction)
                 if($dtID > 0) {
                     $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
                     $relationID = $dtID;
-                }else if($trmID > 0) {
+                }elseif($trmID > 0) {
                     $relationName = self::$defTerms->getTermLabel($trmID, true);
                     $relationID = $trmID;
                 }
@@ -350,7 +350,7 @@ private function _processFieldData($dty_ID, &$values){
                 if(is_numeric($value)){
                     $value = intval($value);
                     $value = mysql__select_value($this->mysqli, "SELECT rec_Title FROM Records WHERE rec_ID = ?", ['i', $value]);
-                }else if(is_array($value)){
+                }elseif(is_array($value)){
                     $value = $value["title"];
                 }
 

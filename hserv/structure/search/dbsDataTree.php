@@ -58,7 +58,7 @@
 
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
-        }else if(!is_array($fieldtypes)){
+        }elseif(!is_array($fieldtypes)){
             $fieldtypes = explode(",",$fieldtypes);
         }
 
@@ -290,7 +290,7 @@
                 array_push($children, __getRecordTypeTree($system, 'Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
             }
 
-        }else if($recTypeId=="Relationship") {
+        }elseif($recTypeId=="Relationship") {
 
             $res['title'] = "Relationship";
             $res['type'] = "relationship";
@@ -415,7 +415,7 @@
                 $max_depth = 2;
                 if ($mode==6 || $mode==4){
                    $max_depth = 3;
-                }else if ($mode==5){ //make it 1 for lazy load
+                }elseif($mode==5){ //make it 1 for lazy load
                    $max_depth = 1;
                 }
 
@@ -483,7 +483,7 @@
                                             $res = $rt_res;
                                             $res['constraint'] = 1;
                                             $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
-                                        }else if($rt_res!=null){
+                                        }elseif($rt_res!=null){
                                             array_push($res['children'], $rt_res);
                                             $res['constraint'] = count($rt_res);
                                         }

@@ -233,12 +233,12 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
             if(strpos($mimeType,"youtube")>0 || strpos($mimeType,"vimeo")>0) {continue;}
 
             $resource_type = 'Video';
-        }else if(strpos($mimeType,"audio/")===0){
+        }elseif(strpos($mimeType,"audio/")===0){
 
             if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
-        }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+        }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
             $resource_type = 'Image';
         }
 
@@ -296,7 +296,7 @@ public static function getIiifResource($system, $record, $iiif_version, $ulf_Obf
                         $mimeType = @$profile[1]['formats'][0];
                         if($mimeType) {$mimeType = 'image/'.$mimeType;}
                         $profile = @$profile[0];
-                    }else if($profile==null){
+                    }elseif($profile==null){
                         $profile = 'level1';
                     }
                     if(!$mimeType) {$mimeType= 'image/jpeg';}

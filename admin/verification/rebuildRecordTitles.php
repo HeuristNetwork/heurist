@@ -302,7 +302,7 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
             //not changed
             $unchanged_count++;
 
-        }else if (! preg_match('/^\\s*$/', $new_title)) {    // if new title is blank, leave the existing title
+        }elseif (! preg_match('/^\\s*$/', $new_title)) {    // if new title is blank, leave the existing title
             //$updates[$rec_id] = $new_title;
             $updates[] = $rec_id;
             $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
@@ -353,13 +353,13 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $q_updates = '';
     if(count($updates)>1000){
         $q_updates = 'sortby:-m';//'&limit='.count($updates);
-    }else if(count($updates)>0){
+    }elseif(count($updates)>0){
         $q_updates = 'ids:'.implode(',',$updates);
     }
     $q_blanks = '';
     if(count($blanks)>2000){
         $q_blanks = 'ids:'.array_slice($blanks, 0, 2000);
-    }else if(count($blanks)>0){
+    }elseif(count($blanks)>0){
         $q_blanks = 'ids:'.implode(',',$blanks);
     }
 

@@ -72,13 +72,13 @@ class DbRecThreadedComments extends DbEntityBase
 
             $this->data['details'] = 'cmt_ID';
 
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list'){
 
             $needRecords = (@$this->data['details']=='list');
 
             $this->data['details'] = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,SUBSTRING(cmt_Text,1,50) as cmt_Text,cmt_Modified';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'cmt_ID,cmt_RecID,cmt_ParentCmtID,cmt_OwnerUgrpID,cmt_Text,cmt_Modified';
 

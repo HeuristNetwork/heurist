@@ -69,11 +69,11 @@ if($system->init(@$_REQUEST['db'])){
     if($response==null){
         if ( !$system->has_access() ) { //not logged in
                 $response = $system->addError(HEURIST_REQUEST_DENIED);
-        }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
+        }elseif($entity_name=='sysGroups' || $entity_name=='sysUsers') {
                 if(!$system->has_access($recID)){ //only user or group admin
                   $response = $system->addError(HEURIST_REQUEST_DENIED);
                 }
-        }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
+        }elseif(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
         { //for all other entities other than recUploadedFile must be admin of dbowners group
                 if(!$system->is_admin()){
                   $response = $syfstem->addError(HEURIST_REQUEST_DENIED);
@@ -190,7 +190,7 @@ if($response!=null){
                 );
 
     }
-    else if($entity_name=="recUploadedFiles"){
+    elseif($entity_name=="recUploadedFiles"){
 
         $options = array(
                 'upload_dir' => HEURIST_SCRATCH_DIR,
@@ -320,7 +320,7 @@ if($response!=null){
                     }else{
                         $file->ulf_ID = $ret;
                     }
-                }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
+                }elseif(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
 
                     $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
                     $img = UImage::createFromString($file->type?$file->type:'XXX!');
@@ -330,7 +330,7 @@ if($response!=null){
                 }
 
             }
-            else if($entity_name=="temp" && $is_autodect_csv) {
+            elseif($entity_name=="temp" && $is_autodect_csv) {
 
                 $filename = HEURIST_FILESTORE_DIR.'scratch/'.basename($file->original_name);
 

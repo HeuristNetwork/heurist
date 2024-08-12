@@ -65,7 +65,7 @@ if($is_included){
         <?php
         exit;
         }
-    }else if(!$system->is_admin()){ //  $system->is_dbowner()
+    }elseif(!$system->is_admin()){ //  $system->is_dbowner()
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
         exit;
     }
@@ -92,7 +92,7 @@ if(@$_REQUEST['all']==1){
     //scan all databases
     $is_all_databases = true;
     $databases = mysql__getdatabases4($mysqli, true);
-}else if(@$_REQUEST['db']){
+}elseif(@$_REQUEST['db']){
     list($db_full, $db) = mysql__get_names($_REQUEST['db']);
     $databases = array($db_full);
 }

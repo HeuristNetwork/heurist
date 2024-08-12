@@ -109,7 +109,7 @@ protected function _outputPrepare($data, $params){
                             if($code=='all'){
                                 //search all geofields
                                 $this->search_all_geofields = true;
-                            }else if(is_array($code)){
+                            }elseif(is_array($code)){
                                 if(!@$code['q']){
                                     array_push($this->find_by_geofields,$code['id']);
                                 }else{
@@ -372,16 +372,16 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                     unset($val['fullPath']);
                     unset($val['ulf_Parameters']);
 
-                }else if(@$value['id']){ //resource
+                }elseif(@$value['id']){ //resource
                     $val = $value['id'];
-                }else if(@$value['geo']){
+                }elseif(@$value['geo']){
 
                     if($this->find_by_geofields==null || in_array($dty_ID, $this->find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
                         /*if($value['geo']['type']=='r'){
                         //@todo convert rect to polygone
-                        }else if($value['geo']['type']='c'){
+                        }elseif($value['geo']['type']='c'){
                         //@todo convert circle to polygone
                         }*/
                         try{
@@ -403,9 +403,9 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                 if($field_type=='date' || $field_type=='year'){
                     if($dty_ID==DT_START_DATE){
                         $date_start = $value;
-                    }else if($dty_ID==DT_END_DATE){
+                    }elseif($dty_ID==DT_END_DATE){
                         $date_end = $value;
-                    }else if($value!=null){
+                    }elseif($value!=null){
                         //parse temporal
                         $ta = new Temporal($value);
                         $ta = $ta->getTimespan(true);
@@ -415,13 +415,13 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                             $timevalues_dty[] = $dty_ID;
                         }
                     }
-                }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
+                }elseif(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);
-                //}else if(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
+                //}elseif(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
                 //    $ext_description = $value;
-                }else if(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
+                }elseif(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
                     $res['properties']['rec_MinZoom'] = $value;
-                }else if(defined('DT_MAXIMUM_ZOOM_LEVEL') && $dty_ID==DT_MAXIMUM_ZOOM_LEVEL){
+                }elseif(defined('DT_MAXIMUM_ZOOM_LEVEL') && $dty_ID==DT_MAXIMUM_ZOOM_LEVEL){
                     $res['properties']['rec_MaxZoom'] = $value;
                 }
                 $val = $value;
@@ -465,7 +465,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         if($ext_description) {$res['properties']['description'] = $ext_description;}
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
-    }else if($detail_mode==1){
+    }elseif($detail_mode==1){
         //details are inline
         $det = $res['properties']['details'];
         for($k=0; $k<count($det); $k++){
@@ -492,7 +492,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         }
                     }
                 }
-            }/*else if (is_numeric($code) && intval($code)>0){
+            }/*elseif (is_numeric($code) && intval($code)>0){
                 if(@$record['details'][$code]['geo']){
                             $wkt = $record['details'][$code]['geo']['wkt'];
                             $json = self::_getJsonFromWkt($wkt, $simplify);
@@ -533,17 +533,17 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
                                if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
                                     $point1[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
                                     $point0[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
                                     $point1[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
                                     $point0[] = $json;
-                               }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
+                               }elseif(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
                                     $points[] = $json;
                                }
                            }
-                       }else if($value['geo']['relationID']>0){
+                       }elseif($value['geo']['relationID']>0){
                            $geovalues_dty[] = 'relation:'.$value['geo']['relationID'];
                        }
                     }
@@ -583,7 +583,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         }
                     }
 
-                }else if(count($point0)==count($point1)){
+                }elseif(count($point0)==count($point1)){
                     //adds lines from start to end
                     foreach($point0 as $idx=>$pnt){
                         $path['coordinates'][] = array($pnt['coordinates'], $point1[$idx]['coordinates']);
@@ -619,7 +619,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
     if(is_array($geovalues)){
         if(count($geovalues)>1){
             $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
-        }else if(count($geovalues)==1){
+        }elseif(count($geovalues)==1){
             $res['geometry'] = $geovalues[0];
         }
         if($separate_geo_by_dty){
@@ -700,11 +700,11 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
 
                         simplifyCoordinates($json['coordinates']);
 
-                    } else if($json['type']=='Polygon'){
+                    } elseif($json['type']=='Polygon'){
                         for($idx=0; $idx<count($json['coordinates']); $idx++){
                             simplifyCoordinates($json['coordinates'][$idx]);
                         }
-                    } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                    } elseif ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                     {
                         for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
                             for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points

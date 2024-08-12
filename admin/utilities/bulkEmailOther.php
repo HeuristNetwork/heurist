@@ -103,7 +103,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
   while($email_dtl = $detail_rtn->fetch_row()){
   	if($email_dtl[1] == $shortsum_detiltype_id){
   		$email_body = $email_dtl[0];
-  	}else if($email_dtl[1] == $title_detailtype_id){
+  	}elseif($email_dtl[1] == $title_detailtype_id){
   		$email_title = $email_dtl[0];
   	}
   }
@@ -115,7 +115,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 
-} else if(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
+} elseif(isset($_REQUEST['db_filtering'])) { /* Get a list of DBs based on the list of provided filters, first search gets all dbs */
 
 	$db_request = $_REQUEST['db_filtering'];
 	$dbs = array();// list of databases
@@ -171,7 +171,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 		$details = getDatabaseDetails($mysqli, $dbs);
 		$data['details'] = $details;
 
-	} else if(is_array($db_request) && count($db_request)==4){ // Do filtering, record count and last modified
+	} elseif(is_array($db_request) && count($db_request)==4){ // Do filtering, record count and last modified
 
 		$count = intval($db_request['count']);
 
@@ -234,7 +234,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 
-} else if(isset($_REQUEST['user_count']) && isset($_REQUEST['db_list'])) { // Get a count of distinct users
+} elseif(isset($_REQUEST['user_count']) && isset($_REQUEST['db_list'])) { // Get a count of distinct users
 
 	$user_request = $_REQUEST['user_count'];
 	$dbs = $_REQUEST['db_list'];
@@ -251,18 +251,18 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 		if($user_request == "owner"){ // Owners
 			$where_clause = "WHERE ugr.ugr_ID = 2";
-		}else if($user_request == "manager"){ // Admins of Database Managers Workgroup
+		}elseif($user_request == "manager"){ // Admins of Database Managers Workgroup
 
 			$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
 
-			}else if($user_request == "admin"){ // Admins for ALL workgroups
+			}elseif($user_request == "admin"){ // Admins for ALL workgroups
 
 				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN
 		  		 (SELECT ugr_ID
 			   		  FROM `" . $db . "`.sysUGrps
 			   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
 
-		}else if($user_request == "user"){ // ALL users
+		}elseif($user_request == "user"){ // ALL users
 			$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
 		}else{
 
@@ -305,7 +305,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 
-} else if(isset($_REQUEST['rec_count']) && isset($_REQUEST['db_list'])){ // Get a count of records
+} elseif(isset($_REQUEST['rec_count']) && isset($_REQUEST['db_list'])){ // Get a count of records
 
 	$dbs = $_REQUEST['db_list'];
 	if(!is_array($dbs)){
@@ -334,7 +334,7 @@ if(isset($_REQUEST['get_email']) && isset($_REQUEST['recid'])) {	/* Get the Titl
 
 	print $rtn;
 
-} else if(isset($sysadmin_pwd)) { // Verify Admin Password
+} elseif(isset($sysadmin_pwd)) { // Verify Admin Password
 
 	if(!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
 		$data = true;

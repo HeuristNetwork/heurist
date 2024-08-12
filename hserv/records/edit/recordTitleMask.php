@@ -209,13 +209,13 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
             //ERROR
             if($rep_mode==ERROR_REP_WARN){
                 return TITLEMASK_ERROR_MSG;
-            }else if($rep_mode==ERROR_REP_MSG){
+            }elseif($rep_mode==ERROR_REP_MSG){
                 return $value;
             }else{
                 $replacements[$matches[1][$i]] = "";
                 $fields_err++;//return "";
             }
-        }else if (null==$value || trim($value)==""){
+        }elseif (null==$value || trim($value)==""){
             $replacements[$matches[1][$i]] = "";
             $fields_blank++;
 
@@ -286,7 +286,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
                     if($cond_replace === null){ // default, replace with empty
                         $cond_replace = '';
                     }
-                }else if(count($cond_parts) == 1 || count($cond_parts) == 2){ // original method
+                }elseif(count($cond_parts) == 1 || count($cond_parts) == 2){ // original method
 
                     // retrieve proceeding field
                     preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
@@ -294,12 +294,12 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
 
                     if(!empty($new_str)){
                         $cond_replace = $cond_parts[0] . ' ' . ($str_maxlen > 0 && mb_strlen($new_str) > $str_maxlen ? mb_substr($new_str, 0, $str_maxlen) . '...' : $new_str);
-                    }else if(empty($cond_parts[1])){
+                    }elseif(empty($cond_parts[1])){
                         $cond_replace = '';
                     }else{
                         $cond_replace = $cond_parts[1];
                     }
-                }else if(count($cond_parts) == 0 && $str_maxlen > 0){
+                }elseif(count($cond_parts) == 0 && $str_maxlen > 0){
 
                     // retrieve proceeding field
                     preg_match("/\[[^\[\]]+?\]/", $cond_str, $cond_field);
@@ -345,7 +345,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
 
             if($rep_mode==ERROR_REP_SILENT){
                 $title = self::__get_forempty($rec_id, $rt);
-            }else if($rep_mode==ERROR_REP_MSG){
+            }elseif($rep_mode==ERROR_REP_MSG){
                 return array(TITLEMASK_EMPTY_MSG);
             }else{
                 return TITLEMASK_EMPTY_MSG;
@@ -407,7 +407,7 @@ private static function __get_detail_types() {
                 if (is_numeric($row['dty_OriginatingDBID']) && $row['dty_OriginatingDBID']>0 &&
                 is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
                     $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
-                } else if (self::$db_regid>0) {
+                } elseif (self::$db_regid>0) {
                     $dt_cc = "" . self::$db_regid . "-" . $row['dty_ID'];
                 } else {
                     $dt_cc = $row['dty_ID'];
@@ -460,7 +460,7 @@ private static function __get_rec_detail_types($rt) {
                 is_numeric($row['dty_IDInOriginatingDB']) && $row['dty_IDInOriginatingDB']>0) {
 
                     $dt_cc = "" . $row['dty_OriginatingDBID'] . "-" . $row['dty_IDInOriginatingDB'];
-                } else if (self::$db_regid>0) {
+                } elseif (self::$db_regid>0) {
                     $dt_cc = "" . self::$db_regid . "-" . $row['dty_ID'];
                 } else {
                     $dt_cc = $row['dty_ID'];
@@ -506,7 +506,7 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
     $constr_ids = prepareIds($constr_ids);
     if(count($constr_ids)==1){
         $constr_ids = '='.$constr_ids[0];
-    }else if(count($constr_ids)>1){
+    }elseif(count($constr_ids)>1){
         $constr_ids = ' IN ('.implode(',',$constr_ids).')';
     }else{
         $constr_ids = null;
@@ -608,7 +608,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 
     if($enum_param_name==null || strcasecmp($enum_param_name,'term')==0){
         $enum_param_name = "label";
-    }else if(strcasecmp($enum_param_name,'internalid')==0){
+    }elseif(strcasecmp($enum_param_name,'internalid')==0){
         $enum_param_name = "id";
     }
 
@@ -702,15 +702,15 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
             if(!$rec_values){
                 return "";
-            }else if (strcasecmp($rdt_id,'id')==0){
+            }elseif (strcasecmp($rdt_id,'id')==0){
                 return $rec_values['rec_ID'];
-            }else if (strcasecmp($rdt_id,'rectitle')==0) {
+            }elseif (strcasecmp($rdt_id,'rectitle')==0) {
                 return $rec_values['rec_Title'];
-            }else if (strcasecmp($rdt_id,'rectypeid')==0) {
+            }elseif (strcasecmp($rdt_id,'rectypeid')==0) {
                 return $rec_values['rec_RecTypeID'];
-            }else if (strcasecmp($rdt_id,'rectypename')==0) {
+            }elseif (strcasecmp($rdt_id,'rectypename')==0) {
                 return $rec_values['rty_Name'];
-            }else if (strcasecmp($rdt_id,'modified')==0) {
+            }elseif (strcasecmp($rdt_id,'modified')==0) {
                 return $rec_values['rec_Modified'];
             }
 
@@ -725,11 +725,11 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     $found = true;
                     if($dt_type=="enum" || $dt_type=="relationtype"){
                         $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
-                    }else if($dt_type=='date'){
+                    }elseif($dt_type=='date'){
                         $value = Temporal::toHumanReadable(trim($detail['dtl_Value']));
-                    }else if($dt_type=="file"){
+                    }elseif($dt_type=="file"){
                         $value = self::__get_file_name(intval($detail['dtl_UploadedFileID']));
-                    }else if($dt_type=='freetext' || $dt_type=='blocktext'){
+                    }elseif($dt_type=='freetext' || $dt_type=='blocktext'){
                         list(, $value) = extractLangPrefix($detail['dtl_Value']);// remove possible language prefix
                     }else{
                         $value = $detail['dtl_Value'];
@@ -737,7 +737,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                     if($value!=null && $value!=''){
                         array_push($res, $value);
                     }
-                }else if($found){
+                }elseif($found){
                     break;
                 }
             }
@@ -746,9 +746,9 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
         if(count($res)==0){
             return "";
-        /*}else if ($dt_type == 'file'){
+        /*}elseif($dt_type == 'file'){
             return count($res)." file".(count($res)>1?"s":"");*/
-        }else if ($dt_type == 'geo') {
+        }elseif($dt_type == 'geo') {
             return count($res)." geographic object".(count($res)>1?"s":"");
         }else{
             return implode(",", $res);
@@ -760,7 +760,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
         strcasecmp($rdt_id,'rectitle')==0 ||
         strcasecmp($rdt_id,'modified')==0){
             return $rdt_id;
-        }else if($mode==1){ //convert to
+        }elseif($mode==1){ //convert to
             return $rdt_id; //concept code
         } else {
             return self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');//original name (with capital chars)
@@ -797,7 +797,7 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     //search in record type structure
     if(@$rdr[$search_fieldname]){  //search by dty_ID, rst_DisplayName, dty_ConceptCode
         return $rdr[$search_fieldname][$result_fieldname];
-    }else if($mode!=1) { //allow to search among all fields
+    }elseif($mode!=1) { //allow to search among all fields
         //if not found in structure - search among all detail types
         $rdt = self::__get_detail_types();
         if(@$rdt[$search_fieldname]){
@@ -846,7 +846,7 @@ private static function __get_rt_id( $rt_search ){
                 if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
                 is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
                     $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
-                } else if (self::$db_regid>0) {
+                } elseif (self::$db_regid>0) {
                     $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
                 } else {
                     $rt_cc = $row['rty_ID'];
@@ -876,13 +876,13 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
     if(strcasecmp($field_name,'Record Title')==0){
         $field_name = 'rectitle';
-    }else if(strcasecmp($field_name,'Record ID')==0){
+    }elseif(strcasecmp($field_name,'Record ID')==0){
         $field_name = 'id';
-    }else if(strcasecmp($field_name,'Record TypeID')==0){
+    }elseif(strcasecmp($field_name,'Record TypeID')==0){
         $field_name = 'rectypeid';
-    }else if(strcasecmp($field_name,'Record TypeName')==0){
+    }elseif(strcasecmp($field_name,'Record TypeName')==0){
         $field_name = 'rectypename';
-    }else if(strcasecmp($field_name,'Record Modified')==0){
+    }elseif(strcasecmp($field_name,'Record Modified')==0){
         $field_name = 'modified';
     }
 
@@ -985,7 +985,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 if(!$inner_field_name || strcasecmp($inner_field_name,'label')==0){
                     $inner_field_name = "term";
-                }else if(strcasecmp($inner_field_name,'id')==0){
+                }elseif(strcasecmp($inner_field_name,'id')==0){
                     $inner_field_name = "internalid";
                 }
 
@@ -1017,7 +1017,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                                             + "text, please let us know with name of database, record type and field name,<br>"
                                             + "as this should not happen.");
                 }
-            }else if($dt_type== 'resource'){
+            }elseif($dt_type== 'resource'){
 
 
             }
@@ -1166,7 +1166,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if(is_array($fld_value)){
                         //for multiconstraint it may return error since field may belong to different rt
                         return '';//$fld_value; //ERROR
-                    }else if($fld_value) {
+                    }elseif($fld_value) {
                         array_push($res, $fld_value);
                     }
                 }
@@ -1197,7 +1197,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     if(is_array($inner_rdt)){
                         //it may be found in another record type for multiconstaints
                         $field_not_found = $inner_rdt; //ERROR
-                    }else if ($inner_rdt) {
+                    }elseif($inner_rdt) {
 
                         if($mode==1){
                             $s1 = $rdt_id; //parent detail id

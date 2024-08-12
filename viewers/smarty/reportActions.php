@@ -261,7 +261,7 @@ class ReportActions {
                             if(substr($part, -1)=='s'){
                                     $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
-                            }else if($this->endsWith($part,'_originalvalue')){
+                            }elseif($this->endsWith($part,'_originalvalue')){
                                     $suffix = '_originalvalue';
                                     $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{

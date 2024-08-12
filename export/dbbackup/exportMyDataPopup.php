@@ -61,13 +61,13 @@ if($mode>1){
 
     if($mode=='2' && file_exists(FOLDER_BACKUP.'.'.$format) ){ //archived entire folder
         downloadFile($mime, FOLDER_BACKUP.'.'.$format);//see recordFile.php
-    }else if($mode=='3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)){  //archived sql dump
+    }elseif($mode=='3' && file_exists(FOLDER_SQL_BACKUP.'.'.$format)){  //archived sql dump
         downloadFile($mime, FOLDER_SQL_BACKUP.'.'.$format);
-    }else if($mode=='5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)){  //archived hml file
+    }elseif($mode=='5' && file_exists(FOLDER_HML_BACKUP.'.'.$format)){  //archived hml file
         downloadFile($mime, FOLDER_HML_BACKUP.'.'.$format);
-    }else if($mode=='6' && folderExists(FOLDER_TSV_BACKUP, false)){  //archived tsv sub directory
+    }elseif($mode=='6' && folderExists(FOLDER_TSV_BACKUP, false)){  //archived tsv sub directory
         downloadFile($mime, FOLDER_TSV_BACKUP.'.'.$format);
-    }else if($mode=='4'){  //cleanup backup folder on exit
+    }elseif($mode=='4'){  //cleanup backup folder on exit
         folderDelete2(HEURIST_FILESTORE_DIR.'backup/', false);
     }
     exit;
@@ -653,7 +653,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                             $field_types[ $row['dty_ID'] ] = [ 'type' => $row['dty_Type'] ];
 
-                        }else if($table == 'defRecStructure'){
+                        }elseif($table == 'defRecStructure'){
 
                             $rty_ID = $row['rst_RecTypeID'];
                             $dty_ID = $row['rst_DetailTypeID'];
@@ -723,7 +723,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
                         echo_flush2("Unable to retrieve records for record type #$rty_ID<br>");
                         continue;
-                    }else if($response['data']['reccount'] == 0){
+                    }elseif($response['data']['reccount'] == 0){
                         continue;
                     }
 
@@ -907,7 +907,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
         if($res_hml===true){ ?>
         <br><br>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_hml.<?php echo $format; ?>?mode=5&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
-            target="_blank" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $format;?> file only</a>
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $format;?> file only</a>
     <?php }else{ ?>
         <br><br>
         <div>Failed to create / set up a standalone HML file. <?php echo $res_hml;?></div>
@@ -918,7 +918,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
         if($res_tsv===true){ ?>
         <br><br>
         <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_tsv.<?php echo $format; ?>?mode=6&db=<?php echo HEURIST_DBNAME.$is_zip;?>"
-            target="_blank" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $format;?> folder only</a>
+            target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $format;?> folder only</a>
     <?php }else{ ?>
         <br><br>
         <div>Failed to create / set up a standalone TSV folder. <?php echo $res_tsv;?></div>
@@ -934,7 +934,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
     <?php
                 }
-                else if($is_repository){
+                elseif($is_repository){
                     //upload archive to repository
 
                     $repo_account = htmlspecialchars($_REQUEST['repo_account']);
@@ -956,7 +956,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $msg .= ' Please check the credentials within Design > External repositories.';
 
                         report_message($msg, true, true);
-                    }else if($repo == 'Nakala'){
+                    }elseif($repo == 'Nakala'){
                         // Title, Type, Alt Author, License, Created
 
                         $date = date('Y-m-d');

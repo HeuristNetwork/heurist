@@ -151,7 +151,7 @@
             if($key=='children'){
                 svsGetOrderFromTree($value, $order);
             }
-            else if (is_array($value) && @$value['key']>0 && @$value['folder']!==true)
+            elseif (is_array($value) && @$value['key']>0 && @$value['folder']!==true)
             {
                 array_push($order, intval($value['key']));
             }
@@ -180,7 +180,7 @@
             if (!$row) {
                 $system->addError(HEURIST_NOT_FOUND,
                     'Cannot duplicate filter criteria. Original filter not found');
-            }else if (!$system->is_member($row['svs_UGrpID'])) { //was has_access
+            }elseif (!$system->is_member($row['svs_UGrpID'])) { //was has_access
                 $system->addError(HEURIST_REQUEST_DENIED,
                     'Cannot duplicate filter criteria. Current user must be member for group');
             }else{
@@ -221,7 +221,7 @@
 
         if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
             $system->addError(HEURIST_INVALID_REQUEST, 'Name not defined');//for new
-        }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
+        }elseif(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
             $system->addError(HEURIST_INVALID_REQUEST, 'Query not defined');//for new
         }else{
 
@@ -237,7 +237,7 @@
                 $is_new = false;
                 if(is_array(@$record['svs_ID'])){
                     $rec_IDs = $record['svs_ID'];
-                }else if (@$record['svs_ID']>0){
+                }elseif (@$record['svs_ID']>0){
                     $rec_IDs = array($record['svs_ID']);
                 }else{
                     $rec_IDs = array(-1);//new
@@ -340,7 +340,7 @@
 
             if($id=="bookmark" || $id=="all"){
                 array_push( $personal_data, '"'.$id.'":'.json_encode($treedata) );
-            }else if(in_array($id, $ugr_groups)){
+            }elseif(in_array($id, $ugr_groups)){
                 //check date of modification
                 $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>$id, 'ugr_NavigationTree'=>json_encode($treedata) ));
                 if(!is_int($res)){
@@ -398,7 +398,7 @@
         //if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){
         if(is_array($groups) && count($groups)==1){
             $where = ' = '.$groups[0];
-        }else if(is_array($groups) && count($groups)>1){
+        }elseif(is_array($groups) && count($groups)>1){
             $where =  ' in ('.implode(',',$groups).')';
         }else {
             $where = ' = '.$ugrID; //only personal

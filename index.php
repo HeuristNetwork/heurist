@@ -63,7 +63,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
     }elseif(@$_REQUEST['format']){
         $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
-    }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
+    }elseif (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
     || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) )
     {
         $format = 'website';
@@ -83,7 +83,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         }
 
 
-    }else if (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
+    }elseif (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
         $format = 'web&field='.intval($_REQUEST['field']);
     }else{
         $format = 'xml';
@@ -93,7 +93,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
             .(@$_REQUEST['noheader']?'&noheader=1':''));
     return;
 
-}else if (@$_REQUEST['ent']){
+}elseif (@$_REQUEST['ent']){
 
     //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
@@ -107,20 +107,20 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         //download xml template for given db defintion
 
         if(@$_REQUEST['rty']) {$s = 'rty='.$_REQUEST['rty'];}
-        else if(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
-            else if(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
+        elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
+            elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
                 header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
-}else if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
+}elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
           array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
 
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
         $script_name = 'hserv/controller/fileGet.php';
-    }else if(array_key_exists('template',$_REQUEST))
+    }elseif(array_key_exists('template',$_REQUEST))
     {
         //execute smarty template
         $script_name = 'viewers/smarty/showReps.php';
@@ -136,7 +136,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
 
-}else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
+}elseif (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
     $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
     //default ext is html
@@ -167,7 +167,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         exit('Asset not found: '.htmlspecialchars($name));
     }
 
-}else if (@$_REQUEST['logo']){
+}elseif (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
     $mime_type = 'jpg';
     if(!$host_logo || !file_exists($host_logo)){

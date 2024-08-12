@@ -28,7 +28,7 @@ if( $system->init(@$_REQUEST['db']) ){
     if(!$system->is_admin()){
         $system->addError(HEURIST_REQUEST_DENIED,
             'To perform this action you must be logged in as Administrator of group \'Database Managers\'');
-    }else if(!@$_REQUEST['rtyID']){
+    }elseif(!@$_REQUEST['rtyID']){
         $system->addError(HEURIST_INVALID_REQUEST, 'Sorry, record type to duplicate has not been defined');
     }else{
 

@@ -198,7 +198,7 @@ if($init_client){
         print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
         print '</div></body></html>';
         exit;
-    }else if($res['message']){
+    }elseif($res['message']){
         print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
     }
 

@@ -396,13 +396,13 @@ if($step=="1"){  //first step - info about current status
     if($code>499 ){
         print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: $code.<br><br>"
         ."Please try this operation later.</div>";
-    }else if($code>399){
+    }elseif($code>399){
         $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br><br>";
         if($code==400 || $code==401 || $code==403){
             $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
-        }else if($code==404 ){
+        }elseif($code==404 ){
             $msg = $msg."Please verify Zotero User and Group ID in Database > Properties - values may be incorrect.";
-        }else if($code==407 ){
+        }elseif($code==407 ){
             $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
         }
         print $msg."</div>";
@@ -426,7 +426,7 @@ if($step=="1"){  //first step - info about current status
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
         }
     }
-}else if ($step=='2'){ //second step - sync
+}elseif($step=='2'){ //second step - sync
 
     $alldettypes = dbs_GetDetailTypes($system);
     $allterms = dbs_GetTerms($system);
@@ -702,7 +702,7 @@ if($step=="1"){  //first step - info about current status
 
                             $value = $trm_value;
 
-                        }else if ($dt_type=='resource'){
+                        }elseif($dt_type=='resource'){
 
                             // 7) store pointer titles in 'unresolved' pointers
                             if(!is_array($key)){ //by default
@@ -1205,7 +1205,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
             }
             $value = $trm_value;
 
-        }else if ($dt_type=='resource'){ //next level of reference
+        }elseif($dt_type=='resource'){ //next level of reference
 
             if(!is_array($recdata)){
 

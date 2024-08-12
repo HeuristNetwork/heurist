@@ -122,7 +122,7 @@ if(!defined('PDIR')){
 
                             if($trg_maj==1 && $src_min==2){
                                 $filename = $filename.'.php';
-                            }else if ($src_min==3 && $trg_sub==14){
+                            }elseif($src_min==3 && $trg_sub==14){
                                 $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
                             }else{
                                 $filename = $filename.'.sql';
@@ -133,7 +133,7 @@ if(!defined('PDIR')){
                                 if($trg_maj==1 && $src_min==2){
                                     include_once $filename;
                                     $rep = updateDatabseTo_v3($system);//PHP
-                                }else if($src_min==3 && $src_sub<$trg_sub){
+                                }elseif($src_min==3 && $src_sub<$trg_sub){
                                     if($src_sub<13){
                                         include_once $filename;
                                         $rep = updateDatabseTo_v1_3_12($system);
@@ -245,7 +245,7 @@ if(!defined('PDIR')){
 
                                                     $safety = substr($line,17);
 
-                                                }else if(strpos($line,"-- Description")===0){
+                                                }elseif(strpos($line,"-- Description")===0){
 
                                                     $description = substr($line,15);
                                                 }

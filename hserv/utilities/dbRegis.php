@@ -132,7 +132,7 @@ class DbRegis {
         global $system;
         if($error==null){
             $system->addErrorArr(self::$system->getError());//transfer from this $system
-        }else if (is_array($error)){
+        }elseif (is_array($error)){
             $system->addErrorArr($error);
         }else{
             $system->addError($error, $msg);

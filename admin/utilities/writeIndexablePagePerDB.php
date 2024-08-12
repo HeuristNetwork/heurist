@@ -52,7 +52,7 @@ if (@$argv) {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
-            } else if(strpos($argv[$i],'-db=')===0){
+            } elseif(strpos($argv[$i],'-db=')===0){
                 $ARGV['-db'] = substr($argv[$i],4);
             }
         } else {
@@ -129,7 +129,7 @@ if($is_dir_writable === -1){ // Create directory
     if($res !== ''){
         exit('Unable to create directory for Database Pages'.$eol.$res.$eol);
     }
-}else if($is_dir_writable === -2 || $is_dir_writable === -3){
+}elseif($is_dir_writable === -2 || $is_dir_writable === -3){
     $msg = $tabs0 . ($is_dir_writable === -2 ? 'Unable to write to directory for Database Pages' :
         'The Database Pages directory has been replaced by a file, that cannot be removed.').$eol.'Please remove it and run this script again.';
     exit($msg);

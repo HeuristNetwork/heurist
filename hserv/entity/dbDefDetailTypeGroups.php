@@ -71,20 +71,20 @@ class DbDefDetailTypeGroups extends DbEntityBase
 
             $this->data['details'] = 'dtg_ID';
 
-        //}else if(@$this->data['details']=='title'){
+        //}elseif(@$this->data['details']=='title'){
 
             //$this->data['details'] = 'dtg_Name';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'dtg_ID,dtg_Name';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'dtg_ID,dtg_Name,dtg_Description,dtg_Order,'
             .'(select count(dty_ID) from defDetailTypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             //$fields2 = array_keys($this->fields);
             //unset($fields2['dtg_FieldCount']);

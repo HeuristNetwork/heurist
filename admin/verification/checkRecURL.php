@@ -193,7 +193,7 @@ function checkURLs($system, $return_output, $verbose=false){
 
                 if($verbose){
                     print '  error:'.(isset($glb_curl_error)?$glb_curl_error:'').'<br>';
-                }else if(!$return_output){
+                }elseif(!$return_output){
 
                     $rec_url = htmlspecialchars($rec_url);
 

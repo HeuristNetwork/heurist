@@ -71,7 +71,7 @@ protected function _outputPrepare($data, $params)
 
         $ext_info = @$params['extinfo'];
         if($ext_info==null) {$ext_info = '0';}
-        else if($ext_info==='1') {$ext_info = '1111';}
+        elseif($ext_info==='1') {$ext_info = '1111';}
         if(strlen($ext_info)<4){
             $ext_info = str_pad($ext_info,4,'0');
         }
@@ -149,7 +149,7 @@ private function _prepareURI($surl, $original_dbid=null){
         //
         if(strpos($surl,'#')>0){
             list($uri, $type) = explode('#',$surl);
-        }else if(strpos($surl,'http://')===0 || strpos($surl,'https://')===0){
+        }elseif(strpos($surl,'http://')===0 || strpos($surl,'https://')===0){
             $parts = explode('/',$surl);
             $type = array_pop($parts);
             if($type=='') {$type = array_pop($parts);}
@@ -160,7 +160,7 @@ private function _prepareURI($surl, $original_dbid=null){
             $type = $surl;
             if(strpos($type,'rty-')===0 || strpos($type,'dty-')===0 || strpos($type,'trm-')===0){
                 $uri = HEURIST_REF.'schema/';
-            }else if($original_dbid!=null){
+            }elseif($original_dbid!=null){
 
                 if(is_string($original_dbid) && strpos($original_dbid,'-')>0){
                     list($dbid, $id) = explode('-', $original_dbid);
@@ -192,16 +192,16 @@ private function _prepareURI($surl, $original_dbid=null){
                         $ns .= $dbid;
                     }
 
-                }else if($uri=='https://www.ica.org/standards/RiC/ontology'){
+                }elseif($uri=='https://www.ica.org/standards/RiC/ontology'){
 
                     $ns = 'rico';
-                }else if($uri=='http://www.w3.org/2000/01/rdf-schema'){
+                }elseif($uri=='http://www.w3.org/2000/01/rdf-schema'){
                     $ns = 'rdfs';
-                }else if($uri=='https://www.omg.org/spec/LCC/Languages/ISO639-2-LanguageCodes'){
+                }elseif($uri=='https://www.omg.org/spec/LCC/Languages/ISO639-2-LanguageCodes'){
 
                     $ns = 'lcc-639-2';
 
-                }else if($uri=='http://xmlns.com/foaf/0.1/'){
+                }elseif($uri=='http://xmlns.com/foaf/0.1/'){
 
                     $ns = 'foaf';
 
@@ -210,15 +210,15 @@ private function _prepareURI($surl, $original_dbid=null){
 
                     /*  http://xmlns.com/foaf/0.1/familyName
 
-                    }else if($uri=='http://dbpedia.org/resource/Category:'){
+                    }elseif($uri=='http://dbpedia.org/resource/Category:'){
                     $ns = 'dbc';
-                    }else if($uri=='http://dbpedia.org/resource/'){
+                    }elseif($uri=='http://dbpedia.org/resource/'){
                     $ns = 'dbpedia';
 
-                    }else if($uri=='http://dbpedia.org/resource/'){
+                    }elseif($uri=='http://dbpedia.org/resource/'){
                     $ns = 'dbo';
 
-                    }else if($uri=='http://dbpedia.org/property/'){
+                    }elseif($uri=='http://dbpedia.org/property/'){
                     $ns = 'dbp';*/
                 }
 
@@ -375,9 +375,9 @@ private function _setResourceProps($record, &$resource){
                     continue;
                 }
                 /*
-                else if(@$value['id']){ //resource
+                elseif(@$value['id']){ //resource
                     $val = $value['id'];
-                }else if(@$value['geo']){
+                }elseif(@$value['geo']){
 
                     if($this->find_by_geofields==null || in_array($dty_ID, $this->find_by_geofields)){
 

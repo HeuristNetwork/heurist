@@ -19,7 +19,7 @@ if(@$_REQUEST['method']){
     if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {  //add
         if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
             $method = 'DELETE';
-        } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT' || $_SERVER['HTTP_X_HTTP_METHOD'] == 'PATCH') {
+        } elseif($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT' || $_SERVER['HTTP_X_HTTP_METHOD'] == 'PATCH') {
             $method = 'PUT';//replace
         } else {
             exitWithError('Unexpected Header', 400);
@@ -89,7 +89,7 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
         exitWithError('API Not Found', 400);
     }
 
-}else if(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
+}elseif(@$_REQUEST['db'] && @$requestUri[2]!=null){ //backward when database is parameter
 
     if(@$entities[$requestUri[2]]!=null){
         $requestUri = array(0, 'api', $_REQUEST['db'], $requestUri[2], @$requestUri[3]);
@@ -97,7 +97,7 @@ if(@$requestUri[1]!== 'api' || @$_REQUEST['ent']!=null){
         exitWithError('API Not Found', 400);
     }
 
-}else if(@$requestUri[2]!=null){
+}elseif(@$requestUri[2]!=null){
     $_REQUEST['db'] = $requestUri[2];
 }
 
@@ -146,7 +146,7 @@ if (@$requestUri[3]=='iiif') {
     }
 
 
-}else if (@$entities[@$requestUri[3]]=='System') {
+}elseif (@$entities[@$requestUri[3]]=='System') {
 
     include_once '../System.php';
 
@@ -169,7 +169,7 @@ if (@$requestUri[3]=='iiif') {
                     $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https, true );
         }
 
-    }else if($requestUri[3]==='logout'){
+    }elseif($requestUri[3]==='logout'){
         $system->doLogout();
     }
 
@@ -213,11 +213,11 @@ function exitWithError($message, $code){
 function getAction($method){
     if($method=='GET'){
         return 'search';
-    }else if($method=='POST'){ // add new
+    }elseif($method=='POST'){ // add new
         return 'add';
-    }else if($method=='PUT'){ // replace
+    }elseif($method=='PUT'){ // replace
         return 'save';
-    }else if($method=='DELETE'){
+    }elseif($method=='DELETE'){
         return 'delete';
     }else{
         return null;

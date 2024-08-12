@@ -85,7 +85,7 @@ class DbAnnotations extends DbEntityBase
                 $sjson['items'] = array();
             }
         }
-        else if($this->data['recID']=='edit'){
+        elseif($this->data['recID']=='edit'){
 
             $recordId = $this->findRecID_by_UUID($this->data['uuid']);
 
@@ -182,7 +182,7 @@ class DbAnnotations extends DbEntityBase
     private function _assignField(&$details, $id, $value){
         if(intval($id)>0){
             $id = intval($id);
-        }else if(defined($id)){
+        }elseif(defined($id)){
             $id = constant($id);
         }
             //$id = "t:".$id;
@@ -265,7 +265,7 @@ class DbAnnotations extends DbEntityBase
                         $field_type = $row[1];
                         if($row[4]){ //dtl_UploadedFileID
                             $value = $row[4];
-                        }else if($row[3]){
+                        }elseif($row[3]){
                             $value = $row[2].' '.$row[3];
                         }else{
                             $value = $row[2];

@@ -1291,15 +1291,15 @@ $website_languages_links ->#main-languages
         $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
         .appendTo($('#main-logo'));
 
-        let $img = $('#main-logo img');
-        if($img.length > 0 && !$img[0].complete && !window.hWin.HEURIST4.util.isempty($img.attr('src'))){
-            $img.css('max-height',$('#main-logo').css('max-height'));
-            $img.on('load', () => {
+        let img = $('#main-logo img');
+        if(img.length > 0 && !img[0].complete && !window.hWin.HEURIST4.util.isempty(img.attr('src'))){
+            img.css('max-height',$('#main-logo').css('max-height'));
+            img.on('load', () => {
                 $('#main-title').css({ left:$('#main-logo').width()+10 });
                 $('#main-title').fadeIn(500);
                 $('#main-title').attr('data-adjusted',1)
             });
-        }else if($img.length == 0){
+        }else  if(img.length == 0){
             $('#main-title').css({
                 left: '10px',
                 top: '30px'
@@ -1375,18 +1375,18 @@ function initHeaderTitle(){
                 ele.css({right:10});
             }
 
-            let $img = $('#main-logo img');
-            if($img.length < 1){ // logo element missing, show title
+            let img = $('#main-logo img');
+            if(img.length < 1){ // logo element missing, show title
                 ele.show();
 
             //show in the same time with logo image
-            }else if($img[0].complete){ // already loaded logo
+            }else if(img[0].complete){ // already loaded logo
 
                 ele.css({left:$('#main-logo').width()+10 });
                 ele.fadeIn(500);
             }else if(ele.attr('data-adjusted')!=1){ // add onload for logo
 
-                $img.on('load', () => {
+                img.on('load', () => {
                     ele.css({ left:$('#main-logo').width()+10 });
                     ele.fadeIn(500);
                 });

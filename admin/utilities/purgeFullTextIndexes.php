@@ -210,7 +210,7 @@ foreach ($databases as $idx=>$db_name){
 
                 $report .= ' full text index purged ';
                 $cnt_processed++;
-            }else if($res!='skip'){
+            }elseif($res!='skip'){
                 $report .= ('ERROR: '.$res);
             }
         }

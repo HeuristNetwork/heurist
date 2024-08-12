@@ -181,7 +181,7 @@ function addParam($parameters, $type, $val){
     if($type=="s" && $val!=null){
         $val = trim($val);
     }
-    //else if($type=="i" && $val==null){
+    //elseif($type=="i" && $val==null){
     //    $val = 0;
     //}
     array_push($parameters, $val);
@@ -419,9 +419,9 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
                 //keep value of text title mask to create canonical one
                 if($convertTitleMask && $colName == "rty_TitleMask"){
                     $titleMask = $val;
-                }else if ($colName == "rty_Name"){
+                }elseif($colName == "rty_Name"){
                     $rty_Name = $val;
-                }else if ($colName == "rty_NonOwnerVisibility" && $val==''){
+                }elseif($colName == "rty_NonOwnerVisibility" && $val==''){
                     $val = 'viewable';
                 }
 
@@ -449,7 +449,7 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
 
         if($rows === "1062"){
             $ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
-        }else if ($rows==0 || is_string($rows) ) {
+        }elseif($rows==0 || is_string($rows) ) {
 
             $ret = 'SQL error inserting data into table defRecTypes';
             handleError($ret, $query, $rows);
@@ -533,7 +533,7 @@ function updateRectype($commonNames, $rtyID, $rt) {
                 if($colName == "rty_TitleMask"){
                     //array_push($parameters, "");//empty title mask - store only canonical!
                     $val = TitleMask::execute($val, $rtyID, 1, null, ERROR_REP_SILENT);//make coded
-                }else if($colName == "rty_Status"){
+                }elseif($colName == "rty_Status"){
                     if($val==null || $val=='') {$val = 'open';}
                 }
 
@@ -552,11 +552,11 @@ function updateRectype($commonNames, $rtyID, $rt) {
             $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
             if($res === "1062"){
                 $ret =  "Record type with specified name already exists in the database, please use the existing record type";
-            }else if(!is_numeric($res)){
+            }elseif(!is_numeric($res)){
                 $ret = "SQL error updating record type $rtyID in updateRectype";
                 handleError($ret, $query, $res);
 
-                //}else if ($rows==0) {
+                //}elseif($rows==0) {
                 //	$ret = "error updating $rtyID in updateRectype - ".$mysqli->error;
             } else {
                 $ret = $rtyID;
@@ -825,9 +825,9 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
                     //special behaviour
                     if($colName=='rst_MaxValues' && $val==null){
                         $val = 0; //repeatbale
-                    }else if($colName=='rst_PointerMode' && ($val=='' || $val==null)){
+                    }elseif($colName=='rst_PointerMode' && ($val=='' || $val==null)){
                         $val = 'addorbrowse';
-                    }else if($colName=='rst_Modified'){
+                    }elseif($colName=='rst_Modified'){
                         $val = date('Y-m-d H:i:s');
                     }
 
@@ -885,7 +885,7 @@ function deleteRecStructure($rtyID, $dtyID) {
     $rv = array();
     if(isset($mysqli) && $mysqli->error!=""){
         $rv = handleError("SQL error deleting entry in defRecStructure for record type $rtyID and field type $dtyID", $query);
-    }else if ($mysqli->affected_rows<1){
+    }elseif($mysqli->affected_rows<1){
         $system->addError(HEURIST_NOT_FOUND, "No record type structure affected. Nothing found for record type $rtyID and field type $dtyID");
         $rv = false;
     }else{
@@ -1419,7 +1419,7 @@ function updateDetailType($commonNames,$dtyID,$dt) {
 
             if($rows === "1062"){
                 $ret =  "Field type with specified name already exists in the database, please use the existing field type";
-            }else if ($rows!='' && is_string($rows)){  //(is_string($rows) || $rows==0)
+            }elseif($rows!='' && is_string($rows)){  //(is_string($rows) || $rows==0)
                 $ret = "SQL error updating field type $dtyID in updateDetailType";
                 handleError($ret, $query.'  parameters='.implode(',',$parameters), $rows);
             } else {
@@ -1518,16 +1518,16 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                 if($colName=="trm_ParentTermID"){
                     if(!($val>0)) {$val = null;}  //set null value, otherwise we get mysql error
                     $ch_parent_id = $val;
-                }else if($colName=="trm_Code"){
+                }elseif($colName=="trm_Code"){
                     $ch_code = $val;
-                }else if($colName=="trm_Label"){
+                }elseif($colName=="trm_Label"){
                     $ch_label = $val;
-                }else if($colName=="trm_InverseTermID"){
+                }elseif($colName=="trm_InverseTermID"){
                     if(!($val>0)) {$val = null;}
                     $inverse_termid = $val;   //set null value, otherwise we get mysql error
-                }else if($colName=="trm_Status"){
+                }elseif($colName=="trm_Status"){
                     if($val=="") {$val="open";}
-                }else if($colName=="trm_NameInOriginatingDB"){
+                }elseif($colName=="trm_NameInOriginatingDB"){
                     $val = $val?substr($val,0,63):'';
                 }
 
@@ -2141,7 +2141,7 @@ function deleteRelConstraint($srcID, $trgID, $trmID){
     $trmID = prepareIds($trmID);
     if ( count($trmID)>1 ) {
         $query = $query." and rcs_TermID in (".implode(',',$trmID).")";
-    }else if(count($trmID)==0){
+    }elseif(count($trmID)==0){
         $query = $query." and rcs_TermID is null";
     }else{
         $query = $query." and rcs_TermID=".intval($trmID[0]);

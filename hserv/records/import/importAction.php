@@ -182,7 +182,7 @@ private static function findRecordIds($imp_session, $params){
     $cnt = 0;
     $step = ceil($tot_count/100);
     if($step>100) {$step = 100;}
-    else if($step<10) {$step=10;}
+    elseif($step<10) {$step=10;}
 
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
 
@@ -237,7 +237,7 @@ private static function findRecordIds($imp_session, $params){
                             array_push($select_query_match_where, "rec_".$field_type."=?");
                             $values_tobind[] = $fieldvalue;
                             $keys_values_all[] = $fieldvalue;
-                        }else if(is_numeric($field_type)){
+                        }elseif(is_numeric($field_type)){
 
                             $from = '';
                             $where = "d".$index.".dtl_DetailTypeID=".$field_type." and ";
@@ -353,7 +353,7 @@ private static function findRecordIds($imp_session, $params){
                         if(array_key_exists($keyvalue, $tmp_idx_insert)){
                             $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (','.$imp_id);
                             $is_insert = true;
-                        }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
+                        }elseif(array_key_exists($keyvalue, $tmp_idx_update)) {
 
                             // make first field (id)  - csv
                             $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
@@ -406,7 +406,7 @@ private static function findRecordIds($imp_session, $params){
                             array_push($imp_session['validation']['recs_insert'], $rec);//group_concat(imp_id), ".implode(",",$sel_query)
                             $is_insert = true;
 
-                        }else if(count($disamb)==1 || $resolved_recid!=null){
+                        }elseif(count($disamb)==1 || $resolved_recid!=null){
                             //array_search($keyvalue, $disamb_resolv, true)!==false){  @$disamb_resolv[addslashes($keyvalue)]){
                             //either found exact or disamiguation is resolved
                             if($resolved_recid!=null){
@@ -633,7 +633,7 @@ public static function assignRecordIds($params){
             'disambiguation'=>array()
         );
     }
-    else if(is_array($records) && count($records)>0)
+    elseif(is_array($records) && count($records)>0)
     {
         //reset index field to '' (means no matching - record will be ignored on update/insert)
         $updquery = "update $import_table set $id_field='' where imp_id>0";
@@ -697,7 +697,7 @@ public static function assignRecordIds($params){
         */
 
 
-    }else if($match_mode==1){
+    }elseif($match_mode==1){
         //find records to insert and update if matching is skipped AND WE USE current key field
 
         // find records to update
@@ -952,7 +952,7 @@ public static function validateImport($params) {
             if(is_array($wrong_records) && count($wrong_records)>0) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
                 $imp_session = $wrong_records;
-            }else if($wrong_records) { //error
+            }elseif($wrong_records) { //error
                 self::$system->addError(HEURIST_ERROR, $wrong_records);
                 return false;
             }
@@ -987,7 +987,7 @@ public static function validateImport($params) {
                     ." ORDER BY `$id_field` LIMIT 5000";//for preview only
                     $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);//for preview only
 
-            }else if($cnt==null){
+            }elseif($cnt==null){
                 self::$system->addError(HEURIST_DB_ERROR,
                         'SQL error: Cannot execute query to calculate number of records to be updated!', $mysqli->error);
                 return false;
@@ -1209,7 +1209,7 @@ public static function validateImport($params) {
                     array_push($query_enum_where, "(".$trm1.".trm_Label is null and not (`$f_name` is null or `$f_name`='' or `$f_name`='NULL'))");
                 }
 
-            }else if($ft_vals[$idx_fieldtype] == "resource"){
+            }elseif($ft_vals[$idx_fieldtype] == "resource"){
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
 
@@ -1220,7 +1220,7 @@ public static function validateImport($params) {
                 array_push($query_res_join, " Records $trm1 on $trm1.rec_ID=$f_name ");
                 array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($f_name is null or $f_name='' or $f_name='NULL'))");
 
-            }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
+            }elseif($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
                 $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
@@ -1230,7 +1230,7 @@ public static function validateImport($params) {
 
 
 
-            }else if($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
+            }elseif($ft_vals[$idx_fieldtype] == "date" ||  $ft_vals[$idx_fieldtype] == "year") {
 
                 $f_name = $field_name[0];//@todo for multimapping as for enum
                 $f_name = preg_replace('/[^a-zA-Z0-9_]/', "", $f_name);//for snyk
@@ -1331,7 +1331,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             }
 
 
-       }else if($wrong_records) {
+       }elseif($wrong_records) {
             self::$system->addError(HEURIST_ERROR, $wrong_records);
             return false;
        }
@@ -1386,7 +1386,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         //if($wrong_records) {return $wrong_records;}
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }elseif($wrong_records) {
             self::$system->addError(HEURIST_ERROR, $wrong_records);
             return false;
         }
@@ -1429,7 +1429,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         //"Fields mapped as resources(pointers)".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }elseif($wrong_records) {
             self::$system->addError(HEURIST_ERROR, $wrong_records);
             return false;
         }
@@ -1472,7 +1472,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         // "Fields mapped as numeric".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }elseif($wrong_records) {
             self::$system->addError(HEURIST_ERROR, $wrong_records);
             return false;
         }
@@ -1514,7 +1514,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         //"Fields mapped as date".$hwv,
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
-        }else if($wrong_records) {
+        }elseif($wrong_records) {
             self::$system->addError(HEURIST_ERROR, $wrong_records);
             return false;
         }
@@ -2131,7 +2131,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
         if($csv_enclosure==1){
             $csv_enclosure = "'";
-        }else if($csv_enclosure=='none'){
+        }elseif($csv_enclosure=='none'){
             $csv_enclosure = 'ʰ';//rare character
         }else {
             $csv_enclosure = '"';
@@ -2193,7 +2193,7 @@ private static function findOriginalRecord($recordId){
                 $field_type = $row[1];
                 if($row[4]){ //dtl_UploadedFileID
                     $value = $row[4];
-                }else if($row[3]){
+                }elseif($row[3]){
                     $value = $row[2].' '.$row[3];
                 }else{
                     $value = $row[2];
@@ -2224,7 +2224,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             self::$rep_permission++;
             return null;
         }
-    }else if($recordId==null ||  $recordId==''){
+    }elseif($recordId==null ||  $recordId==''){
         $recordId = 0; //add new record
     }
 
@@ -2354,7 +2354,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             if($updating_record && !in_array($new_recordID, self::$rep_unique_ids)){
                 self::$rep_unique_ids[] = $new_recordID;
                 self::$rep_updated++;
-            }else if(is_numeric($new_recordID) && $new_recordID > 0){
+            }elseif(is_numeric($new_recordID) && $new_recordID > 0){
                 self::$rep_added++;
                 self::$rep_unique_ids[] = $new_recordID;
             }
@@ -2592,7 +2592,7 @@ public static function performImport($params, $mode_output){
 
         if($ignore_insert){
             $select_query = $select_query." WHERE (".$id_field.">0) ";//use records with defined value in index field
-        }else if($ignore_update){
+        }elseif($ignore_update){
             $select_query = $select_query." LEFT JOIN Records ON rec_ID=".$id_field." WHERE (NOT(rec_ID IS NOT NULL OR ".$id_field."='')) ";//skip updating records
         }else {
             $select_query = $select_query." WHERE (".$id_field."!='') ";//ignore empty values
@@ -2636,7 +2636,7 @@ public static function performImport($params, $mode_output){
         $first_time = true;
         $step = ceil($tot_count/100);
         if($step>100) {$step = 100;}
-        else if($step<10) {$step=10;}
+        elseif($step<10) {$step=10;}
 
         mysql__update_progress( null, $progress_session_id, true, '0,'.$tot_count );
 
@@ -2683,7 +2683,7 @@ public static function performImport($params, $mode_output){
             if($id_field){
                 if(@$row[$id_field_idx]){ //id field defined - detect insert or update
                     $id_field_values = explode($csv_mvsep, $row[$id_field_idx]);
-                }else if(!$ignore_insert){
+                }elseif(!$ignore_insert){
                     //special case: field value is not defined - add new record
                     $id_field_values = array(0=>null);
                 }
@@ -2748,7 +2748,7 @@ public static function performImport($params, $mode_output){
                                 $details = $details_orig;
                             }
 
-                        }else if($ignore_rectype == 1){ // no insert when ignoring rectype
+                        }elseif($ignore_rectype == 1){ // no insert when ignoring rectype
                             self::$rep_skipped ++;
                             continue;
                         }else{
@@ -2757,7 +2757,7 @@ public static function performImport($params, $mode_output){
                     }
 
                 }
-                else if($ignore_rectype == 1) { // no insert when ignoring rectype
+                elseif($ignore_rectype == 1) { // no insert when ignoring rectype
                     self::$rep_skipped ++;
                     continue;
                 }
@@ -2792,7 +2792,7 @@ public static function performImport($params, $mode_output){
                         if($row[$index]){
                             $details['URL'] = super_trim($row[$index]);
                         }
-                    }else if($field_type=="scratchpad"){
+                    }elseif($field_type=="scratchpad"){
                         if($row[$index]){
                             $details['ScratchPad'] = super_trim($row[$index]);
                         }
@@ -2801,10 +2801,10 @@ public static function performImport($params, $mode_output){
                         if(substr($field_type, -strlen("_lat")) === "_lat"){ // || $field_type=="latitude"
                             $field_type = substr($field_type, 0, strlen($field_type)-4);
                             $fieldtype_type = "lat";
-                        }else if (substr($field_type, -strlen("_long")) === "_long"){ // || $field_type=="longitude"
+                        }elseif (substr($field_type, -strlen("_long")) === "_long"){ // || $field_type=="longitude"
                             $field_type = substr($field_type, 0, strlen($field_type)-5);
                             $fieldtype_type = "long";
-                        }else if(defined('DT_PARENT_ENTITY') && $field_type==DT_PARENT_ENTITY){
+                        }elseif(defined('DT_PARENT_ENTITY') && $field_type==DT_PARENT_ENTITY){
                             $fieldtype_type = 'resource';
                         }else{
                             $ft_vals = $recordTypeStructure[$field_type];//field type description
@@ -2849,7 +2849,7 @@ public static function performImport($params, $mode_output){
                                     }
                                 }
                             }
-                            else if($fieldtype_type == "resource"){
+                            elseif($fieldtype_type == "resource"){
 
                                 if(!VerifyValue::isValidPointer(null, $r_value, $field_type)){
                                      $value  = null;
@@ -2859,7 +2859,7 @@ public static function performImport($params, $mode_output){
 
 
                             }
-                            else if($fieldtype_type == "geo"){
+                            elseif($fieldtype_type == "geo"){
                                 //verify WKT
                                 $geoType = null;
                                 $r_value = strtoupper($r_value);
@@ -2871,9 +2871,9 @@ public static function performImport($params, $mode_output){
                                     //get WKT type
                                     if(strpos($r_value,'POINT')!==false){
                                         $geoType = "p";
-                                    }else if(strpos($r_value,'LINESTRING')!==false){
+                                    }elseif(strpos($r_value,'LINESTRING')!==false){
                                         $geoType = "l";
-                                    }else if(strpos($r_value,'POLYGON')!==false){ //MULTIPOLYGON
+                                    }elseif(strpos($r_value,'POLYGON')!==false){ //MULTIPOLYGON
                                         $geoType = "pl";
                                     }
                                 }
@@ -2908,13 +2908,13 @@ public static function performImport($params, $mode_output){
                                 }
 
                             }
-                            else if($fieldtype_type == "lat") {
+                            elseif($fieldtype_type == "lat") {
                                 $lat = $r_value;
-                            }else if($fieldtype_type == "long"){
+                            }elseif($fieldtype_type == "long"){
                                 //WARNING MILTIVALUE IS NOT SUPPORTED
                                 $long = $r_value;
 
-                            }else if($fieldtype_type=="file"){
+                            }elseif($fieldtype_type=="file"){
                                 //value can be remote url
                                 //obfuscation id (from the same database)  (default)
                                 //ulf_ID (from the same database)
@@ -2927,7 +2927,7 @@ public static function performImport($params, $mode_output){
 
                                 if(is_numeric($r_value) && intval($r_value)>0){ //ulf_UD
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ID='.$r_value;
-                                }else if(strpos($r_value,'http')===0){
+                                }elseif(strpos($r_value,'http')===0){
                                     //find if url is already registered
                                     $is_url = true;
                                     $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
@@ -2958,7 +2958,7 @@ public static function performImport($params, $mode_output){
 
                                 if($fres>0){
                                     $ulf_ID = $fres;
-                                }else if($is_url) {
+                                }elseif($is_url) {
                                     //otherwise register as new external resource
 
                                     $entity = new DbRecUploadedFiles(self::$system);
@@ -2972,9 +2972,9 @@ public static function performImport($params, $mode_output){
                                     $rname = strtolower($r_value);
                                     if(strpos($rname, 'youtu.be')!==false || strpos($rname, 'youtube.com')!==false){
                                         $extension = 'youtube';
-                                    }else if(strpos($rname, 'vimeo.com')!==false){
+                                    }elseif(strpos($rname, 'vimeo.com')!==false){
                                         $extension = 'vimeo';
-                                    }else if(strpos($rname, 'soundcloud.com')!==false){
+                                    }elseif(strpos($rname, 'soundcloud.com')!==false){
                                         $extension = 'soundcloud';
                                     }else{
                                             //get extension from url - unreliable
@@ -3096,7 +3096,7 @@ public static function performImport($params, $mode_output){
                                 if($params['sa_upd']==1 && !@$details_orig["t:".$field_type]){
                                     $need_add = true;
 
-                                }else if($params['sa_upd']==2){ //replace old one
+                                }elseif($params['sa_upd']==2){ //replace old one
                                     $need_add = true;
 
                                     if(@$details_orig["t:".$field_type]){ //remove original
@@ -3104,7 +3104,7 @@ public static function performImport($params, $mode_output){
                                         unset($details_orig["t:".$field_type]);
                                     }
 
-                                }else if($params['sa_upd']==0 || $params['sa_upd']==3){ //add distinct only
+                                }elseif($params['sa_upd']==0 || $params['sa_upd']==3){ //add distinct only
 
                                     $need_add = true; //retain existing and add new distinct one
                                 }
@@ -3263,7 +3263,7 @@ public static function performImport($params, $mode_output){
         if($ignore_insert){
             if($use_sequence){
                 $prev_counts = @$imp_session['sequence'][$currentSeqIndex]['counts'];
-            }else if(@$imp_session['counts'][$recordType]){
+            }elseif(@$imp_session['counts'][$recordType]){
                 $prev_counts = $imp_session['counts'][$recordType];
             }
             if(is_array($prev_counts) && count($prev_counts)==4){

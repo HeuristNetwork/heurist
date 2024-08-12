@@ -160,7 +160,7 @@ class ImportDefinitions {
 
             if($idx>=count($tables)){
                 break;
-            }else if($tables[$idx]==''){
+            }elseif($tables[$idx]==''){
                 continue;
             }
 

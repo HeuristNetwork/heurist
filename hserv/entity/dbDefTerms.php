@@ -126,17 +126,17 @@ class DbDefTerms extends DbEntityBase
 
             $this->data['details'] = 'trm_ID';
 
-        }else if($this->data['details']==null || @$this->data['details']=='name'){
+        }elseif($this->data['details']==null || @$this->data['details']=='name'){
 
             $this->data['details'] = 'trm_ID,trm_Label';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermID,trm_Description,'
             .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_OrderInBranch,trm_Code,trm_Status';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermID,'
             .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
@@ -449,7 +449,7 @@ class DbDefTerms extends DbEntityBase
                                         strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
                                         $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
                                         break;
-                                    }else if (@$this->records[$idx]['trm_Code'] &&
+                                    }elseif (@$this->records[$idx]['trm_Code'] &&
                                         strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
                                     {
                                         $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
@@ -657,7 +657,7 @@ class DbDefTerms extends DbEntityBase
                     $new_parent = @$this->data['new_ParentTermID'];
                     if(!($new_parent>0) && $new_vocab>0){
                         $new_parent  = $new_vocab;
-                    }else if($new_parent>0){
+                    }elseif($new_parent>0){
                         $real_vocab_id = getTermTopMostParent($mysqli, $new_parent);
                         if($real_vocab_id != $new_vocab){
                             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Reference can\'t have children.');
@@ -710,7 +710,7 @@ class DbDefTerms extends DbEntityBase
                                                 $sMsg = null;
                                                 if(strcasecmp($vals['trm_Label'],$vals2['trm_Label'])==0){
                                                     $sMsg = 'Term with label <b>'.$vals['trm_Label'];
-                                                }else if ($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2['trm_Code'])==0){
+                                                }elseif($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2['trm_Code'])==0){
                                                     $sMsg = 'Term with code <b>'.$vals['trm_Code'];
                                                 }
                                                 if($sMsg){
@@ -784,7 +784,7 @@ class DbDefTerms extends DbEntityBase
                 }
 
             }
-            else if(@$this->data['merge_id']>0 && @$this->data['retain_id']>0)
+            elseif(@$this->data['merge_id']>0 && @$this->data['retain_id']>0)
             {
                 //merging is performed within one vocabulary only!!!!
                 //check that both have the same vocab
@@ -871,7 +871,7 @@ class DbDefTerms extends DbEntityBase
                 }
 
             }
-            else if(@$this->data['get_translations']){
+            elseif(@$this->data['get_translations']){
 
                 $field = array_key_exists('search_by', $this->data) ? $this->data['search_by'] : 'trm_ID';
                 $field = $field != 'trm_ParentTermID' && $field != 'trm_ID' ? 'trm_ID' : $field;
@@ -882,14 +882,14 @@ class DbDefTerms extends DbEntityBase
                 }
                 if(is_array($ids)){
                     $ids = implode(',', $ids);
-                }else if(!is_int($ids) || $ids < 0){
+                }elseif(!is_int($ids) || $ids < 0){
                     $ids = '';
                 }
 
                 return $this->_getTermTranslations(false, $ids);//see dbsData.php
 
             }
-            else if(@$this->data['set_translations']){
+            elseif(@$this->data['set_translations']){
                 //set_translations - is array of pairs (trm_ID or trm_Label=>translated label (with lang prefix))
                 $ret = $this->_setTermTranslations(intval($this->data['vcb_ID']), $this->data['set_translations']);//see dbsData.php
 
@@ -931,7 +931,7 @@ class DbDefTerms extends DbEntityBase
                 $trm_ids = prepareIds($trm_ids);
 
                 $code_clause = !empty($trm_ids) ? 'trn_Code IN (' . implode(',', $trm_ids) . ')' : '';
-            }else if(is_int($trm_ids) && $trm_ids > 0){
+            }elseif(is_int($trm_ids) && $trm_ids > 0){
                 $code_clause = 'trn_Code = ' . intval($trm_ids);
             }
 
@@ -1102,7 +1102,7 @@ class DbDefTerms extends DbEntityBase
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot delete '.$trm_ID.'. This term has references', $ret);//$ret
                     return false;
-                }else if($ret===false){ //mysql error
+                }elseif($ret===false){ //mysql error
                     return false;
                 }
 
@@ -1307,7 +1307,7 @@ class DbDefTerms extends DbEntityBase
                 if($trm_usage){
                     $res = $trm_usage;
                     //return array($mysqli->error, $res, $query, $trm_usage, $trm_ID);
-                }else if(empty($mysqli->error)){
+                }elseif(empty($mysqli->error)){
                     $res = explode(',', $trm_ID);
                 }else{
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term usages', $mysqli->error);
@@ -1326,7 +1326,7 @@ class DbDefTerms extends DbEntityBase
                             $res[$trmid] = $count;
                         }
                     }
-                }else if(!empty($mysqli->error)){
+                }elseif(!empty($mysqli->error)){
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve term used for relationship marker type', $mysqli->error);
                     return false;
                 }

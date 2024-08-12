@@ -87,7 +87,7 @@ if(!$error){
             }
         }
     }
-    else if(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
+    elseif(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
 
         $fileid = @$req_params['file']? $req_params['file'] :intval(@$req_params['ulf_ID']);
         $size = @$req_params['size'];
@@ -178,7 +178,7 @@ if(!$error){
 
                     fileGetMetadata($fileinfo);
 
-                }else if(@$req_params['metadata']){//download zip file: registered file and file with links to html and xml
+                }elseif(@$req_params['metadata']){//download zip file: registered file and file with links to html and xml
 
                     downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
 
@@ -193,7 +193,7 @@ if(!$error){
                             $finfo = pathinfo($filepath);//take from path
                             if(@$finfo['extension']){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];
-                            }else if($fileExt){
+                            }elseif($fileExt){
                                 if($fileExt=='jpe'){ $fileExt = 'jpg';}
                                 $originalFileName = $originalFileName.'.'.$fileExt;
                             }
@@ -218,7 +218,7 @@ if(!$error){
 
                         header('Location: '.$direct_url);
 
-                    }else if(!$is_download
+                    }elseif(!$is_download
                         && ($fileExt=='nxz' || $fileExt=='nxs' || $fileExt=='ply' || $fileExt=='fbx' || $fileExt=='obj'))
                     {
 
@@ -232,7 +232,7 @@ if(!$error){
                         downloadFile($mimeType, $filepath, @$req_params['embedplayer']==1?null:$originalFileName);
                     }
                 }
-                else if($external_url){
+                elseif($external_url){
                     if(@$req_params['mode']=='url'){
 
                         //if it does not start with http - this is relative path
@@ -251,7 +251,7 @@ if(!$error){
                                 }else{
                                     $external_url = HEURIST_TILESTACKS_URL.$external_url;  //$path;
                                 }
-                            }else if (file_exists($path)) {
+                            }elseif (file_exists($path)) {
                                 $filename = pathinfo($path);
                                 $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$filename['filename'];
                             }

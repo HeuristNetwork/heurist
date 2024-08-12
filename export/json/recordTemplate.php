@@ -158,13 +158,13 @@ foreach ($rectype_ids as $rty_id) {
             foreach ($details as $value) {
                 if(array_key_exists('file', $value)){ // file field
                     $value = $file_field;
-                }else if(array_key_exists('geo', $value)){ // geo field
+                }elseif(array_key_exists('geo', $value)){ // geo field
                     $value = $geo_field;
-                }else if(array_key_exists('id', $value) && $value['id'] == 'RECORD_REFERENCE'){
+                }elseif(array_key_exists('id', $value) && $value['id'] == 'RECORD_REFERENCE'){
                     $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
-                }else if(strpos($value, 'VALUE') !== false){ //$value == 'VALUE'
+                }elseif(strpos($value, 'VALUE') !== false){ //$value == 'VALUE'
                     $value = '"TRM_ID"';
-                }else if(strpos($value, 'SEE NOTES AT START') !== false){ //$value == 'SEE NOTES AT START'
+                }elseif(strpos($value, 'SEE NOTES AT START') !== false){ //$value == 'SEE NOTES AT START'
                     $value = '"RELATIONSHIP_RECORD"';
                 }else{
                     $value = '"' . $value . '"';

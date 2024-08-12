@@ -165,7 +165,7 @@ class SystemEmailExt {
 
 		if ($rtn != 0) {
 			return $rtn;
-		}else if(is_array($this->user_details) && count($this->user_details) == 0){
+		}elseif(is_array($this->user_details) && count($this->user_details) == 0){
 
 			$this->set_error('No users have been retrieved, no emails have been sent');
 			return -1;
@@ -272,16 +272,16 @@ class SystemEmailExt {
 			// Create WHERE clause
 			if ($users == "owner") { // Owners
 				$where_clause = "WHERE ugr.ugr_ID = 2";
-			} else if ($users == "manager") { // Admins for workgroup Database Managers
+			} elseif($users == "manager") { // Admins for workgroup Database Managers
 				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID = 1";
- 			} else if ($users == "admin") { // Admins for ALL workgroups
+ 			} elseif($users == "admin") { // Admins for ALL workgroups
 
  				$where_clause = "WHERE ugl.ugl_Role = 'admin' AND ugr.ugr_Enabled != 'n' AND ugl.ugl_GroupID IN
 						  		 (SELECT ugr_ID
  						   		  FROM " . $db . ".sysUGrps
  						   		  WHERE ugr_Type = 'workgroup' AND ugr_Enabled != 'n')";
 
-			} else if ($users == "user") { // ALL users
+			} elseif($users == "user") { // ALL users
 				$where_clause = "WHERE ugr.ugr_Type = 'user' AND ugr.ugr_Enabled != 'n'";
 			}
 
@@ -530,7 +530,7 @@ class SystemEmailExt {
 
                 $status_msg = 'OK';
 
-            }else if($this->use_native_mail_function){ //use php native mail
+            }elseif($this->use_native_mail_function){ //use php native mail
 
                 $email_header = 'From: Heurist system <no-reply@'.HEURIST_DOMAIN.'>'
                 //."\r\nReply-To: ".
@@ -545,7 +545,7 @@ class SystemEmailExt {
                     $email_rtn = -3;
                 }
 
-            }else if(isset($mailRelayPwd) && $mailRelayPwd!=''
+            }elseif(isset($mailRelayPwd) && $mailRelayPwd!=''
                         && endsWith($email, '@gmail.com')){
 
                 $data = array('pwd' => $mailRelayPwd ,
@@ -616,7 +616,7 @@ class SystemEmailExt {
 				if ($email_rtn == -3){
 					$this->set_error("phpMailer has stopped sending emails due to an error with the email system, Error => "
                             . htmlspecialchars($this->error_msg));
-				}else if($email_rtn == -2){
+				}elseif($email_rtn == -2){
                     continue;
                 }
                 //ERROR

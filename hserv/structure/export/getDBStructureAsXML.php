@@ -254,11 +254,11 @@ function do_print_table2( $tname, $id=0 )
             $val = $row[$fld];
             if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                 $val = htmlspecialchars($mysqli->real_escape_string($val));
-            }else if(strpos($fld,'OriginatingDBID')!==false){
+            }elseif(strpos($fld,'OriginatingDBID')!==false){
                 if(!($val>0)){
                     $val = HEURIST_DBID;
                 }
-            }else if(strpos($fld,'IDInOriginatingDB')!==false){
+            }elseif(strpos($fld,'IDInOriginatingDB')!==false){
                 if(HEURIST_DBID>0 && !($val>0)){
                     $val = $val[$id_field];
                 }

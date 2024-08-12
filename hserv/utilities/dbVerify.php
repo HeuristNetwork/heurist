@@ -1787,13 +1787,13 @@ HEADER;
                 if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
                     $geoType = "m";
                     $hasGeoType = true;
-                }else if(strpos($geoValue,'POINT')!==false){
+                }elseif(strpos($geoValue,'POINT')!==false){
                     $geoType = "p";
                     $hasGeoType = true;
-                }else if(strpos($geoValue,'LINESTRING')!==false){
+                }elseif(strpos($geoValue,'LINESTRING')!==false){
                     $geoType = "l";
                     $hasGeoType = true;
-                }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
+                }elseif(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
                     $geoType = "pl";
                     $hasGeoType = true;
                 }
@@ -2000,7 +2000,7 @@ HEADER;
 
                         if($fixed_multi && !in_array($rec_id, $fixed2)){
                             $fixed2[] = $rec_id;
-                        }else if(!in_array($rec_id, $ids1)){
+                        }elseif(!in_array($rec_id, $ids1)){
                             $ids1[] = $rec_id;
                         }
                     }
@@ -2326,7 +2326,7 @@ HEADER;
                 if($fix_count>0){
                     fwrite($this->out, '<h3>'.$fix_count.' terms referenced in incorrect vocabulary changed to terms in the vocabulary specified for the field</h3>');
 
-                }else if($suggest_cnt>0){
+                }elseif($suggest_cnt>0){
                     $resStatus = false;
 
                     fwrite($this->out, <<<FIXMSG
@@ -2426,7 +2426,7 @@ FIXMSG
                         //this is decades
                         $row['is_ambig'] = 'we suggest using a date range';
 
-                    }else if(preg_match( $year_range_regex, $date_val)){
+                    }elseif(preg_match( $year_range_regex, $date_val)){
 
                         list($y1, $y2) = explode('-',$date_val);
                         if($y1>31 && $y2>12){

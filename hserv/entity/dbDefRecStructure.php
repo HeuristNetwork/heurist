@@ -82,15 +82,15 @@ class DbDefRecStructure extends DbEntityBase
 
             $this->data['details'] = 'rst_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rst_ID,rst_DisplayName';
 
-        }else if(@$this->data['details']=='rectype'){
+        }elseif(@$this->data['details']=='rectype'){
 
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $is_structure = true;
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
@@ -100,12 +100,12 @@ class DbDefRecStructure extends DbEntityBase
             .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ';
             //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
             //all fields from configuration json
 
             $this->data['details'] = implode(',', $this->fieldNames);
 
-        }else if(@$this->data['details']=='structure'){
+        }elseif(@$this->data['details']=='structure'){
 
             //$this->data['details'] = implode(',', $this->fieldNames);
             $is_structure = true;
@@ -289,7 +289,7 @@ class DbDefRecStructure extends DbEntityBase
             }else{
                 $this->recordIDs = array($this->recordIDs);
             }
-        }else if(@$this->data['dtyID']){
+        }elseif(@$this->data['dtyID']){
             $dty_ID = $this->data['dtyID'];
 
             $this->recordIDs = null;
@@ -301,7 +301,7 @@ class DbDefRecStructure extends DbEntityBase
             if(!$this->recordIDs || !is_array($this->recordIDs) || count($this->recordIDs) == 0){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for field ID ' . $dty_ID);
                 return false;
-            }else if(!is_array($this->recordIDs)){
+            }elseif(!is_array($this->recordIDs)){
                 $this->recordIDs = array($this->recordIDs);
             }
         }
@@ -321,7 +321,7 @@ class DbDefRecStructure extends DbEntityBase
         }
         if(@$this->data['newfields']){
             return $this->addNewFields();
-        }else if (@$this->data['orders']){
+        }elseif (@$this->data['orders']){
             return $this->setNewFieldOrder();
         }
     }
@@ -438,7 +438,7 @@ class DbDefRecStructure extends DbEntityBase
                 }
                 if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
                     $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
-                }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                }elseif(@$newfields_values[$dty_ID]['rst_DefaultValue']){
                     $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
                 }
 
@@ -486,7 +486,7 @@ class DbDefRecStructure extends DbEntityBase
                 $detail_usage = mysql__select_assoc2($mysqli, $query);// [ dty_ID1 => count1, ... ]
                 if($detail_usage){
                     $res = $detail_usage;
-                }else if(empty($mysqli->error)){
+                }elseif(empty($mysqli->error)){
                     $res = array();
                 }else{
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve field usages for record type #'.$rty_ID, $mysqli->error);
@@ -546,7 +546,7 @@ class DbDefRecStructure extends DbEntityBase
                                     if(in_array($rec_id, $allowed_recs)){
                                         $count ++;
                                         continue;
-                                    }else if(in_array($rec_id, $not_allowed_recs)){
+                                    }elseif(in_array($rec_id, $not_allowed_recs)){
                                         continue;
                                     }
 
@@ -567,11 +567,11 @@ class DbDefRecStructure extends DbEntityBase
 
                             $res[$dty_id] = $count;
                         }
-                    }else if(!empty($mysqli->error)){
+                    }elseif(!empty($mysqli->error)){
                         $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve related records for counting relationship marker field usage for record type #'.$rty_ID, $mysqli->error);
                         return false;
                     }
-                }else if(!empty($mysqli->error)){
+                }elseif(!empty($mysqli->error)){
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot check record type #'.$rty_ID.' for relationship marker fields', $mysqli->error);
                     return false;
                 }

@@ -79,15 +79,15 @@ class DbSysArchive extends DbEntityBase
             $this->data['details'] = 'arc_ID';
             $is_ids_only = true;
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'arc_ID, arc_DataBeforeChange';
 
-        }else if(@$this->data['details']=='list')
+        }elseif(@$this->data['details']=='list')
         {
             $this->data['details'] = 'arc_ID, arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_TimeOfChange, arc_ContentType';
 
-        }else if(@$this->data['details']=='full')
+        }elseif(@$this->data['details']=='full')
         {
             $this->data['details'] = 'arc_ID, arc_Table, arc_PriKey, arc_ChangedByUGrpID, arc_OwnerUGrpID, arc_RecID, arc_TimeOfChange, arc_DataBeforeChange, arc_ContentType';
 
@@ -300,7 +300,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 }
 
                 $value = trim( implode(',', $value) , '"');
-            }else if($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
+            }elseif($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
                 $value = USanitize::cleanupSpaces($value);// remove extra spacing, avoid displaying extra historical values that are actually the same
             }
 
@@ -419,7 +419,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
             if($mysqli->error){
                 $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
                 return false;
-            }else if(!$record_type){
+            }elseif(!$record_type){
                 return [];
             }
             $record_type = intval($record_type);
@@ -429,7 +429,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
             if($mysqli->error){
                 $this->system->addError(HEURIST_DB_ERROR, 'Unable to query defDetailTypes table for the selected record\'s base fields', $mysqli->error);
                 return false;
-            }else if(empty($record_fields)){
+            }elseif(empty($record_fields)){
                 $this->system->addError(HEURIST_DB_ERROR, "The provided record type #$record_type does not have any usable fields");
                 return false;
             }
@@ -523,7 +523,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
                     if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
                         $res_row['arc_ChangedByUGrpID'] = $last_editor[$dty_ID][$dty_idx];
-                    }else if(mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_ID = " . intval($row_changes['arc_PriKey'])) > 0){
+                    }elseif(mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_ID = " . intval($row_changes['arc_PriKey'])) > 0){
                         // was updated outside of standard record editor
                         $res_row['arc_ChangedByUGrpID'] = $ugr_ID;
                     }else{
@@ -636,7 +636,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
 
             $ret = ['history' => $complete_history, 'users' => $user_list];
 
-        }else if(array_key_exists('revert_record_history', $this->data)){
+        }elseif(array_key_exists('revert_record_history', $this->data)){
 
             $ret = ['errors' => [], 'issues' => []];
 
@@ -663,7 +663,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
             if($mysqli->error){
                 $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
                 return false;
-            }else if(!$record_type){
+            }elseif(!$record_type){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Unable to retrieve the record type of current record');
                 return false;
             }
@@ -674,7 +674,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
             if($mysqli->error){
                 $this->system->addError(HEURIST_DB_ERROR, 'Unable to query defDetailTypes table for the selected record\'s base fields', $mysqli->error);
                 return false;
-            }else if(empty($record_fields)){
+            }elseif(empty($record_fields)){
                 $this->system->addError(HEURIST_DB_ERROR, "The provided record type #$record_type does not have any usable fields");
                 return false;
             }
@@ -686,7 +686,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                 if($dty_ID <= 0 || !is_array($fld_changes) || !array_key_exists($dty_ID, $record_fields)){
                     if($dty_ID <= 0){
                         $ret['errors'][] = "Invalid detail type ID provided #$dty_ID";
-                    }else if(!array_key_exists($dty_ID, $record_fields)){
+                    }elseif(!array_key_exists($dty_ID, $record_fields)){
                         $ret['errors'][] = "Field ID #$dty_ID is not part of the record's structure";
                     }
                     continue;

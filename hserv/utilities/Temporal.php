@@ -163,17 +163,17 @@ class Temporal {
 
                     if(@$date['timestamp']['deviation_negative'] && !@$date['timestamp']['deviation_positive']){
                         $profile = 2; //slow start
-                    }else if(!@$date['timestamp']['deviation_negative'] && @$date['timestamp']['deviation_positive']){
+                    }elseif(!@$date['timestamp']['deviation_negative'] && @$date['timestamp']['deviation_positive']){
                         $profile = 3; //slow finish
                     }else{
                         $profile = 1; //central
                     }
 
-                }else if(@$date['timestamp']['circa']){
+                }elseif(@$date['timestamp']['circa']){
                     $profile = 1; //central
-                }else if(@$date['timestamp']['before']){
+                }elseif(@$date['timestamp']['before']){
                     $profile = 2; //slow start
-                }else if(@$date['timestamp']['after']){
+                }elseif(@$date['timestamp']['after']){
                     $profile = 3; //slow finish
                 }
 
@@ -221,7 +221,7 @@ class Temporal {
             //already defined
             $timespan = $value;
 
-        }else if ($value) {
+        }elseif($value) {
 
             if(strpos($value,'><')===0 || strpos($value,'<>')===0){
                 $is_for_search = true;
@@ -247,12 +247,12 @@ class Temporal {
                         if($timespan){
                             if(@$timespan['timestamp']){
                                 $timespan['timestamp']['circa'] = true;
-                            }else if(@$timespan['start']){
+                            }elseif(@$timespan['start']){
                                 $timespan = array('timestamp' => array('in'=>$timespan['start']['earliest'],'type'=>'s', 'circa'=>true));
                             }
                         }
                     }
-                }else if(preg_match('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)/i',$value)
+                }elseif(preg_match('/(before|bef\.|bef|avant|after|post|aft\.|aft|après)/i',$value)
                       || preg_match('/^\d{4}-$/i', $value))
                 {
                     if(preg_match('/^\d{4}-$/i', $value)){
@@ -352,7 +352,7 @@ class Temporal {
                                 // duration/end
                                 $timespan = Temporal::_getInterval($values[1], $values[0], -1);
 
-                            }else if(strcasecmp(substr($values[1], 0, 1),'P')==0){
+                            }elseif(strcasecmp(substr($values[1], 0, 1),'P')==0){
                                 // start/duration
                                 $timespan = Temporal::_getInterval($values[0], $values[1], 1);
 
@@ -368,7 +368,7 @@ class Temporal {
                             }
                         }
 
-                    }else if(strpos($value,'±')!==false){
+                    }elseif(strpos($value,'±')!==false){
 
                         $values = explode('±', $value);
                         $period = $values[1];
@@ -378,11 +378,11 @@ class Temporal {
                             $period = str_replace('days','D',$period);
                             $period = preg_replace('/\s+/', '', $period);//remove spaces
                             $period = 'P'.$period;
-                        }else if(strpos($period,'year')!==false){
+                        }elseif(strpos($period,'year')!==false){
                             $period = 'P1Y';
-                        }else if(strpos($period,'month')!==false){
+                        }elseif(strpos($period,'month')!==false){
                             $period = 'P1M';
-                        }else if(strpos($period,'day')!==false){
+                        }elseif(strpos($period,'day')!==false){
                             $period = 'P1D';
                         }
                         if(!preg_match('/[Y|M|D]$/i',$period)){
@@ -403,7 +403,7 @@ class Temporal {
                     if(is_double($timespan)){ //200.15
                         $value = strval(intval($timespan));
                         $timespan = null;
-                    }else if(is_array($timespan) && count($timespan)>0 && is_numeric(@$timespan[0])){
+                    }elseif(is_array($timespan) && count($timespan)>0 && is_numeric(@$timespan[0])){
                         if(count($timespan)==1){
                             $value = strval(intval($timespan[0]));
                             $timespan = null;
@@ -418,7 +418,7 @@ class Temporal {
                     $timespan = $timespan[0];//in case [{}]
                 }
 
-            }else if (strpos($value,"|")!==false) {// temporal encoded date - converts to array
+            }elseif (strpos($value,"|")!==false) {// temporal encoded date - converts to array
 
                 $tDate = array();
                 $props = explode("|",substr_replace($value,"",0,1));// remove first verticle bar and create array
@@ -442,9 +442,9 @@ class Temporal {
                         {
                             if(@$tDate['CIR']==1){
                                 $timespan['timestamp']['circa'] = true;
-                            }else if(@$tDate['CIR']==2){
+                            }elseif(@$tDate['CIR']==2){
                                 $timespan['timestamp']['before'] = true;
-                            }else if(@$tDate['CIR']==3){
+                            }elseif(@$tDate['CIR']==3){
                                 $timespan['timestamp']['after'] = true;
                             }
 
@@ -810,7 +810,7 @@ class Temporal {
             if(strlen($value)==14){ //20090410000000
                 $value = substr($value,0,4).'-'.substr($value,4,2).'-'.substr($value,6,2)
                 .' '.substr($value,8,2).':'.substr($value,10,2).':'.substr($value,12,2);
-            }else if(intval($value)>9999){ //20090410
+            }elseif(intval($value)>9999){ //20090410
                 $nval = substr($value,0,4);
                 if(strlen($value)>4) {$nval = $nval.'-'.substr($value,4,2);}
                 if(strlen($value)>6) {$nval = $nval.'-'.substr($value,6,2);}
@@ -888,12 +888,12 @@ class Temporal {
                     $sdate = strtolower($date);
                     if($sdate=='today'){
                         $date = $t2->format('Y-m-d');
-                    }else if($sdate=='now'){
+                    }elseif($sdate=='now'){
                         $date = $t2->format('Y-m-d H:i:s');
-                    }else if($sdate=='yesterday'){
+                    }elseif($sdate=='yesterday'){
                         $t2->modify('-1 day');
                         $date = $t2->format('Y-m-d');//date('Y-m-d',strtotime("-1 days"));
-                    }else if($sdate=='tomorrow'){
+                    }elseif($sdate=='tomorrow'){
                         $t2->modify('+1 day');
                         $date = $t2->format('Y-m-d');//date('Y-m-d',strtotime("+1 days"));
                     }
@@ -919,7 +919,7 @@ class Temporal {
                 //year must be four digit for CE and 6 for BCE
                 if($isbce){
                     $res = str_pad($res,6,'0',STR_PAD_LEFT);// timeline requires 6 digits for BCE years
-                }else if(abs($date['year'])<10000){
+                }elseif(abs($date['year'])<10000){
                     $res = str_pad($res,4,'0',STR_PAD_LEFT);
 
                     if($need_day && count($date) == 1){ // only year, add -01-01 for ISO format
@@ -939,7 +939,7 @@ class Temporal {
 
                 if(!$need_day && @$date['has_days']!=true && !$has_time){
 
-                }else if(@$date['day']){ //&& ($need_day || $has_time)
+                }elseif(@$date['day']){ //&& ($need_day || $has_time)
                     $res = $res.'-'.str_pad(strval($date['day']),2,'0',STR_PAD_LEFT);
                 }
             }
@@ -1009,7 +1009,7 @@ class Temporal {
                 $res2 = '';
                 if(@$date['has_days']!=true){
 
-                }else if(@$date['day']){
+                }elseif(@$date['day']){
                     $res2 = $date['day'];
                 }
                 if(@$date['month']){
@@ -1024,7 +1024,7 @@ class Temporal {
 
                     if(@$date['has_days']!=true && !$has_time){
 
-                    }else if(@$date['day']){
+                    }elseif(@$date['day']){
                         $res = $res.'-'.str_pad(strval($date['day']),2,'0',STR_PAD_LEFT);
                     }
                 }
@@ -1050,7 +1050,7 @@ class Temporal {
                 if(@$date['has_days']!=true && $date['year']<-999999){
                     if($date['year']<-999999999){
                         $res = (intval($res)/1e9).' bya';
-                    }else if($date['year']<-999999){
+                    }elseif($date['year']<-999999){
                         $res = (intval($res)/1e6).' Mya';
                     }else{
                         //$res = (intval($res)/1000).' kya';
@@ -1089,7 +1089,7 @@ class Temporal {
             $cnt_slash = substr_count($value,'/');//try to convert from format with / separator
             if( $cnt_slash>0){  // 6/2006  =  1-6-2006
                 $value = str_replace('/','-',$value);
-            }else if($cnt_dots>0 && preg_match('/\d{1,4}\.\d{1,4}/', $value)){  // 4.3.2006  =  4-3-2006   exclude Mar.2, 2021
+            }elseif($cnt_dots>0 && preg_match('/\d{1,4}\.\d{1,4}/', $value)){  // 4.3.2006  =  4-3-2006   exclude Mar.2, 2021
 
                 $value = str_replace('.','-',$value);
             }
@@ -1104,7 +1104,7 @@ class Temporal {
             if(strlen($m)>2 && is_numeric($m)){
                 list($y, $m) = explode('-', $value);
 
-            }else if((strlen($m)>2 && !is_numeric($m)) || $y>12){ //Oct-12
+            }elseif((strlen($m)>2 && !is_numeric($m)) || $y>12){ //Oct-12
                 $value = $y.'-'.$m;
 
                 if($y>22 && $y<100){
@@ -1113,7 +1113,7 @@ class Temporal {
                     $value = '20'.$y.'-'.$m;
                 }
 
-            }else if( (strlen($y)>2 && !is_numeric($y)) || $y<13){ //09-Nov 09-11
+            }elseif( (strlen($y)>2 && !is_numeric($y)) || $y<13){ //09-Nov 09-11
 
                 if($m>22 && $m<100){
                     $value = '19'.$m.'-'.$y;
@@ -1136,11 +1136,11 @@ class Temporal {
 
                 if(strlen($m)>2 || $d>12){ // month is word
                     //$value = $y.'-'.$m.'-'.$d;
-                }else if(strlen($d)>2 || $m>12){ //$d is word month
+                }elseif(strlen($d)>2 || $m>12){ //$d is word month
                     $d2 = $d; $d = $m;  $m = $d2;
 
                     //$value = $y.'-'.$d.'-'.$m;
-                }else if($d<13 && $m>12){
+                }elseif($d<13 && $m>12){
                     $d2 = $d; $d = $m;  $m = $d2;
 
                     //$value = $y.'-'.$d.'-'.$m;
@@ -1223,7 +1223,7 @@ class Temporal {
 
             if(!$early || !$latest){
                 $res = false;
-            }else if($res !== false){
+            }elseif($res !== false){
 
                 $diff = $early->diff($latest, true);
 
@@ -1404,9 +1404,9 @@ class Temporal {
                 $prefix = null;
                 if(@$date['timestamp']['circa']){
                     $prefix = 'circa ';
-                }else if(@$date['timestamp']['before']){
+                }elseif(@$date['timestamp']['before']){
                     $prefix = 'before ';
-                }else if(@$date['timestamp']['after']){
+                }elseif(@$date['timestamp']['after']){
                     $prefix = 'after ';
                 }
 
@@ -1427,7 +1427,7 @@ class Temporal {
                     if($from && strpos($from,'unknown')===false){
                         $from = $from.Temporal::_deviationSuffix( $date['start'] );
                     }
-                }else if(@$date['start']['earliest']){
+                }elseif(@$date['start']['earliest']){
                     $from = Temporal::dateToString($date['start']['earliest'], $calendar);
                 }
 
@@ -1436,7 +1436,7 @@ class Temporal {
                     if($to && strpos($to,'unknown')===false){
                         $to = $to.Temporal::_deviationSuffix( $date['end'] );
                     }
-                }else if(@$date['end']['latest']){
+                }elseif(@$date['end']['latest']){
                     $to = Temporal::dateToString($date['end']['latest'], $calendar);
                 }
                 $res = $from.' to '.$to;
@@ -1446,7 +1446,7 @@ class Temporal {
             if($native){
                 if($out_calendar=='native'){
                     $res = $native; //native only
-                }else if($out_calendar!='gregorian'){
+                }elseif($out_calendar!='gregorian'){
                     //both gregorian and native
                     $res = $native.'  '.$calendar.' (Gregorian '.$res.')';
                 }
@@ -1497,9 +1497,9 @@ class Temporal {
                 $prefix = null;
                 if(@$date['timestamp']['circa']){
                     $prefix = 'circa ';
-                }else if(@$date['timestamp']['before']){
+                }elseif(@$date['timestamp']['before']){
                     $prefix = 'before ';
-                }else if(@$date['timestamp']['after']){
+                }elseif(@$date['timestamp']['after']){
                     $prefix = 'after ';
                 }
 
@@ -1510,7 +1510,7 @@ class Temporal {
                     }
                 }
 
-            }else if(@$date['start'] && $date['type']=='r'){  //simple range
+            }elseif(@$date['start'] && $date['type']=='r'){  //simple range
 
                 $res['Type'] = 'Simple Range';
 
@@ -1536,7 +1536,7 @@ class Temporal {
                     if(@$date['start']['profile']){
                         $res['Start probability curve'] = $this->dictProfile[intval($date['start']['profile'])];
                     }
-                }else if(@$date['start']['earliest']){
+                }elseif(@$date['start']['earliest']){
                     $from = Temporal::dateToString($date['start']['earliest'], $calendar);
 
                     $dt = null;
@@ -1563,7 +1563,7 @@ class Temporal {
                     if(@$date['end']['profile']){
                         $res['End probability curve'] = $this->dictProfile[intval($date['end']['profile'])];
                     }
-                }else if(@$date['end']['latest']){
+                }elseif(@$date['end']['latest']){
 
                     if(@$date['end']['earliest']){
                         $dt = Temporal::dateToString($date['end']['earliest'], $calendar);
@@ -1606,7 +1606,7 @@ class Temporal {
 
                 if($res['Date']){
                     $res2 = $res2 . $res['Date'];
-                }else if($is_simple){
+                }elseif($is_simple){
 
                     $res2 = $res2 . $res['Earliest estimate'] . ' .. ' . $res['Latest estimate'];
                 }else {
@@ -1624,7 +1624,7 @@ class Temporal {
                 if($native){
                     if($out_calendar=='native'){
                         $res2 = $native; //native only
-                    }else if($out_calendar!='gregorian'){
+                    }elseif($out_calendar!='gregorian'){
                         //both gregorian and native
                         $supinfo[] =  $calendar.' '.$native;
                     }
@@ -1699,9 +1699,9 @@ class Temporal {
                         $res['TYP'] = 's';
                         if(@$date['timestamp']['circa']){
                             $res['CIR'] = '1';
-                        }else if(@$date['timestamp']['before']){
+                        }elseif(@$date['timestamp']['before']){
                             $res['CIR'] = '2';
-                        }else if(@$date['timestamp']['after']){
+                        }elseif(@$date['timestamp']['after']){
                             $res['CIR'] = '3';
                         }
                     }

@@ -99,15 +99,15 @@ class DbDefDetailTypes extends DbEntityBase
 
             $this->data['details'] = 'dty_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'dty_ID,dty_Name';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'dty_ID,dty_Name,dty_ShowInLists,dty_HelpText,dty_Type,dty_Status,dty_DetailTypeGroupID';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fieldNames) ;
         }else{
@@ -323,7 +323,7 @@ class DbDefDetailTypes extends DbEntityBase
                                 $this->system->addError(HEURIST_DB_ERROR,
                                     'Search query error (retrieving number of records that uses terms)', $mysqli->error);
                                 return false;
-                            }else if($total_count_rows>0){
+                            }elseif($total_count_rows>0){
                                 $ret = array('reccount'=>$total_count_rows,'records'=>$records);
                                 $this->system->addError(HEURIST_ACTION_BLOCKED,
                                     'Sorry, we cannot change the vocabulary because terms in the '
@@ -540,7 +540,7 @@ class DbDefDetailTypes extends DbEntityBase
 
                                 if(!$trm_res){
                                     $ret[$idx][] = 'Unable to find vocab id #' . $record['dty_JsonTermIDTree'];
-                                }else if($record['dty_Type'] == 'relmarker' && $trm_res[1] == 'enum'){
+                                }elseif($record['dty_Type'] == 'relmarker' && $trm_res[1] == 'enum'){
                                     $ret[$idx][] = $trm_res[2] . ' (#' . $trm_res[0] . ') is not setup as relation terms';
                                 }
                             }
@@ -596,7 +596,7 @@ class DbDefDetailTypes extends DbEntityBase
 
                 if(!$result){
                     $ret = false;
-                }else if(count($idx_to_do) > 0){ // check if success messages need to be added
+                }elseif(count($idx_to_do) > 0){ // check if success messages need to be added
 
                     $i = 0;
                     foreach ($idx_to_do as $idx){

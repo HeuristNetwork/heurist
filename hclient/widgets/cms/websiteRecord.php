@@ -128,16 +128,16 @@ $isEmptyHomePage = false;
 $open_page_or_record_on_init = 0;
 if(_isPositiveInt(@$_REQUEST['initid'])) {
     $open_page_or_record_on_init = intval(@$_REQUEST['initid']);
-}else if(_isPositiveInt(@$_REQUEST['pageid'])) {
+}elseif(_isPositiveInt(@$_REQUEST['pageid'])) {
     $open_page_or_record_on_init = intval(@$_REQUEST['pageid']);
 }
 
 $rec_id = 0;
 if(_isPositiveInt(@$_REQUEST['recID'])) {
     $rec_id = intval(@$_REQUEST['recID']);
-}else if(_isPositiveInt(@$_REQUEST['recid'])) {
+}elseif(_isPositiveInt(@$_REQUEST['recid'])) {
     $rec_id = intval(@$_REQUEST['recid']);
-}else if(_isPositiveInt(@$_REQUEST['id'])) {
+}elseif(_isPositiveInt(@$_REQUEST['id'])) {
     $rec_id = intval(@$_REQUEST['id']);
 }
 
@@ -380,7 +380,7 @@ function __getValue(&$page_record, $id){
 
     if(is_array($val)){
         return array_shift($val);
-    }else if($val==null){
+    }elseif($val==null){
         return '';
     }else{
         return $val;

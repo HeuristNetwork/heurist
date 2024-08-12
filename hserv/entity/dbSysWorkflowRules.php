@@ -74,7 +74,7 @@ class DbSysWorkflowRules extends DbEntityBase
 
             $this->data['details'] = 'swf_ID';
 
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'swf_ID,swf_RecTypeID,swf_Stage,swf_Order,swf_StageRestrictedTo,swf_SetOwnership,swf_SetVisibility,swf_SendEmail';
 
@@ -156,7 +156,7 @@ class DbSysWorkflowRules extends DbEntityBase
                 }
                 if($this->records[$idx]['swf_Order']=='' || $this->records[$idx]['swf_Order']<0){
                     $this->records[$idx]['swf_Order'] = 0;
-                }else if($this->records[$idx]['swf_Order']>255){
+                }elseif($this->records[$idx]['swf_Order']>255){
                     $this->records[$idx]['swf_Order'] = 255;
                 }
         }

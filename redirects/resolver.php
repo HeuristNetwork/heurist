@@ -199,7 +199,7 @@ $requestUri:
 
         if($database=='MBH'){
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
-        }else if($database=='heurist' || $database=='h6-alpha'){
+        }elseif($database=='heurist' || $database=='h6-alpha'){
             header('Location: /'.rawurlencode($database).'/index.php');
             exit;
         }
@@ -252,7 +252,7 @@ $requestUri:
                     $error_msg = 'Record ID is not defined';
                 }
 
-            }else if($action=='hml'){
+            }elseif($action=='hml'){
 
         // http://127.0.0.1/heurist/osmak_9c/hml/18/1
 
@@ -278,7 +278,7 @@ $requestUri:
                     $error_msg = 'Query or Record ID is not defined';
                 }
 
-            }else if($action=='adm'){
+            }elseif($action=='adm'){
 
                 $redirect = $redirect.'?db='.$database;
 
@@ -299,7 +299,7 @@ $requestUri:
                 //define('PDIR', $host_params['server_url'] . $host_params['install_dir']);
                 //$rewrite_path = dirname(__FILE__).'/../index.php';
 
-            }else if($action=='tpl'){
+            }elseif($action=='tpl'){
 
         //http://127.0.0.1/heurist/osmak_9c/tpl/Basic%20(initial%20record%20types)/t:10
                 $query = null;
@@ -338,7 +338,7 @@ $requestUri:
 
     if($error_msg){
        $redirect .= ('/hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
-    }else if($rewrite_path){
+    }elseif($rewrite_path){
         $_REQUEST = $params;
         include_once $rewrite_path;
         exit;
@@ -444,7 +444,7 @@ if($database_url!=null){ //redirect to resolver for another database
     if($entity!=null){
         $redirect = $database_url.'&'.$entity.'='.$recid;
 
-    }else if($isMediaRequest){
+    }elseif($isMediaRequest){
 
         $redirect = $database_url.'&file='.$recid;
 
@@ -456,15 +456,15 @@ if($database_url!=null){ //redirect to resolver for another database
         $redirect = $database_url.'&recID='.$recid.'&fmt='.$format;
     }
     $redirection_path = '';
-}else if($entity!=null){
+}elseif($entity!=null){
 
     $redirect = 'hserv/structure/export/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
 
-}else if($isMediaRequest){
+}elseif($isMediaRequest){
 
     $redirect = '?db='.$_REQUEST['db'].'&mode=page&file='.$recid;
 
-}else if($format=='html'){ //recirect to recordView
+}elseif($format=='html'){ //recirect to recordView
 
     if(@$_REQUEST['noheader']){
         $redirect = 'viewers/record/renderRecordData.php?db='
@@ -474,14 +474,14 @@ if($database_url!=null){ //redirect to resolver for another database
     }
 
 
-}else if($format=='web' || $format=='website'){ //redirect to website
+}elseif($format=='web' || $format=='website'){ //redirect to website
 
     $redirect = 'hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
     if(@$_REQUEST['field']>0){
         $redirect = $redirect.'&field='.$_REQUEST['field'];
     }
 
-}else if($format=='edit'){  //redirect to record edit
+}elseif($format=='edit'){  //redirect to record edit
 
     //todo include resolver recordSearchReplacement
     $redirect = 'hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];

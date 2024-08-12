@@ -71,15 +71,15 @@ class DbDefCalcFunctions extends DbEntityBase
 
             $this->data['details'] = 'cfn_ID';
 
-        //}else if(@$this->data['details']=='title'){
+        //}elseif(@$this->data['details']=='title'){
 
             //$this->data['details'] = 'cfn_Name';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'cfn_ID,cfn_Name';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'cfn_ID,cfn_Name,cfn_FunctionSpecification,cfn_RecTypeIDs';
         }

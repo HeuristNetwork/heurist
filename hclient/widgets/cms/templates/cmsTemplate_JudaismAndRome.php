@@ -171,7 +171,7 @@ default content consists of
                     . 'style="position:absolute;left:95px; top:5px;color:blue !important;z-index:1;" class="cms-button">database</a>'
                     . '<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
                     . 'style="position:absolute;left:5px;top:5px;color:blue !important;z-index:1;" class="cms-button">website editor</a>';
-                }else if($system->get_user_id() == 0 && $show_login_button){
+                }elseif($system->get_user_id() == 0 && $show_login_button){
                     print '<a href="#" id="btn_signin" style="position:absolute;right:5px; top:5px;color:blue !important;" class="cms-button">login</a>';// login link
                 }
             }

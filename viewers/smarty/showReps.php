@@ -433,7 +433,7 @@ function executeSmartyTemplate($system, $params){
         if($outputfile!=null){
             $smarty->registerFilter('output', 'smarty_output_filter');//to preform output into file
             $need_output_filter = false;
-        }else if($outputmode=='js'){
+        }elseif($outputmode=='js'){
             $smarty->registerFilter('output', 'smarty_output_filter_wrap_js');
             $need_output_filter = false;
         }
@@ -464,11 +464,11 @@ function executeSmartyTemplate($system, $params){
 
             if($outputmode=='js'){
                 header("Content-type: text/javascript");
-            }else if($publishmode>0 && $publishmode<4){
+            }elseif($publishmode>0 && $publishmode<4){
 
                 if($outputmode=='txt'){
                     $mimetype = 'plain/text';
-                }else if($outputmode=='json'){
+                }elseif($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
                     $mimetype = "text/$outputmode";
@@ -1074,7 +1074,7 @@ function save_report_into_file($tpl_source){
 
                 if($outputmode=='txt'){
                     $mimetype = 'plain/text';
-                }else if($outputmode=='json'){
+                }elseif($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
                     $mimetype = "text/$outputmode";
@@ -1100,7 +1100,7 @@ function save_report_into_file($tpl_source){
 
             echo $tpl_res;
 
-        }else if ($publishmode==1){ //info about success of saving into file and where to get it
+        }elseif($publishmode==1){ //info about success of saving into file and where to get it
 
             if($errors!=null){
                 header("Content-type: text/html;charset=UTF-8");
@@ -1331,7 +1331,7 @@ function smarty_function_wrap($params, &$smarty)
 
             return "<a href='".$params['var']."' target=_blank rel=noopener $style>".$params['var']."</a>";
 
-        }else if($dt=="file"){
+        }elseif($dt=="file"){
             //insert image or link
             $values = $params['var'];
 
@@ -1402,7 +1402,7 @@ function smarty_function_wrap($params, &$smarty)
 
             return $sres;
 
-        }else if($dt=='geo'){
+        }elseif($dt=='geo'){
 
             $value = $params['var'];
             $res = "";
@@ -1424,7 +1424,7 @@ function smarty_function_wrap($params, &$smarty)
             }
             return $res;
         }
-        else if($dt=='date'){
+        elseif($dt=='date'){
 
             if($mode==null) {$mode = 1;}
 

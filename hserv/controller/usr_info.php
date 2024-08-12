@@ -102,7 +102,7 @@
         }
 
     }
-    else if($action=='usr_log'){
+    elseif($action=='usr_log'){
 
         if($system->set_dbname_full($dbname)){
 
@@ -116,14 +116,14 @@
             }
         }
 
-    } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
+    } elseif (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
         if($system->verify_credentials($dbname)>0){
             user_setPreferences($system, $req_params);
             $res = true;
         }
 
-    } else if ($action == "logout"){ //save preferences into session
+    } elseif($action == "logout"){ //save preferences into session
 
         if($system->set_dbname_full($dbname)){
 
@@ -135,7 +135,7 @@
             }
         }
 
-    }else if($action == 'check_for_alpha'){ // check if an alpha version is available
+    }elseif($action == 'check_for_alpha'){ // check if an alpha version is available
 
         $is_alpha = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? true : false;
         $res = '';
@@ -180,7 +180,7 @@
             }
         }
 
-    }else if($action == 'get_time_diffs'){
+    }elseif($action == 'get_time_diffs'){
 
         $data = $req_params['data'];
         if(!is_array($data)){
@@ -206,9 +206,9 @@
         }
 
 
-    }else if( !$system->init( $dbname ) ){
+    }elseif( !$system->init( $dbname ) ){
 
-    }else if($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
+    }elseif($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
 
         if(isset($allowCMSCreation) && $allowCMSCreation == -1){
 
@@ -219,7 +219,7 @@
         }else{
             $res = 1;
         }
-    }else if($action == 'check_for_databases'){ // check if the provided databases are available on the current server
+    }elseif($action == 'check_for_databases'){ // check if the provided databases are available on the current server
 
         $mysqli = $system->get_mysqli();
         $data = $req_params['data'];
@@ -251,15 +251,15 @@
                 }
             }
         }
-    }else if($action == 'get_user_notifications'){
+    }elseif($action == 'get_user_notifications'){
         $res = user_getNotifications($system);
-    }else if($action == 'get_tinymce_formats'){
+    }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->getDatabaseSetting('TinyMCE formats');
 
         if(!is_array($settings) || array_key_exists('status', $settings)){
             $res = false;
-        }else if(empty($settings) || empty($settings['formats'])){
+        }elseif(empty($settings) || empty($settings['formats'])){
             $res = array(
                 'content_style' => '',
                 'formats' => array(),
@@ -367,7 +367,7 @@
                 $res = array();// invalid formatting
             }
         }
-    }else if($action == "translate_string"){ // translate given string using Deepl's API, if able
+    }elseif($action == "translate_string"){ // translate given string using Deepl's API, if able
         $res = getExternalTranslation($system, @$req_params['string'], @$req_params['target'], @$req_params['source']);
     }else{
 
@@ -380,7 +380,7 @@
 
             $res = $system->getCurrentUserAndSysInfo(false, (@$req_params['is_guest']==1));
 
-        }else if ($action == "save_prefs"){
+        }elseif($action == "save_prefs"){
 
             if($system->verify_credentials($dbname)>0){
                 user_setPreferences($system, $req_params);
@@ -389,12 +389,12 @@
             }
 
         }
-        else if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
+        elseif ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
         }
-        else if ($action=="file_in_folder") { //get list of system images
+        elseif($action=="file_in_folder") { //get list of system images
 
               $exts = @$req_params['exts'];
               if($exts){
@@ -415,7 +415,7 @@
               $res = folderContent($lib_path, $exts);
 
         }
-        else if ($action=="foldercontent") { //get list of files for given folder
+        elseif($action=="foldercontent") { //get list of files for given folder
 
               //by default this are mbtiles in uploaded_tilestack
 
@@ -431,22 +431,22 @@
 
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
-              }else if(intval($source)>0){
+              }elseif(intval($source)>0){
 
                   $source = intval($source);
                   if($source==1){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
-                  }else if($source==2){
+                  }elseif($source==2){
                       $lib_path = '/srv/BACKUP';
                       $include_dates = true;
-                  }else if($source==3){
+                  }elseif($source==3){
                       $include_dates = true;
                       if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                           $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
                       }else{
                           $lib_path = '/srv/BACKUP/ARCHIVE';
                       }
-                  }else if($source==4){
+                  }elseif($source==4){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
                   }
 
@@ -458,7 +458,7 @@
               $res = folderContent($lib_path, $exts, $include_dates);
 
         }
-        else if ($action=="folders") { //get list of system images
+        elseif($action=="folders") { //get list of system images
 
               $folders = $system->getArrayOfSystemFolders();
 
@@ -482,7 +482,7 @@
 
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
-                  }else if(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
+                  }elseif(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not a directory');
                   }else{
 
@@ -497,11 +497,11 @@
                       $new_name = USanitize::sanitizePath(@$req_params['newname']);
                       if($new_name==''){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'New folder name is not defined or out of the root');
-                      }else if($folders[strtolower($new_name)]){
+                      }elseif($folders[strtolower($new_name)]){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
-                      }else if(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
+                      }elseif(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
-                      }else if(!file_exists($folder_name)){
+                      }elseif(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);
@@ -511,13 +511,13 @@
                           }
                       }
 
-                  }else if($op=='delete'){
+                  }elseif($op=='delete'){
                       //if (is_dir($dir))
 
 
                       if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
-                      }else if (count(scandir($folder_name))>2){
+                      }elseif (count(scandir($folder_name))>2){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$f_name.'" cannot be removed');
                       }else{
                           $res = folderDelete2($folder_name, true);
@@ -526,7 +526,7 @@
                           }
                       }
 
-                  }else if($op=='create'){
+                  }elseif($op=='create'){
                       if(file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with such name already exists');
                       }else{
@@ -540,7 +540,7 @@
                   }
               }
         }
-        else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
+        elseif($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
 
             $msg = '';
 
@@ -619,7 +619,7 @@
                     $system->user_LogActivity('Login');
                 }
 
-            } else if ($action=="reset_password") {
+            } elseif($action=="reset_password") {
 
                 $password = array_key_exists('new_password', $req_params) ? $req_params['new_password'] : null;
                 if(array_key_exists('new_password', $req_params)) {unset($req_params['new_password']);}// remove from REQUEST
@@ -627,7 +627,7 @@
                 if($req_params['pin'] && $req_params['username'] && $password){ // update password w/ pin
                     $system->user_LogActivity('ResetPassword', "Updating password for {$req_params['username']}");
                     $res = user_ResetPassword($system, $req_params['username'], $password, $req_params['pin']);
-                }else if($req_params['pin']){ // get/validate reset pin
+                }elseif($req_params['pin']){ // get/validate reset pin
                     $system->user_LogActivity('ResetPassword', "Handling reset pin for {$req_params['username']}");
                     $res = user_HandleResetPin($system, @$req_params['username'], @$req_params['pin'], @$req_params['captcha']);
                 }else{
@@ -653,11 +653,11 @@
                 }
 
             }
-              else if ($action=="sys_info_count") {
+              elseif($action=="sys_info_count") {
 
                 $res = $system->getTotalRecordsAndDashboard();
 
-            } else if ($action=="usr_save") {
+            } elseif($action=="usr_save") {
 
                 USanitize::sanitizeRequest($req_params);
 
@@ -672,7 +672,7 @@
                     }
                 }
 
-            } else if ($action=="usr_get" && is_numeric(@$req_params['UGrpID'])) {
+            } elseif($action=="usr_get" && is_numeric(@$req_params['UGrpID'])) {
 
                 $ugrID = $req_params['UGrpID'];
 
@@ -685,38 +685,38 @@
                     $system->addError(HEURIST_REQUEST_DENIED);
                 }
 
-            } else if ($action=="usr_names" && @$req_params['UGrpID']) {
+            } elseif($action=="usr_names" && @$req_params['UGrpID']) {
 
                 $res = user_getNamesByIds($system, $req_params['UGrpID']);
 
-            } else if ($action=="groups") {
+            } elseif($action=="groups") {
 
                 $ugr_ID = @$req_params['UGrpID']?$req_params['UGrpID']:$system->get_user_id();
 
                 $res = user_getWorkgroups($system->get_mysqli(), $ugr_ID, true);
 
-            } else if ($action=="members" && @$req_params['UGrpID']) {
+            } elseif($action=="members" && @$req_params['UGrpID']) {
 
                 $res = user_getWorkgroupMembers($system->get_mysqli(), @$req_params['UGrpID']);
 
-            } else if ($action=="user_wss") {
+            } elseif($action=="user_wss") {
 
                 $res = user_WorkSet($system, $req_params);
 
-            } else if ($action=="svs_copy"){
+            } elseif($action=="svs_copy"){
 
                 $res = svsCopy($system, $req_params);
 
-            } else if ($action=="svs_save"){
+            } elseif($action=="svs_save"){
 
                 USanitize::stripScriptTagInRequest($req_params);
                 $res = svsSave($system, $req_params);
 
-            } else if ($action=="svs_delete" && @$req_params['ids']) {
+            } elseif($action=="svs_delete" && @$req_params['ids']) {
 
                 $res = svsDelete($system, $req_params['ids'], @$req_params['UGrpID']);
 
-            } else if ($action=="svs_get" ) {
+            } elseif($action=="svs_get" ) {
 
                 if(@$req_params['svsIDs']){
                     $res = svsGetByIds($system, $req_params['svsIDs']);
@@ -724,23 +724,23 @@
                     $res = svsGetByUser($system, @$req_params['UGrpID'], @$req_params['keep_order']);
                 }
 
-            } else if ($action=="svs_savetree" ) { //save saved searches tree status
+            } elseif($action=="svs_savetree" ) { //save saved searches tree status
 
                 USanitize::stripScriptTagInRequest($req_params);
                 $res = svsSaveTreeData($system, @$req_params['data']);
 
-            } else if ($action=="svs_gettree" ) { //save saved searches tree status
+            } elseif($action=="svs_gettree" ) { //save saved searches tree status
 
                 $res = svsGetTreeData($system, @$req_params['UGrpID']);
 
 
-            }else if($action == 'get_url_content_type'){
+            }elseif($action == 'get_url_content_type'){
 
                 $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
 
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
 
-            }else if($action == 'upload_file_nakala'){ //@todo - move to separate controller
+            }elseif($action == 'upload_file_nakala'){ //@todo - move to separate controller
 
                 // load ONE file to ext.repository - from manageRecUploadedFiles
                 // see also local_to_repository in record_batch

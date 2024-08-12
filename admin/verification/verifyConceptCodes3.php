@@ -143,7 +143,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
 /*   find alternatives
         if($ver==2){
             $dbid = 'in (2,3,1066)';
-        }else if($ver==6){ //biblio
+        }elseif($ver==6){ //biblio
             $dbid = 'in (3,6)';
         }else{
             $dbid = '='.$ver;

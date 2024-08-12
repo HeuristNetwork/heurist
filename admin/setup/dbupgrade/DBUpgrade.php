@@ -40,7 +40,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
             if($trg_maj==1 && $src_min==2){
                 include_once $filename;
                 $rep = updateDatabseTo_v3($system, $dbname);//PHP
-            }else if(!db_script($dbname, $dir.$filename)){ //SQL
+            }elseif(!db_script($dbname, $dir.$filename)){ //SQL
                 $system->addError(HEURIST_DB_ERROR, 'Error: Unable to execute '.$filename.' for database '.$dbname
                     .'Please check whether this file is valid');
                 $rep = false;

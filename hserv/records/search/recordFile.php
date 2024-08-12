@@ -221,7 +221,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
     //@todo use prepareIds() and prepareStrIds
     if(is_string($file_ids)){
         $file_ids = explode(',', $file_ids);
-    }else if(!is_array($file_ids)){
+    }elseif(!is_array($file_ids)){
         $file_ids = array($file_ids);
     }
 
@@ -259,7 +259,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
                 $query = $query.' = "'.$filed_ids2[0].'"';
             }
 
-        }else if(is_numeric($file_ids[0]) && $file_ids[0]>0){
+        }elseif(is_numeric($file_ids[0]) && $file_ids[0]>0){
             $query = 'ulf_ID';
 
             if(count($file_ids)>1){
@@ -300,7 +300,7 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
                 if( $filename && file_exists($filename) ){
                 array_push($result, $filename);
-                }else if($extURL && $type!='local'){
+                }elseif($extURL && $type!='local'){
                 array_push($result, $extURL);
                 }
                 */
@@ -390,7 +390,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
             $background_file  = 'ulf_'.$fileid.'.bg';
             if(false && file_exists(HEURIST_THUMB_DIR . $background_file)){
                 $bg_color = file_get_contents(HEURIST_THUMB_DIR.$background_file);
-            }else if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
+            }elseif(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
                 $bg_color = UImage::getPrevailBackgroundColor( HEURIST_THUMB_DIR . $thumbfile );
             }else{
                 $bg_color = 'rgb(223, 223, 223)';
@@ -632,7 +632,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
         }
         if(@$finfo['extension']){
             $originalFileName = $originalFileName.'.'.@$finfo['extension'];
-        }else if($fileExt){
+        }elseif($fileExt){
             $originalFileName = $originalFileName.'.'.$fileExt;
         }
     }
@@ -642,7 +642,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
     if($is_local){
 
-    }else if($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
+    }elseif($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
 
         $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         $filepath = $_tmpfile;
@@ -655,7 +655,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip = new ZipArchive();
     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
         $system->error_exit_api("Cannot create zip $file_zip_full");
-    }else if(strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled' ) {
+    }elseif(strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled' ) {
         $zip->addFile($filepath, $originalFileName);
     }
 
@@ -765,7 +765,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
         }
 
     }
-    else if ( $is_audio )
+    elseif ( $is_audio )
     {
 
         if ($mimeType=='audio/soundcloud'
@@ -823,7 +823,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
             $fancybox = '';
             if(is_array($params) && @$params['fancybox']){
                 $fancybox =' class="fancybox-thumb" data-id="'.$fileid.'" ';
-            }else if(!$external_url){
+            }elseif(!$external_url){
                 $fancybox =' data-id="'.$fileid.'" ';
             }
             $result = '<img '.$size.$style.' src="'.$filepath.'"'
@@ -832,7 +832,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
 
 
-    }else if($mimeType=='application/pdf'){
+    }elseif($mimeType=='application/pdf'){
         if(($size==null || $size=='') && $style==''){
             $size = '';
             $style = 'style="width:80% !important; height:90% !important"';
@@ -876,14 +876,14 @@ function getPlayerURL($mimeType, $url, $params=null){
 
         $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
 
-    }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
+    }elseif( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
 
         $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".rawurlencode($url), false), true);//get vimeo video id
         $video_id = @$hash['video_id'];
         if($video_id>0){
            $url =  'https://player.vimeo.com/video/'.$video_id;
         }
-    }else if( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
+    }elseif( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
 
         $autoplay = '&amp;auto_play=';
         $show_artwork = '&amp;show_artwork=';
@@ -1030,7 +1030,7 @@ function fileGetMetadata($fileinfo){
             $image = UImage::getImageFromFile($filepath);
             $alt_image = @getimagesize($filepath);
 
-        }else if($external_url){
+        }elseif($external_url){
 
             $image = UImage::getRemoteImage( $external_url );
         }
@@ -1047,7 +1047,7 @@ function fileGetMetadata($fileinfo){
 
                 $res = 'Cannot get image dimensions';
             }
-        }else if(file_exists($filepath) && is_array($alt_image) && !empty($alt_image)){ // [0] => width, [1] => height
+        }elseif(file_exists($filepath) && is_array($alt_image) && !empty($alt_image)){ // [0] => width, [1] => height
             $res = array('width' => $alt_image[0], 'height' => $alt_image[1]);
         }else{
             $res = array('error'=>'Image is not loaded');//Cannot load image file to get dimensions
@@ -1091,7 +1091,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
             if (@$file['fullPath']){
                 $filename = $file['fullPath'];
-            }else if (@$file['ulf_FileName']) {
+            }elseif (@$file['ulf_FileName']) {
                 $filename = $file['ulf_FilePath'].$file['ulf_FileName'];// post 18/11/11 proper file path and name
             } else {
                 $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID'];// pre 18/11/11 - bare numbers as names, just use file ID
@@ -1148,14 +1148,14 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
             }
 
         }
-        else if(@$file['ulf_ExternalFileReference']){  //remote
+        elseif(@$file['ulf_ExternalFileReference']){  //remote
 
             if(@$file['ulf_OrigFileName'] &&
                 (strpos($file['ulf_OrigFileName'],'_tiled')===0 || @$file['ulf_PreferredSource']=='tiled') )  {
 
                 $img = UImage::createFromString('tiled images stack');//from string
 
-            }else if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
+            }elseif(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], 'image/')===0){
                 //@todo for image services (flikr...) take thumbnails directly
                 $img = UImage::getRemoteImage($file['ulf_ExternalFileReference'], $orientation);
 
@@ -1175,7 +1175,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 //$youtubeid = preg_replace('/^[^v]+v.(.{11}).*/' , '$1', $url);
                 //$img = get_remote_image("http://img.youtube.com/vi/".$youtubeid."/0.jpg");//get thumbnail
-            }else if($file['fxm_MimeType'] == 'video/vimeo'){
+            }elseif($file['fxm_MimeType'] == 'video/vimeo'){
 
                 $url = $file['ulf_ExternalFileReference'];
 
@@ -1194,7 +1194,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
                     $img = UImage::getRemoteImage($thumb_url);
                 }
                 */
-            }else if($file['fxm_MimeType'] == 'audio/soundcloud'){
+            }elseif($file['fxm_MimeType'] == 'audio/soundcloud'){
 
                 $url = $file['ulf_ExternalFileReference'];
 

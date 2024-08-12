@@ -322,7 +322,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
             $temp = substr($temp,0, strlen($temp)-1);
         }
         $termIDs = explode(":",$temp);
-    } else if ($is_tree){ //vocabulary
+    } elseif($is_tree){ //vocabulary
 
         $isvocabulary = true;
         $termIDs = array($formattedStringOfTermIDs);
@@ -338,7 +338,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
             if(count($termIDs)>1){
                 array_push($invalidTermIDs, "blank");
             }
-        }else if ( !@$TL[$trmID]){ // invalid trm ID
+        }elseif ( !@$TL[$trmID]){ // invalid trm ID
             array_push($invalidTermIDs,$trmID);
         }
     }
@@ -349,7 +349,7 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
 
         if($isvocabulary ){ //vocabulary
             $validStringOfTerms =  "";
-        } else if($is_tree) {
+        } elseif($is_tree) {
             $termTree = json_decode($formattedStringOfTermIDs);
             $validStringOfTerms = createValidTermTree($termTree, $invalidTermIDs);
             if($validStringOfTerms!=""){

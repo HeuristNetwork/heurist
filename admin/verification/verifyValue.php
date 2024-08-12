@@ -91,7 +91,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
         if ( $dtyID == DT_RELATION_TYPE) {
             $parent_id = 'relation';
-        }else if(is_array($defs) && count($defs)==1){
+        }elseif(is_array($defs) && count($defs)==1){
             $parent_id = $defs[0];
         }else{
             $parent_id = $defs;

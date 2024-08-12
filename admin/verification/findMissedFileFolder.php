@@ -88,9 +88,9 @@ if(!@$_REQUEST['mail']){
         $check = folderExists($dir, true);
         if($check==-1){
             $not_exists[] = $db_name;
-        }else if($check<0){
+        }elseif($check<0){
             $not_writeable[] = $db_name;
-        }else if($check_subfolders){
+        }elseif($check_subfolders){
              //check subfolders
              foreach ($folders as $folder_name=>$folder){
 
@@ -100,7 +100,7 @@ if(!@$_REQUEST['mail']){
                  $check = folderExists($subdir, true);
                  if($check==-1){
                       $not_exists2[] = $subdir;
-                 }else if($check<0){
+                 }elseif($check<0){
                       $not_writeable2[] = $subdir;
                  }
              }

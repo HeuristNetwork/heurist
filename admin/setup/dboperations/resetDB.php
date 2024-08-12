@@ -76,7 +76,7 @@ if($isSystemInited){
 if(is_bool($res) && !$res){
     $response = $system->getError();
     $response = $response['message'];
-}else if(is_array($res) && count($res) > 0){
+}elseif(is_array($res) && count($res) > 0){
     $response = 'not able to create all file directories '.implode(', ',$res);
 }else{
     $response = 'Database '.DEMO_DB.' has been reset';

@@ -266,7 +266,7 @@
                     'blocked' => 0,
                     'last_block' => null
                 );
-            }else if(!array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){
+            }elseif(!array_key_exists($user_id, $_SESSION[$db]['reset_pins'])){
                 $_SESSION[$db]['reset_pins'][$user_id] = array(
                     'pin' => '',
                     'resends' => 1,
@@ -280,7 +280,7 @@
             if($_SESSION[$db]['reset_pins']['last_block'] !== null && $_SESSION[$db]['reset_pins']['last_block'] + (60 * 60) < $now){
                 $_SESSION[$db]['reset_pins']['blocked'] = 0;
                 $_SESSION[$db]['reset_pins']['last_block'] = null;
-            }else if($_SESSION[$db]['reset_pins']['blocked'] == 3){
+            }elseif($_SESSION[$db]['reset_pins']['blocked'] == 3){
 
                 $system->addError(HEURIST_ACTION_BLOCKED, 'We are unable to send a reset pin at this time.<br>Please try again later');
                 return false;
@@ -326,7 +326,7 @@
 
                         $system->addError(HEURIST_ACTION_BLOCKED, $msg);
                         return false;
-                    }else if($expired && $check_pin){ // was checking pin, but existing one has expired
+                    }elseif($expired && $check_pin){ // was checking pin, but existing one has expired
                         $response = 'Your current reset pin has expired.<br>A new one has been sent to your email';
                     }else{ // re-sending
                         $response = 'A new pin has been sent';
@@ -782,7 +782,7 @@
 
                 $system->addError(HEURIST_REQUEST_DENIED, 'Registration is not allowed for current database');
 
-            }else if ($is_registration || $system->has_access($recID)) {
+            }elseif($is_registration || $system->has_access($recID)) {
 
                 //do not allow registration if approvement mail cannot be sent
                 if($is_registration){
@@ -854,7 +854,7 @@
                         $rv = true;
                         if($recID<1 && $system->get_user_id()<1){
                             $rv = user_EmailAboutNewUser($system, $new_recID, false, $is_guest_registration);
-                        }else if($recID<1 || $is_approvement){
+                        }elseif($recID<1 || $is_approvement){
                             $rv = user_EmailApproval($system, $new_recID, $tmp_password, $is_approvement);
 
                             user_SyncCommonCredentials($system,  $new_recID, $is_approvement);
@@ -863,7 +863,7 @@
                             return false;
                         }
 
-                    }else if($recID<1){
+                    }elseif($recID<1){
                         //this is addition of new group
                         //add current user as admin for new group
                         //changeRole($recID, get_user_id(), "admin", null, false, true);
@@ -902,7 +902,7 @@
                 array_push($reqs, 'ugr_Password');
             }
 
-        }else if (@$record['ugr_Type']=='workgroup'){
+        }elseif (@$record['ugr_Type']=='workgroup'){
             $reqs = array('ugr_Name','ugr_eMail');
 
         }else{
@@ -986,7 +986,7 @@
                             "FROM sysUGrps where ugr_ID=".intval($userID);
 
 
-                        }else if($is_approvement){
+                        }elseif($is_approvement){
                             //enable user
                             $query1 = "update `$ldb`.sysUGrps set ugr_Enabled='". $is_approvement ."' where ugr_ID=".intval($userID);
                         }
@@ -1154,7 +1154,7 @@
             $user_settings = array(
                 $usr_id => array()
             );
-        }else if(!array_key_exists($usr_id, $user_settings)){
+        }elseif(!array_key_exists($usr_id, $user_settings)){
             $user_settings[$usr_id] = array();
         }
 
@@ -1179,7 +1179,7 @@
                 'message' => @$notifications['bug_report']['message'],
                 'links' => @$notifications['bug_report']['links']
             );
-        }else if(!array_key_exists('bug_report', $user_settings[$usr_id])){
+        }elseif(!array_key_exists('bug_report', $user_settings[$usr_id])){
             $user_settings[$usr_id]['bug_report'] = $today;
         }
 

@@ -80,7 +80,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
 
 
         }
-        else if ($action=='check_newdefs'){
+        elseif($action=='check_newdefs'){
 
             //check new definitions for current database
             $res = DbUtils::databaseCheckNewDefs();
@@ -89,7 +89,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             }
 
         }
-        else if($action=='create'){
+        elseif($action=='create'){
 
             if( !isset($passwordForDatabaseCreation)
                 || $passwordForDatabaseCreation==''
@@ -165,7 +165,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             }
 
         }
-        else if($action=='restore')
+        elseif($action=='restore')
         {
             //compose database name
             $database_name = __composeDbName($system, $req_params);
@@ -192,7 +192,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                 }
             }
         }
-        else if($action=='delete' || $action=='clear')
+        elseif($action=='delete' || $action=='clear')
         {
 
             $allow_action = false;
@@ -224,7 +224,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                             'To perform this action you must be logged in as Database Owner');
                     }
 
-                }else if(!$allow_action && (!isset($passwordForDatabaseDeletion) || $passwordForDatabaseDeletion=='')) {
+                }elseif(!$allow_action && (!isset($passwordForDatabaseDeletion) || $passwordForDatabaseDeletion=='')) {
                     $system->addError(HEURIST_REQUEST_DENIED,
                         'This action is not allowed unless a password is provided - please consult system administrator');
                 }
@@ -250,7 +250,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
 
 
         }
-        else if($action=='rename' || $action=='clone')
+        elseif($action=='rename' || $action=='clone')
         {
             $allow_action = false;
             $is_current_db = false;
@@ -259,7 +259,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             $is_template = false; //(@$req_params['templatedb']!=null);//not used anymore
             if($is_template){
                 $db_source = filter_var(@$req_params['templatedb'], FILTER_SANITIZE_STRING);
-            }else if (@$req_params['sourcedb']){ //by sysadmin from list of databases
+            }elseif (@$req_params['sourcedb']){ //by sysadmin from list of databases
                 $db_source = filter_var(@$req_params['sourcedb'], FILTER_SANITIZE_STRING);
             }else{
                 $db_source = $req_params['db'];
@@ -316,7 +316,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
                                     }
                                 }
                             }
-                        }else if($is_template){
+                        }elseif($is_template){
 
                             if($sourceRegID>0 && $sourceRegID<1000){
                                 $allow_action = true;
@@ -324,7 +324,7 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
 $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.";
                             }
 
-                        }else if (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
+                        }elseif (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
                             //cloned by sysadmin (sourcedb=) from list of databases
                             $allow_action = true;
                         }
@@ -374,7 +374,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 
         }
 
-        else if($action=='verify')
+        elseif($action=='verify')
         {
 
             if(!$system->is_admin()){
@@ -434,7 +434,7 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
                     if(!(count($res)>0)){
                         $system->addError(HEURIST_INVALID_REQUEST, "'Checks' parameter is missing or incorrect");
                         $res = false;
-                    }else if(@$req_params['reload']==1){
+                    }elseif(@$req_params['reload']==1){
                         $res['reload'] = true;
                     }
                 }

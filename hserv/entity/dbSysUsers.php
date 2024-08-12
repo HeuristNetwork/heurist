@@ -81,7 +81,7 @@ class DbSysUsers extends DbEntityBase
                 array_push($where, '(ugl_UserID = ugr_ID)');
                 array_push($from_table, 'sysUsrGrpLinks');
         }
-        else if (@$this->data['members_only']){ // user's who aren't group admins
+        elseif (@$this->data['members_only']){ // user's who aren't group admins
             array_push($where, '(ugr_ID NOT IN (SELECT ugr_ID FROM sysUGrps, sysUsrGrpLinks WHERE (ugl_UserID = ugr_ID) AND (ugl_Role = "admin")))');
         }
 
@@ -97,20 +97,20 @@ class DbSysUsers extends DbEntityBase
 
             $this->data['details'] = 'ugr_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name';
 
-        }else if(@$this->data['details']=='fullname'){
+        }elseif(@$this->data['details']=='fullname'){
 
             $this->data['details'] = 'ugr_ID,CONCAT(ugr_FirstName,\' \',ugr_LastName) as ugr_FullName';
 
-        }else if(@$this->data['details']=='count'){
+        }elseif(@$this->data['details']=='count'){
 
             $this->data['details'] = 'ugr_ID';
             $needCount = true;
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Organisation,ugr_Enabled';
             if($needRole) {
@@ -119,7 +119,7 @@ class DbSysUsers extends DbEntityBase
                 $needCount = true;  //need count only for all groups
             }
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'ugr_ID,ugr_Name,ugr_FirstName,ugr_LastName,ugr_eMail,ugr_Department,ugr_Organisation,'
             .'ugr_City,ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,usr_ExternalAuthentication';
@@ -219,7 +219,7 @@ class DbSysUsers extends DbEntityBase
                     'You are not admin and can\'t edit another user. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
-        }else if($ugrID != 2 && is_array($this->recordIDs) && in_array(2, $this->recordIDs)){
+        }elseif($ugrID != 2 && is_array($this->recordIDs) && in_array(2, $this->recordIDs)){
             $this->system->addError(HEURIST_REQUEST_DENIED,
                 'You do not have permission to alter the database owner\'s account.');
 
@@ -275,7 +275,7 @@ class DbSysUsers extends DbEntityBase
             if(@$this->records[$idx]['ugr_Password']==''){
                 unset($this->records[$idx]['ugr_Password']);
 
-            }else if(@$this->records[$idx]['ugr_Password']){
+            }elseif(@$this->records[$idx]['ugr_Password']){
 
                 $tmp_password = $this->records[$idx]['ugr_Password'];
 
@@ -288,7 +288,7 @@ class DbSysUsers extends DbEntityBase
             }
             if(!$this->system->is_admin() && (!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0)){
                 $this->records[$idx]['ugr_Enabled'] = 'n';
-            }else if(array_key_exists('ugr_Enabled', $this->records[$idx])){
+            }elseif(array_key_exists('ugr_Enabled', $this->records[$idx])){
 
                 $allowed_status = array('n', 'y', 'y_no_add', 'y_no_delete', 'y_no_add_delete');
                 $is_valid = in_array($this->records[$idx]['ugr_Enabled'], $allowed_status);
@@ -370,7 +370,7 @@ class DbSysUsers extends DbEntityBase
                     $is_approvement = (@$this->records[$idx]['is_approvement']===true);
                     if($is_new && $this->system->get_user_id()<1){ //this is independent registration of new user
                         $rv = user_EmailAboutNewUser($this->system, $ugr_ID);
-                    }else if($is_new || $is_approvement){ //this is approvement or registration FOR user
+                    }elseif($is_new || $is_approvement){ //this is approvement or registration FOR user
                         $rv = user_EmailApproval($this->system, $ugr_ID, @$this->records[$idx]['tmp_password'], $is_approvement);
 
                         user_SyncCommonCredentials($this->system,  $ugr_ID, $is_approvement);
@@ -511,7 +511,7 @@ class DbSysUsers extends DbEntityBase
         if($row == null){
             $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve user account status');
             return false;
-        }else if($row[0] != 'y'){
+        }elseif($row[0] != 'y'){
 
             $msg = $row[0] == 'n' ? 'The selected user is not enabled. Please enable them to transfer database ownership to them.' :
                                     'The selected user does not have full create and delete record permissions. Please change this via the enabled field.';

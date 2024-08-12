@@ -187,7 +187,7 @@ function doReport($system, $update_mode, $format, $row){
 
                         if($ext=='txt'){
                             $mimetype = 'plain/text';
-                        }else if($ext=='json'){
+                        }elseif($ext=='json'){
                             $mimetype = 'application/json';
                         }else{
                             $mimetype = "text/$ext";

@@ -239,9 +239,9 @@ class System {
             global $trmDefines;
             if(@$rtDefines[$const_name]){
                 $this->defineRTLocalMagic($const_name, $rtDefines[$const_name][1], $rtDefines[$const_name][0], $reset);
-            }else if(@$dtDefines[$const_name]){
+            }elseif(@$dtDefines[$const_name]){
                 $this->defineDTLocalMagic($const_name, $dtDefines[$const_name][1], $dtDefines[$const_name][0], $reset);
-            }else if(@$trmDefines[$const_name]){
+            }elseif(@$trmDefines[$const_name]){
                 $this->defineTermLocalMagic($const_name, $trmDefines[$const_name][1], $trmDefines[$const_name][0], $reset);
             }
             return defined($const_name);
@@ -932,11 +932,11 @@ class System {
             $status = @$response['status'];
             if($status==HEURIST_INVALID_REQUEST){
                 $code = 400; // Bad Request - the request could not be understood or was missing required parameters.
-            }else if($status==HEURIST_REQUEST_DENIED) {
+            }elseif($status==HEURIST_REQUEST_DENIED) {
                 $code = 403; // Forbidden - access denied
-            }else if($status==HEURIST_NOT_FOUND){
+            }elseif($status==HEURIST_NOT_FOUND){
                 $code = 404; //Not Found - resource was not found.
-            }else if($status==HEURIST_ACTION_BLOCKED) {
+            }elseif($status==HEURIST_ACTION_BLOCKED) {
                 $code = 409; //cannot add an existing object already exists or constraints violation
             }else{
                 //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
@@ -1749,7 +1749,7 @@ class System {
                     $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
                     return false;
 
-                }else if (  $skip_pwd_check || hash_equals(crypt($password, $user['ugr_Password']), $user['ugr_Password']) ) {
+                }elseif (  $skip_pwd_check || hash_equals(crypt($password, $user['ugr_Password']), $user['ugr_Password']) ) {
 
                     $this->doLoginSession($user['ugr_ID'], $session_type);
 
@@ -1778,9 +1778,9 @@ class System {
         $time = 0;
         if($session_type == 'public'){
             $lifetime = 0;
-        }else if($session_type == 'shared'){
+        }elseif($session_type == 'shared'){
             $lifetime = time() + 24*60*60;     //day
-        }else if ($session_type == 'remember') {
+        }elseif($session_type == 'remember') {
             $lifetime = time() + 30*24*60*60;  //30 days
             $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
         }
@@ -1856,8 +1856,8 @@ class System {
         // TODO: redundancy: this duplicates same in hapi.js
         if('search_detail_limit'==$property){
             if(!$res || $res<500 ) {$res = 500;}
-            else if($res>5000 ) {$res = 5000;}
-        }else if($res==null && $def!=null){
+            elseif($res>5000 ) {$res = 5000;}
+        }elseif($res==null && $def!=null){
             $res = $def;
         }
 
@@ -2277,7 +2277,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
             if($server_parts[$i] == $local_parts[$i]){
                 continue;
-            }else if($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
+            }elseif($server_parts[$i] > $local_parts[$i]){ // main release is newer than installed version, send email
 
                 $title = "Heurist version " . htmlspecialchars($local_ver)
                  . " at " . HEURIST_BASE_URL . " is behind Heurist home server";
@@ -2401,7 +2401,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
         $settings = file_get_contents($setting_file);
         if($settings === false){
             return $this->addError(HEURIST_ERROR, "An error occurred while attempting to read database settings for $setting_name");
-        }else if(empty($settings)){
+        }elseif(empty($settings)){
             return array();
         }
 

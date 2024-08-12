@@ -135,7 +135,7 @@
                 if($val[2]==':'){
                     $lang = substr($val,0,2);
                     $pos = 3;
-                }else if($val[3]==':'){
+                }elseif($val[3]==':'){
                     $lang = substr($val,0,3);
                     $pos = 4;
                 }
@@ -221,7 +221,7 @@
                 if ($lang_!=null && $lang_==$lang){
                     $cnt++;
                     $fnd = $val;
-                }else if($lang_==null){
+                }elseif($lang_==null){
                     $def = $val;
                 }else{
                     $cnt++;
@@ -234,7 +234,7 @@
                 $res = $def;
             }
 
-        }else if(is_string($input)) {
+        }elseif(is_string($input)) {
             list($lang_, $res) = extractLangPrefix($input);//there is no localization
         }
 

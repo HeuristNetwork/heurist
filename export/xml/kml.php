@@ -205,7 +205,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                                 //create timespan from two temporal objects
                                 $dt = Temporal::mergeTemporals($row[7], $row[8]);
 
-                            }else if($row[6]){
+                            }elseif($row[6]){
                                 $dt = new Temporal($row[6]);
                             }
                             if($dt && $dt->isValid()){

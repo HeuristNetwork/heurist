@@ -144,9 +144,9 @@
 
         if($db_name==null || trim($db_name)==''){
             $res = 'Database parameter not defined';
-        }else if(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
+        }elseif(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
             $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
-        }else if(strlen($db_name)>64){
+        }elseif(strlen($db_name)>64){
             $res = 'Database name '.htmlspecialchars($db_name).' is too long. Max 64 characters allowed';
         }
 
@@ -253,7 +253,7 @@
                         $query2 = null;
                         if ($role == 'user') {
                             $query2 = "select ugr_ID from `$database`.sysUGrps where ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
-                        } else if ($role == 'admin') {
+                        } elseif($role == 'admin') {
                             $query2 = "select ugr_ID from `$database`.sysUGrps, `$database`.sysUsrGrpLinks".
                             " left join sysIdentification on ugl_GroupID = sys_OwnerGroupID".
                             " where ugr_ID=ugl_UserID and ugl_Role='admin' and ugr_eMail='" . $mysqli->real_escape_string($email) . "'";
@@ -645,7 +645,7 @@
 
                 if(!in_array($fieldname, $fields)) {continue;}
 
-            }else if(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
+            }elseif(strpos($fieldname, $table_prefix)!==0){ //ignore fields without prefix
                 //$fieldname = $table_prefix.$fieldname;
                 continue;
             }
@@ -681,7 +681,7 @@
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
             if($fieldname == 'ulf_ObfuscatedFileID') {$dtype = 's';}//exception
-            //else if($fieldname == 'dtl_Value') $dtype = 'b';//exception
+            //elseif($fieldname == 'dtl_Value') $dtype = 'b';//exception
 
             $params[0] = $params[0].$dtype;
             if($dtype=='i' && $value==''){
@@ -889,7 +889,7 @@
                     $res = true;
                 }
 
-            /*}else if($dbScriptMode==1){ //DISABLED
+            /*}elseif($dbScriptMode==1){ //DISABLED
                 //internal routine
                 $script_content = file_get_contents($script_file);
 
@@ -1454,7 +1454,7 @@
         if($k===0){
             $str = substr($str,2);
             return super_trim($str);
-        }else if($k===$len-2){
+        }elseif($k===$len-2){
             $str = substr($str,0,$len-2);
             return super_trim($str);
         }
@@ -1462,7 +1462,7 @@
         if($k===0){
             $str = substr($str,3);
             return super_trim($str);
-        }else if($k===$len-3){
+        }elseif($k===$len-3){
             $str = substr($str,0,$len-3);
             return super_trim($str);
         }

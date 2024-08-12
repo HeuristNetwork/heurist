@@ -202,7 +202,7 @@ class RecordsBatch
                     $query .= ' WHERE rec_RecTypeID in ('.getCommaSepIds($rty_ID).')';
                     $this->rtyIDs = $rty_ID;
                 }
-            }else if($rty_ID >0){
+            }elseif($rty_ID >0){
                 $query .= ' WHERE rec_RecTypeID = '.$rty_ID;
                 $this->rtyIDs = array($rty_ID);
             }
@@ -379,7 +379,7 @@ class RecordsBatch
                 if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
                 return $this->system->addError(HEURIST_DB_ERROR,
                     'Unable to insert reverse pointer for child record ID:'.$child_id.' - ', $syserror);
-            }else if($res==0){
+            }elseif($res==0){
                  array_push($childAlready, $child_id);
             }else{
 
@@ -459,14 +459,14 @@ class RecordsBatch
             if(@$this->data['details_encoded']==1 || @$this->data['details_encoded']==2){
                 //$this->data['val'] = json_decode(str_replace( ' xxx_style=', ' style=',
                 //        str_replace( '^^/', '../', urldecode($this->data['val']))));
-                //}else if(@$this->data['details_encoded']==2){
+                //}elseif(@$this->data['details_encoded']==2){
                 $this->data['val'] = urldecode( $this->data['val'] );
             }
         }
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array($this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array($this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -506,14 +506,14 @@ class RecordsBatch
             $dtl['dtl_Value'] = $geoType;
             $dtl['dtl_Geo'] = $geoValue;
             //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");
-        }else if($basetype=='date'){
+        }elseif($basetype=='date'){
 
             $useNewTemporalFormatInRecDetails = ($this->system->get_system('sys_dbSubSubVersion')>=14);
 
             $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $this->data['val'], $useNewTemporalFormatInRecDetails );
 
 
-        }else if(@$this->data['val']!=null){ //sanitize new value
+        }elseif(@$this->data['val']!=null){ //sanitize new value
 
             $this->_initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
@@ -562,7 +562,7 @@ class RecordsBatch
             if (!array_key_exists($rectype_ID,$rtyLimits)) { //limit not defined
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
-            }else if (intval($rtyLimits[$rectype_ID])>0 && $row[1]>0 && ($rtyLimits[$rectype_ID] - $row[1]) < 1){
+            }elseif (intval($rtyLimits[$rectype_ID])>0 && $row[1]>0 && ($rtyLimits[$rectype_ID] - $row[1]) < 1){
                 array_push($limitedRecIDs, $recID);//over limit - skip
                 continue;
             }
@@ -619,11 +619,11 @@ class RecordsBatch
 
                 $res = $this->detailsAdd();
 
-            }else if(@$this->data['a'] == 'replace'){ //returns
+            }elseif(@$this->data['a'] == 'replace'){ //returns
 
                 $res = $this->detailsReplace();
 
-            }else if(@$this->data['a'] == 'addreplace'){
+            }elseif(@$this->data['a'] == 'addreplace'){
 
                 $res = $this->detailsReplace();
                 if(is_array($res) && @$res['passed']==1 && @$res['undefined']==1){
@@ -631,7 +631,7 @@ class RecordsBatch
                     $res = $this->detailsAdd();
                 }
 
-            }else if(@$this->data['a'] == 'delete'){
+            }elseif(@$this->data['a'] == 'delete'){
 
                 $res = $this->detailsDelete(true);
             }
@@ -681,7 +681,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -699,7 +699,7 @@ class RecordsBatch
 
         if(@$this->data['dt_extended_description']>0){
             $this->dt_extended_description = $this->data['dt_extended_description'];
-        }else if(!($this->dt_extended_description>0)){
+        }elseif(!($this->dt_extended_description>0)){
             $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
             $this->dt_extended_description = DT_EXTENDED_DESCRIPTION;
         }
@@ -837,7 +837,7 @@ class RecordsBatch
             if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            //}else if($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
+            //}elseif($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
             //    array_push($undefinedFieldsRecIDs, $recID);
             //    continue;
             }
@@ -934,7 +934,7 @@ class RecordsBatch
 
                             //$s = $this->purifier->purify( $newVal );
                             //$dtl['dtl_Value'] = htmlspecialchars_decode( $dtl['dtl_Value'] );
-                    }else if($basetype=='geo'){
+                    }elseif($basetype=='geo'){
 
                         $dtl['dtl_Value'] = $geoType;
                         $dtl['dtl_Geo'] = $geoValue;
@@ -1002,7 +1002,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1130,7 +1130,7 @@ class RecordsBatch
             if($valuesToBeDeleted==null && $mysqli->error){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            }else if(!is_array($valuesToBeDeleted) || count($valuesToBeDeleted)==0){  //not found
+            }elseif(!is_array($valuesToBeDeleted) || count($valuesToBeDeleted)==0){  //not found
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }
@@ -1250,7 +1250,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1315,7 +1315,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1532,7 +1532,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1666,7 +1666,7 @@ class RecordsBatch
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -1878,7 +1878,7 @@ public methods
                     $system->get_mysqli()->real_escape_string($tag_name).'") and tag_UGrpID='.$ugrID);
                 if($res){
                     array_push($tag_ids, $res);
-                }else if($isadd){
+                }elseif($isadd){
                     $res = $this->_tagSave( array('tag_UGrpID'=>$ugrID, 'tag_Text'=>$tag_name));
                     if($res){
                         array_push($tag_ids, $res);
@@ -2183,7 +2183,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -2234,7 +2234,7 @@ public methods
 
                 return $match[1] . mb_strtoupper($first) . $remainder;
 
-            }else if($operation == 2){
+            }elseif($operation == 2){
                 // lowercase then capitalise first letter for all words
 
                 if(strlen($word) == 1 || mb_ereg("[a-z][A-Z]|[A-Z][a-z]", $word)){ // skip if one letter or camel case
@@ -2284,7 +2284,7 @@ public methods
             if(!$res){
                 $sql_errors[$recID] = $mysqli->error;
                 continue;
-            }else if($res->num_rows == 0){ // no values within field
+            }elseif($res->num_rows == 0){ // no values within field
                 array_push($skipped_recs, $recID);
                 continue;
             }
@@ -2394,7 +2394,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -2438,7 +2438,7 @@ public methods
             if(!$res){
                 $sql_errors[$recID] = $mysqli->error;
                 continue;
-            }else if($res->num_rows == 0){ // no values within field
+            }elseif($res->num_rows == 0){ // no values within field
                 array_push($skipped_recs, $recID);
                 continue;
             }
@@ -2460,7 +2460,7 @@ public methods
                     $value_to_translate = $val;      // $is_replacement
                     $all_detected++;
                     $source_lang = null;
-                }else if($lang2==$lang){
+                }elseif($lang2==$lang){
                     //already has this translation
                     if($is_replacement || $is_deletion){
                         $replacement_dtl_id = intval($values[0]);
@@ -2468,7 +2468,7 @@ public methods
                         $replacement_dtl_id = 0;
                     }
                     $all_detected++;
-                }else if(empty($value_to_translate)){
+                }elseif(empty($value_to_translate)){
                     // temporary source, is replaced by value w/o language prefix
                     $value_to_translate = $val;
                     $source_lang = $lang2;
@@ -2486,10 +2486,10 @@ public methods
                 }else{
                     array_push($skipped_recs, $recID);
                 }
-            }else if($value_to_translate==null){
+            }elseif($value_to_translate==null){
                 //source not found - skip
                 array_push($skipped_recs, $recID);
-            }else if($replacement_dtl_id==0){
+            }elseif($replacement_dtl_id==0){
                 //already translated
                 array_push($already_translated, $recID);
             }else {
@@ -2559,7 +2559,7 @@ public methods
 
         if(!$this->_validateParamsAndCounts()){
             return false;
-        }else if (!is_array(@$this->recIDs) || count($this->recIDs)==0){
+        }elseif (!is_array(@$this->recIDs) || count($this->recIDs)==0){
             return $this->result_data;
         }
 
@@ -2613,12 +2613,12 @@ public methods
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for sepecified repository and user/group not found');
             return false;
 
-        }else if(!@$credentials[$service_id]['params']['writeApiKey']){  // || @$credentials['params']['writeUser']
+        }elseif(!@$credentials[$service_id]['params']['writeApiKey']){  // || @$credentials['params']['writeUser']
 
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
             return false;
 
-        }else if(strpos($service_id,'nakala')===0 || strpos($service_id,'nakala')===1){
+        }elseif(strpos($service_id,'nakala')===0 || strpos($service_id,'nakala')===1){
 
             if(!array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
@@ -2715,11 +2715,11 @@ public methods
                      */
                     if(strpos($file_type, 'text') !== false || strpos($file_type, 'pdf') !== false){
                         $file_type = 'http://purl.org/coar/resource_type/c_1843';
-                    }else if(strpos($file_type, 'sound') !== false || strpos($file_type, 'audio') !== false){
+                    }elseif(strpos($file_type, 'sound') !== false || strpos($file_type, 'audio') !== false){
                         $file_type = 'http://purl.org/coar/resource_type/c_18cc';
-                    }else if(strpos($file_type, 'image') !== false){
+                    }elseif(strpos($file_type, 'image') !== false){
                         $file_type = 'http://purl.org/coar/resource_type/c_c513';
-                    }else if(strpos($file_type, 'video') !== false){
+                    }elseif(strpos($file_type, 'video') !== false){
                         $file_type = 'http://purl.org/coar/resource_type/c_12ce';
                     }else{ // other
                         $file_type = 'http://purl.org/coar/resource_type/c_1843';
@@ -2803,7 +2803,7 @@ public methods
 
                 if(count($dtl_IDs) == 0){ // delete file reference + local file
                     $ulf_to_delete[] = $org_ID;
-                }else if(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
+                }elseif(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
                     $dtl_IDs = prepareIds($dtl_IDs);//for snyk
                     if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
@@ -2870,7 +2870,7 @@ public methods
                 $system->addError(HEURIST_INVALID_REQUEST, 'Wrong paramters for records link creation. Given field is not type "resource"');
                 return false;
             }
-        }else if($trm_ID>0){
+        }elseif($trm_ID>0){
             //check that trm_ID is valid
 
         }
@@ -2922,7 +2922,7 @@ public methods
                 $mysqli->rollback();
                 $res = false;
                 break;
-            }else if($res==0){
+            }elseif($res==0){
                 $res = true;
                 $this->result_data['exist']++;
             }else{

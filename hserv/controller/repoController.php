@@ -119,19 +119,19 @@ if(!$system->init(@$_REQUEST['db'])){
                 array_push($res, ['tnakala', 'Nakala', 0, 'tnakala'], ['unakala1', 'Nakala', 0, 'unakala1'], ['unakala2', 'Nakala', 0, 'unakala2'], ['unakala3', 'Nakala', 0, 'unakala3'] );
             }
 
-        }else if($action=='get'){
+        }elseif($action=='get'){
             //get credentials (to edit on client side) for given user
 
             $res = user_getRepositoryCredentials($system, true, $ugr_ID);
 
-        }else if($action=='update'){
+        }elseif($action=='update'){
             //save credentials
             $to_delete = @$_REQUEST["delete"];
             $to_edit = @$_REQUEST["edit"];
 
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
-        //}else if($action=='upload'){
+        //}elseif($action=='upload'){
             //upload and register file to external repository
 
 

@@ -90,23 +90,23 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         let installDir = '';
-        
+
         if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
             installDir = '/heurist/';
         }else{
-        
-        let script_name = window.hWin.location.pathname;
-        if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
 
-        //actions for redirection https://hist/heurist/[dbname]/web/
-        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
-            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
-        }else{
-            installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+            let script_name = window.hWin.location.pathname;
+            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
+
+            //actions for redirection https://hist/heurist/[dbname]/web/
+            if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
+                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
+                if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
+            }else{
+                installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+            }
         }
-        }
-        
+
         //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.
         that.installDir = installDir; //to detect development or production version 
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
@@ -182,14 +182,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
-                    
+
                 }
                 _oninit(success);
             });
-        } else {
-            if (_oninit) {
+        } else if (_oninit) {
                 _oninit(false);
-            }
         }
 
     }

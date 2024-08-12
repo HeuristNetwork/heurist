@@ -73,21 +73,21 @@ class DbDefRecTypes extends DbEntityBase
 
             $this->data['details'] = 'rty_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rty_ID,rty_Name';
 
-        }else if(@$this->data['details']=='count'){
+        }elseif(@$this->data['details']=='count'){
 
             $this->data['details'] = 'rty_ID,rty_Name';
             $needCount = true;
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_Status,rty_RecTypeGroupID';
             //$needCount = true;  //need count only for all groups
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,'
             .'IF((rty_Plural IS NULL OR rty_Plural=\'\'),rty_Name,rty_Plural) as rty_Plural,'
@@ -303,7 +303,7 @@ class DbDefRecTypes extends DbEntityBase
             $this->system->addError(HEURIST_DB_ERROR,
                     "Cannot delete from table defRecStructure", $mysqli->error);
             $res = false;
-        }else if($affected===0){
+        }elseif($affected===0){
             //$this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
             //$res = false;
         }
@@ -551,7 +551,7 @@ class DbDefRecTypes extends DbEntityBase
 
                 if(!$result){
                     $ret = false;
-                }else if(count($idx_to_do) > 0){ // check if success messages need to be added
+                }elseif(count($idx_to_do) > 0){ // check if success messages need to be added
 
                     $i = 0;
                     foreach ($idx_to_do as $idx){
@@ -665,7 +665,7 @@ WHERE
 
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
 
-        }else if(@$this->data['mode']=='cms_record_count'){
+        }elseif(@$this->data['mode']=='cms_record_count'){
 
             $this->system->defineConstant('RT_CMS_HOME');
             $this->system->defineConstant('RT_CMS_MENU');

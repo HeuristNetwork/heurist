@@ -126,7 +126,7 @@ public static function output($data, $params){
 
     if(@$data['memory_warning']){ //memory overflow in recordSearch
         $records = array();//@todo
-    }else if(!(@$data['reccount']>0)){   //empty response
+    }elseif(!(@$data['reccount']>0)){   //empty response
         $records = array();
     }else{
         $records = $data['records'];
@@ -224,7 +224,7 @@ public static function output($data, $params){
                             if($code=='all'){
                                 //search all geofields
                                 $search_all_geofields = true;
-                            }else if(is_array($code)){
+                            }elseif(is_array($code)){
                                 if(!@$code['q']){
                                     array_push($find_by_geofields,$code['id']);
                                 }else{
@@ -273,7 +273,7 @@ public static function output($data, $params){
         fwrite($fd, '[');
 
     }
-    else if(@$params['restapi']==1){
+    elseif(@$params['restapi']==1){
 
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');
@@ -282,7 +282,7 @@ public static function output($data, $params){
             fwrite($fd, '{"records":[');
         }
 
-    }else if($params['format']=='iiif'){ //it creates iiif manifest see getIiifResource
+    }elseif($params['format']=='iiif'){ //it creates iiif manifest see getIiifResource
 
         self::$version = (@$params['version']==2 || @$params['v']==2)?2:3;
 
@@ -350,7 +350,7 @@ IIIF;
         $params['depth'] = 0;
 
     }
-    else if($params['format']=='json'){
+    elseif($params['format']=='json'){
 
         if(@$params['datatable']>1){
 
@@ -360,14 +360,14 @@ IIIF;
                     .$params['recordsTotal'].',"recordsFiltered":'
                     .(@$params['recordsFiltered']!=null?$params['recordsFiltered']:$params['recordsTotal']).',"data":[');
 
-        }else if(@$params['datatable']==1){
+        }elseif(@$params['datatable']==1){
 
             fwrite($fd, '{"data": [');
         }else{
             fwrite($fd, '{"heurist":{"records":[');
         }
 
-    }else if($params['format']=='gephi'){ //xml
+    }elseif($params['format']=='gephi'){ //xml
 
         $gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");
         //$fd = fopen('php://temp/maxmemory:1048576', 'w');//less than 1MB in memory otherwise as temp file
@@ -459,7 +459,7 @@ IIIF;
 
         fwrite($fd, $gephi_header);
     }
-    else if($params['format']=='hml'){
+    elseif($params['format']=='hml'){
 
         //@TODO
 
@@ -498,9 +498,9 @@ IIIF;
 
         if($params['linkmode']=='none'){
             $max_depth = 0;
-        }else if($params['linkmode']=='direct'){
+        }elseif($params['linkmode']=='direct'){
             $direction = 1; //direct only
-        }else if($params['linkmode']=='direct_links'){
+        }elseif($params['linkmode']=='direct_links'){
             $direction = 1; //direct only
             $no_relationships = true;
         }
@@ -536,7 +536,7 @@ IIIF;
 
                     if(is_numeric($dt_id) && $dt_id>0){
                         array_push($f_res, $dt_id);
-                    }else if(strpos($dt_id,'rec_')===0){
+                    }elseif(strpos($dt_id,'rec_')===0){
                         array_push($retrieve_header_fields, $dt_id);
                     }
                 }
@@ -565,7 +565,7 @@ IIIF;
         //for leaflet get only limited set of fields
         $retrieve_detail_fields = null;
         $retrieve_header_fields = 'rec_ID,rec_RecTypeID,rec_Title';
-    }else if(@$params['datatable']>0){
+    }elseif(@$params['datatable']>0){
 
         //for datatable convert  $params['columns'] to array
 
@@ -595,10 +595,10 @@ IIIF;
 
                 if($col_name=='rec_Tags'){
                     $need_tags = true;
-                }else if($rt_id==0){
+                }elseif($rt_id==0){
                     if(strpos($col_name,'rec_')===0){
                         array_push($retrieve_header_fields, $col_name);
-                    }else if(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
+                    }elseif(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
                         array_push($retrieve_detail_fields, substr($col_name, 2));
                     }else{
                         if($col_name === 'typename'){
@@ -642,7 +642,7 @@ IIIF;
             foreach($params['columns'] as $idx=>$col_name){
                 if(strpos($col_name,'rec_')===0){
                     array_push($retrieve_header_fields, $col_name);
-                }else if($col_name>0){
+                }elseif($col_name>0){
                     array_push($retrieve_detail_fields, $col_name);
                 }
 
@@ -791,7 +791,7 @@ IIIF;
 
             $comma = ',';
 
-        }else if($params['format']=='json'){
+        }elseif($params['format']=='json'){
 
             if(@$params['datatable']>0){
 
@@ -807,10 +807,10 @@ IIIF;
 
                 fwrite($fd, $comma.json_encode($feature));
 
-            }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
+            }elseif(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
                 $feature = self::_getJsonFeature($record, $params['extended']);
                 fwrite($fd, $comma.json_encode($feature));
-            }else if(@$params['extended']==3){
+            }elseif(@$params['extended']==3){
 
                 $feature = self::_getMediaViewerData($record);
                 if($feature){
@@ -825,7 +825,7 @@ IIIF;
             $comma = ',';
 
 
-        }else if($params['format']=='iiif'){
+        }elseif($params['format']=='iiif'){
 
             $canvas = self::getIiifResource($record, @$params['iiif_image']);
             if($canvas && $canvas!=''){
@@ -837,7 +837,7 @@ IIIF;
             //or the only image if it is specified
             if($cnt>1000 || $params['iiif_image']) {break;}
 
-        }else if($params['format']=='gephi'){
+        }elseif($params['format']=='gephi'){
 
             $name   = htmlspecialchars($record['rec_Title']);
             $image  = htmlspecialchars(HEURIST_RTY_ICON.$rty_ID);
@@ -893,7 +893,7 @@ XML;
             }
 
 
-        }else if($params['format']=='hml'){
+        }elseif($params['format']=='hml'){
 
             //@TODO
 
@@ -932,14 +932,14 @@ XML;
         }else{
            fwrite($fd, '}');//close for FeatureCollection
         }
-    }else if(@$params['restapi']==1){
+    }elseif(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');
         }else{
             //@todo xml for api
             fwrite($fd, ']}');
         }
-    }else if($params['format']=='gephi'){
+    }elseif($params['format']=='gephi'){
 
         fwrite($fd, '</nodes>');
 
@@ -949,11 +949,11 @@ XML;
 
         fclose($fd_links);
 
-    }else if($params['format']=='json' && @$params['datatable']>0){
+    }elseif($params['format']=='json' && @$params['datatable']>0){
 
         fwrite($fd, ']}');
 
-    }else if($params['format']=='iiif'){
+    }elseif($params['format']=='iiif'){
 
         if(self::$version==2){
             fwrite($fd, ']}],"structures": []}');
@@ -1145,7 +1145,7 @@ XML;
                     header('Access-Control-Allow-Credentials: true');
                     header('Access-Control-Max-Age: 5');// default value 5 sec
                     //header('Access-Control-Max-Age: 86400');// cache for 1 day
-                /*}else if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+                /*}elseif($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
                     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
                         // may also be using PUT, PATCH, HEAD etc
@@ -1287,7 +1287,7 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
                 if($dtID > 0) {
                     $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
                     $relationID = $dtID;
-                }else if($trmID > 0) {
+                }elseif($trmID > 0) {
                     $relationName = self::$defTerms->getTermLabel($trmID, true);
                     $relationID = $trmID;
                 }
@@ -1507,16 +1507,16 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     unset($val['fullPath']);
                     unset($val['ulf_Parameters']);
 
-                }else if(@$value['id']){ //resource
+                }elseif(@$value['id']){ //resource
                     $val = $value['id'];
-                }else if(@$value['geo']){
+                }elseif(@$value['geo']){
 
                     if($find_by_geofields==null || in_array($dty_ID, $find_by_geofields)){
 
                         $wkt = $value['geo']['wkt'];
                         /*if($value['geo']['type']=='r'){
                         //@todo convert rect to polygone
-                        }else if($value['geo']['type']='c'){
+                        }elseif($value['geo']['type']='c'){
                         //@todo convert circle to polygone
                         }*/
                         try{
@@ -1541,9 +1541,9 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 
                         if($dty_ID==DT_START_DATE){
                             $date_start = $value;
-                        }else if($dty_ID==DT_END_DATE){
+                        }elseif($dty_ID==DT_END_DATE){
                             $date_end = $value;
-                        }else if($value!=null){
+                        }elseif($value!=null){
                             //parse temporal
                             $ta = new Temporal($value);
                             $ta = $ta->getTimespan(true);
@@ -1554,13 +1554,13 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                             }
                         }
                     }
-                }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
+                }elseif(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);
-                //}else if(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
+                //}elseif(defined('DT_EXTENDED_DESCRIPTION') && $dty_ID==DT_EXTENDED_DESCRIPTION){
                 //    $ext_description = $value;
-                }else if(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
+                }elseif(defined('DT_MINIMUM_ZOOM_LEVEL') && $dty_ID==DT_MINIMUM_ZOOM_LEVEL){
                     $res['properties']['rec_MinZoom'] = $value;
-                }else if(defined('DT_MAXIMUM_ZOOM_LEVEL') && $dty_ID==DT_MAXIMUM_ZOOM_LEVEL){
+                }elseif(defined('DT_MAXIMUM_ZOOM_LEVEL') && $dty_ID==DT_MAXIMUM_ZOOM_LEVEL){
                     $res['properties']['rec_MaxZoom'] = $value;
                 }
                 $val = $value;
@@ -1604,7 +1604,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         if($ext_description) {$res['properties']['description'] = $ext_description;}
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
-    }else if($detail_mode==1){
+    }elseif($detail_mode==1){
         //details are inline
         $det = $res['properties']['details'];
         for($k=0; $k<count($det); $k++){
@@ -1631,7 +1631,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                         }
                     }
                 }
-            }/*else if (is_numeric($code) && intval($code)>0){
+            }/*elseif (is_numeric($code) && intval($code)>0){
                 if(@$record['details'][$code]['geo']){
                             $wkt = $record['details'][$code]['geo']['wkt'];
                             $json = self::_getJsonFromWkt($wkt, $simplify);
@@ -1671,17 +1671,17 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 
                                if(defined('DT_PLACE_END') && $pointerDtyID==DT_PLACE_END){
                                     $point1[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START){
                                     $point0[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_END2){
                                     $point1[] = $json;
-                               }else if(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
+                               }elseif(defined('DT_PLACE_START') && $pointerDtyID==DT_PLACE_START2){
                                     $point0[] = $json;
-                               }else if(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
+                               }elseif(defined('DT_PLACE_TRAN') && $pointerDtyID==DT_PLACE_TRAN){
                                     $points[] = $json;
                                }
                            }
-                       }else if($value['geo']['relationID']>0){
+                       }elseif($value['geo']['relationID']>0){
                            $geovalues_dty[] = 'relation:'.$value['geo']['relationID'];
                        }
                     }
@@ -1721,7 +1721,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                         }
                     }
 
-                }else if(count($point0)==count($point1)){
+                }elseif(count($point0)==count($point1)){
                     //adds lines from start to end
                     foreach($point0 as $idx=>$pnt){
                         $path['coordinates'][] = array($pnt['coordinates'], $point1[$idx]['coordinates']);
@@ -1757,7 +1757,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     if(is_array($geovalues)){
         if(count($geovalues)>1){
             $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
-        }else if(count($geovalues)==1){
+        }elseif(count($geovalues)==1){
             $res['geometry'] = $geovalues[0];
         }
         if($separate_geo_by_dty){
@@ -1838,11 +1838,11 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
 
                         simplifyCoordinates($json['coordinates']);
 
-                    } else if($json['type']=='Polygon'){
+                    } elseif($json['type']=='Polygon'){
                         for($idx=0; $idx<count($json['coordinates']); $idx++){
                             simplifyCoordinates($json['coordinates'][$idx]);
                         }
-                    } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                    } elseif ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
                     {
                         for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
                             for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
@@ -1890,28 +1890,28 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         if ($column=='tags' || $column=='rec_Tags'){
             $value = recordSearchPersonalTags(self::$system, $record['rec_ID']);
             $res[$col_name] = ($value==null)?'':implode(' | ', $value);
-        }else if(strpos($column,'rec_')===0){
+        }elseif(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];
-        }else if($column=='ids'){
+        }elseif($column=='ids'){
             $res[$col_name] = $record['rec_ID'];
-        }else if($column=='typeid'){
+        }elseif($column=='typeid'){
             $res[$col_name] = $record['rec_RecTypeID'];
-        }else if($column=='typename'){
+        }elseif($column=='typename'){
             if(self::$defRecTypes==null) {self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 0);}
             $res[$col_name] = self::$defRecTypes['names'][$record['rec_RecTypeID']];
-        }else if($column=='added'){
+        }elseif($column=='added'){
             $res[$col_name] = $record['rec_Added'];
-        }else if($column=='modified'){
+        }elseif($column=='modified'){
             $res[$col_name] = $record['rec_Modified'];
-        }else if($column=='addedby'){
+        }elseif($column=='addedby'){
             $res[$col_name] = $record['rec_AddedBy'];
-        }else if($column=='url'){
+        }elseif($column=='url'){
             $res[$col_name] = $record['rec_URL'];
-        }else if($column=='notes'){
+        }elseif($column=='notes'){
             $res[$col_name] = $record['rec_ScratchPad'];
-        }else if($column=='owner'){
+        }elseif($column=='owner'){
             $res[$col_name] = $record['rec_OwnerUGrpID'];
-        }else if($column=='visibility'){
+        }elseif($column=='visibility'){
             $res[$col_name] = $record['rec_NonOwnerVisibility'];
         }else{
             $res[$col_name] = '';//placeholder
@@ -1992,19 +1992,19 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                     }
                     $field_value = $record['rec_Title'];//$link_rec_Id Record ID replaced with Record Title
 
-                }else if ($field_type=='file'){
+                }elseif($field_type=='file'){
 
                     $field_value = $field_value['file']['ulf_ObfuscatedFileID'];
 
-                }else if ($field_type=='geo'){
+                }elseif($field_type=='geo'){
 
                     $field_value = @$field_value['geo']['wkt'];
 
-                }else if (($field_type=='enum' || $field_type=='relationtype')){
+                }elseif (($field_type=='enum' || $field_type=='relationtype')){
 
                     $field_value = self::$defTerms->getTermLabel($field_value, true);
 
-                }else if ($is_datatables && $field_type=='date'){
+                }elseif($is_datatables && $field_type=='date'){
 
                     $temporal = new Temporal($field_value);
                     $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
@@ -2143,10 +2143,10 @@ private static function _getMediaViewerData($record){
 
             if(strpos($mimeType,"video/")===0){
                 $resource_type = 'Video';
-            }else if(strpos($mimeType,"audio/")===0){
+            }elseif(strpos($mimeType,"audio/")===0){
                 if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
-            }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
                 $resource_type = 'Image';
             }
 
@@ -2257,12 +2257,12 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
             if(strpos($mimeType,"youtube")>0 || strpos($mimeType,"vimeo")>0) {continue;}
 
             $resource_type = 'Video';
-        }else if(strpos($mimeType,"audio/")===0){
+        }elseif(strpos($mimeType,"audio/")===0){
 
             if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
-        }else if(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+        }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
             $resource_type = 'Image';
         }
 
@@ -2320,7 +2320,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
                         $mimeType = @$profile[1]['formats'][0];
                         if($mimeType) {$mimeType = 'image/'.$mimeType;}
                         $profile = @$profile[0];
-                    }else if($profile==null){
+                    }elseif($profile==null){
                         $profile = 'level1';
                     }
                     if(!$mimeType) {$mimeType= 'image/jpeg';}
@@ -2584,7 +2584,7 @@ private static function _processFieldData($dty_ID, &$values){
                 if(is_numeric($value)){
                     $value = intval($value);
                     $value = mysql__select_value(self::$mysqli, "SELECT rec_Title FROM Records WHERE rec_ID = ?", ['i', $value]);
-                }else if(is_array($value)){
+                }elseif(is_array($value)){
                     $value = $value["title"];
                 }
 

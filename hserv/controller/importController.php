@@ -115,7 +115,7 @@ if(!$system->init(@$_REQUEST['db'])){
    if(!$system->is_admin()){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'Administrator permissions are required');
 
-   }else if(!checkUserPermissions($system, 'add')){ // Check that the user is allowed to edit records
+   }elseif(!checkUserPermissions($system, 'add')){ // Check that the user is allowed to edit records
 
         $response = $system->getError();
 
@@ -128,7 +128,7 @@ if(!$system->init(@$_REQUEST['db'])){
         if($action=='step0'){
             $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );//it saves csv data in temp file  -returns array(filename)
 
-        }else if($action=='step1'){
+        }elseif($action=='step1'){
             //file is uploaded with help fileupload widget and controller/fileUpload.php
             $upload_file_name = @$_REQUEST["upload_file_name"];
             if($upload_file_name!=null){
@@ -137,38 +137,38 @@ if(!$system->init(@$_REQUEST['db'])){
                 $res = ImportParser::encodeAndGetPreview( $upload_file_name, $_REQUEST);
             }
 
-        }else if($action=='step2'){
+        }elseif($action=='step2'){
 
             //vaidate values(dates,int) saves into import table
             $res = ImportParser::parseAndValidate( intval(@$_REQUEST["encoded_filename_id"]),
                                                    filter_var(@$_REQUEST["original_filename"],FILTER_SANITIZE_STRING),
                                                    0, $_REQUEST);
 
-        }else if($action=='step3'){ // matching - assign record ids
+        }elseif($action=='step3'){ // matching - assign record ids
 
             $res = ImportAction::assignRecordIds($_REQUEST);
 
-        }else if($action=='step4'){ // validate import - check field values
+        }elseif($action=='step4'){ // validate import - check field values
 
             $res = ImportAction::validateImport($_REQUEST);
 
-        }else if($action=='step5'){ // perform import
+        }elseif($action=='step5'){ // perform import
 
             $res = ImportAction::performImport($_REQUEST, 'json');
 
-        }else if(@$_REQUEST['content']){ //for import terms
+        }elseif(@$_REQUEST['content']){ //for import terms
 
             $res = ImportParser::simpleCsvParser($_REQUEST);
 
-        }else if($action=='set_primary_rectype'){
+        }elseif($action=='set_primary_rectype'){
 
             $res = ImportSession::setPrimaryRectype( intval(@$_REQUEST['imp_ID']), intval(@$_REQUEST['rty_ID']), @$_REQUEST['sequence']);
 
-        }else if($action=='get_matching_samples'){
+        }elseif($action=='get_matching_samples'){
 
             $res = ImportSession::getMatchingSamples( intval(@$_REQUEST['imp_ID']), intval(@$_REQUEST['rty_ID']) );
 
-        }else if($action=='records'){  //load records from temp import table
+        }elseif($action=='records'){  //load records from temp import table
 
             $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
 
@@ -224,13 +224,13 @@ if(!$system->init(@$_REQUEST['db'])){
 
             }
 
-        }else if($action=='import_preview'){
+        }elseif($action=='import_preview'){
             //reads import file and returns list of record types to be imported
             $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
 
             $res = ImportHeurist::getDefintions($filename);
 
-        }else if($action=='import_definitions'){ //import defs before import records
+        }elseif($action=='import_definitions'){ //import defs before import records
 
             //update record types from remote database
             $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
@@ -238,7 +238,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = ImportHeurist::importDefintions($filename, @$_REQUEST['session']);
             //$need_compress = true;
 
-        }else if($action=='import_records'){
+        }elseif($action=='import_records'){
 
             //returns count of imported records
             if(@$_REQUEST['filename']!=null){
@@ -294,7 +294,7 @@ if(@$_REQUEST['output']=='csv'){
 
 }
 
-else if($need_compress){ //importDefintions returns complete set of new defintions - need to compress
+elseif($need_compress){ //importDefintions returns complete set of new defintions - need to compress
 
     ob_start();
     echo json_encode($response);

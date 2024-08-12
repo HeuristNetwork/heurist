@@ -48,7 +48,7 @@ if (@$argv) {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
-            } else if(strpos($argv[$i],'-db=')===0){
+            } elseif(strpos($argv[$i],'-db=')===0){
                 $ARGV['-db'] = substr($argv[$i],4);
             }
         } else {

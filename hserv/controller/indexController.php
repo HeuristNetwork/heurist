@@ -71,11 +71,11 @@ require_once dirname(__FILE__).'/../utilities/dbRegis.php';
     if($allow_action){
         if($action=='info'){
             $res = DbRegis::registrationGet($_REQUEST);
-        }else if($action=='register'){
+        }elseif($action=='register'){
             $res = DbRegis::registrationAdd($_REQUEST);//returns ID or false
-        }else if($action=='update'){
+        }elseif($action=='update'){
             $res = DbRegis::registrationUpdate($_REQUEST);
-        }else if($action=='delete'){
+        }elseif($action=='delete'){
             $res = DbRegis::registrationDelete($_REQUEST);//returns ID or false
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, 'Action parameter is missing or incorrect');

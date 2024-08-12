@@ -176,7 +176,7 @@ if (@$argv) {
                 if($dbdef_cache!=null){
                     $system->cleanDefCache();//fileDelete($dbdef_cache);
                 }
-            }else if(@$_REQUEST['entity']=='relevance'){
+            }elseif(@$_REQUEST['entity']=='relevance'){
                 $_REQUEST['entity'] = 'all';
             }
             $res = entityRefreshDefs($system, @$_REQUEST['entity'], true);//, @$_REQUEST['recID']);
@@ -211,7 +211,7 @@ if (@$argv) {
 
             if(@$req['a'] == 'search' && count($res)==0){
                 $code = 404;
-            }else if (@$req['a'] == 'save'){
+            }elseif (@$req['a'] == 'save'){
                 $code = 201;
             }else{
                 $code = 200;

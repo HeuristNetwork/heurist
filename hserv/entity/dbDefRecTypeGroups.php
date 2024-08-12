@@ -71,16 +71,16 @@ class DbDefRecTypeGroups extends DbEntityBase
 
             $this->data['details'] = 'rtg_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rtg_ID,rtg_Name';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order'
             .',(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fieldNames )
              .', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';

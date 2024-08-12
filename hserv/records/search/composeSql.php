@@ -298,70 +298,70 @@ function parse_query_to_json($query){
 
                     $keyword = 't';
 
-                }else if(preg_match('/^(ids|id|title|added|modified|url|notes|addedby|access|before)$/', $word, $match)>0){ //header fields
+                }elseif(preg_match('/^(ids|id|title|added|modified|url|notes|addedby|access|before)$/', $word, $match)>0){ //header fields
 
                     $keyword = $match[0];
 
-                }else if(preg_match('/^(workgroup|wg|owner)$/', $word, $match)>0){ //ownership (header field)
+                }elseif(preg_match('/^(workgroup|wg|owner)$/', $word, $match)>0){ //ownership (header field)
 
                     $keyword = 'owner';
 
-                }else if(preg_match('/^(user|usr)$/', $word, $match)>0){ //ownership (header field)
+                }elseif(preg_match('/^(user|usr)$/', $word, $match)>0){ //ownership (header field)
 
                     $keyword = 'user';
 
-                }else if(preg_match('/^(after|since)$/', $word, $match)>0){ //special case for modified
+                }elseif(preg_match('/^(after|since)$/', $word, $match)>0){ //special case for modified
 
                     $keyword = 'after';
 
-                }else if(preg_match('/^(sortby|sort|s)$/', $word, $match)>0){ //sort keyword
+                }elseif(preg_match('/^(sortby|sort|s)$/', $word, $match)>0){ //sort keyword
 
                     $keyword = 'sortby';
 
-                }else if(preg_match('/^(field|f)(\d*)$/', $word, $match)>0){ //base field
+                }elseif(preg_match('/^(field|f)(\d*)$/', $word, $match)>0){ //base field
 
                     $keyword = 'f';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(count|cnt|fc|geo|file)(\d*)$/', $word, $match)>0){ //special base field
+                }elseif(preg_match('/^(count|cnt|fc|geo|file)(\d*)$/', $word, $match)>0){ //special base field
 
                     $keyword = $match[1];
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(tag|keyword|kwd)$/', $word, $match)>0){ //tags
+                }elseif(preg_match('/^(tag|keyword|kwd)$/', $word, $match)>0){ //tags
 
                     $keyword = 'tag';
 
-                }else if(preg_match('/^(linked_to|linkedto|linkto|link_to|lt)(\d*)$/', $word, $match)>0){ //resource - linked to
+                }elseif(preg_match('/^(linked_to|linkedto|linkto|link_to|lt)(\d*)$/', $word, $match)>0){ //resource - linked to
 
                     $keyword = 'lt';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(linked_from|linkedfrom|linkfrom|link_from|lf)(\d*)$/', $word, $match)>0){ //backward link
+                }elseif(preg_match('/^(linked_from|linkedfrom|linkfrom|link_from|lf)(\d*)$/', $word, $match)>0){ //backward link
 
                     $keyword = 'lf';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(related_to|relatedto|rt)(\d*)$/', $word, $match)>0){ //relationship to
+                }elseif(preg_match('/^(related_to|relatedto|rt)(\d*)$/', $word, $match)>0){ //relationship to
 
                     $keyword = 'rt';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(related_from|relatedfrom|rf)(\d*)$/', $word, $match)>0){ //relationship from
+                }elseif(preg_match('/^(related_from|relatedfrom|rf)(\d*)$/', $word, $match)>0){ //relationship from
 
                     $keyword = 'rf';
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(related|links)$/', $word, $match)>0){ //link or relation in any direction
+                }elseif(preg_match('/^(related|links)$/', $word, $match)>0){ //link or relation in any direction
 
                     $keyword = $match[0];
 
-                }else if(preg_match('/^(relf|r)(\d*)$/', $word, $match)>0){ //field from relation record
+                }elseif(preg_match('/^(relf|r)(\d*)$/', $word, $match)>0){ //field from relation record
 
                     $keyword = $match[1];
                     $dty_id = @$match[2];
 
-                }else if(preg_match('/^(any|all|not)$/', $word, $match)>0){ //logical operation
+                }elseif(preg_match('/^(any|all|not)$/', $word, $match)>0){ //logical operation
 
                     $keyword = $match[0];
 
@@ -484,9 +484,9 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     // 2. DETECT SEARCH DOMAIN ------------------------------------------------------------------------------------------
     if (strcasecmp($params['w'],'B') == 0  ||  strcasecmp($params['w'],BOOKMARK) == 0) {    // my bookmark entries
         $search_domain = BOOKMARK;
-    } else if ($params['w'] == 'e') { //everything - including temporary
+    } elseif($params['w'] == 'e') { //everything - including temporary
         $search_domain = EVERYTHING;
-    } else if ($params['w'] == 'nobookmark') { //all without BOOKMARK
+    } elseif($params['w'] == 'nobookmark') { //all without BOOKMARK
         $search_domain = NO_BOOKMARK;
     } else {                // all records entries
         $search_domain = "a";
@@ -585,11 +585,11 @@ class HQuery {
         if($this->top_limb->error_message){
              $this->error_message = $this->top_limb->error_message;
              return;
-        }else if($this->search_domain!=null){
+        }elseif($this->search_domain!=null){
 
             if ($this->search_domain == NO_BOOKMARK){
                 $this->from_clause = 'Records r'.$this->level.' ';
-            }else if ($this->search_domain == BOOKMARK) {
+            }elseif($this->search_domain == BOOKMARK) {
                 $this->from_clause = 'usrBookmarks b LEFT JOIN Records r'.$this->level.' ON b.bkm_recID=r'.$this->level.'.rec_ID ';
             }else{
                 $this->from_clause = 'Records r'.$this->level.' LEFT JOIN usrBookmarks b ON b.bkm_recID=r'.$this->level.'.rec_ID and b.bkm_UGrpID='.$this->currUserID.' ';
@@ -643,7 +643,7 @@ class HQuery {
                 if($recVisibilityType){ //hidden
                     $where2 = '(r0.rec_NonOwnerVisibility="hidden")';
                     $where2_conj = ' and ';
-                }else if($this->currUserID!=2){ //by default always exclude "hidden" for not database owner
+                }elseif($this->currUserID!=2){ //by default always exclude "hidden" for not database owner
                     //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
 
                     $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
@@ -655,7 +655,7 @@ class HQuery {
                     }
 
                     $where2_conj = ' or ';
-                }else if ($this->search_domain != BOOKMARK){ //database owner can search everything (including hidden)
+                }elseif($this->search_domain != BOOKMARK){ //database owner can search everything (including hidden)
                     $wg_ids = array();
                 }
 
@@ -732,7 +732,7 @@ class HQuery {
             if ($subtext[0] == '-') {
                 $scending = ' DESC ';
                 $subtext = substr($subtext, 1);
-            } else if ($subtext[0] == '+') {
+            } elseif($subtext[0] == '+') {
                 $subtext = substr($subtext, 1);
             }
             $dty_ID = null;
@@ -850,7 +850,7 @@ class HQuery {
 
                             if($field_type=='float'){
                                 $sortby = 'CAST('.$sortby.' AS DECIMAL) ';
-                            }else if ($field_type=='integer'){
+                            }elseif($field_type=='integer'){
                                 $sortby = 'CAST('.$sortby.' AS SIGNED) ';
                             }
 
@@ -977,7 +977,7 @@ class HLimb {
                             //$where = $where."(".$res["where"].")";
                             //if($ind<$cnt) {$where = $where.$cnj;}
                         }
-                    }else if($limb->error_message){
+                    }elseif($limb->error_message){
                         $this->error_message = $limb->error_message;
                         return null;
                     }
@@ -1003,7 +1003,7 @@ class HLimb {
             if(is_array($table)){
                 $this->tables = array_merge($this->tables, $table);
                 $this->tables = array_unique($this->tables);
-            }else if(!in_array($table, $this->tables)){
+            }elseif(!in_array($table, $this->tables)){
                 array_push($this->tables, $table);
             }
         }
@@ -1113,7 +1113,7 @@ class HPredicate {
                         if(@$this->allowed_term_fields[$val1]){
                             $this->field_term = $val1;
                             if($val2) {$this->field_lang = $val2;}
-                        }else if(@$this->allowed_term_fields[$val2]){
+                        }elseif(@$this->allowed_term_fields[$val2]){
                             $this->field_term = $val2;
                             $this->field_lang = $val1;
                         }*/
@@ -1148,7 +1148,7 @@ class HPredicate {
 
                             $this->relation_types = prepareIds($val);
 
-                        }else if (is_array($val) && array_key_exists('r',$val)) //for relation type
+                        }elseif (is_array($val) && array_key_exists('r',$val)) //for relation type
                         {
                             $val = $val['r'];
                             if($val){
@@ -1163,7 +1163,7 @@ class HPredicate {
                             //break;
 
                         //for fields in relation record
-                        }else if(strpos($idx,'r:')===0 || strpos($idx,'relf:')===0){  //that's for {"r:10":10,,}
+                        }elseif(strpos($idx,'r:')===0 || strpos($idx,'relf:')===0){  //that's for {"r:10":10,,}
                                //fields in relationship record
                                //{"r:10":">2010"}
                                $rel_field = $idx;
@@ -1172,7 +1172,7 @@ class HPredicate {
                                                     :str_replace('relf:','f:',$rel_field);
                                $this->relation_fields[$rel_field] = $val;
 
-                        }else if(is_array($val) &&
+                        }elseif(is_array($val) &&
                                     (strpos(@array_keys($val)[0],'r:')===0 || strpos(@array_keys($val)[0],'relf:')===0)){  //that's for [{"r:10":10},{}]
                             //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
                                $rel_field = array_keys($val)[0];
@@ -1288,12 +1288,12 @@ class HPredicate {
                     }
 
                 }
-                else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
+                elseif (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
                     // comma-separated list of defRecTypes ids
                     $in = ($this->negate)? 'not in' : 'in';
                     $res = "$in (" . $this->value . ")";
                 }
-                else if (preg_match('/^\d+-\d+$/', $this->value)) {
+                elseif (preg_match('/^\d+-\d+$/', $this->value)) {
                     $local_rtyid = ConceptCode::getRecTypeLocalID($this->value);
                     if($local_rtyid>0){
                         $res = "$eq $local_rtyid";
@@ -1432,7 +1432,7 @@ class HPredicate {
 
         if($this->isEmptyValue()){
             $res = ' NOT '.$res.$p.'dtl_Geo IS NOT NULL)';//not defined
-        }else if($this->value==''){
+        }elseif($this->value==''){
             $res = $res.$p.'dtl_Geo IS NOT NULL)';//any not null value
         }else {
             $res = $res
@@ -1468,9 +1468,9 @@ class HPredicate {
 
         if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){
             $this->field_type = 'link';//integer without quotes
-        }else if($this->field_type=='file'){
+        }elseif($this->field_type=='file'){
 
-        }else if(intval($this->field_id)>0){
+        }elseif(intval($this->field_id)>0){
             //find field type - @todo from cache
 
             $this->field_type = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$this->field_id);
@@ -1528,41 +1528,41 @@ class HPredicate {
             $sHeaderField = 'rec_Title';
             $ignoreApostrophe = (strpos($val, 'LIKE')==1);
 
-        }else if($this->pred_type=='added' || $this->field_id=='added'){
+        }elseif($this->pred_type=='added' || $this->field_id=='added'){
 
             $sHeaderField = "rec_Added";
 
-        }else if($this->pred_type=='modified' || $this->pred_type=='after' || $this->pred_type=='before' || $this->field_id=='modified'){
+        }elseif($this->pred_type=='modified' || $this->pred_type=='after' || $this->pred_type=='before' || $this->field_id=='modified'){
 
             $sHeaderField = "rec_Modified";
 
-        }else if($this->pred_type=='url' || $this->field_id=='url'){
+        }elseif($this->pred_type=='url' || $this->field_id=='url'){
 
             $sHeaderField = "rec_URL";
 
-        }else if($this->pred_type=='notes' || $this->field_id=='notes'){
+        }elseif($this->pred_type=='notes' || $this->field_id=='notes'){
 
             $sHeaderField = 'rec_ScratchPad';
             $ignoreApostrophe = (strpos($val, 'LIKE')==1);
 
-        }else if($this->pred_type=='addedby' || $this->field_id=='addedby'){
+        }elseif($this->pred_type=='addedby' || $this->field_id=='addedby'){
 
             $sHeaderField = 'rec_AddedByUGrpID';
 
-        }else if($this->pred_type=='owner' || $this->field_id=='owner'){
+        }elseif($this->pred_type=='owner' || $this->field_id=='owner'){
 
             $sHeaderField = 'rec_OwnerUGrpID';
 
-        }else if($this->pred_type=='access' || $this->field_id=='access'){
+        }elseif($this->pred_type=='access' || $this->field_id=='access'){
 
             $sHeaderField = "rec_NonOwnerVisibility";
 
-        }else if($this->pred_type=='rectype' || $this->field_id=='rectype' ||
+        }elseif($this->pred_type=='rectype' || $this->field_id=='rectype' ||
                  $this->pred_type=='typeid' || $this->field_id=='typeid'){
 
             $sHeaderField = "rec_RecTypeID";
 
-        }else if($this->pred_type=='ids' || $this->field_id=='ids'){
+        }elseif($this->pred_type=='ids' || $this->field_id=='ids'){
 
             $sHeaderField = "rec_ID";
 
@@ -1596,19 +1596,19 @@ class HPredicate {
             }
 
 
-        }else if( $is_empty ){ //search for records where field value is not defined
+        }elseif( $is_empty ){ //search for records where field value is not defined
 
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.' dtl_DetailTypeID';
 
             $res .= $field_id_filter . $field_condition .')';
 
-        }else if($this->pred_type=='tag' || $this->field_id=='tag'){
+        }elseif($this->pred_type=='tag' || $this->field_id=='tag'){
             // it is better to use kwd keyword instead of f:tag
 
             $res = "(r".$this->qlevel.".rec_ID IN ".$val.")";
 
-        }else if($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){ //search for records where field occurs N times (repeatable values)
+        }elseif($this->pred_type=='count' || $this->pred_type=='cnt' || $this->pred_type=='fc'){ //search for records where field occurs N times (repeatable values)
 
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.'dtl_DetailTypeID';
@@ -1622,7 +1622,7 @@ class HPredicate {
             if($this->field_type=='date' && trim($this->value)!='') { //false && $this->isDateTime()){
                 //OUTDATED - REMOVE
 
-            }else if($this->field_type=='file'){
+            }elseif($this->field_type=='file'){
                 $field_name = $p."dtl_UploadedFileID ";//only for search non empty values
             }else{
 
@@ -1650,7 +1650,7 @@ class HPredicate {
                     $field_name = '';
                     //$val = $this->getFieldValue();
 
-                }else if($this->fulltext){
+                }elseif($this->fulltext){
                     $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
                 }else{
                     $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
@@ -1831,7 +1831,7 @@ class HPredicate {
 
                 if(!$this->field_list){
                     $val = "=0";
-                }else if ($p==0){
+                }elseif($p==0){
                     $cs_ids = getCommaSepIds($this->value);
                     if ($cs_ids && strpos($cs_ids, ',')>0) {
                         $top_query->fixed_sortorder = $cs_ids;
@@ -1903,7 +1903,7 @@ class HPredicate {
             if(is_array($this->value)){
                 if(@$this->value['any']!=null){
                     $this->value = $this->value['any'];
-                }else if(@$this->value['all']!=null){
+                }elseif(@$this->value['all']!=null){
                     $this->value = $this->value['all'];
                     $isAll = true;
                 }
@@ -2067,7 +2067,7 @@ class HPredicate {
                 ." AND $rl.rl_DetailTypeID IS NULL "
                 ." AND $rl.rl_SourceID".$val;
 
-            }else if($this->field_id==5){ //special case for relationship records
+            }elseif($this->field_id==5){ //special case for relationship records
 
                 $where = "r$p.rec_ID=$rl.rl_RelationID "
                 ." AND $rl.rl_DetailTypeID IS NULL "
@@ -2153,7 +2153,7 @@ class HPredicate {
             ." AND $rl.rl_DetailTypeID IS NULL "
             ." AND $rl.rl_RelationID".$val;
 
-        }else if($this->field_id==7){ //special case for relationship records
+        }elseif($this->field_id==7){ //special case for relationship records
 
             $where = "r$p.rec_ID=$rl.rl_SourceID "
             ." AND $rl.rl_DetailTypeID IS NULL "
@@ -2583,7 +2583,7 @@ class HPredicate {
             $ret = ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
             return $ret;
 
-        }else if($this->isEmptyValue()){ // {"f:10":"NULL"}
+        }elseif($this->isEmptyValue()){ // {"f:10":"NULL"}
             return 'NULL';
         }else{
 
@@ -2596,10 +2596,10 @@ class HPredicate {
                 $ret = ($this->negate?'!':'')."= '$datestamp'";
                 return $ret;
             }
-            else if ($this->lessthan) {
+            elseif($this->lessthan) {
                 return $this->lessthan." '$datestamp'";
             }
-            else if ($this->greaterthan) {
+            elseif($this->greaterthan) {
                 return $this->greaterthan." '$datestamp'";
             }
             else {
@@ -2690,12 +2690,12 @@ class HPredicate {
             //either begin or end of date range is exact to specified interval
             $res = "(rdi_estMinDate = {$timespan[0]} OR rdi_estMaxDate = {$timespan[1]})";
         }
-        else if ($this->lessthan) {  //search dates before the specified
+        elseif($this->lessthan) {  //search dates before the specified
 
             //timespan rdi_estMaxDate < max
             $res = "(rdi_estMaxDate {$this->lessthan} {$timespan[1]})";
         }
-        else if ($this->greaterthan) { //search dates after the specified
+        elseif($this->greaterthan) { //search dates after the specified
 
             //timespan min > rdi_estMaxDate
             $res = "(rdi_estMinDate {$this->greaterthan} {$timespan[0]})";
@@ -2737,7 +2737,7 @@ class HPredicate {
         foreach($values as $username){
             if(is_numeric($username)){
                 $userids[] = $username;    //ugr_ID
-            }else if(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
+            }elseif(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
                 $userids[] = $currUserID;
             }else{
                  $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
@@ -2809,19 +2809,19 @@ class HPredicate {
             if(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
-            }else if(strpos($this->value, '@')===0){ //full text search
+            }elseif(strpos($this->value, '@')===0){ //full text search
                 $this->fulltext = true; //for detail type "file" - search by obfuscation id
                 $this->value = substr($this->value, 1);
-            }else if(strpos($this->value, '<=')===0){
+            }elseif(strpos($this->value, '<=')===0){
                 $this->lessthan = '<=';
                 $this->value = substr($this->value, 2);
-            }else if(strpos($stripped_value, '<')===0){
+            }elseif(strpos($stripped_value, '<')===0){
                 $this->lessthan = '<';
                 $this->value = substr($this->value, 1);
-            }else if(strpos($this->value, '>=')===0){
+            }elseif(strpos($this->value, '>=')===0){
                 $this->greaterthan = '>=';
                 $this->value = substr($this->value, 2);
-            }else if(strpos($this->value, '>')===0){
+            }elseif(strpos($this->value, '>')===0){
                 $this->greaterthan = '>';
                 $this->value = substr($this->value, 1);
             }
@@ -2846,7 +2846,7 @@ class HPredicate {
             if (preg_match('/^\d+(?:,\d*)+$/', $this->value)){   //numeric comma separated
                 $res = ' in (select trm_ID from defTerms where trm_ID in ('
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
-            }else if(preg_match('/^\d+$/', trim($this->value)) && intval($this->value)){   //integer
+            }elseif(preg_match('/^\d+$/', trim($this->value)) && intval($this->value)){   //integer
 
                 $parent_ids = prepareIds($this->value);
 
@@ -2946,7 +2946,7 @@ class HPredicate {
                 }
                 if(count($ids)==0){
                     $res = ($this->negate?'>0':'=0');
-                }else if(count($ids)==1){
+                }elseif(count($ids)==1){
                     $res = ($this->negate?'<>':'=').$ids[0];
                 }else{
                     $res = ($this->negate?' NOT':'').' IN ('.implode(',',$ids).')';
@@ -3005,7 +3005,7 @@ class HPredicate {
                 if(is_numeric($vals[0]) && is_numeric($vals[1])){
                     $res = $between.$vals[0]." and ".$vals[1];
                 }
-            }else if($this->field_type=="link"){
+            }elseif($this->field_type=="link"){
                 $res = " $eq ".intval($this->value);//no quotes
             }else{
                 $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));//."'";
@@ -3052,7 +3052,7 @@ class HPredicate {
 
                 $this->field_list = true;
 
-            } else if($this->field_type=='date'){ //$this->isDateTime()){
+            } elseif($this->field_type=='date'){ //$this->isDateTime()){
                 //
                 if($isHeaderDate){
                     $res = $this->makeDateClause_ForHeaderField();
@@ -3078,7 +3078,7 @@ class HPredicate {
                         $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
 
-                }else if($this->fulltext){ // && $this->field_type!='link'){
+                }elseif($this->fulltext){ // && $this->field_type!='link'){
 
                     //1. check that fulltext index exists
                     if($this->checkFullTextIndex()){
@@ -3151,10 +3151,10 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                     if(empty($lang)){ // default only
                         $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{3}:'";
                         $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{2}:'";
-                    }else if($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
+                    }elseif($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 3) = '" . $mysqli->real_escape_string($this->value) . "'";
-                    }else if($lang != 'ALL' && !empty($lang)){ // specific language
+                    }elseif($lang != 'ALL' && !empty($lang)){ // specific language
                         $ar2 = strtoupper(getLangCode2($lang));
                         $res = $res . " AND ( LEFT(dtl_Value, 4) = '{$lang}:' OR LEFT(dtl_Value, 3) = '{$ar2}:' )";
                     }

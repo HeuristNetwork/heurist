@@ -124,7 +124,7 @@
             //set_time_limit(120);
             $entities = array('rty','dty','rst','trm','rtg','dtg','vcg','swf');
 
-        }else if(!is_array($entities)){
+        }elseif(!is_array($entities)){
             $entities = explode(',',$entities);
         }
 
@@ -169,14 +169,14 @@
     function entityResolveName($entity_name)
     {
             if($entity_name=='rtg') {$entity_name = 'defRecTypeGroups';}
-            else if($entity_name=='dtg') {$entity_name = 'defDetailTypeGroups';}
-            else if($entity_name=='rty') {$entity_name = 'defRecTypes';}
-            else if($entity_name=='dty') {$entity_name = 'defDetailTypes';}
-            else if($entity_name=='trm' || $entity_name=='term') {$entity_name = 'defTerms';}
-            else if($entity_name=='vcg') {$entity_name = 'defVocabularyGroups';}
-            else if($entity_name=='rst') {$entity_name = 'defRecStructure';}
-            else if($entity_name=='rem') {$entity_name = 'dbUsrReminders';}
-            else if($entity_name=='swf') {$entity_name = 'sysWorkflowRules';}
+            elseif($entity_name=='dtg') {$entity_name = 'defDetailTypeGroups';}
+            elseif($entity_name=='rty') {$entity_name = 'defRecTypes';}
+            elseif($entity_name=='dty') {$entity_name = 'defDetailTypes';}
+            elseif($entity_name=='trm' || $entity_name=='term') {$entity_name = 'defTerms';}
+            elseif($entity_name=='vcg') {$entity_name = 'defVocabularyGroups';}
+            elseif($entity_name=='rst') {$entity_name = 'defRecStructure';}
+            elseif($entity_name=='rem') {$entity_name = 'dbUsrReminders';}
+            elseif($entity_name=='swf') {$entity_name = 'sysWorkflowRules';}
 
             if(!preg_match('/^[A-Za-z]+$/', $entity_name)){ //validatate entity name
                 return null;
@@ -218,7 +218,7 @@
         if(!$version){
             //if version is not specified default is thumbnail (except for record types)
             $version = ($entity_name=='defRecTypes')?'icon':'thumbnail';
-        }else if($version=='thumb'){
+        }elseif($version=='thumb'){
             $version='thumbnail';
         }
 
@@ -240,7 +240,7 @@
                 if(file_exists($fname.'.'.$ext)){
                     if($ext=='jpg' || $ext=='jfif' || $ext=='jpe'){
                         $content_type = 'image/jpeg';
-                    }else if($ext=='svg'){
+                    }elseif($ext=='svg'){
                         $content_type = 'image/svg+xml';
                     }else{
                         $content_type = 'image/'.$ext;

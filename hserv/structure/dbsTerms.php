@@ -261,9 +261,9 @@ class DbsTerms
 
         if($mode=='set'){
             $mode = 3;
-        }else if($mode=='tree'){
+        }elseif($mode=='tree'){
             $mode = 1;
-        }else if($mode=='labels'){
+        }elseif($mode=='labels'){
             $mode = 4;
         }
 
@@ -297,7 +297,7 @@ class DbsTerms
                     if($mode==1){ //tree
                         $res[$parent_id][$trm_ID] = array();
 
-                    }else if($mode==3){
+                    }elseif($mode==3){
                         if(in_array($trm_ID, $res)){ //already in set
                             USanitize::errorLog('!!!!Database '.HEURIST_DBNAME
                                 .' Recursive tree or duplication for term '.$trm_ID.' parent '.$parent_id);
@@ -407,7 +407,7 @@ class DbsTerms
 
                     break;
 
-                }else if(is_array($children) && count($children)>0){
+                }elseif(is_array($children) && count($children)>0){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -434,7 +434,7 @@ class DbsTerms
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }else if(is_array($children) && count($children)>0 ) {
+            }elseif(is_array($children) && count($children)>0 ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) {return $res;}

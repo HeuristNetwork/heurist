@@ -260,7 +260,7 @@ function __getErrMsg($remoteURL, $code, $err_msg){
 
             if($code=='curl'){
                 $reason = 'This may be due to a missing server or timeout on connection';
-            }else if($code==HEURIST_SYSTEM_FATAL){
+            }elseif($code==HEURIST_SYSTEM_FATAL){
                 $reason = 'This may be due to an installation problem on the server';
             }else{
                 $reason = 'This may be due to an error in the registration information recorded in the Heurist master index';

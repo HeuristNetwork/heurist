@@ -81,7 +81,7 @@ private static function _readDataFile($filename, $type=null, $validate=true){
         // and setting default path should only occur where no file path is specified.
         if(strpos($filename,'websiteStarterRecords')===0 || strpos($filename,'webpageStarterRecords')===0){
             $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
-        }else if (!file_exists($filename)) {
+        }elseif (!file_exists($filename)) {
             $filename = HEURIST_SCRATCH_DIR.basename($filename);
         }
 
@@ -243,9 +243,9 @@ private static function hmlToJson($filename){
 						'type'=>'',
 						'title'=>''
 					   );*/
-				   }else if($xml_det->raw){
+				   }elseif($xml_det->raw){
 					   $detail = ''.$xml_det->raw;
-				   }else if($dets['termID']){
+				   }elseif($dets['termID']){
 
 					   $trm_cCode = @$dets['termConceptID'];
 
@@ -257,7 +257,7 @@ private static function hmlToJson($filename){
 							}
 					   }
 
-				   }else if($xml_det->geo){
+				   }elseif($xml_det->geo){
 
 					   $geotype = @$GEO_TYPES[ ''.$xml_det->geo->type ];
 					   if(!$geotype) {$geotype = ''.$xml_det->geo->type;}
@@ -266,7 +266,7 @@ private static function hmlToJson($filename){
 						'type'=>$geotype,
 						'wkt'=>''.$xml_det->geo->wkt
 					   ));
-				   }else if($xml_det->file){
+				   }elseif($xml_det->file){
 					   $detail = array('file'=>array(
 						'ulf_ID'=>''.$xml_det->file->id,
 						//'fullPath'=> null,
@@ -480,7 +480,7 @@ public static function importRecordsFromDatabase($params){
     $search_params = array();
     if(@$params['recID']>0){
         $params['q'] = 'ids:'.$params['recID'];
-    }else if(@$params['ids']){
+    }elseif(@$params['ids']){
         $params['q'] = 'ids:'.implode(',', prepareIds($params['ids']));
     }
     $remote_path = $remote_path.'&q='.$params['q'];
@@ -731,7 +731,7 @@ EOD;
             if($source_url){
                 if(strpos($source_url,'?db=')>0){
                     $databaseURL = $source_url;
-                }else if($source_db){
+                }elseif($source_db){
                     $databaseURL = $source_url.'?db='.$source_db;
                 }
             }
@@ -840,7 +840,7 @@ EOD;
                     $record_src['rec_RecTypeID']>0
                         ?$record_src['rec_RecTypeID']
                         :$record_src['rec_RecTypeConceptID'], false);
-            }else if($mapping_defs!=null){
+            }elseif($mapping_defs!=null){
 
                 $recTypeID = @$mapping_defs[$record_src['rec_RecTypeID']]['rty_ID'];
 
@@ -998,7 +998,7 @@ EOD;
                 if($dbsource_is_same){
                     //$dty_ID can be local id or concept code
                     $ftId = DbsImport::getLocalCode('detailtypes', $defs, $dty_ID, false);
-                }else if($mapping_defs!=null){
+                }elseif($mapping_defs!=null){
 
                     $ftId = @$mapping_defs[$record_src['rec_RecTypeID']]['details'][$dty_ID];
 
@@ -1082,7 +1082,7 @@ EOD;
                         }
                         //replaceTermIds( $value, $def_field[$idx_type] );
                     }
-                }else if($def_field[$idx_type] == "geo"){
+                }elseif($def_field[$idx_type] == "geo"){
 
                    foreach($values as $value){
                        //geo
@@ -1093,7 +1093,7 @@ EOD;
                        $new_values[] = $geotype.$value['geo']['wkt'];
                    }
 
-                }else if($def_field[$idx_type] == "file"){
+                }elseif($def_field[$idx_type] == "file"){
 
                    //copy remote file to target filestore, register and get ulf_ID
                    foreach($values as $value){
@@ -1120,7 +1120,7 @@ EOD;
                             $file_entity->setRecords(null);//reset
                             $dtl_UploadedFileID = $file_entity->save();//register remote url - it returns ulf_ID
 
-                       }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
+                       }elseif(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
 
                             //download to scratch folder
 
@@ -1152,7 +1152,7 @@ EOD;
                             }
 
 
-                       }else if($dbsource_is_same) {
+                       }elseif($dbsource_is_same) {
 
                            $dtl_UploadedFileID = array($value['ulf_ID']);
                        }
@@ -1177,7 +1177,7 @@ EOD;
                     }
 
                 }
-                else if($def_field[$idx_type] == "resource"){
+                elseif($def_field[$idx_type] == "resource"){
 
                    $new_values = array();
                    //keep source record id to replace it to new target record id
@@ -1398,7 +1398,7 @@ EOD;
                                             .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
                                             .' AND dtl_Value='.$old_value;
 
-                                }else if($old_value>0){
+                                }elseif($old_value>0){
                                     //target record not found
                                     $query = 'DELETE FROM recDetails '
                                             .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id

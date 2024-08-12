@@ -102,11 +102,11 @@ class ReportRecord {
 
             $res = mysql__select_value($mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
 
-        }else if($param=='db_rty_counts'){
+        }elseif($param=='db_rty_counts'){
 
             $res = mysql__select_assoc2($mysqli, 'SELECT rec_RecTypeID, count(*) FROM Records WHERE not rec_FlagTemporary GROUP BY rec_RecTypeID');
 
-        }else if($param=='lang'){
+        }elseif($param=='lang'){
 
             $res = $_REQUEST['lang'];
             if (!$res) {
@@ -114,7 +114,7 @@ class ReportRecord {
             }
 
             $res = getLangCode3($res);
-        }else if($param=='user'){
+        }elseif($param=='user'){
 
             $usr=$this->system->getCurrentUser();
             unset($usr['ugr_Preferences']);
@@ -194,7 +194,7 @@ class ReportRecord {
         {
             if($rec['rec_NonOwnerVisibility']=='hidden'){
                 $res = false;
-            }else if($currentUser['ugr_ID']>0 && $rec['rec_NonOwnerVisibility']=='viewable'){
+            }elseif($currentUser['ugr_ID']>0 && $rec['rec_NonOwnerVisibility']=='viewable'){
 
                 $wg_ids = array();
                 if(@$currentUser['ugr_Groups']){
@@ -401,15 +401,15 @@ class ReportRecord {
                         $recTypeID = $value;
                         $record['recTypeID'] = $recTypeID;
                         $record['recTypeName'] = $this->rty_Names[$recTypeID];
-                    }else if ($key=='rec_Tags'){
+                    }elseif($key=='rec_Tags'){
 
                         $record['rec_Tags'] = $value;
 
-                    }else if ($key=='rec_ID'){ //load tags and woottext once per record
+                    }elseif($key=='rec_ID'){ //load tags and woottext once per record
 
                         $record['recWootText'] = $this->getWootText($value);//htmlspecialchars(, ENT_QUOTES, 'UTF-8');//@todo load dynamically
 
-                    }else if ($key == 'rec_ScratchPad'){
+                    }elseif($key == 'rec_ScratchPad'){
 
                         //$record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
                     }

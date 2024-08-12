@@ -103,11 +103,11 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     if($upload_file_name==null){
         $s = 'File parameter is not defined<br><br>'
         .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    }else if (! file_exists($upload_file_name)) {
+    }elseif (! file_exists($upload_file_name)) {
         $s = ' does not exist.<br><br>'
         .'Please clear your browser cache and try again. '
         .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-    }else if (! is_readable($upload_file_name)) {$s = ' is not readable';}
+    }elseif (! is_readable($upload_file_name)) {$s = ' is not readable';}
 
     if($s){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);
@@ -224,14 +224,14 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     if($is_kml_data){
         $extension = 'kml';
-    }else if(!$is_csv_data) {
+    }elseif(!$is_csv_data) {
 
         $s = null;
         if(!$encoded_filename){
             $encoded_filename = '';
             $s = ' not defined';
-        }else if (! file_exists($encoded_filename)) {$s = ' does not exist';}
-        else if (! is_readable($encoded_filename)) {$s = ' is not readable';}
+        }elseif (! file_exists($encoded_filename)) {$s = ' does not exist';}
+        elseif (! is_readable($encoded_filename)) {$s = ' is not readable';}
         if($s){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Temporary file '.$encoded_filename. $s);
             return false;
@@ -391,7 +391,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                                 $flen = strlen($field);
                                 if ($flen>500 || strpos($field, '\\r')!==false) {
                                     $field_sizes[$k] = 'memo';
-                                }else if(@$field_sizes[$k]>0){
+                                }elseif(@$field_sizes[$k]>0){
                                     $field_sizes[$k] = max($field_sizes[$k], $flen);//select max
                                 }else{
                                     $field_sizes[$k] = $flen;
@@ -428,7 +428,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
                         if($field==null || $field==''){
                             $empty75_fields[$k]++;
-                        }else if(@$empty_fields[$k]){//not empty
+                        }elseif(@$empty_fields[$k]){//not empty
                             $empty_fields[$k]=null;
                         }
 
@@ -473,7 +473,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         $csv_linebreak = @$params["csv_linebreak"];
         if(@$params["csv_enclosure"]==1){
             $csv_enclosure = "'";
-        }else if(@$params["csv_enclosure"]=='none'){
+        }elseif(@$params["csv_enclosure"]=='none'){
             $csv_enclosure = 'ʰ';//rare character
         }else {
             $csv_enclosure = '"';
@@ -481,7 +481,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
         if($csv_delimiter=='tab') {
             $csv_delimiter = "\t";
-        }else if($csv_delimiter==null) {
+        }elseif($csv_delimiter==null) {
             $csv_delimiter = ",";
         }
 
@@ -489,11 +489,11 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         if($csv_linebreak=='auto'){
             ini_set('auto_detect_line_endings', 'true');
             $lb = null;
-        }else if($csv_linebreak=='win'){
+        }elseif($csv_linebreak=='win'){
             $lb = "\r\n";
-        }else if($csv_linebreak=='nix'){
+        }elseif($csv_linebreak=='nix'){
             $lb = "\n";
-        }else if($csv_linebreak=='mac'){
+        }elseif($csv_linebreak=='mac'){
             $lb = "\r";
         }
 
@@ -583,7 +583,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                                 $flen = strlen($field);
                                 if ($flen>500 || strpos($field, '\\r')!==false) {
                                     $field_sizes[$k] = 'memo';
-                                }else if(@$field_sizes[$k]>0){
+                                }elseif(@$field_sizes[$k]>0){
                                     $field_sizes[$k] = max($field_sizes[$k], $flen);
                                 }else{
                                     $field_sizes[$k] = $flen;
@@ -618,7 +618,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
                         if($field==null || $field==''){
                              $empty75_fields[$k]++;
-                        }else if(@$empty_fields[$k]){//field has value
+                        }elseif(@$empty_fields[$k]){//field has value
                              $empty_fields[$k]=null;
                         }
 
@@ -857,19 +857,19 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 
                 if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][1]) <= 20){
                     $err_keyfields[$k][1][] = $value;
-                }else if(!is_array(@$err_keyfields[$k])){
+                }elseif(!is_array(@$err_keyfields[$k])){
                     $err_keyfields[$k] = array(array(), array($value));
                 }
             }
             //exclude from array of fields with integer values
             if(@$int_fields[$k]) {$int_fields[$k]=null;}
 
-        }else if(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
+        }elseif(intval($value)<0 || intval($value)>2147483646){ //max int value in mysql
 
             if($check_keyfield_K){
                 if(is_array(@$err_keyfields[$k]) && count($err_keyfields[$k][0]) <= 20){  //out of range
                     $err_keyfields[$k][0][] = $value;
-                }else if(!is_array(@$err_keyfields[$k])){
+                }elseif(!is_array(@$err_keyfields[$k])){
                     $err_keyfields[$k] = array(array($value), array());
                 }
             }
@@ -930,7 +930,7 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
             foreach ($child->childNodes as $timedata) {
                 if ($timedata->nodeName == 'begin') {
                     $properties['timespan_begin'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
-                }else if ($timedata->nodeName == 'end') {
+                }elseif($timedata->nodeName == 'end') {
                     $properties['timespan_end'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
                 }
             }
@@ -956,7 +956,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 
     $s = null;
     if (! file_exists($filename)) {$s = ' does not exist';}
-    else if (! is_readable($filename)) {$s = ' is not readable';}
+    elseif (! is_readable($filename)) {$s = ' is not readable';}
 
     if($s){
         self::$system->addError(HEURIST_UNKNOWN_ERROR, 'Source file '.$filename. $s);
@@ -981,7 +981,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
             $size = @$preproc['field_sizes'][$i];
             if($size==='memo'){
                    $row_size += 12;
-            }else if($size>0){
+            }elseif($size>0){
                    $row_size += (2 + 4*$size);
                    if($size>$max_size){
                         $max_size = $size;
@@ -1147,8 +1147,8 @@ public static function simpleCsvParser($params){
     $csv_linebreak = @$params['csv_linebreak'];
 
     if(!$csv_delimiter) {$csv_delimiter = ',';}
-    else if($csv_delimiter=='tab') {$csv_delimiter="\t";}
-    else if($csv_delimiter=='space') {$csv_delimiter=" ";}
+    elseif($csv_delimiter=='tab') {$csv_delimiter="\t";}
+    elseif($csv_delimiter=='space') {$csv_delimiter=" ";}
 
     if(!$csv_linebreak) {$csv_linebreak = "auto";}
 
@@ -1173,11 +1173,11 @@ public static function simpleCsvParser($params){
         if($csv_linebreak=="auto"){
             //ini_set('auto_detect_line_endings', true);
             $lb = "\n";
-        }else if($csv_linebreak="win"){
+        }elseif($csv_linebreak="win"){
             $lb = "\r\n";
-        }else if($csv_linebreak="nix"){
+        }elseif($csv_linebreak="nix"){
             $lb = "\n";
-        }else if($csv_linebreak="mac"){
+        }elseif($csv_linebreak="mac"){
             $lb = "\r";
         }
 
@@ -1232,13 +1232,13 @@ public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=
                                     "wkt" => $detailValue
                                 )
                             );
-                    }else if($dty_ID==DT_NAME){
+                    }elseif($dty_ID==DT_NAME){
                         $record['rec_Title'] = $detailValue;
-                    }else if($dty_ID==DT_EXTENDED_DESCRIPTION){
+                    }elseif($dty_ID==DT_EXTENDED_DESCRIPTION){
                         $record['Description'] = $detailValue;
-                    }else if($dty_ID=='longitude'){
+                    }elseif($dty_ID=='longitude'){
                         $long = $detailValue;
-                    }else if($dty_ID=='latitude'){
+                    }elseif($dty_ID=='latitude'){
                         $lat = $detailValue;
                     }
 

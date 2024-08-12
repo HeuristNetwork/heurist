@@ -95,7 +95,7 @@ class DbEntitySearch
                             break;
                         }
                     }
-                }else if(array_search($value, $enums, true)!==false){
+                }elseif(array_search($value, $enums, true)!==false){
                     $isNotFound = false;
                 }
                 if($isNotFound){
@@ -118,7 +118,7 @@ class DbEntitySearch
 
             if(is_bool($value)){
                 $value = $value?1:0;
-            }else if(is_numeric($value)){
+            }elseif(is_numeric($value)){
                 $value = $value==1?1:0;
             }else{
                 $value = $value=='y'?1:0;
@@ -154,13 +154,13 @@ class DbEntitySearch
 
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
-                }else if($is_ids=='ids'){
+                }elseif($is_ids=='ids'){
                     $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
 
-                }else if($data_type == 'enum' && !$is_ids){
+                }elseif($data_type == 'enum' && !$is_ids){
                     $res = $this->_validateEnum($fieldname);
 
-                }else if($data_type=='boolean'){
+                }elseif($data_type=='boolean'){
                     $res = $this->_validateBoolean($fieldname);
 
                 }else{
@@ -213,7 +213,7 @@ class DbEntitySearch
 
             if($value == 'NULL'){
                 return '(NOT ('.$fieldname.'>0))';
-            }else if($value == '-NULL'){
+            }elseif($value == '-NULL'){
                 return '('.$fieldname.'>0)';
             }
 
@@ -257,7 +257,7 @@ class DbEntitySearch
             if($value == 'NULL'){
                 array_push($or_predicates, $fieldname.' IS NULL');
                 continue;
-            }else if($value == '-NULL'){
+            }elseif($value == '-NULL'){
                 array_push($or_predicates, '('.$fieldname.' IS NOT NULL AND '.$fieldname.'<>"")');
                 continue;
             }
@@ -282,10 +282,10 @@ class DbEntitySearch
                 if(strpos($value, '=')===0){
                     $exact = true;
                     $value = substr($value, 1);
-                }else if(strpos($value, '<')===0){
+                }elseif(strpos($value, '<')===0){
                     $lessthan = true;
                     $value = substr($value, 1);
-                }else if(strpos($value, '>')===0){
+                }elseif(strpos($value, '>')===0){
                     $greaterthan = true;
                     $value = substr($value, 1);
                 }
@@ -316,7 +316,7 @@ class DbEntitySearch
                     $res = " $eq ".($data_type == 'int'?intval($value):$value);//no quotes
                 }
             }
-            else if ($data_type == 'date') {
+            elseif($data_type == 'date') {
 
                 //$datestamp = Temporal::dateToISO($this->value);
 

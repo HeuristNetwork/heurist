@@ -119,9 +119,9 @@
             $s='';
             if($res==-1){
                 $s = 'Cant find folder "'.$folderName.'" in database directory';
-            }else if($res==-2){
+            }elseif($res==-2){
                 $s = 'Folder "'.$folderName.'" in database directory is not writeable';
-            }else if($res==-3){
+            }elseif($res==-3){
                 $s = 'Cant create folder "'.$folderName.'" in database directory. It is not possible to delete file with the same name';
             }
 
@@ -173,7 +173,7 @@
         if($check==-2){
             $swarn = 'Cannot access folder (it, or a subdirectory, is not writeable) '. $folder .'  '.$message.'<br>';
 
-        }else if($check==-1){
+        }elseif($check==-1){
             if (!mkdir($folder, 0777, true)) {
                 $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
             }else{
@@ -316,7 +316,7 @@
                 //in database filestore
                 $folder = $dir;
                 $url = null;
-            }else if(strpos($dir, '/srv/BACKUP')===0){  //in /srv/BACKUP
+            }elseif(strpos($dir, '/srv/BACKUP')===0){  //in /srv/BACKUP
                 $folder = $dir;
                 $url = null;
             }else{
@@ -439,7 +439,7 @@
                 }
             }
             return $totalSize;
-        } else if (is_file($dir) === true) {
+        } elseif (is_file($dir) === true) {
             return filesize($dir);
         }
     }
@@ -573,7 +573,7 @@
                     }
                 }
 
-            } else if ($node->isFile()) {
+            } elseif($node->isFile()) {
                 if($withFiles){
                     $name = $node->getFilename();
                     if ('' == $regex || preg_match($regex, $name)) { //file filter
@@ -743,7 +743,7 @@
 
         if ($basePath === $targetPath){
             return '';
-        }else if (substr($targetPath,0,1)!='/') { //it is already relative
+        }elseif (substr($targetPath,0,1)!='/') { //it is already relative
             return $targetPath;
         }
         //else  if(strpos($basePath, $targetPath)===0){
@@ -809,7 +809,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
                         }
 
                     }
-                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
+                    elseif($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
                         copy($src.$file,  $dst . '/' . $file_prefix . $file);
                         if($file_to_copy!=null) {return false;}
                     }
@@ -1195,7 +1195,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
             $mimeType  = 'audio/soundcloud';
             $extension = 'soundcloud';
             $force_add = "('soundcloud','audio/soundcloud', '0','','Soundcloud','')";
-        }else if(strpos($url, 'vimeo.com')!==false){
+        }elseif(strpos($url, 'vimeo.com')!==false){
             $mimeType  = 'video/vimeo';
             $extension = 'vimeo';
             $force_add = "('vimeo','video/vimeo', '0','','Vimeo Video','')";
@@ -1306,7 +1306,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     if (!$handle) {
         $s = null;
         if (! file_exists($filename)) {$s = ' does not exist';}
-        else if (! is_readable($filename)) {$s = ' is not readable';}
+        elseif (! is_readable($filename)) {$s = ' is not readable';}
             else {$s = ' could not be read';}
 
         if($s){
@@ -1322,9 +1322,9 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     $eol = null;
     if($csv_linebreak=='win'){
         $eol = "\r\n";
-    }else if($csv_linebreak=='nix'){
+    }elseif($csv_linebreak=='nix'){
         $eol = "\n";
-    }else if($csv_linebreak=='mac'){
+    }elseif($csv_linebreak=='mac'){
         $eol = "\r";
     }
 
@@ -1339,7 +1339,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
 
         if(substr_count($data, "\r\n")>0){
             $eol = "\r\n";
-        }else if(substr_count($data, "\n")>0){
+        }elseif(substr_count($data, "\n")>0){
             $eol = "\n";
         }else{
             $eol = "\r";
@@ -1382,7 +1382,7 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
                         $force_tabs = true;
                         break 2;
                     }
-                }else if($delimiters[$csv_delimiter] != $cnt){
+                }elseif($delimiters[$csv_delimiter] != $cnt){
                     $delimiters[$csv_delimiter] = 0; //not use
                     break;
                 }
@@ -1412,9 +1412,9 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
 
     if($eol=="\r\n"){
         $csv_linebreak='win';
-    }else if($eol=="\n"){
+    }elseif($eol=="\n"){
         $csv_linebreak='nix';
-    }else if($eol=="\r"){
+    }elseif($eol=="\r"){
         $csv_linebreak='mac';
     }
 
@@ -1493,7 +1493,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
         if($not_allowed){
             return false;
         }
-    }else if ($range_minutes>0) {
+    }elseif($range_minutes>0) {
         $fp = fopen($progress_flag, 'w');
         fwrite($fp, $action.' '. date_create('now')->format('Y-m-d H:i:s'));
         fclose($fp);
@@ -1767,7 +1767,7 @@ function uploadFileToNakala($system, $params) {
 
             return false;
         }
-    }else if(array_key_exists('message', $result)){
+    }elseif(array_key_exists('message', $result)){
 
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 

@@ -36,7 +36,7 @@
             return $json;
 
 
-        }else if(count($json['coordinates'])>0){
+        }elseif(count($json['coordinates'])>0){
 
             if($gPoint && ($json['type']=='Point')){
 
@@ -44,19 +44,19 @@
                 geo_SimplifyAndConvert($pnt, false, $gPoint);
                 $json['coordinates'] = $pnt[0];
 
-            }else if($gPoint && ($json['type']=='MultiPoint')){
+            }elseif($gPoint && ($json['type']=='MultiPoint')){
 
                 geo_SimplifyAndConvert($json['coordinates'], false, $gPoint);
 
-            }else if($json['type']=='LineString'){
+            }elseif($json['type']=='LineString'){
 
                 geo_SimplifyAndConvert($json['coordinates'], $need_simplify, $gPoint);
 
-            } else if($json['type']=='Polygon'){
+            } elseif($json['type']=='Polygon'){
                 for($idx=0; $idx<count($json['coordinates']); $idx++){
                     geo_SimplifyAndConvert($json['coordinates'][$idx], $need_simplify, $gPoint);
                 }
-            } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+            } elseif ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
                 for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
                     for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points
@@ -106,7 +106,7 @@
                 }
             }
 
-        }else if($gPoint!=null){
+        }elseif($gPoint!=null){
 
             foreach ($orig_points as $idx=>$point) {
                 $gPoint->setUTM($point[0], $point[1]);
@@ -131,7 +131,7 @@
             return $json;
 
 
-        }else if(count($json['coordinates'])>0){
+        }elseif(count($json['coordinates'])>0){
 
             if($json['type']=='Point'){
 
@@ -139,19 +139,19 @@
                 geo_CorrectLng($pnt);
                 $json['coordinates'] = $pnt[0];
 
-            }else if($json['type']=='MultiPoint'){
+            }elseif($json['type']=='MultiPoint'){
 
                 geo_CorrectLng($json['coordinates']);
 
-            }else if($json['type']=='LineString'){
+            }elseif($json['type']=='LineString'){
 
                 geo_CorrectLng($json['coordinates']);
 
-            } else if($json['type']=='Polygon'){
+            } elseif($json['type']=='Polygon'){
                 for($idx=0; $idx<count($json['coordinates']); $idx++){
                     geo_CorrectLng($json['coordinates'][$idx]);
                 }
-            } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+            } elseif ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
             {
                 for($idx=0; $idx<count($json['coordinates']); $idx++){ //shapes
                     for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++){ //points

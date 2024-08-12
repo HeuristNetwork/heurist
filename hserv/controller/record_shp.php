@@ -117,7 +117,7 @@ use Shapefile\ShapefileReader;
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
                 $isZipArchive = true;
 
-            }else if(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
+            }elseif(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
 
                 $shp_file = fileRetrievePath(array_shift($record['details'][DT_SHAPE_FILE]),'shp',false);
                 $dbf_file = fileRetrievePath(array_shift($record['details'][DT_DBF_FILE]),'dbf',false);
@@ -191,7 +191,7 @@ use Shapefile\ShapefileReader;
                             $files['shx'] = $shx_file;
                         }
                         $shapeFile = new ShapefileReader($files, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true));
-                    }else if(file_exists($shp_file)){
+                    }elseif(file_exists($shp_file)){
                         //if provide only shapefile, it finds other automatically
                         $shapeFile = new ShapefileReader($shp_file, array(Shapefile::OPTION_IGNORE_FILE_SHX=>true, Shapefile::OPTION_IGNORE_FILE_DBF=>true));
                     }else{
@@ -231,12 +231,12 @@ use Shapefile\ShapefileReader;
                                 checkWGS($system, $geo['coordinates']);
                                 if($need_simplify) {simplifyCoordinates($geo['coordinates']);}
 
-                            } else if($geo['type']=='Polygon'){
+                            } elseif($geo['type']=='Polygon'){
                                 for($idx=0; $idx<count($geo['coordinates']); $idx++){
                                     checkWGS($system, $geo['coordinates'][$idx]);
                                     if($need_simplify) {simplifyCoordinates($geo['coordinates'][$idx]);}
                                 }
-                            } else if ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
+                            } elseif ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
                             {
                                 for($idx=0; $idx<count($geo['coordinates']); $idx++){ //shapes
                                     for($idx2=0; $idx2<count($geo['coordinates'][$idx]); $idx2++) //points
@@ -347,7 +347,7 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
 
     if(file_exists($filepath)){
 
-    }else if($external_url){
+    }elseif($external_url){
         $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         saveURLasFile($external_url, $filepath);//save remote shp to temp in scratch folder
     }

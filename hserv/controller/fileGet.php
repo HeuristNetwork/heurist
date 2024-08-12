@@ -77,7 +77,7 @@ if($filename){ //download from scratch (for csv import)
                 if (! file_exists($file_read)){
                      $s = ' does not exist.<br><br>'
                     .'Please clear your browser cache and try again. if problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
-                }else if (! is_readable($file_read)) {
+                }elseif (! is_readable($file_read)) {
                     $s = ' is not readable';
                 }
                 else {
@@ -141,13 +141,13 @@ if($filename){ //download from scratch (for csv import)
             $entity_name  = 'trm';
             $viewmode = 'icon';
             //$path = HEURIST_TERM_ICON_DIR;
-        }else if($rec_id && strpos($rec_id, 'thumb/th_')===0){
+        }elseif($rec_id && strpos($rec_id, 'thumb/th_')===0){
             //backward support - thumbnail for rectype import
             $rec_id = substr($rec_id, 9);
             $entity_name  = 'rty';
             $viewmode = 'thumb';
 
-        }else if(!$entity_name) {
+        }elseif(!$entity_name) {
             $entity_name = 'rty';//default - defRecTypes
         }
 
@@ -174,7 +174,7 @@ if($filename){ //download from scratch (for csv import)
         // otherwise it returns empty image placeholder (100x100 or 16x16 for icons)
         $default_mode = @$_REQUEST['def'];
         if($default_mode=='check') {$default_mode = 3;}
-        else if($default_mode==null) {$default_mode = 2;}
+        elseif($default_mode==null) {$default_mode = 2;}
 
 
         if(file_exists($filename) && !is_dir($filename)){
@@ -198,7 +198,7 @@ if($filename){ //download from scratch (for csv import)
                 }
             }
 
-        }else if($default_mode==3){ //check existance
+        }elseif($default_mode==3){ //check existance
 
                 $response = array('status'=>HEURIST_OK, 'data'=>'not found');
                 header('Content-type: application/json;charset=UTF-8');

@@ -197,7 +197,7 @@ function getRecordDetails($system, $record) {
                 // Description
                 $record->description = $value;
 
-            }else if($type == DT_CREATOR) {
+            }elseif($type == DT_CREATOR) {
                 // Creators
                 if(!property_exists($record, "creators")) {
                     $record->creators = array();
@@ -206,7 +206,7 @@ function getRecordDetails($system, $record) {
 
 
                 /* SOURCE */
-            }else if(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
+            }elseif(defined('DT_SERVICE_URL') && $type == DT_SERVICE_URL) {
                 // Source URL
 
                 if($fileID){
@@ -221,13 +221,13 @@ function getRecordDetails($system, $record) {
                     $record->sourceURL = $value;
                 }
 
-            }else if(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
+            }elseif(defined('DT_DATA_SOURCE') && $type == DT_DATA_SOURCE) {
                 // Data source
                 $record->dataSource = getDetailedRecord($system, $value);
 
 
                 /* MAP LAYERS */
-            }else if(defined('DT_MAP_LAYER') && $type == DT_MAP_LAYER) {
+            }elseif(defined('DT_MAP_LAYER') && $type == DT_MAP_LAYER) {
                 // Map layer
                 if(!property_exists($record, "layers")) { // Recursive
                     $record->layers = array();
@@ -239,25 +239,25 @@ function getRecordDetails($system, $record) {
                 array_push($record->bookmarks, explode(',', $value));
 
                 /* LOCATION */
-            }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
+            }elseif(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
                 //marker icon url
                 $record->iconMarker = $fileID; //getFileURL($system, $fileID);
 
-            }else if(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
+            }elseif(defined('DT_MAXIMUM_ZOOM') && $type == DT_MAXIMUM_ZOOM) {
                 // Maximum zoom
                 $record->maxZoom = floatval($value);
 
-            }else if(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
+            }elseif(defined('DT_MINIMUM_ZOOM') && $type == DT_MINIMUM_ZOOM) {
                 // Minimum zoom
                 $record->minZoom = floatval($value);
 
 
 
-            }else if(defined('DT_OPACITY') && $type == DT_OPACITY) {
+            }elseif(defined('DT_OPACITY') && $type == DT_OPACITY) {
                 // Opacity
                 $record->opacity = floatval($value);
 
-            }else if(defined('DT_SYMBOLOGY_COLOR') && $type == DT_SYMBOLOGY_COLOR) {
+            }elseif(defined('DT_SYMBOLOGY_COLOR') && $type == DT_SYMBOLOGY_COLOR) {
                 // Color - take value from term code
                 $color = _getTermByID($system, $value);
 
@@ -271,58 +271,58 @@ function getRecordDetails($system, $record) {
                 $record->color = $color->label;
                 }*/
 
-            } else if(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
+            } elseif(defined('DT_THUMBNAIL') && $type == DT_THUMBNAIL) {
                 // Uploaded thumbnail
                 $record->thumbnail = getFileURL($system, $fileID);
 
-            } else if(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) {
+            } elseif(defined('DT_MIME_TYPE') && $type == DT_MIME_TYPE) {
                 // Mime type
                 $record->mimeType = _getTermByID($system, $value);
 
-            } else if(defined('DT_IMAGE_TYPE') && $type == DT_IMAGE_TYPE) {
+            } elseif(defined('DT_IMAGE_TYPE') && $type == DT_IMAGE_TYPE) {
                 // Tiled image type
                 $record->imageType = _getTermByID($system, $value);
 
-            }else if(defined('DT_MAP_IMAGE_LAYER_SCHEMA') && $type == DT_MAP_IMAGE_LAYER_SCHEMA) {
+            }elseif(defined('DT_MAP_IMAGE_LAYER_SCHEMA') && $type == DT_MAP_IMAGE_LAYER_SCHEMA) {
                 // Image tiling schema
                 $record->tilingSchema = _getTermByID($system, $value);
 
 
                 /* SNIPPET */
-            }else if(defined('DT_QUERY_STRING') && $type == DT_QUERY_STRING) {
+            }elseif(defined('DT_QUERY_STRING') && $type == DT_QUERY_STRING) {
                 // Heurist query string
                 $record->query = $value;
 
-            }else if(defined('DT_KML') && $type == DT_KML) {
+            }elseif(defined('DT_KML') && $type == DT_KML) {
                 // KML snippet
                 $record->kmlSnippet = 1;//$value;
 
 
                 /* FILES */
-            }else if(defined('DT_FILE_RESOURCE') && $type == DT_FILE_RESOURCE) {
+            }elseif(defined('DT_FILE_RESOURCE') && $type == DT_FILE_RESOURCE) {
                 // File(s)
                 if(!property_exists($record, "files")) {
                     $record->files = array();
                 }
                 array_push($record->files, getFileURL($system, $fileID));
 
-            }else if(defined('DT_SHAPE_FILE') && $type == DT_SHAPE_FILE) {
+            }elseif(defined('DT_SHAPE_FILE') && $type == DT_SHAPE_FILE) {
                 // Shape file (SHP component)
                 $record->shpFile = getFileURL($system, $fileID);
 
-            }else if(defined('DT_DBF_FILE') && $type == DT_DBF_FILE) {
+            }elseif(defined('DT_DBF_FILE') && $type == DT_DBF_FILE) {
                 // DBF file (DBF component)
                 $record->dbfFile = getFileUrl($system, $fileID);
 
-            }else if(defined('DT_SHX_FILE') && $type == DT_SHX_FILE) {
+            }elseif(defined('DT_SHX_FILE') && $type == DT_SHX_FILE) {
                 // SHX file (SHX component)
                 $record->shxFile = getFileURL($system, $fileID);
 
-            }else if(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
+            }elseif(defined('DT_ZIP_FILE') && $type == DT_ZIP_FILE) {
                 // Zip file
                 $record->zipFile = getFileURL($system, $fileID);
 
-            }else if(defined('DT_GEO_OBJECT') && $type == DT_GEO_OBJECT) {
+            }elseif(defined('DT_GEO_OBJECT') && $type == DT_GEO_OBJECT) {
                 // Zip file
                 $record->bounds = $geo_value;
             }

@@ -44,7 +44,7 @@ if ( !isset($_REQUEST['db']) || $system->verifyActionPassword($sysadmin_pwd, $pa
 
     <?php
     exit;
-} else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody'])
+} elseif (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody'])
             && isset($_REQUEST['db']) && isset($sysadmin_pwd)) {
 
     if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){

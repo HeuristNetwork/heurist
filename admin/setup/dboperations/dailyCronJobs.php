@@ -308,7 +308,7 @@ foreach ($databases as $idx=>$db_name){
                     $url_list[$db_name][1][] = $rec_id . ' : ' . implode(',', array_keys($flds));
                 }
             }
-        }else if(!empty($invalid_file_urls)){
+        }elseif(!empty($invalid_file_urls)){
             echo $eol.'Record fields contain invalid urls: ';
         }
 

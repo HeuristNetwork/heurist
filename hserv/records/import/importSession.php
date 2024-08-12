@@ -198,7 +198,7 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
     if($id_field==null || $id_field=='' || $id_field=='null' || $mode=='all'){
         $where  = '1';
         $order_field = 'imp_id';
-    }else if($mode=='insert'){
+    }elseif($mode=='insert'){
         $where  = " ($id_field<0 OR $id_field IS NULL) ";
         $order_field = $id_field;
     }else{

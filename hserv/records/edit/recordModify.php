@@ -82,7 +82,7 @@ function recordAddDefaultValues($system, $record=null){
         if (@$addRecDefaults[1]!=null){ //default ownership
             if(is_string($addRecDefaults[1]) &&  $addRecDefaults[1]!=''){
                 $userDefaultOwnerGroupID = explode(',', $addRecDefaults[1]);
-            }else if(is_numeric($addRecDefaults[1])){
+            }elseif(is_numeric($addRecDefaults[1])){
                 $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
             }
         }
@@ -137,7 +137,7 @@ function recordAddDefaultValues($system, $record=null){
     }
     if(is_array($ownerid)){
         $owner_grps = $ownerid;
-    }else if($ownerid>=0){
+    }elseif($ownerid>=0){
         $owner_grps = array($ownerid);
     }
 
@@ -155,7 +155,7 @@ function recordAddDefaultValues($system, $record=null){
     //access groups
     if($access!='viewable'){
         $access_grps = null;
-    }else if($access_grps==null && isset($userDefaultAccessGroups)){
+    }elseif($access_grps==null && isset($userDefaultAccessGroups)){
         $access_grps = $userDefaultAccessGroups;
     }
 
@@ -187,7 +187,7 @@ function recordAdd($system, $record, $return_id_only=false){
         if (@$addRecDefaults[1]){ //default ownership
             if(is_string($addRecDefaults[1])){
                 $userDefaultOwnerGroupID = explode(',', $addRecDefaults[1]);
-            }else if($addRecDefaults[1]!=''){
+            }elseif($addRecDefaults[1]!=''){
                 $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
             }
         }
@@ -244,7 +244,7 @@ function recordAdd($system, $record, $return_id_only=false){
         }
         if(is_array($ownerid)){
             $owner_grps = $ownerid;
-        }else if($ownerid>=0){
+        }elseif($ownerid>=0){
             $owner_grps = array($ownerid);
         }
     }
@@ -263,7 +263,7 @@ function recordAdd($system, $record, $return_id_only=false){
     //access groups
     if($access!='viewable'){
         $access_grps = null;
-    }else if($access_grps==null && isset($userDefaultAccessGroups)){
+    }elseif($access_grps==null && isset($userDefaultAccessGroups)){
         $access_grps = $userDefaultAccessGroups;
     }
 */
@@ -478,7 +478,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
     if(@$record['no_validation']==='ignore_all'){
         $validation_mode = 0; //no validation at all
-    }else if($modeImport==2 || @$record['no_validation']){
+    }elseif($modeImport==2 || @$record['no_validation']){
         $validation_mode = 1; //don't validate resources
     }
 
@@ -504,7 +504,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
             //            str_replace( '^^/', '../', urldecode($record['details']))), true);
             $record['details'] = json_decode(urldecode($record['details']), true);
             $record['details_visibility'] = json_decode(urldecode($record['details_visibility']), true);
-        }else if(@$record['details_encoded']==3){
+        }elseif(@$record['details_encoded']==3){
             $record['details'] = json_decode($record['details'], true);
             $record['details_visibility'] = json_decode($record['details_visibility'], true);
         }
@@ -560,7 +560,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         if(mysql__select_value($mysqli, $query)>0){
             $record['FlagTemporary'] = 1;
         }
-    }else if(!$is_insert) {
+    }elseif(!$is_insert) {
 
         //check if previous FlagTemporary is 1
         if($system->defineConstant('TRM_SWF_ADDED')){
@@ -799,7 +799,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         }
                         return $system->addError(HEURIST_DB_ERROR,
                             'Cannot save value. Cannot insert reverse pointer for child record', $syserror);
-                    }else if($res!=0){
+                    }elseif($res!=0){
                         //update record title for child record
                         list($child_rectype, $child_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
@@ -807,7 +807,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
                     }
 
-                }else if($dtyID == DT_PARENT_ENTITY){
+                }elseif($dtyID == DT_PARENT_ENTITY){
 
                     $res = addParentToChildPointer($mysqli, $recID, $rectype, $dtl_Value, null, $addedByImport);
                     if($res<0){
@@ -818,7 +818,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         }
                         return $system->addError(HEURIST_DB_ERROR,
                             'Cannot save value. Cannot insert pointer for parent record', $syserror);
-                    }else if($res!=0){
+                    }elseif($res!=0){
                         //update record title for parent record
                         list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
@@ -1004,7 +1004,7 @@ function recordDelete($system, $recids, $need_transaction=true,
         }
         if(count($recids)==1 && $noaccess_count==1){
             return $system->getError();
-            //}else if(count($recids)==$noaccess_count){
+            //}elseif(count($recids)==$noaccess_count){
         }else{
             $system->clearError();
         }
@@ -1085,7 +1085,7 @@ function recordDelete($system, $recids, $need_transaction=true,
 
         if($msg_termination){
             $res = $system->addError(HEURIST_ACTION_BLOCKED, $msg_termination);
-        }else if($msg_error){
+        }elseif($msg_error){
             $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
         }else{
             $res = array('status'=>HEURIST_OK,
@@ -1321,7 +1321,7 @@ function recordUpdateOwnerAccess($system, $params){
 
         if(count($recids)==1 && $noaccess_count==1){
             return $system->getError();
-        }else if($cnt_allowed_recids==0) {
+        }elseif($cnt_allowed_recids==0) {
             return $system->addError(HEURIST_REQUEST_DENIED,
                 'User does not have sufficient authority to change ownership and access for any of '.count($recids).' selected record');
         }else{
@@ -1901,7 +1901,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
     if($access=='public' && $record["rec_NonOwnerVisibility"]=='public'
     && $system->get_system('sys_SetPublicToPendingOnEdit')==1){
         $access='pending';
-    }else if(!$access){
+    }elseif(!$access){
         $access = $record["rec_NonOwnerVisibility"];
     }
     //if defined and wrong it fails
@@ -1980,7 +1980,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
           $rec_count = $rec_count + count($rectypes[$rty_ID]);
         }
 
-    }else if($recID>0){
+    }elseif($recID>0){
 
         //find record type if not defined
         if(!(isset($rty_ID) && $rty_ID>0)){
@@ -2048,7 +2048,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                $cnt = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
                 .'WHERE (rec_RecTypeID='.$rty_ID.') AND (NOT rec_FlagTemporary)');
                $progress_count = $progress_count + $cnt;
-            }else if (is_array($record_ids)) {
+            }elseif (is_array($record_ids)) {
                $progress_count = $progress_count + count($record_ids);
             }
 
@@ -2067,7 +2067,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                 $query = 'SELECT rec_ID FROM Records WHERE (rec_RecTypeID='.intval($rty_ID).') AND (NOT rec_FlagTemporary)';
                 $rows = $mysqli->query($query);
                 //$mode = 'string:';
-            }else if (count($record_ids)>1){
+            }elseif (count($record_ids)>1){
                 //$mode = 'string:';
             }
 
@@ -2109,7 +2109,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
                         $errors[$rty_ID.'.'.$dty_ID] = $new_value[1];
                         break;
                     }
-                }else if($new_value == 'NAN' || $new_value == 'INF' || $new_value == 'NULL'){
+                }elseif($new_value == 'NAN' || $new_value == 'INF' || $new_value == 'NULL'){
                     // relpace not a number, infinite, and null with an empty string
                     $new_value = '';
                 }
@@ -2183,12 +2183,12 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
 
         if(count($updates)>1000){
             $q_updates = 'ids:'.array_slice($updates, 0, 1000);
-        }else if(count($updates)>0){
+        }elseif(count($updates)>0){
             $q_updates = 'ids:'.implode(',',$updates);
         }
         if(count($cleared)>1000){
             $q_cleared = 'ids:'.array_slice($cleared, 0, 1000);
-        }else if(count($cleared)>0){
+        }elseif(count($cleared)>0){
             $q_cleared = 'ids:'.implode(',',$cleared);
         }
 
@@ -2291,7 +2291,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 
     if(is_numeric($rectype_or_mask) && $rectype_or_mask>0){
         $rectype = $rectype_or_mask;
-    }else if($rectype_or_mask!=null){
+    }elseif($rectype_or_mask!=null){
         $mask = $rectype_or_mask;
     }
 
@@ -2420,7 +2420,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
                             if(strlen(@$val['dtl_Geo'])<1000){
                                 $details_lc[] = $val['dtl_Geo'];
                             }
-                        }else if($val['dtl_Value'] && strlen($val['dtl_Value'])<200){
+                        }elseif($val['dtl_Value'] && strlen($val['dtl_Value'])<200){
                             $details_lc[] = trim_lower_accent($val['dtl_Value']);
                         }
                     }
@@ -2433,14 +2433,14 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 
                         if(@$val['dtl_UploadedFileID']>0){
                             $need_add = true;
-                        }else if(@$val['dtl_Geo']){
+                        }elseif(@$val['dtl_Geo']){
 
                             if(strlen($val['dtl_Geo'])>=1000
                             || array_search($val['dtl_Geo'], $details_lc, true)===false){
                                 $need_add = true;
                             }
 
-                        }else if(strlen($val['dtl_Value'])>=200
+                        }elseif(strlen($val['dtl_Value'])>=200
                         || array_search(trim_lower_accent($val['dtl_Value']), $details_lc, true)===false)
                         {
                             $need_add = true;
@@ -2621,7 +2621,7 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                     $isValid = ($len > 0);//preg_match("/\\S/", $dtl_Value);
                     if(!$isValid ){
                         $err_msg = 'Value is empty';
-                    }else if(!in_array($dtyID, $not_purify)){
+                    }elseif(!in_array($dtyID, $not_purify)){
                         $dtl_Value = super_trim($dtl_Value);
                         $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
                         //$dtl_Value = $purifier->purify($dtl_Value);
@@ -2665,13 +2665,13 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
                             $sdate = strtolower(super_trim($dtl_Value));
                             if($sdate=='today'){
                                 $dtl_Value = date('Y-m-d');
-                            }else if($sdate=='now'){
+                            }elseif($sdate=='now'){
                                 $dtl_Value = date('Y-m-d H:i:s');
-                            }else if($sdate=='yesterday'){
+                            }elseif($sdate=='yesterday'){
                                 $dtl_Value = date('Y-m-d',strtotime("-1 days"));
-                            }else if($sdate=='tomorrow'){
+                            }elseif($sdate=='tomorrow'){
                                 $dtl_Value = date('Y-m-d',strtotime("+1 days"));
-                            }else if(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
+                            }elseif(strlen($dtl_Value)>=8 && strpos($dtl_Value,'-')==false){
 
                                 try{
                                     $t2 = new DateTime($dtl_Value);
@@ -2802,12 +2802,12 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
                             break; //just ignore this value
                         }
 
-                    }else if(is_numeric($dtl_Value)){  //this is ulf_ID
+                    }elseif(is_numeric($dtl_Value)){  //this is ulf_ID
                         $dtl_UploadedFileID = intval($dtl_Value);
 
                         //TODO !!! mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".dtl_UploadedFileID)) <=0 )
 
-                    }else if(is_string($dtl_Value)){  //this is base64 encoded image
+                    }elseif(is_string($dtl_Value)){  //this is base64 encoded image
 
                         //save encoded image as file and register it
                         $entity = new DbRecUploadedFiles($system);
@@ -3011,7 +3011,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.')[^>]
                 .' in record type "'.htmlspecialchars($rty_Name)
                 .'" to "optional" or specify default value for the field');
 
-        }else if (!is_array($insertValues) || count($insertValues)<1) {
+        }elseif (!is_array($insertValues) || count($insertValues)<1) {
             $system->addError(HEURIST_INVALID_REQUEST, "It is not possible save record. No fields are defined");
         }else{
             $res = $insertValues;
@@ -3040,13 +3040,13 @@ function prepareGeoValue($mysqli, $dtl_Value){
         if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
             $geoType = "m";
             $hasGeoType = true;
-        }else if(strpos($geoValue,'POINT')!==false){
+        }elseif(strpos($geoValue,'POINT')!==false){
             $geoType = "p";
             $hasGeoType = true;
-        }else if(strpos($geoValue,'LINESTRING')!==false){
+        }elseif(strpos($geoValue,'LINESTRING')!==false){
             $geoType = "l";
             $hasGeoType = true;
-        }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
+        }elseif(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
             $geoType = "pl";
             $hasGeoType = true;
         }
@@ -3587,7 +3587,7 @@ function checkUserPermissions($system, $action){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Only accounts that are enabled can '.$action_msg.' records.');
             return false;
         }
-    }else if(  ($permissions == 'y_no_add')
+    }elseif(  ($permissions == 'y_no_add')
             || ($action == 'add' && strpos($permissions, 'add') !== false)
             || ($action == 'delete' && strpos($permissions, 'delete') !== false)){
 

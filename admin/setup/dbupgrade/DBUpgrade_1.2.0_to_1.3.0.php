@@ -510,9 +510,9 @@ function fillTermsLinks( $mysqli ){
                     $id_orig = 0;
                     if($row[5]==3){  //dty_OriginatingDBID
                         if($row[6]==1079) {$id_orig = 6255;}  //dty_IDInOriginatingDB
-                        else if($row[6]==1080) {$id_orig = 6256;}
-                        else if($row[6]==1087) {$id_orig = 6257;}
-                        else if($row[6]==1088) {$id_orig = 6258;}
+                        elseif($row[6]==1080) {$id_orig = 6256;}
+                        elseif($row[6]==1087) {$id_orig = 6257;}
+                        elseif($row[6]==1088) {$id_orig = 6258;}
 
                         if($id_orig>0){
                             $values['trm_OriginatingDBID'] = 2;

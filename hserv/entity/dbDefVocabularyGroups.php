@@ -61,15 +61,15 @@ class DbDefVocabularyGroups extends DbEntityBase
 
             $this->data['details'] = 'vcg_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'vcg_ID,vcg_Name';
 
-        }else if(@$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'vcg_ID,vcg_Name,vcg_Description,vcg_Order';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = implode(',', $this->fieldNames );
         }

@@ -1130,7 +1130,7 @@ if ($bkm_ID>0 || $rec_id>0) {
             .$bkm_ID.' and bkm_UGrpID='.$system->get_user_id()
             .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
 
-        } else if ($rec_id>0) {
+        } elseif($rec_id>0) {
             $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
@@ -1668,7 +1668,7 @@ function print_public_details($bib) {
 
                 $bd['val'] = output_chunker($trm_label);
 
-            }else if ($bd['dty_Type'] == 'date') {
+            }elseif($bd['dty_Type'] == 'date') {
 
                 if($bd['val']==null || $bd['val']==''){
                     //ignore empty date
@@ -1679,7 +1679,7 @@ function print_public_details($bib) {
                     $bd['val'] = output_chunker($bd['val']);
                 }
 
-            }else if ($bd['dty_Type'] == 'blocktext') {
+            }elseif($bd['dty_Type'] == 'blocktext') {
 
                 $bd['val'] = html_entity_decode($bd['val']);// @todo: get translation
                 list($lang, $value) = output_chunker($bd['val'], true);
@@ -1716,7 +1716,7 @@ function print_public_details($bib) {
                         $bd['val']);
 
 
-            }else if ($bd['dty_Type'] == 'resource') {
+            }elseif($bd['dty_Type'] == 'resource') {
 
 
                 $rec_id = intval($bd['val']);
@@ -1758,7 +1758,7 @@ function print_public_details($bib) {
                 }
 
             }
-            else if ($bd['dty_Type'] == 'file') {
+            elseif($bd['dty_Type'] == 'file') {
 
                 $fileinfo = null;
 
@@ -1843,7 +1843,7 @@ function print_public_details($bib) {
                     else
                         $trim_url = $bd['val'];
                     $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
-                } else if ($bd['dtl_Geo']){
+                } elseif($bd['dtl_Geo']){
 
                     $minX = null;
 
@@ -1855,7 +1855,7 @@ function print_public_details($bib) {
                     }else if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $bd["bd_geo_envelope"], $matches)){
                         $minX = floatval($matches[1]);
                         $minY = floatval($matches[2]);
-                    }else if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",
+                    }elseif($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",
                                 $bd["dtl_Geo"],$matches))
                     {
                         list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
@@ -2394,7 +2394,7 @@ function print_relation_details($bib) {
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
 				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
-			}else if($field_name !== false){
+			}elseif($field_name !== false){
 				print '<div class=detailType>' . $field_name . '</div>';
 			}
 
@@ -2482,7 +2482,7 @@ function print_relation_details($bib) {
 
 			if($field_name === false && array_key_exists('RelTerm',$bd)){
 				print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
-			}else if($field_name !== false){
+			}elseif($field_name !== false){
 				print '<div class=detailType>' . $field_name . '</div>';
 			}
 
@@ -2754,7 +2754,7 @@ function orderComments($cmts) {
             $insertIndex = count($orderedCmtIds);//set insertion to end of array as default
             if($ownerIndex === FALSE) {  // breaks assumption write code to fix up the ordering here
                 array_push($orderErrCmts,array( 'id' => $id, 'level' => 1));
-            }else if ($ownerIndex +1 < $insertIndex) { //not found at the end of the array  note array index +1 = array offset
+            }elseif($ownerIndex +1 < $insertIndex) { //not found at the end of the array  note array index +1 = array offset
                 if (array_key_exists($cmt["owner"],$cmts) && array_key_exists("level",$cmts[$cmt["owner"]])){
                     $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ;//child so increase the level
                     for ($i = $ownerIndex+1; $i < $insertIndex; $i++) {

@@ -438,7 +438,7 @@ hyperlinks of interest).</p>
  </div>
 
 <?php
-	} else if ($nextmode == 'printurls') {
+	} elseif($nextmode == 'printurls') {
 
 /* removed by saw 2010/11/12 doesn't seemed to be used anymore
 		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.$system->get_user_id().' order by tag_Text');
@@ -662,7 +662,7 @@ function print_link($url, $title) {
 
 	if ($word_count == 1) {
 		print '1 word';
-	} else if ($word_count > 1) {
+	} elseif($word_count > 1) {
 		print "$word_count words";
 	}
 ?></small>

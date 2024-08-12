@@ -95,7 +95,7 @@ class DbUsrReminders extends DbEntityBase
 
             $this->data['details'] = 'rem_ID';
 
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list'){
+        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list'){
 
             $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq,u1.ugr_Name as rem_ToWorkgroupName,concat(u2.ugr_FirstName,\' \',u2.ugr_LastName) as rem_ToUserName';
 
@@ -105,7 +105,7 @@ class DbUsrReminders extends DbEntityBase
                     .' LEFT JOIN sysUGrps u1 on rem_ToWorkgroupID=u1.ugr_ID '
                     .' LEFT JOIN sysUGrps u2 on rem_ToUserID=u2.ugr_ID ';
 
-        }else if(@$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rem_ID,rem_RecID,rem_OwnerUGrpID,rem_ToWorkgroupID,rem_ToUserID,rem_ToEmail,rem_Message,rem_StartDate,rem_Freq';
 
@@ -269,7 +269,7 @@ class DbUsrReminders extends DbEntityBase
                     $record['rem_OwnerUGrpID'] = $ugrID;
             }
         /*
-        }else if(@$this->data['fields'] && @$this->data['fields']['rem_RecID']>0){
+        }elseif(@$this->data['fields'] && @$this->data['fields']['rem_RecID']>0){
 
             $rec_IDs = array($this->data['fields']['rem_RecID']);
             $is_notification = true;
@@ -328,7 +328,7 @@ exit;
                     "e"        => $record['rem_ToEmail'],
                     "u"        => null));
             }
-            else if (@$record['rem_ToUserID']) {
+            elseif (@$record['rem_ToUserID']) {
 
                 $row = mysql__select_row($mysqli,
                     'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail FROM sysUGrps usr '
@@ -341,7 +341,7 @@ exit;
                         "u"        => $record['rem_ToUserID']));
                 }
             }
-            else if (@$record['rem_ToWorkgroupID']) {
+            elseif (@$record['rem_ToWorkgroupID']) {
 
                 if($record['rem_ID']>0){
 

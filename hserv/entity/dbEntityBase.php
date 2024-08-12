@@ -175,7 +175,7 @@ abstract class DbEntityBase
            if(@$this->data[$this->primaryField]==null){
                 if(@$this->data['ID']>0) {
                     $this->data[$this->primaryField] = $this->data['ID'];
-                }else if(@$this->data['recID']>0) {
+                }elseif(@$this->data['recID']>0) {
                     $this->data[$this->primaryField] = $this->data['recID'];
                 }
            }
@@ -248,7 +248,7 @@ abstract class DbEntityBase
         if($entity_name!='defRecTypes'){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Entity parameter is wrong or not defined');
             $res = false;
-        }else if($folder==null || !in_array($folder, array('datatable','csvexport','crosstabs'))){
+        }elseif($folder==null || !in_array($folder, array('datatable','csvexport','crosstabs'))){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Folder parameter is wrong or not defined');
             $res = false;
         }else{
@@ -279,21 +279,21 @@ abstract class DbEntityBase
                 $res = folderContent($path, 'cfg');
             }
 
-        }else if($operation=='get'){
+        }elseif($operation=='get'){
 
             $sMsg = 'Cannot get content of settings file. ';
 
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
-            }else if (!file_exists($path.$filename)){
+            }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
                 $res = false;
             }else{
                 $res = file_get_contents($path.$filename);
             }
 
-        }else if($operation=='put'){
+        }elseif($operation=='put'){
 
             $filename = USanitize::sanitizeFileName($filename);
 
@@ -306,10 +306,10 @@ abstract class DbEntityBase
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
-            }else if($ext!='cfg'){
+            }elseif($ext!='cfg'){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
                 $res = false;
-            }else if ($content==null){
+            }elseif($content==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
                 $res = false;
             }else{
@@ -334,7 +334,7 @@ abstract class DbEntityBase
                 }
             }
 
-        }else if($operation=='rename'){
+        }elseif($operation=='rename'){
 
             $sMsg = 'Cannot rename the settings file. ';
 
@@ -351,10 +351,10 @@ abstract class DbEntityBase
                 if($filename==null){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'New filename parameter is not defined');
                     $res = false;
-                }else if($ext!='cfg'){
+                }elseif($ext!='cfg'){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Only cfg extension allowed for configuration file');
                     $res = false;
-                }else if(!copy($path.$fileOld, $path.$filename)){
+                }elseif(!copy($path.$fileOld, $path.$filename)){
                     $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg);
                     $res = false;
                 }else{
@@ -367,14 +367,14 @@ abstract class DbEntityBase
                 $res = false;
             }
 
-        }else if($operation=='delete'){
+        }elseif($operation=='delete'){
 
             $sMsg = 'Cannot remove the settings file. ';
 
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
-            }else if (!file_exists($path.$filename)){
+            }elseif (!file_exists($path.$filename)){
                 $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
                 $res = false;
             }else{
@@ -401,28 +401,28 @@ abstract class DbEntityBase
                 $res = $this->search();
             }else  if(@$this->data['a'] == 'title'){ //search for entity title by id
                 $res = $this->search_title();
-            }else if(@$this->data['a'] == 'add'){
+            }elseif(@$this->data['a'] == 'add'){
                 $this->is_addition = true;
                 $this->data['a'] = 'save';
                 $res = $this->save();
                 $this->is_addition = false;
-            }else if(@$this->data['a'] == 'save'){
+            }elseif(@$this->data['a'] == 'save'){
                 $res = $this->save();
-            }else if(@$this->data['a'] == 'delete'){
+            }elseif(@$this->data['a'] == 'delete'){
                 $res = $this->delete();
 
-            }else if(@$this->data['a'] == 'config'){ // return configuration
+            }elseif(@$this->data['a'] == 'config'){ // return configuration
                 $res = $this->config( @$this->data['locale'] );
-            }else if(@$this->data['a'] == 'files'){ // working with settings/config files
+            }elseif(@$this->data['a'] == 'files'){ // working with settings/config files
 
                 // get list of files by extension
                 // put data into file
                 // load date from file
                 $res = $this->files( $this->data );
 
-            }else if(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
+            }elseif(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
-            }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){
+            }elseif(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){
                 //special and batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
                 if($res &&
@@ -525,7 +525,7 @@ abstract class DbEntityBase
 
             if($ret===true || $ret==null){ //it returns true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
-            }else if(is_numeric($ret)){
+            }elseif(is_numeric($ret)){
                    $this->records[$rec_idx][$this->primaryField] = $ret;
                    $results[] = $ret;
             }else{
@@ -566,7 +566,7 @@ abstract class DbEntityBase
                     }
                 }
 
-            }else if(!$isinsert && count($this->multilangFields)>0){
+            }elseif(!$isinsert && count($this->multilangFields)>0){
                 //remove all translation for this record
 
                 $mysqli->query('DELETE FROM defTranslations where trn_Source LIKE "'
@@ -640,7 +640,7 @@ abstract class DbEntityBase
             $this->system->addError(HEURIST_DB_ERROR,
                     'Cannot delete from table '.$this->config['entityName'], $mysqli->error);
             return false;
-        }else if($affected===0){
+        }elseif($affected===0){
             $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found');
             return false;
         }
@@ -733,7 +733,7 @@ abstract class DbEntityBase
         $table_prefix = @$this->config['tablePrefix'];
         if($table_prefix==null){
             $table_prefix = '';
-        }else if (substr($table_prefix, -1) !== '_') {
+        }elseif (substr($table_prefix, -1) !== '_') {
             $table_prefix = $table_prefix.'_';
         }
         $rec_ID = intval(@$fieldvalues[$this->primaryField]);// $table_prefix.'ID'
@@ -793,7 +793,7 @@ abstract class DbEntityBase
 
             if(@$field['dtID']==$id){
                 return $field;
-            }else if(is_array(@$field['children']) && count($field['children'])>0){
+            }elseif(is_array(@$field['children']) && count($field['children'])>0){
                 $res = $this->_getFieldByID($id, $field['children']);
                 if($res){
                     return $res;
@@ -909,7 +909,7 @@ abstract class DbEntityBase
                   }
             }
 
-        }else if(file_exists($tempfile)){
+        }elseif(file_exists($tempfile)){
             $path_parts = pathinfo($tempfile);
             $ext = strtolower($path_parts['extension']);
 
@@ -992,7 +992,7 @@ abstract class DbEntityBase
 
                 if($version=='thumb' || $version=='thumbnail'){
                     $filename = $path.'thumbnail/'.$recID.'.png';
-                }else if($version=='icon'){
+                }elseif($version=='icon'){
                     $filename = $path.'icon/'.$recID.'.png';
                 }else{
                     $filename = null;
@@ -1077,7 +1077,7 @@ abstract class DbEntityBase
 
                             $this->translation[$idx][$fieldname][$lang] = $val;
 
-                        }else if(!$mainvalue){
+                        }elseif(!$mainvalue){
                             //without lang prefix, take first only
                             $mainvalue = $val;
                         }

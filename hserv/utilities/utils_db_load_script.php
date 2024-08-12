@@ -266,7 +266,7 @@ if (!$error && isset($param_start))
 
     if ($filename!=""){
         $curfilename=$filename;
-    }else if (isset($param_fn)){
+    }elseif (isset($param_fn)){
         $curfilename=urldecode($param_fn);
     }else{
         $curfilename="";
@@ -286,7 +286,7 @@ if (!$error && isset($param_start))
     }
     // Get the file size (can't do it fast on gzipped files, no idea how)
 
-    else if ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
+    elseif ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
     { if (!$gzipmode) {$filesize = ftell($file);}
         else {$filesize = gztell($file);} // Always zero, ignore
     }
@@ -662,7 +662,7 @@ if ($error && TESTMODE){
 }
 if ($mysqli) {$mysqli->close();}
 if ($file && !$gzipmode) {fclose($file);}
-else if ($file && $gzipmode) {gzclose($file);}
+elseif($file && $gzipmode) {gzclose($file);}
 
 // If error or finished put out the whole output from above and stop
 

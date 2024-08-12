@@ -63,19 +63,19 @@ foreach ($databases as $idx=>$db_name){
 if(false){
     //find non UTF-8 in rty_TitleMask
     __findWrongChars();
-}else if(false){
+}elseif(false){
 
     __updateDatabase();
-}else if(false){
+}elseif(false){
 
     __checkVersionDatabase();
-}else if(false){
+}elseif(false){
     //trm_NameInOriginatingDB
     __setTermNameTo255();
     //__findLongTermLabels();
-}else if(false){
+}elseif(false){
     findMissedTermLinks();
-}else if(false){
+}elseif(false){
     __setTermYesNo();
 }else  if(false){
     __renameDegreeToKM();
@@ -85,22 +85,22 @@ if(false){
     __addOtherSources();
 }else  if(false){
     __renameField39();
-}else if(false ){
+}elseif(false ){
     __copy_RecType_And_Term_Icons_To_EntityFolder();
 }else  if(false){
     __delete_OLD_RecType_And_Term_Icons_Folders();
-}else if(false){
+}elseif(false){
     __correctGetEstDate_and_ConvertTemporals_JSON_to_Plain();
-}else if(false){
+}elseif(false){
 
     __updateDatabases_To_V14( @$_REQUEST['process']);
-}else if(false){
+}elseif(false){
     __correctGetEstDate();
-}else if(false){
+}elseif(false){
     __removeDuplicationValues();
-}else if(false){
+}elseif(false){
     __listOfAdminUsers();
-}else if(false){
+}elseif(false){
     __convertTustep();
 }
     __dropBkpDateIndex();
@@ -136,7 +136,7 @@ function __checkVersionDatabase(){
 
             if($ver['sys_dbSubVersion']<3){
                 print '<div style="color:red;font-weight:bold;">';
-            }else if($ver['sys_dbSubVersion']>3){
+            }elseif($ver['sys_dbSubVersion']>3){
                 //$query = 'UPDATE sysIdentification SET sys_dbSubVersion=3 WHERE sys_ID=1';
                 //$mysqli->query($query);
                 print '<div style="color:green;font-weight:bold;">';
@@ -1165,7 +1165,7 @@ function __updateDatabases_To_V14($db_process){
         if($db_name=='misha_cruches_gallo_romaines'){
             $skip_work = false;
             //continue;
-        }else if($skip_work){
+        }elseif($skip_work){
             continue;
         }*/
 

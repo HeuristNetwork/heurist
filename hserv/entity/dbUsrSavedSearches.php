@@ -69,11 +69,11 @@ class DbUsrSavedSearches extends DbEntityBase
 
             $this->data['details'] = 'svs_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'svs_ID,svs_Name';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'svs_ID,svs_Name,svs_UGrpID,svs_Query';
 

@@ -918,7 +918,7 @@ class UImage {
             //save into file
             if(!$scale_type || $scale_type == 'png'){
                 imagepng($src_img, $scaled_file);
-            }else if($scale_type == 'jpg'){
+            }elseif($scale_type == 'jpg'){
                 imagejpeg($src_img, $scaled_file);
             }
             imagedestroy($src_img);
@@ -953,7 +953,7 @@ class UImage {
 
             if(!$scale_type || $scale_type == 'png'){
                 $success = imagepng($new_img, $scaled_file, $image_quality);
-            }else if($scale_type == 'jpg'){
+            }elseif($scale_type == 'jpg'){
                 $success = imagejpeg($new_img, $scaled_file, $image_quality);
             }
         }

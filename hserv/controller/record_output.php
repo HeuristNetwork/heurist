@@ -128,7 +128,7 @@
     //
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>intval($params['recID']));
-    }else if(@$params['ids']){
+    }elseif(@$params['ids']){
         $search_params['q'] = array('ids'=>filter_var(implode(',', prepareIds($params['ids']) ), FILTER_SANITIZE_STRING));
     }else  if(@$params['iiif_image']){
         $params['format'] = 'iiif';
@@ -216,7 +216,7 @@
                     $search_params['needall'] = 0;
                 }
 
-            }else if(@$params['q']!=null){  //first request - save base filter
+            }elseif(@$params['q']!=null){  //first request - save base filter
                 //remove all other "datatableXXX" keys from session
                 $dbname = $system->dbname_full();
                 if(@$_SESSION[$dbname]['ugr_Preferences']!=null){

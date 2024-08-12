@@ -72,11 +72,11 @@ class DbSysDashboard extends DbEntityBase
             $this->data['details'] = 'dsh_ID';
             $is_ids_only = true;
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'dsh_ID,dsh_Label';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full')
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full')
         {
             $this->data['details'] = 'dsh_ID,dsh_Order,dsh_Label,dsh_Description,dsh_Enabled,dsh_ShowIfNoRecords,dsh_CommandToRun,dsh_Parameters';
         }else{
@@ -146,7 +146,7 @@ class DbSysDashboard extends DbEntityBase
             if(@$this->records[$idx]['dsh_CommandToRun']=='action-AddRecord'
                             && @$this->records[$idx]['dsh_ParameterAddRecord']){
                 $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterAddRecord'];
-            }else if(@$this->records[$idx]['dsh_CommandToRun']=='action-SearchById'
+            }elseif(@$this->records[$idx]['dsh_CommandToRun']=='action-SearchById'
                             && @$this->records[$idx]['dsh_ParameterSavedSearch']){
                 $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterSavedSearch'];
             }

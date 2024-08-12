@@ -132,7 +132,7 @@ class UArchive {
                             }
                             $entry_idx++;
                         }
-                        else if (is_file($file) === true) { // File
+                        elseif (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2);//without folder name
                             if(!$zip->addFile($file, $newfile)){
                                 return $verbose?('Can not add file '.$newfile.' to archive'):false;
@@ -148,7 +148,7 @@ class UArchive {
                     }
                 }//recursion
 
-            } else if (is_file($source) === true) {
+            } elseif (is_file($source) === true) {
                 $zip->addFile($source, basename($source));
                 //$zip->addFromString(basename($source), file_get_contents($source));
             }
@@ -410,7 +410,7 @@ class UArchive {
                             $phar->addEmptyDir( $newdir );
                             $entry_idx++;
                         }
-                        else if (is_file($file) === true) { // File
+                        elseif (is_file($file) === true) { // File
                             $newfile = str_replace($source.'/', '', $file2);//without folder name
 
                             $phar->addFile($file, $newfile);
@@ -430,7 +430,7 @@ class UArchive {
                     }
                 }//recursion
 
-            } else if (is_file($source) === true) {
+            } elseif (is_file($source) === true) {
 
                 $size_mb = filesize($source) / pow(1024, 2);
                 if($size_mb>128){

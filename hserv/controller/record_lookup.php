@@ -135,9 +135,9 @@
             $action = @$_REQUEST['action'];
             $valid_service = @$_REQUEST['db'] == $srv_details['db'] || $action == $srv_details['action'];
             $is_estc = $valid_service;
-        }else if(!is_array($srv_details)){
+        }elseif(!is_array($srv_details)){
             $valid_service = $srv_details == $url || strpos($url, $srv_details) === 0;
-        }else if(in_array($url, $srv_details)){
+        }elseif(in_array($url, $srv_details)){
             $valid_service = true;
         }else{
             foreach ($srv_details as $srv_base) {
@@ -194,7 +194,7 @@
                         if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                             require_once dirname(__FILE__).'/importController.php';
                             exit;
-                        }else if($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
+                        }elseif($params['action'] == 'record_output'){ // retrieve record from record_output, user on external server
                             require_once dirname(__FILE__).'/record_output.php';
                             exit;
                         }
@@ -209,7 +209,7 @@
             }else{ // cannot access ESTC DB
                 $response = $is_allowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => $def_err_msg);
             }
-        }else if(isset($ESTC_ServerURL)){ // external server
+        }elseif(isset($ESTC_ServerURL)){ // external server
             //change hsapi to hserv when master index will be v6.5
             $base_url = $ESTC_ServerURL
                 .'hserv/controller/record_lookup.php?';
@@ -291,7 +291,7 @@
     if( !$system->init(@$params['db']) ){  //@todo - we don't need db connection here - it is enough check the session
         //get error and response
         $system->error_exit_api();//exit from script
-    }else if ( $system->get_user_id()<1 ) {
+    }elseif ( $system->get_user_id()<1 ) {
         $system->error_exit_api('You must be logged in to use the external lookup services', HEURIST_REQUEST_DENIED);
         //$response = $system->addError(HEURIST_REQUEST_DENIED);
     }
@@ -333,7 +333,7 @@
                     break;
             }
 
-        }else if($cur_type == 'nakala'){
+        }elseif($cur_type == 'nakala'){
             $response = getNakalaMetadata($system, @$params['type']);
         }
         $response = json_encode($response);
@@ -378,7 +378,7 @@
             // Add default extras
             if($cur_type == 'geonames' && !empty($clean_query)){
                 $clean_query['username'] = $accessToken_GeonamesAPI;
-            }else if($cur_type == 'bnf'){
+            }elseif($cur_type == 'bnf'){
                 $clean_query['version'] = '1.2';
                 $clean_query['operation'] = 'searchRetrieve';
                 $clean_query['recordSchema'] = 'unimarcxchange';
@@ -434,7 +434,7 @@
 
         json_decode($remote_data);
         if(json_last_error() == JSON_ERROR_NONE){
-        }else if(@$_REQUEST['is_XML'] == 1){
+        }elseif(@$_REQUEST['is_XML'] == 1){
             // XML to JSON (no attributes/namespace handling required)
             $xml_obj = simplexml_load_string($remote_data, null, LIBXML_PARSEHUGE);
             $remote_data = json_encode($xml_obj);
@@ -462,7 +462,7 @@
                 if(!$hasGeo){
                     $system->error_exit_api('Service did not return data in an appropriate format', HEURIST_ACTION_BLOCKED);
                 }
-            }else if(is_array($remote_data) && count($remote_data)==1){
+            }elseif(is_array($remote_data) && count($remote_data)==1){
                     $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
             }else{
                     $system->error_exit_api('Service did not return any data', HEURIST_ERROR);
@@ -470,7 +470,7 @@
 
             $remote_data = json_encode($remote_data);
         }
-    }else if(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
+    }elseif(@$params['serviceType'] == 'bnflibrary_bib'){ // BnF Library Search
 
         $author_codes = '';
         //$contributor_codes = '';
@@ -504,7 +504,7 @@
                 if($cf_tag == '001') { // BnF ID
                     $formatted_array['BnF_ID'] = (string)$cf_ele[0];
                     $id = (string)$cf_ele[0];
-                }else if($cf_tag == '003') { // Record URL
+                }elseif($cf_tag == '003') { // Record URL
                     $formatted_array['biburl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -525,7 +525,7 @@
 
                         if($sf_code == 'a') {
                             $formatted_array['title'] = (string)$sf_ele[0];
-                        }else if($sf_code == 'b'){
+                        }elseif($sf_code == 'b'){
 
                             $formatted_array['type'] = (string)$sf_ele[0];
 
@@ -539,7 +539,7 @@
                             }
                         }
                     }
-                }else if($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
+                }elseif($df_tag == '210' || $df_tag == '214') { // Publisher Location / Publisher Name / Year of Publication
 
                     $value = '';
                     $is_valid = false;
@@ -553,11 +553,11 @@
 
                         if($sf_code == 'a'){ // publisher location
                             $location[] = $str_val;
-                        }else if($sf_code == 'c'){ // publisher name
+                        }elseif($sf_code == 'c'){ // publisher name
                             $name[] = $str_val;
-                        }else if($sf_code == 'd'){
+                        }elseif($sf_code == 'd'){
                             $formatted_array['date'][] = $str_val;
-                        }else if($sf_code == 's'){
+                        }elseif($sf_code == 's'){
                             $formatted_array['publisher'][$pub_idx] = $str_val;
                             break;
                         }
@@ -571,7 +571,7 @@
                     }
 
                     $pub_idx ++;
-                }else if($df_tag == '700' || $df_tag == '701' || $df_tag == '702' || $df_tag == '710' || $df_tag == '712' || $df_tag == '716') { // Creator [Author|Contributor]
+                }elseif($df_tag == '700' || $df_tag == '701' || $df_tag == '702' || $df_tag == '710' || $df_tag == '712' || $df_tag == '716') { // Creator [Author|Contributor]
 
                     /**
                      * 3 => ID
@@ -595,7 +595,7 @@
                             $id = (string)$sf_ele[0];
                             $author['id'] = $id;
                             continue;
-                        }else if($sf_code == '4'){
+                        }elseif($sf_code == '4'){
                             $role = (string)$sf_ele[0];
                             $author['role'] = $role;
                             continue;
@@ -609,9 +609,9 @@
 
                                 if($sf_code == 'a') { // Surname
                                     $author['surname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b') { // Given name
+                                }elseif($sf_code == 'b') { // Given name
                                     $author['firstname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'f') { // Years active
+                                }elseif($sf_code == 'f') { // Years active
                                     $author['active'] = (string)$sf_ele[0];
                                 }
 
@@ -624,9 +624,9 @@
 
                                 if($sf_code == 'c') { // Date // $sf_code == 'f' Location
                                     $author['active'] = '(' . (string)$sf_ele[0] . ')';
-                                }else if($sf_code == 'b'){ // Sub unit name
+                                }elseif($sf_code == 'b'){ // Sub unit name
                                     $author['surname'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'a') { // Main name
+                                }elseif($sf_code == 'a') { // Main name
                                     $author['firstname'] = (string)$sf_ele[0];
                                 }
 
@@ -663,7 +663,7 @@
                         $aut_idx ++;
                     }
 
-                }else if($df_tag == '010') { // ISBN
+                }elseif($df_tag == '010') { // ISBN
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
@@ -672,7 +672,7 @@
                             $formatted_array['isbn'][] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '215') { // Description
+                }elseif($df_tag == '215') { // Description
 
                     $value = '';
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
@@ -686,7 +686,7 @@
                     if($value != '') {
                         $formatted_array['description'][] = $value;
                     }
-                }else if($df_tag == '101') { // Language, e.g. fre or FR 101
+                }elseif($df_tag == '101') { // Language, e.g. fre or FR 101
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
@@ -695,7 +695,7 @@
                             $formatted_array['language'][] = (string)$sf_ele[0];
                         }
                     }
-                }else if($df_tag == '327') { // Extended Description
+                }elseif($df_tag == '327') { // Extended Description
 
                     foreach ($df_ele->subfield as $sub_key => $sf_ele) {
                         $sf_code = @$sf_ele->attributes()['code'];
@@ -715,7 +715,7 @@
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'bnflibrary_aut'){
+    }elseif(@$params['serviceType'] == 'bnflibrary_aut'){
 
         $results = array();
 
@@ -737,7 +737,7 @@
 
                 if($cf_tag == '001') { // BnF ID
                     $formatted_array['BnF_ID'] = (string)$cf_ele[0];
-                }else if($cf_tag == '003') { // Record URL
+                }elseif($cf_tag == '003') { // Record URL
                     $formatted_array['auturl'] = (string)$cf_ele[0];
                     break;
                 }
@@ -761,16 +761,16 @@
 
                                 if($sf_code == 'a'){ // Surname
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b'){ // First name
+                                }elseif($sf_code == 'b'){ // First name
 
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ', ' . (string)$sf_ele[0];
                                     }else{
                                         $formatted_array['name'] = (string)$sf_ele[0];
                                     }
-                                }else if($sf_code == 'f' || $sf_code == 'd'){ // Years active
+                                }elseif($sf_code == 'f' || $sf_code == 'd'){ // Years active
                                     $formatted_array['years_active'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Role/Job
+                                }elseif($sf_code == 'c'){ // Role/Job
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -780,9 +780,9 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Location
+                                }elseif($sf_code == 'c'){ // Location
                                     $formatted_array['location'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'b'){ // Type
+                                }elseif($sf_code == 'b'){ // Type
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -792,7 +792,7 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 't'){ // title
+                                }elseif($sf_code == 't'){ // title
 
                                     if( array_key_exists('name', $formatted_array)){
                                         $formatted_array['name'] .= ' [' . (string)$sf_ele[0] . ']';
@@ -839,7 +839,7 @@
 
                                 if($sf_code == 'a'){ // Name
                                     $formatted_array['name'] = (string)$sf_ele[0];
-                                }else if($sf_code == 'c'){ // Type
+                                }elseif($sf_code == 'c'){ // Type
                                     $formatted_array['role'] = (string)$sf_ele[0];
                                 }
 
@@ -868,7 +868,7 @@
 
         // Encode to json for response to JavaScript
         $remote_data = json_encode($results);
-    }else if(@$params['serviceType'] == 'bnf_recdump'){
+    }elseif(@$params['serviceType'] == 'bnf_recdump'){
         $results = array();
 
         // Create xml object
@@ -885,7 +885,7 @@
 
         $remote_data = json_encode($results);
 
-    }else if(@$params['serviceType'] == 'nomisma' && @$params['search_type'] == 'xml'){
+    }elseif(@$params['serviceType'] == 'nomisma' && @$params['search_type'] == 'xml'){
 
 		$xml_obj = new SimpleXMLElement($remote_data, LIBXML_PARSEHUGE);
 
@@ -908,7 +908,7 @@
 
         $remote_data = json_encode(array("status" => HEURIST_OK, "entry" => $results));
 
-    }else if(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
+    }elseif(@$params['serviceType'] == 'nakala'){ // Retrieve basic details - Citation, ID, Name(s)
 
         $remote_data = json_decode($remote_data, true);
         if(json_last_error() == JSON_ERROR_NONE){
@@ -965,23 +965,23 @@
                                         $results['records'][$id]['author'][] = $aut_name;
                                     }
                                 }
-                            }else if(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
+                            }elseif(strpos($metadata['propertyUri'], 'creator') !== false){ // Author
                                 $results['records'][$id]['author'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
+                            }elseif(strpos($metadata['propertyUri'], 'terms#title') !== false){ // Title
                                 $results['records'][$id]['title'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
+                            }elseif(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
                                 $results['records'][$id]['date'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
+                            }elseif(strpos($metadata['propertyUri'], 'terms#license') !== false){ // License
                                 $results['records'][$id]['license'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
+                            }elseif(strpos($metadata['propertyUri'], 'abstract') !== false){ // Abstract
                                 $results['records'][$id]['abstract'] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'contributor') !== false){ // Contributor
+                            }elseif(strpos($metadata['propertyUri'], 'contributor') !== false){ // Contributor
                                 $results['records'][$id]['contributor'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'source') !== false){ // Source
+                            }elseif(strpos($metadata['propertyUri'], 'source') !== false){ // Source
                                 $results['records'][$id]['source'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'rightsHolder') !== false){ // Right Holders
+                            }elseif(strpos($metadata['propertyUri'], 'rightsHolder') !== false){ // Right Holders
                                 $results['records'][$id]['copyright'][] = $metadata['value'];
-                            }else if(strpos($metadata['propertyUri'], 'provenance') !== false){ // Provenance
+                            }elseif(strpos($metadata['propertyUri'], 'provenance') !== false){ // Provenance
                                 $results['records'][$id]['provenance'][] = $metadata['value'];
                             }
                         }
@@ -1017,7 +1017,7 @@
         }else{
             $system->error_exit_api('Service did not return data in an handled format', HEURIST_ERROR);
         }
-    }else if(@$params['serviceType'] == 'opentheso'){
+    }elseif(@$params['serviceType'] == 'opentheso'){
 
         $def_lang = $system->user_GetPreference('layout_language', 'fr');
         $def_lang = getLangCode2($def_lang);
@@ -1430,10 +1430,10 @@
                             }
 
                             $handled_year = true;
-                        }else if(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
+                        }elseif(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data_rtn['licenses'])){ // License
                             $data_rtn['licenses'][] = $metadata['value'];
                             $handled_license = true;
-                        }else if(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
+                        }elseif(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
 
                             //Retrieve type name from XML object
                             $code = explode('/', $metadata['value']);

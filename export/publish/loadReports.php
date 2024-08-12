@@ -82,7 +82,7 @@ $mysqli = $system->get_mysqli();
         $response = array("status"=>HEURIST_OK, "data"=>$records);
         print json_encode($response);
 
-    }else if($metod=="getreport"){ //-----------------
+    }elseif($metod=="getreport"){ //-----------------
 
         $recID = @$_REQUEST['recID'];
         if ($recID==null) {
@@ -109,7 +109,7 @@ $mysqli = $system->get_mysqli();
         $response = array("status"=>HEURIST_OK, "data"=>$records);
         print json_encode($response);
 
-    }else if($metod=="savereport"){ //-----------------
+    }elseif($metod=="savereport"){ //-----------------
 
         $data  = @$_REQUEST['data'];
         //$recID  = @$_REQUEST['recID'];
@@ -131,7 +131,7 @@ $mysqli = $system->get_mysqli();
         $response = array("status"=>HEURIST_OK, "data"=>$rv);
         print json_encode($response);
 
-    }else if($metod=="deletereport"){
+    }elseif($metod=="deletereport"){
 
         $recID  = @$_REQUEST['recID'];
         $rv = array();

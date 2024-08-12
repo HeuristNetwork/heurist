@@ -186,7 +186,7 @@
                  //keep constraints
                  $constraints[$dty_Code] = $codes;
 
-             } else if (($row['dty_Type']=='enum' || $row['dty_Type']=='relmarker') && !@$terms_codes[$dty_Code]){
+             } elseif (($row['dty_Type']=='enum' || $row['dty_Type']=='relmarker') && !@$terms_codes[$dty_Code]){
 
                  $domain = $row['dty_Type']=='enum'?'enum':'relation';
 
@@ -313,7 +313,7 @@
                      //keep constraints
                      $constraints2[$dty_Code] = $codes;
 
-                 } else if (($row['dty_Type']=='enum' || $row['dty_Type']=='relmarker') && !@$terms_codes2[$dty_Code]){
+                 } elseif (($row['dty_Type']=='enum' || $row['dty_Type']=='relmarker') && !@$terms_codes2[$dty_Code]){
 
                      $domain = $row['dty_Type']=='enum'?'enum':'relation';
 
@@ -330,7 +330,7 @@
                              }
 
                          }
-                     }else if($terms!='all'){
+                     }elseif($terms!='all'){
                          $msg_error = $msg_error.'<p>Can\'t parse term list "'.$row['dty_JsonTermIDTree'].'" for field '.$row['dty_ID'].'  '.$row['dty_Name'].'</p>';
                      }
                      //get concept codes

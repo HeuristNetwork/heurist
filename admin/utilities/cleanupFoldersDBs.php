@@ -52,7 +52,7 @@ if (@$argv) {
             } else {
                 if(strpos($argv[$i],'-purge')===0){
                     $ARGV['-purge'] = true;
-                }else if(strpos($argv[$i],'-report')===0){
+                }elseif(strpos($argv[$i],'-report')===0){
                     $ARGV['-report'] = true;
                 }else{
                     $ARGV[$argv[$i]] = true;
@@ -277,7 +277,7 @@ foreach ($databases as $idx=>$db_name){
 
                     fileDelete($log_tmp);// delete temp file
 
-                }else if ($object[1] != '.' && $object[1] != '..' &&
+                }elseif($object[1] != '.' && $object[1] != '..' &&
                     strpos($object[1],'ulf_')===false && strpos($object[1],'userNotifications')===false) {
 
                     if(strpos($object[1], 'index.html') === false){

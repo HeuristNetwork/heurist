@@ -202,7 +202,7 @@ $query = 'SELECT ugr_ID FROM sysUGrps where usr_ExternalAuthentication is not nu
         }
 
 
-    }else if($errMessage!=null){
+    }elseif($errMessage!=null){
 
         $system->addError(HEURIST_REQUEST_DENIED, $errMessage );
     }

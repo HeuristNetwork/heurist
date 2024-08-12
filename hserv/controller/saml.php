@@ -53,7 +53,7 @@ if($error){
             samlLogout($system, $sp, $_SERVER['PHP_SELF']);
             exit;
         }
-    }else if ($action == "login"){
+    }elseif($action == "login"){
 
             $user_id = samlLogin($system, $sp, $dbname, true, (@$_REQUEST['noframe']==1));
 

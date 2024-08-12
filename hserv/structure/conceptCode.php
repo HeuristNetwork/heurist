@@ -36,7 +36,7 @@ private static function initialize($system2=null)
     if($system2!=null){
         self::$system = $system2;
     }
-    else if (self::$initialized){
+    elseif (self::$initialized){
         return;
     }else{
 
@@ -75,7 +75,7 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
         //return "".$ids[0]."-".$ids[1];
         if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
             return "" . $ids[0] . '-' . $ids[1];
-        } else if (self::$database_id) {
+        } elseif (self::$database_id) {
             return '' . self::$database_id . '-' . $lclID;
         } else {
             return '0000-'.$lclID;
@@ -155,7 +155,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
 
 
-    } else if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+    } elseif (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
  $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix
                 . "OriginatingDBID=" . intval($ids[0]) . " and "
                 . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);

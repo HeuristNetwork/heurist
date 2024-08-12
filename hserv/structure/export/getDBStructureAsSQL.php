@@ -249,11 +249,11 @@ function do_print_table($desc, $tname, $where=null)
                 $val = $row[$fld];
                 if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                     $val = htmlspecialchars($mysqli->real_escape_string($val));
-                }else if(strpos($fld,'OriginatingDBID')!==false){
+                }elseif(strpos($fld,'OriginatingDBID')!==false){
                     if(!($val>0)){
                         $val = HEURIST_DBID; //if local - show this db reg id
                     }
-                }else if(strpos($fld,'IDInOriginatingDB')!==false){
+                }elseif(strpos($fld,'IDInOriginatingDB')!==false){
                     if(HEURIST_DBID>0 && !($val>0)){
                         $val = $row[$id_field];
                     }

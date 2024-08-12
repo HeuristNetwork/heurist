@@ -97,7 +97,7 @@ require_once dirname(__FILE__).'/../../../hserv/System.php';
                 $_REQUEST['iiif'] = $row[1];
 
             }
-        }else if(defined('DT_URL')){
+        }elseif(defined('DT_URL')){
             //find linked annotations
             //find CanvasURI linked annotation - to activate this page on mirador load
             $query = 'SELECT dtl_Value, count(*) as cnt FROM recDetails, recLinks, Records '
@@ -150,7 +150,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
 
     $url = $_REQUEST['url'];
 
-}else if(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id
+}elseif(@$_REQUEST['manifest'] || @$_REQUEST['iiif']){  //obfuscation id
     //load manifest directly
     $url = str_replace('hclient/widgets/viewers/miradorViewer.php','', $url);
     $url = str_replace($_SERVER['QUERY_STRING'],
@@ -160,7 +160,7 @@ if(@$_REQUEST['url']) { //direct url to manifest
     if(!@$_REQUEST['q'] && @$_REQUEST['iiif_image']){ //file obfuscatin id
         //find record linked to this media
         //$url = $url.'&q=*file @'.$_REQUEST['iiif_image'];
-    }else if(!@$_REQUEST['q']){ //query not defined
+    }elseif(!@$_REQUEST['q']){ //query not defined
         exit('Need to define either query or file ID');
     }else{
         if(strpos('format=iiif',$url)===false){

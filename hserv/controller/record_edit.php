@@ -61,11 +61,11 @@
 
                 $response = recordAdd($system, $record);
 
-            } else if ($action=="s" || $action=="save") {
+            } elseif($action=="s" || $action=="save") {
 
                 $response = recordSave($system, $_REQUEST);
 
-            } else if ($action=='batch_save') {
+            } elseif($action=='batch_save') {
 
                 $rec_ids = array();
 
@@ -91,19 +91,19 @@
                     $response = array('status'=>HEURIST_ERROR, 'msg'=>'No records provided');
                 }
 
-            } else if (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
+            } elseif (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
 
                 $response = recordDelete($system, $_REQUEST['ids'], true, @$_REQUEST['check_links'], @$_REQUEST['rec_RecTypeID'], @$_REQUEST['session']);
 
-            } else if ($action=="access"){
+            } elseif($action=="access"){
 
                 $response = recordUpdateOwnerAccess($system, $_REQUEST);
 
-            } else if ($action=="increment"){
+            } elseif($action=="increment"){
 
                 $response = recordGetIncrementedValue($system, $_REQUEST);
 
-            } else if ($action=="duplicate" && @$_REQUEST['id']) {
+            } elseif($action=="duplicate" && @$_REQUEST['id']) {
 
 
                 $mysqli = $system->get_mysqli();
