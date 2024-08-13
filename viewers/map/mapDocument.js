@@ -826,7 +826,7 @@ console.log(treedata);
             
             const dataset_name = dataset_options.name;
             
-            if( window.hWin.HEURIST4.util.isRecordSet(dataset) ){
+            if( window.hWin.HEURIST4.util.isRecordSet(data) ){
                     
                     let recset = data;
                     
