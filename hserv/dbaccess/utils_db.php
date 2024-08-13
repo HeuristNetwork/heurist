@@ -1631,17 +1631,22 @@
     //
     // returns timestamp of last update of db denitions
     //
-    function getDefinitionsModTime($mysqli)
+    function getDefinitionsModTime($mysqli, $recstructure_only=false)
     {
         //CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, '+00:00')
         $rst_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rst_Modified), @@session.time_zone, "+00:00") FROM defRecStructure');
-        $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
-        $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
-        $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
+        if($recstructure_only){
+            $last_mod = $rst_mod;
+        }else{
+            
+            $rty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(rty_Modified), @@session.time_zone, "+00:00") FROM defRecTypes');
+            $dty_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(dty_Modified), @@session.time_zone, "+00:00") FROM defDetailTypes');
+            $trm_mod = mysql__select_value($mysqli, 'SELECT CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, "+00:00") FROM defTerms');
 
-        $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
-        $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
-        $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
+            $last_mod = $rst_mod > $rty_mod ? $rst_mod : $rty_mod;
+            $last_mod = $last_mod > $dty_mod ? $last_mod : $dty_mod;
+            $last_mod = $last_mod > $trm_mod ? $last_mod : $trm_mod;
+        }
 
         return date_create($last_mod);
     }

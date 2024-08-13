@@ -370,42 +370,21 @@ function getDatabaseDetails($mysqli, $db_list){
 
 		$db_data = array('name' => $database, 'rec_count' => 0, 'last_update' => null);
 		// Get record count
-		$cnt_query = "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
-		$res = $mysqli->query($cnt_query);
-		if(!$res){
-			$db_data['rec_count'] = 0;
-		}else{
-			while($row = $res->fetch_row()){
-				$db_data['rec_count'] = $row[0];
-			}
-		}
+        $db_data['rec_count'] = mysql__select_value($mysqli, "SELECT COUNT(*) FROM `$database`.Records WHERE rec_FlagTemporary != 1");
 
-		$last_recent = null;
-		$last_struct = null;
+        $last_recent = mysql__select_value($mysqli, "SELECT CONVERT_TZ(MAX(rec_Modified), @@session.time_zone, "+00:00") FROM `$database`.Records WHERE rec_FlagTemporary != 1");
+        
+        if(!$last_recent){
+            $last_recent = date_create($last_recent);
+        }
+        
+        $last_struct = getDefinitionsModTime($mysqli, true);
+        
+        if(!$last_recent || $last_struct>$last_recent){
+            $last_recent = $last_struct;
+        }
 
-		$last_rec_query = "SELECT MAX(rec_Modified) FROM `$database`.Records WHERE rec_FlagTemporary != 1";
-		$res = $mysqli->query($last_rec_query);
-		if($res){
-			while($row = $res->fetch_row()){
-				$last_recent = date_create($row[0]);
-			}
-		} // else keep $last_rec null
-
-		$last_struct_query = "SELECT MAX(rst_Modified) FROM `$database`.defRecStructure";
-		$res = $mysqli->query($last_struct_query);
-		if($res){
-			while($row = $res->fetch_row()){
-				$last_struct = date_create($row[0]);
-
-				if(!$last_recent || $last_struct > $last_recent){
-					$last_recent = $last_struct;
-				}
-			}
-		} // else keep $last_struct null
-
-		if($last_recent){
-			$db_data['last_update'] = $last_recent->format('Y-m-d');
-		}
+		$db_data['last_update'] = $last_recent->format('Y-m-d');
 
 		$details[] = $db_data;
 	}
