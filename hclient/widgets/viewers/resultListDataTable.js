@@ -259,7 +259,11 @@ that._dout('myOnShowEvent');
                         
                         if(this.options.show_export_buttons){
                             dom = dom + 'B'; 
-                            this.options.dataTableParams['buttons'] = ['copy', 'excel', 'pdf'];    
+                            this.options.dataTableParams['buttons'] = ['copy', 'excel', {
+                                extend: 'pdfHtml5',
+                                orientation: 'landscape',
+                                pageSize: 'LEGAL'
+                            }];    
                         }
 
                         this.options.dataTableParams['dom'] = dom;//'<"selectors">frtip'; //l - for page length
