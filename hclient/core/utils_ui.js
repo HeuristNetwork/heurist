@@ -1761,9 +1761,7 @@ window.hWin.HEURIST4.ui = {
             +'</div>',
             onInitFinished:function( last_attempt ){
                 
-                if( query_or_recordset && 
-                    (typeof query_or_recordset.isA == "function") && 
-                        query_or_recordset.isA("HRecordSet") )
+                if( window.hWin.HEURIST4.util.isRecordSet(query_or_recordset) )
                 {
                     //array of record ids 
                     this.updateRecordList(null, {recordset:query_or_recordset});

@@ -2807,7 +2807,7 @@ Automatic translation
                 }
             }
             if (selection) {
-                if ((typeof selection.isA == "function") && selection.isA("HRecordSet")) {
+                if (window.hWin.HEURIST4.util.isRecordSet(selection)) {
                     if (selection.length() > 0) {
                         return (needIds) ? selection.getIds() : selection; //array of record ids
                     }

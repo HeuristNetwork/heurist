@@ -469,7 +469,7 @@ function HMapManager( _options )
         //create treeview data
         let treedata = [];
         
-        if( (typeof resdata.isA == "function") && resdata.isA("HRecordSet") ){
+        if( window.hWin.HEURIST4.util.isRecordSet(resdata) ){
         
             let idx, records = resdata.getRecords();
             for(idx in records){

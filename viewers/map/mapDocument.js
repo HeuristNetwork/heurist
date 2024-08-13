@@ -761,7 +761,7 @@ console.log(treedata);
     //
     function _isDocumentLoaded(mapdoc_id){
             let recset = map_documents_content[mapdoc_id];
-            return (!window.hWin.HEURIST4.util.isnull(recset) && (typeof recset.isA == "function") && recset.isA('HRecordSet'));
+            return window.hWin.HEURIST4.util.isRecordSet(recset);
     }
         
     
@@ -826,7 +826,7 @@ console.log(treedata);
             
             const dataset_name = dataset_options.name;
             
-            if( (typeof data.isA == "function") && data.isA("HRecordSet") ){
+            if( window.hWin.HEURIST4.util.isRecordSet(dataset) ){
                     
                     let recset = data;
                     
