@@ -20,7 +20,7 @@
 */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
@@ -29,7 +29,7 @@ $log_file = $system->getSysDir().'userInteraction.log';
 if(!file_exists($log_file)){
 	print '<h2>There is no interactions log file</h2>';
 	exit;
-}else if(!is_readable($log_file)){
+}elseif(!is_readable($log_file)){
     $system->addError(HEURIST_ERROR, 'Unable to read the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
     print '<h2>Unable to read User interactions file</h2>';
     exit;
@@ -44,7 +44,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         $system->addError(HEURIST_ERROR, 'Unable to open the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
         print '<h2>An error has occurred while trying to open the Interaction log for this database</h2>';
         exit;
-    }else if(!$csv_fd){
+    }elseif(!$csv_fd){
         $system->addError(HEURIST_ERROR, 'Unable to open temporary file for exporting');
         print '<h2>An error has occurred</h2>';
         exit;
@@ -71,9 +71,9 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             break;
 
         case 'database': // database actions
-            array_push($action_filter, 'dbBrowse', 'dbNew', 'dbClone', 
-                        'dbRename', 'dbRestore', 'dbProperties', 
-                        'dbRegister', 'dbClear', 'dbArchive', 'dbArchiveRepository', 
+            array_push($action_filter, 'dbBrowse', 'dbNew', 'dbClone',
+                        'dbRename', 'dbRestore', 'dbProperties',
+                        'dbRegister', 'dbClear', 'dbArchive', 'dbArchiveRepository',
                         'stRebuildTitles', 'stRebuildFields', 'profFiles');
 
             $fileprefix = "database";
@@ -140,19 +140,19 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
         if(count($line_chunks) < 3 || (!$is_all_actions && !in_array($line_chunks[1], $action_filter))){ // check for valid entry (userID, action, timestamp) and apply action filter
             continue;
-        }else if(count($line_chunks) >= 4 && strpos($line_chunks[3], 'recs') !== false){ // contains a listing of rec ids + rec count, re-make indexes
+        }elseif(count($line_chunks) >= 4 && strpos($line_chunks[3], 'recs') !== false){ // contains a listing of rec ids + rec count, re-make indexes
             $part_chunks = explode(' ', $line_chunks[3]);// [0] => count, [1] => 'recs:', [2] => rec id
 
             if(count($line_chunks) == 4){
                 $recids = array($part_chunks[2]);
-            }else{            
+            }else{
                 $recids = array_splice($line_chunks, 4);
                 array_unshift($recids, $part_chunks[2]);
             }
 
             $line_chunks[4] = $part_chunks[0];
             $line_chunks[3] = implode('|', $recids);
-        }else if(count($line_chunks) > 7){ // currently un-supported entry, skip
+        }elseif(count($line_chunks) > 7){ // currently un-supported entry, skip
             continue;
         }
 
@@ -245,7 +245,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                             select_return_mode: 'recordset',
                             edit_mode: 'popup',
                             title: 'Filter by Workgroups',
-                            ugl_UserID: window.hWin.HAPI4.user_id, 
+                            ugl_UserID: window.hWin.HAPI4.user_id,
                             onselect: function(event, data){
                                 if(data && data.selection){
                                     var selection = data.selection;
@@ -286,7 +286,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
 
     </head>
     <body class="popup" style="overflow:auto;">
-    	
+
     	<div style="padding-top: 20px;">
     		Download the user interactions log as a CSV file, select options below to filter the output as needed.
     	</div>
@@ -317,7 +317,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             <!-- Last bit of time period (e.g. last 3 months) -->
             <label id="dateLastSev" for="enableLastSev" style="display: block;margin-top: 10px;">
                 <input type="radio" name="dfType" value="1" id="enableLastSev" checked="true">
-                Within the last <input type="number" name="dateAmount" min="1" value="30"> 
+                Within the last <input type="number" name="dateAmount" min="1" value="30">
                 <select name="datePeriod">
                     <option value="D">Days</option>
                     <option value="M">Months</option>
@@ -337,7 +337,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             <h2>Filter Users:</h2>
             <!-- Certain workgroups (e.g. Members of DB admins) [utilise manageSysWorkroups' multi select] -->
             <div id="wrkGroup">
-                Filter by Workgroups: 
+                Filter by Workgroups:
                 <span id="workgroupList" style="font-weight: bold;">All</span>
                 <input type="hidden" name="workGroups" id="workGroups" value="">
             </div>

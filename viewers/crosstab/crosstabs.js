@@ -1166,8 +1166,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     //When user clicks out of input box change the intervals value min and max
                     $('#changeValueBox').blur(function(){                    
                         //Change the max value for the intervals based on what the user has entered.
-                        for(let k=0;k<fields3[name].intervals.length;k++){
+                        let k=0;
+                        while(k<fields3[name].intervals.length){
                             if(k < intervalId){
+                                k++;
                                 continue;
                             }
                             else{
@@ -1220,7 +1222,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                     break;
                                 }
                             }
-                        }
+                            k++;
+                        }//while
                         //Because user is making changes to the values, save the object, making it easier to return to the original value when decimals are changed.
                         intervalsNumeric = $.extend(true,{},fields3[name].intervals);
                         if(!(fields3[name].type == 'date')){
@@ -1241,12 +1244,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     //Creates separate div for outliers min
                     let outlierNumber = Number($('#minOutlier'+name).val());
                     //Change array to incorporate outliers for min
-                    for(let t=0;t<fields3[name].intervals.length;t++){
+                    let t=0;
+                    while(t<fields3[name].intervals.length){
                         if(t==0){
                             fields3[name].intervals[t].values[0] = fields3[name].values[0];
                             fields3[name].intervals[t].values[1] = outlierNumber;
                             fields3[name].intervals[t].name = '<' + outlierNumber.toFixed(decimalPlace);
                             fields3[name].intervals[t].description = '<' + outlierNumber.toFixed(decimalPlace);
+                            t++;
                             continue;
                         }
 
@@ -1255,6 +1260,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 fields3[name].intervals[t].values[0] = outlierNumber;
                                 fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
                                 fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace) + ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                                t++;
                                 continue;
                             }
                         }
@@ -1269,9 +1275,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].intervals[t].values[0] = outlierNumber;
                             fields3[name].intervals[t].name = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
                             fields3[name].intervals[t].description = outlierNumber.toFixed(decimalPlace)+ ' ~ ' + fields3[name].intervals[t].values[1].toFixed(decimalPlace);
+                            t++;
                             continue;
                         }
-                    }
+                        t++;
+                    }//while
                     let $intRows = $(document.createElement('div'));
                     let lessThanPrior = (fields3[name].type == 'date') ? 'Prior to ' : '<';
 
@@ -1312,18 +1320,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     fields3[name].intervals[i].description = fields3[name].intervals[i].values[0].toFixed(decimalPlace) + ' ~ ' + outlierNumber.toFixed(decimalPlace);
                     
                     //Change array to incorporate outliers for min
-                    for(let t=0;t<fields3[name].intervals.length;t++){
+                    let t=0;
+                    while(t<fields3[name].intervals.length){
                         if(t== fields3[name].intervals.length-1){
                             fields3[name].intervals[t].values[1] = fields3[name].values[1];
                             fields3[name].intervals[t].values[0] = outlierNumber;
                             fields3[name].intervals[t].name = '>' + outlierNumber.toFixed(decimalPlace);
                             fields3[name].intervals[t].description = '>' + outlierNumber.toFixed(decimalPlace);
+                            t++;
                             continue;
                         }
                         
                         if(fields3[name].intervals[t].values[1] > outlierNumber){
                             fields3[name].intervals.splice(t, 1);
-                            t-=1;
+                        }else{
+                            t++;
                         }
                     }
                     let $intRows = $(document.createElement('div'));

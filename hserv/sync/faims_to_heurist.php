@@ -98,7 +98,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
             {
             echo $row[0]."<br>";
             }*/
-            
+
             $need_debug_info = false;
 
             if($need_debug_info){
@@ -175,7 +175,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                 if($row){
 
                     $dtyId = intval($row[0]);
-                    
+
                     print  "DT ".intval($dtyId)."  ".htmlspecialchars($row[1])."  =>".htmlspecialchars($attrID)."<br>";
 
                     $dtyName = $row[1];
@@ -388,11 +388,11 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                                 print "TERM NOT FOUND for Vocabulary ".$vocabID."<br>";
                                 continue;
                             }
-                        }else if($row2[5]){ //freetext
+                        }elseif($row2[5]){ //freetext
                             $value = $row2[5];
-                        }else if($row2[4]){ //measure
+                        }elseif($row2[4]){ //measure
                             $value = $row2[4];
-                        }else if($row2[6]){ //Certainty
+                        }elseif($row2[6]){ //Certainty
                             $value = $row2[6];
                         }else{
                             continue;

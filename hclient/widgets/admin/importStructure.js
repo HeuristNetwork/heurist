@@ -389,7 +389,7 @@ $.widget( "heurist.importStructure", {
                             let splittedURL = recURL.split('?');
                             if(splittedURL && splittedURL.length>0){
                                 dbURL = splittedURL[0];
-                                let matches = recURL.match(/db=([^&]*).*$/);
+                                let matches = recURL.match(/db=([^&]{1,65}).*$/);
                                 dbName = (matches && matches.length>1)?matches[1]:'';
                             }
                         }

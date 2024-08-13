@@ -94,7 +94,7 @@ CREATE TABLE defCalcFunctions (
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   cfn_RecTypeIDs varchar(250) default NULL COMMENT 'CSV list of Rectype IDs that participate in formula',
   PRIMARY KEY  (cfn_ID)
-) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and';
+) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields';
 
 -- --------------------------------------------------------
 

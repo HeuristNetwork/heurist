@@ -20,7 +20,7 @@
 */
 if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     array_key_exists('icon',$_REQUEST)){
-              
+
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
@@ -31,8 +31,8 @@ if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
     }
 }else{
     $script_name = 'renderRecordData.php';
-}        
-//to avoid "Open Redirect" security warning    
+}
+//to avoid "Open Redirect" security warning
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 

@@ -12,20 +12,20 @@
 
 /*
 action
-  
-  list -  get list of available external repositories for given user - user_getRepositoryList 
+
+  list -  get list of available external repositories for given user - user_getRepositoryList
     (need select available repositories on file upload )
-    
+
   get - returns credentials for given service and current user - user_getRepositoryCredentials
     (1. returns values to edit on client side 2. returns parameters to create url or login to repository)
-    
-  update - save/delete credentials in ugr_Preferences - user_saveRepositoryCredentials 
-  
+
+  update - save/delete credentials in ugr_Preferences - user_saveRepositoryCredentials
+
 */
 
 /*
 Credentials for external repositories are saved in sysUGrps.ugr_Preferences
-per database (group 0) per group or per user. 
+per database (group 0) per group or per user.
 Unique id is "serviceName_groupUserid"
 {
     "externalRepositories": {
@@ -46,13 +46,13 @@ Unique id is "serviceName_groupUserid"
     }
 }
 
-These values are not transferred  to client as other user preferences. 
+These values are not transferred  to client as other user preferences.
 On client side it is possible to obtain
 1) either list of available repositories for current user (action "list")
         see recordAction.js  window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'list'}
 2) or for edit form (action "get")
         see repositoryConfig.js window.hWin.HAPI4.SystemMgr.repositoryAction({'a': 'get'}
-        
+
 When a file is uploaded to ext.repository, repository service_id should be provided.
 see recordBatch.php
 
@@ -73,14 +73,14 @@ if(is_array($fileParams) && @$fileParams['repository']){
     $credentials = user_getRepositoryCredentials2($system, $service_id);
     if($credentials!=null){
            $readApiKey = @$credentials[$service_id]['params']['readApiKey'];
-           
+
     }
 }
 
-see dbsUserGroups.php for repository credentials methods 
+see dbsUserGroups.php for repository credentials methods
 
     user_getRepositoryList - list of available/writeable external repositories for given user
-    user_getRepositoryCredentials2 - returns credentials for given service_id  (service_name+user_id) 
+    user_getRepositoryCredentials2 - returns credentials for given service_id  (service_name+user_id)
     user_getRepositoryCredentials - returns read/write credentials for given service and user_id  (for edit on client side)
     user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
 
@@ -96,20 +96,20 @@ if(!$system->init(@$_REQUEST['db'])){
     //get error and response
     $response = $system->getError();
 }else{
-     
+
    if(!$system->get_user_id()>0){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
         // 'Administrator permissions are required');
    }else{
-       
+
         //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["a"];
-        $res = false;        
+        $res = false;
         $ugr_ID = $system->get_user_id();//intval(@$_REQUEST["ugr_ID"]);
-        
-        if($action=='list'){   
+
+        if($action=='list'){
             //get list of available repositories for given user (including for database and groups)
-            
+
             //array(ugr_ID, serviceName)
             $res = user_getRepositoryList($system, $ugr_ID, true);
 
@@ -118,28 +118,28 @@ if(!$system->init(@$_REQUEST['db'])){
                 // add Nakala testing
                 array_push($res, ['tnakala', 'Nakala', 0, 'tnakala'], ['unakala1', 'Nakala', 0, 'unakala1'], ['unakala2', 'Nakala', 0, 'unakala2'], ['unakala3', 'Nakala', 0, 'unakala3'] );
             }
-            
-        }else if($action=='get'){   
+
+        }elseif($action=='get'){
             //get credentials (to edit on client side) for given user
 
             $res = user_getRepositoryCredentials($system, true, $ugr_ID);
-            
-        }else if($action=='update'){   
+
+        }elseif($action=='update'){
             //save credentials
             $to_delete = @$_REQUEST["delete"];
             $to_edit = @$_REQUEST["edit"];
-            
+
             $res = user_saveRepositoryCredentials($system, $to_edit, $to_delete);
 
-        //}else if($action=='upload'){   
+        //}elseif($action=='upload'){
             //upload and register file to external repository
 
-            
+
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");
             $res = false;
         }
-        
+
         if(is_bool($res) && $res==false){
                 $response = $system->getError();
         }else{

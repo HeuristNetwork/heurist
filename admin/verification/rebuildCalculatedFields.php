@@ -10,10 +10,10 @@
     * @author      Tom Murtagh
     * @author      Kim Jackson
     * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Stephen White   
+    * @author      Stephen White
     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0   
+    * @version     3.1.0
     */
 
     /*
@@ -27,7 +27,7 @@
 set_time_limit(0);
 
 define('MANGER_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
@@ -42,34 +42,34 @@ $init_client = (@$_REQUEST['verbose']!=1);
 
 if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
 
-    
+
     if(@$_REQUEST['session']>0)
     {
         $rty_IDs = null;
         if(@$_REQUEST['recTypeIDs']!=null){
             $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs']));
         }
-        
+
         $system->setResponseHeader();
         $res = recordUpdateCalcFields($system, null, $rty_IDs, intval(@$_REQUEST['session']));
-        
+
         //2b. response to client side
         if( is_bool($res) && !$res ){
             $response = $system->getError();
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }
-        
+
         print json_encode($response);
         exit;
     }else{
-        
+
         if(@$_REQUEST['recTypeIDs']){
             $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs']));
         }else{
             $rty_IDs = null;
         }
-        
+
         $res = recordUpdateCalcFields($system, null, $rty_IDs);
     }
 }
@@ -91,38 +91,38 @@ if($init_client){
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         
         <script type="text/javascript">
-    
-        
+
+
     //
     //
     //
     $(document).ready(function() {
-    
+
         if(top.hWin){  //main heurist window
             window.hWin = top.hWin;
         }else{
             return;
-        }        
-            
+        }
+
         var action_url = window.hWin.HAPI4.baseURL + "admin/verification/rebuildCalculatedFields.php";
-        
+
         var session_id = window.hWin.HEURIST4.msg.showProgress( $('.progress_div'),  0, 500 );
-        
+
         var request = {
             'session': session_id
         };
-<?php        
+<?php
         if(@$_REQUEST['recTypeIDs']){
             print "request['recTypeIDs'] = '".htmlspecialchars($_REQUEST['recTypeIDs'])."';";//js output
         }
-?>        
+?>
         //url to show affected records
         var sURL = window.hWin.HAPI4.baseURL
                         +'?w=all&db='+window.hWin.HAPI4.database+'&nometadatadisplay=true&q=';
-        
+
         window.hWin.HEURIST4.util.sendRequest(action_url, request, null, function(response){
             window.hWin.HEURIST4.msg.hideProgress();
-                        
+
             if(response.status == window.hWin.ResponseStatus.OK){
                 $('#rec_total').text(response.data['rec_total']);
                 $('#rec_processed').text(response.data['rec_processed']);
@@ -143,7 +143,7 @@ if($init_client){
 
                 var sErrors = '';
                 if(response.data['errors']){
-                    
+
                     for(var key in response.data['errors']){
                         sErrors = sErrors + key+'  '+response.data['errors'][key]+'<br>';
                     }
@@ -152,43 +152,43 @@ if($init_client){
                 if(!sErrors){
                     $('#formulae_errors').hide();
                 }
-                
-                
+
+
                 $('#info_div').show();
                 $('.result_div').show();
                 $('.header_info').hide();
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
-            
+
         });
-        
-       
+
+
     });
-            
+
         </script>
 
 <?php
-} 
+}
 ?>
     </head>
-    
+
     <body class="popup">
         <div class="banner"><h2 style="margin:0">Rebuild Calculated Fields</h2></div>
         <div id="page-inner" style="overflow:auto;padding: 10px;">
-        
+
 <?php
 $q_updates = '#';
 $q_cleared = '#';
 $q_errors = '#';
- 
-if($init_client){ 
+
+if($init_client){
     if(!@$_REQUEST['recTypeIDs']){ //long operation - entire database
 ?>
             <div class="header_info" style="max-width: 800px;">
                 This function recalculates all the calculated fields, compares
                 them with the existing value and updates the field where the value has
-                changed. 
+                changed.
                 At the end of the process it will display a list of records
                 for which the fields were changed, cleared and a list of errors if formula canot be executed.
             </div>
@@ -200,24 +200,24 @@ if($init_client){
         print '<div><span style="color:red">'.htmlspecialchars($system->getError()['message']).'</span></div>';
         print '</div></body></html>';
         exit;
-    }else if($res['message']){
+    }elseif($res['message']){
         print '<div><span style="color:red">'.htmlspecialchars($res['message']).'</span></div>';
     }
-    
-    if($res['q_updates']){        
+
+    if($res['q_updates']){
         $q_updates = HEURIST_BASE_URL.'?w=all&q='.$res['q_updates']
             .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true';
     }else{
         $q_updates = '';
     }
-    if($res['q_cleared']){        
+    if($res['q_cleared']){
         $q_cleared = HEURIST_BASE_URL.'?w=all&q='.$res['q_cleared']
             .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true';
     }else{
         $q_cleared = '';
     }
-    
-    if(is_array(@$res['errors']) && count($res['errors'])>0){        
+
+    if(is_array(@$res['errors']) && count($res['errors'])>0){
         $q_errors = '';
         foreach($res['errors'] as $key=>$msg){
             $q_errors = $q_errors . $key . '  ' .$msg . '<br>';
@@ -225,24 +225,24 @@ if($init_client){
     }else{
         $q_errors = '';
     }
-} 
-            
+}
+
 ?>
-            
+
             <div class="progress_div" style="background:white;min-height:40px;width:100%"></div>
 
             <div class="result_div" style="display:<?php echo $init_client?'none':'block';?>;">
                 <div><span id=rec_total><?php echo intval(@$res['rec_total']);?></span> records in total</div>
                 <div><span id=rec_processed><?php echo intval(@$res['rec_processed']);?></span> records processed</div>
-                <div><span id=fld_changed><?php echo intval(@$res['fld_changed']);?></span> fields updated in 
+                <div><span id=fld_changed><?php echo intval(@$res['fld_changed']);?></span> fields updated in
                                 <span id=rec_updates><?php echo intval(@$res['rec_updates']);?></span> records</div>
-                <div><span id=fld_cleared><?php echo intval(@$res['fld_cleared']);?></span> fields cleared in 
+                <div><span id=fld_cleared><?php echo intval(@$res['fld_cleared']);?></span> fields cleared in
                                 <span id=rec_cleared><?php echo intval(@$res['rec_cleared']);?></span> records</div>
                 <div><span id=fld_same><?php echo intval(@$res['fld_same']);?></span> fields unchanged</div>
-                
+
                 <br>
 
-                <?php 
+                <?php
                 if($q_updates){
                     print '<a target=_blank id="q_updates" href="'.$q_updates.'">Click to view updated records</a><br>&nbsp;<br>';
                 }
@@ -276,7 +276,7 @@ if(@$_REQUEST['recTypeIDs']){
         </div>
 <?php
 }
-?>            
+?>
         </div>
     </body>
 </html>

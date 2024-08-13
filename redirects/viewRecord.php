@@ -31,7 +31,7 @@
 // Redirect to .../viewers/record/viewRecord.php
 // TODO: change to use /records/view/renderRecordAsXML.php (XML with parameterisation for human-readable view)
 
-//to avoid "Open Redirect" security warning    
+//to avoid "Open Redirect" security warning
 parse_str($_SERVER['QUERY_STRING'], $vars);
 $query_string = http_build_query($vars);
 

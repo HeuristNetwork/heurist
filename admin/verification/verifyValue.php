@@ -35,7 +35,7 @@ class VerifyValue {
      * the outside. This prevents instantiating this class.
      * This is by purpose, because we want a static class.
      */
-    private function __construct() {}    
+    private function __construct() {}
     private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;
@@ -54,7 +54,7 @@ class VerifyValue {
         global $system;
         self::$system = $system;
         self::$mysqli = $system->get_mysqli();
-        
+
         self::$initialized = true;
     }
 
@@ -68,30 +68,30 @@ class VerifyValue {
         self::$dtyIDDefs_labels = array();
         self::$dtyIDDefs_labels_plain = array();
         self::$dtyIDDefs_codes = array();
-        
+
         self::$terms = null;
     }
 
 /**
 * get all terms ids allowed for given field type
-* 
+*
 * @param mixed $defs - array of all terms
 * @param mixed $defs_nonsel - array of disabled(header) terms
 * @param mixed $dtyID - detail type i
 */
 public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
-    
+
     self::initialize();
 
     $allowed_terms = null;
 
     if($dtyID==null || !@self::$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
-    
+
         self::$system->defineConstant('DT_RELATION_TYPE');
-        
+
         if ( $dtyID == DT_RELATION_TYPE) {
             $parent_id = 'relation';
-        }else if(is_array($defs) && count($defs)==1){
+        }elseif(is_array($defs) && count($defs)==1){
             $parent_id = $defs[0];
         }else{
             $parent_id = $defs;
@@ -102,9 +102,9 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
             self::getTerms();
             $allowed_terms = self::$dbs_terms->treeData($parent_id, 3);
         }
-        
+
         self::$dtyIDDefs[$dtyID] = $allowed_terms;
-        
+
 /*
         if ( $dtyID == DT_RELATION_TYPE) {
             //get all root terms (vocabs)
@@ -114,14 +114,14 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
         } else {
 
             $terms = getTermsFromFormat($defs);//see dbsData.php
-            
+
             if (($cntTrm = count($terms)) > 0) {
 
                 if ($cntTrm == 1) {  //vocabulary
                     $vocabId = $terms[0];
                     $terms = getTermOffspringList(self::$mysqli, $vocabId);//see dbsData.php
                     array_push($terms, $vocabId);
-                    
+
                 }else{
                     $nonTerms = getTermsFromFormat($defs_nonsel);//see dbsData.php
                     if (count($nonTerms) > 0) {
@@ -140,9 +140,9 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
             }
         }
-*/        
+*/
     }else{
-        //take from store 
+        //take from store
         $allowed_terms = self::$dtyIDDefs[$dtyID];
     }
     return $allowed_terms;
@@ -153,12 +153,12 @@ public static function getTerms(){
         self::initialize();
         self::$terms = dbs_GetTerms(self::$system);
         self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
-    }  
+    }
     return self::$dbs_terms;
 }
 
 //
-// return term id with given label in given vocabulary 
+// return term id with given label in given vocabulary
 //
 public static function hasVocabGivenLabel($vocab_id, $label){
     self::getTerms();
@@ -177,7 +177,7 @@ public static function hasVocabGivenLabel($vocab_id, $label){
 public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 
     $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
-    
+
     return $allowed_terms && ($allowed_terms === "all" || in_array($id, $allowed_terms));
 }
 
@@ -186,7 +186,7 @@ public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 * Label can be dot separated hierarchical label Parent.Child
 *
 * used in import csv
-* 
+*
 * @param mixed $defs - array of all terms for dty
 * @param mixed $defs_nonsel
 * @param mixed $label
@@ -195,49 +195,49 @@ public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $isStripAccents=false){
 
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
-        
+
         //label may have fullstop in its own name - so we always search with and without hierarchy
         $withHierarchy = true;//(strpos($label,'.')>0);
-    
+
         self::initialize();
         self::getTerms();
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
-        
+
         $allowed_labels = array();
         $allowed_labels_plain = array();
-        
+
         $idx_label = self::$terms['fieldNamesToIndex']['trm_Label'];
-    
-        //get all labels    
+
+        //get all labels
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
            /*if($withHierarchy){
            }else{
-           }*/ 
+           }*/
            $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
            $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];
            //remove last point
            $allowed_labels[$term_id] = trim($allowed_labels[$term_id],'.');
-        }
-    
+        }//for
+
         if($isStripAccents && is_array($allowed_labels)){
             array_walk($allowed_labels, 'trim_lower_accent2');
-            
+
             array_walk($allowed_labels_plain, 'trim_lower_accent2');
         }
-        
+
         //keep for future use
         if($dtyID!=null){
             self::$dtyIDDefs_labels[$dtyID] = $allowed_labels;
             self::$dtyIDDefs_labels_plain[$dtyID] = $allowed_labels_plain;
         }
-        
+
     }else{
         $allowed_labels = self::$dtyIDDefs_labels[$dtyID];
         $allowed_labels_plain = self::$dtyIDDefs_labels_plain[$dtyID];
     }
-    
+
     //check if given label among allowed
     $label = trim(mb_strtolower($label));
     $label = trim($label,'.');
@@ -246,14 +246,13 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $label = array_pop($label);
     }*/
 
-    if(count($allowed_labels)>0){
-        $term_ID = array_search($label, $allowed_labels, true);
-        if(!($term_ID>0)){
-            $term_ID = array_search($label, $allowed_labels_plain, true);
-        }
-    }else{
-        return false;
-        //$term_ID = getTermByLabel($label);//see dbsData.php
+    if(empty($allowed_labels)){
+        return false;   
+    }
+    
+    $term_ID = array_search($label, $allowed_labels, true);
+    if(!($term_ID>0)){
+        $term_ID = array_search($label, $allowed_labels_plain, true);
     }
 
     return $term_ID;
@@ -263,40 +262,40 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
 * Returns term ID if code is valid and false if invalid
 *
 * used in import csv
-* 
+*
 * @param mixed $defs
 * @param mixed $defs_nonsel
 * @param mixed $code
 * @param mixed $dtyID
 */
 public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
-    
+
     if($dtyID==null || !@self::$dtyIDDefs_codes[$dtyID]){
-    
+
         self::initialize();
         self::getTerms();
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
-        
+
         $allowed_codes = array();
-        
+
         $idx_code = self::$terms['fieldNamesToIndex']['trm_Code'];
-    
-        //get all codes  
+
+        //get all codes
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
            $allowed_codes[$term_id] = mb_strtolower($list[$term_id][$idx_code]);
         }
-    
+
         //keep for future use
         if($dtyID!=null){
             self::$dtyIDDefs_codes[$dtyID] = $allowed_codes;
         }
-        
+
     }else{
         $allowed_codes = self::$dtyIDDefs_codes[$dtyID];
     }
-    
+
     //check if given code among allowed
     $code = trim(mb_strtolower($code));
 
@@ -313,17 +312,17 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
 //-------------------------------------
 //
 // verify that given record $rec_id is a rectype that suits $constraints
-// 
+//
 public static function isValidPointer($constraints, $rec_id, $dtyID ){
 
     $isvalid = false;
-    
+
     if(isset($rec_id) && is_numeric($rec_id) && $rec_id>0){
-        
+
         self::initialize();
-        
+
         $tempRtyID = mysql__select_value( self::$mysqli, "select rec_RecTypeID from Records where rec_ID = ".$rec_id);
-    
+
         if ($tempRtyID>0){
 
                 $allowed_types = "all";

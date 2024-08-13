@@ -969,11 +969,12 @@ $.widget( "heurist.mainMenu", {
                             missing = RT_CMS_MENU > 0 && missing == '' ? 'CMS Menu-Page (Concept-ID: 99-52)' : RT_CMS_MENU > 0 ? missing + ' and CMS Menu-Page (Concept-ID: 99-52)' : missing;
                             missing += (RT_CMS_HOME <= 0 && RT_CMS_MENU <= 0 ? ' record types' : ' record type');
 
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                                'Your database is missing the ' + missing + '.<br>'
-                                +'These record types can be downloaded from the Heurist_Bibliographic database (# 6) using Design > Browse templates.<br>'
-                                +'You will need to refresh your window after downloading the record type(s) for the additions to take affect.'
-                            );
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: `Your database is missing the ${missing}.<br>`
+                                        +'These record types can be downloaded from the Heurist_Bibliographic database (# 6) using Design > Browse templates.<br>'
+                                        +'You will need to refresh your window after downloading the record type(s) for the additions to take affect.',
+                                error_title: 'Missing required record types'
+                            });
                             return;
                         }
 
@@ -2422,112 +2423,10 @@ $.widget( "heurist.mainMenu", {
            popup_dialog_options.menu_container.find('span.ui-icon-circle-b-close').hide();
            popup_dialog_options.menu_container.find('span.ui-icon-circle-b-help').show();
         }
-        if(this.isResultSetEmpty()) return false;
-    
-        let action = 'recordExport'+(popup_dialog_options.format=='csv'?'CSV':'');
-        window.hWin.HEURIST4.ui.showRecordActionDialog(action, popup_dialog_options);
-    
-/*
-        var that = this;
-    
-        var q = "",
-        layoutString,rtFilter,relFilter,ptrFilter;
-        
-        var isEntireDb = false;
-        
-        opts.isAll = (opts.isAll!==false);
-        opts.multifile = (opts.multifile===true);
-
-        if(opts.isAll){
-
-            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-                
-                q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
-                
-                isEntireDb = (window.hWin.HAPI4.currentRecordset && 
-                    window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
-                    
-            }
-
-        }else{    //selected only
-
-            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
-                return false;
-            }
-            q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
-
+        if(!this.isResultSetEmpty()){
+            let action = 'recordExport'+(popup_dialog_options.format=='csv'?'CSV':'');
+            window.hWin.HEURIST4.ui.showRecordActionDialog(action, popup_dialog_options);
         }
-
-        if(q!=''){
-            
-            var script; 
-            var params = '';
-            if(true || $('#followPointers').is(':checked')){
-
-                if(isEntireDb){
-                    params =  'depth=0';
-                }else {
-                    if(opts.questionResolved!==true){
-                        var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
-//+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
-//+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-+'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
-+'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
-+'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
-+'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
-                        , function(){ 
-                            
-                            var val = $expdlg.find('input[name="links"]:checked').val();
-                            
-                            opts.linksMode = val;
-                            opts.questionResolved=true; 
-                            that._exportRecords( opts ); 
-                        },
-                        {
-                            yes: 'Proceed',
-                            no: 'Cancel'
-                        });
-                        
-                        return;
-                    }
-                    params =  'depth=all';
-                }
-                
-            }
-            params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
-            
-            if(opts.format=='hml'){
-                script = 'export/xml/flathml.php';                
-                
-                //multifile is for HuNI  
-                params =  params + (opts.multifile?'&multifile=1':'');  
-               
-            }else{
-                script = 'hserv/controller/record_output.php';
-                params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
-                
-                if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
-                    params = params + '&limit=1000';    
-                }
-            }
-            
-            if(opts.save_as_file===true){          
-                params = params + '&file=1'; //save as file
-            }
-                
-
-            var url = window.hWin.HAPI4.baseURL + script + 
-            q + 
-            "&a=1"+
-            "&db=" + window.hWin.HAPI4.database
-            +'&'+params;
-
-            window.open(url, '_blank');
-        }
-*/
-        return false;
     },
      
     //

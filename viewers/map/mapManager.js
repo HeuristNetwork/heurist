@@ -117,7 +117,7 @@ L.control.addmapdoc = function(opts) {
 //        
 //$.widget( "heurist.mapmanager", {
     
-function hMapManager( _options )
+function HMapManager( _options )
 {    
     const _className = "MapManager",
     _version   = "0.4",
@@ -1659,7 +1659,7 @@ function hMapManager( _options )
         
         //
         //  add entries into search result mapdocument (id=0) and refresh legend
-        // (see hMapLayer2._addQueryLayer)        
+        // (see HMapLayer2._addQueryLayer)        
         //
         addLayerRecords: function( layers_ids ) {
             

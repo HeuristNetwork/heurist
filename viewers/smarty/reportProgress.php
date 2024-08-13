@@ -4,12 +4,12 @@
     $res = '';
 
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
-        
+
         $system = new System();
         $dbname = @$_REQUEST['db'];
         $error = System::dbname_check($dbname);
         if(!$error){
-        
+
             if(!defined('HEURIST_SCRATCH_DIR')){
                 //$system->initPathConstants($dbname);
                 $upload_root = $system->getFileStoreRootFolder();
@@ -23,7 +23,7 @@
                 }
             }
             $mysqli = null;
-            
+
             //keep progress value in HEURIST_SCRATCH_DIR
             if(@$_REQUEST['terminate']==1){
                 $res = 'terminate';

@@ -21,46 +21,46 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
     require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
     require_once dirname(__FILE__).'/../utilities/uFile.php';
-    require_once dirname(__FILE__).'/../utilities/uImage.php';	
+    require_once dirname(__FILE__).'/../utilities/uImage.php';
     require_once dirname(__FILE__).'/../utilities/uSanitize.php';
-    
+
 
     $response = array();//"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
-    
+
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $req_params = filter_input_array(INPUT_POST);
     }else{
         $req_params = filter_input_array(INPUT_GET);
-    }    
+    }
 
     $action = @$req_params['a'];//$system->getError();
-    
+
     $system = new System();
     $dbname = @$req_params['db'];
     $error = System::dbname_check($dbname);
 
-    $dbname = preg_replace('/[^a-zA-Z0-9_]/', "", $dbname);//for snyk    
-    
+    $dbname = preg_replace(REGEX_ALPHANUM, "", $dbname);//for snyk
+
     if($error){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;
-  
+
     }else
     if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
-        
+
         $res = $system->verify_credentials($dbname);
-        
+
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
             $db_full_name = $system->dbname_full();
             $reload_user_from_db = (@$_SESSION[$db_full_name]['need_refresh']==1);
-            
+
             $const_toinit = true;
             if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
@@ -68,7 +68,7 @@
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
-            
+
             if($reload_user_from_db){
                 $system->init($dbname, false, $const_toinit);//session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
@@ -100,33 +100,33 @@
             //logged off
             $res = array("currentUser"=>array('ugr_ID'=>0,'ugr_FullName'=>'Guest'));
         }
-    
+
     }
-    else if($action=='usr_log'){
+    elseif($action=='usr_log'){
 
         if($system->set_dbname_full($dbname)){
 
             $system->initPathConstants($dbname);
             $system->user_LogActivity(@$req_params['activity'], @$req_params['suplementary'], @$req_params['user']);
             $res = true;
-            
+
             if(@$req_params['activity']=='impEmails'){
                 $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.$dbname;
                 $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg);
             }
         }
 
-    } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
+    } elseif (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
         if($system->verify_credentials($dbname)>0){
             user_setPreferences($system, $req_params);
             $res = true;
         }
 
-    } else if ($action == "logout"){ //save preferences into session
-    
+    } elseif($action == "logout"){ //save preferences into session
+
         if($system->set_dbname_full($dbname)){
-            
+
             $system->initPathConstants($dbname);
             $system->user_LogActivity('Logout');
 
@@ -134,14 +134,14 @@
                 $res = true;
             }
         }
-        
-    }else if($action == 'check_for_alpha'){ // check if an alpha version is available
+
+    }elseif($action == 'check_for_alpha'){ // check if an alpha version is available
 
         $is_alpha = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? true : false;
         $res = '';
 
         if(!$is_alpha){
-            
+
             if(!defined('HEURIST_FILESTORE_ROOT')){
                 if($system->set_dbname_full($dbname)){
                     $system->initPathConstants($dbname);
@@ -180,7 +180,7 @@
             }
         }
 
-    }else if($action == 'get_time_diffs'){
+    }elseif($action == 'get_time_diffs'){
 
         $data = $req_params['data'];
         if(!is_array($data)){
@@ -197,7 +197,7 @@
 
             $err_msg = array();
             $res = true;
-            
+
             $res = Temporal::getPeriod($early_org, $latest_org);
 
             if($res === false){
@@ -206,9 +206,9 @@
         }
 
 
-    }else if( !$system->init( $dbname ) ){ 
-        
-    }else if($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
+    }elseif( !$system->init( $dbname ) ){
+
+    }elseif($action == 'check_allow_cms'){ // check if CMS creation is allow on current server - $allowCMSCreation set in heuristConfigIni.php
 
         if(isset($allowCMSCreation) && $allowCMSCreation == -1){
 
@@ -219,7 +219,7 @@
         }else{
             $res = 1;
         }
-    }else if($action == 'check_for_databases'){ // check if the provided databases are available on the current server
+    }elseif($action == 'check_for_databases'){ // check if the provided databases are available on the current server
 
         $mysqli = $system->get_mysqli();
         $data = $req_params['data'];
@@ -251,15 +251,15 @@
                 }
             }
         }
-    }else if($action == 'get_user_notifications'){
+    }elseif($action == 'get_user_notifications'){
         $res = user_getNotifications($system);
-    }else if($action == 'get_tinymce_formats'){
+    }elseif($action == 'get_tinymce_formats'){
 
         $settings = $system->getDatabaseSetting('TinyMCE formats');
 
         if(!is_array($settings) || array_key_exists('status', $settings)){
             $res = false;
-        }else if(empty($settings) || empty($settings['formats'])){
+        }elseif(empty($settings) || empty($settings['formats'])){
             $res = array(
                 'content_style' => '',
                 'formats' => array(),
@@ -292,7 +292,7 @@
                     $res['webfonts'][$key] = $font;
                 }
             }
-            
+
             foreach($settings['formats'] as $key => $format){
 
                 $key = str_ireplace(' ', '_', $key);// replace spaces with underscore
@@ -367,21 +367,21 @@
                 $res = array();// invalid formatting
             }
         }
-    }else if($action == "translate_string"){ // translate given string using Deepl's API, if able
+    }elseif($action == "translate_string"){ // translate given string using Deepl's API, if able
         $res = getExternalTranslation($system, @$req_params['string'], @$req_params['target'], @$req_params['source']);
     }else{
-        
+
         $mysqli = $system->get_mysqli();
 
         //allowed actions for guest
         $quest_allowed = array('login','reset_password','svs_savetree','svs_gettree','usr_save','svs_get');
-        
+
         if ($action=="sysinfo") { //it call once on hapi.init on client side - so it always need to reload sysinfo
 
             $res = $system->getCurrentUserAndSysInfo(false, (@$req_params['is_guest']==1));
-            
-        }else if ($action == "save_prefs"){
-           
+
+        }elseif($action == "save_prefs"){
+
             if($system->verify_credentials($dbname)>0){
                 user_setPreferences($system, $req_params);
                 $res = true;
@@ -389,13 +389,13 @@
             }
 
         }
-        else if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
+        elseif ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
         }
-        else if ($action=="file_in_folder") { //get list of system images
-        
+        elseif($action=="file_in_folder") { //get list of system images
+
               $exts = @$req_params['exts'];
               if($exts){
                     $exts = explode(',',$exts);
@@ -403,22 +403,22 @@
               if(!is_array($exts) || count($exts)<1){
                     $exts = array('png','svg');
               }
-              
+
               $source = @$req_params['source'];
-              
+
               if($source=='tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
               }else{ //assets
                   $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
               }
-              
+
               $res = folderContent($lib_path, $exts);
-              
+
         }
-        else if ($action=="foldercontent") { //get list of files for given folder
-        
-              //by default this are mbtiles in uploaded_tilestack  
-        
+        elseif($action=="foldercontent") { //get list of files for given folder
+
+              //by default this are mbtiles in uploaded_tilestack
+
               $source = @$req_params['source'];
               if(@$req_params['exts']){
                     $exts = explode(',',@$req_params['exts']);
@@ -426,27 +426,27 @@
               if(!is_array($exts) || count($exts)<1){
                     $exts = array('png','svg');
               }
-              
+
               $include_dates = false;
-              
+
               if($source=='uploaded_tilestacks'){
                   $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
-              }else if(intval($source)>0){
+              }elseif(intval($source)>0){
 
                   $source = intval($source);
                   if($source==1){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
-                  }else if($source==2){
+                  }elseif($source==2){
                       $lib_path = '/srv/BACKUP';
                       $include_dates = true;
-                  }else if($source==3){
+                  }elseif($source==3){
                       $include_dates = true;
                       if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
                           $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
                       }else{
                           $lib_path = '/srv/BACKUP/ARCHIVE';
                       }
-                  }else if($source==4){
+                  }elseif($source==4){
                       $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
                   }
 
@@ -456,12 +456,12 @@
                   $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
               }
               $res = folderContent($lib_path, $exts, $include_dates);
-              
+
         }
-        else if ($action=="folders") { //get list of system images
+        elseif($action=="folders") { //get list of system images
 
               $folders = $system->getArrayOfSystemFolders();
-               
+
               $op = @$req_params['operation'];
               if(!$op || $op=='list'){
 
@@ -470,38 +470,38 @@
                       $root_dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.@$req_params['root_dir']);
                   }
 
-                  $res = folderTree($root_dir, 
+                  $res = folderTree($root_dir,
                       array('systemFolders'=>$folders,'format'=>'fancy') );//see utils_file
                   $res = $res['children'];
                   //$res = folderTreeToFancyTree($res, 0, $folders);
               }else{
-                  
+
                   $res = false;
-                  
+
                   $dir_name = USanitize::sanitizePath(@$req_params['name']);
-                  
+
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
-                  }else if(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
+                  }elseif(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not a directory');
                   }else{
 
                   $f_name = htmlspecialchars($dir_name);
                   $folder_name = HEURIST_FILESTORE_DIR.$dir_name;
-                  
+
                   if($folders[strtolower($dir_name)]){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Cannot modify system folder');
                   }else
                   if($op=='rename'){
-                      
+
                       $new_name = USanitize::sanitizePath(@$req_params['newname']);
                       if($new_name==''){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'New folder name is not defined or out of the root');
-                      }else if($folders[strtolower($new_name)]){
+                      }elseif($folders[strtolower($new_name)]){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
-                      }else if(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
+                      }elseif(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
-                      }else if(!file_exists($folder_name)){
+                      }elseif(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
                       }else{
                           $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);
@@ -510,14 +510,14 @@
                                     .$dir_name.'" to name "'.$new_name.'"');
                           }
                       }
-     
-                  }else if($op=='delete'){
+
+                  }elseif($op=='delete'){
                       //if (is_dir($dir))
 
-                      
+
                       if(!file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$f_name.'" does not exist');
-                      }else if (count(scandir($folder_name))>2){
+                      }elseif (count(scandir($folder_name))>2){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$f_name.'" cannot be removed');
                       }else{
                           $res = folderDelete2($folder_name, true);
@@ -525,8 +525,8 @@
                               $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$f_name.'" cannot be removed');
                           }
                       }
-                      
-                  }else if($op=='create'){
+
+                  }elseif($op=='create'){
                       if(file_exists($folder_name)){
                           $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with such name already exists');
                       }else{
@@ -536,11 +536,11 @@
                          }
                       }
                   }
-                  
+
                   }
               }
         }
-        else if($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
+        elseif($action == 'check_allow_estc'){ // check if the ESTC or LRC18C lookups are allowed for current server+database
 
             $msg = '';
 
@@ -591,35 +591,35 @@
                 $is_guest = (@$req_params['is_guest']==1);
                 $skip_pwd_check = false;
                 $res = false;
-                
+
                 if(@$req_params['saml_entity']){
-                    
+
                     $sp = $req_params['saml_entity'];
-                    
+
                     //check saml session
                     require_once dirname(__FILE__).'/../utilities/uSaml.php';
-                    
-                    //if currently authenticated - take username 
+
+                    //if currently authenticated - take username
                     $username = samlLogin($system, $sp, $system->dbname(), false);
-                    
+
                     if($username>0){
-                        $password= null;    
+                        $password= null;
                         $session_type = 'remember';
                         $skip_pwd_check = true;
                     }else{
                         $username = null;
                     }
                 }
-                
+
                 if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check, $is_guest)){
                     $res = $system->getCurrentUserAndSysInfo( true, $is_guest );//including reccount and dashboard entries
-                    
+
                     checkDatabaseFunctions($mysqli);
 
                     $system->user_LogActivity('Login');
                 }
 
-            } else if ($action=="reset_password") {
+            } elseif($action=="reset_password") {
 
                 $password = array_key_exists('new_password', $req_params) ? $req_params['new_password'] : null;
                 if(array_key_exists('new_password', $req_params)) {unset($req_params['new_password']);}// remove from REQUEST
@@ -627,7 +627,7 @@
                 if($req_params['pin'] && $req_params['username'] && $password){ // update password w/ pin
                     $system->user_LogActivity('ResetPassword', "Updating password for {$req_params['username']}");
                     $res = user_ResetPassword($system, $req_params['username'], $password, $req_params['pin']);
-                }else if($req_params['pin']){ // get/validate reset pin
+                }elseif($req_params['pin']){ // get/validate reset pin
                     $system->user_LogActivity('ResetPassword', "Handling reset pin for {$req_params['username']}");
                     $res = user_HandleResetPin($system, @$req_params['username'], @$req_params['pin'], @$req_params['captcha']);
                 }else{
@@ -653,18 +653,18 @@
                 }
 
             }
-              else if ($action=="sys_info_count") { 
-                
+              elseif($action=="sys_info_count") {
+
                 $res = $system->getTotalRecordsAndDashboard();
-                        
-            } else if ($action=="usr_save") {
-                
+
+            } elseif($action=="usr_save") {
+
                 USanitize::sanitizeRequest($req_params);
-                
+
                 $is_guest_registration = (@$req_params['is_guest']==1);
-                
+
                 $res = user_Update($system, $req_params, $is_guest_registration);
-                
+
                 if($res!==false && $is_guest_registration){
                     //login at once
                     if($system->doLogin($res, null, 'remember', true, true)){
@@ -672,7 +672,7 @@
                     }
                 }
 
-            } else if ($action=="usr_get" && is_numeric(@$req_params['UGrpID'])) {
+            } elseif($action=="usr_get" && is_numeric(@$req_params['UGrpID'])) {
 
                 $ugrID = $req_params['UGrpID'];
 
@@ -685,38 +685,38 @@
                     $system->addError(HEURIST_REQUEST_DENIED);
                 }
 
-            } else if ($action=="usr_names" && @$req_params['UGrpID']) {
-                
+            } elseif($action=="usr_names" && @$req_params['UGrpID']) {
+
                 $res = user_getNamesByIds($system, $req_params['UGrpID']);
-                
-            } else if ($action=="groups") {
+
+            } elseif($action=="groups") {
 
                 $ugr_ID = @$req_params['UGrpID']?$req_params['UGrpID']:$system->get_user_id();
 
                 $res = user_getWorkgroups($system->get_mysqli(), $ugr_ID, true);
 
-            } else if ($action=="members" && @$req_params['UGrpID']) {
+            } elseif($action=="members" && @$req_params['UGrpID']) {
 
                 $res = user_getWorkgroupMembers($system->get_mysqli(), @$req_params['UGrpID']);
 
-            } else if ($action=="user_wss") {
-                
+            } elseif($action=="user_wss") {
+
                 $res = user_WorkSet($system, $req_params);
 
-            } else if ($action=="svs_copy"){
-                
+            } elseif($action=="svs_copy"){
+
                 $res = svsCopy($system, $req_params);
 
-            } else if ($action=="svs_save"){
-                
+            } elseif($action=="svs_save"){
+
                 USanitize::stripScriptTagInRequest($req_params);
                 $res = svsSave($system, $req_params);
 
-            } else if ($action=="svs_delete" && @$req_params['ids']) {
+            } elseif($action=="svs_delete" && @$req_params['ids']) {
 
                 $res = svsDelete($system, $req_params['ids'], @$req_params['UGrpID']);
 
-            } else if ($action=="svs_get" ) {
+            } elseif($action=="svs_get" ) {
 
                 if(@$req_params['svsIDs']){
                     $res = svsGetByIds($system, $req_params['svsIDs']);
@@ -724,23 +724,23 @@
                     $res = svsGetByUser($system, @$req_params['UGrpID'], @$req_params['keep_order']);
                 }
 
-            } else if ($action=="svs_savetree" ) { //save saved searches tree status
+            } elseif($action=="svs_savetree" ) { //save saved searches tree status
 
                 USanitize::stripScriptTagInRequest($req_params);
                 $res = svsSaveTreeData($system, @$req_params['data']);
 
-            } else if ($action=="svs_gettree" ) { //save saved searches tree status
+            } elseif($action=="svs_gettree" ) { //save saved searches tree status
 
                 $res = svsGetTreeData($system, @$req_params['UGrpID']);
 
-                
-            }else if($action == 'get_url_content_type'){
-                
+
+            }elseif($action == 'get_url_content_type'){
+
                 $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
-                
+
                 $res = recognizeMimeTypeFromURL($mysqli, $url, false);
-                
-            }else if($action == 'upload_file_nakala'){ //@todo - move to separate controller
+
+            }elseif($action == 'upload_file_nakala'){ //@todo - move to separate controller
 
                 // load ONE file to ext.repository - from manageRecUploadedFiles
                 // see also local_to_repository in record_batch
@@ -755,7 +755,7 @@
 
                     // File
                     $params['file'] = array(
-                        'path' => HEURIST_FILESTORE_DIR . '/scratch/' 
+                        'path' => HEURIST_FILESTORE_DIR . '/scratch/'
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
                         'name' => htmlspecialchars($req_params['file'][0]['original_name'])
@@ -766,7 +766,7 @@
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#title'
+                        'propertyUri' => NAKALA_REPO.'terms#title'
                     );
 
                     if(empty($req_params['meta']['creator']['authorId'])){
@@ -774,7 +774,7 @@
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
-                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                            'propertyUri' => NAKALA_REPO.'terms#creator'
                         );
 
                         if(array_key_exists('givenname', $req_params['meta']['creator']) || array_key_exists('surname', $req_params['meta']['creator'])){
@@ -798,7 +798,7 @@
                     }else{
                         $params['meta']['creator'] = array(
                             'value' => @$req_params['meta']['creator'],
-                            'propertyUri' => 'http://nakala.fr/terms#creator'
+                            'propertyUri' => NAKALA_REPO.'terms#creator'
                         );
                     }
 
@@ -807,14 +807,14 @@
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
                             'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                            'propertyUri' => 'http://nakala.fr/terms#created'
+                            'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }else{
                         $params['meta']['created'] = array(
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
-                            'propertyUri' => 'http://nakala.fr/terms#created'
+                            'propertyUri' => NAKALA_REPO.'terms#created'
                         );
                     }
 
@@ -822,14 +822,14 @@
                         'value' => @$req_params['meta']['type'],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                        'propertyUri' => 'http://nakala.fr/terms#type'
+                        'propertyUri' => NAKALA_REPO.'terms#type'
                     );
 
                     $params['meta']['license'] = array(
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#string',
-                        'propertyUri' => 'http://nakala.fr/terms#license'
+                        'propertyUri' => NAKALA_REPO.'terms#license'
                     );
 
                     // User API Key
@@ -843,7 +843,7 @@
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
 
                 }
-                
+
                 if($res !== false){
                     // delete local file after upload
                     fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . basename($req_params['file'][0]['name']));
@@ -856,10 +856,10 @@
 
 
         }
-        
+
         $system->dbclose();
     }
-    
+
     if(is_bool($res) && !$res){
         $response = $system->getError();
     }else{
@@ -868,7 +868,7 @@
             $response['context'] = filter_var($req_params['context']);
         }
     }
-    
+
 $system->setResponseHeader();
 print json_encode($response);
 ?>

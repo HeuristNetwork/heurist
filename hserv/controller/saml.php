@@ -1,7 +1,7 @@
 <?php
 /**
 * Simplesaml authentification
-* 
+*
 * parameters:
 * db - database name
 * sp - service prodiver
@@ -37,31 +37,31 @@ $msg = null;
 if($error){
     $system->addError(HEURIST_INVALID_REQUEST, $error);
 }else{
-    
+
     $sp = @$_REQUEST['sp'];
     if(!$sp) {$sp = 'default-sp';}
-    
+
     if(!$sp){
         $system->addError(HEURIST_INVALID_REQUEST, 'Database '.$dbname.' does not support SAML authorisation');
     }else
     if ($action == "logout"){ //save preferences into session
-    
+
         if($system->set_dbname_full($dbname)){
 
             $system->initPathConstants($dbname);
-            
+
             samlLogout($system, $sp, $_SERVER['PHP_SELF']);
             exit;
         }
-    }else if ($action == "login"){
+    }elseif($action == "login"){
 
             $user_id = samlLogin($system, $sp, $dbname, true, (@$_REQUEST['noframe']==1));
-            
+
             if(@$_REQUEST['noframe']==1) {return;}
-            
+
             if($user_id>0){
                 $msg = $user_id;
-/*                
+/*
                 if($system->doLogin($user_id, 'x', 'remember', true)){
                     //after login - close parent dialog and reload CurrentUserAndSysInfo
                     $res = $system->getCurrentUserAndSysInfo();
@@ -76,11 +76,11 @@ if($error){
                     <script>
                         window.hWin.HAPI4.currentUser = <?php echo json_encode($res['currentUser']);?>;
                         window.hWin.HAPI4.sysinfo = <?php echo json_encode($res['sysinfo']);?>;
-                    
+
                         window.onload = function(){
 console.log('Authentification completed ','<?php echo intval($user_id);?>');
                             setTimeout(function(){window.close(<?php echo intval($user_id);?>);}, 1000);
-                        }                 
+                        }
                     </script>
                     </head>
                     <body>
@@ -91,11 +91,11 @@ console.log('Authentification completed ','<?php echo intval($user_id);?>');
                         User: <?php echo htmlspecialchars($res['currentUser']['ugr_FullName']);?>
                     </body>
                     </html>
-                    
+
                     <?php
-                    exit;                
+                    exit;
                 }
-*/                
+*/
             }
     }else{
         //after logout - close parent window
@@ -121,7 +121,7 @@ if($msg==null){
     window.onload = function(){
 console.log('Authentification completed ','<?php echo htmlspecialchars($msg);?>');
         setTimeout(function(){window.close("<?php echo htmlspecialchars($msg);?>");}, 1000);
-    }                 
+    }
 </script>
 </head>
 <body>

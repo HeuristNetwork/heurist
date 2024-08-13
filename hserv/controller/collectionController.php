@@ -1,15 +1,15 @@
 <?php
 /**
-* collectionController.php 
-* 
+* collectionController.php
+*
 * manages user's collection of record ids stored in SESSION
-* 
+*
 * see for client side utilsCollection.js, used in recordList
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org

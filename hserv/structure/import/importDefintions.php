@@ -1,8 +1,8 @@
 <?php
 /**
 * importDefinitions.php - add complete set of definitions to database
-* see dbUtils::databaseCreateFull - it creates database and import defintions 
-* from file coreDefinitions.txt created with getDBStructureAsSQL. 
+* see dbUtils::databaseCreateFull - it creates database and import defintions
+* from file coreDefinitions.txt created with getDBStructureAsSQL.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -39,7 +39,7 @@ class ImportDefinitions {
         }else{
             $this->mysqli = $system->get_mysqli();
         }
-        
+
         define('START_TOKEN', '>>StartData>>');
         define('END_TOKEN', '>>EndData>>');
 
@@ -80,10 +80,10 @@ class ImportDefinitions {
             }
             $offset = $pos2;
         }
-        return false;    
+        return false;
 
     }
-    
+
     //
     //
     //
@@ -106,11 +106,11 @@ class ImportDefinitions {
                 $i--;
                 $splittedData3 = substr($splittedData2[0],0,-$i);
             }
-            
+
             return $splittedData3;
-            
+
     } // getNextDataSet
-        
+
 
     //
     //
@@ -131,73 +131,73 @@ class ImportDefinitions {
             $this->system->addError(HEURIST_SYSTEM_CONFIG,  $error);
             return false;
         }
-        
+
         $this->mysqli->query("SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO'");
         $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
 
 
         //order of tables - this must correspond with order in getDBStructureAsSQL.php
         $tables = array('',
-        'defRecTypeGroups', 
-        'defDetailTypeGroups', 
-        'defVocabularyGroups', 
+        'defRecTypeGroups',
+        'defDetailTypeGroups',
+        'defVocabularyGroups',
         'defOntologies',
-        'defTerms',        
-        'defTermsLinks',        
+        'defTerms',
+        'defTermsLinks',
         'defRecTypes',
         'defDetailTypes',
-        'defRecStructure',        
+        'defRecStructure',
         'defRelationshipConstraints',
         'defFileExtToMimetype',
         'defTranslations',
         'usrSavedSearches',
         'sysDashboard' // added 12/11/18
         );
-        
+
         $splittedData = explode(START_TOKEN, $data);
-        
+
         foreach($splittedData as $idx=>$tableData){
-            
+
             if($idx>=count($tables)){
                 break;
-            }else if($tables[$idx]==''){
+            }elseif($tables[$idx]==''){
                 continue;
             }
-            
+
             $dataSet = $this->prepareDataSet($tableData);
-            
-            
+
+
             if(!(($dataSet == "") || (strlen($dataSet) <= 2))) { // no action if no data
 
                 $flds = mysql__select_list2($this->mysqli, 'SHOW COLUMNS FROM '.$tables[$idx]);
                 if($tables[$idx]=='defTermsLinks'){
                     array_shift($flds);//remove primary key field
-                }                
+                }
 
                 $flds = '`'.implode('`,`', $flds).'`';
 
-                
+
                 $query = 'INSERT INTO `'.$tables[$idx]."` ($flds) VALUES ". $dataSet;
                 $this->mysqli->query($query);
                 if($this->mysqli->error && $this->mysqli->error!='') {
 
                     $merror = $this->mysqli->error;
                     $error = 'Error inserting data into '.$tables[$idx];
-                    
+
                     $this->mysqli->query("SET SESSION sql_mode=''");
                     $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
-        
+
                     //add error
                     $this->system->addError(HEURIST_DB_ERROR,  $error, $merror);
                     return false;
                 }
-            }            
-            
+            }
+
         }//for
 
         $this->mysqli->query("SET SESSION sql_mode=''");
         $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
-        
+
         return true;
     }
 

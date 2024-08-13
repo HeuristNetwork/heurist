@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -39,7 +39,7 @@ require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
-}    
+}
 
 // using ob_gzhandler makes this stuff up on IE6-
 ini_set("zlib.output_compression_level", '5');

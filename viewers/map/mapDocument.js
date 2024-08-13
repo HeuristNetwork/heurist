@@ -21,7 +21,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global hMapLayer2 */
+/* global HMapLayer2 */
 
 /**
 * Manages list of map documents
@@ -401,7 +401,7 @@ function hMapDocument( _options )
                     //creates and add layer to nativemap
                     //returns mapLayer object
                     record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');  //for icon in legend
-                    record['layer'] = new hMapLayer2({rec_layer: record,      //on mapdoc open
+                    record['layer'] = new HMapLayer2({rec_layer: record,      //on mapdoc open
                                                       rec_datasource: datasource_record, 
                                                       mapdoc_recordset: resdata, //need to get fields
                                                       mapwidget: options.mapwidget});
@@ -579,7 +579,7 @@ console.log(treedata);
                                         //creates and add layer to nativemap
                                         //returns mapLayer object
                                         record2['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID'); //for icon in legend
-                                        record2['layer'] = new hMapLayer2({rec_layer: record,  //on add layer
+                                        record2['layer'] = new HMapLayer2({rec_layer: record,  //on add layer
                                                                           rec_datasource: datasource_record, 
                                                                           mapdoc_recordset: resdata, //need to get fields
                                                                           mapwidget: options.mapwidget,
@@ -863,7 +863,7 @@ console.log(treedata);
                 _record = recset.getById(recID);
                 recset.setFld(_record, DT_QUERY_STRING, curr_request);
                 //remove previous result set from map
-                if(_record['layer']){ //ref to hMapLayer2
+                if(_record['layer']){ //ref to HMapLayer2
                     _record['layer'].removeLayer();    
                     delete _record['layer']; //clear
                 }
@@ -882,7 +882,7 @@ console.log(treedata);
             const preserveViewport = (mapdoc_id!=0) || (dataset_options.viewport===true);
             
             recset.setFld(_record, 'layer',
-                        new hMapLayer2({rec_datasource: _record,   //adds search results or query as a new layer
+                        new HMapLayer2({rec_datasource: _record,   //adds search results or query as a new layer
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,  //need to call back addGeoJson when data ara obtained from server
                                         mapdocument_id: mapdoc_id,
@@ -894,7 +894,7 @@ console.log(treedata);
         },
         
         //
-        // returns reference to hMapLayer by mapdoc id and name
+        // returns reference to HMapLayer by mapdoc id and name
         //
         getLayerByName: function( mapdoc_id, dataset_name, dataset_id ){
             
@@ -963,7 +963,7 @@ console.log(treedata);
             
             _record['source_rectype'] = RT_QUERY_SOURCE;  //for icon in legend
             recset.setFld(_record, 'layer',
-                        new hMapLayer2({recordset: recordset,  //adds recordset
+                        new HMapLayer2({recordset: recordset,  //adds recordset
                                         rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,

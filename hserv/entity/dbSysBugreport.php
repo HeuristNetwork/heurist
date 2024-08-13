@@ -2,7 +2,7 @@
 
     /**
     * db access to usrUGrps table for users
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -28,40 +28,40 @@ class DbSysBugreport extends DbEntityBase
 
     /**
     *  search users
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
         return null;
     }
-    
+
     //
     // validate permission
-    //    
+    //
     protected function _validatePermission(){
-        
+
         if(!$this->system->has_access()){
-             $this->system->addError(HEURIST_REQUEST_DENIED, 
+             $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You must be logged in for bug reporting. Insufficient rights (logout/in to refresh) for this operation');
              return false;
         }
-        
+
         return true;
     }
-    
-    //      
+
+    //
     //   This is virtual "save". In fact it sends email
     //
     public function save(){
 
         if(!$this->prepareRecords()){
-                return false;    
+                return false;
         }
 
         if(is_array($this->records) && count($this->records)==1){
@@ -72,15 +72,15 @@ class DbSysBugreport extends DbEntityBase
                  return $this->_prepareEmail($fields);
             }
         }
-        
+
         //validate permission for current user and set of records see $this->recordIDs
         if(!$this->_validatePermission()){
             return false;
         }
-        
+
         //validate values and check mandatory fields
         foreach($this->records as $record){
-        
+
             $this->data['fields'] = $record;
 
             //validate mandatory fields
@@ -88,41 +88,41 @@ class DbSysBugreport extends DbEntityBase
                 return false;
             }
         }
-        
+
         $record = $this->records[0];
 
-        
+
         $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
         if(!(isset($toEmailAddress) && $toEmailAddress)){
-             $this->system->addError(HEURIST_SYSTEM_CONFIG, 
+             $this->system->addError(HEURIST_SYSTEM_CONFIG,
                     'The owner of this instance of Heurist has not defined either the info nor system emails');
              return false;
         }
-        
+
         $sMessage = '';
-        
+
         $message = array();
         $message["rectype"] = '2-253';
-        
+
         $bug_title = 'Bug report or feature request: '.$record['2-1'];
         $message['type:2-1'] = $record['2-1'];
-    
+
         //keep new line
         $bug_descr = $record['2-3'];
-        
+
         if($bug_descr){
             $bug_descr = str_replace("\n","&#13;",$bug_descr);
             $bug_descr = str_replace("\"","\\\"",$bug_descr);
             $message['type:2-3'] = $bug_descr;
-            
+
             $sMessage = '<p>'.str_replace("\n",'<br>', $record['2-3']).'</p>';
         }
 
         $repro_steps = $record['2-4'];
         $repro_steps = explode("\n", $repro_steps);//split on line break
         $message['type:2-4'] = $repro_steps;
-        
+
         if(count($repro_steps)>0){
             $sMessage = $sMessage.'<p>Reproduction steps:<br>'.implode('<br>',$repro_steps).'</p>';
         }
@@ -137,26 +137,26 @@ class DbSysBugreport extends DbEntityBase
         array_push($ext_info, "   Heurist dbversion: ".$this->system->get_system('sys_dbVersion').'.'
                                                       .$this->system->get_system('sys_dbSubVersion').'.'
                                                       .$this->system->get_system('sys_dbSubSubVersion'));
-        
+
         //extra information
         array_push($ext_info, "   Report type: " . (array_key_exists('2-2', $record) ? $record['2-2'] : 'None provided'));
         if(array_key_exists('3-1058', $record)){
             array_push($ext_info, "   Provided url: " . $record['3-1058']);
         }
-        
+
         $user = $this->system->getCurrentUser();
         if($user){
             $user = user_getByField($this->system->get_mysqli(), 'ugr_ID', $user['ugr_ID']);
-            
+
             array_push($ext_info, "   Heurist user: ".@$user['ugr_Name'].' ('.@$user['ugr_eMail'].')');
         }
         $message['type:2-51'] = $ext_info;  //DT_BUG_REPORT_EXTRA_INFO;
         $sMessage = $sMessage.'<p>'.implode('<br>',$ext_info).'</p>';
-        
+
         $filename = null;
         $attachment_temp_name = @$record['2-38'];
         if($attachment_temp_name){
-            
+
             if(is_array($attachment_temp_name)){
 
                 $filename = array();
@@ -187,43 +187,43 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
-        if(sendPHPMailer(null, 'Bug reporter', $toEmailAddress, 
-                $bug_title, 
-                $sMessage,   //since 02 Dec 2021 we sent human readable message     
+        if(sendPHPMailer(null, 'Bug reporter', $toEmailAddress,
+                $bug_title,
+                $sMessage,   //since 02 Dec 2021 we sent human readable message
                 $filename, true)){
             return array(1);//fake rec id
         }else{
             return false;
         }
-    }  
-  
+    }
+
     //
-    // this is response to emailForm widget 
+    // this is response to emailForm widget
     // it sends email to owner of database or to email specified in website_id record
     //
     private function _prepareEmail($fields){
-        
+
         //1. verify captcha
         if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
-            
+
             $is_InValid = (@$_SESSION["captcha_code"] != @$fields['captcha']);
-            
+
             if (@$_SESSION["captcha_code"]){
                 unset($_SESSION["captcha_code"]);
             }
-            
+
             if($is_InValid) {
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                $this->system->addError(HEURIST_ACTION_BLOCKED,
                    'Are you a bot? Please enter the correct answer to the challenge question');
-                return false;                                
+                return false;
             }
         }else {
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_ACTION_BLOCKED,
                     'Captcha is not defined. Please provide correct value');
             return false;
         }
-        
-        
+
+
         //2. get email fields
         $email_text = @$fields['content'];
         if(!$email_text){
@@ -235,18 +235,18 @@ class DbSysBugreport extends DbEntityBase
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Email address is not defined.');
             return false;
         }
-        
-        
+
+
         $email_title = null;
         $email_from_name = @$fields['person'];
         $email_to = null;
-        
+
         //3. get $email_to - either address from website_id record or current database owner
         $rec_ID = $fields['website_id'];
         if($rec_ID>0){
             $this->system->defineConstant('DT_NAME');
             $this->system->defineConstant('DT_EMAIL');
-            
+
             $record = recordSearchByID($this->system, $rec_ID, array(DT_NAME, DT_EMAIL), 'rec_ID');
             if($record){
                 $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
@@ -267,13 +267,13 @@ class DbSysBugreport extends DbEntityBase
             $email_title = $email_title.'  From '.$email_from_name;
         }
         $email_text = 'From '.$email_from.' ( '.$email_from_name.' )<br>'.$email_text;
-    
+
         $email_from = null;
         $email_from_name = null;
-    
-    
-        if(sendPHPMailer(null, $email_from_name, $email_to, 
-                $email_title, 
+
+
+        if(sendPHPMailer(null, $email_from_name, $email_to,
+                $email_title,
                 $email_text,
                 null, true))
         {
@@ -281,22 +281,22 @@ class DbSysBugreport extends DbEntityBase
         }else{
             return false;
         }
-        
+
     }
-            
+
     //
     //
     //
     public function delete($disable_foreign_checks = false){
         return false;
     }
-    
+
     //
     // batch action for users
     // 1) import users from another db
     //
     public function batch_action(){
          return false;
-    }    
+    }
 }
 ?>

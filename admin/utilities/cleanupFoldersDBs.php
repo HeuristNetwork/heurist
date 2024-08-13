@@ -1,13 +1,13 @@
 <?php
 
 /**
-* cleanupFoldersDBs.php - cleanup temporary and logs from database folder 
-* 
+* cleanupFoldersDBs.php - cleanup temporary and logs from database folder
+*
 * Remove contents of scratch
 * Remove content of backup
 * Remove documentation and templates
 * Remove all files from root (except index.html)
-* 
+*
 * Runs from shell and from Server Manager menu
 *
 * @package     Heurist academic knowledge management system
@@ -28,8 +28,8 @@
 */
 
 // Default values for arguments
-$arg_need_report = false;  
-$arg_need_action = false;  
+$arg_need_report = false;
+$arg_need_action = false;
 $eol = "\n";
 $tabs = "\t\t";
 $tabs0 = '';
@@ -37,7 +37,7 @@ $is_command_line = false;
 $is_shell = true;
 
 if (@$argv) {
-    
+
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/cleanupFoldersDBs.php -- -purge
 //  sudo php -f cleanupFoldersDBs.php -- -purge  -  action,  -report - report only
@@ -45,17 +45,17 @@ if (@$argv) {
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
-        if ($argv[$i][0] === '-') {                    
+        if ($argv[$i][0] === '-') {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
             } else {
                 if(strpos($argv[$i],'-purge')===0){
                     $ARGV['-purge'] = true;
-                }else if(strpos($argv[$i],'-report')===0){
+                }elseif(strpos($argv[$i],'-report')===0){
                     $ARGV['-report'] = true;
                 }else{
-                    $ARGV[$argv[$i]] = true;    
+                    $ARGV[$argv[$i]] = true;
                 }
 
 
@@ -64,12 +64,12 @@ if (@$argv) {
             array_push($ARGV, $argv[$i]);
         }
     }
-    
-    if (@$ARGV['-purge']) {$arg_need_action = true;}   
+
+    if (@$ARGV['-purge']) {$arg_need_action = true;}
     if (@$ARGV['-report']) {$arg_need_report = true;}
 
     $is_command_line = true;
-    
+
 }else{
     $is_shell = false;
     //from browser
@@ -80,7 +80,7 @@ if (@$argv) {
     $tabs0 = '<div style="min-width:300px;display:inline-block;text-align:left">';
     $tabs = "</div>".$tabs0;
     //exit('This function must be run from the shell');
-    
+
     $arg_need_report = true;
     $arg_need_action = (@$_REQUEST['purge']=='1');
 }
@@ -155,16 +155,16 @@ foreach ($databases as $idx=>$db_name){
     $dir_root = HEURIST_FILESTORE_ROOT.$db_name.'/';
 
     $db_name = htmlspecialchars($db_name);
-    
+
     if(file_exists($dir_root)){
 
         $dir_backup = $dir_root.'backup/';
         $dir_scratch = $dir_root.'scratch/';
         $dir_docs = $dir_root.'documentation_and_templates/';
-        
+
         $report = '';
         $db_size = 0;
-        
+
         //only list with size summary
         $res = listFolderContent($dir_root);
         $root_line = $tabs0.'..  '.intval($res[0]).$eol;
@@ -185,8 +185,8 @@ foreach ($databases as $idx=>$db_name){
         }
 
         if($arg_need_action){
-            
-            //1 root 
+
+            //1 root
             $content = folderContent($dir_root);
             $added_root_line = false;
             foreach ($content['records'] as $object) {
@@ -236,7 +236,7 @@ foreach ($databases as $idx=>$db_name){
 
                     $remove_lines = 0;
                     $skip_overwrite = false;
-                    
+
                     // Check each line's date
                     while($org_log!=null && !$org_log->eof()){
 
@@ -277,9 +277,9 @@ foreach ($databases as $idx=>$db_name){
 
                     fileDelete($log_tmp);// delete temp file
 
-                }else if ($object[1] != '.' && $object[1] != '..' && 
+                }elseif($object[1] != '.' && $object[1] != '..' &&
                     strpos($object[1],'ulf_')===false && strpos($object[1],'userNotifications')===false) {
-                        
+
                     if(strpos($object[1], 'index.html') === false){
 
                         if(!$added_root_line){
@@ -295,8 +295,8 @@ foreach ($databases as $idx=>$db_name){
                 }
             }
             folderAddIndexHTML($dir_root);
-            
-            //2 backup   
+
+            //2 backup
             $delete_log = folderDelete($dir_backup, false, true);
             if(count($delete_log) > 1){ // check that more than index.html has been deleted
                 $report .= $backup_line;
@@ -308,7 +308,7 @@ foreach ($databases as $idx=>$db_name){
             }
             folderAddIndexHTML($dir_backup);
 
-            //3 scratch   
+            //3 scratch
             $delete_log = folderDelete($dir_scratch, false, true);
             if(count($delete_log) > 1){ // check that more than index.html has been deleted
                 $report .= $scratch_line;
@@ -332,7 +332,7 @@ foreach ($databases as $idx=>$db_name){
                     }
                 }
             }
-        
+
         }
 
         if($arg_need_report){
@@ -341,12 +341,12 @@ foreach ($databases as $idx=>$db_name){
                 echo $tabs0.$db_name.$eol;
                 echo $tabs0.$report.$eol;
             }
-        }     
-        
+        }
+
         $cnt_archived++;
-        $tot_size = $tot_size + $db_size; 
+        $tot_size = $tot_size + $db_size;
     }else{
-        //database folder is missed   
+        //database folder is missed
         echo $tabs0.$db_name.' file folder not found'.$eol;
     }
 
@@ -357,15 +357,15 @@ foreach ($databases as $idx=>$db_name){
 
 echo $tabs0.'---'.$eol;
 if($arg_need_action){
-    echo $tabs0.'Processed '.$cnt_archived.' databases. Total disk volume cleaned: '.round($tot_size/(1024*1024)).'Mb'.$eol;    
+    echo $tabs0.'Processed '.$cnt_archived.' databases. Total disk volume cleaned: '.round($tot_size/(1024*1024)).'Mb'.$eol;
     /*
     if(count($email_list_deleted)>0){
-        $sTitle = 'Cleanup databases on '.HEURIST_SERVER_NAME;                
+        $sTitle = 'Cleanup databases on '.HEURIST_SERVER_NAME;
         sendEmail(array(HEURIST_MAIL_TO_ADMIN), $sTitle, $sTitle.' <table>'.implode("\n",$email_list_deleted).'</table>',true);
     }
     */
 }else{
-    echo $tabs0.'Databases: '.$cnt_archived.'. Total size: '.round($tot_size/(1024*1024)).'Mb'.$eol;    
+    echo $tabs0.'Databases: '.$cnt_archived.'. Total size: '.round($tot_size/(1024*1024)).'Mb'.$eol;
 }
 
 echo $tabs0.'finished'.$eol;
@@ -374,25 +374,25 @@ if(!$is_command_line) {print '</body></html>';}
 
 /*
 if(is_array($email_list) && count($email_list)>0){
-    
+
 sendEmail(HEURIST_MAIL_TO_ADMIN, "List of inactive databases on ".HEURIST_SERVER_NAME,
     "List of inactive databases for more than a year with more than 200 records:\n"
     .implode(",\n", $email_list));
 }
 */
 function listFolderContent($dir){
-    
+
     $size = 0;
     $list = '<div>'.substr($dir, strrpos($dir, '/',-2)).'</div><table style="min-width:500px;border:1px solid red"><tr><th align="left">file</th><th align="right">size</th></tr>';
     $content = folderContent($dir);
-    
+
     foreach ($content['records'] as $object) {
         if ($object[1] != '.' && $object[1] != '..') {
             $list = $list.'<tr><td>'.$object[1].'</td><td align="right">'.$object[4].'</td></tr>';//(intdiv($object[4], 1024))
             $size += intval($object[4]);
         }
     }
-    
+
     $list = $list.'<tr><td align="left">total</td><td align="right">'.($size).'</td></tr></table>';
     return array($size, $list);
 }

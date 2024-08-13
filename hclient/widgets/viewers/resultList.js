@@ -199,7 +199,7 @@ $.widget( "heurist.resultList", {
     _cached_linked_images: {}, // cache of images linked to the record
     
     //to refresh icon after structure edit
-    _icon_timer_suffix: ('&t='+Math.round(Math.random()*100000)),
+    _icon_timer_suffix: ('&t='+window.hWin.HEURIST4.util.random()),
     
     // the constructor
     _create: function() {
@@ -509,7 +509,7 @@ $.widget( "heurist.resultList", {
                 if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE)
                 {
                     //update record type icon
-                    that._icon_timer_suffix = ('&t='+Math.round(Math.random()*100000));
+                    that._icon_timer_suffix = ('&t='+window.hWin.HEURIST4.util.random());
                     that._renderPage(that.current_page);
                 }
                 
@@ -1678,11 +1678,11 @@ $.widget( "heurist.resultList", {
             
         }
         // Show a key icon and popup if there is a password reminder string
-        let html_pwdrem = '';
+        let html_p_reminder = '';
         let p_reminder = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(p_reminder){
-            html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
-            p_reminder = ' pwd="'+p_reminder+'" ';
+            html_p_reminder =  '<span class="logged-in-only ui-icon ui-icon-key rec_p_reminder" style="display:inline;left:14px;font-size:0.99em"></span>';
+            p_reminder = ' data-reminder="'+p_reminder+'" ';
         }else{
             p_reminder = '';
         }
@@ -1786,7 +1786,7 @@ $.widget( "heurist.resultList", {
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
         +     '<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
         +     html_owner
-        +     html_pwdrem
+        +     html_p_reminder
         + '</div>'
 
 
@@ -2095,9 +2095,9 @@ $.widget( "heurist.resultList", {
             //return;
         }
 
-        let ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
+        let ispwdreminder = $target.hasClass('rec_p_reminder'); //this is password reminder click
         if (ispwdreminder){
-            let pwd = $rdiv.attr('pwd');
+            let pwd = $rdiv.attr('data-reminder');
             let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HEURIST4.util.htmlEscape(pwd),
                     null, window.hWin.HR('Password reminder'), 
                 {my: "left top", at: "left bottom", of: $target, modal:false}

@@ -1,7 +1,7 @@
 <?php
 
 /**
-* 
+*
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -28,7 +28,7 @@ $isSystemInited = $system->init(@$_REQUEST['db'], true);
 if( !$isSystemInited ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
     $err = $system->getError();
     $error_msg = @$err['message'];
-}else if(!$system->has_access()){ 
+}elseif(!$system->has_access()){
     $error_msg = 'You must be logged in';
 }
 if(isset($error_msg)){
@@ -39,7 +39,7 @@ $mysqli = $system->get_mysqli();
 
 //find duplicates for districts
 $query = 'select rec_ID, d1.dtl_Value, d2.dtl_Value from Records, recDetails d1, recDetails d2
-where rec_RecTypeID=25 
+where rec_RecTypeID=25
 and rec_ID=d1.dtl_RecID and d1.dtl_DetailTypeID=1
 and rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID=169
 order by d1.dtl_Value, d2.dtl_Value';
@@ -51,9 +51,9 @@ $name = '';
 $gov_id = '';
 $ids = array();
 while ( $row = $res->fetch_row() ) {
-    
+
     if($name!=$row[1] || $gov_id != $row[2]){
-        //take first on and replace in towns 
+        //take first on and replace in towns
         if(count($ids)>1) {print '<br>'.htmlspecialchars($name).' '.count($ids);}
 
         removeDuplicates($ids);
@@ -77,24 +77,24 @@ print '<br>Removed: '.$removed;
 function removeDuplicates($ids){
     global $mysqli, $removed;
     if(count($ids)>1){
-        //take first on and replace in towns 
+        //take first on and replace in towns
         $rec_id = array_shift($ids);
-        
+
         $ids_todel = implode(',',$ids);
-        
+
         $query = 'update recDetails set dtl_Value='.$rec_id.' where dtl_Value in ('.$ids_todel.') and dtl_DetailTypeID=170';
 //print $query; return;
-        
+
         $res = $mysqli->query($query);
 
         $mysqli->query('SET foreign_key_checks = 0');
-        
+
         //delete rest of districts
         $query = 'delete from recDetails where dtl_RecID in ('.$ids_todel.')';
         $res = $mysqli->query($query);
         $query = 'delete from Records where rec_ID in ('.$ids_todel.')';
         $res = $mysqli->query($query);
-        
+
         $query = 'delete from usrReminders where rem_RecID in ('.$ids_todel.')';
         $res = $mysqli->query($query);
         $query = 'delete from usrRecTagLinks where rtl_RecID in ('.$ids_todel.')';
@@ -105,7 +105,7 @@ function removeDuplicates($ids){
         $res = $mysqli->query($query);
 
         $mysqli->query('SET foreign_key_checks = 1');
-        
+
         $removed = $removed + count($ids);
     }
 }

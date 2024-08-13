@@ -34,7 +34,7 @@ if(defined('IS_INDEX_PAGE')){
 }else{
     if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-    
+
     $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 }
 
@@ -58,16 +58,16 @@ if(!$isSystemInited){
 }
 
 if(defined('IS_INDEX_PAGE')){
-    
+
     //verify database version against minimal required
     $subsubVer = intval($system->get_system('sys_dbSubSubVersion'));
-    
-    if($subsubVer==null){
+
+    if($subsubVer===null){
         $message = $system->getErrorMsg();
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;
     }
-    
+
     if (version_compare(HEURIST_MIN_DBVERSION,
     $system->get_system('sys_dbVersion').'.'
     .$system->get_system('sys_dbSubVersion').'.'
@@ -76,10 +76,10 @@ if(defined('IS_INDEX_PAGE')){
         include_once 'admin/setup/dbupgrade/upgradeDatabase.php';
         exit;
     }
-    
+
     //check for missed tables
     $missed = hasAllTables($system->get_mysqli());
-    
+
     if(is_array($missed)){
         if(count($missed)>0){
             $message = 'Database <b>'.HEURIST_DBNAME
@@ -87,28 +87,28 @@ if(defined('IS_INDEX_PAGE')){
             .implode(', ',$missed)
             .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
             .CRITICAL_DB_ERROR_CONTACT_SYSADMIN.'</p>';
-            
-            //to add to error log            
+
+            //to add to error log
             $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
                     .' is missing the following tables: '.implode(', ',$missed));
-            
+
             include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
             exit;
         }
     }else{
         $message = 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
-        
+
         $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
-        
+
         include_once ERROR_REDIR; //dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         exit;
     }
 }
 
 if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
-    
+
     $user_pwd = System::getAdminPwd();
-    
+
     $mysqli = $system->get_mysqli();
     $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;
     $username = "";
@@ -127,7 +127,7 @@ if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pw
     }
 
     // Handle individual cases
-    if(intval($ugr_ID) > 2 && 
+    if(intval($ugr_ID) > 2 &&
         array_key_exists('rec_rectype', $_REQUEST) && strpos($_SERVER['REQUEST_URI'], 'recordEdit.php') !== false){
         // Record Edit from non-logged in user, use the provided default account
         // Cannot be a workgroup admin, a member of the DB managers workgroup or the DB owner
@@ -140,7 +140,7 @@ if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pw
 
         $attempt_login = intval($role_count) === 0;
     }
-    
+
     if($attempt_login && !empty($username) && $user_pwd!=null){
         $system->doLogin($username, $user_pwd, 'public');
     }
@@ -160,11 +160,11 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //$message = $login_warning
     //include_once ERROR_REDIR;
     exit;
-}else if(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
+}elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
     include_once ERROR_REDIR;
     exit;
-}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
+}elseif(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
     include_once ERROR_REDIR;
     exit;
@@ -201,7 +201,7 @@ if(defined('IS_INDEX_PAGE')){
 //header("Content-Security-Policy: frame-ancestors 'self'");
 ?>
 <!DOCTYPE html>
-<?php    
+<?php
 }
 ?>
 <html lang="en">
@@ -248,12 +248,11 @@ $isUpgrade = true;
 
 <script type="text/javascript">
 //init globa variables
-//let Hul, $Db, cfg_widgets, cfg_layout, regional, layoutMgr, editCMS_instance2; 
+//let Hul, $Db, cfg_widgets, cfg_layout, regional, layoutMgr, editCMS_instance2;
 </script>
 
- 
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
@@ -306,7 +305,7 @@ $isUpgrade = true;
         inst.drawYear = inst.selectedYear = date.getFullYear();
 
         $.datepicker._selectDate(event,
-            $.datepicker._formatDate(inst, 
+            $.datepicker._formatDate(inst,
                 inst.selectedDay, inst.selectedMonth, inst.selectedYear));
 
     }
@@ -347,7 +346,7 @@ $isUpgrade = true;
             }
 
             if(initialLoadDatabaseDefintions(null, onPageInit)){
-                return;                
+                return;
             }
 
         }else{
@@ -367,21 +366,21 @@ $isUpgrade = true;
     //
     //
     function initialLoadDatabaseDefintions(params, callback){
-    
+
             if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ //defintions are not loaded
 
                 var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
                 +'This is probably due to a network timeout. However, if the problem '
                 +'persists please report to Heurist developers as it could indicate '
-                +'corruption of the database.'; 
-                
+                +'corruption of the database.';
+
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
                 var entities = (params)?params:'all';//'rty,dty,rst,swf';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
-                    if(arguments){                    
+                    if(arguments){
                     if(arguments[1]){
-                        
+
                         //verify definitions relevance every 20 seconds
                         if(false){
                             setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
@@ -402,7 +401,7 @@ $isUpgrade = true;
                 return true;
             }
             return false;
-        
+
     }
 </script>
 

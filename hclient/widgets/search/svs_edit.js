@@ -21,7 +21,7 @@
 
 /* global translationToUI, translationFromUI, showSearchFacetedWizard */
 
-function hSvsEdit(args) {
+function HSvsEdit(args) {
     const _className = "SvsEdit",
     _version   = "0.4";
     let edit_dialog = null,

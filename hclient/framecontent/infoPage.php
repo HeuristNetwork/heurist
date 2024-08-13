@@ -42,10 +42,10 @@ if(!isset($message)){
                 $message = $message.$message['sysmsg'];
             }
         }
-    }else if( @$_REQUEST['message'] ){
+    }elseif( @$_REQUEST['message'] ){
         $message = $_REQUEST['message'];
         $is_error = false;
-    }else{ 
+    }else{
         //take error message from system
         if(isset($system)){
             $err = $system->getError();
@@ -54,16 +54,16 @@ if(!isset($message)){
             $message = 'Heurist core engine is not initialized.';
             $is_error_unknown = true;
         }
-        
+
     }
     if(!$message){
         $message ='Unknown error.';
         $is_error_unknown = true;
     }
-            
+
     if($is_error_unknown){
         if(defined('CONTACT_HEURIST_TEAM')){
-            $message = $message.' Please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM; 
+            $message = $message.' Please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM;
         }else{
             $message = $message.' Please contact Heurist team';
         }
@@ -108,12 +108,12 @@ if(!isset($message)){
         <script>window.hWin = window;</script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
-    
+
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>   
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_edit.js"></script>
 
         <script>
@@ -130,7 +130,7 @@ if(!isset($message)){
                                 }else{
                                     location.reload();
                                 }
-                                
+
                             });
                         }
                     });
@@ -145,7 +145,7 @@ if(!isset($message)){
     }else{
         print '<script>if(window.history && typeof history.pushState === "function") {window.history.pushState({}, document.title, window.location.pathname)}</script>';
     }
-    
+
     ?>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
@@ -153,9 +153,9 @@ if(!isset($message)){
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
-            <div class="<?php echo $is_error?'ui-state-error':'';?>" 
+            <div class="<?php echo $is_error?'ui-state-error':'';?>"
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info';?>" 
+                <span class="ui-icon <?php echo $is_error?'ui-icon-alert':'ui-icon-info';?>"
                       style="float: left; margin-right:.3em;font-weight:bold"></span>
                 <?php echo USanitize::sanitizeString($message);?>
             </div>

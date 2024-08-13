@@ -182,14 +182,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             if(is_initscope_empty){
                 //find all types for result and add option for each with counts.
                 let rectype_Ids = window.hWin.HAPI4.currentRecordset.getRectypes();
-
-                for (let rty in rectype_Ids){
-                    if(rty>=0){
-                        rty = rectype_Ids[rty];
-                        opt = new Option('only: '+$Db.rty(rty,'rty_Plural'), rty);
+                rectype_Ids.forEach(rty => {
+                        let opt = new Option('only: '+$Db.rty(rty,'rty_Plural'), rty);
                         selScope.appendChild(opt);
-                    }
-                }
+                });
             }
         }
         //$(selScope)
@@ -1006,12 +1002,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             let recids = Object.keys(response['errors_list']);
                             if(recids && recids.length>0){
                                 sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
-                                for(key in response['errors_list']){
-                                    let text = response['errors_list'][key];
+                                for(let key2 in response['errors_list']){
+                                    let text = response['errors_list'][key2];
                                     if(Array.isArray(text)){
                                         text = text.join('<br>');
                                     }
-                                    sResult += (key+': '+ text + '<br>');   
+                                    sResult += (key2+': '+ text + '<br>');   
                                 }
                                 sResult += '</div>';   
                             }

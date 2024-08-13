@@ -116,7 +116,10 @@ $.widget( "heurist.lookupConfig", {
         
         this._available_services = window.hWin.HAPI4.sysinfo['services_list'];
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
-            window.hWin.HEURIST4.msg.showMsgErr('There are no available services, or the configuration file was not found or is broken');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'There are no available services, or the configuration file was not found or is broken',
+                status: window.hWin.ResponseStatus.ACTION_BLOCKED
+            });
             return;
         }
         
@@ -886,7 +889,10 @@ $.widget( "heurist.lookupConfig", {
 
                 this._on($('#a_lookup_url'), {
                     click: function(){
-                        window.hWin.HEURIST4.msg.showMsgErr('Due to security reasons this url cannot be provided.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'Due to security reasons this url cannot be provided.',
+                            status: window.hWin.ResponseStatus.ACTION_BLOCKED
+                        });
                         return false;
                     }
                 });
@@ -1170,7 +1176,10 @@ $.widget( "heurist.lookupConfig", {
         type = (type == '') ? 'getMints' : type;
 
         if(nomismaServices.indexOf(type) == -1){
-            window.hWin.HEURIST4.msg.showMsgErr('An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "'+ type +'"');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "${type}"`,
+                status: window.hWin.ResponseStatus.ACTION_BLOCKED
+            });
             return;
         }
 

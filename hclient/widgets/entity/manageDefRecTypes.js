@@ -1758,7 +1758,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     
     saveUiPreferences:function(new_params){
 
-        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single') return true;
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single') return;
+        
         if(new_params){
             let params = this.getUiPreferences();
             
@@ -1768,7 +1769,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             this.usrPreferences = params;
         }
-        return true;
     },
     
     //

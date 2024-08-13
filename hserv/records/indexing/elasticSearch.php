@@ -61,8 +61,8 @@
 
     */
 require_once 'elasticSearchHelper.php';
-    
-// it is assumed that $system is already inited    
+
+// it is assumed that $system is already inited
 class ElasticSearch {
 
      /**
@@ -70,7 +70,7 @@ class ElasticSearch {
      * the outside. This prevents instantiating this class.
      * This is by purpose, because we want a static class.
      */
-    private function __construct() {}    
+    private function __construct() {}
     private static $mysqli = null;
     private static $initialized = false;
 
@@ -93,11 +93,11 @@ class ElasticSearch {
     * @return bool True if successful
     */
     public static function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
-        
+
         if(isElasticUp()) {
-            
+
             self::initialize();
-            
+
             $record = new stdClass();
 
             // Retrieve record level data
@@ -186,7 +186,7 @@ class ElasticSearch {
     */
     public static function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         if(isElasticUp()) {
-            
+
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $query = new stdClass();
@@ -234,7 +234,7 @@ class ElasticSearch {
     */
     public static function deleteIndexForDatabase ($dbName) {
         if(isElasticUp()) {
-            
+
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName);
             $query = new stdClass();
@@ -259,9 +259,9 @@ class ElasticSearch {
     */
     public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
-            
+
             self::initialize();
-            
+
             self::deleteIndexForRectype ($dbName, $recTypeID);// clear the existing index
 
             $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
@@ -323,12 +323,12 @@ class ElasticSearch {
         }
         return false;
     } // buildAllIndices
-    
+
     /**
      * Checks if ElasticSearch is synchronised, called by functions in elasticSearch.php
      */
     private static function checkElasticSync($dbName) {
-        
+
         self::initialize();
         // 1. Retrieve highest MySQL timestamp
         $mysqlTimestamp = self::getHighestMySqlTimestamp();
@@ -344,7 +344,7 @@ class ElasticSearch {
             }
         }
     }
-    
+
     /**
      * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
      * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
@@ -353,7 +353,7 @@ class ElasticSearch {
 
         $query = 'SELECT MAX(rec_Modified) FROM Records';
         $res = mysql__select_value(self::$mysqli, $query);
-        
+
         if ($res) {
             return $res; // Gets the rec_Modified value from the first row.
         } else {
@@ -388,7 +388,7 @@ class ElasticSearch {
         }
 
         return NULL;
-    }    
-    
+    }
+
 }
 ?>

@@ -18,7 +18,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    
+
 define('LOGIN_REQUIRED',1);
 define('PDIR','../../');
 
@@ -34,8 +34,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     var importMedia = new hImportMedia();
                 }
             }
-        
-        
+
+
         </script>
         <style>
             body{
@@ -57,8 +57,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 /*border-collapse:collapse;*/
                 font-size: 1em;
             }
-            
-            div.top-div, 
+
+            div.top-div,
 			div.bottom-div{
 				display: flex;
 				align-content: center;
@@ -82,7 +82,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 				flex: 0 1 200px;
 			}
         </style>
-        
+
     </head>
 
     <!-- HTML -->
@@ -90,33 +90,33 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 <div class="top-div">
 <div id="divStep1">
     <div style="height:8em;padding:0">
-        <p><b>This function uploads a set of files specified by URLs.</b></p> 
+        <p><b>This function uploads a set of files specified by URLs.</b></p>
         <p><b>Step 1: </b>Paste URLs + optional description, one file to a line, in the area below. Recommended format is CSV with a header ( URL,Description ) in line 1</p>
         <input type="file" id="uploadFile" style="display:none">
       <div style="padding-top:4px">
         <h2 style="display: inline-block;margin:0">or</h2>
         <div id="btnUploadFile">Upload File</div>
-        <div style="float:right">encoding: 
+        <div style="float:right">encoding:
             <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
             </select>
        </div>
-    </div>          
-    <div class="heurist-helper1" style="padding-top: 9px;">
-    
-    </div>                                    
-                    
     </div>
-    <textarea id="sourceContent" rows="25" cols="0" 
+    <div class="heurist-helper1" style="padding-top: 9px;">
+
+    </div>
+
+    </div>
+    <textarea id="sourceContent" rows="25" cols="0"
     style="width:100%;resize:none;padding:0.5em;border:2px solid lightblue;margin-top: 10px;"></textarea>
-    
-    
+
+
 </div>
 <div id="divStep2">
     <div style="height:10em;">
         <p><b>Step 2</b></p>
         <div>
             <br>
-            <input id="csv_header" 
+            <input id="csv_header"
                 style="margin:0 0.5em 0 0"
                 class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
             <label for="csv_header">Labels in line 1</label>
@@ -154,18 +154,18 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
             </div>
             <div>
                 <label for="multival_separator">Multivalue separator:</label>
-                <input id="multival_separator" value="|" class="text ui-widget-content ui-corner-all" 
+                <input id="multival_separator" value="|" class="text ui-widget-content ui-corner-all"
                     style="width: 25px;margin-left: 8px;">
             </div>
     </fieldset>
 </div>
-<div id="divStep3"> 
+<div id="divStep3">
     <div style="height:6em;">
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field assignment<br>(URL/path is required)</p>
     </div>
     <fieldset style="padding-top:1em;"><legend style="display:none"></legend>
-           
+
             <div>
                 <span style="color:red">URL/Path</span><br>
                 <select id="field_url" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
@@ -182,7 +182,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
-            <!-- Separator for description field for multivalue 
+            <!-- Separator for description field for multivalue
             <div>
                 <span>Description separator</span><br>
                 <input id="field_desc_sep" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px" value=", Download "/>
@@ -193,15 +193,15 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 <input id="field_desc_concat" checked class="column_roles text ui-widget-content ui-corner-all" type="checkbox" value="1" style="margin-left:0px"/>
                 <span> Concatenate additional fields past first delimiter with Description</span>
             </div>
-            
-            
-    </fieldset> 
+
+
+    </fieldset>
     <div style="padding-left:5px;height:5em">
         <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em;padding:4px"></div>
         <div id="btnImportData">Import</div>
     </div>
 </div>
-<!-- <div id="divCurtain" style="position:absolute;right:0px;height:520px;width:400px;" class="semitransparent"> 
+<!-- <div id="divCurtain" style="position:absolute;right:0px;height:520px;width:400px;" class="semitransparent">
  curtain
 </div> -->
 </div>

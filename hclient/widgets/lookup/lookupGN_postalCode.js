@@ -269,7 +269,7 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
             return;
         }
 
-        let sURL = 'http://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI;
+        let sURL = 'http'+'://api.geonames.org/postalCodeLookupJSON?username='+accessToken_GeonamesAPI;
 
         if(this.element.find('#inpt_postalcode').val()!=''){
             sURL += '&postalcode=' + this.element.find('#inpt_postalcode').val(); 
@@ -422,7 +422,10 @@ $.widget( "heurist.lookupGN_postalCode", $.heurist.recordAction, {
         if(is_wrong_data){
 
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
         }
     }
 });

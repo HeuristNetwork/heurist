@@ -15,7 +15,7 @@
 
     /**
     * Order resource fields by rec_Title
-    * 
+    *
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @copyright   (C) 2005-2023 University of Sydney
     * @link        https://HeuristNetwork.org
@@ -46,7 +46,7 @@ if(!(@$_REQUEST['rty_ID']>0 && @$_REQUEST['dty_ID']>0)){
     print 'You have to define rty_ID (rectype id) and dty_ID (field id) parameters';
     exit;
 }
-    
+
 $mysqli = $system->get_mysqli();
 
 //3, 134
@@ -54,7 +54,7 @@ $mysqli = $system->get_mysqli();
 $query = 'SELECT dtl_ID, r1.rec_ID, dtl_Value, r2.rec_Title FROM recDetails, Records r1, Records r2 '
 .' where r1.rec_ID=dtl_RecID and r1.rec_RecTypeID='.intval($_REQUEST['rty_ID']).' and dtl_DetailTypeID='.intval($_REQUEST['dty_ID']
 ).' and dtl_Value=r2.rec_ID order by r1.rec_ID, r2.rec_Title ';
-// and r1.rec_ID=494461    
+// and r1.rec_ID=494461
 $res = $mysqli->query($query);
 
 $rec_ID = 0;
@@ -67,7 +67,7 @@ $cnt = 0;
 
 if($res){
     while ($row = $res->fetch_row()) {
-        
+
         if($rec_ID!=$row[1]){
             $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);
             $rec_ID=$row[1];
@@ -87,7 +87,7 @@ print $cnt.' records updated';
 function updateDtlValues($mysqli, $ids, $vals, $titles){
 
     if(is_array($vals) && count($vals)>1){
-        
+
         sort($ids);
         $k = 0;
         foreach ($ids as $dt) { //sorted dtl_ID
@@ -102,9 +102,9 @@ function updateDtlValues($mysqli, $ids, $vals, $titles){
 
 	    $k++;
         }
-        return 1;  
+        return 1;
     }else{
         return 0;
-    }    
-}    
+    }
+}
 ?>

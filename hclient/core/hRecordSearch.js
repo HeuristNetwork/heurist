@@ -50,7 +50,10 @@ function HRecordSearch() {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(response.data  && response.data.memory_warning){
-                           window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: response.data.memory_warning,
+                            error_title: 'Query results too large'
+                        });
                     }
                     
                     callback( HRecordSet(response.data) );
@@ -142,7 +145,10 @@ function HRecordSearch() {
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                         if(response.data  && response.data.memory_warning){
-                               window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: response.data.memory_warning,
+                                error_title: 'Query results too large'
+                            }); 
                         }
                         
                         recordset = new HRecordSet(response.data);

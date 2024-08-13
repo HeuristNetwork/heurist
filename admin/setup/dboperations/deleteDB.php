@@ -1,4 +1,4 @@
-<?php                                                
+<?php
 /**
 * deleteDB.php: delete MULTIPLE databases. Called by dbStatistics.php (for system admin only)
 *               note that deletion of current database is handled separately by deleteCurrentDB.php which calls dbUtils.php
@@ -35,16 +35,16 @@ $sysadmin_pwd = System::getAdminPwd();
 if($sysadmin_pwd==null){
     $system->addError(HEURIST_INVALID_REQUEST, 'Password parameter is not defined');
 }else{
-    
+
     $database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
     //database validation - code duplicates System::dbname_check. However security reports does not recognize it
     $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, 2);
-    
+
     if ($sErrorMsg!=null) {
         $system->addError(HEURIST_ACTION_BLOCKED, $sErrorMsg);
     }else{
 
-    $database_to_delete = preg_replace('/[^a-zA-Z0-9_]/', "", $database_to_delete);//for snyk
+    $database_to_delete = preg_replace(REGEX_ALPHANUM, "", $database_to_delete);//for snyk
 
     if(array_key_exists('create_archive', $_REQUEST)){
         $create_arc = $_REQUEST['create_archive'];
@@ -56,10 +56,10 @@ if($sysadmin_pwd==null){
     $is_delete_current_db = (@$_REQUEST['db']==$database_to_delete && $sysadmin_pwd=='DELETE MY DATABASE');
 
 // Password check for system administrator who can delete any database
-    if($is_delete_current_db || !$system->verifyActionPassword($sysadmin_pwd, $passwordForDatabaseDeletion, 14)) 
+    if($is_delete_current_db || !$system->verifyActionPassword($sysadmin_pwd, $passwordForDatabaseDeletion, 14))
     {
         if($database_to_delete){
-            
+
             //if database to be deleted is not current - only system admin can do it
             $isSystemInited = $system->init(@$_REQUEST['db']);//need to verify credentials for current database
 
@@ -70,15 +70,15 @@ if($sysadmin_pwd==null){
 //    $system->addError(HEURIST_INVALID_REQUEST, 'Database parameter is not defined');
 //}
 
-                    $allow_deletion = true;        
-                
+                    $allow_deletion = true;
+
 
                     list($dbname_full, $dbname ) = mysql__get_names( $database_to_delete );
 
                     if($is_delete_current_db){
-                
+
                         $user = user_getById($system->get_mysqli(), $system->get_user_id());//user in current db
-                            
+
                         $allow_deletion = false;
                         //find the same user in database to be deleted
                         //find user by email
@@ -91,17 +91,17 @@ if($sysadmin_pwd==null){
                             $allow_deletion = (@$groups[1]=='admin');
                         }
                     }
-                    
-    /* before 2020-12-21 only system administrator or db            
+
+    /* before 2020-12-21 only system administrator or db
                 if (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN)){ //system admin
-                    
+
                     $allow_deletion = true;
                 }else{
                     list($dbname_full, $dbname ) = mysql__get_names( $_REQUEST['database'] );
                     //find user by email
                     $usr = user_getByField($system->get_mysqli(), 'ugr_eMail', $user['ugr_eMail'], $dbname_full);
                     if(@$usr['ugr_ID']==2){ //database owner
-                        $allow_deletion = true;   
+                        $allow_deletion = true;
                     }
                 }
     */
@@ -109,18 +109,18 @@ if($sysadmin_pwd==null){
                     {
                         //find owner of database
                         $usr_owner = user_getByField($system->get_mysqli(), 'ugr_ID', 2, $dbname_full);
-                
+
                         //not verbose
                         $res = DbUtils::databaseDrop(false, $database_to_delete, $create_arc);
-                        
+
                         // in case deletion by sysadmin - send email to onwer of deleted database
                         if($res && !$is_delete_current_db)
-                        { 
+                        {
                             sendEmail_DatabaseDelete($usr_owner, $dbname, 1);
                         }
-                        
+
                     }else{
-                        $system->addError(HEURIST_REQUEST_DENIED, 
+                        $system->addError(HEURIST_REQUEST_DENIED,
                             'You must be a database administrator or owner to delete database '.$database_to_delete,1);
                     }
 
@@ -141,7 +141,7 @@ if(is_bool($res) && !$res){
 }else{
     $response = array("status"=>HEURIST_OK, "data"=> $res);
 }
-    
+
 header('Content-type: text/javascript');
 print json_encode($response);
 ?>

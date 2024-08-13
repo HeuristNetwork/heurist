@@ -645,15 +645,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 //load list of field types
                 this._initStep2_FieldTreeView(rectypeIds, tree_mode);
 
-            }  if(this.step==2 && newstep==3){  //set individual facets
+            }else if(this.step==2 && newstep==3){  //set individual facets
 
                 if(!this._initStep3_FacetsSettings()){
                     return;
                 }
-            }
-
-            //skip step
-            if(this.step==2 && newstep==1){
+            }else if(this.step==2 && newstep==1){
+                //skip step
                 newstep = 0;
             }else if(this.step==4 && newstep==3){
                 //newstep=2;
@@ -1230,11 +1228,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 //treedata[0]['children'][2]['children'] = treedata[0]['children'][2]['children'].filter(field => dtys_to_keep.includes(field.dtyID_local));
                 let fields = treedata[0]['children'][2]['children'];
 
-                for(let idx = 0; idx < fields.length; idx ++){
+                let idx = 0;
+                while(idx < fields.length){
                     /*
                     if(fields[idx].type == 'separator'){ // remove separators
                         fields.splice(idx, 1);
-                        --idx;
                         continue;
                     }
                     */
@@ -1242,14 +1240,15 @@ $.widget( "heurist.search_faceted_wiz", {
                     let dty_id = fields[idx].dtyID_local;
                     if(!dtys_to_keep.includes(dty_id)){
                         fields.splice(idx, 1);
-                        --idx;
                         continue;
                     }
 
-                    let org_name = fields[idx].name;
-                    let fld_name = $Db.dty(dty_id, 'dty_Name');
+                    const org_name = fields[idx].name;
+                    const fld_name = $Db.dty(dty_id, 'dty_Name');
                     fields[idx].name = fld_name;
                     fields[idx].title = fields[idx].title.replace(org_name, fld_name);
+                    
+                    idx++;
                 }
 
                 treedata[0]['children'][2]['children'] = fields;
@@ -1605,14 +1604,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
         facets = [];
 
-        function __getRandomInt() {
-            let min = 0;
-            let max =  100000;
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-        }
-
         let old_facets = this.options.params.facets;
 
         if(sharedFields){ // retrieve shared fields, replace record type id at start of code
@@ -1699,7 +1690,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     if(old_facet!=null){
 
                         let new_facet = {
-                            'var': __getRandomInt(), //unique identificator
+                            'var': window.hWin.HEURIST4.util.random(), //unique identificator
                             code:node.data.code,
                             title: old_facet.title,
                             help: old_facet.help,
@@ -1727,7 +1718,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }else{
 
                         facets.push( {
-                            'var': __getRandomInt(),
+                            'var': window.hWin.HEURIST4.util.random(),
                             code:node.data.code,
                             title:'{NEW}', //(node.data.name?node.data.name:node.title),
                             groupby: null,

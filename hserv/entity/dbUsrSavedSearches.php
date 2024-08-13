@@ -2,7 +2,7 @@
 
     /**
     * db access to usrSavedSearches table for saved searches
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -32,59 +32,59 @@ class DbUsrSavedSearches extends DbEntityBase
 
     /**
     *  search users
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
-                
+
         if(parent::search()===false){
-              return false;   
+              return false;
         }
-        
+
         $needCheck = false;
-        
-        //compose WHERE 
+
+        //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);
-        
+
         $pred = $this->searchMgr->getPredicate('svs_ID');
         if($pred!=null) {array_push($where, $pred);}
 
         $pred = $this->searchMgr->getPredicate('svs_Name');
         if($pred!=null) {array_push($where, $pred);}
-        
+
         //find filters belong to group
         $pred = $this->searchMgr->getPredicate('svs_UGrpID');
         if($pred!=null) {array_push($where, $pred);}
-        
-        
+
+
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
-        
+
             $this->data['details'] = 'svs_ID';
-            
-        }else if(@$this->data['details']=='name'){
+
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'svs_ID,svs_Name';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
-            
+        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
+
             $this->data['details'] = 'svs_ID,svs_Name,svs_UGrpID,svs_Query';
-            
+
         }else{
             $needCheck = true;
         }
-        
+
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
+
         //validate names of fields
         if($needCheck && !$this->_validateFieldsForSearch()){
             return false;
@@ -93,7 +93,7 @@ class DbUsrSavedSearches extends DbEntityBase
         //----- order by ------------
         //compose ORDER BY
         $order = array();
-        
+
         $value = @$this->data['sort:svs_Modified'];
         if($value!=null){
             array_push($order, 'svs_Modified '.($value>0?'ASC':'DESC'));
@@ -112,7 +112,7 @@ class DbUsrSavedSearches extends DbEntityBase
                     }
                 }
             }
-        }  
+        }
 
         $is_ids_only = (count($this->data['details'])==1);
 
@@ -135,53 +135,53 @@ class DbUsrSavedSearches extends DbEntityBase
 
         return $result;
     }
-    
-    
+
+
     //
     // validate permission for edit tag
     // for delete and assign see appropriate methods
-    //    
+    //
     protected function _validatePermission(){
-        
-        if(!$this->system->is_admin() && 
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+
+        if(!$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-        
-        
+
+
             $grpIDs = $this->system->get_user_group_ids('admin');
-            
+
             $mysqli = $this->system->get_mysqli();
-                                                           
+
             $cnt = mysql__select_value($mysqli, 'SELECT count(svs_ID) FROM '.$this->config['tableName']
             .' WHERE svs_ID in ('.implode(',', $this->recordIDs).' AND svs_UGrpID not in ('.implode(',', $grpIDs).')');
-                    
-            
+
+
             if($cnt>0){
-                
-                $this->system->addError(HEURIST_REQUEST_DENIED, 
+
+                $this->system->addError(HEURIST_REQUEST_DENIED,
                     'Insufficient rights (logout/in to refresh) for this operation');
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     //
     //
-    //    
+    //
     protected function prepareRecords(){
-    
+
         $ret = parent::prepareRecords();
 
         //@todo captcha validation for registration
-        
+
         //add specific field values
         foreach($this->records as $idx=>$record){
-            $this->records[$idx]['svs_Modified'] = date('Y-m-d H:i:s');//reset
-            
+            $this->records[$idx]['svs_Modified'] = date(DATE_8601);//reset
+
             $tbl = $this->config['tableName'];
-            
+
             //validate duplication
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
@@ -189,19 +189,19 @@ class DbUsrSavedSearches extends DbEntityBase
                     .$this->records[$idx]['svs_UGrpID']
                     ." AND svs_Name='"
                     .$mysqli->real_escape_string( $this->records[$idx]['svs_Name'])."'");
-                    
+
             if($res>0 && $res!=@$this->records[$idx]['svs_ID']){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Filter cannot be saved. The provided name already exists in group');
                 return false;
             }
-            
+
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['svs_ID']>0));
-            
+
         }
-        
+
         return $ret;
-        
-    }    
- 
+
+    }
+
 }
 ?>

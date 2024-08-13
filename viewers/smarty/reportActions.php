@@ -22,33 +22,33 @@
 
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
-    
+
 class ReportActions {
-    
+
     protected $system;
     protected $dir; //smarty folder
-    
+
     public function __construct( $_system, $_dir) {
-       global $system; 
-       
+       global $system;
+
        if($_system){
-            $this->system = $_system;    
+            $this->system = $_system;
        }else{
            $this->system = $system;
        }
-       
-       
+
+
        if($_dir){
            $this->dir = $_dir;
-       }else if(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
-            $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;    
+       }elseif(defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+            $this->dir = HEURIST_SMARTY_TEMPLATES_DIR;
        }
-    }    
-    
+    }
+
 
     /**
     * Returns the list of available tempaltes as json array
-    * 
+    *
     *  1. checks for gpl in template folder
     *  2. convert them to tpl
     *  3. return all tpl names
@@ -75,24 +75,24 @@ class ReportActions {
                     // gpl->tpl
                     $template_body = file_get_contents($this->dir.$filename);
                     $res = $this->convertTemplate($template_body, 1);//to local codes
-                    
+
                     if(is_array($res) && @$res['details_not_found']){
                         //error except Harvard Bibliography (since many databases do not have biblio defs by default)
                         if($filename!='Harvard Bibliography.gpl'){
                             USanitize::errorLog('Cant convert gpl template '.$this->dir.$filename
                                 .'. Local details not found '.print_r($res['details_not_found'],true));
                         }
-                        
-                    }else if(is_array($res) && @$res['template']) {
+
+                    }elseif(is_array($res) && @$res['template']) {
                         $name = substr($filename, 0, -4);
                         $filename_tpl = $name.'.tpl';
                         $template_body = $res['template'];
-                        
+
                         //save tpl
                         $res = $this->saveTemplate($template_body, $this->dir.$filename_tpl);
 
                         if(@$res['ok']){
-                            //remove gpl 
+                            //remove gpl
                             fileDelete($this->dir.$filename);
                             array_push($results, array( 'filename'=>$filename_tpl, 'name'=>$name));
                         }else{
@@ -101,9 +101,9 @@ class ReportActions {
                     }else{
                         USanitize::errorLog('Unknow issue on gpl convertation '.$this->dir.$filename.'. '.print_r($res,true));
                     }
-                       
-                    
-                }else if(file_exists($this->dir.$filename) && $ext=="tpl" && $isnot_temp)
+
+
+                }elseif(file_exists($this->dir.$filename) && $ext=="tpl" && $isnot_temp)
                 {
                     //$path_parts['filename'] ));- does not work for nonlatin names
                     $name = substr($filename, 0, -4);
@@ -126,7 +126,7 @@ class ReportActions {
         if($filename) {
             $filename = $this->dir.basename($filename);
         }
-        
+
         if($filename && file_exists($filename)){
             header('Content-type: text/html; charset=utf-8');
             readfile($filename);
@@ -135,20 +135,20 @@ class ReportActions {
             print json_encode(array("error"=>"file not found"));
         }
     }
-    
+
     //
     //
     //
     private function getUniqueTemplateName($template_file){
 
-         
+
 
         $path_parts = pathinfo($template_file);
         $template_file = $path_parts['filename'];
         $cnt = 0;
-        
+
         $template_file_fullpath = $this->dir.$template_file.'.tpl';
-        
+
         do{
             if(file_exists($template_file_fullpath)){
                 if($cnt>0){
@@ -162,7 +162,7 @@ class ReportActions {
                 $template_file_fullpath = $this->dir.$template_file."($cnt).tpl";
             }
         }while (file_exists($template_file_fullpath));
-        
+
         return $template_file_fullpath;
     }
 
@@ -170,13 +170,13 @@ class ReportActions {
     //
     //
     public function  saveTemplate($template_body, $template_file){
-         
+
 
         $path_parts = pathinfo($template_file);
         $template_file = $path_parts['filename'];
         $template_file = $template_file.".tpl";
         $template_file_fullpath = $this->dir.$template_file;
-        
+
         /*$ext = (array_key_exists('extension',$path_parts))?strtolower($path_parts['extension']):"";
         if($ext!="tpl"){
             $template_file = $template_file.".tpl";
@@ -195,7 +195,7 @@ class ReportActions {
     private function endsWith($haystack, $needle) {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
-    }    
+    }
 
     /**
     * Returns the content of template file as text with local IDs replaced by concept IDs or viseverse
@@ -204,7 +204,7 @@ class ReportActions {
     * @param mixed $mode - 0 - to concept code, 1 - to local code
     */
     public function convertTemplate($template, $mode){
-        
+
         //1. get template content
         //2. find all texts within {}
         //3. find words within this text
@@ -217,7 +217,7 @@ class ReportActions {
         if($template==null || $template==''){
             return array("error"=>"Template is empty");
         }
-        
+
         //2. find all texts within {} - expressions
         if (! preg_match_all('/\{([^}]+)\}/s', $template, $matches)){
             return $template;    // nothing to do -- no substitutions
@@ -225,7 +225,7 @@ class ReportActions {
 
         $not_found_details = array();
         $replacements_exp = array();
-        
+
         $len = count($matches[1]);
         for ($i=0; $i < $len; ++$i) {
 
@@ -237,11 +237,11 @@ class ReportActions {
             if (! preg_match_all('/(\\$([a-zA-Z_0-9.])+)/', $exp, $matches2) ){
                 continue;
             }
-            
+
             $replacements = array();
-        
+
             foreach ($matches2[1] as $var) {
-                
+
         //4. split by "."
                     $parts = explode(".", $var);
                     $parts2 = array();
@@ -249,25 +249,25 @@ class ReportActions {
         //5. find starting with "f"
                         if(strpos($part, 'f')===0){
                             $prefix = 'f';
-                        }else if(strpos($part, '$f')===0){
+                        }elseif(strpos($part, '$f')===0){
                             $prefix = '$f';
                         }else{
                             $prefix = null;
                         }
-        
+
                         if($prefix){
         //6. get local DT ID - find Concept Code
                             $code = substr($part, strlen($prefix));
                             if(substr($part, -1)=='s'){
                                     $suffix = 's';
                                     $code = substr($code,0,strlen($code)-1);
-                            }else if($this->endsWith($part,'_originalvalue')){                                            
+                            }elseif($this->endsWith($part,'_originalvalue')){
                                     $suffix = '_originalvalue';
                                     $code = substr($code,0,strlen($code)-strlen($suffix));
                             }else{
                                     $suffix = "";
                             }
-                            
+
                             if($mode==0){
                                 $localID = $code;
                                 if(strpos($localID,"_")===false){
@@ -276,10 +276,10 @@ class ReportActions {
                                 }
                             }else{
                                 $conceptCode = $code;
-                                
+
                                 if(strpos($conceptCode,"_")!==false){
                                     $conceptCode = str_replace("_","-",$conceptCode);
-                                    
+
                                     $localID = ConceptCode::getDetailTypeLocalID($conceptCode);
                                     if($localID==null){
                                         //local code not found - it means that this detail is not in this database
@@ -294,12 +294,12 @@ class ReportActions {
                         array_push($parts2, $part);
                     }
                     $new_var = implode(".", $parts2);
-                    
+
                     if($var!=$new_var){
-                        $replacements[$var] = $new_var;  
+                        $replacements[$var] = $new_var;
                     }
             }//for vars
-            
+
             if(count($replacements)>0){
                    $new_exp = "{".$this->array_str_replace(array_keys($replacements), array_values($replacements), $exp)."}";
                    if($matches[0][$i] != $new_exp){
@@ -307,8 +307,8 @@ class ReportActions {
                    }
             }
         }//for expressions
-        
-        
+
+
         if(count($replacements_exp)>0){
              $template = $this->array_str_replace(array_keys($replacements_exp), array_values($replacements_exp), $template);
         }
@@ -318,7 +318,7 @@ class ReportActions {
         }else{
             return $template;
         }
-        
+
     }
 
     /**
@@ -327,10 +327,10 @@ class ReportActions {
     * @param mixed $filename - name of template file
     */
     public function smartyLocalIDsToConceptIDs($filename, $template=null){
-        
+
         $dbID = $this->system->get_system('sys_dbRegisteredID');
         $res = null;
-        
+
         if(!$dbID){
              $res = array("error"=>"Database must be registered to allow translation of local template to global template");
         }else {
@@ -342,7 +342,7 @@ class ReportActions {
                     $res = array('error'=>"File $filename not found");
                 }
             }
-            
+
             if(!$res){
                 if($template && strlen($template)>0){
                     $res = $this->convertTemplate($template, 0);
@@ -350,9 +350,9 @@ class ReportActions {
                     $res = array('error'=>'Template is not defined or empty');
                 }
             }
-            
+
         }
-        
+
         if(is_array($res)){
             header("Content-type: text/javascript");
             print json_encode($res);
@@ -364,66 +364,66 @@ class ReportActions {
             print $res; //"<hr><br><br><xmp>".$template."</xmp>";
         }
     }
-    
+
     /**
     * Returns the content of global concept IDs stream as text with local IDs
     *
     * @param mixed $instream - source data with global concept IDs
     */
     public function importTemplate($params, $for_cms = null){
-         
+
         if($params==null){
             $res = array("error"=>'Error occurred - request is empty');
-            
+
         }else
         if ( !@$params['size'] ) {
             $res = array("error"=>'Error occurred during upload - file had zero size');
-            
+
         }else{
 
             $origfilename = basename($params['name']);
             $res = array("error"=>'Error occurred during upload - file does not exist');
 
-            $filename = null;        
-            
+            $filename = null;
+
             if($for_cms!=null){
                 $path = dirname(__FILE__).'/../../hclient/widgets/cms/templates/snippets/';
                 $path = realpath($path);
                 if($path!==false){ //does not exist
                     $filename = $path.DIRECTORY_SEPARATOR.basename($for_cms);
                 }
-            }else if (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
+            }elseif (@$params['tmp_name'] && is_uploaded_file($params['tmp_name'])) {
                     $filename = USanitize::sanitizePath($params['tmp_name']);
             }
-            
+
             if(file_exists($filename)){
-                
+
                 //read tempfile
                 $template = file_get_contents($filename);
-            
+
                 $res = $this->convertTemplate($template, 1);
-                
+
                 if(!is_array($res)){
                     $res = array('template'=>$res);
                 }
-                
+
                 if(!@$res['error']){
-                      //check if template with such name already exists 
+                      //check if template with such name already exists
                       /*while (file_exists($this->dir.$origfilename)){
                           $this->dir.$origfilename = $this->dir.$origfilename . "($cnt)";
                       }*/
                       $origfilename = $this->getUniqueTemplateName($origfilename);
-                    
+
                       $res2 = $this->saveTemplate($res['template'], $origfilename);
                       if(count(@$res['details_not_found'])>0){
                           $res2['details_not_found'] = $res['details_not_found'];
                       }
                       $res = $res2;
                 }
-            
+
             }
         }
-        
+
         //header("Content-type: text/javascript");
         header('Content-type: application/json');
         print json_encode($res);

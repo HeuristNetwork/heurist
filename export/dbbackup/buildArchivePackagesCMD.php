@@ -24,16 +24,16 @@
 */
 
 // Default values for arguments
-$arg_database = null;  
+$arg_database = null;
 $arg_skip_files = false;    // include all the uploaded files
 $arg_include_docs = true;   // include full documentation to make the archive interpretable
-$arg_skip_hml = true;       // don't include HML as this function is primarily intended for database transfer 
+$arg_skip_hml = true;       // don't include HML as this function is primarily intended for database transfer
                             // and HML is voluminous. HML should be included if this is intended as longer term archive.
 $with_triggers = false;
-$backup_root = null; 
+$backup_root = null;
 
 if (@$argv) {
-    
+
 // example:
 //  sudo php -f /var/www/html/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
 //  sudo php -f buildArchivePackagesCMD.php -- -db=osmak_9,osmak_9c,osmak_9d
@@ -45,7 +45,7 @@ if (@$argv) {
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
-        if ($argv[$i][0] === '-') {                    
+        if ($argv[$i][0] === '-') {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
@@ -53,7 +53,7 @@ if (@$argv) {
                 if(strpos($argv[$i],'-db=')===0){
                     $ARGV['-db'] = substr($argv[$i],4);
                 }else{
-                    $ARGV[$argv[$i]] = true;    
+                    $ARGV[$argv[$i]] = true;
                 }
 
 
@@ -104,7 +104,7 @@ if($arg_database=='all'){
     foreach ($arg_database as $db){
         if(!in_array($db,$databases)){
             exit("Database $db not found\n");
-        }           
+        }
     }
 }
 
@@ -150,7 +150,7 @@ if($with_triggers){
                 'add-drop-database' => true,
                 'add-drop-table' => true,
                 'single-transaction' => true,
-                'skip-triggers' => true,  
+                'skip-triggers' => true,
                 'add-drop-trigger' => false);
 }
 
@@ -175,28 +175,28 @@ foreach ($arg_database as $idx=>$db_name){
             exit("Cannot clear existing backup folder $folder \n");
         }
     }
-    
+
     if(!file_exists($database_folder)){
         echo "skipped (database folder is missed)\n";
         continue;
     }
 
-    
+
     if (!folderCreate($folder, true)) {
         if(file_exists($progress_flag)) {unlink($progress_flag);}
         exit("Failed to create folder $folder in which to create the backup \n");
     }
-    
+
     echo "files.. ";
     $folders_to_copy = null;
 
     //copy resource folders
     if($arg_include_docs){
         //Exporting system folders
-        
+
         //get all folders except backup, scratch, file_uploads and filethumbs
         $folders_to_copy = folderSubs($database_folder, array('backup', 'scratch', 'file_uploads', 'filethumbs', 'webimagecache'));
-        
+
         // this is limited set of folder
         //$folders_to_copy = $system->getSystemFolders( 1, $db_name );
     }
@@ -218,11 +218,11 @@ foreach ($arg_database as $idx=>$db_name){
     }
 
 
-    if($arg_include_docs || !$arg_skip_files){     
+    if($arg_include_docs || !$arg_skip_files){
         folderRecurseCopy( $database_folder, $folder, $folders_to_copy, null, $copy_files_in_root);
     }
 
-    //if(false){// 2016-10-25  
+    //if(false){// 2016-10-25
     //    folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
     //}
 
@@ -274,17 +274,17 @@ foreach ($arg_database as $idx=>$db_name){
 
     // Do an SQL dump of the whole database
     $dumpfile = $folder."/".$db_name."_MySQL_Database_Dump.sql";
-    
+
     $res = DbUtils::databaseDump($db_name, $dumpfile, $dump_options);
     if($res===false){
         if(file_exists($progress_flag)) {unlink($progress_flag);}
-        
+
         $err = $system->getError();
         error_log('buildArchivePackagesCMD Error: '.@$err['message']);
-        
+
         exit("Sorry, unable to generate MySQL database dump for $db_name.".$err['message']."\n");
     }
-/*    
+/*
     try{
         $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
         $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
@@ -295,7 +295,7 @@ foreach ($arg_database as $idx=>$db_name){
     }
 */
      echo "zip.. ";
-     
+
     // Create a zipfile of the definitions and data which have been dumped to disk
     $destination = $backup_zip; //$folder.'.zip';
     if(file_exists($destination)) {unlink($destination);}

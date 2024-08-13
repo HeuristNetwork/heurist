@@ -5,37 +5,37 @@
     <legend>
     
         <div class="heurist-helper1" style="margin-top:50px;margin-bottom: 20px">       
-            This function registers the current database <b><span class="dbname"></span></b> in Heurist reference index database.
-            The database structure becomes available for reference, browsing and exporting to other Heurist databases.
+Cette fonction enregistre la base de données actuelle <b><span class="dbname"></span></b> dans la base de données d'index de référence Heurist.
+La structure de la base de données devient disponible pour référence, navigation et exportation vers d'autres bases de données Heurist.
         </div>
     
     </legend>
 
         <div>
-            <div class="header" style="vertical-align:top;min-width:100px">Registration URL:</div>
+            <div class="header" style="vertical-align:top;min-width:100px">URL d'inscription:</div>
             <input readonly="readonly" style="background-color:lightgray;width: 520px;margin-bottom: 10px;" tabindex="-1" id="serverURL"/>
         </div>
         <div>
-            <div class="header" style="vertical-align:top;min-width:100px">Database Description:</div>
+            <div class="header" style="vertical-align:top;min-width:100px">Description de la base de données:</div>
             <textarea maxlength="1000" cols="70" rows="3" id="dbTitle" class="text" style="border:1px solid;padding:2px" tabindex="0" autofocus=""></textarea>
             <div class="heurist-helper2">
-                Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)<br>
-                <span style="text-align: left; color: red;"><span id="cntChars">0</span> characters</span><br>
+                Saisissez une description courte mais informative (minimum 40 caractères) de cette base de données (affichée dans la liste de recherche)<br>
+                <span style="text-align: left; color: red;"><span id="cntChars">0</span> caractères</span><br>
             </div>
         </div>
         <div id="div_need_password" style="display:none">
-            <div class="header" style="min-width:100px">Sysadmin bypass:</div>
+            <div class="header" style="min-width:100px">Contournement de l'administrateur système:</div>
             <div style="margin-top: 10px;display:inline-block;">
                 <input type="password" maxlength="64" size="25" id="pwd"/>
             </div>
             <div class="heurist-helper2">
-                Since you are not database owner, please provide the password set by your system administrator to registered this database
+                Étant donné que vous n'êtes pas le propriétaire de la base de données, veuillez fournir le mot de passe défini par votre administrateur système pour enregistrer cette base de données
             </div>
         </div> 
         <div>
             <div class="header"></div>
             <div style="padding-top:10px" xstyle="display:inline-block;vertical-align:top;padding-left:4px">
-                <button class="ui-button-action" id="btnRegisterDb">Register <span class="dbname"></span></button>
+                <button class="ui-button-action" id="btnRegisterDb">Registre <span class="dbname"></span></button>
             </div>
             
         </div>
@@ -43,10 +43,10 @@
     </fieldset>    
     
     <div class="heurist-helper1" style="margin-top: 15px; margin-bottom: 20px;">
-            <br>Note: After registering the database, you will be asked to log in to a Heurist database (Heurist_Reference_Index).
-            <br>You should log into this database using your email address and the same login as your current database
-            <br>(or the first database you registered, if different). This will allow you to edit the collection metadata
-            <br>describing your database.
+            <br>Remarque : après avoir enregistré la base de données, il vous sera demandé de vous connecter à une base de données Heurist (Heurist_Reference_Index).
+            <br>Vous devez vous connecter à cette base de données en utilisant votre adresse e-mail et le même identifiant que votre base de données actuelle
+            <br>(ou la première base de données que vous avez enregistrée, si elle est différente). Cela vous permettra de modifier les métadonnées de la collection
+            <br>décrivant votre base de données.
     </div>
     
 </div>
@@ -63,12 +63,12 @@
     <fieldset><legend style="display:none"></legend>
     
     <div>
-        <div class="header">Database:</div>
+        <div class="header">Base de données:</div>
         <div class="text ui-corner-all" style="margin:4px"><span class="dbname"></span></div>
     </div>
 
     <div>
-        <div class="header">Registered with ID:</div>
+        <div class="header">Enregistré avec ID:</div>
         <div class="text ui-corner-all" style="margin:4px"><span class="dbId"></span></div>
     </div>
 
@@ -82,11 +82,11 @@
     </fieldset>
     
     <div class="heurist-helper1" style="margin-top: 15px; margin-bottom: 20px;"\>
-        <div class="header"><b>Please edit the collection metadata 
-                describing this database:</b></div>
+        <div class="header"><b>Veuillez modifier les métadonnées de la collection
+décrivant cette base de données:</b></div>
         <div class="text ui-corner-all" style="margin:4px">
-            <a href="" target="_blank" style="color:red;" class="dbLink">Click here to edit</a> 
-                (login as person who registered this database - note: use EMAIL ADDRESS as username)
+            <a href="" target="_blank" style="color:red;" class="dbLink">Cliquez ici pour éditer</a> 
+                (connectez-vous en tant que personne qui a enregistré cette base de données - remarque : utilisez l'ADRESSE EMAIL comme nom d'utilisateur)
         </div>
     </div>
                 

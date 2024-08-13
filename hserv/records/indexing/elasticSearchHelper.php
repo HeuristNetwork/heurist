@@ -43,9 +43,9 @@
      * @return string Name of the ElasticSearch index
      */
     function getElasticIndex($dbName) {
-        
+
         list($database_name_full, $database_name) = mysql__get_names( $dbName );
-        
+
         $elasticIndex = strtolower($database_name);// Must be lowercase
         preg_replace('/[^A-Za-z0-9 ]/', '_', $elasticIndex);// Replace non-alphanumeric with underscore
         return $elasticIndex;
@@ -174,7 +174,7 @@
      */
     function queryElastic($curl, $address, $query) {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(CTYPE_JSON));
         curl_setopt($curl, CURLOPT_URL, $address);
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($query));
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 10);// Max 10 seconds connection time
@@ -212,8 +212,8 @@
      */
     function createElasticIndex($database) {
         if(isElasticUp()) {
-            $query = '{ 
-                        "settings": { 
+            $query = '{
+                        "settings": {
                             "number_of_replicas": 1,
                             "number_of_shards": 1
                         },

@@ -1545,7 +1545,8 @@ $.widget( "heurist.search_faceted", {
                                                 }
                                                 
                                                 let predicates = [];
-                                                for (let i=0; i<values.length; i++){
+                                                let i=0;
+                                                while (i<values.length) {
                                                     let pred_parts = {};
                                                     if(window.hWin.HEURIST4.util.isempty(values[i])
                                                         || values[i].toLowerCase() == 'or' 
@@ -1571,17 +1572,15 @@ $.widget( "heurist.search_faceted", {
                                                             if(or_pred.length > 1){ // add to query
                                                                 pred.push({"any":or_pred});
                                                                 i = j-1; // outter search's continuing point
+                                                                continue;
                                                             }
                                                         }
-                                                    }else{
-    
-                                                        if(values[i+1] && values[i+1].toLowerCase() == "or"){ // Skip if predicate is part of an OR statement
-                                                            continue;
-                                                        }
-                                                        pred_parts[key] = values[i];
-                                                        predicates.push(pred_parts);
+                                                    }else if(!(values[i+1] && values[i+1].toLowerCase() == "or")){ // Skip if predicate is part of an OR statement
+                                                            pred_parts[key] = values[i];
+                                                            predicates.push(pred_parts);
                                                     }
-                                                }
+                                                    i++;
+                                                }//while
 
                                                 if(predicates.length > 0){
                                                     pred.push(...predicates);
@@ -1818,7 +1817,7 @@ $.widget( "heurist.search_faceted", {
             //first call
             field_index = -1;  
             
-            this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
+            this._request_id =  window.hWin.HEURIST4.util.random();
         
             this._terminateFacetCalculation = false;
             this.btn_terminate.show();
@@ -3440,13 +3439,12 @@ $.widget( "heurist.search_faceted", {
                     }
                     else{   //freetext  or enum groupby firstlevel
                         
-                        //$facet_values.css('padding-left','5px');
-                        
                         //draw history
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-
+                            
                             const len = field.history.length;
-                            for (let k=0;k<1;k++){
+                            let k=0;
+                            //while(k<1)
                                 if(len>2){
                                     k=len-2; //instead of reset show last one    
                                 }
@@ -3463,7 +3461,8 @@ $.widget( "heurist.search_faceted", {
                                     $span.css({'display':'inline-block','vertical-align':'middle'}).append(f_link).appendTo($facet_values);
                                     //$span.append($('<span class="ui-icon ui-icon-carat-1-e" ></span>').css({'display':'inline-block','height':'13px'}));
                                 }
-                            }
+                                
+                            
                         }
                         
                         //sort by count

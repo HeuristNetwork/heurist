@@ -29,7 +29,7 @@
 *  This class responsible for all interaction with UI and map object 
 *   mapping - parent container
 */
-function hMappingControls( mapping, startup_mapdocument_id ) {
+function HMappingControls( mapping, startup_mapdocument_id ) {
     const _className = "MappingControls",
     _version   = "0.4";
 

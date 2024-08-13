@@ -63,9 +63,9 @@ $is_admin = $system->is_admin();
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning;
-}else if(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database
+}elseif(defined('MANAGER_REQUIRED') && !$is_admin ){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
-}else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
+}elseif(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     $message = $login_warning.' as Database Owner';
 }else{
     $invalid_access = false;

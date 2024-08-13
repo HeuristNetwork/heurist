@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 print '<!DOCTYPE html>';
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
         <style>
@@ -129,33 +129,33 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
                 }else{
-       
+
                     var request = {source: 'dbsummary', w:'a',
                                         q:  't:'+rt_ID};
                     if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                         window.hWin.HAPI4.LayoutMgr.putAppOnTopById('FAP');
                     }
                     window.hWin.HAPI4.RecordSearch.doSearch( $(window.hWin.document), request );
-                    
+
                     if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
                         window.close();
                     }
-                    
+
                     return false;
                 }
             }
-           
+
            function onPageInit(success){
                    if(!success) {return;}
                    $("#expand").trigger('click');
             }
-            
+
         </script>
-        
+
     </head>
 
     <body class="popup" style="background-color: #FFF;padding: 0px;margin: 0px;">
-    
+
         <div class="ent_wrapper" style="height: 100%;">
         <div class="layout-container" style="height: 100%;">
 
@@ -184,22 +184,22 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                             <?php
                             /** RETRIEVING RECORDS WITH CONNECTIONS */
                             // Building query
-                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, rg.rtg_ID as grp_id, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count 
+                            $query = "SELECT d.rty_ID as id, rg.rtg_Name grp, rg.rtg_ID as grp_id, d.rty_Name as title, sum(if(r.rec_FlagTemporary!=1, 1, 0)) as count
                                       FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID,
-                                      defRecTypeGroups rg 
+                                      defRecTypeGroups rg
                                       WHERE rg.rtg_ID=d.rty_RecTypeGroupID
-                                      GROUP BY id 
+                                      GROUP BY id
                                       ORDER BY rtg_Order, title ASC";
                             // Put record types & counts in the table
                             $res = $system->get_mysqli()->query($query);
-                            $count = 0; 
+                            $count = 0;
                             $grp_name = null;
                             $first_grp  = 'first_grp';
-                            
+
                             while($row = $res->fetch_assoc()) { // each loop is a complete table row
                                 $rt_ID = $row["id"];
                                 $title = htmlspecialchars($row["title"]);
-                            
+
                                 if($grp_name!=$row['grp']){
                                     if($grp_name!=null) {$first_grp = '';}
                                     $grp_name = $row['grp'];
@@ -210,7 +210,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                             </tr>
                                     <?php
                                 }
-                                    
+
                                 // ID
                                 echo "<tr class='row'>";
                                 echo "<td align='center'>$rt_ID</td>";
@@ -241,7 +241,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                                     echo "<td align='center' class='show'><input id='" .$rt_ID. "' type='checkbox' class='show-record $first_grp rectype_grp_". $row["grp_id"] ."' name='" .$title. "'></td>";
                                 }
                                 echo "</tr>";
-                            }                      
+                            }
                             ?>
 
                         </table>
@@ -252,7 +252,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
             <div class="ui-layout-center">
                 <div id="main_content" class="ent_wrapper" style="left:0px;">
-                    <?php 
+                    <?php
                         $isDatabaseStructure = 1;
                         include_once dirname(__FILE__).'/visualize.php';
                     ?>
@@ -287,7 +287,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     ?>
                             isfirst_time = !(getSetting('hdb_'+window.hWin.HAPI4.database)>0);
                             putSetting('hdb_'+window.hWin.HAPI4.database, 1);
-                    <?php  
+                    <?php
                         }
                     ?>
 
@@ -297,7 +297,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                             var name = $(this).attr("name");
                             var record = getSetting(name);//@todo - change to recordtype ID
                             if(record>0) {
-                                at_least_one_marked = true;   
+                                at_least_one_marked = true;
                                 $(this).prop("checked", true);
                             }else{
                                 $(this).prop("checked", false);
@@ -305,7 +305,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         }
                         );
                     }
-                        
+
                     if(isfirst_time || !at_least_one_marked){
                         $(".first_grp").each(function() {
                             $(this).prop("checked", true);
@@ -316,7 +316,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     }else{
                         putSetting('startup_rectype_'+window.hWin.HAPI4.database, 0);
                     }
-                    
+
                     // Listen to 'show-record' checkbox changes
                     $(".show-record").on('change', function(e) {
                         // Update record field 'checked' value in localstorage
@@ -403,11 +403,11 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data 
+                    // Visualizes the data
                     function initVisualizeData() {
                         // Call plugin
                         var data_to_vis = getData(json_data);
-                        
+
                         $("#visualisation").visualize({
                             data: json_data,
                             getData: function(data) { return data_to_vis; },
@@ -429,7 +429,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                 });
             });
-            
+
             function onVisualizeResize(){
 
 				/*
@@ -442,7 +442,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                      supw = 2;
                 }
 				*/
-                
+
                 var dbkey = 'db'+window.hWin.HAPI4.database;
                 putSetting(dbkey, '1');
 

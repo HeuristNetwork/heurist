@@ -37,9 +37,9 @@ if( @$_REQUEST['isalive']==1){
     }
     //print $is_inited?'ok':'error:'.$system->getErrorMsg();
     exit;
-    
+
 }else
-//redirection for CMS 
+//redirection for CMS
 if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
 
     $recid = 0;
@@ -57,14 +57,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         $recid = intval($recid);
     }
-    
-    
+
+
     if(@$_REQUEST['fmt']){
         $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
     }elseif(@$_REQUEST['format']){
         $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
-    }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
-    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ) 
+    }elseif (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
+    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) )
     {
         $format = 'website';
 
@@ -83,7 +83,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         }
 
 
-    }else if (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
+    }elseif (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
         $format = 'web&field='.intval($_REQUEST['field']);
     }else{
         $format = 'xml';
@@ -93,34 +93,34 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
             .(@$_REQUEST['noheader']?'&noheader=1':''));
     return;
 
-}else if (@$_REQUEST['ent']){
+}elseif (@$_REQUEST['ent']){
 
-    //to avoid "Open Redirect" security warning    
+    //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    
+
     header('Location: hserv/controller/api.php?'.$query_string);
     return;
-    
-}else 
+
+}else
     if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
         if(@$_REQUEST['rty']) {$s = 'rty='.$_REQUEST['rty'];}
-        else if(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
-            else if(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
+        elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
+            elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
                 header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
-}else if (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
+}elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
           array_key_exists('icon',$_REQUEST) || array_key_exists('template',$_REQUEST)){
-              
+
     if(array_key_exists('icon',$_REQUEST))
     {
         //download entity icon or thumbnail
         $script_name = 'hserv/controller/fileGet.php';
-    }else if(array_key_exists('template',$_REQUEST))
+    }elseif(array_key_exists('template',$_REQUEST))
     {
         //execute smarty template
         $script_name = 'viewers/smarty/showReps.php';
@@ -128,15 +128,15 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         //download file, thumb or remote url for recUploadedFiles
         $script_name = 'hserv/controller/fileDownload.php';
     }
-        
-    //to avoid "Open Redirect" security warning    
+
+    //to avoid "Open Redirect" security warning
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
-    
+
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
-    
-}else if (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
+
+}elseif (@$_REQUEST['asset']){ //only from context_help - download localized help or documentation
 
     $name = basename(filter_var($_REQUEST['asset'], FILTER_SANITIZE_STRING));
     //default ext is html
@@ -167,7 +167,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         exit('Asset not found: '.htmlspecialchars($name));
     }
 
-}else if (@$_REQUEST['logo']){
+}elseif (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
     $mime_type = 'jpg';
     if(!$host_logo || !file_exists($host_logo)){
@@ -241,7 +241,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
 
-<!-- edit entity -->        
+<!-- edit entity -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectMultiValues.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFolders.js"></script>
@@ -347,15 +347,15 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
             }
         });
 
-<?php        
+<?php
 /*
 if(@$_SERVER['REQUEST_METHOD']=='POST'){
     $req_params = filter_input_array(INPUT_POST);
     print 'window.hWin.HAPI4.postparams='.json_encode($req_params).';';
     print 'console.log(window.hWin.HAPI4.postparams)';
-}     
+}
 */
-?>     
+?>
 
         //
         // cfg_widgets and cfg_layouts are defined in layout_default.js
@@ -369,7 +369,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
 
 
         <?php
-        //returns total records in db and counts of active entries in dashboard  
+        //returns total records in db and counts of active entries in dashboard
         list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard();
         echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
         echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
@@ -379,7 +379,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         var lt = window.hWin.HAPI4.sysinfo['layout'];
 
         window.hWin.HAPI4.is_publish_mode = (lt=='WebSearch');
-        
+
         if(lt=='WebSearch'){
             $('#layout_panes').css({'height':'100%',width:'100%',position:'absolute'});
             $(window.hWin.document.body).css({'margin':'0px',overflow:'hidden'});
@@ -436,21 +436,21 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         }
 
         if(!window.hWin.HAPI4.is_publish_mode)
-        {                
+        {
 
             if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
-                //version is old 
+                //version is old
                 return;
             }
-            
-            
+
+
             var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
             if(editRecID>0){
                 //edit record
                 window.hWin.HEURIST4.ui.openRecordEdit(editRecID, null);
             }else
                 if(window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search) ||
-                    (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
+                    (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) &&
                         window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
                 {
                     //add new record from bookmarklet  - see recordEdit.php as alternative, it opens record editor in separate window
@@ -574,19 +574,19 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
 
         <p style="padding:10px">Please <?php echo CONTACT_HEURIST_TEAM;?> for further information or to express an interest in a tablet version</p>
-    </div> 
+    </div>
 
     <div id="heurist-safari-warning" style="display:none;">
         <p style="padding:10px">
-            Heurist is not fully supported in Safari. 
-            Sorry, we no longer support Apple's Safari browser which was discontinued on Windows over a decade ago due to the appearance of widely used free cross-platform browsers such as Chrome and Firefox. 
+            Heurist is not fully supported in Safari.
+            Sorry, we no longer support Apple's Safari browser which was discontinued on Windows over a decade ago due to the appearance of widely used free cross-platform browsers such as Chrome and Firefox.
         </p>
 
         <p style="padding:10px">
             Please download Chrome or Firefox to use with Heurist (and perhaps with your other applications).
         </p>
-    </div> 
-    
+    </div>
+
     <div id="heurist-dialog">
     </div>
 

@@ -45,7 +45,10 @@ function prepareTemplateBlog(new_element_json, callback){
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(res){
                     
                     if(res['error']){
-                        window.hWin.HEURIST4.msg.showMsgErr(res['error'], true);
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: res['error'],
+                            error_title: 'Failed to prepare blog template'
+                        }, true);
                     }else{
                         let template_name = res['ok'];
 

@@ -2843,17 +2843,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {
             help_on: true
         });
-
         return this.usrPreferences;
     },
 
-    //    
-    saveUiPreferences:function(){
-        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
-
-        return true;
-    },
-
+    //saveUiPreferences:function() { this._super(); }, 
+    
     //
     // invokes popup to import list of terms from file
     //

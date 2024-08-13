@@ -20,7 +20,7 @@
 
 /*
 
-There are 3 color themes in Heurist. 
+There are 3 color themes in Heurist.
 Main (gray) with option of different bg (white) for lists and popups
 Editor (light blue)
 Header (iron head flower color)
@@ -38,14 +38,14 @@ Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <!-- Heurist CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-<?php 
+<?php
     $lt = @$_REQUEST['ll'];
     if($lt!='H5Default'){
 
 //special webfont for database
 $font_styles = '';
 if(isset($system) && $system->is_inited()){
-    
+
     $webfonts = $system->getDatabaseSetting('Webfonts');
     if(is_array($webfonts) && count($webfonts)>0){
         foreach($webfonts as $font_family => $src){
@@ -58,11 +58,11 @@ if(isset($system) && $system->is_inited()){
             $font_families[] = $font_family;
         }
     }
-    
-}  
+
+}
 if(!empty($font_styles)){ // add extra font-faces
     echo "<style> $font_styles </style>";
-    
+
     if(count($font_families)>0){
         $font_families[] = 'sans-serif';
         echo '<style>body,.ui-widget,.ui-widget input,.ui-widget textarea,.ui-widget select{font-family: '

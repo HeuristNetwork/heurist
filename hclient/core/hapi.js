@@ -60,7 +60,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     let _database = null, //same as public property  @toremove      
 
         _region = null, //current region ISO639-2 (alpha3) in uppercase
-        _regional = null, //localization resources
+        _regional = {}, //localization resources
 
         _guestUser = { ugr_ID: 0, ugr_FullName: 'Guest' },
         _listeners = [],
@@ -90,23 +90,23 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         let installDir = '';
-        
+
         if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
             installDir = '/heurist/';
         }else{
-        
-        let script_name = window.hWin.location.pathname;
-        if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
 
-        //actions for redirection https://hist/heurist/[dbname]/web/
-        if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
-            installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
-            if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
-        }else{
-            installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+            let script_name = window.hWin.location.pathname;
+            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
+
+            //actions for redirection https://hist/heurist/[dbname]/web/
+            if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/)>=0){
+                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm)\/.*/, '')+'/';
+                if(installDir=='/') installDir = '/h6-alpha/';//'/heurist/';
+            }else{
+                installDir = script_name.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserv|import|startup|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+            }
         }
-        }
-        
+
         //TODO: top directories - admin|applications|common| ... are defined in 3 separate locations. Rationalise.
         that.installDir = installDir; //to detect development or production version 
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
@@ -178,18 +178,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     } else {
                         lang = window.hWin.HAPI4.get_prefs_def('layout_language', 'ENG');
                     }
-                    window.hWin.HR = that.setLocale(lang);
+                    window.hWin.HR = that.setLocale(lang); //change current locale
                     window.hWin.HRA = that.HRA; //localize all elements with class slocale for given element
                     window.hWin.HRes = that.HRes; //returns url or content for localized resource (help, documentation)
                     window.hWin.HRJ = that.HRJ; // returns localized value for json (options in widget)
-                    
+
                 }
                 _oninit(success);
             });
-        } else {
-            if (_oninit) {
+        } else if (_oninit) {
                 _oninit(false);
-            }
         }
 
     }
@@ -692,7 +690,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HAPI4.sysinfo['db_workset_count'] = response.data[2];
                             if (callback) callback();
                         } else {
-                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
             },
@@ -731,7 +729,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 //!!!! assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                             }
                         } else {
-                            window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         if (callback) {
                             callback(success);
@@ -1153,8 +1151,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             check_for_databases: function(data, callback){
                  
                 if(!data){
-                    window.hWin.HEURIST4.msg.showMsgErr('The list of databases to be checked is missing<br>'
-                    +'Please contact the Heurist team.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'The list of databases to be checked is missing<br>'
+                                +'Please contact the Heurist team.',
+                        status: window.hWin.ResponseStatus.INVALID_REQUEST
+                    });
                     return false;
                 }
                  
@@ -1175,7 +1176,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             get_time_diffs: function(data, callback){
 
                 if(!data || !data.early_date || !data.latest_date){
-                    window.hWin.HEURIST4.msg.showMsgErr('Both an earliest and latest date are required.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Both an earliest and latest date are required.',
+                        status: window.hWin.ResponseStatus.INVALID_REQUEST
+                    });
                     return false;
                 }
 
@@ -2628,17 +2632,31 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         setLocale: function (region) {
         
             region = that.getLangCode3(region, 'ENG'); //English is default
+            if (typeof _regional === 'undefined' || _regional === null){
+                _regional = {};
+            }
             
-            if (typeof regional === 'undefined' || regional === null  || !regional[region]) {
-                $.getScript(that.baseURL + 'hclient/assets/localization/localization'
-                    + (region == 'ENG' ? '' : ('_' + region.toLowerCase())) + '.js', function () {
-                        _region = region;
-                        _regional = regional[_region];
-                    });
-            } else {
-                //already loaded - switch region
+            if (!_regional[region]) {
+                
                 _region = region;
-                _regional = regional[_region];
+                
+                $.get(that.baseURL + `hclient/assets/localization/localization_${region.toLowerCase()}.txt`,
+                    function(response){
+                        const lines = response.split("\n");
+                        _regional[_region] = {};
+                        let prev_key = '';
+                        lines.forEach((line,i)=>{
+                            if(line.trim()!='' && line.indexOf('//')!=0){
+                                if(line[0]=='#'){
+                                    const pos = line.indexOf('#',2);
+                                    const key = line.substring(1,pos);
+                                    _regional[_region][key] = line.substring(pos+1);
+                                }else if(prev_key!=''){
+                                    _regional[_region][prev_key] = line;
+                                }
+                            }    
+                        });
+                    }); //get
             }
 
             // function that returns string resouce according to current region setting
@@ -2648,26 +2666,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return '';
                 }
                 let key = res.trim();
-                //if (key.indexOf('menu-') == 0) {
-                //    key = key.replaceAll('-', '_');
-                //}
 
-                if (_regional && _regional[key]) {
-                    return _regional[key];
-                } else {
-                    //if not found take from english version
-                    if (_region != 'ENG' && 
-                       !(typeof regional === 'undefined' || regional==null || !regional['ENG'] || !regional['ENG'][key])) {
-                        //base localization loaded
-                        return regional['ENG'][key];
-
-                    } else if (key.indexOf('menu-') == 0) {
-
-                        return '';
-                    } else {
-                        return res; //returns itself   
-                    }
+                if (_regional[_region] && _regional[_region][key]) {
+                    return _regional[_region][key];
+                } else if (_region != 'ENG' && _regional['ENG'][key])
+                {
+                    return _regional['ENG'][key];
+                }else{
+                    return res;
                 }
+
             }
         },
 
@@ -2680,6 +2688,34 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 * 
 *In other words, where content is created dynamically (widgets, edit forms) we take localized strings (mostly for labels and hints) from json arrays 
 *For large static content with a lot of text we load the entire translated html snippet. 
+*/
+/*
+When translation happens
+on client side:
+A) On widgets initControls
+B) On load html snippets
+C) On arbitrary call HLocale.translate(element, lang)
+it peroforms the following actions
+1) loads translations from assets/widgetName_lang.txt
+2) loads common words from assets/localization_lang.txt
+3) scans this.element and find either elements with id, data-hr or data-title-hr(and with class "slocale"
+   or plain text content less than 20 chars - it may be some kind of code too) 
+4) Finds in translations by ID or by plain text content
+
+#widgetName#id/data-hr:
+#id-hint:
+
+html_snippetName_lang.txt
+
+
+on server side:
+1) Message translation
+
+
+Automatic translation
+1) Finds elements with id and data-hr
+2) Finds elements with id and content with limited set of tags (p,i,b,a,strong)
+
 */
         //
         //localize all elements with class slocale for given element
@@ -2717,7 +2753,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         },
 
         //
-        // returns url or loads content for localized resource (for example help, documentation or html snipper for form)
+        // returns url or loads content for localized resource (for example help, documentation or html snippet for form)
         // name - name of file (default html ext)
         // ele - target element
         //

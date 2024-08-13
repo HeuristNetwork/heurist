@@ -23,7 +23,7 @@
 * If publish=1 then the script displays a web page with a report on the process
 * (success or errors as below). If not set, then the errors (file can't be written, can't find template,
 * can't find file path, empty query etc) are sent by email to the database owner.
-* 
+*
 * Use this script in cronjob for auto regenerate all reports
 * viewers/smarty/updateReportOutput.php?db=xxx&publish=3
 *
@@ -57,7 +57,7 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
     }else{
 	    $update_mode = 1;
     }
-    
+
     $format = null;
     if(array_key_exists('mode',$_REQUEST)){
         $mode = htmlspecialchars($_REQUEST['mode']);
@@ -84,9 +84,9 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
             $res->close();
         }
 
-    }else if(is_numeric($rps_ID)){
+    }elseif(is_numeric($rps_ID)){
 	    //load one
-        
+
 	    $row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);
         if($row){
 			    doReport($system, $update_mode, $format, $row);
@@ -103,18 +103,18 @@ if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCron
 //
 // $update_mode
 // 1 saves into file and produces (into browser) the report only (with urls)
-// 2 executes report and download it under given output name (no file save, no browser output) 
-// 3 redirects to the existing report (use already publshed output), if it does not exist, recreate it (publish=1) 
+// 2 executes report and download it under given output name (no file save, no browser output)
+// 3 redirects to the existing report (use already publshed output), if it does not exist, recreate it (publish=1)
 // 4 supress output
 //
 // returns:
-// 1 - report is created 
+// 1 - report is created
 // 2 - report is updated
-// 3 - report is intakted (not updated) 
+// 3 - report is intakted (not updated)
 //
 function doReport($system, $update_mode, $format, $row){
-    
-    $res = 1;    
+
+    $res = 1;
 
     /* not allows due to security reasons
 	if($row['rps_FilePath']!=null){
@@ -125,14 +125,14 @@ function doReport($system, $update_mode, $format, $row){
 	$dir = $system->getSysDir('generated-reports');
     if(!folderCreate($dir, true)){
         die('Failed to create folder for generated reports');
-    }   
-	
-    
+    }
+
+
     if($format==null){
         if(strpos(@$row['rps_URL'],'&mode=')!==false){
             $params = array();
             parse_str($row['rps_URL'], $params);
-            $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']);//for snyk    
+            $format = preg_replace('/[^a-zA-Z]/', "", @$params['mode']);//for snyk
         }else{
             $format = null;
         }
@@ -156,16 +156,16 @@ function doReport($system, $update_mode, $format, $row){
 			$filename2 = $outputfile.'.'.$format;
 			if(file_exists($filename2)){
 				$outputfile = $filename2;
-			
+
 			}else{ // if ($format=="js")
 				$outputfile = $outputfile.'.'.$format;
 			}
             $ext = $format;
             $filename = $filename.'.'.$ext;
 		}
-        
+
 		if(file_exists($outputfile)){
-            
+
             if($row['rps_IntervalMinutes']>0){
                 $dt1 = new DateTime("now");
                 $dt2 = new DateTime();
@@ -180,29 +180,29 @@ function doReport($system, $update_mode, $format, $row){
             }
             if($res == 1){ //request for current files (without smarty execution)
                 if($update_mode==3){
-                    
+
                     if($ext=='js'){
                         header("Content-type: text/javascript");
-                    }else{ 
-                        
+                    }else{
+
                         if($ext=='txt'){
                             $mimetype = 'plain/text';
-                        }else if($ext=='json'){
+                        }elseif($ext=='json'){
                             $mimetype = 'application/json';
                         }else{
                             $mimetype = "text/$ext";
                         }
-                        
+
                         if($ext!='html'){
                             header("Content-type: $mimetype;charset=UTF-8");
                         }
-                        
+
                         if($ext!='html'){
                             header('Pragma: public');
                             header('Content-Disposition: attachment; filename="'.$filename.'"');
                         }
                     }
-                    
+
 			        $content = file_get_contents($outputfile);
 			        if($ext=="js"){
 				        $content = str_replace("\n","",$content);
@@ -244,13 +244,13 @@ function doReport($system, $update_mode, $format, $row){
     $params["void"]     = ($update_mode==4);//no browser output
 
 	$success = executeSmartyTemplate($system, $params);//in showReps
-    
+
     if(!$success) {$res = 0;}
 
     if($update_mode==4){
         echo htmlspecialchars($outputfile.'  '.($res==0?'error':($res==1?'created':'updated')))."\n";
     }
-    
+
     return $res;
 }
 ?>

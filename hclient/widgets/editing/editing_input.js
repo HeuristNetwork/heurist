@@ -835,23 +835,18 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.inputs.length >= 1 && this.enum_buttons == 'checkbox'){ // uncheck all checkboxes
 
-            let $input;
-
             $(this.inputs[0]).val(''); // Set first value to empty
 
             if(this.inputs.length > 1){
-
                 for (let i = 1; i < this.inputs.length; i++) {
                     
-                    $input = $(this.inputs[i]);
+                    let $input = $(this.inputs[i]);
 
                     this._off($input, 'change');
 
                     this._getInputDiv($input).remove();
-
-                    that.inputs.splice(i,1);
-                    i--;
                 }
+                that.inputs = array(that.inputs[0]);
             }
 
             this._getInputDiv($(this.inputs[0]))

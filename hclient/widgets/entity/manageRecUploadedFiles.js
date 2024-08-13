@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global hEditing */
+/* global HEditing */
 
 $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
    
@@ -1009,7 +1009,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 let container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 
-                this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
+                this._editing_uploadfile = new HEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
                     //registerAtOnce is true, so we get new file id

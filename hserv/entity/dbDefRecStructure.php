@@ -2,7 +2,7 @@
 
     /**
     * db access to defRecStructure.php table
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -28,10 +28,10 @@ require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 
 class DbDefRecStructure extends DbEntityBase
 {
-    
+
     /**
     *  search user or/and groups
-    * 
+    *
     *  sysUGrps.ugr_ID
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
@@ -41,22 +41,22 @@ class DbDefRecStructure extends DbEntityBase
     *  sysUsrGrpLinks.ugl_GroupID
     *  sysUsrGrpLinks.ugl_Role
     *  (omit table name)
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
 
         if(parent::search()===false){
-            return false;   
+            return false;
         }
 
-        //compose WHERE 
+        //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);
 
@@ -68,7 +68,7 @@ class DbDefRecStructure extends DbEntityBase
 
         $pred = $this->searchMgr->getPredicate('rst_DetailTypeID');
         if($pred!=null) {array_push($where, $pred);}
-        
+
         $pred = $this->searchMgr->getPredicate('rst_CalcFunctionID');
         if($pred!=null) {array_push($where, $pred);}
 
@@ -82,30 +82,30 @@ class DbDefRecStructure extends DbEntityBase
 
             $this->data['details'] = 'rst_ID';
 
-        }else if(@$this->data['details']=='name'){
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rst_ID,rst_DisplayName';
 
-        }else if(@$this->data['details']=='rectype'){
+        }elseif(@$this->data['details']=='rectype'){
 
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID';
-            
-        }else if(@$this->data['details']=='list'){
-        
+
+        }elseif(@$this->data['details']=='list'){
+
             $is_structure = true;
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription'
 			.',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
             .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status, rst_MayModify, rst_SemanticReferenceURL, rst_TermsAsButtons, rst_CalcFunctionID ';
-            //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs 
-        
-        }else if(@$this->data['details']=='full'){
+            //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs
+
+        }elseif(@$this->data['details']=='full'){
             //all fields from configuration json
 
             $this->data['details'] = implode(',', $this->fieldNames);
 
-        }else if(@$this->data['details']=='structure'){
+        }elseif(@$this->data['details']=='structure'){
 
             //$this->data['details'] = implode(',', $this->fieldNames);
             $is_structure = true;
@@ -118,9 +118,9 @@ class DbDefRecStructure extends DbEntityBase
             //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
             "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
             "rst_RequirementType",
-            "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue","rst_CalcFunctionID", 
+            "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue","rst_CalcFunctionID",
             //XXX "rst_RecordMatchOrder"
-            
+
             "rst_NonOwnerVisibility", "rst_Status", "rst_MayModify", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
             //here we check for an override in the recTypeStrucutre for displayGroup
             //XXX "dty_DetailTypeGroupID as rst_DisplayDetailTypeGroupID",
@@ -134,9 +134,9 @@ class DbDefRecStructure extends DbEntityBase
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
             "dty_Type");
-            
+
             $this->data['details'] = implode(',', $colNames);
-        
+
         }else{
             $needCheck = true;
         }
@@ -169,7 +169,7 @@ class DbDefRecStructure extends DbEntityBase
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
-        
+
         if($is_structure){
             $query = $query.' left join defDetailTypes on rst_DetailTypeID = dty_ID ';
         }
@@ -195,24 +195,24 @@ class DbDefRecStructure extends DbEntityBase
     //
     // validate permission for edit record type
     // for delete and assign see appropriate methods
-    //    
+    //
     protected function _validatePermission(){
 
-        if(!$this->system->is_admin() && 
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+        if(!$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
 
-            $this->system->addError(HEURIST_REQUEST_DENIED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED,
                 'You are not admin and can\'t edit record type structure. Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
 
         return true;
-    }     
+    }
 
     //
     //
-    //    
+    //
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -220,9 +220,9 @@ class DbDefRecStructure extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
 
-            //find real rst_ID 
+            //find real rst_ID
             $mysqli = $this->system->get_mysqli();
-                
+
             $row = mysql__select_row_assoc($mysqli,
                 'SELECT rst_ID, rst_OriginatingDBID FROM '.$this->config['tableName']
                 .' WHERE rst_DetailTypeID='.intval( $this->records[$idx]['rst_DetailTypeID'] )
@@ -234,7 +234,7 @@ class DbDefRecStructure extends DbEntityBase
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
                 if(!@$this->records[$idx]['rst_Status']) {$this->records[$idx]['rst_Status'] = 'open';}
-                
+
                 if($this->records[$idx]['rst_DefaultValue']=='tabs' && !@$this->records[$idx]['rst_DisplayName']){
                     $this->records[$idx]['rst_DisplayName'] = 'Divider '.$idx;
                 }
@@ -247,18 +247,18 @@ class DbDefRecStructure extends DbEntityBase
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
-            
-            $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s');//reset
+
+            $this->records[$idx]['rst_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = $isInsert;
         }
 
         return $ret;
 
-    }    
+    }
 
     public function save(){
-        
+
         $results = parent::save();
         if($results!==false){
             $results = array();
@@ -266,16 +266,16 @@ class DbDefRecStructure extends DbEntityBase
                 $results[] = $this->records[$rec_idx]['rst_DetailTypeID'];
             }
         }
-        return $results;    
-    } 
-    
+        return $results;
+    }
+
     public function delete($disable_foreign_checks = false){
-        
+
         $mysqli = $this->system->get_mysqli();
 
         if(@$this->data['recID'] && strpos($this->data['recID'],'.')){
             list($rty_ID, $dty_ID) = explode('.', $this->data['recID']);
-            
+
             $this->recordIDs = 0;
             if(is_numeric($rty_ID) && $rty_ID>0 && is_numeric($dty_ID) && $dty_ID>0){
                 $this->recordIDs = mysql__select_value($mysqli,
@@ -285,23 +285,23 @@ class DbDefRecStructure extends DbEntityBase
             }
             if(!($this->recordIDs>0)){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for given record and field type');
-                return false;    
+                return false;
             }else{
                 $this->recordIDs = array($this->recordIDs);
             }
-        }else if(@$this->data['dtyID']){
+        }elseif(@$this->data['dtyID']){
             $dty_ID = $this->data['dtyID'];
 
             $this->recordIDs = null;
             if(is_numeric($dty_ID) && $dty_ID > 0){
-                $this->recordIDs = mysql__select_list2($mysqli, 
+                $this->recordIDs = mysql__select_list2($mysqli,
                     'SELECT rst_ID FROM '.$this->config['tableName']
                     .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string($dty_ID));
             }
             if(!$this->recordIDs || !is_array($this->recordIDs) || count($this->recordIDs) == 0){
                 $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found for field ID ' . $dty_ID);
                 return false;
-            }else if(!is_array($this->recordIDs)){
+            }elseif(!is_array($this->recordIDs)){
                 $this->recordIDs = array($this->recordIDs);
             }
         }
@@ -309,51 +309,51 @@ class DbDefRecStructure extends DbEntityBase
         return parent::delete();
     }
 
-    //    
+    //
     // A. update order for fields in record type - see parameter "orders"
     // B. add set of new fields - see parameter "newfields"
     //
     public function batch_action(){
-        
+
         if(!(@$this->data['rtyID']>0)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Record type identificator not defined');
             return false;
         }
         if(@$this->data['newfields']){
             return $this->addNewFields();
-        }else if (@$this->data['orders']){
+        }elseif (@$this->data['orders']){
             return $this->setNewFieldOrder();
         }
     }
-        
+
     //
     //
     //
     private function setNewFieldOrder(){
-        
+
         $rty_ID = $this->data['rtyID'];
-        
+
         //dty_ID
         $this->recordIDs = prepareIds(@$this->data['recID']);
-        if(count($this->recordIDs)==0){             
+        if(count($this->recordIDs)==0){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field identificators');
             return false;
         }
-        
+
         $orders = prepareIds(@$this->data['orders'], true);
-        if(count($orders)==0){             
+        if(count($orders)==0){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for fields order');
             return false;
         }
-        
+
         $ret = true;
         $mysqli = $this->system->get_mysqli();
         $keep_autocommit = mysql__begin_transaction($mysqli);
-        
-        foreach ($this->recordIDs as $idx => $dty_ID){        
-            
+
+        foreach ($this->recordIDs as $idx => $dty_ID){
+
             $order = $orders[$idx];
-            
+
             $query = 'UPDATE '.$this->config['tableName'].' SET rst_DisplayOrder='.$order
                     .' WHERE rst_DetailTypeID='.intval( $dty_ID )
                     .' AND rst_RecTypeID='.intval( $rty_ID  );
@@ -369,28 +369,28 @@ class DbDefRecStructure extends DbEntityBase
             $mysqli->commit();
         }
         if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
-            
-        return $ret;        
+
+        return $ret;
     }
-    
+
     //
     // newfields=>array(
-    //        fields=>  array of ids 
-    //        reqs=>   array of ids 
+    //        fields=>  array of ids
+    //        reqs=>   array of ids
     //        values=>  [dty_ID][fieldName]=>value
     //
     private function addNewFields(){
-        
+
         $rty_ID = $this->data['rtyID'];
         $newfields = @$this->data['newfields'];
-        
-        if(!is_array($newfields) || count($newfields)==0){             
+
+        if(!is_array($newfields) || count($newfields)==0){
             //if rt structure has zero fields adds 2 default fields: DT_NAME and DT_DESCRIPTION
             $mysqli = $this->system->get_mysqli();
             if(mysql__select_value($mysqli,
                     'SELECT count(*) FROM '.$this->config['tableName']
                     .' WHERE rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID ))===0){
-                        
+
                         $newfields['fields'] = array(DT_NAME, DT_DESCRIPTION);
                         $newfields['reqs'] = array(DT_NAME);
             }else{
@@ -398,35 +398,35 @@ class DbDefRecStructure extends DbEntityBase
                 return false;
             }
         }
-        
+
         $fields = prepareIds($newfields['fields'], false);
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
         $newfields_values  = @$newfields['values']?$newfields['values']:array();
         $order = 0;
         if(isset($this->data['order'])){ $order = $this->data['order'];}
-        
+
         $dt_fields = dbs_GetDetailTypes($this->system, $fields);
         $dt_fields = $dt_fields['typedefs'];
         $di = $dt_fields['fieldNamesToIndex'];
-        
-        
+
+
         $records = array();
         foreach($fields as $dty_ID){
             if(@$dt_fields[$dty_ID])
             {
-            
+
                 $dt = $dt_fields[$dty_ID]['commonFields'];
-                
+
                 $recvalues = array(
                 'rst_ID'=> $dty_ID,
                 'rst_RecTypeID'=> $rty_ID,
                 'rst_DisplayOrder'=> $order,
                 'rst_DetailTypeID'=> $dty_ID,
                 'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
-                                         ?$newfields_values[$dty_ID]['dty_Name'] 
+                                         ?$newfields_values[$dty_ID]['dty_Name']
                                          :$dt[$di['dty_Name']],
                 'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
-                                         ?$newfields_values[$dty_ID]['dty_HelpText'] 
+                                         ?$newfields_values[$dty_ID]['dty_HelpText']
                                          :$dt[$di['dty_HelpText']],
                 'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
                 'rst_MaxValues'=> 1,
@@ -438,17 +438,17 @@ class DbDefRecStructure extends DbEntityBase
                 }
                 if(@$newfields_values[$dty_ID]['dty_DefaultValue']){
                     $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['dty_DefaultValue'];
-                }else if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                }elseif(@$newfields_values[$dty_ID]['rst_DefaultValue']){
                     $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
                 }
-                
+
                 $records[] = $recvalues;
-                
+
                 if(isset($this->data['order'])){ $order = $this->data['order'];}
                 else { $order = $order+10; }
             }
         }
-        
+
         if(count($records)>0){
             $this->data['fields'] = $records;
             $this->is_addition = true;
@@ -457,7 +457,7 @@ class DbDefRecStructure extends DbEntityBase
             return false;
         }
     }
-    
+
     //
     // Counts:
     //  rectype_field_usage: count all bits of data for all records of the provided record type
@@ -485,8 +485,8 @@ class DbDefRecStructure extends DbEntityBase
                     . 'GROUP BY dtl_DetailTypeID';
                 $detail_usage = mysql__select_assoc2($mysqli, $query);// [ dty_ID1 => count1, ... ]
                 if($detail_usage){
-                    $res = $detail_usage; 
-                }else if(empty($mysqli->error)){
+                    $res = $detail_usage;
+                }elseif(empty($mysqli->error)){
                     $res = array();
                 }else{
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve field usages for record type #'.$rty_ID, $mysqli->error);
@@ -502,7 +502,7 @@ class DbDefRecStructure extends DbEntityBase
                 if($relmarker_filters && count($relmarker_filters) > 0){
 
                     // Retrieve record ids that are relevant
-                    $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID 
+                    $query = 'SELECT DISTINCT rec_ID FROM Records, recLinks WHERE rec_RecTypeID=' . $rty_ID
                         . ' AND rl_RelationID > 0 AND (rl_SourceID=rec_ID OR rl_TargetID=rec_ID)';
                     $ids = mysql__select_list2($mysqli, $query);// returns array of rec ids
                     if(is_array($ids) && count($ids) > 0){
@@ -546,7 +546,7 @@ class DbDefRecStructure extends DbEntityBase
                                     if(in_array($rec_id, $allowed_recs)){
                                         $count ++;
                                         continue;
-                                    }else if(in_array($rec_id, $not_allowed_recs)){
+                                    }elseif(in_array($rec_id, $not_allowed_recs)){
                                         continue;
                                     }
 
@@ -567,11 +567,11 @@ class DbDefRecStructure extends DbEntityBase
 
                             $res[$dty_id] = $count;
                         }
-                    }else if(!empty($mysqli->error)){
+                    }elseif(!empty($mysqli->error)){
                         $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve related records for counting relationship marker field usage for record type #'.$rty_ID, $mysqli->error);
                         return false;
                     }
-                }else if(!empty($mysqli->error)){
+                }elseif(!empty($mysqli->error)){
                     $this->system->addError(HEURIST_DB_ERROR, 'Cannot check record type #'.$rty_ID.' for relationship marker fields', $mysqli->error);
                     return false;
                 }

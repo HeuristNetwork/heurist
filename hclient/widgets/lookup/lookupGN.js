@@ -255,7 +255,7 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
             return;
         }
 
-        let sURL = 'http://api.geonames.org/';
+        let sURL = 'http'+'://api.geonames.org/';
         let xml_response = 0;
 
         if(this.element.find('#inpt_id').val()!=''){
@@ -420,7 +420,10 @@ $.widget( "heurist.lookupGN", $.heurist.recordAction, {
         if(is_wrong_data){
 
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
         }else{
             this.tabs_container.tabs('option', 'active', 1); // switch to results tab
         }

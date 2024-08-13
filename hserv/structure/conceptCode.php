@@ -8,7 +8,7 @@
 */
 
 /**
-* conceptCode.php - gets local code by concept code and vice versa 
+* conceptCode.php - gets local code by concept code and vice versa
 *
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
@@ -16,7 +16,7 @@
 * @version     4
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  
+* @subpackage
 */
 class ConceptCode {
 
@@ -25,7 +25,7 @@ class ConceptCode {
  * the outside. This prevents instantiating this class.
  * This is by purpose, because we want a static class.
  */
-private function __construct() {}    
+private function __construct() {}
 
 private static $initialized = false;
 private static $system = null;
@@ -36,16 +36,16 @@ private static function initialize($system2=null)
     if($system2!=null){
         self::$system = $system2;
     }
-    else if (self::$initialized){
-        return;   
+    elseif (self::$initialized){
+        return;
     }else{
-        
+
         global $system;
         self::$system = $system;
     }
 
     self::$initialized = true;
-    
+
     self::$database_id = self::$system->get_system('sys_dbRegisteredID');
 }
 
@@ -63,24 +63,24 @@ public static function setSystem($new_system){
 * @uses      self::$database_id
 */
 private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
-    
+
     self::initialize();
-    
+
     if($lclID>0){
-    
+
         $query = "select " . $fieldNamePrefix . "OriginatingDBID," . $fieldNamePrefix . "IDInOriginatingDB from $tableName where " . $fieldNamePrefix . "ID = $lclID";
-        
+
         $ids = mysql__select_row(self::$system->get_mysqli(), $query);
-        
+
         //return "".$ids[0]."-".$ids[1];
         if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
             return "" . $ids[0] . '-' . $ids[1];
-        } else if (self::$database_id) {
+        } elseif (self::$database_id) {
             return '' . self::$database_id . '-' . $lclID;
         } else {
             return '0000-'.$lclID;
         }
-    
+
     }else{
         return '';
     }
@@ -134,35 +134,35 @@ public static function getOntologyConceptID($lclOntID) {
 * @uses      self::$database_id
 */
 private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
-    
+
     self::initialize();
-    
+
     $ids = explode('-', $conceptID);
     $res_id = null;
-    if (is_array($ids) && (count($ids) == 1 && is_numeric($ids[0])) 
-            || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == self::$database_id)) ) 
+    if (is_array($ids) && (count($ids) == 1 && is_numeric($ids[0]))
+            || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == self::$database_id)) )
     {
         //local or defined in this database
-        
+
         if (count($ids) == 2) {
             $res_id = $ids[1];//this code is already local
         } else {
             $res_id = $ids[0];
         }
-        
-        $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "ID=" . intval($res_id);
-        
-        $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
-        
 
-    } else if (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
- $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix 
-                . "OriginatingDBID=" . intval($ids[0]) . " and " 
+        $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix . "ID=" . intval($res_id);
+
+        $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
+
+
+    } elseif (is_array($ids) && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+ $query = "select " . $fieldNamePrefix . "ID from $tableName where " . $fieldNamePrefix
+                . "OriginatingDBID=" . intval($ids[0]) . " and "
                 . $fieldNamePrefix . "IDInOriginatingDB=" . intval($ids[1]);
-                
+
         $res_id = mysql__select_value(self::$system->get_mysqli(), $query);
     }
-    
+
     if (!($res_id>0)) {
         $res_id = null;
     }
@@ -205,5 +205,5 @@ public static function getOntologyLocalID($ontConceptID) {
     return self::getLocalID($ontConceptID, "defOntologies", "ont_");
 }
 
-}  
+}
 ?>

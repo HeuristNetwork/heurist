@@ -32,15 +32,15 @@ $post_max_size = USystem::getConfigBytes('post_max_size');
 $params = null;
 
 if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
-    
+
         $response = '<p class="heurist-message">The upload size of '.$_SERVER['CONTENT_LENGTH'].' bytes exceeds the limit of '.ini_get('post_max_size')
         .'.<br><br>If you need to upload larger files please contact the system administrator '.HEURIST_MAIL_TO_ADMIN.'</p>';
-        /*    
+        /*
             $response = $system->addError(HEURIST_ACTION_BLOCKED, $response);
         */
 }else
 if($system->init(@$_REQUEST['db'])){
-    
+
     if(@$_SERVER['REQUEST_METHOD']=='POST'){
         $params = filter_input_array(INPUT_POST);
     }else{
@@ -53,13 +53,13 @@ if($system->init(@$_REQUEST['db'])){
     $recID = @$params['recID'];
     $registerAtOnce = (@$params['registerAtOnce']==1);
     $tiledImageStack = (@$params['tiledImageStack']==1);//unzip archive and copy to uploaded_tilestacks
-    
+
     $new_file_name = @$params['newfilename'];
     if($new_file_name){
         $new_file_name = basename($new_file_name);
         $new_file_name = USanitize::sanitizeFileName($new_file_name, false);
     }
-    
+
     if(@$params['entity']){
         $entity_name = entityResolveName($params['entity']);
         if(!$entity_name){
@@ -69,11 +69,11 @@ if($system->init(@$_REQUEST['db'])){
     if($response==null){
         if ( !$system->has_access() ) { //not logged in
                 $response = $system->addError(HEURIST_REQUEST_DENIED);
-        }else if ($entity_name=='sysGroups' || $entity_name=='sysUsers') {
+        }elseif($entity_name=='sysGroups' || $entity_name=='sysUsers') {
                 if(!$system->has_access($recID)){ //only user or group admin
                   $response = $system->addError(HEURIST_REQUEST_DENIED);
                 }
-        }else if(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
+        }elseif(!($entity_name=='recUploadedFiles' || $entity_name=='sysBugreport'))
         { //for all other entities other than recUploadedFile must be admin of dbowners group
                 if(!$system->is_admin()){
                   $response = $syfstem->addError(HEURIST_REQUEST_DENIED);
@@ -83,49 +83,49 @@ if($system->init(@$_REQUEST['db'])){
     if($entity_name==null){
         $response = $system->addError(HEURIST_INVALID_REQUEST, "'entity' parameter is not defined");
     }
-    
+
     if(!$response){
-        
+
         $quota = $system->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
-            $quota = 1073741824; //1GB    
+            $quota = 1073741824; //1GB
         }
         $usage = filestoreGetUsageByScan($system);
-        
-        
+
+
         $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
         $file_length = (int)(@$params['fileSize']>0?@$params['fileSize']:$content_length);
 
         if($usage + $file_length > $quota){ //check quota
-            
+
             $error = 'The allowed disk quota ('.($quota/1048576).'Mb) for this database is reached';
             $response = $system->addError(HEURIST_ACTION_BLOCKED, $error);
-            $response['message'] = $error . '<br><br>If you need more disk space please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;    
-            
+            $response['message'] = $error . '<br><br>If you need more disk space please contact the system administrator ' . HEURIST_MAIL_TO_ADMIN;
+
         }else
         if ($quota_not_defined && $post_max_size && ($content_length > $post_max_size)) { //quota not defined - multipart upload disabled
 
-        }        
-        
+        }
+
     }
-    
+
 }else{
     $response = $system->getError();
 }
 
 if($response!=null){
-    header('Content-type: application/json;charset=UTF-8');
+    header(CTYPE_JSON);
     http_response_code(406);
     if(is_array($response)){
         print json_encode($response);
     }else{
-        print $response;    
+        print $response;
     }
     exit;
 }
-    
-    
+
+
 /*
         'thumbnail' => array(
                     'upload_dir' => dirname($this->get_server_var('SCRIPT_FILENAME')).'/icons/',
@@ -133,11 +133,11 @@ if($response!=null){
                     'crop' => true,
                     'max_width' => 18,
                     'max_height' => 18
-*/    
+*/
     //error_reporting(E_ALL | E_STRICT);
 
-//define options for upload handler    
-    
+//define options for upload handler
+
     if($entity_name==null){
         //NOT USED
         /*
@@ -157,28 +157,28 @@ if($response!=null){
                         'upload_url' => HEURIST_THUMB_URL,
                         'max_width' => 400,
                         'max_height' => 400,
-                        'scale_to_png' => true    
+                        'scale_to_png' => true
                     )
                 )
         );
        */
 /*
-  it was form parameters in manageFilesUpload        
+  it was form parameters in manageFilesUpload
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
             <input type="hidden" name="upload_thumb_url" value="<?php echo defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:'';?>"/>
-*/        
-        
+*/
+
     }else
     if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
-                                   // for example in term list import 
-           
+                                   // for example in term list import
+
         $max_file_size = intval(@$params['max_file_size']);
         if($max_file_size>0){
-// it does not work             
-//            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess', 
+// it does not work
+//            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess',
 //                "php_value post_max_size $max_file_size\nphp_value upload_max_filesize $max_file_size");
         }
-    
+
         $options = array(
                 'upload_dir' => HEURIST_FILESTORE_DIR.'scratch/',
                 'upload_url' => HEURIST_FILESTORE_URL.'scratch/',
@@ -188,10 +188,10 @@ if($response!=null){
                 //'print_response' => false,
                 //'download_via_php' => 1
                 );
-                
+
     }
-    else if($entity_name=="recUploadedFiles"){
-        
+    elseif($entity_name=="recUploadedFiles"){
+
         $options = array(
                 'upload_dir' => HEURIST_SCRATCH_DIR,
                 'upload_url' => HEURIST_FILESTORE_URL.'scratch/', //file_uploads/
@@ -208,19 +208,19 @@ if($response!=null){
                         'upload_url' => HEURIST_FILESTORE_URL.'scratch/thumbs/',
                         'max_width' => 200,
                         'max_height' => 200,
-                        'scale_to_png' => true    
+                        'scale_to_png' => true
                     )
                 )
                 //'max_file_size' => 1024,
                 //'print_response ' => false
         );
-        
+
         allowWebAccessForForlder(HEURIST_SCRATCH_DIR.'thumbs/');
-    
+
     }else{
-        
+
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
-        
+
         $version = @$params['version']!='icon'?'thumbnail':'icon';
         $maxsize = intval(@$params['maxsize'])>0?intval($params['maxsize']):120; //dimension
 
@@ -238,16 +238,16 @@ if($response!=null){
                         'auto_orient' => true,
                         'max_width' => $maxsize,
                         'max_height' => $maxsize,
-                        'scale_to_png' => true    
+                        'scale_to_png' => true
                     )
                 )
-                
+
                 //'max_file_size' => 1024,
                 //'print_response ' => false
         );
-        
+
         allowWebAccessForForlder($entityDir.$version.'/');
-    
+
     }
 
     if(@$params['acceptFileTypes']){
@@ -259,7 +259,7 @@ if($response!=null){
             if(in_array(strtolower($ext), $allowed_exts_all)){
                 $idx = array_search(strtolower($ext), $allowed_exts_all);
                 if($idx>=0) {$allowed_exts[] = $allowed_exts_all[$idx];}
-            }    
+            }
         }
         */
         $options['accept_file_types'] = 'zip|mbtiles';//$params['acceptFileTypes'];
@@ -267,30 +267,30 @@ if($response!=null){
         $allowed_exts = mysql__select_list2($system->get_mysqli(), 'select fxm_Extension from defFileExtToMimetype');
         $options['accept_file_types'] = implode('|', $allowed_exts);
     }
-    
+
     $options['print_response'] = false;
-    
+
     $options['database'] = $system->dbname();
-    
+
     $upload_handler = new UploadHandler($options);// from 3d party uploader
-    
+
     //@todo set print_response=false
     //and send to client standard HEURIST response
     $response = null;
     $res = $upload_handler->get_response();//it returns file object  $res['size]
-        
+
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
             $sMsg = "Sorry, file was not processed due to the following reported error:\n\n".$file->error.".\n\n";// Error Log
 
             if(strpos($file->error, 'Filetype not')===0 || strpos($file->error, 'File with the same name')===0){
-                
+
                 $response = $system->addError(HEURIST_ACTION_BLOCKED, $sMsg, null);
-                
+
             }else{
-            
-                if(false && strpos($file->error, 'Filetype not')===false && 
-                   strpos($file->error, 'ownership permissions')===false && 
+
+                if(false && strpos($file->error, 'Filetype not')===false &&
+                   strpos($file->error, 'ownership permissions')===false &&
                    strpos($file->error, 'post_max_size')===false){
                     $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
                 }
@@ -303,37 +303,37 @@ if($response!=null){
             }
             $response['message'] = nl2br($sMsg);
 
-            break;            
+            break;
         }
-        
+
         if( !($file->size_total>0) || $file->size_total==$file->size){
-        
+
             if($entity_name=="recUploadedFiles"){ //register at once
-                
+
                 if($registerAtOnce==1){
-                
+
                     $entity = new DbRecUploadedFiles($system);
                     $ret = $entity->registerFile($file, null, true, $tiledImageStack);//it returns ulf_ID
-                    
+
                     if( is_bool($ret) && !$ret ){
                         $response = $system->getError();
                     }else{
                         $file->ulf_ID = $ret;
                     }
-                }else if(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
-                    
+                }elseif(!@$file->thumbnailUrl){ //if UploadHandler does not create thumb - creates it as image with text (file extension)
+
                     $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.$new_file_name;
                     $img = UImage::createFromString($file->type?$file->type:'XXX!');
                     imagepng($img, $thumb_file);//save into file
                     imagedestroy($img);
                     $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.$new_file_name;
                 }
-                    
+
             }
-            else if($entity_name=="temp" && $is_autodect_csv) {
-                
+            elseif($entity_name=="temp" && $is_autodect_csv) {
+
                 $filename = HEURIST_FILESTORE_DIR.'scratch/'.basename($file->original_name);
-                
+
                 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                 $isKML = ($extension=='kml' || $extension=='kmz');
                 if($isKML){ //no need to detect params for kml
@@ -347,22 +347,22 @@ if($response!=null){
             }
         }
     }
-    
+
     if($response==null){
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
-    header('Content-type: application/json;charset=UTF-8');
+    header(CTYPE_JSON);
     print json_encode($response);
 
     $system->dbclose();
-    
+
 //------------
 //  NOT USED. verification of uploaded file integrated with UploadHandler
-//    
+//
 function postmode_file_selection() {
 
     $param_name = 'file';
-    
+
     // there are two ways into the file selection mode;
     // either the user has just arrived at the import page,
     // or they've selected a file *and might progress to file-parsing mode*
@@ -393,10 +393,10 @@ function postmode_file_selection() {
                 default:
                     $error = "Unknown file error";
             }
-            
-            
+
+
             $content_length = fix_integer_overflow((int)@$_SERVER['CONTENT_LENGTH']);
-            
+
             $post_max_size = USystem::getConfigBytes('post_max_size');
             if ($post_max_size && ($content_length > $post_max_size)) {
                 $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
@@ -410,7 +410,7 @@ function postmode_file_selection() {
                 if ($file_max_size && ($content_length > $file_max_size)) {
                     $error = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
                 }
-                
+
             }
         }
 
@@ -420,5 +420,5 @@ function postmode_file_selection() {
     }
 
     return $error;
-}    
+}
 ?>

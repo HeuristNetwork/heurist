@@ -3,13 +3,13 @@
     /**
     * Application interface. See HRecordMgr in hapi.js
     * Record search
-    * 
+    *
     * parameters
     * db - heurist database
     * remote=master - request to HEURIST_INDEX_DATABASE
-    * a  - action 
+    * a  - action
     *       minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
-    *       getfacets -   finds all possible facet values for current query and calculates counts for every value 
+    *       getfacets -   finds all possible facet values for current query and calculates counts for every value
     *       related -   finds all related record IDs for given set record "ids"
     *       search - default
     *
@@ -74,8 +74,8 @@
         $req_params = filter_input_array(INPUT_POST);
     }else{
         $req_params = filter_input_array(INPUT_GET);
-    }    
-    
+    }
+
     //these are internal parameters, they cannot be sent from client side
     if( @$req_params['sql'] ) {unset( $req_params['sql'] );}
     if( @$req_params['parentquery'] ) {unset ($req_params['parentquery'] );}
@@ -84,27 +84,27 @@
     //get list of registered database and master index db on the same server
     if(@$req_params['remote'] == 'master' &&
        strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //the same server  - switch database only
-       
+
        unset($req_params['remote']);
        $req_params['db'] = HEURIST_INDEX_DATABASE;
        if(!@$req_params['q']) {$req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';}
     }
-    
+
 
     if(@$req_params['details_encoded']==1){
-        
+
         if(@$req_params['q']){
-            $req_params['q'] = str_replace( ' xxx_style=', ' style=', 
+            $req_params['q'] = str_replace( ' xxx_style=', ' style=',
                         str_replace( '^^/', '../', urldecode($req_params['q'])));
         }
-                    
+
         if(@$req_params['count_query']){
-            $req_params['count_query'] = json_decode(str_replace( ' xxx_style=', ' style=', 
+            $req_params['count_query'] = json_decode(str_replace( ' xxx_style=', ' style=',
                         str_replace( '^^/', '../', urldecode($req_params['count_query']))),true);
         }
 
-    }else if(@$req_params['details_encoded']==2){
-        
+    }elseif(@$req_params['details_encoded']==2){
+
         if(@$req_params['q']){
             $req_params['q'] = urldecode($req_params['q']);
         }
@@ -112,76 +112,76 @@
             $req_params['count_query'] = json_decode(urldecode($req_params['count_query']), true);
         }
     }
-    
+
     $response = array();
 
     $system = new System();
-    
+
     if( ! $system->init(@$req_params['db']) ){
         //get error and response
         $response = $system->getError();
 
-    }else if(@$req_params['a'] == 'minmax'){
+    }elseif(@$req_params['a'] == 'minmax'){
 
         $response = recordSearchMinMax($system, $req_params);
 
-    }else if(@$req_params['a'] == 'count_details'){
+    }elseif(@$req_params['a'] == 'count_details'){
 
         $response = recordSearchDistinctValue($system, $req_params);
-        
-    }else if(@$req_params['a'] == 'count_matches'){
+
+    }elseif(@$req_params['a'] == 'count_matches'){
 
         $response = recordSearchMatchedValues($system, $req_params);
-        
-    }else if(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
-    
+
+    }elseif(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
+
         $params = array();
-        
+
         $params = filter_input_array(INPUT_POST);
 
         $response = recordSearchFacets($system, $params);
 
-    }else if(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
+    }elseif(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 
-        $response = getDateHistogramData($system, $req_params['range'], $req_params['interval'], 
+        $response = getDateHistogramData($system, $req_params['range'], $req_params['interval'],
                     @$req_params['recids'], @$req_params['dtyid'], @$req_params['format'], @$req_params['is_between']==1);
 
-    }else if(@$req_params['a'] == 'related'){
+    }elseif(@$req_params['a'] == 'related'){
 
         $response = recordSearchRelated($system, $req_params['ids'], @$req_params['direction']);
 
-    }else if(@$req_params['a'] == 'links_count'){
+    }elseif(@$req_params['a'] == 'links_count'){
 
         $response = recordLinkedCount($system, @$req_params['source_ID'], @$req_params['target_ID'], @$req_params['dty_ID']);
-        
-    }else if(@$req_params['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
-        
+
+    }elseif(@$req_params['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
+
         $system->defineConstants();
-        
+
         if(!($system->defineConstant('RT_CMS_HOME') &&
              $system->defineConstant('RT_CMS_MENU'))){
-                
+
             $response = $system->addError(HEURIST_ERROR, 'Required record type "Menu" not defined in this database');
-            
-        }else if(!($system->defineConstant('DT_CMS_MENU') && 
+
+        }elseif(!($system->defineConstant('DT_CMS_MENU') &&
                    $system->defineConstant('DT_CMS_TOP_MENU'))){
 
             $response = $system->addError(HEURIST_ERROR, 'Required field type "Menu pointer" not defined in this database');
-            
+
         }else{
-            
+
             $resids = array();
             $response = recordSearchMenuItems($system, $req_params['ids'], $resids, (@$req_params['main_menu']==1) );
         }
-        
+
     /* not implemented
-    }else if(@$req_params['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
-        
+    }elseif(@$req_params['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
+
         $resids = array();
         $response = recordSearchMapDocItems($system, $req_params['ids'], $resids);
     */
-    }else if(@$req_params['a'] == 'links_details'){
-        
+    }elseif(@$req_params['a'] == 'links_details'){
+
         $ids = prepareIds($req_params['ids']);
         $response = array();
         if($req_params['q']=='$IDS'){
@@ -192,9 +192,9 @@
             }
         }
         $response = array('status'=>HEURIST_OK, 'data'=> $response);
-        
-        
-    }else if(@$req_params['a'] == 'get_linked_media'){
+
+
+    }elseif(@$req_params['a'] == 'get_linked_media'){
 
         $ids = prepareIds($req_params['ids']);
         $response = array();
@@ -207,9 +207,9 @@
         $response = array('status' => HEURIST_OK, 'data' => $response);
 
     }else{
-        
+
         if(@$req_params['remote'] == 'master'){
-            
+
                 if(!@$req_params['q']) {$req_params['q'] = '{"t":"'.HEURIST_INDEX_DBREC.'"}';}//all registred db
                 //change hsapi to hserv when master index will be v6.5
                 $reg_url = HEURIST_INDEX_BASE_URL
@@ -218,7 +218,7 @@
                     $reg_url = $reg_url.'&detail='
                         .(is_array($req_params['detail'])?json_encode($req_params['detail']):$req_params['detail']);
                 }
-                $data = loadRemoteURLContent($reg_url);//search master index database for all regitered databases          
+                $data = loadRemoteURLContent($reg_url);//search master index database for all regitered databases
 
                 if($data==false){
                     $msg = 'Cannot access Master Index database on '.HEURIST_INDEX_BASE_URL;
@@ -230,14 +230,14 @@
                 }else{
                     $response = json_decode($data, true);
                 }
-                
-            
+
+
         }else{
             $response = recordSearch($system, $req_params);
             $response['queryid'] = @$req_params['id'];
         }
     }
-    
+
     $system->dbclose();
 
 // Return the response object as JSON

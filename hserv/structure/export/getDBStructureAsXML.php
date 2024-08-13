@@ -4,7 +4,7 @@
 * getDBStructureAsXML.php: returns database definitions (rectypes, details etc.) as XML (HML)
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney
@@ -60,7 +60,7 @@ $is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
 // admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface lsiting in exchange format)
 
 
-print '<?xml version="1.0" encoding="UTF-8"?>';
+print XML_HEADER;
 print "\n\n<hml_structure>";
 
 // TODO: ADD OTHER XML HEADER INFORMATION *************
@@ -128,7 +128,7 @@ if(!$is_subset || $dty_ID>0){
 if(!$is_subset || $rty_ID>0){
 
     do_print_table2('defRecStructure', $rty_ID);
-    
+
 }
 
 if(!$is_subset){
@@ -218,10 +218,10 @@ function do_print_table2( $tname, $id=0 )
     global $mysqli;
 
     $tname_tag = substr($tname,3);
-    
+
     print "\n\n<$tname_tag>";
 
-    
+
     $flds_list = mysql__select_assoc2($mysqli, 'SHOW COLUMNS FROM '.$tname);
     $flds_names = array_keys($flds_list);
     $flds = '`'.implode('`,`', $flds_names).'`';
@@ -231,7 +231,7 @@ function do_print_table2( $tname, $id=0 )
     $id_field = $flds_names[0];
     $prefix = substr($id_field,0,3);
     $where = '';
-    
+
     if($id>0){
         if($prefix=='rst'){
             $where = ' where rst_RecTypeID='.intval($id);
@@ -239,32 +239,32 @@ function do_print_table2( $tname, $id=0 )
             $where = " where $id_field=".intval($id);
         }
     }
-    
-    
+
+
     $query = "select $flds from $tname".$where;
     $res = $mysqli->query($query);
 
-    while ($row = $res->fetch_assoc()) { 
-        
+    while ($row = $res->fetch_assoc()) {
+
         if($prefix=='rty' && !(@$row[$id_field]>0)) {continue;}
-        
+
         print "<$prefix>";
         foreach($flds_list as $fld => $type){
-            
+
             $val = $row[$fld];
             if(strpos($type,'text')!==false || strpos($type,'varchar')!==false){
                 $val = htmlspecialchars($mysqli->real_escape_string($val));
-            }else if(strpos($fld,'OriginatingDBID')!==false){
+            }elseif(strpos($fld,'OriginatingDBID')!==false){
                 if(!($val>0)){
                     $val = HEURIST_DBID;
                 }
-            }else if(strpos($fld,'IDInOriginatingDB')!==false){
+            }elseif(strpos($fld,'IDInOriginatingDB')!==false){
                 if(HEURIST_DBID>0 && !($val>0)){
                     $val = $val[$id_field];
                 }
             }
             print "<$fld>$val</$fld>";
-        }   
+        }
         print "</$prefix>\n";
 
     }

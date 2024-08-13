@@ -247,15 +247,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             let opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
             $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-        
-            for (let rty in rectype_Ids){
-                if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Name') ){
-                    rty = rectype_Ids[rty];
+
+            rectype_Ids.forEach(rty => {
+                if(rty>0 && $Db.rty(rty,'rty_Name') ){
                     let name = $Db.rty(rty,'rty_Plural');
                     if(!name) name = $Db.rty(rty,'rty_Name');
                     window.hWin.HEURIST4.ui.addoption(selScope,rty,'only: '+name);
                 }
-            }
+            });
         }
 
         

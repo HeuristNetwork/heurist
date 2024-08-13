@@ -2,7 +2,7 @@
 
     /**
     * db access to sysUGrpps table
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -25,11 +25,11 @@ require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/dbEntitySearch.php';
 
 
-class DbDefRecTypeGroups extends DbEntityBase 
+class DbDefRecTypeGroups extends DbEntityBase
 {
     /**
     *  search user or/and groups
-    * 
+    *
     *  sysUGrps.ugr_ID
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
@@ -39,24 +39,24 @@ class DbDefRecTypeGroups extends DbEntityBase
     *  sysUsrGrpLinks.ugl_GroupID
     *  sysUsrGrpLinks.ugl_Role
     *  (omit table name)
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
-        
+
         if(parent::search()===false){
-              return false;   
+              return false;
         }
-        
-        //compose WHERE 
+
+        //compose WHERE
         $where = array();
-        
+
         $pred = $this->searchMgr->getPredicate('rtg_ID');
         if($pred!=null) {array_push($where, $pred);}
 
@@ -64,38 +64,38 @@ class DbDefRecTypeGroups extends DbEntityBase
         if($pred!=null) {array_push($where, $pred);}
 
         if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
-       
+
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property
         if(@$this->data['details']=='id'){
-        
+
             $this->data['details'] = 'rtg_ID';
-            
-        }else if(@$this->data['details']=='name'){
+
+        }elseif(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rtg_ID,rtg_Name';
-            
-        }else if(@$this->data['details']=='list'){
+
+        }elseif(@$this->data['details']=='list'){
 
             $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order'
             .',(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
-            
-        }else if(@$this->data['details']=='full'){
-            
+
+        }elseif(@$this->data['details']=='full'){
+
             $this->data['details'] = implode(',', $this->fieldNames )
              .', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
         }
-        
+
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
+
         /*validate names of fields
         foreach($this->data['details'] as $fieldname){
             if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
-            }            
+            }
         }*/
 
         //ID field is mandatory and MUST be first in the list
@@ -108,7 +108,7 @@ class DbDefRecTypeGroups extends DbEntityBase
             array_unshift($this->data['details'],'rtg_ID');
         }
         $is_ids_only = (count($this->data['details'])==1);
-            
+
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.$this->config['tableName'];
@@ -117,12 +117,12 @@ class DbDefRecTypeGroups extends DbEntityBase
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
          $query = $query.' ORDER BY rtg_Order '.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
-        
+
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
         return $res;
     }
-    
+
     //
     //
     //
@@ -130,14 +130,14 @@ class DbDefRecTypeGroups extends DbEntityBase
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
-        if(count($this->recordIDs)==0){             
+        if(count($this->recordIDs)==0){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
             return false;
-        }        
-        
+        }
+
         $query = 'select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID` in ('.implode(',', $this->recordIDs).')';
         $ret = mysql__select_value($this->system->get_mysqli(), $query);
-        
+
         if($ret>0){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
             return false;
@@ -145,30 +145,30 @@ class DbDefRecTypeGroups extends DbEntityBase
 
         return parent::delete();
     }
-    
+
     //
     // validate permission
-    //    
+    //
     protected function _validatePermission(){
-        
-        if(!$this->system->is_admin() && 
-            ((is_array($this->recordIDs) && count($this->recordIDs)>0) 
+
+        if(!$this->system->is_admin() &&
+            ((is_array($this->recordIDs) && count($this->recordIDs)>0)
             || (is_array($this->records) && count($this->records)>0))){ //there are records to update/delete
-            
-            $this->system->addError(HEURIST_REQUEST_DENIED, 
+
+            $this->system->addError(HEURIST_REQUEST_DENIED,
                     'You are not admin and can\'t edit record type groups. Insufficient rights (logout/in to refresh) for this operation');
                 return false;
         }
-        
+
         return true;
-    }      
-    
-    
+    }
+
+
     //
     //
-    //    
+    //
     protected function prepareRecords(){
-    
+
         $ret = parent::prepareRecords();
 
         //add specific field values
@@ -185,18 +185,18 @@ class DbDefRecTypeGroups extends DbEntityBase
                     return false;
                 }
             }
-            
-            $this->records[$idx]['rtg_Modified'] = date('Y-m-d H:i:s');//reset
-            
+
+            $this->records[$idx]['rtg_Modified'] = date(DATE_8601);//reset
+
             if(!(@$this->records[$idx]['rtg_Order']>0)){
                 $this->records[$idx]['rtg_Order'] = 2;
             }
-            
+
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rtg_ID']>0));
         }
-        
+
         return $ret;
-        
-    }     
+
+    }
 }
 ?>

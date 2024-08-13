@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -35,12 +35,12 @@ function exist_similar($mysqli, $url) {
 	/* are there similar URLs to this one already? */
 
     // URL minus the protocol + possibly www.  and minus slash onwards
-	$noproto_url = preg_replace('!^http://(?:www[.])?([^/]*).*!', '\1', $url);	
+	$noproto_url = preg_replace('!^http://(?:www[.])?([^/]*).*!', '\1', $url);
 
 	$res = mysql__select_value($mysqli, 'select count(rec_ID) from Records '
         .' where rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%" '
         .' or rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%"');//http://www.
-	
+
 	return $res>0;
 }
 
@@ -54,7 +54,7 @@ function similar_urls($mysqli, $url) {
 
 	$noproto_url = preg_replace('!^http://(?:www[.])?!', '', $url);	// URL minus the protocol + possibly www.
 
-	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
+	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
                 'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
 	            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
 	if (count($new_matches) >= 10) {return $new_matches;}
@@ -65,7 +65,7 @@ function similar_urls($mysqli, $url) {
 	$qpos = strpos($noproto_url, '?');
 	if ($qpos) {
 		$noproto_url = substr($noproto_url, 0, $qpos);
-		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
+		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
 		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
 		if (count($new_matches) >= 20) {return $matches;}
@@ -77,7 +77,7 @@ function similar_urls($mysqli, $url) {
 	}
 	while (($spos = strrpos($noproto_url, '/'))) {
 		$noproto_url = substr($noproto_url, 0, $spos);
-		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
+		$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'/%" '
 		            .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'/%"');
 		if (count($new_matches) >= 20) {
@@ -97,7 +97,7 @@ function similar_urls($mysqli, $url) {
 	}
 
 	/* try it without the trailing slash */
-	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID', 
+	$new_matches = mysql__select_list($mysqli, 'Records', 'rec_ID',
                     'rec_URL like "http://'.$mysqli->real_escape_string($noproto_url).'%" '
                     .' or rec_URL like "http://www.'.$mysqli->real_escape_string($noproto_url).'%"');
 	if (count($new_matches) >= 20) {return $matches;}
@@ -117,7 +117,7 @@ function site_urls($mysqli, $url) {
 
 	$sitename = preg_replace('!^http://(?:www[.])?([^/]+)(?:.*)!', '$1', $url);
 		// just the host name
-        
+
     $sitename = $mysqli->real_escape_string($sitename);
 
 	$res = $mysqli->query('select rec_URL, rec_ID, rec_Title from Records where
@@ -131,7 +131,7 @@ function site_urls($mysqli, $url) {
 	    while ($row = $res->fetch_row()){
             $matches[$row[0]] = array($row[1], $row[2]);
         }
-		    
+
         $res->close();
     }
 	return $matches;

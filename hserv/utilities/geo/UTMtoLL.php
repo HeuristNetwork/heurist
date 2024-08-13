@@ -5,20 +5,20 @@
  * PHP class to convert UTM to Latitude & Longitude coordinates
 */
 function ToLL($north, $east, $utmZone, $hemisphere)
-{ 
+{
   // This is the lambda knot value in the reference
   $LngOrigin = Deg2Rad($utmZone * 6 - 183);
 
   // The following set of class constants define characteristics of the
   // ellipsoid, as defined my the WGS84 datum.  These values need to be
-  // changed if a different dataum is used.    
+  // changed if a different dataum is used.
 
   $FalseNorth = 0;   // South or North?
   if(strtoupper($hemisphere)=='S'){
       $FalseNorth = 10000000.0;
   }
   //if (lat < 0.) FalseNorth = 10000000.  // South or North?
-  //else          FalseNorth = 0.   
+  //else          FalseNorth = 0.
 
   $Ecc = 0.081819190842622;       // Eccentricity
   $EccSq = $Ecc * $Ecc;

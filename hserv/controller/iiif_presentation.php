@@ -2,8 +2,8 @@
     /**
     * Representations of iiif objects in Presentation API v3
     * https://iiif.io/api/presentation/3.0/
-    * 
-    * 
+    *
+    *
     * parameters
     * db - heurist database
     * resource - name of resource: Canvas, Annotation Page, Annotation, Image
@@ -32,9 +32,9 @@
     $response = array();
 
     $params = $_REQUEST;
-    
+
     if(!isset($system) || $system==null){
-    
+
         $system = new System();
 
         if( ! $system->init(@$params['db']) ){
@@ -42,26 +42,26 @@
             $system->error_exit_api();//exit from script
         }
     }
-    
-    if(!(array_key_exists('id',$params) 
+
+    if(!(array_key_exists('id',$params)
         && $params['id']!='' && $params['id']!=null)){
-        
+
         $system->error_exit_api('Resource id is not defined');//exit from script
     }
-    
-    if(!(array_key_exists('resource',$params) 
+
+    if(!(array_key_exists('resource',$params)
         && $params['resource']!='' && $params['resource']!=null)){
-            
-            
+
+
     }
-  
+
     RecordsExport::setSession($system);
     $res = RecordsExport::getIiifResource(null, $params['id'], $params['resource']);
-    
+
     $system->dbclose();
-    
+
     if($res) {
-        header("Access-Control-Allow-Origin: *");
+        header(HEADER_CORS_POLICY);
         $system->setResponseHeader();
         print $res;
     }else{

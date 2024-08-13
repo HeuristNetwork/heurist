@@ -1,7 +1,7 @@
 <?php
     /**
     * UploadHandlerInit.php
-    * Entry point for fileupload widget. It is used in multi file uploads. 
+    * Entry point for fileupload widget. It is used in multi file uploads.
     * For single file upload see fileUpload.php
     *
     * @package     Heurist academic knowledge management system

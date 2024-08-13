@@ -19,8 +19,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('PDIR','../../');//need for proper path to js and css    
- 
+define('PDIR','../../');//need for proper path to js and css
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 require_once dirname(__FILE__).'/bulkEmailSystem.php';
@@ -39,12 +39,12 @@ if (@$_REQUEST["exportCSV"] == 1) {
 
 if ( !isset($_REQUEST['db']) || $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     ?>
-    
+
     <h3> A Heurist database and Server Manager password are required to enter this function </h3>
 
     <?php
     exit;
-} else if (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody']) 
+} elseif (isset($_REQUEST['databases']) && isset($_REQUEST['users']) && isset($_REQUEST['emailBody'])
             && isset($_REQUEST['db']) && isset($sysadmin_pwd)) {
 
     if($system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)){
@@ -80,13 +80,13 @@ if (empty($email_rectype_id)) {
     exit;
 }
 
-$query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = " 
-            . $email_rectype_id 
+$query = "SELECT rec_ID, rec_Title FROM Records WHERE rec_RecTypeID = "
+            . $email_rectype_id
             . " AND rec_Title != '' AND rec_Title IS NOT NULL AND rec_FlagTemporary != 1";
 
 $email_list = $mysqli->query($query);
-if (!$email_list) { 
-    print "Either unable to retrieve Email records from the current database, Error => " . $mysqli->error. ", Query => " .$query; 
+if (!$email_list) {
+    print "Either unable to retrieve Email records from the current database, Error => " . $mysqli->error. ", Query => " .$query;
     exit;
 }
 
@@ -107,18 +107,18 @@ if(!$has_emails || empty($emails)) {
     . "<strong>Please create an Email record in the database containing the text<br>"
     . "you want to send out, using ##xxxx## markers for values to be inserted.</strong><br><br>"
     . "The Email record to be used must contain a title field and a short summary field - the latter will be used as the email's body. The title and body can be edited before sending. <br>"
-    . "If you want to create your email on-the-fly simply create a dummy record with placeholders for title and body to enable this function. <br><br>" 
+    . "If you want to create your email on-the-fly simply create a dummy record with placeholders for title and body to enable this function. <br><br>"
     . "Placeholders that will be replaced with proper values (case insensitive):<br><br>"
     . "##firstname## &rarr; User's First Name,<br>"
-    . "##lastname## &rarr; User's Last Name,<br>" 
-    . "##email## &rarr; User's Email,<br>" 
-    . "##database## &rarr; Database Name,<br>" 
-    . "##dburl## &rarr; Database URL,<br>" 
-    . "##records## &rarr; Record Count, and<br>" 
+    . "##lastname## &rarr; User's Last Name,<br>"
+    . "##email## &rarr; User's Email,<br>"
+    . "##database## &rarr; Database Name,<br>"
+    . "##dburl## &rarr; Database URL,<br>"
+    . "##records## &rarr; Record Count, and<br>"
     . "##lastmodified## &rarr; Date of the Last Modified Record<br>";
     exit;
 }
-?>  
+?>
 <!DOCTYPE html>
 <html lang="en" xml:lang="en">
     <head>
@@ -215,7 +215,7 @@ if(!$has_emails || empty($emails)) {
                 -webkit-user-select: none;
                 -moz-user-select: none;
                 -ms-user-select: none;
-                user-select: none;        
+                user-select: none;
             }
 
             .t-row {
@@ -264,7 +264,7 @@ if(!$has_emails || empty($emails)) {
             window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
 
             var all_emails = <?php echo json_encode($emails)?>;// Object of Email records id->title
-            
+
             var current_db = "<?php echo $current_db ?>";
             var getting_databases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
             var run_filter = false;
@@ -272,7 +272,7 @@ if(!$has_emails || empty($emails)) {
 
             const handled_sort = ['name', 'rec_count', 'last_update'];
             var database_details = null; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
-            
+
             //
             // Get list of currently selected databases
             //
@@ -309,9 +309,9 @@ if(!$has_emails || empty($emails)) {
             // Prepare and run export script
             //
             function doExportCSV(e) {
-                
-                if(!validateForm(e)) { 
-                    return false; 
+
+                if(!validateForm(e)) {
+                    return false;
                 }
 
                 //prevent dbl click
@@ -337,7 +337,7 @@ if(!$has_emails || empty($emails)) {
 
                 //$("#emailOptions").attr("onsubmit", action);
                 $("input[name='exportCSV']").val('');
-                
+
                 setTimeout('isFormSubmit=false', 5000);
 
                 return false;
@@ -347,7 +347,7 @@ if(!$has_emails || empty($emails)) {
             // Valid main form
             //
             function validateForm(e) {
-                
+
                 var isValid = true;
 
                 var err_text = "The following actions are required:<br><br>";
@@ -403,12 +403,12 @@ if(!$has_emails || empty($emails)) {
                     isValid = false;
                 }
 
-                if(!isValid) { 
+                if(!isValid) {
                     window.hWin.HEURIST4.msg.showMsgFlash(err_text, 5000);
                 }else{
                     //verifySystemAdminPwd();
                 }
-                
+
                 return isValid;
             }
 
@@ -583,7 +583,7 @@ if(!$has_emails || empty($emails)) {
             // Setup email selection elements
             //
             function setupEmailSelection() {
-                
+
                 var $email_selection = $("#emailOutline");
 
                 var options = [
@@ -612,7 +612,7 @@ if(!$has_emails || empty($emails)) {
                         }
                     }
                 });
-            }            
+            }
 
             //
             // Setup remaining elements
@@ -642,7 +642,7 @@ if(!$has_emails || empty($emails)) {
 
                 $("#btnApply").on({
                     click: function(event, data) {
-                        
+
                         if(getting_databases){
                             run_filter = getting_databases == 1;
                             window.hWin.HEURIST4.msg.showMsgFlash('Please wait for the database list to update...', 5000);
@@ -830,7 +830,7 @@ if(!$has_emails || empty($emails)) {
                         });
                     },
                     success: function(response, textStatus, jqXHR){
-                        
+
                         if(response.status == "ok"){
                             $("#emailTitle").val(response.data[0]);
                             $("#emailBody").text(response.data[1]);
@@ -992,7 +992,7 @@ if(!$has_emails || empty($emails)) {
                     db_list: dbs.join(','),
                     req_id: window.hWin.HEURIST4.util.random()
                 };
-                
+
                 $.ajax({
                     url: 'bulkEmailOther.php',
                     type: 'POST',
@@ -1012,7 +1012,7 @@ if(!$has_emails || empty($emails)) {
                         });
                     },
                     success: function(response, textStatus, jqXHR){
-                        
+
                         if(response.status == "ok"){
                             $("#userCount").text(response.data);
                         } else {
@@ -1035,7 +1035,7 @@ if(!$has_emails || empty($emails)) {
             // Verify sysadmin password
             //
             function verifySystemAdminPwd() {
-                
+
                 var data = {
                     db: current_db,
                     sysadmin_pwd: $("#sm_pwd").val()
@@ -1060,10 +1060,10 @@ if(!$has_emails || empty($emails)) {
                         });
                     },
                     success: function(response, textStatus, jqXHR){
-                        
+
                         if(response.status == "ok"){
                             if(response.data == true){
-                                
+
                                 getDbList();
                                 $("#emailOptions").submit();
                             }else{
@@ -1120,14 +1120,14 @@ if(!$has_emails || empty($emails)) {
             });
 
         </script>
-        
+
     </head>
 
     <body style="margin: 10px 10px 10px 20px;">
-        
+
         <div style="font-family:Arial,Helvetica,sans-serif;">
             <h3>Heurist System Email</h3>
-            
+
             <span class="instruction">
                 This tool allows you to email all users / specified types of user on all / selected Heurist databases available on this server. <br><br>
                 The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br><br>
@@ -1140,7 +1140,7 @@ if(!$has_emails || empty($emails)) {
                     <span style="margin-right: 50px;">Filter: </span>
 
                     <span>
-                        
+
                         <label for="recTotal" class="non-selectable"> Over <input type="number" class="input-num" name="recTotal" id="recTotal" min="0" value="0"> records </label>
 
                         &nbsp;&nbsp;&nbsp;
@@ -1180,14 +1180,14 @@ if(!$has_emails || empty($emails)) {
                         <div>Get users from these databases:</div>
 
                         <div style="margin: 10px 0px;">
-                            Sort by: 
+                            Sort by:
                             <label><input type="radio" name="dbSortBy" class="dbSort" id="name"> Name</label>
                             <label><input type="radio" name="dbSortBy" class="dbSort" id="rec_count"> Record count</label>
                             <label><input type="radio" name="dbSortBy" class="dbSort" id="last_update"> Last updated</label>
                         </div>
 
                         <div class="non-selectable" style="margin: 0px 0px 10px 5px;">
-                            <label><input type="checkbox" id="allDBs"> Select All</label> 
+                            <label><input type="checkbox" id="allDBs"> Select All</label>
                             <span style="float: right; display: none; margin-right: 10px;">Record count:</span>
                         </div>
                         <div id="dbSelection" data-order="name">
@@ -1198,24 +1198,24 @@ if(!$has_emails || empty($emails)) {
                 </div>
 
                 <div class="r-col">
-                    
+
                     <div style="margin-bottom: 20px;">
-                        Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp; 
-                        Count of distinct users: <span id="userCount">0</span> 
+                        Send email to: <span id="userSelection"></span> &nbsp;&nbsp;&nbsp;
+                        Count of distinct users: <span id="userCount">0</span>
                         <button id="btnCalRecCount" style="margin-left: 10px;" onclick="return false;">Count total DB records</button>
                         <span style="float: right; margin-left: 50px;">Number of databases selected: <span id="dbCount">0</span></span>
                         <br>
                         <span style="float: right;">Total count of records (selected databases): <span id="recCount">0</span></span>
                     </div>
 
-                    <div class="non-selectable" style="margin-bottom: 20px;"> 
-                        Email record containing the email outline 
+                    <div class="non-selectable" style="margin-bottom: 20px;">
+                        Email record containing the email outline
                         <br>
                         <select id="emailOutline" name="emailId" style="width: 99%;"></select>
                     </div>
-                    
+
                     <div style="margin-bottom: 20px;">
-                        
+
                         <div style="margin-bottom: 15px;">
                             Email Subject: <input type="text" id="emailTitle" name="emailTitle" style="margin-left: 5px;width: 86.6%;">
                         </div>
@@ -1248,16 +1248,16 @@ if(!$has_emails || empty($emails)) {
                         Please enter the System Manager password to confirm:&nbsp;
 
                         <input type="password" name="pwd" autocomplete="off" id="sm_pwd" />
-                        
-                        
+
+
                         <label><input type="checkbox" name="use_native" id="use_native" value="1"/>use native mail</label>
 
                     </div>
-                    
+
                     <div style="margin-top: 10px;">
 
                         <button style="margin-left: 5px;" type="button" id="btnEmail">Send Emails</button>
-                        
+
                     </div>
 
                 </div>
@@ -1274,6 +1274,6 @@ if(!$has_emails || empty($emails)) {
             </form>
 -->
         </div>
-        
+
     </body>
 </html>

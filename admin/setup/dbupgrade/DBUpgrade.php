@@ -17,7 +17,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
 
     $src_maj = intval( $row['sys_dbVersion'] );
     $src_min = intval( $row['sys_dbSubVersion'] );
-    
+
     $upgrade_success = true;
 
     if($src_min>=$trg_min){
@@ -40,7 +40,7 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
             if($trg_maj==1 && $src_min==2){
                 include_once $filename;
                 $rep = updateDatabseTo_v3($system, $dbname);//PHP
-            }else if(!db_script($dbname, $dir.$filename)){ //SQL
+            }elseif(!db_script($dbname, $dir.$filename)){ //SQL
                 $system->addError(HEURIST_DB_ERROR, 'Error: Unable to execute '.$filename.' for database '.$dbname
                     .'Please check whether this file is valid');
                 $rep = false;
@@ -91,6 +91,6 @@ function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
     }
     if($keep_autocommit===true) {$mysqli->autocommit(TRUE);}
 
-    return $upgrade_success; 
-}  
+    return $upgrade_success;
+}
 ?>

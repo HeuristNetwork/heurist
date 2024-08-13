@@ -17,7 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global hEditing */
+/* global HEditing */
 
 let _theme_editing_symbology;
 
@@ -37,7 +37,7 @@ function editTheme(current_value, callback){
     let editForm = $('<div class="ent_content_full editForm" style="top:0">')
     .appendTo($('<div class="ent_wrapper">').appendTo(popup_dlg));
 
-    _theme_editing_symbology = new hEditing({container:editForm, 
+    _theme_editing_symbology = new HEditing({container:editForm, 
         onchange:
         function(){
             if(edit_dialog){

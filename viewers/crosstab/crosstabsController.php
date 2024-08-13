@@ -32,14 +32,14 @@ if( !$system->init(@$_REQUEST['db']) ){
 
             $response = recordSearchMinMax( $system, $params );//recordSearch.php
 
-    }else if(@$_REQUEST['a'] == 'pointers' ){
+    }elseif(@$_REQUEST['a'] == 'pointers' ){
 
             $response = recordSearchDistinctPointers( $params );
 
-    }else if(@$_REQUEST['a'] == 'crosstab' ){
+    }elseif(@$_REQUEST['a'] == 'crosstab' ){
 
 ini_set('max_execution_time', '0');
-        
+
             $response = getCrossTab( $params );
 
     }else{
@@ -61,9 +61,9 @@ exit;
 /*
 function recordSearchMinMax( $params){
     global $system;
-    
+
     $mysqli = $system->get_mysqli();
-    
+
     if(@$params['dt']){
 
 // no more rectype filter
@@ -101,7 +101,7 @@ function recordSearchMinMax( $params){
 function getWhereRecordIds($params){
 
     $recIDs = null;
-    
+
     if(@$params['recordset']){
         if(is_array($params['recordset'])){
             $recids = $params['recordset'];
@@ -110,8 +110,8 @@ function getWhereRecordIds($params){
         }
         //$recIDs = explode(',',$recids['recIDs']);
         $recIDs = prepareIds($recids['recIDs']);
-        
-        
+
+
     }
     return $recIDs;
 }
@@ -125,18 +125,18 @@ function getWhereRecordIds($params){
 */
 function recordSearchDistinctPointers( $params ){
     global $system, $mysqli;
-    
+
     if(@$params['dt']){
 
     $where = getWhereRecordIds($params);
-        
+
     if($where==null){
-        
+
         $currentUser = $system->getCurrentUser();
-        
+
         $query = get_sql_query_clauses($mysqli, $params, $currentUser);
         $where_clause = $query["where"];
-        
+
         /*remove order by
         $pos = strrpos($where, " order by ");
         if($pos){
@@ -144,13 +144,13 @@ function recordSearchDistinctPointers( $params ){
         }*/
         $where = '(select rec_ID '.$where_clause.' )';
     }else{
-        
+
         $where = '('.implode(',',$where).')';
     }
-    
+
     $query = "select distinct dtl_Value as id, rec_Title as text from Records, recDetails where rec_ID=dtl_Value and dtl_DetailTypeID="
                         .intval($params['dt'])." and dtl_RecID in ".$where;
-        
+
         $res = $mysqli->query($query);
         if (!$res){
             $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
@@ -174,20 +174,20 @@ function recordSearchDistinctPointers( $params ){
 
 /**
 * main request to find crosstab data
-* 
+*
 * @param mixed $mysqli
 * @param mixed $params
 *               dt_page - detail type for page/groups
 *               dt_col - detail type for columns
 *               dt_row - detail type for rows
-*               agg_mode - aggreagation mode: sum, avg, count   
+*               agg_mode - aggreagation mode: sum, avg, count
 *               agg_field - field for avg or sum mode
 *               q - current Heurist query
 */
 function getCrossTab( $params){
-    
+
     global $system;
-    
+
     $mysqli = $system->get_mysqli();
 
     $dt_page = @$params['dt_page'];
@@ -216,19 +216,19 @@ function getCrossTab( $params){
     if($recIDs!=null){
         $params['q'] = 'ids:'.implode(',',$recIDs);
     }
-        
+
     $currentUser = $system->getCurrentUser();
-        
+
     $query = get_sql_query_clauses($mysqli, $params, $currentUser);
     $where = $query["where"];
     $from = $query["from"];
-        
+
 
     /*remove order by
     $pos = strrpos($where, " order by ");
     if($pos){
         $where = substr($where,0,$pos);
-    }*/ 
+    }*/
 
 $query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$from;
 

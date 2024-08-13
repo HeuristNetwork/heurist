@@ -2,7 +2,7 @@
 
     /**
     * db access to usrReminders table
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -30,20 +30,20 @@ class DbSysWorkflowRules extends DbEntityBase
 
     /**
     *  search usrReminders
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
-                
-        
+
+
         if(parent::search()===false){
-              return false;   
+              return false;
         }
 
         //special case -> find all rectypes with rules
@@ -52,13 +52,13 @@ class DbSysWorkflowRules extends DbEntityBase
             $result = $this->searchMgr->execute($query, true, $this->config['entityName'], null);
             return $result;
         }
-        
+
         $needCheck = false;
-        
-        //compose WHERE 
+
+        //compose WHERE
         $where = array();
         $from_table = array($this->config['tableName']);
-        
+
         $pred = $this->searchMgr->getPredicate('swf_ID');
         if($pred!=null) {array_push($where, $pred);}
 
@@ -71,32 +71,32 @@ class DbSysWorkflowRules extends DbEntityBase
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
-        
+
             $this->data['details'] = 'swf_ID';
-            
-        }else if(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
+
+        }elseif(@$this->data['details']=='name' || @$this->data['details']=='list' || @$this->data['details']=='full'){
 
             $this->data['details'] = 'swf_ID,swf_RecTypeID,swf_Stage,swf_Order,swf_StageRestrictedTo,swf_SetOwnership,swf_SetVisibility,swf_SendEmail';
-            
+
         }else{
             $needCheck = true;
         }
-        
+
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
+
         //validate names of fields
         if($needCheck && !$this->_validateFieldsForSearch()){
             return false;
         }
 
         //----- order by ------------
-        //compose ORDER BY 
+        //compose ORDER BY
         $order = array('swf_RecTypeID, swf_Order, swf_Stage ASC');
-        
+
         $is_ids_only = (count($this->data['details'])==1);
-        
+
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
@@ -107,41 +107,41 @@ class DbSysWorkflowRules extends DbEntityBase
         if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
         }
-         
+
         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         $calculatedFields = null;
-        
+
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-        
+
         return $result;
     }
-    
+
     //
     // validate permission for edit tag
     // for delete and assign see appropriate methods
-    //    
+    //
     protected function _validatePermission(){
-        
+
         if(!$this->system->is_admin() && is_array($this->recordIDs) && count($this->recordIDs)>0){ //there are records to update/delete
 
-            $this->system->addError(HEURIST_REQUEST_DENIED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED,
                 'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
             return false;
         }
 
         return true;
     }
-    
+
     //
     //
-    //    
+    //
     protected function prepareRecords(){
-    
+
         $ret = parent::prepareRecords();
 
         //add specific field values
         foreach($this->records as $idx=>$record){
- 
+
                 if($this->records[$idx]['swf_StageRestrictedTo']==''){
                     $this->records[$idx]['swf_StageRestrictedTo'] = null;
                 }
@@ -156,15 +156,15 @@ class DbSysWorkflowRules extends DbEntityBase
                 }
                 if($this->records[$idx]['swf_Order']=='' || $this->records[$idx]['swf_Order']<0){
                     $this->records[$idx]['swf_Order'] = 0;
-                }else if($this->records[$idx]['swf_Order']>255){
+                }elseif($this->records[$idx]['swf_Order']>255){
                     $this->records[$idx]['swf_Order'] = 255;
                 }
         }
 
         return $ret;
-        
-    }       
-    
+
+    }
+
     // Operations:
     // 1) adds entire ruleset for record type
     // 2) set order of stages per record type
@@ -177,26 +177,26 @@ class DbSysWorkflowRules extends DbEntityBase
 
             $mysqli = $this->system->get_mysqli();
 
-            if(mysql__select_value($mysqli, 
+            if(mysql__select_value($mysqli,
             'SELECT swf_RecTypeID FROM sysWorkflowRules where swf_RecTypeID='.$rty_ID.' LIMIT 1')>0){
 
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'There are already rules for record type '.$rty_ID);
                 $ret = false;
             }else{
-                
+
                 if(!$this->system->is_admin()){
 
-                    $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    $this->system->addError(HEURIST_REQUEST_DENIED,
                         'You are not DB admin. Insufficient rights (logout/in to refresh) for this operation');
                     $ret = false;
-                }else{                
-                    
+                }else{
+
                     $this->system->defineConstant('TRM_SWF');
                     $query = 'INSERT INTO sysWorkflowRules (swf_RecTypeID,swf_Stage) SELECT '
                     .$rty_ID.', trm_ID FROM defTerms where trm_ParentTermID='.TRM_SWF.' ORDER BY trm_Label';
                     $ret = $mysqli->query($query);
                     if(!$ret){
-                        $this->system->addError(HEURIST_DB_ERROR, 
+                        $this->system->addError(HEURIST_DB_ERROR,
                             'Cannot add ruleset to sysWorkflowRules table', $mysqli->error);
                         $ret = false;
                     }
@@ -212,6 +212,6 @@ class DbSysWorkflowRules extends DbEntityBase
         return $ret;
     }
 
-    
+
 }
 ?>

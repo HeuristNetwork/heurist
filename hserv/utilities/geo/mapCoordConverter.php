@@ -2,35 +2,35 @@
 
 /**
  * PHP class to convert Latitude & Longitude coordinates into UTM & Lambert Conic Conformal Northing/Easting coordinates.
- * 
+ *
  * This class encapsulates the methods for representing a geographic point on the earth in three different coordinate systema. Lat/Long, UTM and Lambert Conic Conformal.
- * 
+ *
  * Code for datum and UTM conversion was converted from C++ code written by Chuck Gantz (chuck.gantz@globalstar.com) from http://www.gpsy.com/gpsinfo/geotoutm/
  * This code was converted into PHP by Brenor Brophy (brenor@sbcglobal.net) and later refactored for PHP 5.3 by Hans Duedal (hd@onlinecity.dk).
- * 
+ *
  * @author chuck.gantz@globalstar.com, brenor@sbcglobal.net, hd@onlinecity.dk
  * @version 1.0
- * 
+ *
  * COPYRIGHT (c) 2005, 2006, 2007, 2008 BRENOR BROPHY
  * The source code included in this package is free software; you can
  * redistribute it and/or modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation. This license can be read at:
- * 
+ *
  * http://www.opensource.org/licenses/gpl-license.php
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
- * 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
  * @link http://www.gpsy.com/gpsinfo/geotoutm/
  * @link http://www.phpclasses.org/browse/file/10671.html
  * @link https://gist.github.com/840476#file_gpointconverter.class.php
  */
 class GpointConverter
 {
-    
+
     /**
-     * Reference ellipsoids derived from Peter H. Dana's website: 
+     * Reference ellipsoids derived from Peter H. Dana's website:
      *     http://www.utexas.edu/depts/grg/gcraft/notes/datum/elist.html
      *     Department of Geography, University of Texas at Austin
      *     Internet: pdana@mail.utexas.edu 3/22/95
@@ -38,10 +38,10 @@ class GpointConverter
      *     Defense Mapping Agency. 1987b. DMA Technical Report: Supplement to Department of Defense World Geodetic System 1984 Technical Report. Part I and II.
      *     Washington, DC: Defense Mapping Agency
      * Alternative names added in for easy compatibility by hd@onlinecity.dk
-     * 
+     *
      * @var array - format ("Ellipsoid name" => array(Equatorial Radius, square of eccentricity))
      */
-    public static $ellipsoid = array(    
+    public static $ellipsoid = array(
         "Airy"                    =>array (6377563, 0.00667054),
         "Australian National"    =>array    (6378160, 0.006694542),
         "Bessel 1841"            =>array    (6377397, 0.006674372),
@@ -65,11 +65,11 @@ class GpointConverter
         "WGS 66"                =>array (6378145, 0.006694542),
         "WGS 72"                =>array (6378135, 0.006694318),
         "WGS 84"                =>array (6378137, 0.00669438),
-        
+
         // Alternative names, added in for easy compatibility by hd@onlinecity.dk
         "ED50"                    =>array    (6378388, 0.00672267), // International Ellipsoid
         "EUREF89"                =>array    (6378137, 0.00669438), // Max deviation from WGS 84 is 40 cm/km see (in danish) http://www2.kms.dk/C1256AED004E87BA/(AllDocsByDocId)/3382517647F695C9C1256BC700265CE7
-        "ETRS89"                =>array    (6378137, 0.00669438)  // Same as EUREF89 
+        "ETRS89"                =>array    (6378137, 0.00669438)  // Same as EUREF89
     );
 
     // Properties
@@ -88,7 +88,7 @@ class GpointConverter
 
     /**
      * Constructs the object and sets the datum
-     * 
+     *
      * @param string $datum
      */
     public function __construct($datum='WGS 84')            // Default datum is WGS 84
@@ -97,10 +97,10 @@ class GpointConverter
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
-    
+
     /**
      * Set the datum
-     * 
+     *
      * @param string $datum
      */
     public function setDatum($datum='WGS 84')
@@ -109,10 +109,10 @@ class GpointConverter
         $this->e2 = self::$ellipsoid[$datum][1];// Set datum Square of eccentricity
         $this->datum = $datum;                        // Save the datum
     }
-    
+
     /**
      * Set X & Y pixel of the point (used if it is being drawn on an image)
-     * 
+     *
      * @param integer $x
      * @param integer $y
      */
@@ -120,21 +120,21 @@ class GpointConverter
     {
         $this->Xp = $x; $this->Yp = $y;
     }
-    
+
     /**
      * Get X pixel location
      */
     public function Xp() {
-        return $this->Xp; 
+        return $this->Xp;
     }
-    
+
     /**
      * Get Y pixel location
      */
     public function Yp() {
         return $this->Yp;
     }
-    
+
     /**
      * Set/Get/Output Longitude & Latitude of the point
      * @param float $long
@@ -145,35 +145,35 @@ class GpointConverter
         $this->long = $long;
         $this->lat = $lat;
     }
-    
+
     /**
      * Get latitude
-     * 
+     *
      */
     public function Lat() {
         return $this->lat;
     }
-    
+
     /**
      * Get longitude
-     * 
+     *
      */
     public function Long() {
         return $this->long;
     }
-    
+
     /**
      * Print latitude/longitude
-     * 
+     *
      */
     public function printLatLong() {
         printf("Latitude: %1.5f Longitude: %1.5f",$this->lat, $this->long);
     }
-    
-    
+
+
     /**
      * Set Universal Transverse Mercator Coordinates
-     * 
+     *
      * @param integer $easting
      * @param integer $northing
      * @param string $zone
@@ -184,46 +184,46 @@ class GpointConverter
         $this->utmEasting = $easting;
         if($zone!=null && $zone!='') {$this->utmZone = $zone;}
     }
-    
+
     public function setUTMZone($zone){
         $this->utmZone = $zone;
     }
-    
-    
+
+
     /**
      * Get utm northing
-     * 
+     *
      */
     public function N() {
         return $this->utmNorthing;
     }
-    
+
     /**
      * Get utm easting
-     * 
+     *
      */
     public function E() {
         return $this->utmEasting;
     }
-    
+
     /**
      * Get utm zone
      */
     public function Z() {
         return $this->utmZone;
     }
-    
+
     /**
      * Print UTM coordinates
-     * 
+     *
      */
     public function printUTM() {
         print "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone;
     }
-    
+
     /**
      * Set the lambert coordinates
-     * 
+     *
      * @param integer $northing
      * @param integer $easting
      */
@@ -232,39 +232,39 @@ class GpointConverter
         $this->lccNorthing = $northing;
         $this->lccEasting = $easting;
     }
-    
+
     /**
      * Get lccNorthing
      */
     public function lccN() {
         return $this->lccNorthing;
     }
-    
+
     /**
      * Get lccEasting
      */
     public function lccE() {
         return $this->lccEasting;
     }
-    
+
     /**
      * Print lambert coordinates
-     * 
+     *
      */
     public function printLambert() {
         print  "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting;
     }
-    
+
     /**
      * Convert Longitude/Latitude to UTM
-     * 
-     * Equations from USGS Bulletin 1532 
-     * East Longitudes are positive, West longitudes are negative. 
+     *
+     * Equations from USGS Bulletin 1532
+     * East Longitudes are positive, West longitudes are negative.
      * North latitudes are positive, South latitudes are negative
      * Lat and Long are in decimal degrees
      * Written by Chuck Gantz- chuck.gantz@globalstar.com, converted to PHP by
      * Brenor Brophy, brenor@sbcglobal.net
-     * 
+     *
      * UTM coordinates are useful when dealing with paper maps. Basically the
      * map will can cover a single UTM zone which is 6 degrees on longitude.
      * So you really don't care about an object crossing two zones. You just get a
@@ -282,7 +282,7 @@ class GpointConverter
      * have to have a couple of maps to cover the whole state because TM projection
      * looses accuracy as you move further away from the Longitude of Origin, 15 degrees
      * is usually the limit.
-     * 
+     *
      * Now, in the case where we want to generate electronic maps that may be
      * placed pretty much anywhere on the globe we really don't to deal with the
      * issue of UTM zones in our coordinate system. We would really just like a
@@ -299,7 +299,7 @@ class GpointConverter
      * UTMZone value will be valid for Long/Lat given - thought it is not meaningful
      * in the context of Local TM. If a NULL value is passed for $LongOrigin
      * then the standard UTM coordinates are calculated.
-     * 
+     *
      * @param float $LongOrigin
      */
     public function convertLLtoTM($LongOrigin)
@@ -318,13 +318,13 @@ class GpointConverter
             // Special zones for Svalbard
             if( $this->lat >= 72.0 && $this->lat < 84.0 )  {
                 if($LongTemp >= 0.0  && $LongTemp <  9.0) {
-                    $ZoneNumber = 31;    
-                } else if($LongTemp >= 9.0  && $LongTemp < 21.0) {
-                    $ZoneNumber = 33;    
-                } else if($LongTemp >= 21.0 && $LongTemp < 33.0) {
-                    $ZoneNumber = 35;    
-                } else if($LongTemp >= 33.0 && $LongTemp < 42.0) {
-                    $ZoneNumber = 37;    
+                    $ZoneNumber = 31;
+                } elseif($LongTemp >= 9.0  && $LongTemp < 21.0) {
+                    $ZoneNumber = 33;
+                } elseif($LongTemp >= 21.0 && $LongTemp < 33.0) {
+                    $ZoneNumber = 35;
+                } elseif($LongTemp >= 33.0 && $LongTemp < 42.0) {
+                    $ZoneNumber = 37;
                 }
             }
             $LongOrigin = ($ZoneNumber - 1)*6 - 180 + 3;  //+3 puts origin in middle of zone
@@ -333,7 +333,7 @@ class GpointConverter
             // We also need to set the false Easting value adjust the UTM easting coordinate
             $falseEasting = 500000.0;
         }
-        
+
         $LongOriginRad = deg2rad($LongOrigin);
 
         $eccPrimeSquared = ($this->e2)/(1-$this->e2);
@@ -343,48 +343,48 @@ class GpointConverter
         $C = $eccPrimeSquared*cos($LatRad)*cos($LatRad);
         $A = cos($LatRad)*($LongRad-$LongOriginRad);
 
-        $M = $this->a*((1    - $this->e2/4        - 3*$this->e2*$this->e2/64    - 5*$this->e2*$this->e2*$this->e2/256)*$LatRad 
+        $M = $this->a*((1    - $this->e2/4        - 3*$this->e2*$this->e2/64    - 5*$this->e2*$this->e2*$this->e2/256)*$LatRad
                             - (3*$this->e2/8    + 3*$this->e2*$this->e2/32    + 45*$this->e2*$this->e2*$this->e2/1024)*sin(2*$LatRad)
-                                                + (15*$this->e2*$this->e2/256 + 45*$this->e2*$this->e2*$this->e2/1024)*sin(4*$LatRad) 
+                                                + (15*$this->e2*$this->e2/256 + 45*$this->e2*$this->e2*$this->e2/1024)*sin(4*$LatRad)
                                                 - (35*$this->e2*$this->e2*$this->e2/3072)*sin(6*$LatRad));
-    
+
         $this->utmEasting = ($k0*$N*($A+(1-$T+$C)*$A*$A*$A/6
                         + (5-18*$T+$T*$T+72*$C-58*$eccPrimeSquared)*$A*$A*$A*$A*$A/120)
                         + $falseEasting);
 
         $this->utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
                      + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
-        
+
         if($this->lat < 0) {$this->utmNorthing += 10000000.0;} //10000000 meter offset for southern hemisphere
     }
 
     /**
      * This routine determines the correct UTM letter designator for the given latitude
      * returns 'Z' if latitude is outside the UTM limits of 84N to 80S
-     * Written by Chuck Gantz- chuck.gantz@globalstar.com, converted to PHP by Brenor Brophy, brenor@sbcglobal.net 
+     * Written by Chuck Gantz- chuck.gantz@globalstar.com, converted to PHP by Brenor Brophy, brenor@sbcglobal.net
      */
     public function UTMLetterDesignator()
-    {    
+    {
         if((84 >= $this->lat) && ($this->lat >= 72)) {$LetterDesignator = 'X';}
-        else if((72 > $this->lat) && ($this->lat >= 64)) {$LetterDesignator = 'W';}
-        else if((64 > $this->lat) && ($this->lat >= 56)) {$LetterDesignator = 'V';}
-        else if((56 > $this->lat) && ($this->lat >= 48)) {$LetterDesignator = 'U';}
-        else if((48 > $this->lat) && ($this->lat >= 40)) {$LetterDesignator = 'T';}
-        else if((40 > $this->lat) && ($this->lat >= 32)) {$LetterDesignator = 'S';}
-        else if((32 > $this->lat) && ($this->lat >= 24)) {$LetterDesignator = 'R';}
-        else if((24 > $this->lat) && ($this->lat >= 16)) {$LetterDesignator = 'Q';}
-        else if((16 > $this->lat) && ($this->lat >= 8)) {$LetterDesignator = 'P';}
-        else if(( 8 > $this->lat) && ($this->lat >= 0)) {$LetterDesignator = 'N';}
-        else if(( 0 > $this->lat) && ($this->lat >= -8)) {$LetterDesignator = 'M';}
-        else if((-8 > $this->lat) && ($this->lat >= -16)) {$LetterDesignator = 'L';}
-        else if((-16 > $this->lat) && ($this->lat >= -24)) {$LetterDesignator = 'K';}
-        else if((-24 > $this->lat) && ($this->lat >= -32)) {$LetterDesignator = 'J';}
-        else if((-32 > $this->lat) && ($this->lat >= -40)) {$LetterDesignator = 'H';}
-        else if((-40 > $this->lat) && ($this->lat >= -48)) {$LetterDesignator = 'G';}
-        else if((-48 > $this->lat) && ($this->lat >= -56)) {$LetterDesignator = 'F';}
-        else if((-56 > $this->lat) && ($this->lat >= -64)) {$LetterDesignator = 'E';}
-        else if((-64 > $this->lat) && ($this->lat >= -72)) {$LetterDesignator = 'D';}
-        else if((-72 > $this->lat) && ($this->lat >= -80)) {$LetterDesignator = 'C';}
+        elseif((72 > $this->lat) && ($this->lat >= 64)) {$LetterDesignator = 'W';}
+        elseif((64 > $this->lat) && ($this->lat >= 56)) {$LetterDesignator = 'V';}
+        elseif((56 > $this->lat) && ($this->lat >= 48)) {$LetterDesignator = 'U';}
+        elseif((48 > $this->lat) && ($this->lat >= 40)) {$LetterDesignator = 'T';}
+        elseif((40 > $this->lat) && ($this->lat >= 32)) {$LetterDesignator = 'S';}
+        elseif((32 > $this->lat) && ($this->lat >= 24)) {$LetterDesignator = 'R';}
+        elseif((24 > $this->lat) && ($this->lat >= 16)) {$LetterDesignator = 'Q';}
+        elseif((16 > $this->lat) && ($this->lat >= 8)) {$LetterDesignator = 'P';}
+        elseif(( 8 > $this->lat) && ($this->lat >= 0)) {$LetterDesignator = 'N';}
+        elseif(( 0 > $this->lat) && ($this->lat >= -8)) {$LetterDesignator = 'M';}
+        elseif((-8 > $this->lat) && ($this->lat >= -16)) {$LetterDesignator = 'L';}
+        elseif((-16 > $this->lat) && ($this->lat >= -24)) {$LetterDesignator = 'K';}
+        elseif((-24 > $this->lat) && ($this->lat >= -32)) {$LetterDesignator = 'J';}
+        elseif((-32 > $this->lat) && ($this->lat >= -40)) {$LetterDesignator = 'H';}
+        elseif((-40 > $this->lat) && ($this->lat >= -48)) {$LetterDesignator = 'G';}
+        elseif((-48 > $this->lat) && ($this->lat >= -56)) {$LetterDesignator = 'F';}
+        elseif((-56 > $this->lat) && ($this->lat >= -64)) {$LetterDesignator = 'E';}
+        elseif((-64 > $this->lat) && ($this->lat >= -72)) {$LetterDesignator = 'D';}
+        elseif((-72 > $this->lat) && ($this->lat >= -80)) {$LetterDesignator = 'C';}
         else {$LetterDesignator = 'Z';}//This is here as an error flag to show that the Latitude is outside the UTM limits
 
         return $LetterDesignator;
@@ -393,10 +393,10 @@ class GpointConverter
     /**
      * Convert UTM to Longitude/Latitude
      *
-     * Equations from USGS Bulletin 1532 
-     * East Longitudes are positive, West longitudes are negative. 
+     * Equations from USGS Bulletin 1532
+     * East Longitudes are positive, West longitudes are negative.
      * North latitudes are positive, South latitudes are negative
-     * Lat and Long are in decimal degrees. 
+     * Lat and Long are in decimal degrees.
      * Written by Chuck Gantz- chuck.gantz@globalstar.com, converted to PHP by
      * Brenor Brophy, brenor@sbcglobal.net
      *
@@ -409,7 +409,7 @@ class GpointConverter
      * direction - so only northern hemesphere lat/long coordinates are returned.
      * If you live south of the equator there is a note later in the code
      * explaining how to have it just return southern hemesphere lat/longs.
-     * 
+     *
      * @param float $LongOrigin
      */
     public function convertTMtoLL($LongOrigin=null)
@@ -439,7 +439,7 @@ class GpointConverter
         $M = $y / $k0;
         $mu = $M/($this->a*(1-$this->e2/4-3*$this->e2*$this->e2/64-5*$this->e2*$this->e2*$this->e2/256));
 
-        $phi1Rad = $mu    + (3*$e1/2-27*$e1*$e1*$e1/32)*sin(2*$mu) 
+        $phi1Rad = $mu    + (3*$e1/2-27*$e1*$e1*$e1/32)*sin(2*$mu)
                     + (21*$e1*$e1/16-55*$e1*$e1*$e1*$e1/32)*sin(4*$mu)
                     +(151*$e1*$e1*$e1/96)*sin(6*$mu);
         $phi1 = rad2deg($phi1Rad);
@@ -471,7 +471,7 @@ class GpointConverter
      *
      * firstStdParallel & secondStdParallel are the two lines of longitude (that
      * is they run east-west) that define where the "cone" intersects the earth.
-     * Simply put they should bracket the area being projected. 
+     * Simply put they should bracket the area being projected.
      *
      * @param integer $falseEasting
      * @param integer $falseNorthing
@@ -502,7 +502,7 @@ class GpointConverter
      * Lat/Long of origin The formula were obtained from URL:
      * http://www.ihsenergy.com/epsg/guid7_2.html.
      * Code was written by Brenor Brophy, brenor@sbcglobal.net
-     * 
+     *
      */
     public function convertLLtoLCC()
     {
@@ -530,7 +530,7 @@ class GpointConverter
         $this->lccEasting = $this->falseEasting + $r*sin($theta);
         $this->lccNorthing = $this->falseNorthing + $rf - $r*cos($theta);
     }
-    
+
     /**
      * Convert Easting/Northing on a Lambert Conic projection to Longitude/Latitude
      *
@@ -573,24 +573,24 @@ class GpointConverter
         $phi1    = (pi()/2) - 2*atan($t_*pow(((1-$e*sin($phi0))/(1+$e*sin(phi0))),$e/2));
         $phi2    = (pi()/2) - 2*atan($t_*pow(((1-$e*sin($phi1))/(1+$e*sin(phi1))),$e/2));
         $phi    = (pi()/2) - 2*atan($t_*pow(((1-$e*sin($phi2))/(1+$e*sin(phi2))),$e/2));
-        
+
         $this->lat     = rad2deg($phi);
         $this->long = rad2deg($lamda);
     }
 
-    
+
     /**
      * This is a useful function that returns the Great Circle distance from the GpointConverter to another Long/Lat coordinate
-     * 
+     *
      * Result is returned as meters
      * @param float $lon1
      * @param float $lat1
      */
     public function distanceFrom($lon1, $lat1)
-    { 
+    {
         $lon1 = deg2rad($lon1); $lat1 = deg2rad($lat1);
         $lon2 = deg2rad($this->Long()); $lat2 = deg2rad($this->Lat());
- 
+
         $theta = $lon2 - $lon1;
         $dist = acos(sin($lat1) * sin($lat2) + cos($lat1) * cos($lat2) * cos($theta));
 
@@ -598,19 +598,19 @@ class GpointConverter
 //        $dist = 2*asin(sqrt( pow(sin(($lat1-$lat2)/2),2) + cos($lat1)*cos($lat2)*pow(sin(($lon1-$lon2)/2),2)));
         return $dist * 6366710;// from http://williams.best.vwh.net/avform.htm#GCF
     }
-    
-    
+
+
     /**
      * This function also calculates the distance between two points. In this case it just uses Pythagoras's theorm using TM coordinates.
      * @param GpointConverter $pt
      */
     public function distanceFromTM(&$pt)
-    { 
+    {
         $E1 = $pt->E(); $N1 = $pt->N();
         $E2 = $this->E(); $N2 = $this->N();
- 
+
         $dist = sqrt(pow(($E1-$E2),2)+pow(($N1-$N2),2));
-        return $dist; 
+        return $dist;
     }
 
     /**
@@ -625,7 +625,7 @@ class GpointConverter
      * ($rE/$rN) coordinate it is to this coordinate that he point will be
      * geo-referenced. The $LongOrigin is needed to make sure the Easting/Northing
      * coordinates of the point are correctly converted.
-     * 
+     *
      * @param integer $rX
      * @param integer $rY
      * @param integer $rE

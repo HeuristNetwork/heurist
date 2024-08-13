@@ -2,7 +2,7 @@
 
     /**
     * db access to sysIdentification table
-    * 
+    *
     *
     * @package     Heurist academic knowledge management system
     * @link        https://HeuristNetwork.org
@@ -32,7 +32,7 @@ class DbSysIdentification extends DbEntityBase
     'dty_OriginatingDBID'=>'int',
     'dty_NameInOriginatingDB'=>255,
     'dty_IDInOriginatingDB'=>'int',
-  
+
     'dty_OrderInGroup'=>'int',
     'dty_TermIDTreeNonSelectableIDs'=>1000,
     'dty_FieldSetRectypeID'=>'int',
@@ -41,7 +41,7 @@ class DbSysIdentification extends DbEntityBase
 
     /**
     *  search user or/and groups
-    * 
+    *
     *  sysUGrps.ugr_ID
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
@@ -51,22 +51,22 @@ class DbSysIdentification extends DbEntityBase
     *  sysUsrGrpLinks.ugl_GroupID
     *  sysUsrGrpLinks.ugl_Role
     *  (omit table name)
-    * 
+    *
     *  other parameters :
     *  details - id|name|list|all or list of table fields
     *  offset
     *  limit
     *  request_id
-    * 
+    *
     *  @todo overwrite
     */
     public function search(){
-        
+
         $query = 'SELECT * FROM sysIdentification LIMIT 1';
 
         $mysqli = $this->system->get_mysqli();
         $res = $mysqli->query($query);
-        
+
         if (!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
@@ -113,10 +113,10 @@ class DbSysIdentification extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
             $res = $mysqli->query($query);
         }
-        
-        
+
+
         $ret = parent::save();
-       
+
         if($ret!==false){
             //copy temporary file
             foreach($this->records as $idx=>$record){
@@ -130,9 +130,9 @@ class DbSysIdentification extends DbEntityBase
                     }
                 }
             }
-        }        
+        }
         return $ret;
-    }   
+    }
     //
     // deletion not allowed for db properties
     //
@@ -140,6 +140,6 @@ class DbSysIdentification extends DbEntityBase
         //virtual method
     }
 
-    
+
 }
 ?>

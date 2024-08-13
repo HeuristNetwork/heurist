@@ -23,16 +23,16 @@
 *
 * 'output' - full file path to be saved
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 vsn 3 UI (smarty tab),  
-*             1,2,3 - different behaviour when output is defined 
+* 'publish' - 0 vsn 3 UI (smarty tab),
+*             1,2,3 - different behaviour when output is defined
 *             if output si null if html and js - output to browser, otherwise download
-*             4 - for calculation fields  
+*             4 - for calculation fields
 *
 * other parameters are hquery's
-* 
-* 
+*
+*
 * smarty_function_wrap  - function for var wrap
-* 
+*
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -56,7 +56,7 @@ require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPu
 
 $outputfile = null;
 
-// param: mode 
+// param: mode
 // text or text/plain - without header and body tags  $is_headless=true
 // html or text/html  - usual mode
 // js or text/javascript
@@ -78,12 +78,12 @@ $max_allowed_depth = 2;
 //"publish"
 // 0  - Heurist User Interface (smarty tab) it truncates number of records to be out (see smarty-output-limit)
 // 4 - execute smarty from string (for calculated fields and title mask). It is nearly same as 0
-// 
+//
 // otherwise it works in publish mode and takes all records from search output
-// if param "output" ($outputfile) is defined it saves smarty report into file 
+// if param "output" ($outputfile) is defined it saves smarty report into file
 // and
-//    1 produces info page (user report) only - Content-type is text/html always 
-//    2 downloads it under given output name (no browser output) 
+//    1 produces info page (user report) only - Content-type is text/html always
+//    2 downloads it under given output name (no browser output)
 //    3 outputs smarty report into browser (for html and js) and download for other content types
 //
 $publishmode = 0;
@@ -113,7 +113,7 @@ if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 
 /*
 executeSmartyTemplate - main routine
-smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to    
+smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to
                         maintain progress
 smarty_output_filter - SMARTY callback:  calls save_report_into_file
 smarty_output_filter_strip_js  - purify html and strip js - this is last filter
@@ -133,52 +133,52 @@ function executeSmartyTemplate($system, $params){
            $execution_counter, $execution_total_counter, $is_included, $is_jsallowed,
            $record_with_custom_styles, $is_headless;
 
-           
+
     $outputfile  = (array_key_exists("output", $params)) ? htmlspecialchars($params["output"]) :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage'] :null;
     $record_with_custom_styles = (array_key_exists("cssid", $params))? intval($params['cssid']) :null;
 
     $facet_value = (array_key_exists("facet_val", $params)) ? htmlspecialchars($params['facet_val']) : null;
-    
+
 // text or text/plain - without header and body tags  $is_headless=true
 // html or text/html  - usual mode
 // js or text/javascript
 // csv or text/csv
-// xml or text/xml        
+// xml or text/xml
     $is_headless = @$params['snippet']==1; //former $is_snippet_output
     if(array_key_exists("mode", $params) && $params["mode"]){
         $outputmode = preg_replace('/[^a-z]/', "", $params["mode"]);//for snyk
     }
     if($outputmode!='js' && $outputmode!='html'){
-        $is_headless = true;            
+        $is_headless = true;
     }
     if($outputmode=='text'){ $outputmode = 'txt';}
-           
+
     if(!isset($system) || !$system->is_inited()){
         smarty_error_output( $system, null );
         return false;
     }
-    
+
     $is_jsallowed = $system->isJavaScriptAllowed();
-           
+
     $mysqli = $system->get_mysqli();
 
     set_time_limit(0);//no script execution time limit
 
     $session_id = @$params['session'];//session progress id
-    
+
     $params["f"] = 1; //always search (do not use cache)
 
     $params["void"] = (@$params["void"]==true);
-    
+
     $gparams = $params; //keep to use in other functions
 
     if( !array_key_exists("limit", $params) ){ //not defined
 
         if($publishmode==0){
             $limit_for_interface = intval($system->user_GetPreference('smarty-output-limit'));
-            
+
             if (!$limit_for_interface || $limit_for_interface<1){
                 $limit_for_interface = 50; //default limit in dispPreferences
             }
@@ -188,7 +188,7 @@ function executeSmartyTemplate($system, $params){
             $params["limit"] = PHP_INT_MAX;
         }
     }
-    
+
     $recIDs = array();
 
     if(@$params['recordset']){ //we already have the list of record ids
@@ -201,7 +201,7 @@ function executeSmartyTemplate($system, $params){
 
         //truncate recordset for output in smarty TAB - limit does not work for publish mode
         if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
-                        
+
             $recIDs = prepareIds($qresult['recIDs']);
             if($params["limit"]<count($recIDs)){
                 //$qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));
@@ -228,11 +228,11 @@ function executeSmartyTemplate($system, $params){
 
     // EMPTY RESULT SET - EXIT
     if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
-    
+
         if($publishmode==4){ //from string var
             echo USanitize::sanitizeString(($emptysetmessage && $emptysetmessage != 'def') ? $emptysetmessage : '');
         }else{
-            
+
             if ($emptysetmessage && $emptysetmessage != 'def') {
                 $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
             } else {
@@ -244,7 +244,7 @@ function executeSmartyTemplate($system, $params){
                     $error = '<b><font color="#ff0000">Search or Select records to see template output</font></b>';
                 }
             }
-            
+
             smarty_error_output( $system, $error );
         }
         return true; //exit;
@@ -260,12 +260,12 @@ function executeSmartyTemplate($system, $params){
         if(substr($template_file,-4)!=".tpl"){
             $template_file = $template_file.".tpl";
         }
-        
+
         if(file_exists($system->getSysDir('smarty-templates').$template_file)){
             $content = file_get_contents($system->getSysDir('smarty-templates').$template_file);
         }else{
             $error = '<b><font color="#ff0000">Template file '.htmlspecialchars($template_file).' does not exist</font></b>';
-            
+
             smarty_error_output($system, $error);
             return false; //exit;
         }
@@ -274,12 +274,12 @@ function executeSmartyTemplate($system, $params){
         if($publishmode!=4) {$publishmode = 0;}
         $outputmode = 'html';
     }
-    
+
     //verify that template has new features
     //need to detect $heurist->getRecord - if it is not found this is old version - show error message
     if($publishmode!=4 && strpos($content, '{foreach $results as ')>0 && strpos($content, '$heurist->getRecord(')===false){
-            
-           $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
+
+           $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'.
                     '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br>'
                     .'immediately after the start of the main record loop indicated by {foreach $results as $r}, like this:<p/>'
                     .'<p><br>{*------------------------------------------------------------*}'
@@ -291,11 +291,11 @@ function executeSmartyTemplate($system, $params){
                     .'Generate a new report to obtain examples, then cut and paste into your existing report.</p>'
                     .'<p>If you are stuck, please send your report template to <br>'
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
-           
+
            smarty_error_output($system, $error);
            return false; //exit;
     }
-    
+
 
     $k = strpos($content, "{*depth");
     $kp = 8;
@@ -311,7 +311,7 @@ function executeSmartyTemplate($system, $params){
     }
     //end pre-parsing of template
 
-    
+
     if(!isset($smarty) || $smarty==null){
         initSmarty($system->getSysDir('smarty-templates'));//global function from smartyInit.php
         if(!isset($smarty) || $smarty==null){
@@ -320,7 +320,7 @@ function executeSmartyTemplate($system, $params){
         }
     }
 
-    
+
     if($publishmode==0 && $session_id!=null){
         mysql__update_progress($mysqli, $session_id, true, '0,0');
     }else{
@@ -333,9 +333,9 @@ function executeSmartyTemplate($system, $params){
 
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
-    
+
     $smarty->assignByRef('heurist', $heuristRec);
-    
+
     $smarty->assign('results', $results);//assign record ids
 
     if(!empty($facet_value)){
@@ -368,7 +368,7 @@ function executeSmartyTemplate($system, $params){
     $smarty->error_reporting = 0;
 
     $need_output_filter = true;
-    
+
     if($template_body)
     {	//execute template from string - modified template in editor
         //error report level: 1 notices, 2 all, 3 debug mode
@@ -392,7 +392,7 @@ function executeSmartyTemplate($system, $params){
         //save temporary template
         //this is user name $template_file = "_temp.tpl";
         $user = $system->getCurrentUser();
-        
+
         $template_file = '_'.USanitize::sanitizeFileName($user['ugr_Name']).'.tpl';//snyk SSRF
         $template_folder = $smarty->getTemplateDir();
         if(is_array($template_folder)) {$template_folder = $template_folder[0];}
@@ -407,7 +407,7 @@ function executeSmartyTemplate($system, $params){
             //$smarty->registerFilter('output', 'smarty_output_filter_strip_js');
             try{
                 $output = $smarty->fetch($template_file);
-                
+
             } catch (Exception $e) {
                 $output = 'Exception on calc field execution: '.$e->getMessage();
             }
@@ -423,17 +423,17 @@ function executeSmartyTemplate($system, $params){
         if(!$template_file){
             $template_file = 'test01.tpl';
         }
-        
+
         //$smarty->debugging = true;
         //$smarty->error_reporting = E_ALL & ~E_STRICT & ~E_NOTICE;
 
         $smarty->debugging = false;
         $smarty->error_reporting = 0;
-        
+
         if($outputfile!=null){
             $smarty->registerFilter('output', 'smarty_output_filter');//to preform output into file
             $need_output_filter = false;
-        }else if($outputmode=='js'){
+        }elseif($outputmode=='js'){
             $smarty->registerFilter('output', 'smarty_output_filter_wrap_js');
             $need_output_filter = false;
         }
@@ -441,65 +441,65 @@ function executeSmartyTemplate($system, $params){
     if($need_output_filter){ //Strip js and clean html
         $smarty->registerFilter('output', 'smarty_output_filter_strip_js');
     }
-    
+
     $smarty->registerFilter('pre', 'smarty_pre_filter');//before compilation: handle short form term translations
     if($publishmode==0 && $session_id>0)
     {
         $smarty->registerFilter('post','smarty_post_filter');//after compilation: to add progress support
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
     }
-    
+
     $execution_counter = -1;
     $execution_total_counter = count($results);
-    
-    
+
+
     $result = true;
-    
+
     $smarty->assign('template_file', $template_file);
     try{
-        
+
         //if $outputfile is not defined - define content type
         if($outputfile==null && !$is_included){
             //header("Content-type: text/html;charset=UTF-8");
-            
+
             if($outputmode=='js'){
                 header("Content-type: text/javascript");
-            }else if($publishmode>0 && $publishmode<4){ 
-                
+            }elseif($publishmode>0 && $publishmode<4){
+
                 if($outputmode=='txt'){
                     $mimetype = 'plain/text';
-                }else if($outputmode=='json'){
+                }elseif($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
                     $mimetype = "text/$outputmode";
                 }
-                
+
                 if(!$is_headless && $outputmode!='html'){
                     header("Content-type: $mimetype;charset=UTF-8");
                 }
-                
+
                 if($outputmode!='html'){
                     $outputfile = 'heurist_output.'.$outputmode;
                     header('Pragma: public');
                     header('Content-Disposition: attachment; filename="'.$outputfile.'"');
-                    //header('Content-Length: ' . strlen($tpl_res));
+                    //header(CONTENT_LENGTH . strlen($tpl_res));
                 }
             }
         }
-        
+
         if($gparams['void']){
             $smarty->fetch($template_file);
         }else{
             $smarty->display($template_file);
         }
-        
+
         //not record list, not from editor
         if(!$is_headless && !@$template_body && !$params["void"]){
             // log activity, rec ids separated by spaces
             log_smarty_activity($system, $results);
             //$system->user_LogActivity('custRep', array(implode(' ',$results), count($results)), null, TRUE);
         }
-        
+
     } catch (Exception $e) {
         smarty_error_output($system, 'Exception on execution: '.$e->getMessage());
         //echo 'Exception on execution: ', $e->getMessage(), "\n";
@@ -512,14 +512,14 @@ function executeSmartyTemplate($system, $params){
     if(!$params["void"]){
         $mysqli->close();
     }
-    
+
     if($publishmode==0 && $params["limit"] < count($recIDs)){
         echo '<div><b>Report preview has been truncated to '.intval($params["limit"]).' records.<br>'
         .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
     }
-    
+
     return $result;
-    
+
 } //END executeSmartyTemplate
 
 //Performs the following, before Smarty processes the report:
@@ -602,9 +602,9 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 // it calls before other output filters
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
-    
+
     global $system, $is_jsallowed, $record_with_custom_styles, $is_headless, $outputmode, $publishmode;
-    
+
     if($outputmode=='js' || $outputmode=='html'){
 
         $font_styles = '';
@@ -629,12 +629,12 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 $font_styles .= "} ";
             }
         }
-        
+
         $import_webfonts = '';
         $webfonts = $system->getDatabaseSetting('Webfonts');
         if(is_array($webfonts) && count($webfonts)>0){
             $font_families = array();
-            
+
             foreach($webfonts as $font_family => $src){
                 $src = str_replace("url('settings/", "url('".HEURIST_FILESTORE_URL.'settings/',$src);
                 if(strpos($src,'@import')===0){
@@ -649,29 +649,29 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 $font_styles = 'body{font-family: '.implode(',',$font_families).'} '.$font_styles;
             }
         }
-        
+
         if(!empty($font_styles)){
             $font_styles = "<style> $font_styles </style>";
         }
         if(!empty($import_webfonts)){
             $font_styles = '<style>'.$import_webfonts.'</style>'.$font_styles;
         }
-        
-    
+
+
         if($is_jsallowed){
-            
+
             if(!$is_headless){ //full html output. inside iframe - add all styles and scripts to header at once
-            
+
                 //adds custom scripts and styles to html head
-            
+
                 $head = $font_styles;
                 $close_tags = '';
-            
+
                 if(strpos($tpl_source, '<html>')===false){
                     $open_tags = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>';
                     $close_tags = '</body></html>';
                 }
-            
+
                 //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
                 if($record_with_custom_styles>0){
                     //find record with css fields
@@ -687,10 +687,10 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                         if($record && @$record['details']){
 
                             if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                            //add to begining 
+                            //add to begining
                             $head .= '<style>'.recordGetField($record, DT_CMS_CSS).'</style>';
                             }
-                            
+
                             if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
                                 //add to header
                                 $external_files = @$record['details'][DT_CMS_EXTFILES];
@@ -705,7 +705,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                             }
                         }
                     }
-                }            
+                }
 
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
@@ -717,34 +717,34 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/core/detectHeurist.js"></script>'
                         .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
                         .'<link rel="stylesheet" href="'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css" />');
-                    
+
                     //init mediaviewer after page load
                     $head .=  ('<script>'
                     .'var rec_Files=[];'
                     .'$(document).ready(function() {'
                         .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                        .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                        .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'
                     .'});'
                     .'</script>'
                     .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
                 }
 
-                
+
                 //forcefully adds html and body tags
                 $tpl_source = $open_tags.$tpl_source.$close_tags;
-                
+
                 $tpl_source = str_replace('<body>','<body class="smarty-report">', $tpl_source);
                 if($head!=''){
                     $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
                 }
-                
-                
+
+
             }else{ //html snippet output (without head) ----------------------------
-            
+
                 //adds custom scripts and styles to parent document head (insertAdjacentHTML and )
-            
+
                 $head = $font_styles;
-            
+
                 //check if need to init mediaViewer
                 if(strpos($tpl_source,'fancybox-thumb')>0){
                     
@@ -756,19 +756,19 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                             .'<script type="text/javascript" src="'.HEURIST_BASE_URL.'hclient/widgets/viewers/mediaViewer.js"></script>'
                             .'<script>'
                             .'var rec_Files=[];</script>';
-                    
+
                     $head .= (
                         '<script>$(document).ready(function() {'
-                        
-        .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'                
-                        
+
+        .'document.getElementsByTagName("head")[0].insertAdjacentHTML("beforeend","<link rel=\"stylesheet\" href=\"'.HEURIST_BASE_URL.'external/jquery.fancybox/jquery.fancybox.css\" />");'
+
                             .'$("body").mediaViewer({rec_Files:rec_Files, showLink:false, selector:".fancybox-thumb", '
-                            .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'    
+                            .'database:"'.$system->dbname().'", baseURL:"'.HEURIST_BASE_URL.'"});'
                         .'});'
                         .'</script>'
                         .'<style>.fancybox-toolbar{visibility: visible !important; opacity: 1 !important;}</style>');
                 }
-                
+
                 //add custom css and external links from CMS_HOME  DT_CMS_CSS and DT_CMS_EXTFILES
                 if($record_with_custom_styles>0){
                     //find record with css fields
@@ -784,14 +784,14 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                         if($record && @$record['details']){
 
                             if(defined('DT_CMS_CSS') && @$record['details'][DT_CMS_CSS]){
-                            //add to begining 
+                            //add to begining
                             $head = '<style>'.recordGetField($record, DT_CMS_CSS).'</style>'.$head;
-                            
+
                             $head = $head.'<script>if(document.body){
                                     document.body.classList.add("smarty-report");
                             } </script>';
                             }
-                            
+
                             if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
                                 //add to header
                                 $external_files = @$record['details'][DT_CMS_EXTFILES];
@@ -805,7 +805,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                                 $head = $head .$ext_file;
                                             }
                                         }
-    /*                                    
+    /*
                     $head = $head.'<script>(function() {';
                                         foreach ($external_files as $ext_file){
                                             if(strpos($ext_file,'<link')===0){ // || strpos($ext_file,'<script')===0
@@ -813,9 +813,9 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                                             .$ext_file //str_replace('"','\"',$ext_file)
                                             .'\');';}
                                         }
-                                        
+
                     $head = $head.' })();</script>';
-    */                
+    */
                                     }
                                 }
                             }
@@ -826,7 +826,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 //
                 if($head!=''){
                     //$tpl_source = removeHeadAndBodyTags($tpl_source);
-                    
+
                     if(strpos($tpl_source, '<head>')>0){
                         $tpl_source = str_replace('</head>',$head.'</head>', $tpl_source);
                     }else{
@@ -835,9 +835,9 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     }
                 }
             }
-            
+
         }else{
-            
+
             //if javascript not allowed, use html purifier to remove suspicious code
 
             $config = \HTMLPurifier_Config::createDefault();
@@ -851,10 +851,10 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
             $config->set('CSS.Trusted', true);
             $config->set('Attr.AllowedFrameTargets','_blank');
             $config->set('HTML.SafeIframe', true);
-            //allow YouTube, Soundlcoud and Vimeo     
+            //allow YouTube, Soundlcoud and Vimeo
             // https://w.soundcloud.com/player/
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
-            
+
             $def = $config->getHTMLDefinition(true);
             $def->addElement(
                 'audio',
@@ -884,13 +884,13 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                     'preload' => 'Enum#auto,metadata,none',
                     'controls' => 'Bool',
                 ));
-            }        
+            }
             */
 
             //$config->set('HTML.Trusted', true);
             //$config->set('Filter.ExtractStyleBlocks', true);
             $purifier = new HTMLPurifier($config);
-            
+
             $tpl_source = $purifier->purify($tpl_source);
 
             if(!empty($font_styles)){
@@ -908,7 +908,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         //other than html or js output - it removes html and body tags
         $tpl_source = removeHeadAndBodyTags($tpl_source);
     }
-    
+
     $onclick = '';
     if(($publishmode==0 || $publishmode==1) && ($outputmode=='js' || $outputmode=='html')){
         $onclick = 'onclick="'
@@ -925,33 +925,33 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
                 .'}'
             .'}" ';
     }
-    
+
     $tpl_source = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
         function($matches) use ($onclick){
             global $system;
             return $onclick.'href="'.$system->recordLink($matches[1]).'"';
         },
         $tpl_source);
-    
+
     return $tpl_source;
-    
+
 }
 
 function removeHeadAndBodyTags($content){
-    
+
             $dom = new domDocument;
             $dom->preserveWhiteSpace = false;
             //$dom->formatOutput       = true;
             @$dom->loadHTML($content);
             $body = $dom->getElementsByTagName('body');
             if($body){
-                $content = $dom->saveHtml($body[0]);//outer html  
+                $content = $dom->saveHtml($body[0]);//outer html
                 $content = preg_replace( '@^<body[^>]*>|</body>$@', '', $content );
                 $content = preg_replace( '@^<p[^>]*>|</p>$@', '', $content );
             }
-            
+
             return $content;
-    
+
 }
 
 //
@@ -965,12 +965,12 @@ function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 }
 
 //
-// save smarty report output as a file (if there is parameter "output" -> $outputfile) 
+// save smarty report output as a file (if there is parameter "output" -> $outputfile)
 //
-// if param "output" ($outputfile) is defined it saves smarty report into file 
+// if param "output" ($outputfile) is defined it saves smarty report into file
 // and
-// $publishmode - 1 produces info page (user report) only 
-//                2 downloads ONLY it under given output name (no file save, no browser output) 
+// $publishmode - 1 produces info page (user report) only
+//                2 downloads ONLY it under given output name (no file save, no browser output)
 //                3 outputs smarty report into browser
 //
 function save_report_into_file($tpl_source){
@@ -980,25 +980,25 @@ function save_report_into_file($tpl_source){
     $errors = null;
     $res_file = null;
     $file_name = null;
-    
-    if($publishmode!=2){ //saves into $outputfile 
+
+    if($publishmode!=2){ //saves into $outputfile
 
         try{
 
             $path_parts = pathinfo($outputfile);
             $dirname = USanitize::sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
-            
+
             if($dirname && isPathInHeuristUploadFolder($dirname)===false){
                 $dirname = null;
             }
-            
+
             //if folder is not defined - output into generated-reports
             if(!$dirname){
                 $dirname = $system->getSysDir('generated-reports');
                 if(!folderCreate($dirname, true)){
                     $errors = 'Failed to create folder for generated reports';
                 }
-            }else if(!file_exists($dirname)){
+            }elseif(!file_exists($dirname)){
                 $errors = "Output folder $dirname does not exist";
             }
 
@@ -1038,7 +1038,7 @@ function save_report_into_file($tpl_source){
                     if(unlink($res_file) === false){ // Delete old file
                         unlink($temp_file);// on error, remove temp file
                         $errors = "Can't delete old report file $res_file. Check permission for file";
-                    }else if(rename($temp_file, $res_file) === false){ // Rename temp file
+                    }elseif(rename($temp_file, $res_file) === false){ // Rename temp file
                         unlink($temp_file);// on error, remove temp file
                         $errors = "Can't rename temporary file $temp_file to $res_file. Check permissions";
                     }
@@ -1049,13 +1049,13 @@ function save_report_into_file($tpl_source){
         {
             $errors = $e->getMessage();
         }
-        
+
         if($gparams['void'] && $errors!=null){
             echo htmlspecialchars($errors)."\n";
         }
     }
-    
-    
+
+
     if(!$gparams['void'])
     {
 
@@ -1071,10 +1071,10 @@ function save_report_into_file($tpl_source){
                 header("Content-type: text/javascript");
                 $tpl_res = add_javascript_wrap4($tpl_source);
             }else{
-                
+
                 if($outputmode=='txt'){
                     $mimetype = 'plain/text';
-                }else if($outputmode=='json'){
+                }elseif($outputmode=='json'){
                     $mimetype = 'application/json';
                 }else{
                     $mimetype = "text/$outputmode";
@@ -1095,13 +1095,13 @@ function save_report_into_file($tpl_source){
 
                 header('Pragma: public');
                 header('Content-Disposition: attachment; filename="'.$output_name.'"');
-                header('Content-Length: ' . strlen($tpl_res));
+                header(CONTENT_LENGTH . strlen($tpl_res));
             }
-            
+
             echo $tpl_res;
 
-        }else if ($publishmode==1){ //info about success of saving into file and where to get it
-            
+        }elseif($publishmode==1){ //info about success of saving into file and where to get it
+
             if($errors!=null){
                 header("Content-type: text/html;charset=UTF-8");
                 echo htmlspecialchars($errors);
@@ -1149,7 +1149,7 @@ function save_report_into_file($tpl_source){
                 }
 
                 $surl = str_replace('&amp;','&',htmlspecialchars($surl, ENT_QUOTES));
-                
+
                 ?><br>
                 To publish the report as dynamic (generated on-the-fly) output, use the code below.
                 <br><br>
@@ -1207,7 +1207,7 @@ function smarty_function_progress($params, &$smarty){
 
         if(isset($execution_total_counter) && $execution_total_counter>0){
             $tot_count = $execution_total_counter;
-        }else 
+        }else
             if(@$params['tot_count']>=0){
                 $tot_count = $params['tot_count'];
             }else{
@@ -1250,7 +1250,7 @@ function smarty_function_out($params, &$smarty)
 // smarty plugin function
 // {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto" mode=""}
 //
-// $params - array of 
+// $params - array of
 // var - value
 // dt - detail type: url, file, geo
 // mode - for dt=file only:   thumbnail, link or player by default
@@ -1261,7 +1261,7 @@ function smarty_function_out($params, &$smarty)
 //
 function smarty_function_wrap($params, &$smarty)
 {
-    global $system, $is_jsallowed;    
+    global $system, $is_jsallowed;
 
 
     if($params['var']){
@@ -1283,13 +1283,13 @@ function smarty_function_wrap($params, &$smarty)
         $size = '';
         $mapsize = '';
         $style = '';
-        
+
         if(array_key_exists('style',$params) && $params['style']!=""){
-        
+
             $style = ' style="'.$params['style'].'"';
-            
-        }else{            
-            
+
+        }else{
+
             $width = "";
             $mapsize = "width=200";
 
@@ -1331,7 +1331,7 @@ function smarty_function_wrap($params, &$smarty)
 
             return "<a href='".$params['var']."' target=_blank rel=noopener $style>".$params['var']."</a>";
 
-        }else if($dt=="file"){
+        }elseif($dt=="file"){
             //insert image or link
             $values = $params['var'];
 
@@ -1352,24 +1352,24 @@ function smarty_function_wrap($params, &$smarty)
                 $mimeType = $fileinfo['fxm_MimeType'];
                 $file_Ext= $fileinfo['ulf_MimeExt'];
                 $sourceType = $fileinfo['ulf_PreferredSource'];
-                    
+
                 $file_playerURL = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce.'&mode=tag';
                 $file_thumbURL  = HEURIST_BASE_URL.'?db='.$system->dbname().'&thumb='.$file_nonce;
                 $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce; //download
-                            
+
                 if($mode=="link") {
 
                     $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)
                         ?$external_url:$originalFileName;
-                        
+
                     if(@$params['fancybox']){
                         $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
                             .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
                     }else{
                         $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>".$sname."</a>";
                     }
-                    
-                }else 
+
+                }else
                 if($mode=="thumbnail"){
 
                     if(@$params['fancybox']){
@@ -1378,17 +1378,17 @@ function smarty_function_wrap($params, &$smarty)
                         $sres = $sres."<a href='".$file_URL."' target=_blank rel=noopener>".
                         "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                     }
-                    
+
                 }else{ //player is default
 
                     $sres = $sres.fileGetPlayerTag($system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
-                    
+
                 }
-                
+
                 if(@$params['fancybox'] && $is_jsallowed){
-                    
+
                     $mode_3d_viewer = detect3D_byExt($file_Ext);
-                    
+
                     $sres .= ('<script>if(rec_Files)rec_Files.push({'
                             .'rec_ID:'.$fileinfo['rec_ID']
                             .',id:"'.$file_nonce
@@ -1402,7 +1402,7 @@ function smarty_function_wrap($params, &$smarty)
 
             return $sres;
 
-        }else if($dt=='geo'){
+        }elseif($dt=='geo'){
 
             $value = $params['var'];
             $res = "";
@@ -1424,10 +1424,10 @@ function smarty_function_wrap($params, &$smarty)
             }
             return $res;
         }
-        else if($dt=='date'){
-            
+        elseif($dt=='date'){
+
             if($mode==null) {$mode = 1;}
-            
+
             $calendar = null;
             if(array_key_exists('calendar',$params)){
                 $calendar = $params['calendar'];
@@ -1435,23 +1435,23 @@ function smarty_function_wrap($params, &$smarty)
             if(is_array($params['var']) && array_key_exists(0,$params['var'])){
                 $params['var'] = $params['var'][0];
             }
-            
+
             $content = Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
-            
+
             if($label!="") {$label = $label.": ";}
             return $label.$content.'<br>';
         }
         else{
             //if this is CMS content
             // 1. Extract HTML content from text elements [{"name":"Content","type":"text","css":{},"content":
-            // 2. Convert relative paths to absolute 
+            // 2. Convert relative paths to absolute
             $content = json_decode($params['var'], true);
             if(is_array($content)){
                 $content = cms_content_prepare($content);
             }else{
                 $content = cms_content_prepare($params['var']);
             }
-                                                                        
+
             if($label!="") {$label = $label.": ";}
             return $label.$content.'<br>';
         }
@@ -1464,40 +1464,40 @@ function smarty_function_wrap($params, &$smarty)
 //  Replace relative path to absolute
 //
 function cms_content_prepare($content){
-    
+
     $cnt = '';
     $convert_links = true;
-    
+
     if(is_array($content)){
-        
+
         if(!@$content['type']=='text'){
             $convert_links = false;
             foreach($content as $grp){
                 $res = cms_content_prepare($grp);
                 if($res){
-                    $cnt = $cnt.'<br>'.$res;    
+                    $cnt = $cnt.'<br>'.$res;
                 }
             }
-        }else if(@$content['type']=='text'){
+        }elseif(@$content['type']=='text'){
             $cnt =  @$content['content'];
-        }else if(@$content['type']=='group' && is_array(@$content['children'])){
+        }elseif(@$content['type']=='group' && is_array(@$content['children'])){
             $convert_links = false;
             foreach($content['children'] as $grp){
                 $res = cms_content_prepare($grp);
                 if($res){
-                    $cnt = $cnt.'<br>'.$res;    
+                    $cnt = $cnt.'<br>'.$res;
                 }
             }
         }
     }else{
         $cnt = $content;
     }
-    
+
     if($convert_links && $cnt!=null){
         $cnt = str_replace('./?db=',HEURIST_BASE_URL.'?db=',$cnt);
     }
 
-    return $cnt;    
+    return $cnt;
 }
 
 
@@ -1505,13 +1505,13 @@ function cms_content_prepare($content){
 //
 //
 function smarty_error_output($system, $error_msg){
-    global $outputmode, $publishmode, $outputfile;  
-    
+    global $outputmode, $publishmode, $outputfile;
+
     if(!isset($error_msg)){
         $error_msg = $system->getError();
         $error_msg = (@$error_msg['message'])?$error_msg['message']:'Undefined smarty error';
     }
- 
+
     if($outputmode=='js'){
         $error_msg = add_javascript_wrap4($error_msg);
     }
@@ -1575,7 +1575,7 @@ function log_smarty_activity($system, $rec_ids){
         }
 
         // log each id one at a time
-        for ($i=0; $i < count($rec_ids); $i++) {     
+        for ($i=0; $i < count($rec_ids); $i++) {
             $system->user_LogActivity('custRep', array(implode(' ', $rec_ids), count($rec_ids)));
         }
     }

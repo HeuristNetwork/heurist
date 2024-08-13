@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -37,7 +37,7 @@ require_once dirname(__FILE__).'/../../hserv/System.php';
 $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
-}    
+}
 
 // using ob_gzhandler makes this stuff up on IE6-
 ini_set("zlib.output_compression_level", '5');
@@ -60,11 +60,11 @@ $bkm_id = 0;
 
 if ($rec_id>0) {
 	print "HEURIST_url_bib_id = ".intval($rec_id).";\n\n";
-    
+
     //find bookmark for this record for current user
     $query = 'select bkm_ID from usrBookmarks where bkm_recID='.intval($rec_id).' and bkm_UGrpID='.$system->get_user_id();
     $bkm_id = mysql__select_value($mysqli, $query);
-    
+
 } else {
 	print "HEURIST_url_bib_id = null;\n\n";
 }

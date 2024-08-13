@@ -1,11 +1,11 @@
 <?php
 
 /**
-* purgeFullTextIndexes.php: 
-* 
-* Remove fulltext indexes and optimize Records and recDetail tables for databases 
+* purgeFullTextIndexes.php:
+*
+* Remove fulltext indexes and optimize Records and recDetail tables for databases
 * inactive for 3 months
-* 
+*
 * Runs from shell only
 *
 * @package     Heurist academic knowledge management system
@@ -27,23 +27,23 @@
 
 // Default values for arguments
 $is_shell = false;
-$arg_no_action = true;  
+$arg_no_action = true;
 $eol = "\n";
 $tabs = "\t\t";
 $tabs0 = '';
 
 if (@$argv) {
-    
+
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/purgeFullTextIndexes.php -- -purge
-//  sudo php -f purgeFullTextIndexes.php -- -purge  -  action, otherwise only report 
+//  sudo php -f purgeFullTextIndexes.php -- -purge  -  action, otherwise only report
 
     $is_shell =  true;
 
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
-        if ($argv[$i][0] === '-') {                    
+        if ($argv[$i][0] === '-') {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
@@ -51,7 +51,7 @@ if (@$argv) {
                 if(strpos($argv[$i],'-purge')===0){
                     $ARGV['-purge'] = true;
                 }else{
-                    $ARGV[$argv[$i]] = true;    
+                    $ARGV[$argv[$i]] = true;
                 }
 
 
@@ -60,11 +60,11 @@ if (@$argv) {
             array_push($ARGV, $argv[$i]);
         }
     }
-    
+
     if (@$ARGV['-purge']) {$arg_no_action = false;}
 
 }else{
-    
+
     //report only
     $arg_no_action = true;
     $eol = "</div><br>";
@@ -85,7 +85,7 @@ $system = new System();
 
 if(!$is_shell){
     $sysadmin_pwd = System::getAdminPwd();
-    
+
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         $response = $system->getError();
         print $response['message'];
@@ -103,7 +103,7 @@ $databases = mysql__getdatabases4($mysqli, false);
 $exclusion_list = exclusion_list();
 
 if(!$arg_no_action){
-    
+
     $action = 'purgeFullTextIndexes';
     if(false && !isActionInProgress($action, 1)){
         exit("It appears that 'purge full text indexes' operation has been started already. Please try this function later\n");
@@ -118,30 +118,30 @@ $datetime1 = date_create('now');
 $cnt_processed = 0;
 
 foreach ($databases as $idx=>$db_name){
-    
+
     if(in_array($db_name,$exclusion_list)){
         continue;
     }
     //if(strcmp($db_name,'crvr_eglisesXX')<=0){
     //    continue;
     //}
-    
+
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
         echo @$res[1]."\n";
         continue;
     }
-    
+
     $db_name = htmlspecialchars($db_name);
 
-/*    
-* Delete/archive any database not updated for more than: 
+/*
+* Delete/archive any database not updated for more than:
 *           3 months with 10 records or less
 *           6 months with 50 records or less
-*           one year with 200 records or less 
+*           one year with 200 records or less
 * Send sysadmin a list of databases
 *            for more than a year with more than 200 records
-*/    
+*/
     //find number of records and date of last update
     $query = 'SELECT count(rec_ID) as cnt, max(rec_Modified) as mdate FROM Records';
     $vals = mysql__select_row_assoc($mysqli, $query);
@@ -153,9 +153,9 @@ foreach ($databases as $idx=>$db_name){
         //find date of last modification from definitions
         $vals['mdate'] = mysql__select_value($mysqli, 'select max(rst_Modified) from defRecStructure');
     }
-    
+
     $datetime2 = date_create($vals['mdate']);
-    
+
     if(!$datetime2){
         echo $tabs0.$db_name.' cannot detect modification date'.$eol;
         continue;
@@ -164,7 +164,7 @@ foreach ($databases as $idx=>$db_name){
     //"processing ".
     //echo $db_name.' ';//.'  in '.$folder
     $report = '';
-    
+
     $interval = date_diff($datetime1, $datetime2);
     $diff = $interval->format('%y')*12 + $interval->format('%m');
 
@@ -174,9 +174,9 @@ foreach ($databases as $idx=>$db_name){
         if($arg_no_action){
             $report .= ' ';
         }else{
-            
+
             $res = false;
-            
+
             $query = "SHOW INDEX FROM Records WHERE Key_name='rec_Title_FullText'";
             $has_index = mysql__select_value($mysqli, $query, null);
             if($has_index!=null){
@@ -190,7 +190,7 @@ foreach ($databases as $idx=>$db_name){
                 $report .= ' Records index does not exist ';
                 $res = 'skip';
             }
-            if($res===true){                
+            if($res===true){
                 $query = "SHOW INDEX FROM recDetails WHERE Key_name='dtl_Value_FullText'";
                 $has_index = mysql__select_value($mysqli, $query, null);
                 if($has_index!=null){
@@ -207,15 +207,15 @@ foreach ($databases as $idx=>$db_name){
             }
 
             if($res===true){
-                
+
                 $report .= ' full text index purged ';
                 $cnt_processed++;
-            }else if($res!='skip'){
+            }elseif($res!='skip'){
                 $report .= ('ERROR: '.$res);
             }
         }
     }
-    
+
     if($report!=''){
         echo $tabs0.htmlspecialchars($db_name).$tabs.htmlspecialchars($report).$eol;
     }
@@ -226,13 +226,13 @@ foreach ($databases as $idx=>$db_name){
 
 
 if(!$arg_no_action){
-    echo $tabs0.'Purged indexes for '.$cnt_processed.' databases'.$eol;    
+    echo $tabs0.'Purged indexes for '.$cnt_processed.' databases'.$eol;
 }
 
 echo $tabs0.'finished'.$eol;
 
 function exclusion_list(){
-    
+
     $res = array();
     $fname = realpath(dirname(__FILE__)."/../../../../databases_not_to_purge.txt");
     if($fname!==false && file_exists($fname)){

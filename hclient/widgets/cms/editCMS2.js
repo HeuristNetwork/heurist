@@ -774,7 +774,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                     const org_href = href;
                     args.content = '';
 
-                    href += `_${Math.random()}`;
+                    href += `_${window.hWin.HEURIST4.util.random()}`;
 
                     tinymce.activeEditor.execCommand('mceInsertLink', false, href);
 
@@ -1883,7 +1883,7 @@ function(value){
  'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
  'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1171&q=80'];
  
-            let k = Math.floor(Math.random() * 4);
+            let k = Math.floor(Math.random() * 4); //select one of 4 banners in example set
             
             new_ele = {name:'Banner', type:'group', 
                     css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
@@ -2119,11 +2119,16 @@ function(value){
                     if(response.data.errors==1){
                         let errs = response.data.errors_list;
                         let errMsg = errs[Object.keys(errs)[0]];
-                        window.hWin.HEURIST4.msg.showMsgErr( errMsg );
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: errMsg,
+                            error_title: 'Failed to save configuration'
+                        });
                     }else
                     if(response.data.noaccess==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('It appears you do not have enough rights (logout/in to refresh) to edit this record');
-                        
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'It appears you do not have enough rights (logout/in to refresh) to edit this record',
+                            status: window.hWin.ResponseStatus.REQUEST_DENIED
+                        });
                     }else{
                         _toolbar_Page.hide();
                         page_was_modified = false;

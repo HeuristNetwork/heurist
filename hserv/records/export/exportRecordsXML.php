@@ -9,7 +9,7 @@
 
 /**
 * exportRecordsXML.php - class to export records as XML
-* 
+*
 * Controller is records_output
 *
 * @package     Heurist academic knowledge management system
@@ -24,19 +24,19 @@
 require_once 'exportRecords.php';
 
 /**
-* 
+*
 *  setSession - switch current datbase
 *  output - main method
-* 
+*
 */
 class ExportRecordsXML extends ExportRecords {
-    
+
 //
 //
-//  
+//
 protected function _outputHeader(){
-    
-    fwrite($this->fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');
+
+    fwrite($this->fd, XML_HEADER.'<heurist><records>');
 }
 
 //
@@ -44,24 +44,24 @@ protected function _outputHeader(){
 //
 protected function _outputRecord($record){
 
-    $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
+    $xml = new SimpleXMLElement(XML_HEADER.'<record/>');
     self::_array_to_xml($record, $xml);
     fwrite($this->fd, substr($xml->asXML(),38));//remove header
 
     return true;
-    
+
 }
 
 //
 //
 //
 protected function _outputFooter(){
-    
+
     fwrite($this->fd, '</records>');
 
     $database_info = $this->_getDatabaseInfo();
-    
-    $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
+
+    $xml = new SimpleXMLElement(XML_HEADER.'<database/>');
     self::_array_to_xml($database_info, $xml);
     fwrite($this->fd, substr($xml->asXML(),38));
     fwrite($this->fd, '</heurist>');

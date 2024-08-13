@@ -1,10 +1,10 @@
 <?php
 
 /**
-* notifyDatabaseArchive.php: 
+* notifyDatabaseArchive.php:
 *   Send emails about creating DB archives to DB owners
 *   Owners will recieve the email if records in their DB has been modified within the last month
-* 
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2022 University of Sydney
@@ -24,12 +24,12 @@
 
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/notifyDatabaseArchive.php -- -db=database_1,database_2
-//  If dbs are not specified, all dbs are processed 
+//  If dbs are not specified, all dbs are processed
 
 /*
  This routine:
  Checks each database's last modification (in records or record structure)
- If the last modification was within the last month, 
+ If the last modification was within the last month,
     send a notification to DB owner about making an archive of their database
 */
 
@@ -48,7 +48,7 @@ if (@$argv) {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
-            } else if(strpos($argv[$i],'-db=')===0){
+            } elseif(strpos($argv[$i],'-db=')===0){
                 $ARGV['-db'] = substr($argv[$i],4);
             }
         } else {
@@ -144,7 +144,7 @@ foreach ($databases as $idx=>$db_name){
     }
 
     echo $eol.htmlspecialchars($db_name).' Checking'.$eol;
-    
+
     $res = mysql__usedatabase($mysqli, $db_name);
     if(!$res){
         echo $tabs0.@$res[1].$eol;

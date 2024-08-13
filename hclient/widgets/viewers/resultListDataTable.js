@@ -291,6 +291,7 @@ that._dout('myOnShowEvent');
                     let cols = this.options.dataTableParams['columns'];
                     this.hidden_cols = [];
                     for(let i=0;i<cols.length;i++){
+                        /* custom rendereing is not use - remarked due a secirity reason - using eval
                         if(typeof cols[i]['render']==='string'){
                             let fooName = cols[i]['render']
                             if(typeof(eval(fooName))=='function'){ 
@@ -299,6 +300,8 @@ that._dout('myOnShowEvent');
                                 cols[i]['render'] = null;
                             }
                         }
+                        */
+                        cols[i]['render'] = null;
 
                         if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
                             this.hidden_cols.push(i);
@@ -415,9 +418,8 @@ this._dout('reload datatable '+this.options.serverSide);
                     
                     let opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
                     $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-                
-                    for (let rty in rectype_Ids){
-                        rty = rectype_Ids[rty];
+
+                    rectype_Ids.forEach(rty => {
                         if(rty>0 && $Db.rty(rty,'rty_Name') ){
                             
                             let name = $Db.rty(rty,'rty_Plural');
@@ -425,7 +427,7 @@ this._dout('reload datatable '+this.options.serverSide);
                             
                             window.hWin.HEURIST4.ui.addoption(selScope[0], rty, name ); //'only: '+
                         }
-                    }
+                    });
                     window.hWin.HEURIST4.ui.addoption(selScope[0],'', 'Any record type');
                     
                     this._on( selScope, {

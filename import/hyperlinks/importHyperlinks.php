@@ -20,7 +20,7 @@
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney
 * @link        https://HeuristNetwork.org
@@ -31,7 +31,7 @@
 */
 
 define('LOGIN_REQUIRED',1);
-define('PDIR','../../');//need for proper path to js and css    
+define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
@@ -59,16 +59,16 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 	if (@$_REQUEST['source'] == 'file') {
 		$src = file_get_contents($_FILES['file']['tmp_name']);
 		$srcname = $_FILES['file']['name'];
-	} else if (@$_REQUEST['source'] == 'url') {
+	} elseif (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
 
         $url = filter_input($_SERVER['REQUEST_METHOD']=='POST'?INPUT_POST:INPUT_GET, 'url', FILTER_VALIDATE_URL);
-        
+
         if(empty($url) || $url===false){
 
             $src = null;
             $error = 'URL is not valid.';
-            
+
         }else{
             $src = loadRemoteURLContentWithRange($url, null, false, 120);//load external webpage to extract links
             if(!$src){
@@ -110,7 +110,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		/* get a list of the link-texts that we are going to ignore */
 		$ignored = mysql__select_assoc2($mysqli, 'SELECT lcase(hyf_String), -1 usrHyperlinkFilters '
                         .' WHERE hyf_UGrpID is null or hyf_UGrpID='.$system->get_user_id());
-                                       
+
 		$wildcard_ignored = array();
 		if($ignored){
 			foreach ($ignored as $key => $val) {
@@ -122,7 +122,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 				}
 			}
 		}
-        
+
         // minimum number of words that must appear in the link
 		$word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
 
@@ -155,10 +155,10 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			if (@$ignored[$lcase]){
                     $forbidden = 1;            // ignore forbidden links
             }
-			else {                
+			else {
 				foreach ($wildcard_ignored as $wc => $len) {
-					if (substr($lcase, 0, $len) == $wc) { 
-                            $forbidden = 1; break; 
+					if (substr($lcase, 0, $len) == $wc) {
+                            $forbidden = 1; break;
                     }
 				}
 			}
@@ -197,7 +197,7 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$nextmode = 'printurls';
 	}
 
-} else if (@$_REQUEST['link']) {
+} elseif (@$_REQUEST['link']) {
 	$urls = array();
 	$max_no = max(array_keys($_REQUEST['link']));
 
@@ -225,10 +225,10 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) {continue;}
 
-		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], 
-                                (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), 
+		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno],
+                                (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL),
                                  @$_REQUEST['rec_ID'][$linkno]);
-                                
+
 		if ($rec_id && is_array($rec_id)) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_rec_ids[$_REQUEST['link'][$linkno]] = $rec_id;
@@ -251,17 +251,17 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		//method to add bookmarks and tags
 		$data = array();
 		$data['rec_ids'] = $record_tobebookmarked;
-        
+
         $params = array(
            'entity'=>'usrTags',
            'mode'  =>'assign',
            'tagIDs'=> $kwd,
            'recIDs'=> $record_tobebookmarked
         );
-        
+
         $entity = new DbUsrTags($system, $params);
         $res = $entity->batch_action();
-        
+
         if( is_bool($res) && !$res ){
             $error = $system->getError();
             $error = $error['message'];
@@ -281,7 +281,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	}
 	if (@$bkmk_insert_count == 1){
 		$success = 'Added one bookmark';
-	}else if (@$bkmk_insert_count > 1){
+	}elseif (@$bkmk_insert_count > 1){
 		$success = 'Added ' . $bkmk_insert_count . ' bookmarks';
 	}
 	*/
@@ -292,7 +292,7 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 if (@$urls) {
     $bkmk_urls = mysql__select_assoc2($mysqli, 'SELECT rec_URL, 1 FROM usrBookmarks '
         .'left join Records on rec_ID = bkm_recID WHERE bkm_UGrpID='.$system->get_user_id());
-    
+
 	$ignore = array();
 	foreach ($urls as $url => $title){
 		if (@$bkmk_urls[$url]) {$ignore[$url] = 1;}
@@ -309,42 +309,42 @@ if (@$urls) {
             font-family: Helvetica,Arial,sans-serif;
             line-height: 2ex;
         }
-    
+
         .input-row {
             border-bottom: 1px solid RGBA(255,255,255,0.5);
             padding: 3px 0;
-        }    
+        }
         .input-row input:not([type="submit"]) {
             font-size: 11px;
             background: none repeat scroll 0 0 #FFF;
             border: 1px solid rgba(0, 0, 0, 0.2);
             margin: 2px 0;
             padding: 3px;
-        }        
-        
+        }
+
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
 		.input-header-cell input[type="radio"]{float:left;min-width:35px}
 		.error {color:#C00; font-weight:bold;}
 		.words {color: #6A7C99;}
 		.similar_bm{text-align: left;width:100%;color: #6A7C99;}
 		.similar_bm label{text-align: left;}
-        
+
         H2 {
             color: #6A7C99;
             font-size: 14px;
             line-height: 25px;
             margin: 0;
-        }        
+        }
         A:link {
             color: #2080C0;
             text-decoration: none;
-        }        
+        }
         P {
             color: #333333;
             font-size: 11px;
             line-height: 21px;
-        }   
-        
+        }
+
         .button, input[type="button"], input[type="submit"] {
             text-transform: uppercase !important;
             display: inline-block !important;
@@ -365,25 +365,25 @@ if (@$urls) {
             color: #000 !important;
         }
 	</style>
-    
+
     <script type="text/javascript">
-        function onPageInit(success){ 
+        function onPageInit(success){
                     $('input[type="button"]').button().css({'background-color':'#ddd','text-transform':'uppercase'});
-/* adjust size in case of dialog                    
+/* adjust size in case of dialog
                     var body = document.body,
                         html = document.documentElement;
 
-                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight, 
+                    var desiredHeight = Math.max( body.scrollHeight, body.offsetHeight,
                                            html.clientHeight, html.scrollHeight, html.offsetHeight );
-                    var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth, 
+                    var desiredWidth = Math.max( 700, body.scrollWidth, body.offsetWidth,
                                            html.clientWidth, html.scrollWidth, html.offsetWidth );
-                                                              
+
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
                         doDialogResize(desiredWidth, desiredHeight);
                     }
-*/                    
+*/
         }
-    
+
     </script>
 </head>
 
@@ -393,7 +393,7 @@ if (@$urls) {
 <script src="importHyperlinks.js"></script>
 
 <?php //this frame is needed for title lookup ?>
-<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post" 
+<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post"
         enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
@@ -438,7 +438,7 @@ hyperlinks of interest).</p>
  </div>
 
 <?php
-	} else if ($nextmode == 'printurls') {
+	} elseif($nextmode == 'printurls') {
 
 /* removed by saw 2010/11/12 doesn't seemed to be used anymore
 		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.$system->get_user_id().' order by tag_Text');
@@ -446,7 +446,7 @@ hyperlinks of interest).</p>
 		foreach ($tags as $kwd)
 			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
 */
-		
+
         $word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
         $word_limit = intval($word_limit);
 ?>
@@ -463,16 +463,16 @@ Note: the list only shows links which you have not already bookmarked.<br>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
   <input type="button"
-    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>', 
+    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>',
   { title:'Bookmark import settings',
     width:700,
     height:400,
-    callback: function( context ) { 
+    callback: function( context ) {
         if(context){
             document.forms[0].style.display = 'none';
             document.location.reload();
         }
-    } });}" 
+    } });}"
     value="Change settings">
 <br>
 We recommend bookmarking a few links at a time.<br>The list is reloaded after each addition and after change of settings.
@@ -497,7 +497,7 @@ We recommend bookmarking a few links at a time.<br>The list is reloaded after ea
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;" 
+   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;"
         onClick="{doBookmark();}">
  </div>
 
@@ -565,7 +565,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
             return $res;
         }
 
-	} else if (! $user_rec_id) {
+	} elseif (! $user_rec_id) {
 
 		$rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
 		if ($rec_ids) {return $rec_ids;}
@@ -583,7 +583,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 		}
 */
 	}
-    
+
     $system->defineConstants();
 
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
@@ -600,17 +600,17 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $record['details']["t:".DT_NAME] = array("0"=>$title);
     $record['details']["t:".DT_EXTENDED_DESCRIPTION] = array("0"=>$notes);
 
-    
-    $out = recordSave($system, $record);//see recordModify.php    
-    
+
+    $out = recordSave($system, $record);//see recordModify.php
+
     if ( @$out['status'] != HEURIST_OK ) {
         //print "<div style='color:red'> Error: ".$out["message"]."</div>";
         return 0;
     }else{
-        
+
         return intval($out['data']);
     }
-    
+
 }
 
 
@@ -622,13 +622,13 @@ function print_link($url, $title) {
 	global $linkno;
 	global $disambiguate_rec_ids;
 	global $notes;
-    
+
     $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
     $title_esc = htmlspecialchars($title);
 ?>
 <div class="input-row" style="background-color:#CCCCCC; padding-left: 40px; width:90%;">
-		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?> 
+		<input type="checkbox" name="links[<?php echo  $linkno ?>]" value="1" class="check_link" id="flag<?php echo $linkno ?>" <?php echo  @$_REQUEST['links'][$linkno]? 'checked' : '' ?>
             onChange="var t=document.getElementById('t<?php echo $linkno ?>').value; var n=document.getElementById('n<?php echo $linkno ?>').value; if (!this.checked || n.length > t.length) { var e=document.getElementById('un<?php echo $linkno ?>'); if(e) e.checked = this.checked; }">
 		&nbsp;<input type="text" name="title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" style="width:70%; font-weight: bold; background-color: #eee;" id="t<?php echo $linkno ?>">
 		<input type="hidden" name="alt_title[<?php echo  $linkno ?>]" value="<?php echo  $title_esc ?>" id="at<?php echo $linkno ?>">
@@ -646,7 +646,7 @@ function print_link($url, $title) {
 <div class="input-row" style="padding-left: 60px;">
 	<div style="display:inline-block;width:30px;vertical-align: middle;">
 		<input style="margin: 0px;" type="checkbox" name="use_notes[<?php echo  $linkno ?>]" value="1" id="un<?php echo $linkno ?>" class="use_notes_checkbox" title="Use Notes">
-      	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>" 
+      	<input type="hidden" name="notes[<?php echo  $linkno ?>]" id="n<?php echo $linkno ?>"
             value="<?php echo  htmlspecialchars(@$_REQUEST['notes'][$linkno]? str_replace('"', '\\"', $_REQUEST['notes'][$linkno]) : str_replace('"', '\\"', $notes[$url]));?>">
 	  </div>
       <div style="display:inline-block;width:70%;max-height:5.5em;text-overflow: ellipsis; overflow:hidden; white-space:normal;">
@@ -659,10 +659,10 @@ function print_link($url, $title) {
 	}else{
 		$word_count = str_word_count($notes[$url]);
     }
-        
+
 	if ($word_count == 1) {
 		print '1 word';
-	} else if ($word_count > 1) {
+	} elseif($word_count > 1) {
 		print "$word_count words";
 	}
 ?></small>

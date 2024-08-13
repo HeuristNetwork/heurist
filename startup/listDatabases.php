@@ -49,15 +49,15 @@ if($system->get_mysqli()!=null) { //server is connected
 }
 
 if($is_json){
-    
-    header( 'Content-Type: application/json');
-    
+
+    header( CTYPE_JSON);
+
     if(isset($error_msg) && $error_msg!=''){
         $response = $system->getError();
     }else{
         $response = array("status"=>HEURIST_OK, "data"=> $list);
-    }    
-        
+    }
+
     print json_encode( $response );
     exit;
 }

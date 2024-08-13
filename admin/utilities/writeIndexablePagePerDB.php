@@ -1,8 +1,8 @@
 <?php
 
 /**
-* writeIndexablePagePerDB.php: Creates a html page containing details about each database 
-* 
+* writeIndexablePagePerDB.php: Creates a html page containing details about each database
+*
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2022 University of Sydney
@@ -22,7 +22,7 @@
 
 // example:
 //  sudo php -f /var/www/html/heurist/admin/utilities/writeIndexablePagePerDB.php -- -db=database_1,database_2
-//  If dbs are not specified, all dbs are processed 
+//  If dbs are not specified, all dbs are processed
 
 /*
  This routine:
@@ -52,7 +52,7 @@ if (@$argv) {
             if (@$argv[$i + 1] && $argv[$i + 1][0] != '-') {
                 $ARGV[$argv[$i]] = $argv[$i + 1];
                 ++$i;
-            } else if(strpos($argv[$i],'-db=')===0){
+            } elseif(strpos($argv[$i],'-db=')===0){
                 $ARGV['-db'] = substr($argv[$i],4);
             }
         } else {
@@ -119,7 +119,7 @@ if(strpos($base_url, '/heurist/') === false){
 $mysqli = $system->get_mysqli();
 $databases = mysql__getdatabases4($mysqli, false);
 
-// TODO: Should be using setting for web root in configIni.php 
+// TODO: Should be using setting for web root in configIni.php
 $index_dir = dirname(__FILE__)."/../../../HarvestableDatabaseDescriptions";
 
 $is_dir_writable = folderExists($index_dir, true);
@@ -129,8 +129,8 @@ if($is_dir_writable === -1){ // Create directory
     if($res !== ''){
         exit('Unable to create directory for Database Pages'.$eol.$res.$eol);
     }
-}else if($is_dir_writable === -2 || $is_dir_writable === -3){
-    $msg = $tabs0 . ($is_dir_writable === -2 ? 'Unable to write to directory for Database Pages' : 
+}elseif($is_dir_writable === -2 || $is_dir_writable === -3){
+    $msg = $tabs0 . ($is_dir_writable === -2 ? 'Unable to write to directory for Database Pages' :
         'The Database Pages directory has been replaced by a file, that cannot be removed.').$eol.'Please remove it and run this script again.';
     exit($msg);
 }
@@ -316,11 +316,11 @@ foreach ($databases as $idx=>$db_name){
         continue;
     }
     $res = mysql__usedatabase($mysqli, $db_name);
-    
+
     $db_name = htmlspecialchars($db_name);
 
     echo $tabs0.$db_name.' Starting'.$eol;
-    
+
     if(!$res){
         echo $tabs0.@$res[1].$eol;
         continue;
@@ -488,7 +488,7 @@ $files = scandir($index_dir);
 if(is_array($files)){ // iterate through files
 
     foreach ($files as $full_filename) {
-        
+
         $filename = pathinfo("$index_dir/$full_filename", PATHINFO_FILENAME);
 
         if(empty($filename) || $filename === '.' || $filename === 'index' || in_array($filename, $databases)){

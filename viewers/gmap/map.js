@@ -24,7 +24,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global temporalToHumanReadableString, TimeMap, TimeMapTheme, google, vis, hMappingControls, mxn, _adjustLegendHeight */
+/* global temporalToHumanReadableString, TimeMap, TimeMapTheme, google, vis, HMappingControls, mxn, _adjustLegendHeight */
 
 function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     const _className = "Mapping",
@@ -1101,7 +1101,7 @@ if(_mapdata.limit_warning){
                     }
                     
                     // loading the list of map documents  see mapOverlay.js
-                    that.map_control = new hMappingControls(that, __startup_mapdocument);
+                    that.map_control = new HMappingControls(that, __startup_mapdocument);
 
                     
                     $("#map-settingup-message").hide();

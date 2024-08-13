@@ -1,27 +1,27 @@
 <?php
 /**
 * Image manipulation library
-* 
+*
 * createFromString - creates image with given text
 * makeURLScreenshot - makes screenshot for given url
 * getRemoteImage - downloads image from given url
 * getImageFromFile - returns image object for given file
-* changeImageColor - changes black color in given image to new one (for icons), adds circle and circle background   
+* changeImageColor - changes black color in given image to new one (for icons), adds circle and circle background
 * getImageType - returns extension based of exif
 * checkMemoryForImage - verifies if image can be loaded into memory
-* 
+*
 * safeLoadImage -  memory safe load from file to image object
 * createScaledImageFile - creates thumbnail for given image file
-* resizeImage - resizes given image   
+* resizeImage - resizes given image
 * getPdfThumbnail - creates thumbnail from pdf file
-* 
+*
 * getPrevailBackgroundColor - finds prevail background color
 *
-* private 
+* private
 * _resizeImageGD - creates scaled image with native GD php functions
 * _parseColor
 * _rgb2hex
-* 
+*
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -42,7 +42,7 @@
 //use Screen\Capture; //for micorweber
 
 class UImage {
-    
+
     /**
     * Creates image with given text
     *
@@ -94,13 +94,13 @@ class UImage {
         }
 
         return $im;
-    }    
+    }
 
 
     /**
     * makes screenshot for given url (using either WEBSITE_THUMBNAIL_SERVICE
     * or Google PageSpeed Insights API
-    * 
+    *
     * @param mixed $url
     */
     public static function makeURLScreenshot($siteURL){
@@ -112,7 +112,7 @@ class UImage {
 
 
             if(defined('WEBSITE_THUMBNAIL_SERVICE') && WEBSITE_THUMBNAIL_SERVICE!=''){
-            
+
                 $remote_path =  str_replace("[URL]", $siteURL, WEBSITE_THUMBNAIL_SERVICE);
                 $filesize = saveURLasFile($remote_path, $heurist_path);//save url screenshot in tep file
 
@@ -127,7 +127,7 @@ class UImage {
                     }
                 }
 
-            }else{  
+            }else{
 
                 //call Google PageSpeed Insights API
                 $googlePagespeedData = file_get_contents( //loadRemoteURLContent
@@ -137,38 +137,38 @@ class UImage {
                 $googlePagespeedData = json_decode($googlePagespeedData, true);
 
                 //screenshot data
-                
+
                 //full-page-screenshot details screenshot data
                 //screenshot-thumbnails details items[] data
                 $screenshot = @$googlePagespeedData['lighthouseResult']['audits']['final-screenshot']['details']['data'];
-                
+
                 //$screenshot = str_replace(array('_','-'),array('/','+'),$screenshot);
-                
+
                 $fp = fopen($heurist_path, "w+");
                 fwrite($fp, base64_decode($screenshot));
                 fclose($fp);
-                
+
                 //display screenshot image
                 //echo "<img src=\"data:image/jpeg;base64,".$screenshot."\" /-->";
             }
-            
+
             if(file_exists($heurist_path)){
-                
+
                 $filesize = filesize($heurist_path);
-                
+
                 $file = new \stdClass();
                 $file->original_name = 'snapshot.jpg';
                 $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME);//name with ext
                 $file->fullpath = $heurist_path;
                 $file->size = $filesize; //fix_integer_overflow
                 $file->type = 'jpg';
-                
-                return $file;         
+
+                return $file;
 
             }else{
                 return array('error'=>'Cannot download image from thumbnail generator service. '.$siteURL.' to '.$heurist_path);
             }
-            
+
         }else{
             return array('error'=>'URL to generate snapshot '.$siteURL.' is not valid');
         }
@@ -183,10 +183,10 @@ class UImage {
     public static function getRemoteImage($remote_url, &$orientation=null){  //get_remote_image
 
         $img = null;
-        
+
         $data = loadRemoteURLContent($remote_url, false);//get_remote_image as raw data
         if($data){
-            
+
             if(isset($orientation)){
                 //save into file
                 $_tmp = tempnam(HEURIST_SCRATCHSPACE_DIR, 'img');
@@ -195,8 +195,8 @@ class UImage {
                 $orientation = UImage::getImageOrientation($_tmp);
                 unlink($_tmp);
             }
-            
-            try{    
+
+            try{
                 $img = imagecreatefromstring($data);
             }catch(Exception  $e){
                 $img = false;
@@ -208,10 +208,10 @@ class UImage {
         return $img;
     }
 
-    
+
     /**
     * Returns image object for given filename
-    *     
+    *
     * @param mixed $filename
     * @return {false|GdImage|null}
     */
@@ -223,30 +223,30 @@ class UImage {
         }
         return $image;
     }
-    
+
     /**
     * Changes black color in given image to new one (for icons)
-    * Adds circle and circle background   
+    * Adds circle and circle background
     */
     public static function changeImageColor($filename, $filename_new, $color_new, $circle_color, $bg_circle_color){
-      
+
         if(file_exists($filename)){
-            
-            
+
+
             $color_new = UImage::_parseColor($color_new);
             $circle_color = UImage::_parseColor($circle_color);
             $bg_circle_color = UImage::_parseColor($bg_circle_color);
-            
+
             // load icon
             $img_icon = @imagecreatefrompng($filename);
 
             if($img_icon===false) {return;}
-            
+
             $color_old = array(0,0,0);//???? 54,100,139);
             $color_new = (!$color_new)?array(255, 0, 0):$color_new;  //array(54,64,80);
             /* RGB of your inside color */
             $rgb = $color_new; //array(0,0,255);
-            
+
             // Negative values, don't edit
             $rgb = array(($color_old[0]-$rgb[0]),($color_old[1]-$rgb[1]),($color_old[2]-$rgb[2]));
             imagefilter($img_icon, IMG_FILTER_NEGATE);
@@ -256,20 +256,20 @@ class UImage {
             //imagesavealpha( $img_icon, true );
 
             if($bg_circle_color!=null || $circle_color!=null){
-                
+
                 $img = imagecreatetruecolor(25, 25);//truecolor image 25x25 pix
                 imagealphablending( $img, false );
                 imagesavealpha( $img, true );
-                
+
                 //fill the background color
                 //$bg = imagecolorallocate($img, 200, 200, 200);
                 //imagecolortransparent($img, $bg);
                 // make the background transparent
                 $bg = imagecolorallocatealpha($img, 200, 200, 200, 127);
-                
+
                 //draw transparent rectangle
                 imagefilledrectangle($img, 0, 0, 25, 25, $bg);//fill bg rectangle
-                
+
                 // draw filled circle
                 if($bg_circle_color!=null){
                     //$col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
@@ -281,18 +281,18 @@ class UImage {
                     $col_ellipse = imagecolorallocate($img, $circle_color[0], $circle_color[1], $circle_color[2]);
                     imagearc($img, 12, 12 , 24, 24,  0, 360, $col_ellipse);
                     //imagearc($img, 12, 12 , 23, 23,  0, 360, $col_ellipse);
-                }        
-                
+                }
+
                 $imageInfo = getimagesize($filename);
                 if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
                     imagecopy($img, $img_icon, 1, 1, 0, 0, 24, 24);
                 }else{
                     imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16);
                 }
-                
+
                 // output
                 if($filename_new){
-                    imagepng($img, $filename_new);//save to file     
+                    imagepng($img, $filename_new);//save to file
                 }else{
                     header("Content-type: image/png");
                     imagepng($img);
@@ -302,30 +302,30 @@ class UImage {
             }else{
                 // output
                 if($filename_new){
-                    imagepng($img_icon, $filename_new);//save to file     
+                    imagepng($img_icon, $filename_new);//save to file
                 }else{
                     header("Content-type: image/png");
                     imagepng($img_icon);
                 }
             }
-        
+
             imagedestroy($img_icon);
-            
+
         }
     }
 
     /**
     * Returns extension based of exif
-    *     
+    *
     * @param mixed $filename
     * @return null
     */
     public static function getImageType($filename){
-        
+
         $mimeExt = null;
-        
+
         if(file_exists($filename)){
-        
+
             if (function_exists('exif_imagetype')) {
                 switch(@exif_imagetype($filename)){
                     case IMAGETYPE_JPEG:
@@ -358,19 +358,19 @@ class UImage {
                 }
             }
         }
-                
+
         return  $mimeExt;
     }
-    
-    
+
+
     /**
     * Returns orientation based of exif
-    *     
+    *
     * @param mixed $file_path
     * @return int
     */
     public static function getImageOrientation($file_path){
-        
+
         if (!function_exists('exif_read_data')) {
             return 0;
         }
@@ -384,19 +384,19 @@ class UImage {
         }else{
             return $orientation;
         }
-        
+
     }
 
     /**
     * Verifies the size of image - is it possible to load into allowed memory
-    * 
+    *
     * @param mixed $filename
     * @param mixed $mimeExt
     */
     public static function checkMemoryForImage($filename, $mimeExt){
-        
+
         $errorMsg = null;
-        
+
         //if img check memory to be allocated
         switch($mimeExt) {
             case 'image/jpeg':
@@ -408,15 +408,15 @@ class UImage {
             case 'gif':
             case 'image/png':
             case 'png':
-            
+
                 $imageInfo = getimagesize($filename);
                 if(is_array($imageInfo)){
                     if(array_key_exists('channels', $imageInfo) && array_key_exists('bits', $imageInfo)){
                         $memoryNeeded = round(($imageInfo[0] * $imageInfo[1] * $imageInfo['bits'] * $imageInfo['channels'] / 8 + Pow(2,16)) * 1.65);
                     }else{ //width x height
                         $memoryNeeded = round($imageInfo[0] * $imageInfo[1]*3);
-                    } 
-                    
+                    }
+
                     $error_msg = USystem::isMemoryAllowed( $memoryNeeded );
                     if($error_msg!==true){
                         $errorMsg = $error_msg;
@@ -425,40 +425,40 @@ class UImage {
                 break;
             default:
                 break;
-        }        
-        
+        }
+
         return $errorMsg;
-        
+
     }
-    
+
     /**
     * memory safe load from file to image object
-    * 
+    *
     * @param mixed $filename
     * @param mixed $mimeExt
     */
     public static function safeLoadImage($filename, $mimeExt){
-     
+
             $img = null;
-        
+
             $errline_prev = 0;
-            
+
             set_error_handler(function($errno, $errstr, $errfile, $errline=null, array $errcontext=null) {
                 global $errline_prev, $filename, $file;
-                
+
                 //it may report error several times with different messages - send for the first one
                 if($errline_prev!=$errline){
-                    
+
                         $errline_prev=$errline;
                         //database, record ID and name of bad image
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cannot load image file. DB:'.HEURIST_DBNAME, 
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cannot load image file. DB:'.HEURIST_DBNAME,
                         'File :'.$filename.' is corrupted. System message: '.$errstr);
-                        //ID#'.$file['ulf_ID'].'  
-                    
+                        //ID#'.$file['ulf_ID'].'
+
                 }
                 return false;
             });//, E_WARNING);
-            
+
             switch($mimeExt) {
                 case 'image/jpeg':
                 case 'jpeg':
@@ -479,9 +479,9 @@ class UImage {
                     $img = false; //not image
                     break;
             }
-            
+
             restore_error_handler();
-        
+
             return $img;
     }
 
@@ -489,14 +489,14 @@ class UImage {
     * Creates thumbnail for given image file
     */
     public static function createScaledImageFile($filename, $scaled_file, $max_width = 200, $max_height = 200, $create_error_thumb=true, $force_type='png'){
-    
+
         $mimeExt = UImage::getImageType($filename);
-        
+
         if($mimeExt){
             $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
-            
+
             if(!$errorMsg){
-            
+
                 if (extension_loaded('imagick')) {
                     $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height, $force_type);
                     if($res!==true) {$errorMsg = 'Cannot resize image. '.$res;}
@@ -511,7 +511,7 @@ class UImage {
                         $errorMsg = 'Cannot load image file';
                     }
                 }
-                
+
             }
             if($errorMsg && $create_error_thumb)
             {
@@ -519,19 +519,19 @@ class UImage {
                 imagepng($img, $scaled_file);
                 imagedestroy($img);
                 return $errorMsg;
-            
+
             }else{
                 return file_exists($scaled_file)?true:$errorMsg;
             }
         }
     }
 
-    
+
     /**
     * Resizes given image to PNG
     * saves into $thumbnail_file and returns true if success
     * Used ONLY in recordFile.php fileCreateThumbnail
-    * 
+    *
     * @param mixed $filename
     */
     public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200, $orientation=0){
@@ -539,7 +539,7 @@ class UImage {
         if($orientation>0){
             $img = UImage::gd_orient_image($img, $orientation);
         }
-        
+
         $no_enlarge = false;
         // calculate image size
         // note - we never change the aspect ratio of the image!
@@ -559,12 +559,12 @@ class UImage {
         $new_y = ceil($orig_y * $scale);
 
         $img_resized = imagecreatetruecolor($new_x, $new_y)  or die;
-        
+
         // Handle transparency
         imagecolortransparent($img_resized, imagecolorallocate($img_resized, 0, 0, 0));
         imagealphablending($img_resized, false);
         imagesavealpha($img_resized, true);
-        
+
         imagecopyresampled($img_resized, $img, 0, 0, 0, 0, $new_x, $new_y, $orig_x, $orig_y)  or die;
 
         if ($thumbnail_file) {
@@ -573,7 +573,7 @@ class UImage {
             //?????
             $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
         }
-        
+
         imagepng($img_resized, $resized_file);//save into file
         imagedestroy($img);
         imagedestroy($img_resized);
@@ -582,10 +582,10 @@ class UImage {
             //remove themp file
             unlink($resized_file);
         }
-        
-        return true;   
+
+        return true;
     }
-    
+
     private static function gd_imageflip($image, $mode) {
         if (function_exists('imageflip')) {
             return imageflip($image, $mode);
@@ -676,19 +676,19 @@ class UImage {
 
         return $new_img;
     }
-    
+
 
     /**
     * Creates thumbnail from pdf file
-    * 
+    *
     * @param mixed $filename
     * @param mixed $thumbnail_file
     */
     public static function getPdfThumbnail( $filename, $thumbnail_file ){
-        
+
             if(!extension_loaded('imagick')){
-                
-                $cmd = 'convert -thumbnail x200 -flatten ';//-background white -alpha remove 
+
+                $cmd = 'convert -thumbnail x200 -flatten ';//-background white -alpha remove
                 $cmd .= ' '.escapeshellarg($filename.'[0]');
                 $cmd .= ' '.escapeshellarg($thumbnail_file);
                 exec($cmd, $output, $error);
@@ -697,11 +697,11 @@ class UImage {
                     USanitize::errorLog('ERROR on pdf thumbnail creation: '.$filename.'  '.$cmd.'   '.implode('\n', $output));
                     return false;
                 }
-                
+
             }else{
                 //Imagic
                 try {
-                    
+
                     $im =  new Imagick($filename.'[0]');
                     $im->setImageFormat('png');
                     $im->thumbnailImage(200,200);
@@ -710,7 +710,7 @@ class UImage {
                             unlink($thumbnail_file);
                     }
                     $im->writeImage($thumbnail_file);
-                    
+
                 } catch(ImagickException $e) {
                     USanitize::errorLog($e . ', From Database: ' . HEURIST_DBNAME);
                     return false;
@@ -728,10 +728,10 @@ class UImage {
     * @param mixed $file
     */
     public static function getPrevailBackgroundColor2($filename){
-        
+
         $image = UImage::getImageFromFile($filename);
         if($image){
-            
+
             $scaled = imagescale($image, 1, 1, IMG_BICUBIC);//since v5.5
             $index = imagecolorat($scaled, 0, 0);
             $rgb = imagecolorsforindex($scaled, $index);
@@ -744,13 +744,13 @@ class UImage {
         }else{
             return '#FFFFFF';
         }
-        
+
     }
 
-    
+
     /**
     * Finds prevail background color
-    * 
+    *
     * @param mixed $file
     */
     public static function getPrevailBackgroundColor($filename){
@@ -834,11 +834,11 @@ class UImage {
     /**
     * Creates scaled image with Imagic
     * saves into $thumbnail_file and returns true or error message
-    * 
+    *
     * @param mixed $filename
     */
     private static function _resizeImageImagic($filename, $scaled_file, $max_width = 200, $max_height = 200, $force_type='png'){
-       
+
             try{
                 $image = new \Imagick($filename);
                 $dims = array('height' => $image->getImageHeight(), 'width' => $image->getImageWidth());
@@ -865,30 +865,30 @@ class UImage {
                 }
 
                 $success = $image->writeImage($scaled_file);
-                
+
                 $image->destroy();
-        
+
                 return $success;
-                
+
             }catch(\ImagickException $e){
                 return $e->message;
-            }                
+            }
     }
-    
-    
+
+
     /**
     * Creates scaled PNG image with native GD php functions
     * saves into $thumbnail_file and returns true or false
-    * 
+    *
     * @param mixed $filename
     */
     private static function _resizeImageGD($src_img, $scaled_file, $max_width = 200, $max_height = 200, $scale_type = 'png'){
-        
+
         if (!function_exists('imagecreatetruecolor')) {
             USanitize::errorLog('Function not found: imagecreatetruecolor');
             return false;
         }
-        
+
         $write_func = 'imagepng';
         $image_quality = 9;
         /*
@@ -910,7 +910,7 @@ class UImage {
             $max_height / $img_height
         );
         if ($scale >= 1) {
-            
+
             //if ($image_oriented) {
             //  $ret = ($write_func!=null)?$write_func($src_img, $scaled_file, $image_quality):false;
             //  return $ret;
@@ -918,24 +918,24 @@ class UImage {
             //save into file
             if(!$scale_type || $scale_type == 'png'){
                 imagepng($src_img, $scaled_file);
-            }else if($scale_type == 'jpg'){
+            }elseif($scale_type == 'jpg'){
                 imagejpeg($src_img, $scaled_file);
             }
             imagedestroy($src_img);
             return true;
         }
-        
+
         $new_width = $img_width * $scale;
         $new_height = $img_height * $scale;
         $dst_x = 0;
         $dst_y = 0;
         $new_img = imagecreatetruecolor($new_width, $new_height);
-                
+
         // Handle transparency
         imagecolortransparent($new_img, imagecolorallocate($new_img, 0, 0, 0));
         imagealphablending($new_img, false);
         imagesavealpha($new_img, true);
-        
+
         $success = imagecopyresampled(
             $new_img,
             $src_img,
@@ -953,14 +953,14 @@ class UImage {
 
             if(!$scale_type || $scale_type == 'png'){
                 $success = imagepng($new_img, $scaled_file, $image_quality);
-            }else if($scale_type == 'jpg'){
+            }elseif($scale_type == 'jpg'){
                 $success = imagejpeg($new_img, $scaled_file, $image_quality);
             }
         }
-        
+
         imagedestroy($src_img);
         if($new_img) {imagedestroy($new_img);}
-        
+
         return $success;
     }
 
@@ -981,17 +981,17 @@ class UImage {
                 $hexcolor = $param_color;
                 $shorthand = (strlen($hexcolor) == 4);
                 list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
-                $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
+                $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b"))
                 :array(hexdec($r), hexdec($g), hexdec($b));
             }
 
         }else{
             $color_new = null; //array(255, 0, 0);
-        }  
+        }
         return $color_new;
     }
 
-    
+
     //
     //
     //
@@ -1004,6 +1004,6 @@ class UImage {
        return $hex; // returns the hex value including the number sign (#)
     }
 
-    
+
 }
 ?>

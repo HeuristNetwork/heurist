@@ -308,20 +308,17 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         if(rectype_Ids.length==0){
             window.hWin.HEURIST4.ui.createRectypeSelect(selScope,null,'select record type …',true);
-        }else{
-            if(rectype_Ids.length>1){
+        }else {
                 let opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
                 $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-            }
-            for (let rty in rectype_Ids){
-                    if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Name')){
-                        rty = rectype_Ids[rty];
-                        let name = $Db.rty(rty,'rty_Plural');
-
-                        if(!name) name = $Db.rty(rty,'rty_Name');
-                        window.hWin.HEURIST4.ui.addoption(selScope,rty,name); //'only: '+
-                    }
-            }
+            
+                rectype_Ids.forEach(rty => {
+                        if(rty>0 && $Db.rty(rty,'rty_Name')){
+                            let name = $Db.rty(rty,'rty_Plural');
+                            if(!name) name = $Db.rty(rty,'rty_Name');
+                            window.hWin.HEURIST4.ui.addoption(selScope,rty,name); //'only: '+
+                        }
+                });
         }
 
 /*        
