@@ -111,9 +111,9 @@ EXP;
 
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_ExternalReferenceLookups', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'");
 
-            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_NavigationTree', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'", true);
+            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_NavigationTree', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters' AFTER `ugr_Modified`", true);
             
-            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Preferences', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'", true);
+            list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'ugr_Preferences', "ALTER TABLE `sysUGrps` ADD COLUMN `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences' AFTER `ugr_NavigationTree`", true);
 
             list($is_added,$report[]) = alterTable($system, 'usrBookmarks', 'bkm_Notes', "ALTER TABLE `usrBookmarks` ADD COLUMN `bkm_Notes` mediumtext COMMENT 'Personal notes'");
 

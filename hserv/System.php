@@ -1081,7 +1081,7 @@ class System {
         $db_total_records = 0;
         $db_has_active_dashboard = 0;
         $db_workset_count = 0;
-f
+
         $db_total_records = mysql__select_value($this->mysqli, 'SELECT count(*) FROM Records WHERE not rec_FlagTemporary');
         $db_total_records = ($db_total_records>0)?$db_total_records:0;
 

@@ -1874,13 +1874,15 @@
         }
     }
 
-    function createTable($system, $table_name, $query){
+    function createTable($system, $table_name, $query, $recreate = false){
     
         $mysqli = $system->get_mysqli();
     
-        if(!hasTable($mysqli, $table_name)){
-            $res = false;
-            //$res = $mysqli->query($query);
+        if($recreate || !hasTable($mysqli, $table_name)){
+            
+            $res = $mysqli->query('DROP TABLE IF EXISTS '.$table_name);
+            
+            $res = $mysqli->query($query);
             if(!$res){
                 $msg = "Cannot create $table_name";
                 $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
@@ -1903,7 +1905,10 @@
         $rep2 = 'added';
         
         if($column_exists && $modify_if_exists){
-            $query = str_replace('ADD COLUMN','CHANGE COLUMN',$query);
+            $query = str_replace('ADD COLUMN','MODIFY',$query);
+            if(stripos($query,' AFTER `')>0){
+                $query = stristr($query,' AFTER `',true);
+            }
             $column_exists = false;
             $rep1 = 'alter';
             $rep2 = 'altered';
