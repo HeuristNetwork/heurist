@@ -153,7 +153,7 @@ var svg;        // The SVG where the visualisation will be executed on
 
         // Check visualisation limit
         var amount = Object.keys(settings.data.nodes).length;
-        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+        const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         
         visualizeData();    
 

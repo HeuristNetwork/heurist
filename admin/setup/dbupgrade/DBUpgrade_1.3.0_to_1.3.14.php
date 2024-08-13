@@ -126,11 +126,6 @@ EXP;
                 ."NOT NULL default 'local' COMMENT 'Preferred source of file if both local file and external reference set'", true);             
            
 
-                if(hasTable($mysqli, 'defCalcFunctions')){
-                    $query = 'DROP TABLE IF EXISTS defCalcFunctions';
-                    $res = $mysqli->query($query);
-                }
-
             $query = <<<EXP
 CREATE TABLE defCalcFunctions (
   cfn_ID smallint unsigned NOT NULL auto_increment COMMENT 'Primary key of defCalcFunctions table',
@@ -165,13 +160,11 @@ EXP;
 
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_NakalaKey', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'");
        
-            if($is_added){
-                        $usr_prefs = user_getPreferences($system);
-                        if(array_key_exists('nakala_api_key', $usr_prefs)){
-                            $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
-                            .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
+            $usr_prefs = user_getPreferences($system);
+            if($is_added && array_key_exists('nakala_api_key', $usr_prefs)){
+                $query = "UPDATE `sysIdentification` SET sys_NakalaKey='"
+                    .$mysqli->real_escape_string($usr_prefs['nakala_api_key'])."' WHERE 1";
                             $res = $mysqli->query($query);
-                        }
             }
        }
 
@@ -221,7 +214,21 @@ EXP;
 
 
             //import field 2-1080 Workflowstages
-            if($dbVerSubSub<4 && !(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
+            $report[] = importField_2_1080($system);
+
+        
+        return $report;
+    }
+    
+    //
+    // import field 2-1080 Workflowstages
+    //
+    function importField_2_1080($system){
+            //$dbVerSubSub<4 && 
+            $res = false;
+            $ret = '';
+            
+            if(!(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
                 $importDef = new DbsImport( $system );
                 if($importDef->doPrepare(  array(
                 'defType'=>'detailtype',
@@ -230,12 +237,10 @@ EXP;
                 {
                     $res = $importDef->doImport();
                 }
-                if($res){
-                    $report[] = 'Field 2-1080 "Workflow stages imported';
-                }
             }
-
-        
-        return $report;
+            if($res){
+                $ret = 'Field 2-1080 "Workflow stages imported';
+            }
+            return $ret;
     }
 ?>
