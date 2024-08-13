@@ -223,7 +223,7 @@ $.widget( "heurist.search", {
                 + ' <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')
             .attr('id', 'search_help_link')
             .addClass('graytext')
-            .css({'font-size':'10px',display:'inline-block','text-decoration':'none','outline':0, cursor:'pointer'})
+            .css({'font-size':'10px',display:'inline-block','text-decoration':'none',outline:'none', cursor:'pointer'})
             .appendTo(this.div_search_input);
 
             this._on( link, {  click: function(){
@@ -922,7 +922,7 @@ $.widget( "heurist.search", {
                     }
                 }
 
-                if(that.btn_save_filter.is(':visible')){ // 'flash' save filter button
+                if(that.btn_save_filter && that.btn_save_filter.is(':visible')){ // 'flash' save filter button
 
                     that.btn_save_filter.fadeOut(100)
                                         .fadeIn(100)

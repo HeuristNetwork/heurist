@@ -337,9 +337,16 @@ $isUpgrade = true;
 
         if(success) // Successfully initialized system
         {
-            if(!window.hWin.HAPI4.sysinfo['layout']){
-                var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
+            
+            var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
 
+            if(window.hWin.HEURIST4.util.isempty(layoutid)){
+                layoutid = "H6Default";
+            }
+            if(!window.hWin.HAPI4.sysinfo['layout']){
+                window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
+            }            
+            
             if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && window.hWin.HEURIST4.util.isFunction(onAboutInit)){
                 if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                     onAboutInit();//init about dialog
@@ -379,23 +386,23 @@ $isUpgrade = true;
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     if(arguments){
-                    if(arguments[1]){
+                        if(arguments[1]){
 
-                        //verify definitions relevance every 20 seconds
-                        if(false){
-                            setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
-                        }
+                            //verify definitions relevance every 20 seconds
+                            if(false){
+                                setInterval(function(){window.hWin.HAPI4.EntityMgr.relevanceEntityData()}, 20000);
+                            }
 
-                        if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HEURIST4.util.isFunction(callback)){
-                            callback(true);
+                            if(!window.hWin.HEURIST4.util.isnull(callback) && window.hWin.HEURIST4.util.isFunction(callback)){
+                                callback(true);
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: sMsg,
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
+                            if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
                         }
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: sMsg,
-                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                        });
-                        if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}
-                    }
                     }
                 });
                 return true;

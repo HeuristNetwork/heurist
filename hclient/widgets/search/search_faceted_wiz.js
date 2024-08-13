@@ -2484,5 +2484,5 @@ function showSearchFacetedWizard( params ){
         manage_dlg.search_faceted_wiz( 'show' );
         
         return manage_dlg;
-
+    }
 }

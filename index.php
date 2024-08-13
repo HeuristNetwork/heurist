@@ -285,26 +285,6 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
 <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
-<!-- Calendar picker -->
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
-
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-<script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-<script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
-
 <!-- os, browser detector -->
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
 
@@ -333,6 +313,8 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
 <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
+
+<script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
 
 <script type="text/javascript">
 

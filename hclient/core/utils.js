@@ -906,7 +906,7 @@ window.hWin.HUL = window.hWin.HEURIST4.util = {
 
 
     isRecordSet: function(recordset){
-        return !window.hWin.HUL.isnull(recordset) && window.hWin.HEURIST4.util.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
+        return !window.hWin.HUL.isnull(recordset) && window.hWin.HEURIST4.util.isFunction(recordset.isA) && recordset.isA('HRecordSet');   
     },
 
     random: function(){

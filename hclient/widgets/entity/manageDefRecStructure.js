@@ -454,10 +454,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._treeview = this.element.find('.treeView');
         
         if(this._treeview.fancytree('instance')){
-            let tree = this._treeview.fancytree('getTree');
-            tree.reload(treeData)
-            //tree.render(true);
-        
+            this._tree = $.ui.fancytree.getTree(this._treeview[0]);
+            this._tree.reload(treeData)
         }else{
         
         fancytree_options =
@@ -810,8 +808,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             .hide()
             .css({'position':'absolute', 'padding':'5px'})
             .menu({select: function(event, ui){
-                    let tree = that._treeview.fancytree("getTree");
-                    let node = tree.getActiveNode();
+                    let node = that._tree.getActiveNode();
                     if(node){
                         
                         let fields = {
@@ -1055,8 +1052,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
         if(!isEditOpen){
             //deactivate node - add action buttons
-            let tree = this._treeview.fancytree('getTree');
-            let node = tree.getActiveNode();
+            let node = this._tree.getActiveNode();
             if(node && node.key!=this._currentEditID){
                 node.setActive(false);  
             } 
@@ -1183,8 +1179,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             let after_dty_ID = 0;
             if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
-                let tree = this._treeview.fancytree("getTree");
-                let node = tree.getNodeByKey(arg2);
+                let node = this._tree.getNodeByKey(arg2);
                 if(node) node.setActive();
                 after_dty_ID = arg2;
             }
@@ -1453,7 +1448,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     that._cachedRecordset.setRecord(rec_ID, fields); // update cached record
                     $Db.rst(that.options.rty_ID).setRecord(rec_ID, fields);
                     
-                    let tree = that._treeview.fancytree("getTree"); // get fancytree to update
                     let parentnode;
                     // get parentnode for new leaf
                     if(after_dty_ID>0){
@@ -2305,12 +2299,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _saveRtStructureTree: function(){
         
             let recset = this._cachedRecordset;
-            let tree = this._treeview.fancytree("getTree");
             let order = 0;
             let that = this;
             let dtyIDs = [];
             let orders = [];
-            tree.visit(function(node){
+            this._tree.visit(function(node){
             
                 
                 
@@ -2545,9 +2538,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
 //2. update $Db
         //3. refresh treeview
-        let tree = this._treeview.fancytree("getTree");
-        if(tree){
-            let node = tree.getNodeByKey( recID );
+        if(this._tree){
+            let node = this._tree.getNodeByKey( recID );
             if(node) {
                 let sType = $Db.dty(recID, 'dty_Type');
                 let isSep = (sType=='separator');
@@ -2610,8 +2602,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
             if(after_dtid>0){
                 this._lockDefaultEdit = true;
-                let tree = this._treeview.fancytree("getTree");
-                let node = tree.getNodeByKey(after_dtid);
+                let node = this._tree.getNodeByKey(after_dtid);
                 if(node) node.setActive();
             }
             
@@ -2685,7 +2676,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     _removeField: function(recID){
         
-        let tree = this._treeview.fancytree("getTree");
         let node = null;
         if(recID>0){
             node = this._tree.getNodeByKey(String(recID));
@@ -2723,8 +2713,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         this._super(recID);
         
-        let tree = this._treeview.fancytree("getTree");
-        let node = tree.getNodeByKey(String(recID));
+        let node = this._tree.getNodeByKey(String(recID));
         let isfolder = false;
         if(node){
             if(node.folder){
@@ -2753,9 +2742,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //
     editField: function(recID){
-        let tree = this._treeview.fancytree("getTree");
-        tree.getRootNode().setActive();
-        let node = tree.getNodeByKey(String(recID));
+        this._tree.getRootNode().setActive();
+        let node = this._tree.getNodeByKey(String(recID));
         node.setActive();
     },
     

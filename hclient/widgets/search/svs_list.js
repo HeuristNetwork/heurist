@@ -1508,9 +1508,9 @@ $.widget( "heurist.svs_list", {
 
                     // Custom event handler that is triggered by keydown-handler and
                     // context menu:
-                    let refNode, moveMode,
-                        wtree = $(tree).fancytree("getTree"),
-                        node = wtree.getActiveNode();
+                    let refNode, moveMode;
+                    let wtree = $.ui.fancytree.getTree(tree);
+                    let node = wtree.getActiveNode();
 
                     switch( data.cmd ) {
                         case "moveUp":
@@ -1757,8 +1757,8 @@ $.widget( "heurist.svs_list", {
                 select: function(event, ui) {
                     
                     if(ui.cmd=='copycb'){
-                            let wtree = $(tree).fancytree("getTree"),
-                                node = wtree.getActiveNode();
+                            let wtree = $.ui.fancytree.getTree(tree);
+                            let node = wtree.getActiveNode();
                             that._getFilterString(node.key);
                     }else{
                         let that2 = this;
