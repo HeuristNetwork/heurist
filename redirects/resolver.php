@@ -185,7 +185,7 @@ $requestUri:
        array_unshift($requestUri, 'heurist');//not used
     }
 
-    $error_msg = null; //System::dbname_check($requestUri[1]);
+    $error_msg = null; //mysql__check_dbname($requestUri[1]);
     if($requestUri[1]=='' || preg_match('/[^A-Za-z0-9_\$]/', $requestUri[1])){
         $error_msg = 'Database parameter is wrong';
     }
@@ -207,7 +207,7 @@ $requestUri:
         $params['db'] = $database;
 
         require_once '../hserv/utilities/uSystem.php';
-        $host_params = USystem::getHostParams();
+        $host_params = hserv\utilities\USystem::getHostParams();
 
         if($action=='web' || $action=='website'){
 
@@ -415,10 +415,10 @@ if ($database_id>0) {
     include_once dirname(__FILE__).'/../hserv/utilities/dbRegis.php';
 
     if(!isset($system)){
-        $system = new System();//to keep error
+        $system = new hserv\System();//to keep error
     }
 
-    $database_url = DbRegis::registrationGet(array('dbID'=>$database_id));
+    $database_url = hserv\utilities\DbRegis::registrationGet(array('dbID'=>$database_id));
     if(!$database_url){
         $err = $system->getError();
         $error_msg = @$err['message'];

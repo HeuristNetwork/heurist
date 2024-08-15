@@ -25,12 +25,12 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 $rv = array();
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     $response = $system->getError();

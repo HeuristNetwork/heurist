@@ -1,4 +1,8 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
     /**
     * db access to defTerms table
@@ -19,11 +23,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
 
 class DbDefTerms extends DbEntityBase
 {

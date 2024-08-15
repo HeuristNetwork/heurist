@@ -21,8 +21,8 @@
 */
 
 header('Content-type: text/javascript');
-require_once dirname(__FILE__).'/../../hserv/System.php';
-$system = new System();
+require_once dirname(__FILE__).'/../../autoload.php';
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
 }

@@ -1,4 +1,9 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\entity\DbDefTerms;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
     /**
     * db access to sysUGrpps table
@@ -20,10 +25,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-require_once dirname(__FILE__).'/dbDefTerms.php';
 
 class DbDefDetailTypes extends DbEntityBase
 {

@@ -25,7 +25,7 @@
 *
 * getWebImageCache - get scaled down jpeg version of a image, to reduce load times
 *
-* @todo move to uFile.php
+* @todo move to UFile.php
 * resolveFilePath
 * downloadFile
 *
@@ -48,12 +48,11 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\entity\DbRecUploadedFiles;
+use hserv\utilities\USanitize;
+use hserv\utilities\UImage;
 
-require_once dirname(__FILE__).'/../../System.php';
 require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/../../utilities/uFile.php';
-require_once dirname(__FILE__).'/../../utilities/uImage.php';
-require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
 
 /**
 * @todo - make it as method of DbRecUploadedFiles
@@ -403,7 +402,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
 }
 
 /**
-* @TODO there are places with the same code - 1) use this function everywhere 2) move to uFile.php
+* @TODO there are places with the same code - 1) use this function everywhere 2) move to UFile.php
 *
 * resolve path relatively db root or file_uploads
 *

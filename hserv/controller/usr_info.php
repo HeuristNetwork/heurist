@@ -1,5 +1,4 @@
 <?php
-
     /**
     * Application interface. See HSystemMgr in hapi.js
     *    user/groups information/credentials
@@ -22,32 +21,27 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    //use hserv\utilities as utils;
+    use hserv\utilities\USanitize;
+    //use hserv\utilities\Temporal;
+    
+    require_once dirname(__FILE__).'/../../autoload.php';
+    
     require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
     require_once dirname(__FILE__).'/../structure/dbsSavedSearches.php';
-    require_once dirname(__FILE__).'/../utilities/uFile.php';
-    require_once dirname(__FILE__).'/../utilities/uImage.php';
-    require_once dirname(__FILE__).'/../utilities/uSanitize.php';
-
 
     $response = array();//"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
-
+    $req_params = USanitize::sanitizeInputArray();
+    
     $action = @$req_params['a'];//$system->getError();
 
-    $system = new System();
+    $system = new hserv\System();
     $dbname = @$req_params['db'];
-    $error = System::dbname_check($dbname);
+    $error = mysql__check_dbname($dbname);
 
-    $dbname = preg_replace(REGEX_ALPHANUM, "", $dbname);//for snyk
-
-    if($error){
+    if($error!=null){
         $system->addError(HEURIST_INVALID_REQUEST, $error);
         $res = false;
 
@@ -597,7 +591,7 @@
                     $sp = $req_params['saml_entity'];
 
                     //check saml session
-                    require_once dirname(__FILE__).'/../utilities/uSaml.php';
+                    require_once dirname(__FILE__).'/../utilities/USaml.php';
 
                     //if currently authenticated - take username
                     $username = samlLogin($system, $sp, $system->dbname(), false);

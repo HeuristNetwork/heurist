@@ -907,7 +907,7 @@ function do_fix_dupe()
         }
 
         $master_pers_record['bkm_Rating'] = max($master_pers_record['bkm_Rating'],$delete_dup_pers_record['bkm_Rating']);
-        if (!$master_pers_record['bkm_ZoteroID']{) $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];}
+        if (!$master_pers_record['bkm_ZoteroID']){ $master_pers_record['bkm_ZoteroID']= $delete_dup_pers_record['bkm_ZoteroID'];}
 
         $master_pers_record['bkm_ID'] = $master_bkm_ID;
         mysql__insertupdate($mysqli, 'usrBookmarks', 'bkm_', $master_pers_record);

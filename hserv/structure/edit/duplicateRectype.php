@@ -22,7 +22,7 @@ require_once dirname(__FILE__).'/../../System.php';
 
 $res = false;
 
-$system = new System();
+$system = new hserv\System();
 if( $system->init(@$_REQUEST['db']) ){
 
     if(!$system->is_admin()){

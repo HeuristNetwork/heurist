@@ -22,11 +22,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
-$system = new System();
+$system = new hserv\System();
 $inverses = null;
 
 if(!$system->init(@$_REQUEST['db'])){

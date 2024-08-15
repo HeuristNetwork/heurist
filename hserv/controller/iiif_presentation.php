@@ -24,9 +24,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-    require_once dirname(__FILE__).'/../System.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../records/export/recordsExport.php';
 
     $response = array();
@@ -35,7 +33,7 @@
 
     if(!isset($system) || $system==null){
 
-        $system = new System();
+        $system = new hserv\System();
 
         if( ! $system->init(@$params['db']) ){
             //get error and response

@@ -39,6 +39,7 @@
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
     */
+use hserv\utilities\USanitize;
 
 class DbsTerms
 {

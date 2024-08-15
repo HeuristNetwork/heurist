@@ -91,16 +91,15 @@ if (@$argv) {
     */
 }
 
-require_once dirname(__FILE__).'/../../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+use hserv\entity\DbUsrReminders;
+
+require_once dirname(__FILE__).'/../../../autoload.php';
+
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../../../hserv/entity/dbUsrReminders.php';
 require_once dirname(__FILE__).'/../../../admin/verification/checkRecURL.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }

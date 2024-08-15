@@ -21,13 +21,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/dbaccess/utils_db.php';
+use hserv\utilities\USanitize;
 
-$system = new System();
+require_once dirname(__FILE__).'/../../autoload.php';
 
-$sysadmin_pwd = System::getAdminPwd();
+$system = new hserv\System();
+
+$sysadmin_pwd = USanitize::getAdminPwd();
 
 if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
     include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';

@@ -18,19 +18,20 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
+use hserv\structure\ConceptCode;
 
 if(!array_key_exists('rectype_ids', $_REQUEST)){
     require_once dirname(__FILE__).'/../../hserv/controller/record_output.php';// attempt to export actual records
     exit;
 }
 
+require_once dirname(__FILE__).'/../../autoload.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+
+
 if(!defined('PDIR')){
-    $system = new System();
+    $system = new hserv\System();
     if( !$system->init(filter_var(@$_REQUEST['db'])) ){
         die("Cannot connect to database");
     }

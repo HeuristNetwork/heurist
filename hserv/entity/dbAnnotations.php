@@ -1,4 +1,7 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\entity\DbRecUploadedFiles;
 
     /**
     * dbAnnotations
@@ -20,8 +23,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
 require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 class DbAnnotations extends DbEntityBase
@@ -213,7 +214,7 @@ class DbAnnotations extends DbEntityBase
         if(!defined('RT_MAP_ANNOTATION')){
 
             $isOK = false;
-            $importDef = new DbsImport( $this->system );
+            $importDef = new \DbsImport( $this->system );
             if($importDef->doPrepare(  array(
             'defType'=>'rectype',
             'databaseID'=>2,

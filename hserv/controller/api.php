@@ -147,10 +147,11 @@ if (@$requestUri[3]=='iiif') {
 
 
 }elseif (@$entities[@$requestUri[3]]=='System') {
+    //login and logout actions
 
-    include_once '../System.php';
+    include_once '../autoload.php';
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init($_REQUEST['db']) ){
         //get error and response
         $system->error_exit_api();//exit from script

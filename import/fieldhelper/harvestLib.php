@@ -1,4 +1,5 @@
 <?php
+use hserv\utilities\USanitize;
 
     $rep_counter = null;
     $rep_issues = null;

@@ -87,8 +87,12 @@
         import_records
 
     */
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/../entity/dbSysImportFiles.php';
+    
+use hserv\utilities\USanitize;
+use hserv\entity\DbSysImportFiles;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+    
 require_once dirname(__FILE__).'/../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
 
@@ -97,15 +101,12 @@ require_once dirname(__FILE__).'/../records/import/importSession.php';//work wor
 require_once dirname(__FILE__).'/../records/import/importAction.php';//work with import table: matching, assign id, performs validation and import
 require_once dirname(__FILE__).'/../records/import/importHeurist.php';//work with Heurist exchange format
 
-require_once dirname(__FILE__).'/../utilities/uArchive.php';
-
-
 set_time_limit(0);
 
 $response = null;
 $need_compress = false;
 
-$system = new System();
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     //get error and response

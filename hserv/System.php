@@ -1,4 +1,9 @@
 <?php
+namespace hserv;
+use hserv\structure\ConceptCode;
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
+
 /**
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -17,18 +22,9 @@
 */
 
 //declare(strict_types=1);
+//require_once dirname(__FILE__).'/../autoload.php';
 
-require_once dirname(__FILE__).'/../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/consts.php';
-
-
-require_once dirname(__FILE__).'/dbaccess/utils_db.php';
-require_once dirname(__FILE__).'/utilities/uFile.php';
-require_once dirname(__FILE__).'/utilities/uSanitize.php';
-require_once dirname(__FILE__).'/utilities/uMail.php';
-require_once dirname(__FILE__).'/utilities/uLocale.php';
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/structure/conceptCode.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
 
 set_error_handler('boot_error_handler');
@@ -658,8 +654,7 @@ class System {
         }
 
         list($database_name_full, $dbname) = mysql__get_names($dbname);
-        $error = System::dbname_check($dbname);
-        if($error!=null || !$dbname) {return false;}
+        if(!$dbname || mysql__check_dbname($dbname)!=null) {return false;}
 
         $upload_root = $this->getFileStoreRootFolder();
 
@@ -733,7 +728,7 @@ class System {
             }
         }//for
         
-        if(count($warnings)>0){
+        if(!empty($warnings)){
             $this->addError(HEURIST_SYSTEM_FATAL, implode('',$warnings));
             return false;
         }
@@ -838,38 +833,22 @@ class System {
     }
 
     /**
-    * returns error message if $db is not valid
-    *
-    * @param mixed $db
-    */
-    public static function dbname_check($db){
-
-        $error = mysql__check_dbname( $db );
-
-        if(is_array($error)){
-            return $error[1];
-        }else{
-            return null;
-        }
-    }
-
-    /**
     * set dbname and dbname_full properties
     *
     * @param mixed $db
     */
     public function set_dbname_full($db, $dbrequired=true){
 
-        $db_check_result = mysql__check_dbname($db);
+        $error = mysql__check_dbname($db);
 
-        if($db_check_result===true && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
+        if($error==null && preg_match('/[A-Za-z0-9_\$]/', $db)){ //additional validatate database name for sonarcloud
             list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
         }else{
             $this->dbname = null;
             $this->dbname_full = null;
 
             if($dbrequired){
-                $this->addErrorArr($db_check_result);
+                $this->addErrorArr($error);
                 $this->mysqli = null;
                 return false;
             }
@@ -985,7 +964,7 @@ class System {
     //
     private function _treatSeriousError($status, $message, $sysmsg, $title) {
         
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $now = $this->getNow();
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
             //3. write error into current error log
@@ -1868,7 +1847,7 @@ class System {
             $user_id = $this->get_user_id();
         }
 
-        $now = new DateTime();
+        $now = new \DateTime();
 
         $user_agent = USystem::getUserAgent();
 
@@ -2106,19 +2085,6 @@ class System {
     }
 
     //
-    //
-    //
-    public static function getAdminPwd($name='pwd'){
-        if(@$_REQUEST[$name]){
-            $sysadmin_pwd  = $_REQUEST[$name];
-            unset($_REQUEST[$name]);
-        }else{
-            $sysadmin_pwd = null;
-        }
-        return $sysadmin_pwd;
-    }
-
-    //
     // returns true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)
@@ -2179,7 +2145,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
     //
     private function _executeScriptOncePerDay(){
 
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $now = $this->getNow();
             $flag_file = HEURIST_FILESTORE_ROOT.'flag_'.$now->format('Y-m-d');
 
             if(file_exists($flag_file)){
@@ -2189,8 +2155,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
                 //remove flag files for previous days
                 for($i=1;$i<10;$i++){
-                    $d = new DateTime('now', new DateTimeZone('UTC'));
-                    $yesterday = $d->sub(new DateInterval('P'.sprintf('%02d', $i).'D'));
+                    $d = $this->getNow();
+                    $yesterday = $d->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
                     $arc_flagfile = HEURIST_FILESTORE_ROOT.'flag_'.$yesterday->format('Y-m-d');
                     //if yesterday log file exists
                     if(file_exists($arc_flagfile)){
@@ -2204,13 +2170,17 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
                 $this->_getDeeplLanguages();// Get list of allowed target languages from Deepl API
             }
     }
+    
+    private function getNow(){
+        return new \DateTime('now', new \DateTimeZone('UTC'));    
+    }
 
     //
     //
     //
     private function _sendDailyErrorReport(){
 
-            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $now = $this->getNow();
             $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
             $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
             $archiveFolder = $root_folder."AAA_LOGS/";
@@ -2220,8 +2190,8 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
 
             //1. check if log files for previous 30 days exist
             for($i=1;$i<31;$i++){
-                $now = new DateTime('now', new DateTimeZone('UTC'));
-                $yesterday = $now->sub(new DateInterval('P'.sprintf('%02d', $i).'D'));
+                $now = $this->getNow();
+                $yesterday = $now->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
                 $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
                 //if yesterday log file exists
                 if(file_exists($root_folder.$arc_logfile)){

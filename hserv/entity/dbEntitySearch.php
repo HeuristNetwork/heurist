@@ -1,4 +1,7 @@
 <?php
+namespace hserv\entity;
+
+require_once dirname(__FILE__).'/../System.php';
 
     /**
     *
@@ -19,22 +22,29 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-
 class DbEntitySearch
 {
     private $system;
 
-    private $data = array();//assigned in validate params
+    private $data = array();//request - assigned in validate params
 
+    //name of primary key field from $config  by dty_Role="primary"
+    private $primaryField;
+    
+    private $whereConditions;
+    
     //data types: ids, int, float, date, bool, enum
     //structure
-    private $fields = array();
+    private $fields = array(); //fields from configuration
 
-    public function __construct( $system, $fields ) {
+    private $config = array(); //configuration
+    
+    
+    public function __construct( $system, $config, $fields) {
        $this->system = $system;
        $this->fields = $fields;
+       $this->config = $config;
+       $this->whereConditions = array();
     }
 
     //
@@ -144,6 +154,11 @@ class DbEntitySearch
         //loop for config
         foreach($this->fields as $fieldname=>$field_config){
             $value = @$this->data[$fieldname];
+            
+            $data_role = @$field_config['dty_Role'];
+            if($data_role=='primary'){
+                $this->primaryField = $fieldname;
+            }
 
             if($value!=null){
 
@@ -155,6 +170,7 @@ class DbEntitySearch
                 if($value=='NULL' || $value=='-NULL'){
                     $res = true;
                 }elseif($is_ids=='ids'){
+                    
                     $res = $this->_validateIds($fieldname, $data_type);//, 'user/group IDs');
 
                 }elseif($data_type == 'enum' && !$is_ids){
@@ -195,6 +211,59 @@ class DbEntitySearch
         return $val;
     }
 
+    
+    public function addPredicate($fieldname, $is_ids=false) {
+        
+        $pred = $this->getPredicate($fieldname, $is_ids);
+        if($pred!=null) {array_push($this->whereConditions, $pred);}
+        
+    }
+    
+    public function setSelFields($fields){
+        if(!is_array(@$this->data['details'])){
+            $this->data['details'] = $fields;
+        }
+    }
+    
+    
+    public function composeAndExecute($orderBy){
+        
+        if(!is_array($this->data['details'])){ //specific list of fields
+            $this->data['details'] = explode(',', $this->data['details']);
+        }
+        
+        //ID field is mandatory and MUST be first in the list
+        $idx = array_search($this->primaryField, $this->data['details']);
+        if($idx>0){ //remove from list if not on first place
+            unset($this->data['details'][$idx]);
+            $idx = false;
+        }
+        if($idx===false){ 
+            array_unshift($this->data['details'], $this->primaryField); //insert first
+        }
+        $is_ids_only = (count($this->data['details'])==1);
+
+        //compose query
+        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        .' FROM '.$this->config['tableName'];
+
+        if(count($this->whereConditions)>0){
+            $query = $query.' WHERE '.implode(' AND ',$this->whereConditions);
+        }
+         
+        if($orderBy!=null){
+            $query = $query.' ORDER BY '.$orderBy;   
+        }
+         
+        $query = $query.' '.$this->getLimit().$this->getOffset();
+
+        $res = $this->execute($query, $is_ids_only);
+        return $res;
+        
+        
+    }
+    
+    
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
     //
@@ -400,25 +469,28 @@ class DbEntitySearch
     //
     // $calculatedFields - is function that returns array of fieldnames or calculate and adds values of this field to result row
     //
-    public function execute($query, $is_ids_only, $entityName, $calculatedFields=null, $multiLangs=null){
+    public function execute($query, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
 
         $mysqli = $this->system->get_mysqli();
-
+        
         $res = $mysqli->query($query);
         if (!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
-        }else{
+        }
 
-            $fres = $mysqli->query('select found_rows()');
-            if (!$fres)     {
-                $this->system->addError(HEURIST_DB_ERROR, 'Search error (retrieving number of records)', $mysqli->error);
-                return false;
-            }else{
-
-                $total_count_rows = $fres->fetch_row();
-                $total_count_rows = $total_count_rows[0];
-                $fres->close();
+        $fres = $mysqli->query('select found_rows()');
+        if (!$fres)     {
+            $this->system->addError(HEURIST_DB_ERROR, 'Search error (retrieving number of records)', $mysqli->error);
+            return false;
+        }
+        $total_count_rows = $fres->fetch_row();
+        $total_count_rows = $total_count_rows[0];
+        $fres->close();
+        
+        if($entityName==null){
+            $entityName = $this->config['entityName'];
+        }
 
                 if($is_ids_only){ //------------------------  LOAD and RETURN only IDS
 
@@ -528,10 +600,7 @@ class DbEntitySearch
                     }
 
                 }//$is_ids_only
-            }
-
-        }
-
+            
         return $response;
     }
 

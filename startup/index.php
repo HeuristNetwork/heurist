@@ -19,11 +19,11 @@
 */
 if (!defined('PDIR')){
     define('PDIR','../');
-    require_once dirname(__FILE__).'/../hserv/System.php';
+    require_once dirname(__FILE__).'/../autoload.php';
 }
 
 // init main system class
-//$system = new System();
+//$system = new hserv\System();
 //$system->defineConstants();
 ?>
 <!DOCTYPE html>

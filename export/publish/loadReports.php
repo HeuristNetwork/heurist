@@ -2,7 +2,7 @@
 
 /**
 *
-* loadReports.php : load the particular report or list of reports
+* loadReports.php : load the particular smarty report or list of reports
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -21,10 +21,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     $system->error_exit;
 }

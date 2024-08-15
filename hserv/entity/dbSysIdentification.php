@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to sysIdentification table
@@ -21,7 +23,6 @@
     */
 
 require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
 
 
 class DbSysIdentification extends DbEntityBase

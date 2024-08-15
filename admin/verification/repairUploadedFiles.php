@@ -24,20 +24,19 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-require_once dirname(__FILE__).'/../../hserv/System.php';
 
-header('Content-type: text/javascript');
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
+header(CTYPE_JSON);
 
 $rv = array();
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 if(!$system->init(@$req_params['db'])){
     $response = $system->getError();

@@ -26,6 +26,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+use hserv\structure\ConceptCode;
 
     function updateDatabseTo_v1_3_12($system, $dbname=null){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1

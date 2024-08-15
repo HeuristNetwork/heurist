@@ -1,4 +1,8 @@
 <?php
+use hserv\utilities\DbUtils;
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
+
 //@TODO convert to class
 
     /**
@@ -110,7 +114,7 @@
             list($database_name_full, $database_name) = mysql__get_names( $dbname );
 
             $res = mysql__check_dbname($dbname);
-            if($res===true){
+            if($res==null){
                 $success = $mysqli->select_db($database_name_full);
                 if(!$success){
                     $db_exists = mysql__select_value($mysqli, "SHOW DATABASES LIKE '$database_name_full'");
@@ -124,7 +128,7 @@
                     }
                 }
             }else{
-                return $res;
+                return array(HEURIST_INVALID_REQUEST, $res);
             }
 
             //$mysqli->query('SET CHARACTER SET utf8mb4');//utf8 is utf8mb3 by default
@@ -140,7 +144,7 @@
     //
     function mysql__check_dbname($db_name){
 
-        $res = true;
+        $res = null;
 
         if($db_name==null || trim($db_name)==''){
             $res = 'Database parameter not defined';
@@ -148,10 +152,6 @@
             $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';
         }elseif(strlen($db_name)>64){
             $res = 'Database name '.htmlspecialchars($db_name).' is too long. Max 64 characters allowed';
-        }
-
-        if($res!==true){
-            $res = array(HEURIST_INVALID_REQUEST, $res);
         }
 
         return $res;
@@ -165,7 +165,7 @@
         $res = mysql__check_dbname($db_name);
 
         // Avoid illegal chars in db
-        if ($res===true) {
+        if ($res==null) {
             // Create database
             // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
             // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
@@ -183,6 +183,8 @@
                             .htmlspecialchars($db_name, ENT_QUOTES, 'UTF-8')
                             .' SQL error: '.$mysqli->error);
             }
+        }else{
+            $res = array(HEURIST_INVALID_REQUEST, $res);
         }
         return $res;
     }
@@ -228,7 +230,7 @@
 
         if($starts_with!=null)
         {
-            if(mysql__check_dbname($starts_with)===true
+            if(mysql__check_dbname($starts_with)==null
               && preg_match('/[A-Za-z0-9_\$]/', $starts_with)){
 
                 $where = 'hdb_'.$starts_with.'%';

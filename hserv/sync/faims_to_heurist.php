@@ -26,7 +26,7 @@ require_once dirname(__FILE__).'/../../records/edit/recordModify.php';
 //@todo HARDCODED id of OriginalID
 $dt_SourceRecordID = 36;
 
-$system = new System();
+$system = new hserv\System();
 
 if(! $system->init(@$_REQUEST['db'], true) ){
     //@todo - redirect to error page

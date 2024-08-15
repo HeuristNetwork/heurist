@@ -24,16 +24,14 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-
+use hserv\utilities\USanitize;
 
 // Include Composer autoloader if not already done.
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';
 
-require_once dirname(__FILE__).'/../../System.php';
 require_once dirname(__FILE__).'/recordModify.php';
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
-//require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
 define('DEBUG_RUN', false);
 

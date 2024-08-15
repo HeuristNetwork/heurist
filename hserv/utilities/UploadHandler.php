@@ -1,4 +1,9 @@
 <?php
+namespace hserv\utilities;
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+use hserv\utilities\UImage;
+
 /*
  * jQuery File Upload Plugin PHP Class
  * https://github.com/blueimp/jQuery-File-Upload
@@ -68,14 +73,14 @@ class UploadHandler
 
         $heurist_db = @$options['database'];
 
-        $error = System::dbname_check($heurist_db);
-        if($error){
+        $error = mysql__check_dbname($heurist_db);
+        if($error!=null){
             //database not defined
             $this->header('HTTP/1.1 403 Forbidden');
             return;
         }
 
-        $system = new System();
+        $system = new hserv\System();
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
             //not logged in

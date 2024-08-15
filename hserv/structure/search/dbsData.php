@@ -58,8 +58,9 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\utilities\USanitize;
+    
     require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
-    require_once dirname(__FILE__).'/../../utilities/uMail.php';
     require_once dirname(__FILE__).'/../../../viewers/smarty/reportActions.php';
 
 

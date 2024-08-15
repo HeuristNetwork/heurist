@@ -36,12 +36,13 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    use hserv\utilities\USanitize;
+    use hserv\utilities\UArchive;
+    
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-    require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../utilities/geo/mapSimplify.php';
-    require_once dirname(__FILE__).'/../utilities/uArchive.php';
     //require_once dirname(__FILE__).'/../../vendor/autoload.php';//for ShapeFile
 
 // Register autoloader
@@ -55,7 +56,7 @@ use Shapefile\ShapefileReader;
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     $params = $_REQUEST;
     $is_api = (@$_REQUEST['api']!=0);

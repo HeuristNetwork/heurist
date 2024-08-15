@@ -18,15 +18,16 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+use hserv\utilities\USanitize;
+
 define('PDIR','../../');//need for proper path to js and css
 define('MANAGER_REQUIRED', 1);
 
 require_once 'initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uMail.php';
 
 // POST request
 if(isset($_POST['data'])) {
-    $params = filter_input_array(INPUT_POST);
+    $params = USanitize::sanitizeInputArray();
 
     $data = json_decode($params['data']);
     $response = "";

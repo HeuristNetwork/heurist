@@ -23,7 +23,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTypeID=d.rty_ID";
@@ -386,7 +386,7 @@ function getMapDocuments($system, $recId) {
 }
 
 // Initialize a System object that uses the requested database
-$system = new System();
+$system = new hserv\System();
 
 if( $system->init(@$_REQUEST['db']) ){
 

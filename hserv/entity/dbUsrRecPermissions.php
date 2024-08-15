@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to usrRecPermissions table
@@ -21,8 +23,6 @@
     */
 
 require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 
 
 class DbUsrRecPermissions extends DbEntityBase

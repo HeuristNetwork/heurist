@@ -18,14 +18,15 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+    require_once dirname(__FILE__).'/autoload.php';
 
 $isLocalHost = ($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1');
 
 //validate that instance is ok and database is accessible
 if( @$_REQUEST['isalive']==1){
 
-    require_once dirname(__FILE__).'/hserv/System.php';
-    $system = new System();
+    //require_once dirname(__FILE__).'/hserv/System.php';
+    $system = new hserv\System();
     $is_inited = $system->init(@$_REQUEST['db'], true, false);
     if($is_inited){
         $mysqli = $system->get_mysqli();
@@ -70,7 +71,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
 
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            require_once dirname(__FILE__).'/hserv/System.php';
+            //require_once dirname(__FILE__).'/hserv/System.php';
             define('PDIR', HEURIST_INDEX_BASE_URL);
         }else{
             if(!defined('PDIR')) {define('PDIR','');}
@@ -153,8 +154,8 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $locale = '';
     }
 
-    $asset = 'context_help/'.$locale.urlencode($name);
-    if(!file_exists('context_help/'.$locale.$name)){
+    $asset = 'context_help/'.$locale.'/'.urlencode($name);
+    if(!file_exists('context_help/'.$locale.'/'.$name)){
         //without locale - default is English
         $asset = 'context_help/'.urlencode($name);
     }

@@ -27,6 +27,9 @@
 * parseAndValidate - read file, remove spaces, convert dates, validate identifies/integers, find memo and multivalues
 *
 */
+use hserv\utilities\USanitize;
+use hserv\utilities\UArchive;
+
 class ImportParser {
 
     private static $system = null;

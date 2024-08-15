@@ -74,17 +74,17 @@ if (@$argv) {
 }
 
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 
 if(!$is_shell){
-    $sysadmin_pwd = System::getAdminPwd();
+    $sysadmin_pwd = USanitize::getAdminPwd();
 
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         $response = $system->getError();

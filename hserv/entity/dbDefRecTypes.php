@@ -1,4 +1,9 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../records/edit/recordTitleMask.php';
 
     /**
     * db access to defRecTypes table
@@ -19,12 +24,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
-
 class DbDefRecTypes extends DbEntityBase
 {
     private $where_for_count = null;
@@ -127,7 +126,7 @@ class DbDefRecTypes extends DbEntityBase
                         $mask_concept_codes = $row[$idx];
                         array_push($row, $mask_concept_codes);//keep
                         //convert to human readable
-                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, ERROR_REP_SILENT);
+                        $row[$idx] = \TitleMask::execute($mask_concept_codes, $row[0], 2, null, ERROR_REP_SILENT);
                     }else{
                         array_push($row, '');
                     }
@@ -447,7 +446,7 @@ class DbDefRecTypes extends DbEntityBase
                     $mask = @$record['rty_TitleMask'];
                     if($mask){
                             $parameters = array("");
-                            $val = TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);//convert from human to coded
+                            $val = \TitleMask::execute($mask, $rty_ID, 1, null, ERROR_REP_SILENT);//convert from human to coded
                             $parameters = array('s', $val);
 
                             $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";

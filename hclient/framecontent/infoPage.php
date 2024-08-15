@@ -17,12 +17,14 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
+
 $is_inlcuded = false;
 
 if(!defined('PDIR')) {
     $is_inlcuded = true;
     define('PDIR','../../');
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 }
 
 //variable is_error can be defined as global

@@ -26,24 +26,23 @@ Restore
 */
 set_time_limit(0);
 
-require_once dirname(__FILE__).'/../System.php';
+use hserv\utilities\DbUtils;
+use hserv\utilities\DbVerify;
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
-require_once dirname(__FILE__).'/../utilities/dbUtils.php';
-require_once dirname(__FILE__).'/../utilities/dbVerify.php';
 require_once dirname(__FILE__).'/../../admin/setup/dboperations/welcomeEmail.php';
 
-$system = new System();
+$system = new hserv\System();
 
 //sysadmin protection - reset from request to avoid exposure in possible error/log messages
-$create_pwd = System::getAdminPwd('create_pwd');
-$challenge_pwd = System::getAdminPwd('chpwd');
-$sysadmin_pwd = System::getAdminPwd('pwd');
+$create_pwd = USanitize::getAdminPwd('create_pwd');
+$challenge_pwd = USanitize::getAdminPwd('chpwd');
+$sysadmin_pwd = USanitize::getAdminPwd('pwd');
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $action = @$req_params['a'];
 $locale = @$req_params['locale'];

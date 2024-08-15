@@ -65,8 +65,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             msg = response;
         }else{
             let request_code = null;
-            if(window.hWin.HEURIST4.util.isnull(response) || 
-               window.hWin.HEURIST4.util.isempty(response.message) || response.message.trim().toLowerCase() == 'error'){
+            if(window.hWin.HEURIST4.util.isempty(response?.message) || response.message.trim().toLowerCase() == 'error'){
 
                 msg = 'Error_Empty_Message';
                 if(response){

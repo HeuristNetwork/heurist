@@ -41,22 +41,19 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once dirname(__FILE__).'/../System.php';
+
+use hserv\utilities\USanitize;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $db = @$req_params['db'];
 
-$error = System::dbname_check($db);
+if(mysql__check_dbname($db)==null){
 
-if(!$error){
-
-    $system = new System();//without connection
+    $system = new hserv\System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
     if($fileid!=null){
 
