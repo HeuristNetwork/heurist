@@ -2552,7 +2552,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 counts = [0,0,0,0,0];
                 //reccount - total records in import table
                 //uniqcnt - unique values per column
-                let idx = _getFieldIndexForIdentifier(idx); 
+                idx = _getFieldIndexForIdentifier(idx); 
                 if(idx>=0){
                     //id column already exists in import table
                     counts[2] = counts[3] = imp_session['uniqcnt'][idx];
@@ -2615,7 +2615,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
                 
-                    let response = response.data;
+                        response = response.data;
                     
                         $("#current_row").html(response[0]);
 
