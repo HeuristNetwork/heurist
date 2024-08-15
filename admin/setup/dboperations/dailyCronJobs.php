@@ -170,7 +170,7 @@ foreach ($databases as $idx=>$db_name){
 
     $res = mysql__usedatabase($mysqli, $db_name);
     if($res!==true){
-        $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;
+        $mysql_gone_away_error = $mysqli && $mysqli->errno==2006;
         if($mysql_gone_away_error){
             $last_processed_database = $db_name;
             break;
