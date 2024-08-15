@@ -11,7 +11,7 @@ spl_autoload_register(function ($class) {
     if (!is_readable($filepath)) {
         return;
     }
-    require $filepath;
+    require_once $filepath;
 });
 
 require_once dirname(__FILE__).'../configIni.php';// read in the configuration file

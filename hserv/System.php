@@ -1252,7 +1252,7 @@ class System {
 
             recreateRecLinks( $this, false );//see utils_db
 
-        }catch( Exception $e ){
+        }catch( \Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
             $res = false;
         }
