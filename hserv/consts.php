@@ -198,7 +198,7 @@ define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
 define('CONTENT_LENGTH', 'Content-Length: ');
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
 
-
+global $glb_lang_codes;
 $glb_lang_codes = null;
 
 //common languages for translation database definitions (ISO639-2 codes)

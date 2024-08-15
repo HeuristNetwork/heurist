@@ -1434,7 +1434,7 @@ HEADER;
                 $res[0] = "Title mask is not defined";
             }else{
                 //get human readable
-                $res = TitleMask::execute($mask, $rty_ID, 2, null, ERROR_REP_MSG);
+                $res = \TitleMask::execute($mask, $rty_ID, 2, null, ERROR_REP_MSG);
             }
 
             if(is_array($res)){ //error
@@ -1757,11 +1757,11 @@ HEADER;
         $this->keep_autocommit = null;
         if($need_correct_long){
             if(method_exists('geoPHP','getAdapter')){
-                $wkt_adapter = geoPHP::getAdapter('wkt');
-                $geojson_adapter = geoPHP::getAdapter('json');
+                $wkt_adapter = \geoPHP::getAdapter('wkt');
+                $geojson_adapter = \geoPHP::getAdapter('json');
             }else{
-                $wkt_adapter = new WKT();
-                $geojson_adapter = new GeoJSON();
+                $wkt_adapter = new \WKT();
+                $geojson_adapter = new \GeoJSON();
             }
             $update_stmt = $mysqli->prepare('UPDATE recDetails SET dtl_Geo=ST_GeomFromText(?) WHERE dtl_ID=?');
             $this->keep_autocommit = mysql__begin_transaction($mysqli);
@@ -1809,7 +1809,7 @@ HEADER;
 
             try{
 
-                $geom = geoPHP::load($row['wkt'], 'wkt');
+                $geom = \geoPHP::load($row['wkt'], 'wkt');
                 if($geom!=null && !$geom->isEmpty()){ // Check that long (x) < 180 AND lat (y) < 90
 
                     $bbox = $geom->getBBox();
@@ -2208,7 +2208,7 @@ HEADER;
         $total_count = mysql__select_value($mysqli, 'SELECT COUNT(dtl_ID) FROM recDetails, defDetailTypes '
             .'WHERE dtl_DetailTypeID = dty_ID AND (dty_Type = "enum" or dty_Type = "relmarker")');
 
-        $dbterms = VerifyValue::getTerms();
+        $dbterms = \VerifyValue::getTerms();
 
         $this->keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -2235,7 +2235,7 @@ HEADER;
 
                     //verify value
                     if(trim($term_id) == ''
-                       ||  VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $term_id, $row['dty_ID'] ))
+                       ||  \VerifyValue::isValidTerm($row['dty_JsonTermIDTree'],null, $term_id, $row['dty_ID'] ))
                     {
                         continue;   //valid term
                     }
@@ -2252,7 +2252,7 @@ HEADER;
                     if($term_label){
                         $row['dtl_Value'] = $term_id.'&nbsp;'.$term_label;
 
-                        $suggested_term_id = VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $term_label);
+                        $suggested_term_id = \VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $term_label);
                         if($suggested_term_id>0){
 
                             if($fix_same_name_terms){
@@ -2440,7 +2440,7 @@ FIXMSG
                     if($row['new_value']==null && $row['is_ambig']===true){
 
                         //parse and validate value order 2 (mm/dd), don't add day if it is not defined
-                        $row['new_value'] = Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
+                        $row['new_value'] = \Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
                         if($row['new_value']==$date_val){ //nothing to correct - result is the same
 
                             if(strlen($date_val)>=8 && strpos($date_val,'-')==false){ // try automatic convert to ISO format
@@ -2465,7 +2465,7 @@ FIXMSG
                             continue;
                         }
                         if($row['new_value']!=null && $row['new_value']!=''){
-                            $row['is_ambig'] = Temporal::correctDMYorder($date_val, true);
+                            $row['is_ambig'] = \Temporal::correctDMYorder($date_val, true);
                             $autofix = ($row['is_ambig']===false);
                         }
                     }

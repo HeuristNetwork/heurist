@@ -35,6 +35,8 @@ if(!$system->has_access()){
 
 header(CTYPE_JSON);
 
+global $sys_usrReportSchedule_ColumnNames;
+
 $sys_usrReportSchedule_ColumnNames = array(
     "rps_ID"=>"i",
     "rps_Type"=>"s",

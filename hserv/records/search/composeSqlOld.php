@@ -38,6 +38,7 @@ define('SORT_ID', 'id');
 
 
 //defined in const.php define('DT_RELATION_TYPE', 6);
+global $mysqli, $currUserID, $sortType;
 
 $mysqli = null;
 $currUserID = 0;

@@ -52,6 +52,8 @@ require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.p
 require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
 require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';
 
+global $useNewTemporalFormatInRecDetails;
+global $recstructures, $detailtypes, $terms, $block_swf_email;
 
 $recstructures = array();
 $detailtypes   = array();

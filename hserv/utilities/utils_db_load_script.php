@@ -66,6 +66,8 @@ define ('TESTMODE', false);// Set to true to process the file without actually a
 //define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
+
+global $errorScriptExecution;
 $error = false;
 $errorScriptExecution = null;
 

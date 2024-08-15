@@ -35,6 +35,8 @@ use hserv\structure\ConceptCode;
 require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
 require_once dirname(__FILE__).'/../../records/edit/recordModify.php';//to delete temporary records
 
+global $rtyColumnNames, $rstColumnNames, $rcsColumnNames, $dtyColumnNames, $rtgColumnNames, $dtgColumnNames, $trmColumnNames;
+
 $rtyColumnNames = array(
     "rty_ID"=>"i",
     "rty_Name"=>"s",
@@ -172,6 +174,7 @@ $trmColumnNames = array(
     "trm_SemanticReferenceURL"=>"s",
     "trm_VocabularyGroupID"=>"i"
 );
+
 
 //
 // helper function

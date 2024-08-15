@@ -622,7 +622,7 @@ class DbUtils {
             if(file_exists($templateFileName) && filesize($templateFileName)>0){
 
                 //import definitions from template file
-                $idef = new ImportDefinitions();
+                $idef = new \ImportDefinitions();
                 $idef->initialize( $mysqli );
 
                 if(!$idef->doImport( $templateFileName )) {

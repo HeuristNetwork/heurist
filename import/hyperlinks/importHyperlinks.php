@@ -40,6 +40,8 @@ require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 
 
+global $linkno, $disambiguate_rec_ids, $notes, $mysqli;
+
 $nextmode = 'inputselect';
 $mysqli = $system->get_mysqli();
 

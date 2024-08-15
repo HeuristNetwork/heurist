@@ -201,6 +201,9 @@ select
 
 
 */
+global $mysqli,$wg_ids,$publicOnly,$currUserID,$is_admin,$params_global,$top_query;
+global $rty_id_relation,$dty_id_relation_type;
+
 $mysqli = null;
 $wg_ids = null; //groups current user is member
 $publicOnly = false;

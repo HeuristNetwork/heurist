@@ -54,6 +54,8 @@ use Shapefile\Shapefile;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileReader;
 
+global $is_api;
+
     $response = array();
 
     $system = new hserv\System();

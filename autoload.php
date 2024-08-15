@@ -22,4 +22,6 @@ require_once dirname(__FILE__).'/hserv/utilities/UFile.php';
 require_once dirname(__FILE__).'/hserv/utilities/UMail.php';
 require_once dirname(__FILE__).'/hserv/utilities/ULocale.php';
 
+global $system;
+global $glb_curl_error;
 ?>

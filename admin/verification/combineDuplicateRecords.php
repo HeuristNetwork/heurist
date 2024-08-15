@@ -41,6 +41,7 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordTitleMask.php';
 
+global $mysqli;
 $mysqli = $system->get_mysqli();
 
 $do_merge_details = false;

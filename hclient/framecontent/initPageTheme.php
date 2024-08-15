@@ -35,11 +35,13 @@ Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 */
 require_once dirname(__FILE__).'/../../autoload.php';
 
+global $ut;
+
 // arbitrary color scheme defined in script that includes this one
 // usage: websiteRecord.php takes color scheme from field of CMS_HOME record
 if(isset($site_colors) && $site_colors!=null){
 
-    $ut = json_decode($site_colors, true);
+$ut = json_decode($site_colors, true);
 
 }else{
 

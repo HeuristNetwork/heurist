@@ -53,7 +53,7 @@
 
 // Default values for arguments
 $is_shell =  false;
-$arg_no_action = true;
+global $arg_no_action = true;
 $need_email = true;
 $eol = "\n";
 $tabs = "\t\t";

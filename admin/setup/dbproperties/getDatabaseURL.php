@@ -42,7 +42,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $data = loadRemoteURLContentSpecial($reg_url);//get registered database URL
 
     if (!$data) {
-        global $glb_curl_error;
+        
         $error_code = (!empty($glb_curl_error)) ? $glb_curl_error : 'Error code: 500 Heurist Error';
 
         $error_msg = "Unable to connect Heurist Reference Index, possibly due to timeout or proxy setting<br>"

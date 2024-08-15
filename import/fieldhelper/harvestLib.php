@@ -1,9 +1,11 @@
 <?php
 use hserv\utilities\USanitize;
 
-    $rep_counter = null;
-    $rep_issues = null;
-    $reg_info = array('reg'=>array(),'nonreg'=>array());
+global $rep_counter, $rep_issues, $reg_info;
+  
+$rep_counter = null;
+$rep_issues = null;
+$reg_info = array('reg'=>array(),'nonreg'=>array());
 
 
 //

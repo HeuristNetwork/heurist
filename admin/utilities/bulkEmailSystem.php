@@ -465,7 +465,7 @@ class SystemEmailExt {
 
 	public function constructEmails() {
 
-		global $system, $mailRelayPwd;
+		global $system, $mailRelayPwd; //se in heuristConfigIni
 
 		$email_rtn = 0;
 		$user_cnt = 0;

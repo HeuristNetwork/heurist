@@ -37,6 +37,11 @@ $system->defineConstants();
 
 define('H_ID','h-id');
 
+global $rectypes, $is_verbose, $report_log, $rep_errors_only, $dt_SourceRecordID;
+global $alldettypes, $allterms, $fi_dettype, $fi_constraint, $fi_trmlabel;
+global $mapping_dt, $mapping_errors, $warning_count, $transfer_errors, $successful_rows;
+
+
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 if($dt_SourceRecordID==0){ //this field is critical - need to download it from heurist core defintions database
 
@@ -234,7 +239,6 @@ if($user_ID!=null) {$user_ID = trim($user_ID);}
 if($group_ID!=null) {$group_ID = trim($group_ID);}
 if($api_Key!=null) {$api_Key = trim($api_Key);}
 
-global $rectypes, $is_verbose;
 $is_verbose = true;
 
 if($is_verbose){

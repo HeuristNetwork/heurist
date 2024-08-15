@@ -26,6 +26,7 @@
     *  __getRecordTypeTree
     *  __getDetailSection
     */
+    global $dbs_rtStructs, $dbs_lookups;
 
     $dbs_rtStructs = null;
     $dbs_lookups = null; //human readale field type names

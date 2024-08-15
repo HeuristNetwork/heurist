@@ -43,6 +43,11 @@ require_once dirname(__FILE__).'/../../hserv/structure/import/dbsImport.php';
 
 $system->defineConstants();
 
+global $rep_counter, $rep_issues, $system_folders,
+       $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
+       $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT, $failed_exts;
+
+
 if(!defined('RT_MEDIA_RECORD')){
 
     $isOK = false;
