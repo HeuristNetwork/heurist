@@ -337,6 +337,7 @@ $failed_exts = array();
 
                             if(!($filename=="." || $filename=="..")){
                                 if(is_dir($dir.$filename)){
+                                    if($filename=='thumbnail') {continue;}
                                     array_push($subdirs, $dir.$filename."/");
                                 }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
                                     $isfirst = false;

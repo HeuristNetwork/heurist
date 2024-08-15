@@ -33,6 +33,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+global $TL, $RTN;
+
 $TL = array();//list of all terms
 $RTN = array();//rty_ID=>rty_Name
 

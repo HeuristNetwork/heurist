@@ -53,10 +53,13 @@ function getMediaFolders($mysqli) {
 //
 // $imode - 0 - registration
 //          1 - get registered and nonreg files
+// folders "thumbnail" will be skipped
 //
 function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_folders=false) {
 
-    global $rep_counter, $rep_issues;
+    global $rep_counter, $rep_issues, $reg_info;
+    
+    $reg_info = array('reg'=>array(),'nonreg'=>array());
 
     $system_folders = $system->getSystemFolders();
 
@@ -111,7 +114,7 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
                     if(!($filename=="." || $filename=="..")){
                         if(is_dir($dir.$filename)){
                             $subdir = $dir.$filename."/";
-                            if(!in_array($subdir, $system_folders)){
+                            if($filename!='thumbnail' && !in_array($subdir, $system_folders)){
                                     array_push($subdirs, $subdir);
                             }
                         }elseif($isfirst){ //if($filename == "fieldhelper.xml"){
@@ -181,7 +184,7 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
             {
                 if($imode==1){
 
-                    $file_id = fileGetByFileName( $system, $filename);//see recordFile.php
+                    $file_id = fileGetByFileName( $system, $filename );//see recordFile.php
 
                     if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
                         //Check if this is just a thumbnail version of an image

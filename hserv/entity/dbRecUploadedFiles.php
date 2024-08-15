@@ -1516,7 +1516,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $file = urldecode($file);
                 $provided_file = $file;
-                if(strpos($file, HEURIST_FILESTORE_DIR) === false){
+                if(strpos($file, HEURIST_FILESTORE_URL) === 0){
+                    $file = str_replace(HEURIST_FILESTORE_URL, HEURIST_FILESTORE_DIR, $file);
+                }else if(strpos($file, HEURIST_FILESTORE_DIR) === false){
                     $file = HEURIST_FILESTORE_DIR . $file;
                 }
 

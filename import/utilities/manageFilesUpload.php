@@ -498,9 +498,10 @@ if(!($max_size>0)) {$max_size = 0;}
                 }
 
                 const base_path = $('#upload_folder').val();
-                let base_folder = base_path.split('/');
-                base_folder = base_folder[base_folder.length-1];
-
+                //let base_folder = base_path.split('/');
+                //base_folder = base_folder[base_folder.length-1];
+                let base_folder = base_path;
+                
                 if(files && files.length > 0){
 
                     for(let i = 0; i < files.length; i++){
