@@ -1,6 +1,6 @@
 <div id="div_header" class="ent_wrapper" style="margin-left:40px;font-size:0.95em">
         
-        <h3>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h3>        
+        <h3>Vérifiez les définitions et données non valides (pointeurs non valides, termes, éléments requis manquants, valeurs excédentaires, etc.)</h3>        
         
         <div style="display: flex;">
         <div>
@@ -15,33 +15,33 @@
             </ul>           
 
             <div style="max-width:400px;padding:5px 5px 5px 25px;" class="heurist-helper2">
-              Note: checks marked as SLOW are indicative. The pattern of usage of different functions will determine which checks are slowest.
+              Remarque : les vérifications marquées comme LENT sont indicatives. Le modèle d'utilisation des différentes fonctions déterminera quelles vérifications sont les plus lentes.
             </div>
             <div style="max-width:400px;padding:5px 5px 5px 25px;display:none;" class="heurist-helper2" id="notice_for_large_database">
-             Please note, owing to the size of the database and the version of MySQL in use on this server, functions indicated as SLOW may timeout. We suggest regular checks of those which are not marked as SLOW, and occasional checks of the remainder.
-             <br> <br>
-             Please submit a bug report if you are having a problem with timeouts.
+Veuillez noter qu'en raison de la taille de la base de données et de la version de MySQL utilisée sur ce serveur, les fonctions indiquées comme LENTES peuvent expirer. Nous vous suggérons de vérifier régulièrement celles qui ne sont pas marquées comme LENTES et de vérifier occasionnellement les autres.
+<br> <br>
+Veuillez soumettre un rapport de bogue si vous rencontrez un problème avec les délais d'expiration.
             </div>
         </div>
         </div>
         
-        <div>Select desired actions and: 
-            <button class="ui-button-action" id="btnVerifyDb">Verify Integrity</button>
+        <div>Sélectionnez les actions souhaitées et :
+            <button class="ui-button-action" id="btnVerifyDb">Vérifier l'intégrité</button>
         </div>
 
         <div class="slow-checks-in-popup" style="margin-top:20px">
             <hr style="color:lightgray;width:60%;float:left"><br>
-            <h3>Slow checks (will be opened in separate popup)</h3>
+            <h3>Vérifications lentes (seront ouvertes dans une fenêtre contextuelle séparée)</h3>
             <button style="margin-right: 25px;" data-type="files">
-                Check files for consistency
+                Vérifier la cohérence des fichiers
             </button>
-            <span class="heurist-helper2">Finds missing, duplicate and unused uploaded files</span>
+            <span class="heurist-helper2">Recherche les fichiers téléchargés manquants, en double et inutilisés</span>
             <br>
             <br>
             <button style="margin-right: 86px;" data-type="urls">
-                Check URLs
+                Vérifier les URL
             </button>
-            <span class="heurist-helper2">Checks record URLs and URLs referenced within text fields</span>
+            <span class="heurist-helper2">Vérifie les URL d'enregistrement et les URL référencées dans les champs de texte</span>
         </div>
         
 </div>
