@@ -208,4 +208,3 @@ public static function getOntologyLocalID($ontConceptID) {
 }
 
 }
-?>
