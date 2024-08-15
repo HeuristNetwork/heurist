@@ -31,7 +31,7 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Viewers/Map
 */
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
     require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
@@ -43,7 +43,7 @@
 
     define('USE_GOOGLE', false);
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         //$response = $system->getError();

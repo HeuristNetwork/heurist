@@ -31,6 +31,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+namespace hserv\utilities;
+use hserv\utilities\USanitize;
+
 define('MAX_FILES', 10000);
 define('MAX_SIZE', 1073741824);// 1 GB
 define('MAX_RATIO', 90);

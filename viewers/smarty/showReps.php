@@ -46,8 +46,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 
@@ -96,7 +97,7 @@ $record_with_custom_styles = 0; //record id with custom css and style links DT_C
 $is_included = isset($system);//this script is included into other one
 
 if(!$is_included){
-    $system = new System();
+    $system = new hserv\System();
     if(!$system->init(@$_REQUEST['db'])){
         exit;
     }
@@ -347,11 +348,11 @@ function executeSmartyTemplate($system, $params){
         if(method_exists($smarty, 'registerPlugin')){ // version 3
 
             $smarty->registerPlugin('modifier', 'file_data', [$heuristRec, 'getFileField']);// from reportRecord.php
-            $smarty->registerPlugin('modifier', 'translate', 'getTranslation');// from uLocale.php
+            $smarty->registerPlugin('modifier', 'translate', 'getTranslation');// from ULocale.php
         }else{ // version 2
 
             $smarty->register_modifier('file_data', [$heuristRec, 'getFileField']);// from reportRecord.php
-            $smarty->register_modifier('translate', 'getTranslation');// from uLocale.php
+            $smarty->register_modifier('translate', 'getTranslation');// from ULocale.php
         }
 
     }catch(Exception $e){

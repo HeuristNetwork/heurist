@@ -19,17 +19,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\DbUtils;
+
+require_once dirname(__FILE__).'/../../../autoload.php';
+
+
 define('DEMO_DB', 'hdb_demo');
 define('DEMO_DB_TEMPLATE', 'hdb_demo_template');
 define('DEMO_DB_ONLY', false);
 
-
-require_once dirname(__FILE__).'/../../../hserv/System.php';
-require_once dirname(__FILE__).'/../../../hserv/utilities/dbUtils.php';
-
 set_time_limit(0);
 
-$system = new System();
+$system = new hserv\System();
 
 $res = false;
 

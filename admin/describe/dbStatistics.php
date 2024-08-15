@@ -24,7 +24,6 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
 
 $is_csv = (@$_REQUEST['csv']==1);
 
@@ -67,7 +66,7 @@ function mysql__select_val($query) {
 * Calculates the directory size
 * @param mixed $dir Directory to check
 *
-* @todo move to utilities/uFile.php
+* @todo move to utilities/UFile.php
 */
 function dirsize($dir)
 {

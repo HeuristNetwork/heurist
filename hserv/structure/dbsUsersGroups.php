@@ -73,9 +73,6 @@
     *
     */
 
-
-    require_once dirname(__FILE__).'/../utilities/uMail.php';
-
     /**
     * Get user/group by field value
     *

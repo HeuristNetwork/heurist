@@ -27,12 +27,12 @@ define('PDIR','../../');//need for proper path to js and css
 
 set_time_limit(0);//no limit
 
+use hserv\structure\ConceptCode;
+use hserv\utilities\DbUtils;
+use hserv\utilities\UArchive;
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 
 define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME);

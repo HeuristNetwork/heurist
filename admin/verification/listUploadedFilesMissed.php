@@ -23,6 +23,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\USanitize;
+
 $is_included = (defined('PDIR'));
 $has_broken_url = false;
 
@@ -31,13 +33,14 @@ if($is_included){
     print '<div style="padding:10px"><h3 id="recordfiles_missed_msg">Check missed registered files</h3><br>';
 
 }else{
+    
     define('PDIR','../../');
+    
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    $sysadmin_pwd = USanitize::getAdminPwd();
 
-    $sysadmin_pwd = System::getAdminPwd();
-
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         print $system->getError()['message'];

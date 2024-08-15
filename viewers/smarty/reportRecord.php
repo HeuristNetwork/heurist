@@ -10,8 +10,9 @@ getRelatedRecords - returns an array of related record for given recID or record
 getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
+use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';

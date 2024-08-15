@@ -22,15 +22,17 @@
 
 define('PDIR','../../');//need for proper path to js and css
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 
 //header(HEADER_CORS_POLICY);
 header(CTYPE_JSON);
 
-$system = new System();
+$system = new hserv\System();
 
-$sysadmin_pwd = System::getAdminPwd('sysadmin_pwd');
+$sysadmin_pwd = USanitize::getAdminPwd('sysadmin_pwd');
 
 $data = null;
 $response = array();

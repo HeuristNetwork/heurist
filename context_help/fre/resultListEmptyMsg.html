@@ -4,21 +4,20 @@
 <div style="display:inline-block" class="not-found2"></div>
 
 <br> 
-<p style="padding:20px 0">
+<div style="padding:20px 0">
     <i class="no-filter">
-        This panel normally displays a filtered subset of the database which you can edit, analyse, visualise and publish in the righthand panel or via menu entries, depending on context. 
-        <br>
-        You may wish to create a startup filter - see below - so that a particular subset of the database is 
-        displayed when you first load Heurist, or you may enter a search/filter in the filter field above
-        (use the filter builders to build more complex filters or click on <u>filter help</u> for an extensive list of filter options).</i> 
+Ce panneau affiche normalement un sous-ensemble filtré de la base de données que vous pouvez modifier, analyser, visualiser et publier dans le panneau de droite ou via des entrées de menu, selon le contexte.
+<br>
+Vous souhaiterez peut-être créer un filtre de démarrage - voir ci-dessous - afin qu'un sous-ensemble particulier de la base de données
+s'affiche lorsque vous chargez Heurist pour la première fois, ou vous pouvez saisir une recherche/un filtre dans le champ de filtre ci-dessus
+(utilisez les générateurs de filtres pour créer des filtres plus complexes ou cliquez sur <u>aide sur les filtres</u> pour obtenir une liste complète des options de filtre).</i>
 
     <i class="not-found">
-        <div style="font-weight: bold;margin-bottom: 10px;">Why am I getting no results?</div>
-        &nbsp;&nbsp;Bulk uploaded files will not show until you create multimedia records <br> &nbsp;&nbsp;from them using Populate &gt; Index Media Files. <br><br>
-        &nbsp;&nbsp;Some records may only be visible to members of particular workgroups
+        <div style="font-weight: bold;margin-bottom: 10px;">Pourquoi n'obtiens-je aucun résultat ?</div>
+&nbsp;&nbsp;Les fichiers téléchargés en masse ne s'afficheront pas tant que vous n'aurez pas créé d'enregistrements multimédias <br> &nbsp;&nbsp;à partir d'eux à l'aide de Remplir > Indexer les fichiers multimédias. <br><br>
+&nbsp;&nbsp;Certains enregistrements peuvent n'être visibles que par les membres de groupes de travail particuliers
     </i>
-
-</p>
+</div>
 
 <hr>
 
@@ -28,46 +27,43 @@
     <div>
         <i> 
             <p>
-                Filters (aka searches or queries) are used to find information in the database and to create subsets  
-                to which different actions can be applied - editing, listing, tagging, mapping, export etc.  
-                If you are not using filters,  
-                and in particular <b>Saved filters and Facet filters</b></a>, you are not getting the best out of Heurist. 
+Les filtres (également appelés recherches ou requêtes) sont utilisés pour rechercher des informations dans la base de données et pour créer des sous-ensembles
+auxquels différentes actions peuvent être appliquées : édition, liste, marquage, mappage, exportation, etc.
+Si vous n'utilisez pas de filtres,
+et en particulier les <b>filtres enregistrés et les filtres à facettes</b>, vous ne tirez pas le meilleur parti d'Heurist.
             </p> 
             <p>
-                Use the filter field at the top of the page to find records / define a filter. 
-                Use the Filter builder to build simple filters.  
-                More complex filters can be built using the Facets builder. Instructions for building fitles by hand are linked from  
-                <a href="context_help/advanced_search.html" target="_blank"><b>filter help</b></a> 
-                below the Filter box.  
+Utilisez le champ de filtre en haut de la page pour rechercher des enregistrements / définir un filtre.
+Utilisez le générateur de filtres pour créer des filtres simples.
+Des filtres plus complexes peuvent être créés à l'aide du générateur de facettes. Les instructions pour créer des filtres à la main sont liées à
+<a href="context_help/advanced_search.html" target="_blank"><b>aide sur les filtres</b></a>
+sous la boîte de filtre.
             </p>     
             <p>
-                After running a filter, click <b>Save filter for re-use</b> (which is only enabled 
-                after a filter has been run) to save it in the Saved filters list. 
+Après avoir exécuté un filtre, cliquez sur <b>Enregistrer le filtre pour réutilisation</b> (qui n'est activé qu'après l'exécution d'un filtre) pour l'enregistrer dans la liste des filtres enregistrés.
             </p>     
-            <p>Simple to very complex filters, including Facet queries and Rule-based expansion of query results,  
-                can also be built by right-clicking in the Saved filters tree 
-                and selecting New, New Faceted or New Ruleset. 
+            <p>
+Des filtres simples à très complexes, y compris les requêtes à facettes et l'extension des résultats de requête basée sur des règles,
+peuvent également être créés en cliquant avec le bouton droit de la souris dans l'arborescence des filtres enregistrés
+et en sélectionnant Nouveau, Nouvelle facette ou Nouvel ensemble de règles.
             </p>     
         </i>
     </div>
 </div>
 
 <div class="acc acc2 no-filter">
-    <h3>Defining a startup filter</h3> 
+    <h3>Définir un filtre de démarrage</h3> 
     <div >
 
-        <p>
-            A startup filter can populate this panel automatically with the set of records to which you often  
-            need immediate access. For example, <i>tags:Favourites</i> (for records tagged as favourites),  
-            <i>sortby:-m</i> (for recently modified records) or a more complex query retrieving, for instance,  
-            recent meeting notes in date order or records relating to current projects. 
-        </p> 
-        <p>
-            To set a startup filter, first create a suitable filter using the filter icon
-            <img alt src="hclient/assets/filter_form_icon_black.png"> at the end of the 
-            search/filter box above, then copy the filter text from the search/filter box to the Startup filter field in <i>Settings &gt; Preferences</i> (menu at top right). 
-            <br><br>
-            You can also load Heurist directly with a filter by adding a parameter <i>&amp;q=xxxx</i> to the end of the URL which you use to load Heurist (where xxxx is a valid Heurist search/filter string). 
-        </p>    
+<p>
+Un filtre de démarrage peut remplir automatiquement ce panneau avec l'ensemble des enregistrements auxquels vous avez souvent besoin d'accéder immédiatement. Par exemple, <i>tags:Favourites</i> (pour les enregistrements marqués comme favoris), <i>sortby:-m</i> (pour les enregistrements récemment modifiés) ou une requête plus complexe récupérant, par exemple, les notes de réunion récentes par ordre de date ou les enregistrements relatifs aux projets en cours.
+</p>
+<p>
+Pour définir un filtre de démarrage, créez d'abord un filtre approprié à l'aide de l'icône de filtre
+<img alt src="hclient/assets/filter_form_icon_black.png"> à la fin de la zone de recherche/filtre ci-dessus, puis copiez le texte du filtre de la zone de recherche/filtre dans le champ Filtre de démarrage dans <i>Paramètres &gt; Préférences</i> (menu en haut à droite).
+<br><br>
+Vous pouvez également charger Heurist directement avec un filtre en ajoutant un paramètre <i>&amp;q=xxxx</i> à la fin de l'URL que vous utilisez pour charger Heurist (où xxxx est une chaîne de recherche/filtrage Heurist valide).
+</p>
+   
     </div>    
 </div>

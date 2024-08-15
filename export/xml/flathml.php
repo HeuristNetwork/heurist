@@ -101,10 +101,11 @@ if (@$argv) {
 
 }
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\structure\ConceptCode;
+
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 
 
 if(@$_REQUEST['postdata']){
@@ -137,7 +138,7 @@ $output_file_fd = null;
 $hunifile = null; //name of file-per-record for HuNI mode
 
 if(!defined('PDIR')){
-    $system = new System();
+    $system = new hserv\System();
     if( !$system->init(@$_REQUEST['db']) ){
         die("Cannot connect to database");
     }

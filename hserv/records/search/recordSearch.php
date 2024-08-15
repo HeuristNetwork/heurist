@@ -41,11 +41,13 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USystem;
+use hserv\entity\DbsUsersGroups;
+use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/recordFile.php';//it includes uFile.php
-require_once dirname(__FILE__).'/composeSql.php';
+require_once 'recordFile.php';//it includes UFile.php
+require_once 'composeSql.php';
 require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
@@ -2103,7 +2105,7 @@ function recordSearch($system, $params, $relation_query=null)
     $needThumbBackground = $needThumbBackground || (@$params['thumb_bg']==1);
 
     if(null==$system){
-        $system = new System();
+        $system = new hserv\System();
         if( ! $system->init(htmlspecialchars(@$_REQUEST['db'])) ){
             $response = $system->getError();
             if($return_h3_format){

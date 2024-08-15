@@ -20,13 +20,13 @@
 
 if(!defined('PDIR')){
     define('PDIR','../');
-    require_once dirname(__FILE__).'/../hserv/System.php';
+    require_once dirname(__FILE__).'/../autoload.php';
 }
 
 $is_json = (@$_REQUEST['format']=='json');
 
 if(!isset($system)){
-    $system = new System();
+    $system = new hserv\System();
 }
 
 if(!$system->is_inited()){

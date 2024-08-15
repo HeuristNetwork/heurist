@@ -39,6 +39,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+use hserv\utilities\USanitize;
+
 require_once dirname(__FILE__).'/../../viewers/smarty/showReps.php';
 
 if(isset($_REQUEST) && count($_REQUEST)>0){ //if set it is included in dailyCronJobs

@@ -65,11 +65,9 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-
-    require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
     require_once dirname(__FILE__).'/../records/search/recordFile.php';
     require_once dirname(__FILE__).'/../structure/dbsTerms.php';
     require_once dirname(__FILE__).'/../utilities/Temporal.php';
@@ -90,7 +88,7 @@
 
     if(!isset($system) || $system==null){
 
-        $system = new System();
+        $system = new hserv\System();
 
         if( ! $system->init(@$params['db']) ){
             //get error and response
@@ -278,8 +276,8 @@
                 $idx = 0;
             }
 
-            $classname = 'exportRecords'.strtoupper($allowed_formats[$idx]);
-
+            $classname = 'hserv\records\export\exportRecords'.strtoupper($allowed_formats[$idx]);
+/*
             spl_autoload_register(function ($class) {
                 $file = dirname(__FILE__).'/../records/export/'.$class.'.php';
                 if (file_exists($file)) {
@@ -288,6 +286,7 @@
                 }
                 return false;
             });
+*/            
 
             $outputHandler = false;
 

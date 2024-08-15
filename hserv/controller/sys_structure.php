@@ -20,8 +20,10 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    use hserv\utilities\USanitize;
+    
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-    require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../structure/search/dbsData.php';
     require_once dirname(__FILE__).'/../structure/search/dbsDataTree.php';
     require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
@@ -30,11 +32,7 @@
     $is_remote = false;
     $remoteURL = null;
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
+    $req_params = USanitize::sanitizeInputArray();
 
     //get list of registered database and master index db on the same server
     if(@$req_params['remote']){
@@ -92,7 +90,7 @@
 
 
     $mode = 0;
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$req_params['db']) ){
 
         //get error and response

@@ -1,4 +1,6 @@
 <?php
+namespace hserv\utilities;
+
 /**
 * Library to obtain system and php config value
 *
@@ -196,7 +198,7 @@ class USystem {
     */
     public static function isMemoryAllowed( $memoryNeeded ){
 
-        $mem_limit = USystem::getConfigBytes('memory_limit');
+        $mem_limit = self::getConfigBytes('memory_limit');
         $mem_usage = memory_get_usage();
 
         if ($mem_usage+$memoryNeeded > $mem_limit - 10485760){

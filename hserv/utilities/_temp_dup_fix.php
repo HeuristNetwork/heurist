@@ -19,9 +19,9 @@
 */
 exit;
 
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
-$system = new System();
+$system = new hserv\System();
 $isSystemInited = $system->init(@$_REQUEST['db'], true);
 
 

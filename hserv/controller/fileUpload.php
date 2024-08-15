@@ -18,15 +18,19 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once dirname(__FILE__).'/../System.php';
+
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+use hserv\utilities\UImage;
+use hserv\utilities\UploadHandler;
+use hserv\entity\DbRecUploadedFiles;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once 'entityScrudSrv.php';
-require_once dirname(__FILE__).'/../entity/dbRecUploadedFiles.php';
-require_once dirname(__FILE__).'/../utilities/uFile.php';
-require_once dirname(__FILE__).'/../utilities/uImage.php';
-require_once dirname(__FILE__).'/../utilities/UploadHandler.php';
 
 $response = null;
-$system = new System();
+$system = new hserv\System();
 
 $post_max_size = USystem::getConfigBytes('post_max_size');
 $params = null;
@@ -41,11 +45,7 @@ if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
 }else
 if($system->init(@$_REQUEST['db'])){
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $params = filter_input_array(INPUT_POST);
-    }else{
-        $params = filter_input_array(INPUT_GET);
-    }
+    $params = USanitize::sanitizeInputArray();
 
     //define upload folder   HEURIST_FILESTORE_DIR/ $params['entity'] /
     $entity_name = null;

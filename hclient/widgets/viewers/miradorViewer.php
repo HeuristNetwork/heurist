@@ -57,9 +57,9 @@ $baseUrl = null;
 //if database and record id are defined we take manifest url from database
 if(!preg_match('[\W]', $dbname) && $rec_ID>0){
 
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../autoload.php';
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init($_REQUEST['db'], true, false) ){
         //get error and response
         $system->error_exit_api();//exit from script

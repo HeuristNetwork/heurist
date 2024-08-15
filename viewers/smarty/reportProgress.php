@@ -1,14 +1,14 @@
 <?php
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
     $res = '';
 
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
 
-        $system = new System();
+        $system = new hserv\System();
         $dbname = @$_REQUEST['db'];
-        $error = System::dbname_check($dbname);
-        if(!$error){
+        $error = mysql__check_dbname($dbname);
+        if($error==null){
 
             if(!defined('HEURIST_SCRATCH_DIR')){
                 //$system->initPathConstants($dbname);

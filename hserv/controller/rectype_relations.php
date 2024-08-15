@@ -19,13 +19,13 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once dirname(__FILE__).'/../System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
     if(isset($_REQUEST['db'])) {
         $dbName = $_REQUEST['db'];
 
         // Initialize a System object that uses the requested database
-        $system = new System();
+        $system = new hserv\System();
         if( $system->init($dbName) ){
             // Result object
             $result = new stdClass();

@@ -33,7 +33,7 @@ Select linked record button   bg:#f0ecf0 - can be changed to button light gray o
 Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
 
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 // arbitrary color scheme defined in script that includes this one
 // usage: websiteRecord.php takes color scheme from field of CMS_HOME record
@@ -46,7 +46,7 @@ if(isset($site_colors) && $site_colors!=null){
     if(!isset($system)){
 
         // init main system class
-        $system = new System();
+        $system = new hserv\System();
 
         if(@$_REQUEST['db']){
             //if database is defined then connect to given database

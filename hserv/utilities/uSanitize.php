@@ -1,4 +1,6 @@
 <?php
+namespace hserv\utilities;
+
 /**
 * Sanitize library to make requests, urls, paths, filenames safe
 * (SSRF and path traversal attacks)
@@ -35,7 +37,36 @@
 class USanitize {
 
     private static $purifier = null;
+    
+    //
+    // sysadmin protection - reset from request to avoid exposure in possible error/log messages
+    //
+    //
+    //
+    //
+    public static function getAdminPwd($name='pwd'){
+        if(@$_REQUEST[$name]){
+            $sysadmin_pwd  = $_REQUEST[$name];
+            unset($_REQUEST[$name]);
+        }else{
+            $sysadmin_pwd = null;
+        }
+        return $sysadmin_pwd;
+    }
 
+    //
+    //
+    //
+    public static function sanitizeInputArray()
+    {
+        if(@$_SERVER['REQUEST_METHOD']=='POST'){
+            $req_params = filter_input_array(INPUT_POST);
+        }else{
+            $req_params = filter_input_array(INPUT_GET);
+        }
+        return $req_params;
+    }
+    
     //
     //
     //

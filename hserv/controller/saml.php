@@ -24,17 +24,17 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/../utilities/uSaml.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+require_once dirname(__FILE__).'/../utilities/USaml.php';
 
 $action = @$_REQUEST['a'];//$system->getError();
 
-$system = new System();
+$system = new hserv\System();
 $dbname = @$_REQUEST['db'];
-$error = System::dbname_check($dbname);
+$error = mysql__check_dbname($dbname);
 $msg = null;
 
-if($error){
+if($error!=null){
     $system->addError(HEURIST_INVALID_REQUEST, $error);
 }else{
 

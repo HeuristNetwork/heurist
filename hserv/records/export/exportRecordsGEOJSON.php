@@ -20,6 +20,7 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
+use hserv\structure\ConceptCode;
 
 require_once 'exportRecords.php';
 

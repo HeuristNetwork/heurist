@@ -1,4 +1,8 @@
 <?php
+namespace hserv\utilities;
+use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
+
 /**
 * Image manipulation library
 *

@@ -1,4 +1,8 @@
 <?php
+namespace hserv\entity;
+use hserv\utilities\USanitize;
+use hserv\entity\DbEntitySearch;
+
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
@@ -1119,7 +1123,7 @@ abstract class DbEntityBase
     public function search(){
 
         if($this->isvalid()){
-            $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
+            $this->searchMgr = new DbEntitySearch( $this->system, $this->config, $this->fields);
 
             $res = $this->searchMgr->validateParams( $this->data );
             if(!is_bool($res)){
@@ -1127,6 +1131,8 @@ abstract class DbEntityBase
             }else{
                 if(!$res) {return false;}
             }
+            
+            //if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default search mode
 
             return true;
         }else{

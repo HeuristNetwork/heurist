@@ -18,11 +18,11 @@
 * @package     Heurist academic knowledge management system
 * @subpackage
 */
-require_once dirname(__FILE__).'/../../System.php';
+require_once dirname(__FILE__).'/../../../autoload.php';
 
 $res = false;
 
-$system = new System();
+$system = new hserv\System();
 if( $system->init(@$_REQUEST['db']) ){
 
     if(!$system->is_admin()){

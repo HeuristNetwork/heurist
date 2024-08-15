@@ -77,14 +77,14 @@ if (@$argv) {
 
 define('HEURIST_DIR', dirname(__FILE__).'/../../');
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+use hserv\utilities\USystem;
+
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(null, false, false) ){
     exit("Cannot establish connection to sql server\n");
 }

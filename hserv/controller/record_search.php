@@ -28,10 +28,12 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+    use hserv\utilities\USanitize;
+    
+    require_once dirname(__FILE__).'/../../autoload.php';
 
-    require_once dirname(__FILE__).'/../System.php';
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
-    require_once dirname(__FILE__).'/../dbaccess/utils_db.php';
 
     /*
      parameters
@@ -70,11 +72,7 @@
 
     */
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
+    $req_params = USanitize::sanitizeInputArray();
 
     //these are internal parameters, they cannot be sent from client side
     if( @$req_params['sql'] ) {unset( $req_params['sql'] );}
@@ -115,7 +113,7 @@
 
     $response = array();
 
-    $system = new System();
+    $system = new hserv\System();
 
     if( ! $system->init(@$req_params['db']) ){
         //get error and response
@@ -135,11 +133,7 @@
 
     }elseif(@$req_params['a'] == 'getfacets'){ //returns counts for facets for given query
 
-        $params = array();
-
-        $params = filter_input_array(INPUT_POST);
-
-        $response = recordSearchFacets($system, $params);
+        $response = recordSearchFacets($system, $req_params);
 
     }elseif(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 

@@ -49,7 +49,9 @@
 * databaseCreateConstraintsAndTriggers - Recreates constraints and triggers
 */
 
-require_once dirname(__FILE__).'/../System.php';
+namespace hserv\utilities;
+use hserv\utilities\DbUtils;
+
 require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
 require_once dirname(__FILE__).'/../utilities/Temporal.php';

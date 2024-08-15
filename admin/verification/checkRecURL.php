@@ -43,11 +43,11 @@ if($is_included){
 }else{
     define('PDIR','../../');
 
-    require_once dirname(__FILE__).'/../../hserv/System.php';
+    require_once dirname(__FILE__).'/../../autoload.php';
 
     $verbose = (@$_REQUEST['verbose']==1);
 
-    $system = new System();
+    $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         print $system->getError()['message'];

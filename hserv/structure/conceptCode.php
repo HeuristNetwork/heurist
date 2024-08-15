@@ -1,4 +1,6 @@
 <?php
+namespace hserv\structure;
+
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
@@ -31,10 +33,10 @@ private static $initialized = false;
 private static $system = null;
 private static $database_id = null;
 
-private static function initialize($system2=null)
+private static function initialize($init_system=null)
 {
-    if($system2!=null){
-        self::$system = $system2;
+    if($init_system!=null){
+        self::$system = $init_system;
     }
     elseif (self::$initialized){
         return;

@@ -17,10 +17,10 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     $response = $system->getError();
 }else{

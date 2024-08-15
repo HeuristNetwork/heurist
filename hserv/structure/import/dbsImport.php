@@ -19,14 +19,13 @@
 * @version     4
 */
 
-require_once dirname(__FILE__).'/../../System.php';
+use hserv\utilities\DbRegis;
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/../search/dbsData.php';
 require_once dirname(__FILE__).'/../edit/saveStructureLib.php';
 require_once dirname(__FILE__).'/../../controller/entityScrudSrv.php';
 require_once dirname(__FILE__).'/../dbsTerms.php';
-
-//require_once dirname(__FILE__).'/../../utilities/dbRegis.php';
-require_once dirname(__FILE__).'/../../utilities/uFile.php';
 
 define('IS_DBG', false);//debug log output
 
@@ -1176,7 +1175,7 @@ $mysqli->commit();
 
           $defs = array();
 
-          $system2 = new System();
+          $system2 = new hserv\System();
           if(!$system2->init($remote_dbname, true, false)){ //init without paths and consts
             $this->system->addError(HEURIST_ERROR, $message);
             return false;
@@ -2362,7 +2361,7 @@ $mysqli->commit();
 
             $defs = array();
 
-            $system2 = new System();
+            $system2 = new hserv\System();
             if(!$system2->init($remote_dbname, true, false)){ //init without paths and consts
                 // Invalid source, unable to retrieve translations
                 $this->translations_report = 'We were unable to connect to the registered database located on this server.';

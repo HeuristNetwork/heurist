@@ -35,6 +35,8 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  CommonPHP
 */
+use hserv\utilities\USystem;
+
 require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 

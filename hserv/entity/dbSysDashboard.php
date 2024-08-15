@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to sysDashboard table
@@ -20,9 +22,6 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 

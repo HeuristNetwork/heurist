@@ -1,4 +1,10 @@
 <?php
+use hserv\entity\DbRecUploadedFiles;
+use hserv\entity\DbDefRecTypes;
+use hserv\utilities\USanitize;
+use hserv\utilities\UImage;
+use hserv\structure\ConceptCode;
+
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
@@ -34,19 +40,14 @@
 * _prepareDetails - validate records detail (need to combine with validators in fileParse)
 *
 */
-require_once dirname(__FILE__).'/../../System.php';
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
-require_once dirname(__FILE__).'/../../dbaccess/utils_db.php';
 require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
-require_once dirname(__FILE__).'/../../entity/dbRecUploadedFiles.php';
-require_once dirname(__FILE__).'/../../entity/dbDefRecTypes.php';
-require_once dirname(__FILE__).'/../../utilities/uImage.php';
+
 require_once dirname(__FILE__).'/../../../hserv/records/indexing/elasticSearch.php';
 //require_once dirname(__FILE__).'/../../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
-require_once dirname(__FILE__).'/../../utilities/uSanitize.php';
 
 require_once dirname(__FILE__).'/../../../viewers/smarty/smartyInit.php';
 require_once dirname(__FILE__).'/../../../viewers/smarty/reportRecord.php';

@@ -1,4 +1,8 @@
 <?php
+namespace hserv\utilities;
+use hserv\utilities\DbRegis;
+use hserv\utilities\UArchive;
+
 /**
 * dbUtils.php : Functions to create, delelet, clean the entire HEURIST database
 *               and other functions to do with database file structure
@@ -51,8 +55,6 @@
 */
 
 require_once 'utils_db_load_script.php';
-require_once 'uArchive.php';
-require_once 'dbRegis.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 require_once dirname(__FILE__).'/../structure/import/importDefintions.php';
 
@@ -784,7 +786,7 @@ class DbUtils {
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
 
-        $error_msg = System::dbname_check($database_name_full);
+        $error_msg = mysql__check_dbname($database_name_full);
 
         if ($check_exist_or_unique>0 && $error_msg==null) {
 

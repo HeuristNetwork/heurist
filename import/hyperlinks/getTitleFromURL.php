@@ -30,7 +30,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 
 header('Content-type: text/javascript; charset=utf-8');
 
@@ -40,7 +40,7 @@ $url = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
 
 $rv = array('num'=>$_REQUEST['num']);
 
-$system = new System();
+$system = new hserv\System();
 if(!$system->init(@$_REQUEST['db'])){
     print json_encode( $system->getError() );
 }elseif(!$system->has_access() ){

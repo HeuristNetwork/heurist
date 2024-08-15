@@ -77,16 +77,16 @@ if($arg_database==null){
     exit("Required parameter -db is not defined\n");
 }
 
+use hserv\utilities\DbUtils;
+use hserv\utilities\UArchive;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-//require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/uArchive.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
 
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(null, false,false) ){
     exit("Cannot establish connection to sql server\n");
 }

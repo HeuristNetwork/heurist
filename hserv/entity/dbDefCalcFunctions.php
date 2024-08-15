@@ -1,4 +1,6 @@
 <?php
+namespace hserv\entity;
+use hserv\entity\DbEntityBase;
 
     /**
     * db access to dbDefCalcFunctions table
@@ -20,33 +22,10 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once dirname(__FILE__).'/../System.php';
-require_once dirname(__FILE__).'/dbEntityBase.php';
-require_once dirname(__FILE__).'/dbEntitySearch.php';
-
-
 class DbDefCalcFunctions extends DbEntityBase
 {
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
+    *  search claculcated fields
     */
     public function search(){
 
@@ -54,72 +33,16 @@ class DbDefCalcFunctions extends DbEntityBase
               return false;
         }
 
-        //compose WHERE
-        $where = array();
-
-        $pred = $this->searchMgr->getPredicate('cfn_ID');
-        if($pred!=null) {array_push($where, $pred);}
-
-        $pred = $this->searchMgr->getPredicate('cfn_Name');
-        if($pred!=null) {array_push($where, $pred);}
-
-        if(@$this->data['details']==null) {$this->data['details'] = 'full';}//default
-
-        //compose SELECT it depends on param 'details' ------------------------
-        //@todo - take it form fiels using some property
-        if(@$this->data['details']=='id'){
-
-            $this->data['details'] = 'cfn_ID';
-
-        //}elseif(@$this->data['details']=='title'){
-
-            //$this->data['details'] = 'cfn_Name';
-
-        }elseif(@$this->data['details']=='name'){
-
-            $this->data['details'] = 'cfn_ID,cfn_Name';
-
-        }elseif(@$this->data['details']=='list' || @$this->data['details']=='full'){
-
-            $this->data['details'] = 'cfn_ID,cfn_Name,cfn_FunctionSpecification,cfn_RecTypeIDs';
+        $this->searchMgr->addPredicate('cfn_ID');
+        $this->searchMgr->addPredicate('cfn_Name');
+        
+        switch (@$this->data['details']){
+            case 'id': $this->searchMgr->setSelFields('cfn_ID'); break;  
+            case 'name': $this->searchMgr->setSelFields('cfn_ID,cfn_Name'); break;  
+            default: $this->searchMgr->setSelFields('cfn_ID,cfn_Name,cfn_FunctionSpecification,cfn_RecTypeIDs');
         }
-
-        if(!is_array($this->data['details'])){ //specific list of fields
-            $this->data['details'] = explode(',', $this->data['details']);
-        }
-
-        /*validate names of fields
-        foreach($this->data['details'] as $fieldname){
-            if(!@$this->fields[$fieldname]){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
-                return false;
-            }
-        }*/
-
-        //ID field is mandatory and MUST be first in the list
-        $idx = array_search('cfn_ID', $this->data['details']);
-        if($idx>0){
-            unset($this->data['details'][$idx]);
-            $idx = false;
-        }
-        if($idx===false){
-            array_unshift($this->data['details'],'cfn_ID');
-        }
-        $is_ids_only = (count($this->data['details'])==1);
-
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.$this->config['tableName'];
-
-        if(count($where)>0){
-            $query = $query.' WHERE '.implode(' AND ',$where);
-        }
-        $query = $query.' ORDER BY cfn_Name '.$this->searchMgr->getLimit()
-                        .$this->searchMgr->getOffset();
-
-
-        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
-        return $res;
+        
+        return $this->searchMgr->composeAndExecute('cfn_Name');
     }
 
     //

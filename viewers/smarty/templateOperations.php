@@ -19,6 +19,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+use hserv\utilities\USanitize;
 
 $mode = $_REQUEST['mode'];
 if($mode!='serve'){ // OK to serve tempalte files without login
@@ -28,16 +29,10 @@ define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
-
 
     $dir = HEURIST_SMARTY_TEMPLATES_DIR;
 
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
+    $req_params = USanitize::sanitizeInputArray();
 
     if($mode){ //operations with template files
 

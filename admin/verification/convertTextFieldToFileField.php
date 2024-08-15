@@ -27,9 +27,11 @@
 
 define('PDIR','../../');//need for proper path to js and css
 
+use hserv\utilities\USanitize;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
-$sysadmin_pwd = System::getAdminPwd();
+$sysadmin_pwd = USanitize::getAdminPwd();
 
 if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     ?>

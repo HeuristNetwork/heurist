@@ -85,12 +85,12 @@ see dbsUserGroups.php for repository credentials methods
     user_saveRepositoryCredentials - Saves repository credentials in ugr_Preferences
 
 */
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';
 
 $need_compress = false;
 
-$system = new System();
+$system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     //get error and response

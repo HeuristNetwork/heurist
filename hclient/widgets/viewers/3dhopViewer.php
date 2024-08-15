@@ -17,8 +17,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../../hserv/System.php';
+require_once dirname(__FILE__).'/../../../autoload.php';
+
 require_once dirname(__FILE__).'/../../../hserv/records/search/recordFile.php';
 
 define('ERROR_REDIR', dirname(__FILE__).'/../../framecontent/infoPage.php');
@@ -32,17 +34,13 @@ file or ulf_ID - obfuscation id for registred 3object in nxs or nxz format
 @todo id - record with 3object media
 
 */
-if(@$_SERVER['REQUEST_METHOD']=='POST'){
-    $req_params = filter_input_array(INPUT_POST);
-}else{
-    $req_params = filter_input_array(INPUT_GET);
-}
+$req_params = USanitize::sanitizeInputArray();
 
 $is_not_inited = true;
 $db = @$req_params['db'];
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
 if($system->init($db, true, false)){
 

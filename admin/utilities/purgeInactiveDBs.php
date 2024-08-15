@@ -136,19 +136,19 @@ if (@$argv) {
     //exit('This function must be run from the shell');
 }
 
+use hserv\utilities\DbUtils;
+use hserv\utilities\UArchive;
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../configIni.php';// read in the configuration file
-require_once dirname(__FILE__).'/../../hserv/consts.php';
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/dbUtils.php';
-//require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 
 //retrieve list of databases
-$system = new System();
+$system = new hserv\System();
 
 if(!$is_shell){
-    $sysadmin_pwd = System::getAdminPwd();
+    $sysadmin_pwd = USanitize::getAdminPwd();
     if($system->verifyActionPassword( $sysadmin_pwd, $passwordForServerFunctions) ){
         include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
         //$response = $system->getError();

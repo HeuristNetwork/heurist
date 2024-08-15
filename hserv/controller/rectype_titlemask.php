@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once dirname(__FILE__).'/../System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../records/edit/recordTitleMask.php';
 
 /*
@@ -38,7 +38,7 @@ check 0 - execute for given record id
 */
 
 // Initialize a System object that uses the requested database
-$system = new System();
+$system = new hserv\System();
 if( $system->init(@$_REQUEST['db']) ){
 
             $rectypeID = @$_REQUEST['rty_id'];

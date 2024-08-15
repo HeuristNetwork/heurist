@@ -24,8 +24,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+use hserv\utilities\USanitize;
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
+
 
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
@@ -42,7 +44,7 @@ $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
-$system = new System();
+$system = new hserv\System();
 
 if(@$_REQUEST['db']){
     //if database is defined then connect to given database
@@ -107,7 +109,7 @@ if(defined('IS_INDEX_PAGE')){
 
 if(!$system->has_access() && !empty(@$_REQUEST['user']) && !empty(@$_REQUEST['pwd'])){ // attempt login with provided creds
 
-    $user_pwd = System::getAdminPwd();
+    $user_pwd = USanitize::getAdminPwd();
 
     $mysqli = $system->get_mysqli();
     $ugr_ID = is_numeric($_REQUEST["user"]) && $_REQUEST["user"] > 0 ? intval($_REQUEST["user"]) : null;

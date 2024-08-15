@@ -27,12 +27,12 @@
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
 
-require_once dirname(__FILE__).'/../../hserv/System.php';
+require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
-$system = new System();
+$system = new hserv\System();
 if( !$system->init(@$_REQUEST['db']) ){
     die("Cannot connect to database");
 }

@@ -19,8 +19,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/structure/conceptCode.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php';
 

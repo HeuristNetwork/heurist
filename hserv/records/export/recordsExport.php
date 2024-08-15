@@ -20,7 +20,8 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */
-
+use hserv\structure\ConceptCode;
+use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';

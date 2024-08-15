@@ -36,10 +36,11 @@
 * _registrationValidateUser
 *
 */
+namespace hserv\utilities;
+use hserv\utilities\DbUtils;
+use hserv\utilities\USanitize;
+use hserv\structure\ConceptCode;
 
-require_once dirname(__FILE__).'/../System.php';
-require_once 'uSanitize.php';
-require_once 'dbUtils.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
 class DbRegis {
@@ -66,7 +67,7 @@ class DbRegis {
 
         if(!self::$isOutSideRequest){
             //connect
-            self::$system = new System();
+            self::$system = new hserv\System();
             if(self::$system->init(HEURIST_INDEX_DATABASE, true, false)){ //init without paths and consts
                 self::$mysqli = self::$system->get_mysqli();
             }else{

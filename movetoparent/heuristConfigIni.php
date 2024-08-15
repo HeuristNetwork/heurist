@@ -103,7 +103,7 @@ $allowWebAccessThumbnails = true;
 $allowWebAccessUploadedFiles = true;
 $allowWebAccessEntityFiles = true;
 
-//Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within uFile.php
+//Proxy use. If httpProxyAuth is set this will override the value of bypassProxy when making external requests via cURL within UFile.php
 if (!@$httpProxy) {$httpProxy = '';}// blank = assumes direct internet access from server
 if (!@$httpProxyAuth) {$httpProxyAuth = '';}// authorization for proxy server "username:password"
 $httpProxyAlwaysActive = false;           // if true - always use proxy for CURL, otherwise proxy will mostly be used for non-heurist resources
