@@ -1,5 +1,6 @@
 <?php
 namespace hserv\entity;
+use hserv\System;
 use hserv\entity\DbEntityBase;
 
     /**
@@ -618,7 +619,7 @@ class DbSysUsers extends DbEntityBase
         //import users from another db
 
         // validate that current user is admin in source database as well
-        $sytem_source = new hserv\System();
+        $sytem_source = new System();
         if(!$sytem_source->init($this->data['sourceDB'], true, false)){
             return false;
         }

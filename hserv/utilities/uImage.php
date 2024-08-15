@@ -202,7 +202,7 @@ class UImage {
 
             try{
                 $img = imagecreatefromstring($data);
-            }catch(Exception  $e){
+            }catch(\Exception  $e){
                 $img = false;
             }
         }else{
@@ -706,7 +706,7 @@ class UImage {
                 //Imagic
                 try {
 
-                    $im =  new Imagick($filename.'[0]');
+                    $im =  new \Imagick($filename.'[0]');
                     $im->setImageFormat('png');
                     $im->thumbnailImage(200,200);
 
@@ -715,7 +715,7 @@ class UImage {
                     }
                     $im->writeImage($thumbnail_file);
 
-                } catch(ImagickException $e) {
+                } catch(\ImagickException $e) {
                     USanitize::errorLog($e . ', From Database: ' . HEURIST_DBNAME);
                     return false;
                 }

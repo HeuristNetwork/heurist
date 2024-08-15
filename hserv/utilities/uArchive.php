@@ -60,8 +60,8 @@ class UArchive {
 
 
 
-        $zip = new ZipArchive();
-        if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+        $zip = new \ZipArchive();
+        if (!$zip->open($destination, \ZipArchive::CREATE)) {
             return $verbose?('Failed to create zip file at '.htmlspecialchars($destination)):false;
         }
 
@@ -92,7 +92,7 @@ class UArchive {
                 $entry_idx = 0;
                 $do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
 
-                $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+                $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
 
@@ -142,7 +142,7 @@ class UArchive {
                             }
                             $type = strtolower(substr(strrchr($newfile, '.'), 1));
                             if(in_array($type, $do_not_compress)){
-                                $zip->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
+                                $zip->setCompressionIndex($entry_idx, \ZipArchive::CM_STORE);
                             }
                             $entry_idx++;
 
@@ -172,9 +172,9 @@ class UArchive {
             }
             return true;
 
-        } catch (Exception  $e){
+        } catch (\Exception  $e){
             error_log( $e->getMessage() );
-            return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.Exception::getMessage()):false;
+            return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.\Exception::getMessage()):false;
         }
     }
 
@@ -188,7 +188,7 @@ class UArchive {
     public static function unzip($system, $zipfile, $destination){
 
         if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
-            throw new Exception('Archive file not found');
+            throw new \Exception('Archive file not found');
         }
 
         $root_folder = $system->getFileStoreRootFolder();
@@ -213,28 +213,28 @@ class UArchive {
             if (strpos($destination_dir, $root_folder) !== 0) {
                 //HEURIST_SCRATCH_DIR
                 //HEURIST_TILESTACKS_DIR
-                throw new Exception('Destination folder must within database storage folder ');//$destination_dir.'  '.$root_folder
+                throw new \Exception('Destination folder must within database storage folder ');//$destination_dir.'  '.$root_folder
             }
         }
 
         $fileCount = 0;
         $totalSize = 0;
 
-        $zip = new ZipArchive();
+        $zip = new \ZipArchive();
         if ($zip->open($zipfile) === true) {
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $filename = $zip->getNameIndex($i);
                 $stats = $zip->statIndex($i);
 
                 if (strpos($filename, '../') !== false || substr($filename, 0, 1) === '/') {
-                    throw new Exception('Archive contains unsecure entry '.$filename);
+                    throw new \Exception('Archive contains unsecure entry '.$filename);
                 }
 
                 if (substr($filename, -1) !== '/') {
                     $fileCount++;
                     if ($fileCount > MAX_FILES) {
                         // Reached max. number of files
-                        throw new Exception('Archive contains more than '.MAX_FILES.' entries');
+                        throw new \Exception('Archive contains more than '.MAX_FILES.' entries');
                     }
 
                     $destination_file = $destination_dir.$filename;
@@ -247,7 +247,7 @@ class UArchive {
 
                         if ($totalSize > MAX_SIZE) {
                             // Reached max. size
-                            throw new Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
+                            throw new \Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
                         }
 
                         // Additional protection: check compression ratio
@@ -255,7 +255,7 @@ class UArchive {
                             $ratio = floor($currentSize / $stats['comp_size']);
                             if ($ratio > MAX_RATIO) {
                                 // Reached max. compression ratio
-                                throw new Exception('Maximum allowed compression ration detected ('.$ratio.' > '.MAX_RATIO.')');
+                                throw new \Exception('Maximum allowed compression ration detected ('.$ratio.' > '.MAX_RATIO.')');
                             }
                         }
 
@@ -265,7 +265,7 @@ class UArchive {
                     fclose($fp);
                 } else {
                     if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
-                        throw new Exception('Cannot create subfolder on unzip');
+                        throw new \Exception('Cannot create subfolder on unzip');
                     }
                 }
             }
@@ -284,7 +284,7 @@ class UArchive {
         if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
 
             $res = array();
-            $zip = new ZipArchive;
+            $zip = new \ZipArchive;
             if ( $zip->open( $zipfile ) === true)
             {
                 for ( $i=0; $i < $zip->numFiles; $i++ )
@@ -294,7 +294,7 @@ class UArchive {
 
                     $fp = $zip->getStream( $entry );
                     if (!$fp ) {
-                        throw new Exception('Unable to extract the file.');
+                        throw new \Exception('Unable to extract the file.');
                     }else{
                         $filename = $destination.USanitize::sanitizeFileName(basename($entry));//snyk SSRF
                         $ofp = fopen($filename, 'w' );
@@ -334,7 +334,7 @@ class UArchive {
             $numFiles = 0;
         }
 
-        $phar = new PharData($destination);
+        $phar = new \PharData($destination);
 
         if (false === $phar) {
             return $verbose?('Failed to create bz2 file at '.htmlspecialchars($destination)):false;
@@ -373,7 +373,7 @@ class UArchive {
                 $entry_idx = 0;
                 //$do_not_compress = array('jpg','jpeg','jfif','jpe','gif','png','mp3','mp4','mpg','mpeg','tif','tiff','zip','gzip','kmz','tar');
 
-                $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+                $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source), \RecursiveIteratorIterator::SELF_FIRST);
 
                 foreach ($files as $file) {
 
@@ -421,7 +421,7 @@ class UArchive {
                             // THERE IS NO WAY TO SET INDIVIDUAL COMPRESSION LEVEL PER FILE
                             //$type = strtolower(substr(strrchr($newfile, '.'), 1));
                             //if(in_array($type, $do_not_compress)){
-                            //    $phar->setCompressionIndex($entry_idx, ZipArchive::CM_STORE);
+                            //    $phar->setCompressionIndex($entry_idx, \ZipArchive::CM_STORE);
                             //}
                             $entry_idx++;
 
@@ -457,7 +457,7 @@ class UArchive {
                 return $verbose?$res:false;
             }
 
-            //$phar->compress(Phar::BZ2); it does not work for large data
+            //$phar->compress(\Phar::BZ2); it does not work for large data
 
             if(file_exists($destination.'.bz2')){ //
 
@@ -475,7 +475,7 @@ class UArchive {
 
             return true;
 
-        } catch (Exception  $e){
+        } catch (\Exception  $e){
             error_log( $e->getMessage() );
             return $verbose? ('Cannot create archive '.htmlspecialchars($destination).' '.$e->getMessage()) :false;
         }
@@ -530,11 +530,11 @@ class UArchive {
     public static function bunzip2($in, $out)
     {
         if (!file_exists ($in) || !is_readable ($in)){
-             throw new Exception('Archive file doesn\'t exists');
+             throw new \Exception('Archive file doesn\'t exists');
         }
 
         if ((!file_exists ($out) && !is_writeable (dirname ($out)) || (file_exists($out) && !is_writable($out)) )){
-             throw new Exception('Destination folder or file is not writeable');
+             throw new \Exception('Destination folder or file is not writeable');
         }
 
         $in_file = bzopen ($in, "r");

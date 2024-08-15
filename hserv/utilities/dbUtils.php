@@ -523,10 +523,10 @@ class DbUtils {
 
                 try{
                     $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname='.$database_name_full.';charset=utf8mb4';
-                    $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
+                    $dump = new \Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
 
                     $dump->start($database_dumpfile);
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $e->getMessage());
                     return false;
                 }
@@ -650,7 +650,7 @@ class DbUtils {
                 $unzip_error = null;
                 try{
                     UArchive::unzip($system, $templateFoldersContent, $upload_root.$database_name.'/');
-                }catch(Exception $e){
+                }catch(\Exception $e){
                     array_push($warnings, 'Cannot extract template folders from archive '.$templateFoldersContent
                                 //.' Target :'.$upload_root.$database_name
                                 .' Error: '.$e->getMessage());
@@ -890,14 +890,14 @@ class DbUtils {
                     $needCopyCurrentDbFolder = true;
                     UArchive::bunzip2($archive_file, $database_folder.'dump.sql');
                 }else{
-                    throw new Exception('bz2 extension is not detected');
+                    throw new \Exception('bz2 extension is not detected');
                 }
             }else{
                 $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);
                 $needCopyCurrentDbFolder = ($fileCount==1);
             }
 
-        }catch(Exception $e){
+        }catch(\Exception $e){
             folderDelete($database_folder);
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Cannot unpack database archive. '
                             .' Error: '.$e->getMessage());
@@ -954,7 +954,7 @@ class DbUtils {
                 folderDelete($database_folder);
             }else{
                 $path = realpath(dirname(__FILE__).'/../../../');
-                $now = new DateTime('now', new DateTimeZone('UTC'));
+                $now = self::$system->getNow();
                 fileAdd($database_name.' # restore '.$now->format('Y-m-d'),
                             $path.'/databases_not_to_purge.txt');
             }

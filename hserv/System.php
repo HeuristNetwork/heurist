@@ -2171,7 +2171,7 @@ $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://nov
             }
     }
     
-    private function getNow(){
+    public function getNow(){
         return new \DateTime('now', new \DateTimeZone('UTC'));    
     }
 

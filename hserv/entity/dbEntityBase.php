@@ -266,7 +266,7 @@ abstract class DbEntityBase
                 if(file_exists($path)){
 
                     $dirs = array();
-                    $dir = new DirectoryIterator($path);
+                    $dir = new \DirectoryIterator($path);
                     foreach ($dir as $node) {
                         if ($node->isDir() && !$node->isDot()) {
                             $folder_name = $node->getFilename();

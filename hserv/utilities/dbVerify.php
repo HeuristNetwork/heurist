@@ -1858,7 +1858,7 @@ HEADER;
                     //array_push($ids3, $row['rec_ID']);
                     continue;
                 }
-            }catch(Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
+            }catch(\Exception $e){ // it is invalid, viewed as a string without numbers/numbers separated with a comma + no spaces
                 array_push($bibs3, $row);
                 //array_push($ids3, $row['rec_ID']);
                 continue;
@@ -2446,7 +2446,7 @@ FIXMSG
                             if(strlen($date_val)>=8 && strpos($date_val,'-')==false){ // try automatic convert to ISO format
 
                                 try{
-                                    $t2 = new DateTime($date_val);
+                                    $t2 = new \DateTime($date_val);
 
                                     $format = 'Y-m-d';
                                     if($t2->format('H')>0 || $t2->format('i')>0 || $t2->format('s')>0){
@@ -2458,7 +2458,7 @@ FIXMSG
                                     }
                                     $row['new_value'] = $t2->format($format);
                                     $row['dtl_Value'] = $row['new_value'];// for final ambiguous check
-                                }catch(Exception  $e){
+                                }catch(\Exception  $e){
                                     //skip
                                 }
                             }

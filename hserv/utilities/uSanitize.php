@@ -213,7 +213,7 @@ class USanitize {
     //
     public static function getHTMLPurifier(){
 
-            $config = HTMLPurifier_Config::createDefault();
+            $config = \HTMLPurifier_Config::createDefault();
 
             $config->set('HTML.Doctype', 'HTML 4.01 Transitional');
             $config->set('HTML.DefinitionID', 'html5-definitions');// unqiue id
@@ -245,7 +245,7 @@ class USanitize {
             $def->addAttribute('div', 'data-inited', 'Text');
             $def->addAttribute('a', 'data-ref', 'Text');
 
-            return new HTMLPurifier($config);
+            return new \HTMLPurifier($config);
 
     }
 

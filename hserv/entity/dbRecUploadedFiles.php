@@ -271,7 +271,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     $res = $mysqli->query($query);
                     if ($res){
                             while ($row = $res->fetch_row()) {
-                                $relation = new stdClass();
+                                $relation = new \stdClass();
                                 $relation->recID = intval($row[0]);//file id
                                 $relation->targetID = intval($row[1]);//record id
                                 $relation->dtID  = intval($row[2]);
@@ -753,7 +753,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         $unzip_error = null;
                         try{
                             UArchive::unzip($this->system, $tmp_name, $dest);
-                        } catch (Exception  $e) {
+                        } catch (\Exception  $e) {
                             $unzip_error = $e->getMessage();
                         }
 

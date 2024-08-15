@@ -1,5 +1,6 @@
 <?php
 namespace hserv\utilities;
+use hserv\System;
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 use hserv\utilities\UImage;
@@ -80,7 +81,7 @@ class UploadHandler
             return;
         }
 
-        $system = new hserv\System();
+        $system = new System();
         $res = $system->verify_credentials($heurist_db);
         if(!($res>0)){
             //not logged in

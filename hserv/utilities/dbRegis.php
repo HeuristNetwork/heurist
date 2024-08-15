@@ -37,6 +37,7 @@
 *
 */
 namespace hserv\utilities;
+use hserv\System;
 use hserv\utilities\DbUtils;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
@@ -67,7 +68,7 @@ class DbRegis {
 
         if(!self::$isOutSideRequest){
             //connect
-            self::$system = new hserv\System();
+            self::$system = new System();
             if(self::$system->init(HEURIST_INDEX_DATABASE, true, false)){ //init without paths and consts
                 self::$mysqli = self::$system->get_mysqli();
             }else{
