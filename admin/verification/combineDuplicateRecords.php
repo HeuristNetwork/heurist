@@ -415,8 +415,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 }
                                 $res2->close();
 
-                                if (count($rems))
+                                if (count($rems)){
                                     print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+                                }
 
                                 print '</table>';
 
@@ -489,10 +490,10 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                     //FIXME place a keep checkbox on values for repeatable fields , place a radio button for non-repeatable fields with
                                     //keep_dt_### where ### is detail Type id and mark both "checked" for master record
                                     print '<td style="padding-left:10px;">';
-                                    if(@$rec_requirements[$master_rec_type][$rd_type])
+                                    $repeatCount = 0;
+                                    if(@$rec_requirements[$master_rec_type][$rd_type]){
                                         $repeatCount = intval($rec_requirements[$master_rec_type][$rd_type]['rst_MaxValues']);
-                                    else
-                                        $repeatCount = 0;
+                                    }
 
                                     $is_missing_master = $repeatCount == 1 && !array_key_exists($rd_type, $master_details);
                                     if($is_missing_master && !in_array($rd_type, $missing_in_master)){
@@ -560,8 +561,9 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         .($rem['rem_Freq']=='once' ? ' on ' : ' from ').$rem['rem_StartDate']);
                                 }
                                 $res2->close();
-                                if (count($rems))
+                                if (count($rems)){
                                     print '<tr><td>Reminders</td><td>' . join(', ', $rems) . '</td></tr>';
+                                }
 
                                 print '</table>';
 
@@ -694,8 +696,9 @@ function detail_str($rd_type, $rd_val)
         }
 
 
-    } else
+    } else {
         return $rd_val;
+    }
 }
 
 // ---------------------------------------------- //
@@ -757,11 +760,12 @@ function do_fix_dupe()
                     $add_dt_ids[$matches[2]] = $prepared_values;
                     break;
                 case 'update':
-                    if ($value != "master")$update_dt_ids[$matches[2]] = $prepared_values[0];
+                    if ($value != "master") {$update_dt_ids[$matches[2]] = $prepared_values[0];}
                     break;
                 case 'keep':
                     $keep_dt_ids[$matches[2]] = $prepared_values;
                     break;
+                default;
             }
         }
     }
@@ -796,8 +800,9 @@ function do_fix_dupe()
     if (is_array($keep_dt_ids) && count($keep_dt_ids)){
         $master_keep_ids = array();
         foreach($keep_dt_ids as $dt_id => $details){
-            foreach($details as $detail)
+            foreach($details as $detail){
                 array_push($master_keep_ids,intval($detail));
+            }
         }
     }
     //diff the arrays  don't delet yet as the user might be adding an existing value
@@ -874,14 +879,16 @@ function do_fix_dupe()
     $dup_delete_bkm_ID_to_master_bkm_id = array();
     //for every user or group that bookmarks a dup record if it already bookmarks the master then mark it for deletion
     // otherwise mark it for update to point to the master record
-    if($dup_bkm_UGrpIDs)
-    foreach ($dup_bkm_UGrpIDs as $dup_bkm_ID => $dup_bkm_UGrpID){
-        if (is_array($master_bkm_UGrpIDs) && count($master_bkm_UGrpIDs)>0 && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs)){
-            array_push($delete_bkm_IDs, $dup_bkm_ID);
-            $dup_delete_bkm_ID_to_master_bkm_id[$dup_bkm_ID] = $matching_master_bkm_ID;
-        }else{
-            array_push($update_bkm_IDs, $dup_bkm_ID);
-            $master_bkm_UGrpIDs[$dup_bkm_ID] = $dup_bkm_UGrpID;
+    if($dup_bkm_UGrpIDs){
+        foreach ($dup_bkm_UGrpIDs as $dup_bkm_ID => $dup_bkm_UGrpID){
+            if (is_array($master_bkm_UGrpIDs) && count($master_bkm_UGrpIDs)>0 && $matching_master_bkm_ID = array_search($dup_bkm_UGrpID,$master_bkm_UGrpIDs))
+            {
+                array_push($delete_bkm_IDs, $dup_bkm_ID);
+                $dup_delete_bkm_ID_to_master_bkm_id[$dup_bkm_ID] = $matching_master_bkm_ID;
+            }else{
+                array_push($update_bkm_IDs, $dup_bkm_ID);
+                $master_bkm_UGrpIDs[$dup_bkm_ID] = $dup_bkm_UGrpID;
+            }
         }
     }
     //move duplicate record bookmarks for users without bookmarks on the master record
