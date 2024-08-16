@@ -261,8 +261,29 @@ that._dout('myOnShowEvent');
                             dom = dom + 'B'; 
                             this.options.dataTableParams['buttons'] = ['copy', 'excel', {
                                 extend: 'pdfHtml5',
-                                orientation: 'landscape',
-                                pageSize: 'LEGAL'
+                                orientation: 'portrait',
+                                pageSize: 'A4',
+                                customize: (doc) => {
+                                    // Change to landscape for larger tables
+                                    let setting = window.hWin.HAPI4.get_prefs('columns_datatable');
+                                    let col_count = 0;
+
+                                    if(setting && setting.columns.length > 0){
+
+                                        setting.columns.forEach(field => {
+                                            if(field.visible){
+                                                col_count += $Db.dty(field.data, 'dty_Type') == 'blocktext' ? 3 : 1;
+                                            }
+                                        });
+                                    }else{
+                                        let tableNode = doc.content[1];// [0] => Title
+                                        col_count = tableNode && tableNode.table ? tableNode.table.body[0].length : 10;
+                                    }
+
+                                    if(col_count > 5){
+                                        doc.pageOrientation = 'landscape';
+                                    }
+                                }
                             }];    
                         }
 
