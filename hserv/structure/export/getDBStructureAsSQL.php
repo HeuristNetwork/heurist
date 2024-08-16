@@ -51,8 +51,6 @@ $mysqli = $system->get_mysqli();
 //      Version info in common/config/initialise.php
 //      admin/setup/dbcreate/blankDBStructure.sql - dump structure of hdb_Heurist_Core_Definitions database
 //         and insert where indicated in file
-//      admin/setup/dbcreate/blankDBStructureDefinitionsOnly.sql - copy blankDBStructure.sql and delete
-//         non-definitional tables for temp db creation speed
 //      admin/setup/dbcreate/coreDefinitions.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsHuNI.txt (get this from the admin interface listing in SQL exchange format)
 //      admin/setup/dbcreate/coreDefinitionsFAIMS.txt (get this from the admin interface listing in SQL exchange format)

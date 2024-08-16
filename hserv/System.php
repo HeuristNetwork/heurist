@@ -22,7 +22,6 @@ use hserv\utilities\USanitize;
 */
 
 //declare(strict_types=1);
-//require_once dirname(__FILE__).'/../autoload.php';
 
 require_once dirname(__FILE__).'/structure/dbsUsersGroups.php';
 require_once dirname(__FILE__).'/structure/import/dbsImport.php';
