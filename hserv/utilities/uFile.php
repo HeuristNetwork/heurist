@@ -744,9 +744,11 @@ use hserv\utilities\USanitize;
 
         if ($basePath === $targetPath){
             return '';
-        }elseif (substr($targetPath,0,1)!='/') { //it is already relative
+        }elseif (substr($targetPath,0,1)!='/' && !preg_match('/^[A-Z]:/i',$targetPath)) { //it is already relative
             return $targetPath;
         }
+        
+        
         //else  if(strpos($basePath, $targetPath)===0){
         //    $relative_path = $dirname;
 

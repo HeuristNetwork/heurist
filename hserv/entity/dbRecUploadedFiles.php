@@ -836,6 +836,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //    csv_import (with optional is_download)
     //    delete_unused
     //    regExternalFiles (with optional is_download)
+    //    merge_duplicates
+    //    create_media_records
+    //    bulk_reg_filestore  
+    //    import_data
     public function batch_action(){
 
         $mysqli = $this->system->get_mysqli();
@@ -1556,7 +1560,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     continue;
                 }
 
-                $ulf_ID = fileRegister($this->system, $file);
+                $ulf_ID = fileRegister($this->system, $file); //@todo convert this function to method of this class
                 if($ulf_ID > 0){
                     $created[] = $name . ' => Registered file as #' . $ulf_ID;
                 }else{
@@ -2127,6 +2131,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
     }
 
-
+    //
+    // actions on set of files (called from butch_action)
+    //
+    
+    
 }
 ?>

@@ -474,7 +474,6 @@ $failed_exts = array();
                             $recordType  = RT_MEDIA_RECORD; //media by default
                             $recordURL   = null;
                             $recordNotes = null;
-                            $el_heuristid = array();
                             $lat = null;
                             $lon = null;
                             $filename = null;
@@ -525,7 +524,6 @@ $failed_exts = array();
 
                                     }elseif($key2=="recordId"){
                                         $recordIds[] = $value;
-                                        $el_heuristid[$value] = $el;
                                     }elseif(intval($key2)>0) {
                                         //add to details
                                         $details["t:".$key2] = array("1"=>$value);
@@ -550,9 +548,6 @@ $failed_exts = array();
                                     $query2 = 'SELECT rec_ID FROM Records WHERE rec_ID='.$recId;
                                     $res = mysql__select_value($system->get_mysqli(),$query2);
                                     if (!($res>0)) {
-                                        /*print "<div>File: <i>$filename_base</i> Remove entry $recId</div>";
-                                        unset($el_heuristid[$recId]);
-                                        print 'ok';*/
                                         $notFoundMessage = "<div>File: <i>$filename_base</i> was indexed as rec# $recId. ".
                                             "This record was not found. File will be reindexed</div>";
                                     }else{
@@ -566,7 +561,7 @@ $failed_exts = array();
                                 print $notFoundMessage;
                             }
 
-                            if($recordId==null){ //import only new
+                            if($recordId==null){ //import only new (reocrd that refers this media not found)
 
                                 if($filename){
 
@@ -592,13 +587,14 @@ $failed_exts = array();
                                         print "<div>File: <i>$filename_base</i> <span  style=\"color:red\">".
                                         "File is referenced in fieldhelper.xml but was not found on disk.".
                                         "No record was created.</span></div>";
+                                        //@todo exclude missed file from manifest
                                     }
                                 }
 
                                 if(!$file_id){
                                     continue; //add with valid file only
                                 }
-
+                                
                                 if(is_numeric($lat) && is_numeric($lon) && ($lat!=0 || $lon!=0) ){
                                     $details["t:".$geoDT] = array("1"=>"p POINT ($lon $lat)");
                                 }
@@ -618,50 +614,55 @@ $failed_exts = array();
                                     $details["t:".$key] = array("1"=>$new_md5);
                                 }
 
-                                $record = array();
-                                $record['ID'] = 0; //add new
-                                $record['RecTypeID'] = $recordType;
-                                $record['AddedByImport'] = 2;
-                                $record['no_validation'] = true;
-                                $record['URL'] = $recordURL;
-                                $record['ScratchPad'] = null;
-                                $record['details'] = $details;
-
-                                $out = recordSave($system, $record);//see recordModify.php
-
-                                if ( @$out['status'] != HEURIST_OK ) {
-                                    print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
-                                    htmlspecialchars($out["message"])."</span></div>";
-
+                                $query2 = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID='.$file_id;
+                                $new_recordID = mysql__select_value($system->get_mysqli(),$query2);
+                                if ($new_recordID>0) {
+                                     //int "<div>File: <i>$filename_base</i> <span>".
+                                     //ile is already referenced in system. Record ID:".$dtl_RecID."</span></div>";
+                                     $rep_updated++;
                                 }else{
+                                    $record = array();
+                                    $record['ID'] = 0; //add new
+                                    $record['RecTypeID'] = $recordType;
+                                    $record['AddedByImport'] = 2;
+                                    $record['no_validation'] = true;
+                                    $record['URL'] = $recordURL;
+                                    $record['ScratchPad'] = null;
+                                    $record['details'] = $details;
+
+                                    // create missed record (from data in manifest)
+                                    $out = recordSave($system, $record);//see recordModify.php
+
+                                    if ( @$out['status'] != HEURIST_OK ) {
+                                        print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:red">Error: '.
+                                        htmlspecialchars($out["message"])."</span></div>";
+
+                                    }else{
+                                        $new_recordID = intval($out['data']);
+                                        $rep_added++;
+                                    }
+                                }
+                                                                
+                                if($new_recordID>0){
+                                    
                                     if($new_md5==null){
                                         $new_md5 = md5_file($filename);
                                     }
-                                    $new_recordID = intval($out['data']);
                                     //update xml
-                                    if($recordId==null){
-                                        if($old_md5!=$new_md5){
-                                            print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
-                                            "Warning: Checksum differs from value in manifest; ".
-                                            "data file may have been changed</span></div>";
-                                        }
-                                        $f_item->addChild("heurist_id", $new_recordID);
-                                        $f_item->addChild("md5", $new_md5);
-                                        $f_item->addChild("filesize", filesize($filename));
-
-
-                                        $rep_added++;
-                                    }else{
-                                        $el_heuristid["heurist_id"] = $new_recordID;
-                                        $rep_updated++;
+                                    if($old_md5!=$new_md5){
+                                        print '<div>File: <i>'.htmlspecialchars($filename_base).'</i> <span  style="color:#ff8844">'.
+                                        "Warning: Checksum differs from value in manifest; ".
+                                        "data file may have been changed</span></div>";
                                     }
+                                    $f_item->addChild("heurist_id", $new_recordID);
+                                    $f_item->addChild("md5", $new_md5);
+                                    $f_item->addChild("filesize", filesize($filename));
 
                                     if (@$out['warning']) {
                                         print '<div>File: <i>'.htmlspecialchars($filename_base).
                                         '</i> <span  style="color:#ff8844">Warning: '.
                                         htmlspecialchars(implode(";",$out["warning"]))."</span></div>";
                                     }
-
                                 }
                                 $rep_processed++;
 
@@ -755,7 +756,7 @@ XML;
                             $file_id = null;
                             continue;
                         }
-
+                        
                         $details["t:".$titleDT] = array("1"=>$flleinfo['basename']);
                         /* TODO - extract these data from exif
                         $details["t:".$descriptionDT] = array("1"=>$file_id);
@@ -797,17 +798,7 @@ XML;
                             $details["t:".$key] = array("1"=>filesize($filename));
                         }
 
-                        //add-update Heurist record
-                        $record = array();
-                        $record['ID'] = 0; //add new
-                        $record['RecTypeID'] = RT_MEDIA_RECORD;
-                        $record['AddedByImport'] = 2;
-                        $record['no_validation'] = true;
-                        $record['URL'] = null;
-                        $record['ScratchPad'] = $recordNotes;
-                        $record['details'] = $details;
 
-                        $out = recordSave($system, $record);//see recordModify.php
 
                         $f_item = $f_items->addChild("item");
                         $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));
@@ -825,16 +816,37 @@ XML;
                         $f_item->addChild("md5", $new_md5);
                         $f_item->addChild("filesize", filesize($filename));
 
+                        $query2 = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID='.$file_id;
+                        $new_recordID = mysql__select_value($system->get_mysqli(),$query2);
+                        if ($new_recordID>0) {
+                            //print "<div>File: <i>$filename_base</i> <span>".
+                            //"File is already referenced in system. Record ID:".$dtl_RecID."</span></div>";
+                            $rep_updated++;
 
-                        if ( @$out['status'] != HEURIST_OK ) {
-                            print '<div>File: <i>'.htmlspecialchars($filename_base)
-                            .'</i> <span style="color:red">Error: '.htmlspecialchars($out["message"])."</span></div>";
                         }else{
-                            $new_recordID = intval($out['data']);
-                            $f_item->addChild("heurist_id", $new_recordID);
-                            $cnt_added++;
+                            //add-update Heurist record
+                            $record = array();
+                            $record['ID'] = 0; //add new
+                            $record['RecTypeID'] = RT_MEDIA_RECORD;
+                            $record['AddedByImport'] = 2;
+                            $record['no_validation'] = true;
+                            $record['URL'] = null;
+                            $record['ScratchPad'] = $recordNotes;
+                            $record['details'] = $details;                            
+                            $out = recordSave($system, $record);//see recordModify.php
+                            
+                            if ( @$out['status'] != HEURIST_OK ) {
+                                print '<div>File: <i>'.htmlspecialchars($filename_base)
+                                .'</i> <span style="color:red">Error: '.htmlspecialchars($out["message"])."</span></div>";
+                            }else{
+                                $new_recordID = intval($out['data']);
+                                $cnt_added++;
+                            }
                         }
-
+                        
+                        if($new_recordID>0){
+                            $f_item->addChild("heurist_id", $new_recordID);
+                        }
 
                         $rep_processed_dir++;
                     }//check ext
