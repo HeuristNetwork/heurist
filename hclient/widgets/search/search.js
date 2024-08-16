@@ -97,7 +97,10 @@ $.widget( "heurist.search", {
                             if(window.hWin.HEURIST4.util.isFunction($('body')['searchByEntity'])){
                                 __initEntityFilter();
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Widget searchByEntity not loaded. Verify your configuration');
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    message: 'Widget searchByEntity not loaded. Verify your configuration',
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             }
                     });
 

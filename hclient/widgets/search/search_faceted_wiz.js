@@ -1735,7 +1735,10 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(facets.length == 0){
                 if(fieldIds.length > 0){
-                    window.hWin.HEURIST4.msg.showMsgErr('An error occurred while preparing your selected facets.<br>Please report this bug to the Heurist team.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'An error occurred while preparing your selected facets.',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }
                 return;
             }

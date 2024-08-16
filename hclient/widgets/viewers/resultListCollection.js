@@ -260,8 +260,11 @@ $.widget( "heurist.resultListCollection", {
         
         if(!this.options.target_db){
             
-            window.hWin.HEURIST4.msg.showMsgErr('Wrong configuration. Target database for mapspace is not defined');
-            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Wrong configuration. Target database for mapspace is not defined',
+                error_title: 'Missing target database'
+            });
+
         }else
         if(!window.hWin.HEURIST4.util.isempty(this._collection)){
             
