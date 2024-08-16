@@ -2153,11 +2153,14 @@ $.widget( "heurist.svs_list", {
 
                 }else{
 
-                    window.hWin.HEURIST4.msg.showMsgErr("This faceted search is in an old format. "
-                        + "Please delete it and add a new one (right click in the saved search list). "
-                        + "We apologise for this inconvenience, but we have added many new features to the facet search "
-                        + "function and it was not cost-effective to provide backward compatibility (given the relative "
-                        + "ease of rebuilding searches and the new features now available).");
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: "This faceted search is in an old format. "
+                                + "Please delete it and add a new one (right click in the saved search list). "
+                                + "We apologise for this inconvenience, but we have added many new features to the facet search "
+                                + "function and it was not cost-effective to provide backward compatibility (given the relative "
+                                + "ease of rebuilding searches and the new features now available).",
+                        error_title: 'Out dated facet formatting'
+                    });
                     return;
                 }
                 
@@ -2530,7 +2533,10 @@ $.widget( "heurist.svs_list", {
     // IJ 2022-10-04 Block use here, Publish alternative are to be used instead
     //
     _showEmbedDialog: function(svs_ID){
-        window.hWin.HEURIST4.msg.showMsgErr('Embed is no longer supported. Please use the much more flexible standalone web page builder or the website builder, which are located under the Publish menu.');
+        window.hWin.HEURIST4.msg.showMsgErr({
+            message: 'Embed is no longer supported. Please use the much more flexible standalone web page builder or the website builder, which are located under the Publish menu.',
+            status: window.hWin.ResponseStatus.ACTION_BLOCKED
+        });
     },
 
     //--------------------------------------------------------------------------------------
@@ -2559,8 +2565,12 @@ $.widget( "heurist.svs_list", {
                             resTreeData = that.__clean_TreeData(resTreeData, 0, 0);    
                         }else{
                             resTreeData = null;
-                            window.hWin.HEURIST4.msg.showMsgErr('Server returns saved filters tree data in wrong format.'
-                            +'<br>New default treeview will be created');
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: 'Server returns saved filters tree data in wrong format.'
+                                        +'<br>New default treeview will be created',
+                                error_title: 'Invalid formatting',
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
                         }
                     }
                     catch (err) {

@@ -432,7 +432,11 @@ $.widget( "heurist.app_storymap", {
                     setTimeout(function(){ that._initCompleted(); },200);
                     return;
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('Mapping widget for story map is not inited properly');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Mapping widget for story map is not inited properly',
+                        error_title: 'Map not initialised',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }
             }
         }
