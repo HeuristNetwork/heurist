@@ -678,7 +678,10 @@ function doRegister( parentwin, is_guest=false ){
             if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
                 doRegister( parentwin, is_guest );
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Widget "Profile edit" cannot be loaded!',
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                });
             }
         });
     }

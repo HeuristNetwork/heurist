@@ -183,13 +183,16 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         
                         if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
 
-                            let sMsg = '<p>Finding duplicates in '+response.message+' records will be extremely slow and could overload our server under some circumstances.</p>' 
+                            let sMsg = `<p>Finding duplicates in ${response.message} records will be extremely slow and could overload our server under some circumstances.</p>` 
 +'<p>In order to streamline the process, please specify a field on which to sort the records. Typically use the constructed title, or a name or title field which will ensure that potential duplicates sort close to one-another. The sort is alphabetical.</p>' 
 +'<p>We then search for duplicates in a sliding window of 10,000 records within this sorted list</p>'
 +'<p>You may further increase speed by setting "Group by beginning"</p>';
 
                             
-                            window.hWin.HEURIST4.msg.showMsgErr(sMsg);    
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: sMsg,
+                                status: window.hWin.ResponseStatus.ACTION_BLOCKED 
+                            });    
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);    

@@ -194,7 +194,10 @@ $.widget( "heurist.profile_edit", {
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
                                 that._fromDataToUI();
                             }else{
-                                that.options.parentwin.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
+                                that.options.parentwin.HEURIST4.msg.showMsgErr({
+                                    message: "Unexpected user data obtained from server",
+                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                                });
                             }
                         }else{
                             that.options.parentwin.HEURIST4.msg.showMsgErr(response, true);
@@ -415,7 +418,11 @@ $.widget( "heurist.profile_edit", {
             }
 
         }else{
-            parentWin.HEURIST4.msg.showMsgErr(err_text);
+            parentWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Missing required fields',
+                status: window.hWin.ResponseStatus.INVALID_REQUEST
+            });
             /*let message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
             setTimeout(function() {

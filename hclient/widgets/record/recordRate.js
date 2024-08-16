@@ -62,7 +62,10 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
             let rating = this.element.find('input[type=radio]:checked').val();
             
             if(!(rating>=0 && rating<6)){
-                window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please specify rating value',
+                    status: window.hWin.ResponseStatus.INVALID_REQUEST
+                });
                 return;
             }
             
