@@ -206,7 +206,7 @@ $requestUri:
 
         $params['db'] = $database;
 
-        require_once '../hserv/utilities/uSystem.php';
+        require_once '../hserv/utilities/USystem.php';
         $host_params = hserv\utilities\USystem::getHostParams();
 
         if($action=='web' || $action=='website'){
@@ -412,7 +412,7 @@ if($isMediaRequest){
 $database_url = null;
 
 if ($database_id>0) {
-    include_once dirname(__FILE__).'/../hserv/utilities/dbRegis.php';
+    include_once dirname(__FILE__).'/../hserv/utilities/DbRegis.php';
 
     if(!isset($system)){
         $system = new hserv\System();//to keep error

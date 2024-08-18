@@ -562,7 +562,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         if($is_zip){
             ob_start();
             readfile($filename);
-            $output = gzencode(ob_get_contents(),6);
+            $output = gzencode(ob_get_contents(),6); //memory overflow may happen here
             ob_end_clean();
             echo $output;
             unset($output);

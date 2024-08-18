@@ -549,6 +549,8 @@ CREATE TABLE recThreadedComments (
 --
 -- Table structure for table 'recUploadedFiles'
 --
+--  ulf_Visibility enum('viewable','hidden','public','pending') NULL COMMENT "Defines if the file is visible when not logged in. If public or blank then file is visible to all',
+--  ulf_MD5Checksum text(32) NULL COMMENT "A checksum for the uploaded file which can be used to verify integrity and to merge duplicates",
 
 CREATE TABLE recUploadedFiles (
   ulf_ID mediumint unsigned NOT NULL auto_increment COMMENT 'A unique numeric file ID used as filename to store the data on disk and should be different ids if shared',
