@@ -1721,10 +1721,14 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         if(!this._checkUserPermissions(1)){
             return;
         }
-
+        
+        const session_id = window.hWin.HEURIST4.msg.showProgress( {interval:900, 
+            steps:['Uploaded files by fullpath','External resources','Uploaded files by name and checksum','Merging, Update reference records, Delete']} );
+        
         let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
         let request = {
+            'session': session_id,
             'a': 'batch',
             'entity': that.options.entity.entityName,
             'merge_duplicates': 'all' //ids
@@ -1732,25 +1736,35 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
         function(response){
+            
+            window.hWin.HEURIST4.msg.hideProgress();
+                
             if(response.status == window.hWin.ResponseStatus.OK){
                 
                 let res = response.data;
                 let msg = '';
 
-                if(res.local > 0 || res.location_local > 0){
-                    let local_other = res.location_local > 0 ? res.location_local > 0 : 0;
-                    msg = (res.local + local_other) + ' local files processed';
-                }
-                if(res.remote > 0){
-                    msg += (msg == '' ? '<br>' : '') + res.remote + ' remote files processed';
-                }
+                if(res?.local > 0){
+                    msg += res.local + ' duplications by fullpath<br><br>';
+                } 
+                if(res?.local_checksum > 0){
+                    msg += res.local_checksum + ' duplications by checksum and original file name<br><br>';
+                } 
+                if(res?.remote > 0){
+                    msg += res.remote + ' duplications for remote resources<br>';
+                } 
+                if(res?.tumbnails > 0){
+                    msg += res.tumbnails + ' redundant thumbnails<br>';
+                } 
 
                 if(msg == ''){
-                    msg = 'No duplicates found';
+                    window.hWin.HEURIST4.msg.showMsgFlash('No duplicates found', 3000);
+                }else{
+                    msg = `<div style="font-size:1.em">${msg}</div>`;
+                    window.hWin.HEURIST4.msg.showMsg(msg, {title:window.hWin.HR('Combine duplicates')});
+                    that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh    
                 }
-
-                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
-                that.searchForm.searchRecUploadedFiles('searchRecent', null); // refresh
+                
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }

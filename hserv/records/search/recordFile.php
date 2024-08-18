@@ -63,7 +63,6 @@ require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 */
 function fileRegister($system, $fullname, $description=null){
 
-
     $file_id = fileGetByFileName($system, $fullname);//check if it is already registered
 
     if(!($file_id>0)) {

@@ -3,6 +3,7 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\utilities\UArchive;
 use hserv\utilities\USanitize;
+use hserv\utilities\DbUtils;
 
     /**
     * db access to recUploadedFiles table
@@ -39,7 +40,7 @@ require_once dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php';
 class DbRecUploadedFiles extends DbEntityBase
 {
     private $error_ext;
-
+    
     //
     // constructor - load configuration from json file
     //
@@ -1077,257 +1078,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
         }
         elseif(@$this->data['merge_duplicates']){ // merge duplicate local + remote files
-
-            $ids = prepareIds($this->data['merge_duplicates']);
-            $where_ids = '';
-
-            $local_fixes = 0;
-            $remote_fixes = 0;
-            $dif_local_fixes = 0;
-            $to_delete = array();// array(new_ulf_id => array(dup_ulf_ids))
-
-            if(is_array($ids) && count($ids) > 0){ // multiple
-                $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
-            }elseif(is_int($ids) && $ids > 0){ // single
-                $where_ids .= ' AND ulf_ID = ' . intval($ids);
-            }// else use all
-
-            //search for duplicated local files
-            $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
-            $local_dups = $mysqli->query($query);
-
-            if($local_dups && $local_dups->num_rows > 0){
-
-                //find id with duplicated path+name
-                while($local_file = $local_dups->fetch_row()){
-
-                    $path = ' IS NULL';
-                    $fname = ' IS NULL';
-                    $params = array('');
-                    if(@$local_file[0]!=null){
-                        $path = '=?';
-                        $params[0] = 's';
-                        $params[] = $local_file[0];
-                    }
-                    if(@$local_file[1]!=null){
-                        $fname = '=?';
-                        $params[0] = $params[0].'s';
-                        $params[] = $local_file[1];
-                    }
-
-                    //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
-                    //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
-
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath'
-                        .  $path
-                        .' AND ulf_FileName '.$fname
-                        . $where_ids;
-
-                    $res = mysql__select_param_query($mysqli, $query, $params);
-
-                    //$res = $mysqli->query($query);
-
-                    $dups_ids = array();
-                    if($res){
-                        while ($local_id = $res->fetch_row()) {
-                            array_push($dups_ids, intval($local_id[0]));
-                        }
-                        $res->close();
-                    }
-
-                    $new_ulf_id = array_shift($dups_ids);
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($new_ulf_id)
-                        .' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $mysqli->query($upd_query);
-
-                    if($mysqli->error !== ''){
-                        $ret = false;
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        break;
-                    }elseif($mysqli->affected_rows == 0){
-                        continue;
-                    }
-
-                    $to_delete[$new_ulf_id] = $dups_ids;
-
-                    $local_fixes = $local_fixes + count($dups_ids);
-                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-                    //$mysqli->query($del_query);
-                }
-                $local_dups->close();
-            }
-
-            //search for duplicated remote files
-            $query = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles WHERE ulf_ExternalFileReference IS NOT NULL'. $where_ids .' GROUP BY ulf_ExternalFileReference HAVING cnt > 1';
-            $remote_dups = $mysqli->query($query);
-
-            if ($remote_dups && $remote_dups->num_rows > 0) {
-
-                //find id with duplicated url
-                while ($res = $remote_dups->fetch_row()) {
-
-                    if(@$res[0]==null || $res[0]=='') {
-                        continue;
-                    }
-
-                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
-                             .$where_ids;
-                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
-
-                    $dups_ids = array();
-                    while ($remote_id = $res->fetch_row()) {
-                        array_push($dups_ids, intval($remote_id[0]));
-                    }
-                    $res->close();
-
-                    $new_ulf_id = array_shift($dups_ids);
-
-                    $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.$new_ulf_id.' WHERE dtl_UploadedFileID in ('.implode(',',$dups_ids).')';
-                    $mysqli->query($upd_query);
-
-                    if($mysqli->error !== ''){
-                        $ret = false;
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        break;
-                    }elseif($mysqli->affected_rows == 0){
-                        continue;
-                    }
-
-                    $to_delete[$new_ulf_id] = $dups_ids;
-
-                    $remote_fixes = $remote_fixes + count($dups_ids);
-                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
-                    //$mysqli->query($del_query);
-                }
-
-                $remote_dups->close();
-            }
-
-            // Check dup local file's size and checksum against each other
-            $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
-            . 'FROM recUploadedFiles '
-            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
-            . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
-            $local_dups = $mysqli->query($query);
-
-            if($local_dups && $local_dups->num_rows > 0){
-
-                while($local_file = $local_dups->fetch_row()){
-
-                    $fname = (@$local_file[0]!=null)?$local_file[0]:'';
-
-                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName=?';
-
-                    $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
-
-                    $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
-
-                    while ($file_dtls = $dup_local_files->fetch_assoc()) {
-
-                        //compare files
-                        if(@$file_dtls['ulf_FilePath']==null){
-                            $res_fullpath = $file_dtls['ulf_FileName'];
-                        }else{
-                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] );//see recordFile.php
-                        }
-
-                        if(file_exists($res_fullpath)){
-                            $f_size = filesize($res_fullpath);
-                            $f_md5 = md5_file($res_fullpath);
-
-                            $file_id = intval($file_dtls['ulf_ID']);
-
-                            $is_unique = true;
-                            foreach ($dups_files as $ulf_ID => $file_arr){
-                                if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
-                                    $is_unique = false;
-                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
-                                    break;
-                                }
-                            }
-                            if($is_unique){
-                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath,
-                            }
-                        }
-                    }
-                    $dup_local_files->close();
-
-                    foreach ($dups_files as $ulf_ID => $file_arr) {
-                        if(count($file_arr['dups']) > 0){
-
-                            $dup_ids = implode(',', $file_arr['dups']);
-                            $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.$ulf_ID.' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
-                            $affected_rows = $mysqli->query($upd_query);
-
-                            if($mysqli->error !== ''){
-                                $ret = false;
-                                $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                                break;
-                            }elseif($mysqli->affected_rows == 0){
-                                continue;
-                            }
-
-                            $to_delete[$ulf_ID] = $file_arr['dups'];
-                            $dif_local_fixes = $dif_local_fixes + count($file_arr['dups']);
-                        }
-                    }
-                }
-            }
-
-            // Add existing descriptions in dup records to new main record, then delete
-            if($ret && count($to_delete) > 0){
-                foreach ($to_delete as $ulf_ID => $d_ids) {
-
-                    $dup_ids = $d_ids;
-                    if(is_array($dup_ids)){
-                        $dup_ids = implode(',', $dup_ids);
-                        $to_delete[$ulf_ID] = $dup_ids;
-                    }
-
-                    // Concat descriptions
-                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID IN (' . $dup_ids . ') AND ulf_Description != ""';
-                    $res = $mysqli->query($query);
-                    $extra_desc = "";
-
-                    if($mysqli->error != ''){
-                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
-                        $ret = false;
-                        break;
-                    }elseif(!$res){
-                        $this->system->addError(HEURIST_DB_ERROR, 'An unknown error occurred');
-                        $ret = false;
-                        break;
-                    }
-
-                    while($file_desc = $res->fetch_row()){
-                        $extra_desc .= $file_desc[0] . "\n";
-                    }
-
-                    $query = 'SELECT ulf_Description FROM recUploadedFiles WHERE ulf_ID = ' . $ulf_ID;
-                    $res = $mysqli->query($query);
-
-                    if($mysqli->error == ''){
-                        $desc = $res->fetch_row()[0];
-                        if(!empty($desc)){
-                            $extra_desc = $desc . "\n" . $extra_desc;
-                        }
-                    }
-
-                    if(!empty($extra_desc)){
-                        $upd_query = 'UPDATE recUploadedFiles SET ulf_Description=? '
-                                    .' WHERE ulf_ID=' . intval($ulf_ID);
-                        mysql__exec_param_query($mysqli, $upd_query, array('s', $extra_desc));
-                    }
-                }
-
-                // Delete files
-                $this->data[$this->primaryField] = $to_delete;
-                $ret = $this->delete();
-            }
-
-            if($ret){
-                $ret = array('local' => $local_fixes, 'remote' => $remote_fixes, 'location_local' => $dif_local_fixes);
-            }
+            $ret = $this->mergeDuplicates();
         }
         elseif(@$this->data['create_media_records']){ // create Multi Media records for files without one
 
@@ -1723,7 +1474,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //
     //
-    public function delete($disable_foreign_checks = false){
+    public function delete($keep_uploaded_files=false){ //$disable_foreign_checks = false
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
@@ -1758,10 +1509,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }
 
-
-        //gather data to remove files
+        //collect data to remove files
         $query = 'SELECT ulf_ObfuscatedFileID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID in ('
-                .implode(',',$this->recordIDs).')';
+                .implode(',', $this->recordIDs).')';
 
         $res = $mysqli->query($query);
         if ($res){
@@ -1799,9 +1549,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             return false;
         }else{
 
-            //remove files from webimagecache
+            //remove files and webimagecache
             foreach ($file_data as $file_id=>$file){
-                if($file['path']!=null){
+                //remove main uploaded file
+                if(!$keep_uploaded_files && $file['path']!=null){
                     unlink($file['path']);
                 }
                 //remove thumbnail
@@ -2130,11 +1881,399 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        return $ulf_ID;
 
     }
+    
+    //
+    // $is_concatente - true, concatenate all unique values, otherwise takes first non empty
+    //
+    private function mergeDuplicatesFields($fieldName, $ulf_ID, $dup_IDs, $is_concatenate=false){
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        $ulf_ID = intval($ulf_ID);
+        
+        $query = "SELECT $fieldName FROM recUploadedFiles WHERE ulf_ID=$ulf_ID AND $fieldName != ''";
+        $main_value = mysql__select_value($mysqli, $query);
+
+        if(!$is_concatenate && $main_value){
+            return; //value is already set   
+        }
+        
+        $query = "SELECT DISTINCT $fieldName FROM recUploadedFiles WHERE ulf_ID IN ($dup_IDs) AND $fieldName != ''";
+        $values = mysql__select_list2($mysqli, $query);
+
+        if(empty($values)){
+            return; //nothing found
+        }    
+
+        $new_value = $main_value;
+        
+        foreach($values as $val){
+            if($main_value!=$val){
+                $new_value = ($new_value?($new_value."\n"):'').$val;
+                if(!$is_concatenate){
+                    break; //one non empty value is enough  
+                }
+            }
+        }
+        
+        if($new_value){
+            $upd_query = "UPDATE recUploadedFiles SET $fieldName=? WHERE ulf_ID=$ulf_ID";
+            mysql__exec_param_query($mysqli, $upd_query, array('s', $new_value));
+        }
+        
+    }
 
     //
     // actions on set of files (called from butch_action)
     //
+    private function mergeDuplicates(){
+        
+            define('SPECIAL_FOR_LIMC_FRANCE', true); //remove unlinked ref records and files from upload_files/...thumbnail
+            define('TERMINATED_BY_USER', 'Merging Duplications has been terminated by user');
+            
+            $ret = true;
+        
+            $mysqli = $this->system->get_mysqli();
     
+            $session_id = intval(@$this->data['session']);
+            if($session_id>0){
+                DbUtils::initialize();
+                DbUtils::setSessionId($session_id);//start progress session
+            }
+
     
+            $ids = prepareIds($this->data['merge_duplicates']);
+            $where_ids = '';
+
+            $cnt_local_fixes_by_path = 0;
+            $cnt_local_fixes_by_checksum  = 0;
+            $cnt_remote_fixes = 0;
+            $cnt_thumbnails = 0;
+            
+            $to_delete_ids_with_files = array();//for files with different upload names and same md5 and original name
+            $to_delete_ids = array();
+            
+            $to_delete = array();
+
+            if(is_array($ids) && count($ids) > 1){ // multiple
+                $where_ids .= ' AND ulf_ID IN (' . implode(',', $ids) . ')';
+                //elseif(is_int($ids) && $ids > 0){ 
+                // single
+                //$where_ids .= ' AND ulf_ID = ' . intval($ids);
+            }
+            // else use all
+            
+            if(SPECIAL_FOR_LIMC_FRANCE){
+                //remove files from thumbnail
+$query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_files/%" AND ulf_FilePath LIKE "%/thumbnail/"';
+                $to_delete_thumbs = mysql__select_list2($mysqli, $query);
+                if(!empty($to_delete_thumbs)){
+                    $records_without_links = mysql__select_list2($mysqli,
+    'SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)'
+    .' WHERE dtl_UploadedFileID IN ('.implode(',',$to_delete_thumbs).') GROUP BY dtl_RecID HAVING cnt=0');
+                    if(!empty($records_without_links)){
+                        recordDelete($this->system, $records_without_links);   
+                    }
+                    $this->data[$this->primaryField] = $to_delete_thumbs;
+                    $res = $this->delete();
+                    
+                    $cnt_thumbnails = $cnt_thumbnails + count($to_delete_thumbs);
+                }
+            }
+
+            //1. ---------------------------------------------------------------
+            //search for duplicated local files - with the same name and path 
+            $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+            
+            $cnt = 0;
+            $tot_cnt = $local_dups->num_rows;
+
+            if($local_dups &&  $tot_cnt > 0){
+
+                //find id with duplicated path+name
+                while($local_file = $local_dups->fetch_row()){
+
+                    $path = ' IS NULL';
+                    $fname = ' IS NULL';
+                    $params = array('');
+                    if(@$local_file[0]!=null){
+                        $path = '=?';
+                        $params[0] = 's';
+                        $params[] = $local_file[0];
+                    }
+                    if(@$local_file[1]!=null){
+                        $fname = '=?';
+                        $params[0] = $params[0].'s';
+                        $params[] = $local_file[1];
+                    }
+
+                    //$path = (@$local_file[0]!=null) ? ('="' . $mysqli->real_escape_string($local_file[0]) . '"') : ' IS NULL';
+                    //$fname = (@$local_file[1]!=null) ? ('="' . $mysqli->real_escape_string($local_file[1]) . '"') : ' IS NULL';
+                    
+                    //find IDS with the same name and path
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath'
+                        .  $path
+                        .' AND ulf_FileName '.$fname
+                        . $where_ids;
+
+                    $res = mysql__select_param_query($mysqli, $query, $params);
+
+                    //$res = $mysqli->query($query);
+
+                    $dups_ids = array();
+                    if($res){
+                        while ($local_id = $res->fetch_row()) {
+                            array_push($dups_ids, intval($local_id[0]));
+                        }
+                        $res->close();
+                    }
+
+                    //update references in recDetails    
+                    $new_ulf_id = intval(array_shift($dups_ids)); //get first
+                    $to_delete[$new_ulf_id] = $dups_ids;
+                    $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
+                    
+                    if(DbUtils::setSessionVal('0,'.$cnt.','.$tot_cnt)){            
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    $cnt++;
+
+                    $cnt_local_fixes_by_path = $cnt_local_fixes_by_path + count($dups_ids);
+
+                }//while
+                $local_dups->close();
+            }
+            
+            
+            if($ret){
+            //2. ---------------------------------------------------------------
+            // Check dup local file's size and checksum against each other
+            $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
+            . 'FROM recUploadedFiles '
+            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
+            . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
+            $local_dups = $mysqli->query($query);
+            $cnt = 0;
+            $tot_cnt = $local_dups->num_rows;
+
+            if($local_dups && $tot_cnt > 0){
+
+                while($local_file = $local_dups->fetch_row()){
+
+                    $fname = (@$local_file[0]!=null)?$local_file[0]:'';
+
+                    $dup_query = 'SELECT ulf_ID, ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_OrigFileName=?';
+
+                    $dup_local_files = mysql__select_param_query($mysqli, $dup_query, array('s', $fname));
+
+                    $dups_files = array();//ulf_ID => path, size, md, array(dup_ulf_ids)
+
+                    while ($file_dtls = $dup_local_files->fetch_assoc()) {
+                        
+                        $file_id = intval($file_dtls['ulf_ID']);
+                        
+                        if(array_key_exists($file_id, $to_delete) || in_array($file_id, $to_delete_ids))
+                        {
+                            continue; //already detected as duplicated in previous step
+                        }
+
+                        //compare files
+                        if(@$file_dtls['ulf_FilePath']==null){
+                            $res_fullpath = $file_dtls['ulf_FileName'];
+                        }else{
+                            $res_fullpath = resolveFilePath( $file_dtls['ulf_FilePath'].$file_dtls['ulf_FileName'] );//see recordFile.php
+                        }
+
+                        if(file_exists($res_fullpath)){
+                            $f_size = filesize($res_fullpath);
+                            $f_md5 = md5_file($res_fullpath);
+
+
+                            $is_unique = true;
+                            foreach ($dups_files as $ulf_ID => $file_arr){
+                                if ($file_arr['size'] == $f_size && $file_arr['md5'] == $f_md5){ // same file
+                                    $is_unique = false;
+                                    $dups_files[$ulf_ID]['dups'][] = $file_id;
+                                    break;
+                                }
+                            }
+                            if($is_unique){
+                                $dups_files[$file_id] = array('md5'=>$f_md5, 'size'=>intval($f_size), 'dups'=>array());//'path'=>$res_fullpath,
+                            }
+                        }
+                    }//while
+                    $dup_local_files->close();
+
+                    
+                    foreach ($dups_files as $ulf_ID => $file_arr) {
+                        if(!empty($file_arr['dups'])){
+
+                            $to_delete[$ulf_ID] = $file_arr['dups'];
+                            $to_delete_ids_with_files = array_merge($to_delete_ids_with_files, $file_arr['dups']);
+                            
+                            $cnt_local_fixes_by_checksum = $cnt_local_fixes_by_checksum + count($file_arr['dups']);
+                        }
+                    }//foreach
+                    
+                    if($cnt%10==0){
+                    if(DbUtils::setSessionVal('1,'.$cnt.','.$tot_cnt)){            
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    }
+                    $cnt++;
+                    
+                }//while main
+            }
+
+            }
+            
+            if($ret){
+
+            //3. ---------------------------------------------------------------
+            //search for duplicated remote files
+            $query = 'SELECT ulf_ExternalFileReference, count(*) as cnt FROM recUploadedFiles WHERE ulf_ExternalFileReference IS NOT NULL'. $where_ids .' GROUP BY ulf_ExternalFileReference HAVING cnt > 1';
+            $remote_dups = $mysqli->query($query);
+            $cnt = 0;
+            $tot_cnt = $remote_dups->num_rows;
+
+            if ($remote_dups && $tot_cnt > 0) {
+
+                //find id with duplicated url
+                while ($res = $remote_dups->fetch_row()) {
+
+                    if(@$res[0]==null || $res[0]=='') {
+                        continue;
+                    }
+
+                    $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference=? '
+                             .$where_ids;
+                    $res = mysql__select_param_query($mysqli, $query, array('s', $res[0]));
+
+                    $dups_ids = array();
+                    while ($remote_id = $res->fetch_row()) {
+                        array_push($dups_ids, intval($remote_id[0]));
+                    }
+                    $res->close();
+
+                    $new_ulf_id = intval(array_shift($dups_ids));
+                    $to_delete[$new_ulf_id] = $dups_ids;
+                    
+                    $to_delete_ids = array_merge($to_delete_ids, $dups_ids);
+                    
+                    
+                    if(DbUtils::setSessionVal('2,'.$cnt.','.$tot_cnt)){            
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    $cnt++;
+
+                    $cnt_remote_fixes = $cnt_remote_fixes + count($dups_ids);
+                    //$del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.implode(',',$dups_ids).')';
+                    //$mysqli->query($del_query);
+                }//while
+
+                $remote_dups->close();
+            }
+            }
+            
+            //4. ------------------------------------------------------------------
+            // Merge description fields to new main record, remove references in recDetails, then delete
+            $cnt = 0;
+            $tot_cnt = count($to_delete);
+            
+            if($ret &&  $tot_cnt > 0){
+                
+                DbUtils::setSessionVal('3');
+                
+                foreach ($to_delete as $ulf_ID => $d_ids) {
+
+                    $dup_ids = $d_ids;
+                    if(is_array($dup_ids)){
+                        $dup_ids = implode(',', $dup_ids);
+                        //$to_delete[$ulf_ID] = $dup_ids;
+                    }else{
+                        $d_ids = array($d_ids);
+                    }
+                    
+                    //merge other fields ulf_Caption, ulf_Description, ulf_Copyright, ulf_Copyowner
+                    $this->mergeDuplicatesFields('ulf_Description', $ulf_ID, $dup_ids, true);
+                    $this->mergeDuplicatesFields('ulf_Caption', $ulf_ID, $dup_ids);
+                    $this->mergeDuplicatesFields('ulf_Copyright', $ulf_ID, $dup_ids);
+                    $this->mergeDuplicatesFields('ulf_Copyowner', $ulf_ID, $dup_ids);
+                    
+                    if(SPECIAL_FOR_LIMC_FRANCE){                    
+                    //remove referenced records if they are not linked anywhere
+                    $records_without_links = mysql__select_list2($mysqli,
+"SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)"
+." WHERE dtl_UploadedFileID IN ($dup_ids) GROUP BY dtl_RecID HAVING cnt=0");
+                    recordDelete($this->system, $records_without_links);
+                    }
+                    
+                    //remove references in recDetails
+                    $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.intval($ulf_ID)
+                                    .' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
+                    $mysqli->query($upd_query);
+
+                    if($mysqli->error !== ''){
+                        $ret = false;
+                        $this->system->addError(HEURIST_DB_ERROR, $mysqli->error);
+                        break;
+                    }
+                    
+                    if($cnt%10==0){
+                    if(DbUtils::setSessionVal('3,'.$cnt.','.$tot_cnt)){            
+                            //terminated by user
+                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $ret = false;
+                            break;
+                    }
+                    }
+                    $cnt++;
+                    
+                }//for
+
+                if($ret){
+                
+                    if(!empty($to_delete_ids)){
+                        // Delete files - except local by path - remove only table entry and thumbnail!!!!!
+                        $this->data[$this->primaryField] = $to_delete_ids;
+                        $ret = $this->delete(true); //keep uploaded files
+                        
+                        foreach($to_delete_ids as $id){
+                            $key = array_search($id, $to_delete_ids_with_files);
+                            if($key!==false){
+                                unset($to_delete_ids_with_files[$key]);
+                            }    
+                        }
+                    }
+                    if(!empty($to_delete_ids_with_files)){
+                        $this->data[$this->primaryField] = $to_delete_ids_with_files;
+                        $ret = $this->delete();
+                    }
+                }
+            }
+
+            if($ret){
+                $ret = array('local' => $cnt_local_fixes_by_path, 
+                            'local_checksum' => $cnt_local_fixes_by_checksum, 
+                            'remote' => $cnt_remote_fixes,
+                            'tumbnails'=>$cnt_thumbnails);
+            }
+            
+            DbUtils::setSessionVal('REMOVE');
+            
+            return $ret;
+        
+    }
+
 }
 ?>

@@ -730,7 +730,10 @@ XML;
 
             //for files in folder that are not specified in the manifest file
             foreach ($all_files as $filename){
-                if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
+                if($filename=="." || $filename==".." || is_dir($dir.$filename) 
+                        || $filename=="fieldhelper.xml" || $filename=="index.html"){
+                        continue;            
+                }
 
                     $filename_base = $filename;
                     $filename = $dir.$filename;
@@ -859,8 +862,6 @@ XML;
                         ob_flush();
                         flush();
                     }
-
-                }
             }//for files in folder that are not specified in the directory
 
 
