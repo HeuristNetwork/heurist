@@ -1928,9 +1928,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     private function mergeDuplicates(){
         
+            set_time_limit(0);
+        
             define('SPECIAL_FOR_LIMC_FRANCE', true); //remove unlinked ref records and files from upload_files/...thumbnail
             define('TERMINATED_BY_USER', 'Merging Duplications has been terminated by user');
-            
+
             $ret = true;
         
             $mysqli = $this->system->get_mysqli();
@@ -1962,25 +1964,108 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //$where_ids .= ' AND ulf_ID = ' . intval($ids);
             }
             // else use all
-            
+  
+ /*           
             if(SPECIAL_FOR_LIMC_FRANCE){
                 //remove files from thumbnail
 $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_files/%" AND ulf_FilePath LIKE "%/thumbnail/"';
                 $to_delete_thumbs = mysql__select_list2($mysqli, $query);
-                if(!empty($to_delete_thumbs)){
-                    $records_without_links = mysql__select_list2($mysqli,
-    'SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)'
-    .' WHERE dtl_UploadedFileID IN ('.implode(',',$to_delete_thumbs).') GROUP BY dtl_RecID HAVING cnt=0');
-                    if(!empty($records_without_links)){
-                        recordDelete($this->system, $records_without_links);   
-                    }
-                    $this->data[$this->primaryField] = $to_delete_thumbs;
-                    $res = $this->delete();
-                    
-                    $cnt_thumbnails = $cnt_thumbnails + count($to_delete_thumbs);
-                }
-            }
+                
+if($is_verbose) {
+        $msg = 'found  thumbs '.count($to_delete_thumbs);
+        error_log($msg);
+        echo $msg.'<br>';
+}         
 
+                if(!empty($to_delete_thumbs)){
+                    
+                    $mysqli->query('SET foreign_key_checks = 0');
+                    
+                    $total_cnt = count($to_delete_thumbs);
+                    $offset = 0;
+                    while ($offset<$total_cnt){
+
+                        $to_delete_thumbs_chunk = array_slice($to_delete_thumbs, $offset, 250);
+                        
+                        $records_without_links = mysql__select_list2($mysqli,
+        'SELECT dtl_RecID, count(rl_ID) as cnt FROM recDetails LEFT JOIN recLinks ON (rl_SourceID=dtl_RecID OR rl_TargetID=dtl_RecID)'
+        .' WHERE dtl_UploadedFileID IN ('.implode(',',$to_delete_thumbs_chunk).') GROUP BY dtl_RecID HAVING cnt=0');
+
+if($is_verbose) {
+        $msg = 'found  records '.count($records_without_links);
+        error_log($msg);
+        echo $msg.'<br>';
+}         
+
+                        if(!empty($records_without_links)){
+                            //recordDelete($this->system, $records_without_links);   
+                            $records_without_links = '('.implode(',',$records_without_links).')';
+                            
+                            $mysqli->query('delete from recDetails where dtl_RecID IN ' . $records_without_links);
+                            if ($mysqli->error) {
+                                    $ret = false;
+                                    $this->system->addError(HEURIST_DB_ERROR, 'error delete rec details' ,$mysqli->error);
+                                    break;
+                            }
+                            //
+                            $mysqli->query('delete from Records where rec_ID IN ' . $records_without_links);
+                            if ($mysqli->error) {
+                                    $ret = false;
+                                    $this->system->addError(HEURIST_DB_ERROR, 'error delete records', $mysqli->error);
+                                    break;
+                            }
+                        }
+                        
+                        //exclud thumbnails that still have references
+                        $list = mysql__select_assoc2($mysqli, 'SELECT dtl_UploadedFileID, dtl_RecID '
+                            .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $to_delete_thumbs_chunk).')');
+                        if(!empty($list)){
+                            if($is_verbose) {
+                                    $msg = 'found ref records '.count($list);
+                                    error_log($msg);
+                                    echo $msg.'<br>'.implode(',',$list).'<br>';
+                            }         
+                            //remove 
+                            foreach($list as $ulf_ID=>$rec_ID){
+                                $idx = array_search($ulf_ID, $to_delete_thumbs_chunk);
+                                if($idx!==false){
+                                    unset($to_delete_thumbs_chunk[$idx]);                           
+                                }
+                            }
+                            
+                            if($is_verbose) {
+                                echo 'Removed '.count($to_delete_thumbs_chunk).'<br>';
+                            }
+                        }
+                        //remove ulf entries 
+                        $this->data[$this->primaryField] = $to_delete_thumbs_chunk;
+                        $ret = $this->delete();
+                        
+                        if(!$ret) { break; }
+                        
+                        $offset = $offset + 250;
+
+                        $mysqli->commit();
+                        mysql__begin_transaction($mysqli);
+                        
+                        //break; //remove first 250 only                        
+                    }//while
+
+                    $mysqli->query('SET foreign_key_checks = 1');
+                    
+                    if($ret===false){
+                        $mysqli->rollback();
+                    }
+                    
+                    $cnt_thumbnails = $cnt_thumbnails + $total_cnt;
+                }
+if($is_verbose) {echo 'Thumnails DONE<br>';}         
+
+                //return $ret;    
+            }
+*/
+            
+            
             //1. ---------------------------------------------------------------
             //search for duplicated local files - with the same name and path 
             $query = 'SELECT ulf_FilePath, ulf_FileName, count(*) as cnt FROM recUploadedFiles WHERE ulf_FileName IS NOT NULL' . $where_ids . ' GROUP BY ulf_FilePath, ulf_FileName HAVING cnt > 1';
@@ -2036,7 +2121,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
                     
                     if(DbUtils::setSessionVal('0,'.$cnt.','.$tot_cnt)){            
                             //terminated by user
-                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
                             break;
                     }
@@ -2122,7 +2207,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
                     if($cnt%10==0){
                     if(DbUtils::setSessionVal('1,'.$cnt.','.$tot_cnt)){            
                             //terminated by user
-                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
                             break;
                     }
@@ -2170,7 +2255,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
                     
                     if(DbUtils::setSessionVal('2,'.$cnt.','.$tot_cnt)){            
                             //terminated by user
-                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
                             break;
                     }
@@ -2210,6 +2295,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
                     $this->mergeDuplicatesFields('ulf_Copyright', $ulf_ID, $dup_ids);
                     $this->mergeDuplicatesFields('ulf_Copyowner', $ulf_ID, $dup_ids);
                     
+/*                    
                     if(SPECIAL_FOR_LIMC_FRANCE){                    
                     //remove referenced records if they are not linked anywhere
                     $records_without_links = mysql__select_list2($mysqli,
@@ -2217,7 +2303,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
 ." WHERE dtl_UploadedFileID IN ($dup_ids) GROUP BY dtl_RecID HAVING cnt=0");
                     recordDelete($this->system, $records_without_links);
                     }
-                    
+*/                    
                     //remove references in recDetails
                     $upd_query = 'UPDATE recDetails SET dtl_UploadedFileID='.intval($ulf_ID)
                                     .' WHERE dtl_UploadedFileID IN (' . $dup_ids .')';
@@ -2232,7 +2318,7 @@ $query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_FilePath LIKE "uploaded_
                     if($cnt%10==0){
                     if(DbUtils::setSessionVal('3,'.$cnt.','.$tot_cnt)){            
                             //terminated by user
-                            $system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, TERMINATED_BY_USER);
                             $ret = false;
                             break;
                     }

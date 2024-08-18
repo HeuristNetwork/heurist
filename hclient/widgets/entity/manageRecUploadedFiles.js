@@ -1724,8 +1724,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         
         const session_id = window.hWin.HEURIST4.msg.showProgress( {interval:900, 
             steps:['Uploaded files by fullpath','External resources','Uploaded files by name and checksum','Merging, Update reference records, Delete']} );
-        
-        let ids = this.recordList && !this._selectAllFiles ? this.recordList.resultList('getSelected', true) : 'all';
 
         let request = {
             'session': session_id,
