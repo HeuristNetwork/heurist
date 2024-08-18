@@ -102,7 +102,7 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
 
         var action_url = window.hWin.HAPI4.baseURL + "admin/verification/rebuildRecordTitles.php";
 
-        var session_id = window.hWin.HEURIST4.msg.showProgress( $('.progress_div'),  0, 500 );
+        var session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('.progress_div'), interval:500} );
 
         var request = {
             'session': session_id

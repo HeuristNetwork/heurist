@@ -401,10 +401,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         content.position({ my: "center center", at: "center center", of: $dlg });
         
-        //var hh = hideTitle?0:$dlg.parent().find('.ui-dialog-titlebar').height() + $dlg.height() + 20; 
-        
-        //$dlg.dialog("option", "buttons", null);      
-        
         if(hideTitle){
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }
@@ -642,8 +638,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dosframe[0].doDialogResize = function(width, height) {
                 //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
                 /*
-                var body = $(this.document).find('body');
-                var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
+                let body = $(this.document).find('body');
+                let dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
 
                 if(width>0)
                 $dlg.dialog('option','width', Math.min(dim.w, width));
@@ -1422,40 +1418,100 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },  
     
+    // for progress message
     _progressInterval: 0,
     _progressDiv: null,
-                        
-    showProgress: function( $progress_div, session_id, t_interval, need_content ){
+    _progressPopup: null,
+    
+    //
+    // returns session_id
+    // container - container element. if not defined it shows in popup
+    // content - 1)html code 2)false - use given content 3) otherwise fill container with default content
+    // steps - array of labels
+    //
+    // session_id - unique id of progress session
+    // t_interval - checkout interval
+    //
+    showProgress: function( options ){
+        
+        let $progress_div;
+        let content = options.content;
+        let is_popup = true;
+
+        if(options.container){ //container element
+            is_popup = false;
+            $progress_div = options.container;
+        }        
+        
+        if (window.hWin.HEURIST4.util.isempty(content)) {
+            //default content
+            content = '';
+            
+            if(Array.isArray(options.steps)){
+                
+                content = '<ol type="1" style="font-size:12px;height:80%;padding-top:20px;" class="progress-steps">';
+                
+                options.steps.forEach((item)=>{
+                    content += `<li style="color:gray">${item}</li>`;
+                });
+                
+                content += '</ol>';
+            }else{
+                content = '<div class="loading" style="height:80%"></div>';
+            }
+            
+            content += '<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:10px">'
+                +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
+                +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
+            +'</div>';
+            
+        }else if(typeof content !== 'string'){
+            content = false;
+        }
+        
+        if(is_popup){
+            options['buttons'] = {}; //no buttons
+            options['width'] = 500;
+            options['hideTitle'] = true;
+   
+            window.hWin.HEURIST4.msg._progressPopup = window.hWin.HEURIST4.msg.showMsg( 
+                    '<div class="progressbar_div" style="margin:10px"></div>', options );
+        
+            $progress_div = window.hWin.HEURIST4.msg._progressPopup.find('div.progressbar_div');
+        }
+        
         
         let progressCounter = 0;        
         let progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-        if(!(session_id>0)) session_id = Math.round((new Date()).getTime()/1000);
+        
+        let session_id = options.session;
+        if(!(session_id>0)) session_id = window.hWin.HEURIST4.util.random();
+
+        let t_interval = options.interval;
+        if(!(t_interval>0)) t_interval = 900;
         
         window.hWin.HEURIST4.msg._progressDiv = $progress_div;
         $progress_div.show(); 
         document.body.style.cursor = 'progress';
         
         //add progress bar content
-        if(need_content!=false){
-            $progress_div.html('<div class="loading" style="display:none;height:80%"></div>'
-            +'<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">'
-                +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
-                +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
-            +'</div>');
+        if(content){
+            $progress_div.html(content);
         }
         
-        
+
+        //elements        
         let btn_stop = $progress_div.find('.progress_stop').button();
         
-        //this._on(,{click: function() {
-        
-        btn_stop.click(function(){
+        // termination
+        btn_stop.on({click:function(){
                 let request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    _hideProgress();
+                    window.hWin.HEURIST4.msg.hideProgress();
                 });
-            });
+            }});
     
+        let progressSteps = $progress_div.find('.progress-steps');
         let div_loading = $progress_div.find('.loading').show();
         let pbar = $progress_div.find('#progressbar');
         let progressLabel = pbar.find('.progress-label').text('');
@@ -1470,22 +1526,70 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
                 if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    _hideProgress();
-                }else{
+                    window.hWin.HEURIST4.msg.hideProgress();
+                }else if(response){
                     //it may return terminate,done,
-                    let resp = response?response.split(','):[];
+                    
+                    let resp = response.split(',');
+                    
                     if(response=='terminate' || !(resp.length>=2)){
+                        //first or last response
                         if(response=='terminate'){
-                            _hideProgress();
+                            window.hWin.HEURIST4.msg.hideProgress();
                         }else{
                             div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
                         }
                     }else{
                         div_loading.hide();
-                        if(resp[0]>0 && resp[1]>0){
-                            let val = resp[0]*100/resp[1];
+                        
+                        if(resp.length==3 || resp.length==1){
+                            let newStep = resp.shift();
+                            let percentage = 0;
+                            progressSteps.show();
+
+                            if(window.hWin.HEURIST4.util.isNumber(newStep)){
+                                newStep = parseInt(newStep);
+                                let all_li = progressSteps.find('li');
+                                if(newStep>0){
+                                    let arr = all_li.slice(0,newStep);
+                                    arr.css('color','black');
+                                    arr.find('span.processing').remove(); //remove rotation icon
+                                }
+                                if(newStep<all_li.length){
+                                        if(percentage>0){
+                                            if(percentage>100) percentage = 100;
+                                            percentage = percentage+'%'; 
+                                        }else{
+                                            percentage = 'processing...'
+                                        }
+                                        let ele = $(all_li[newStep]).find('span.percentage');
+                                        if(ele.length==0){
+                                            percentage = '<span class="percentage">'+percentage+'</span>';
+                                            $('<span class="processing"> <span class="ui-icon ui-icon-loading-status-balls"></span> '
+                                                +percentage+'</span>')
+                                                .appendTo( $(all_li[newStep]) );
+                                            $(all_li[newStep]).css('color','black');
+                                        }else{
+                                            ele.text(percentage);
+                                        }
+                                }
+                            }else{
+                                let container = progressSteps.find('ol');
+                                let li_ele = container.find('li:contains("'+newStep+'")');
+                                if(li_ele.length==0){ //not added yet
+                                    $('<li>'+newStep+'</li>').appendTo(container);    
+                                }
+                            }
+                        }
+
+                        let cnt=0, total=0;
+                        if(resp.length>1){
+                            cnt = resp[0];
+                            total = resp[1];
+                        }
+                        
+                        if(cnt>0 && total>0){
+                            const val = cnt*100/total;
                             pbar.progressbar( "value", val );
 
                             elapsed += t_interval;
@@ -1529,6 +1633,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(window.hWin.HEURIST4.msg._progressDiv){
             window.hWin.HEURIST4.msg._progressDiv.hide();    
             window.hWin.HEURIST4.msg._progressDiv = null;
+        }
+        if(window.hWin.HEURIST4.msg._progressPopup){
+            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            $dlg.dialog( "close" );
+            window.hWin.HEURIST4.msg._progressPopup = null;
         }
         
     },

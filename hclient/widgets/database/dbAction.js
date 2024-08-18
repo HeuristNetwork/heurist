@@ -360,7 +360,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _sendRequest: function(request)
     {
         //unique session id    ------------------------
-        this._session_id = Math.round((new Date()).getTime()/1000);
+        this._session_id = window.hWin.HEURIST4.util.random();
         
         request['action'] = this.options.actionName;       
         request['db'] = window.hWin.HAPI4.database;

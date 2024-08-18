@@ -55,8 +55,6 @@ $.widget( "heurist.baseAction", {
     
     _context_on_close:false, //variable to be passed to options.onClose event listener
     
-    _progressInterval:null,
-    
     //controls
     //.....selectRecordScope:null,
     

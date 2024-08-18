@@ -3362,7 +3362,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
        function __doMatchingStart(){    
          
            
-            let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
+            
             let handle_rectype = $('#ignore_rectype').is(':checked') ? '1' : '0';
            
             let request = {
@@ -3615,7 +3616,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         function __doPrepareStart(){
 
-            let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
             
             let request = {
                 db        : window.hWin.HAPI4.database,
@@ -3808,7 +3809,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             return;
         }
         
-        let session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+        let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
         
         let update_mode = $("input[name='sa_upd']:checked"). val();
         let retain_existing = 0
