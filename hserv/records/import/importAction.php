@@ -23,6 +23,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+use hserv\entity\DbDefTerms;
+
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
@@ -1909,7 +1912,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value2)!='NULL'){
+                if($r_value!=null && super_trim($r_value)!='' && super_trim($r_value)!='NULL'){
 
                     if(!is_numeric($r_value)){
                         $is_error = true;
@@ -2116,14 +2119,14 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
 /**
 * Split multivalue field
 *
-* @param array $values
+* @param array|string $values
 * @param mixed $csv_enclosure
 */
 private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
     $nv = array();
 
-    $values =  ($csv_mvsep=='none')?array($values) :explode($csv_mvsep, $values);
+    $values =  ($csv_mvsep=='none')?array($values) : explode($csv_mvsep, $values);
 
     if(count($values)==1){
         array_push($nv, super_trim($values[0]));
@@ -3313,5 +3316,157 @@ public static function performImport($params, $mode_output){
     return $res;
 } //end performImport
 
+// Imports all missing terms
+public static function importTerms($params){
+
+    self::initialize();
+
+    $imp_session = ImportSession::load(@$params['imp_ID']);
+    if($imp_session==false){
+        return false;
+    }
+    $import_table = $imp_session['import_table'];
+
+    $fields = @$params['fields'];
+    if(!is_array($fields) || empty($fields)){
+        return [];
+    }
+
+    $trm_Separator = @$params['trm_Separator'];
+    if(empty($trm_Separator) || $trm_Separator !== '.'){
+        $trm_Separator = '';
+    }
+
+    $progress_session_id = @$params['session'];
+
+    $results = [
+        'invalid' => [],
+        'error' => [],
+        'success' => []
+    ];
+
+    $def_terms = new DbDefTerms(self::$system);
+
+    mysql__update_progress(null, $progress_session_id, true, "0,0");
+
+    $total = 0;
+
+    foreach($fields as $idx => $field){
+
+        $tab_num = $idx + 1;
+
+        if(!is_array($field) || count($field) != 3){// skip
+            $results['invalid'][$idx] = "Tab $tab_num => Invalid number of items provided";
+            continue;
+        }
+
+        $field_id = $field[0];
+        $dty_ID = intval($field[1]);
+        $parent_ID = intval($field[2]);
+
+        if(strpos($field_id, 'field_') !== 0 || $dty_ID <= 0 || $parent_ID <= 0){
+            $results['invalid'][$idx] = "Tab $tab_num => Invalid parameters provided";
+            continue;
+        }
+
+        $parent_ID = mysql__select_value(self::$mysqli, "SELECT trm_ID FROM defTerms WHERE trm_ID = ?", ['i', $parent_ID]);
+        if(!$parent_ID || $parent_ID < 0){
+            $results['error'][$idx] = "Tab $tab_num => Invalid parent term id provided";
+            continue;
+        }
+
+        $query = "SELECT imp_ID, $field_id FROM $import_table WHERE $field_id <> '' GROUP BY $field_id";
+
+        $terms = mysql__select_assoc2(self::$mysqli, $query);
+
+        $results['success'][$idx] = [];
+        if(empty($terms)){
+            continue;
+        }
+        $results['error'][$idx] = [];
+
+        $row_total = count($terms);
+        mysql__update_progress(null, $progress_session_id, false, "0,$row_total");
+
+        $new_terms = [];
+
+        $new_term = [
+            'trm_Label' => null,
+            'trm_ParentTermID' => $parent_ID,
+            'trm_Domain' => 'enum'
+        ];
+
+        $row_count = 1;
+        foreach($terms as $row => $term){
+
+            $row_count ++;
+
+            if(mb_strlen($term) > 200){
+                $results['error'][$idx] = "Row $row => Invalid term label";
+                continue;
+            }
+
+            $new_term['trm_Label'] = $term;
+
+            $new_terms[] = $new_term;
+
+            if(!empty($new_terms) && count($new_terms) % 500 === 0){
+
+                $def_terms->setData([
+                    'fields' => $new_terms,
+                    'term_separator' => $trm_Separator
+                ]);
+
+                $res = $def_terms->batch_action();
+                if(!$res){
+                    $results['error'][$idx] = self::$system->getError()['msg'];
+                    continue 2;
+                }
+
+                if(!empty($res)){
+                    $results['success'][$idx] = array_merge($results['success'][$idx], $res);
+                    $total += count($res);
+                }
+
+                $new_terms = [];
+
+                mysql__update_progress(null, $progress_session_id, false, "$row_count,$row_total");
+            }
+        }
+
+        mysql__update_progress(null, $progress_session_id, false, "$row_total,$row_total");
+
+        if(!empty($new_terms)){
+
+            $def_terms->setData([
+                'fields' => $new_terms,
+                'term_separator' => $trm_Separator
+            ]);
+
+            $res = $def_terms->batch_action();
+            if(!$res){
+                $results['error'][$idx] = self::$system->getError()['msg'];
+                continue;
+            }
+
+            if(!empty($res)){
+                $results['success'][$idx] = array_merge($results['success'][$idx], $res);
+                $total += count($res);
+            }
+        }
+
+        if(empty($results['error'][$idx])){
+            unset($results['error'][$idx]);
+        }else{
+            $results['error'][$idx] = "Tab $tab_num:<br>" . implode('<br>', $results['error'][$idx]) . "<br>";
+        }
+    }
+
+    $results['added'] = $total;
+
+    mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+
+    return $results;
+}
 } //end class
 ?>
