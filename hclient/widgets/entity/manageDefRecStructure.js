@@ -2968,7 +2968,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         let is_reserved = $Db.dty(dtyid, 'dty_Status') == "reserved";
 
         if(is_reserved){
-            window.hWin.HEURIST4.msg.showMsgErr('Unable to delete field ' + label + ' as it\'s a reserved field');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Unable to delete field ${label} as it's a reserved field`,
+                error_title: 'Cannot delete field'
+            });
             return;
         }
 

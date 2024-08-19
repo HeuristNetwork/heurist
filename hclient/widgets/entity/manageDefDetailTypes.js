@@ -2002,8 +2002,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 if(!fieldvalues['dty_JsonTermIDTree']){
 
                     if(dt_type=='enum'){    
-                        window.hWin.HEURIST4.msg.showMsgErr(
-                            'Please select or add a vocabulary. Vocabularies must contain at least one term.', 'Warning');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'Please select or add a vocabulary. Vocabularies must contain at least one term.',
+                            status: window.hWin.ResponseStatus.INVALID_REQUEST
+                        });
                     }else{
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Please select or add relationship types',null, 'Warning',

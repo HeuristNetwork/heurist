@@ -322,7 +322,10 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     _checkUserPermissions: function(level, event){
 
         if(!window.hWin.HAPI4.has_access(level)){
-            window.hWin.HEURIST4.msg.showMsgErr('You must be an administrator of the database managers group to use this feature');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'You must be an administrator of the database managers group to use this feature',
+                error_title: 'Invalid permissions'
+            });
             return;
         }
 
