@@ -1907,7 +1907,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             let msg = 'You do not have permission to perform this action';
             msg = (level == 1) ? 'You must be an administrator of the database managers group to use this feature' : msg;
-            window.hWin.HEURIST4.msg.showMsgErr(msg);
+            
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: msg,
+                error_title: 'Invalid permissions'
+            });
+                    
             return false;
         }
 
