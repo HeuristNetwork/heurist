@@ -28,47 +28,12 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         
         this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
         this.btn_add_record_ext = this.element.find('#btn_add_record_ext');
-        this.btn_add_record_popup = this.element.find('#btn_add_record_popup'); 
-        this.btn_add_record_any = this.element.find('#btn_add_record_any');
         this.btn_edit_mimetypes = this.element.find('#btn_edit_mimetypes');
-        this.btn_remove_dups = this.element.find('#btn_remove_dups');
-        this.btn_remove_unused = this.element.find('#btn_remove_unused');
-        this.btn_refresh_index = this.element.find('#btn_refresh_index');
-        this.btn_create_records = this.element.find('#btn_create_records');
-        this.btn_check_files = this.element.find('#btn_check_files');
-        
+
+
         if(this.options.edit_mode=='none'){
             this.element.find('#div_add_record').hide();
         }else{
-            //this.btn_add_record_inline.hide();
-            //.css({position:'absolute',top:0,right:170,'max-width':300,'max-height':150});
-                        
-            
-            this.btn_add_record_loc.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Select file to upload"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .on('click', function(e) {
-                    that._trigger( "onaddlocal" );
-                }); 
-
-            this.btn_add_record_popup.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Drag and drop file to upload"), icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .on('click', function(e) {
-                    that._trigger( "onaddpopup" );
-                }); 
-            
-            this.btn_add_record_ext.css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR("Specify external file/URL"),icons: {
-                            primary: "ui-icon-plus"
-                    }})
-                .on('click', function(e) {
-                    that._trigger( "onaddext" );
-                }); 
-                
-                
             this.btn_edit_mimetypes
                     .button({label: window.hWin.HR("Define mime types"),icons: {
                             primary: "ui-icon-pencil"
@@ -78,49 +43,28 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                                                 {edit_mode:'inline', width:900});
                 }); 
 
-            this.btn_remove_dups.button({label: window.hWin.HR("Combine duplicates")})
-                .on('click', function(e) {
-                    that._checkUserPermissions(1, 'onremovedups');
-                });
-
-// Removed by Ian 12 May 2023
-// TODO: WARNING: This button only recognises use in a File field, it does nto see use in web pages 
-// or within text files. It is therefore exceedingly dangerous. Also operates instantly without warning.
-//            this.btn_remove_unused.button({label: window.hWin.HR("Delete unused files"), icons: {primary: "ui-icon-trash"} })
-//                .on('click', function(e) {
-//                    that._checkUserPermissions(1, 'onremoveunused');
-//                }); 
-
-            this.btn_create_records.button({label: window.hWin.HR("Create multimedia records for selected")})
-                .on('click', function() {
-                    that._checkUserPermissions(1, 'onfilerecs')
-                });
-                /*.position({
-                    my: 'right top+5',
-                    at: 'right bottom',
-                    of: this.btn_remove_unused
-                });*/
-
-            this.btn_refresh_index.button({label: window.hWin.HR("Index new files")})
-                .on('click', function() {
-                    that._checkUserPermissions(1, 'onrefreshindex')
-                });
-
-            this.element.find('#select_all')
-                .on('change', function() {
-                    that._trigger('onselectall');
-                });
-
-            this.element.find('#selected_only')
-                .on('change', function() {
-                    that._trigger('onselectedonly');
-                });
-
-            this.btn_check_files.button({label: window.hWin.HR("Check files")})
-                .on('click', function(){
-                    let url = `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`;
-                    window.open(url, '_blank');
-                });
+            this.element.find('#btn_menu').buttonsMenu({
+                menuContent:
+                    '<div>'
+                    +'<ul id="menu-file-add-local" name="Select file to upload" data-icon="ui-icon-plus"></ul>'
+                    +'<ul id="menu-file-add-ext" name="Select external file/URL" data-icon="ui-icon-plus"></ul>'
+                    +'<ul name="Selected">'
+                    +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
+                    +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
+                    +'<li id="menu-file-refrec-show"><a href="#">Show referenced records</a></li>'
+                    +'<li id="menu-file-export-csv"><a href="#">Download CSV of file refrences</a></li>'
+                    +'<li id="menu-file-refrec-add"><a href="#">Create multimedia record</a></li>'
+                    +'<li id="menu-file-delete-selected"><a href="#">Delete</a></li>'
+                    +'</ul>'
+                    +'<ul name="Integrity">'
+                    +'<li id="menu-file-merge-dupes"><a href="#">Combine duplicates</a></li>'
+                    +'<li id="menu-file-refresh-index"><a href="#">Refresh index</a></li>'
+                    +'<li id="menu-file-check-files"><a href="#">Check files</a></li></ul></div>',
+                actionHandler:function(action){
+                    that._trigger('onaction', null, action);   
+                }
+            });
+                
         }
 
         this.selectGroup = this.element.find('#sel_group');
@@ -172,8 +116,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         if(this.options.select_mode=='manager'){
 
             this.element.find('#input_search_type_div').css('float','left');
-
-            this._on(this.element.find('#dwnld_refs'), { click: function(){ this._trigger("ondownload"); } });
 
             if(!window.hWin.HAPI4.is_admin()){
                 this.element.find('.admin-only').hide().off('click'); // hide and remove functions 
@@ -317,21 +259,6 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     
     getUploadContainer:function(){
         return this.btn_add_record_inline; //element.find('#btn_add_record_loc');
-    },
-
-    _checkUserPermissions: function(level, event){
-
-        if(!window.hWin.HAPI4.has_access(level)){
-            window.hWin.HEURIST4.msg.showMsgErr('You must be an administrator of the database managers group to use this feature');
-            return;
-        }
-
-        /*if(event == 'defineMimeType'){
-            window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype', {edit_mode:'inline', width:900});
-            return;
-        }*/
-
-        this._trigger(event);
     }
 
 });

@@ -24,7 +24,7 @@ $.widget( "heurist.resultListMenu", {
         is_h6style: false,
         // callbacks
         menu_class:null,
-        resultList: null,  //reference to parent
+        resultList: null,  //reference to parent resultList
         search_realm: null
     },
 
@@ -147,8 +147,6 @@ $.widget( "heurist.resultListMenu", {
             this.btn_Recode.show();
             this.btn_Shared.show();
             this.btn_Reorder.show();
-            
-            
 
             this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').show();
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
@@ -219,14 +217,15 @@ $.widget( "heurist.resultListMenu", {
         let that = this;
         let myTimeoutId = -1;
 
-        //show hide function
+        //show hide functions
         let _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
                 $( ele ).hide();
                 }, 1);
             //$( ele ).delay(800).hide();
-        },
-        _show = function(ele, parent) {
+        };
+        
+        let _show = function(ele, parent) {
             clearTimeout(myTimeoutId);
 
             $('.menu-or-popup').hide(); //hide other

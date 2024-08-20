@@ -158,22 +158,55 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         this._on( this.searchForm, {
-                "searchrecuploadedfilesonresult": this.updateRecordList,
-                "searchrecuploadedfilesonaddext": function() { this._additionMode='remote'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddpopup": function() {this._additionMode='local'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister,   //browse, register and exit at once
-                "searchrecuploadedfilesondownload": this._downloadFileRefs,
-                "searchrecuploadedfilesonremoveunused": this._deleteUnused,
-                "searchrecuploadedfilesonremovedups": this._combineDups,
-                "searchrecuploadedfilesonrefreshindex": this._refreshIndex,
-                "searchrecuploadedfilesonfilerecs": this._createMediaRecords,
-                "searchrecuploadedfilesonselectall": function(event){ 
-                    if($(event.target).find('#select_all').length>0){
-                        this._selectAllFiles = $(event.target).find('#select_all').prop('checked') ? true : false;
-                        this.recordList.resultList('setSelected', this._selectAllFiles ? 'all' : '');
+            
+                "searchrecuploadedfilesonaction": function(event, action) { 
+                    if(action=='menu-file-add-local'){
+                        this._uploadFileAndRegister();
+                        
+                    }else if(action=='menu-file-add-ext'){ 
+                        this._additionMode='remote'; this.addEditRecord(-1);
+                        
+                    }else if(action=='menu-file-select-all'){ 
+                        this._selectAllFiles = true;
+                        this.recordList.resultList('setSelected', 'all');
+                        
+                    }else if(action=='menu-file-select-none'){ 
+                        this._selectAllFiles = false;
+                        this.recordList.resultList('setSelected', '');
+                        
+                    }else if(action=='menu-file-refrec-show'){ 
+
+                    }else if(action=='menu-file-refrec-add'){ 
+                        
+                        this._createMediaRecords();
+                        
+                    }else if(action=='menu-file-export-csv'){ 
+                        
+                        this._downloadFileRefs()
+
+                    }else if(action=='menu-file-delete-selected'){ 
+                        
+                        this._deleteSelected();
+                        
+                    }else if(action=='menu-file-delete-unused'){ 
+                        
+                        //this._deleteUnused();
+                        
+                    }else if(action=='menu-file-merge-dupes'){ 
+                        
+                        this._combineDups();
+                        
+                    }else if(action=='menu-file-refresh-index'){ 
+                        
+                        this._refreshIndex();
+                        
+                    }else if(action=='menu-file-check-files'){ 
+                        
+                        this._checkFiles();
+                        
                     }
                 },
+                "searchrecuploadedfilesonresult": this.updateRecordList,
                 "searchrecuploadedfilesonselectedonly": function(event){
                     this._downloadAllFiles = false;
                     if($(event.target).find('#selected_only').length > 0){
@@ -1197,6 +1230,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     // Download file references for current resultset
     //
     _downloadFileRefs: function(){
+        
+        if(!this._checkUserPermissions(1)){
+            return;
+        }
 
         let ids = this.recordList && !this._downloadAllFiles //&& !this._selectAllFiles ? 
                     ?this.recordList.resultList('getSelected', true) : 'all';
@@ -1859,7 +1896,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         if(!window.hWin.HAPI4.has_access(level)){
 
             let msg = 'You do not have permission to perform this action';
-            msg = level == 1 ? 'You must be an administrator of the database managers group to use this feature' : msg;
+            msg = (level == 1) ? 'You must be an administrator of the database managers group to use this feature' : msg;
             window.hWin.HEURIST4.msg.showMsgErr(msg);
             return false;
         }
@@ -1869,6 +1906,24 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
     contextOnClose: function(){
         return this._lastFileDetails;
+    },
+    
+    _checkFiles: function(){
+        
+                let body = $(window.hWin.document).find('body');
+
+                let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
+                                    window.innerHeight : body.innerHeight();
+
+                let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
+
+                window.hWin.HEURIST4.msg.showDialog(
+                    `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`
+                    , opts);                
+    },
+    
+    _deleteSelected: function(){
+        window.hWin.HEURIST4.msg.showMsgFlash('to be implemented');
     }
     
 });

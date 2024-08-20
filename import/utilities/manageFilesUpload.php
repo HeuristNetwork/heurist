@@ -267,8 +267,8 @@ if(!($max_size>0)) {$max_size = 0;}
 
                 <br>
 
-                <label><input type="checkbox" checked=checked name="registerFiles">
-                    Register file after upload (missed indexed files can be registered in Admin > Manage files)
+                <label style="margin-left:25px"> <!-- <input type="checkbox" checked=checked name="registerFiles"> -->
+                    If files do not appear in Admin > Manage files, click on the Refresh Index button
                 </label>
 
                 <br><br>
@@ -490,7 +490,7 @@ if(!($max_size>0)) {$max_size = 0;}
 
             function registerFile(files, do_register){
 
-                let prepare_file = $('input[name="registerFiles"]').is(':checked');
+                let prepare_file = true; //$('input[name="registerFiles"]').is(':checked');
 
                 if(!prepare_file){
                     to_reg_count = 1;
@@ -725,7 +725,7 @@ if(!($max_size>0)) {$max_size = 0;}
                                   .removeClass('ui-button-action');
                     $('#btnCancel').button('option','label','Cancel uploads');
 
-                    to_reg_count = $('input[name="registerFiles"]').is(':checked') ? $('.template-upload').length : 1;
+                    to_reg_count = $('.template-upload').length; //$('input[name="registerFiles"]').is(':checked') ? $('.template-upload').length : 1;
 
                     // add coverall
                     window.hWin.HEURIST4.msg.bringCoverallToFront($('table[role="presentation"]'), {'font-size': '16px', color: 'white', position: 'relative'}, 'Uploading all files...');
