@@ -791,15 +791,16 @@ $.widget( "heurist.mapping", {
 
                     }catch(e){
                         // display error
-                        window.hWin.HEURIST4.msg.showMsgErr(
-                            'We were unable to load your selected base map.<br>'
-                          + 'If this problem persists, please report this through the bug reporter under Help at the top right of the main screen or,<br>'
-                          + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
-                          + 'Base map values:<br>'
-                          + 'Base map id: ' + basemap_id + '<br>'
-                          + 'Base map name: ' + (provider['name'] != '' ? provider['name'] : 'missing'));
-                          //+ 'Base map url (if found): ' + provider['url'] + '<br><br>'
-                          //+ 'Error thrown: ' + e + '<br>'
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'We were unable to load your selected base map.<br>'
+                                    +'If this problem persists, please report this through the bug reporter under Help at the top right of the main screen or,<br>'
+                                    +'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
+                                    +'Base map values:<br>'
+                                    +`Base map id: ${basemap_id}<br>`
+                                    +`Base map name: ${(provider['name'] != '' ? provider['name'] : 'missing')}`,
+                            error_title: 'Unable to load basemap'
+                        });
+
                         return;
                     }
                 }

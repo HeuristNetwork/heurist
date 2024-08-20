@@ -47,8 +47,10 @@ function SelectLinkField()
 
         
         if(!$Db.rty(rty_ID)){
-            window.hWin.HEURIST4.msg.showMsgErr('Parameter for record type "rty_ID" ( '
-                +rty_ID+' ) is not defined or invalid');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Parameter for record type "rty_ID" (${rty_ID}) is not defined or invalid`,
+                error_title: 'Missing record type'
+            });
             window.close(false);
         }
         
