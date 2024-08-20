@@ -608,11 +608,17 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             }
             
             if(window.hWin.HEURIST4.util.isempty(t_map.title)){
-                window.hWin.HEURIST4.msg.showMsgErr('Title is mandatory');            
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Title is mandatory',
+                    error_title: 'Missing title'
+                });
                 return false;
             }
             if(t_map.fields.length==0){
-                window.hWin.HEURIST4.msg.showMsgErr('Need to define at least one field with ranges/categories');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Need to define at least one field with ranges/categories',
+                    error_title: 'Missing field'
+                });
                 return false;
             }
 

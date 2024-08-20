@@ -321,11 +321,13 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
                 }
             }//for map bookmarks
             if(err_msg_all!=''){
-                window.hWin.HEURIST4.msg.showMsgErr('<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div>'
-                +'<br>eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br> '
-                    +err_msg_all
-                    +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>'
-                );
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: '<div>Map-zoom bookmark is not interpretable, set to Label,xmin,xmax,ymin,ymax,tmin,tmax (tmin,tmax are optional)</div><br>'
+                            +'eg. Harlem, -74.000000,-73.900000,40.764134,40.864134,1915,1930<br> '
+                            +err_msg_all
+                            +'<br><br><div>Please edit the map document (button next to map name dropdown above) and correct the contents of the map-zoom bookmark following the instructions in the field help.</div>',
+                    error_title: 'Invalid map bookmark'
+                });
             }
 
 
@@ -826,8 +828,11 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
         }else{
             overlays[index] = _getStubOverlay();
 
-            window.hWin.HEURIST4.msg.showMsgErr('Map layer: '+source.title
-                +'<br>Unable to add image layer. '+msg);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Map layer: ${source.title}<br>`
+                        +`Unable to add image layer. ${msg}`,
+                error_title: 'Unable to add image layer'
+            });
             //Please check that the file or service specified is in one of the supported formats. 
         }
     }

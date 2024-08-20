@@ -425,7 +425,7 @@ function ShowReps( is_snippet_editor ) {
                 return;
             }
             if(context===false){
-                window.hWin.HEURIST4.msg.showMsgErr('No template generated');
+                window.hWin.HEURIST4.msg.showMsgErr({message: 'No template generated', error_title: 'No template'});
                 return;
             }
 
@@ -578,7 +578,7 @@ function ShowReps( is_snippet_editor ) {
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
         function(obj) {
             if (obj  &&  obj.error) {
-                window.hWin.HEURIST4.msg.showMsgErr(obj.error);
+                window.hWin.HEURIST4.msg.showMsgErr({message: obj.error, error_title: 'Failed to create template'});
             }else{
                 _onGetTemplate(obj);
             }
@@ -610,7 +610,7 @@ function ShowReps( is_snippet_editor ) {
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                  function(obj) {
                     if (obj  &&  obj.error) {
-                        window.hWin.HEURIST4.msg.showMsgErr(obj.error);
+                        window.hWin.HEURIST4.msg.showMsgErr({message: obj.error, error_title: 'Failed to create template'});
                     }else{
                         _updateReps('<xmp>'+obj+'</xmp>');
                     }
@@ -622,7 +622,10 @@ function ShowReps( is_snippet_editor ) {
             }
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Database must be registered to allow translation of local template to global template.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Database must be registered to allow translation of local template to global template.',
+                error_title: 'Cannot convert to global template'
+            });
         }
     }
 
@@ -710,7 +713,10 @@ function ShowReps( is_snippet_editor ) {
 
                     _keepTemplateValue = template_body;
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('The template body is suspiciously short. No operation performed.');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'The template body is suspiciously short. No operation performed.',
+                        error_title: 'No action'
+                    });
                     request = null;
                 }
             }
@@ -846,7 +852,10 @@ function ShowReps( is_snippet_editor ) {
             if(_is_snippet_editor){
                 let rec_ID = $('#listRecords').val();
                 if(!(rec_ID>0)){
-                    window.hWin.HEURIST4.msg.showMsgErr('Select record to test on');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Select record to test on',
+                        error_title: 'Missing record'
+                    });
                     return;
                 }
                 request['publish'] = 4;
@@ -876,7 +885,10 @@ function ShowReps( is_snippet_editor ) {
                 }, 'auto');
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr('Nothing to execute');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Nothing to execute',
+                error_title: 'No action'
+            });
         }
     }
 
@@ -2142,7 +2154,10 @@ this_id       : "term"
 
         generateTemplate:  function (name){
             if(_needSelection){
-                window.hWin.HEURIST4.msg.showMsgErr('Please select some records to allow generation of the template.');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please select some records to allow generation of the template.',
+                    error_title: 'Missing selected record(s)'
+                });
             }else{
                 _needListRefresh = true;
                 _generateTemplate(name, true);
@@ -2151,7 +2166,10 @@ this_id       : "term"
 
         showEditor:  function (template_file, needRefresh){
             if(_needSelection){
-                window.hWin.HEURIST4.msg.showMsgErr('Please select some records in the search results before editing the template.');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please select some records in the search results before editing the template.',
+                    error_title: 'Missing selected record(s)'
+                });
             }else{
                 _needListRefresh = (needRefresh===true);
                 _showEditor(template_file);

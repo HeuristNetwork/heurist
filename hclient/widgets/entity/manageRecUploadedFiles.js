@@ -492,7 +492,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                     }
                                 });
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                                 
                             let inpt = this;
@@ -502,6 +502,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                             }});                
                         },
                         fail: function (e, response) {
+                            response = response.message ? response : {message: response, error_title: 'File upload error'};
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
@@ -755,7 +756,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             let mimeext = this._editing.getValue('ulf_MimeExt');
             let err_msg = this._validateExt( mimeext[0] );        
             if(err_msg){
-                window.hWin.HEURIST4.msg.showMsgErr( err_msg );
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: err_msg,
+                    error_title: 'File type error'
+                });
                 res = null;
             }
         }
@@ -1546,8 +1550,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         $dlg.dialog('widget').show();
                     }else{
                         $dlg.dialog('close');
-                        window.hWin.HEURIST4.msg.showMsgErr('An unknown error has occurred while attempting to retrieve the data types and license metadata values.<br>'
-                            + 'If this problem persists, please contact the Heurist team.');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'An unknown error has occurred while attempting to retrieve the data types and license metadata values.<br>'
+                                    +'If this problem persists, please contact the Heurist team.',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     }
                 });
 
@@ -1573,7 +1580,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 break;
             }    
             default:
-                window.hWin.HEURIST4.msg.showMsgErr('The external service "' + selected_repo + '" is not supported.<br>Please contact the Heurist team.');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `The external service "${selected_repo}" is not supported.`,
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                });
                 break;
         }
     },

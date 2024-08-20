@@ -125,8 +125,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     function onMapInit(){
 
         if(!target_database){
-            window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
-                +'It is not possiblle to perform this operation');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Target database not defined. It is not possiblle to perform this operation',
+                error_title: 'Target database missing'
+            });
             window.close();
         }
 
@@ -296,7 +298,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 +'If you do not know the owner, please advise the system administrator ('
 +'<a href="mailto:'+window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>)</p>';
 
-                window.hWin.HEURIST4.msg.showMsgErr( sMsg );
+                window.hWin.HEURIST4.msg.showMsgErr({message: sMsg, error_title: 'Required records not publicly visible'});
                 $('#save-button').show();
                 return;
             }

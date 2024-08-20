@@ -365,7 +365,10 @@ function getDataFromServer(){
     d3.json(url, function(error, json_data) {
         // Error check
         if(error) {
-            window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: `Error loading JSON data: ${error.message}`,
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
         }
         
         settings.data = json_data; //all data

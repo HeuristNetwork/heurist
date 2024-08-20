@@ -319,7 +319,10 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                             that.recordList.resultList('refreshPage');  
                                             $('body').find('div[id^="heurist-dialog-SysGroups-"]').manageSysGroups('closeDialog', true);
                                         }else{
-                                            window.hWin.HEURIST4.msg.showMsgErr('User must belong to one group at least');
+                                            window.hWin.HEURIST4.msg.showMsgErr({
+                                                message: 'User must belong to one group at least',
+                                                error_title: 'Select a workgroup'
+                                            });
                                         }
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -729,7 +732,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     window.hWin.HAPI4.setCurrentUser(null);
                     window.location.reload();  // page reload
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response + ' <br> Heurist is unable to refresh the page!');
+                    response.message += ' <br> Heurist is unable to refresh the page!'
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
         );

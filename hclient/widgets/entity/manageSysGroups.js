@@ -586,7 +586,10 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         if(this.options.select_mode=='select_roles'){ //special case - select roles for any set of users
             if( $.isEmptyObject(this._select_roles)){
-                window.hWin.HEURIST4.msg.showMsgErr('You have to allocate membership in at last one group');
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'You have to allocate membership in at last one group',
+                    error_title: 'Select a workgroup'
+                });
             }else{
                 this._trigger( "onselect", null, {selection: this._select_roles});
                 this.closeDialog();

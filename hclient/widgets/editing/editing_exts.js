@@ -849,8 +849,11 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
         let dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
         ele = _editing.getFieldByName( dtId_Geo );
         if(!ele){
-            window.hWin.HEURIST4.msg.showMsgErr('Image map source record must have Bounding Box field! '
-                +'Please correct record type structure.');
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Image map source record must have Bounding Box field! '
+                        +'Please correct record type structure.',
+                error_title: 'Missing bounding box'
+            });
         }else{
 
             window.hWin.HEURIST4.msg.showMsgDlg(
@@ -871,11 +874,16 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
                                     if(extentWKT){
                                         _editing.setFieldValueByName(dtId_Geo, 'pl '+extentWKT);
                                     }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr( 'Cannot calculate image extent. Verify your worldfile parameters' );
+                                        window.hWin.HEURIST4.msg.showMsgErr({
+                                            message: 'Cannot calculate image extent. Verify your worldfile parameters',
+                                            error_title: 'Invalid image extent'
+                                        });
                                     }
 
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr( response.data.error ? response.data.error : response.data );
+                                    let error = response.data.error ? response.data.error : response.data;
+                                    error = $.isPlainObject(error) ? error : {message: error, error_title: 'Data error'};
+                                    window.hWin.HEURIST4.msg.showMsgErr( error );
                                 }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr( response );
@@ -2099,7 +2107,10 @@ function translationSupport(_input_or_values, is_text_area, callback){
                 if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('Widget editTranslations not loaded. Verify your configuration');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Widget editTranslations not loaded. Verify your configuration',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }
         });
     }else{

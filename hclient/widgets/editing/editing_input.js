@@ -3372,7 +3372,7 @@ $.widget( "heurist.editing_input", {
                             that.linkedImgContainer.find('img').prop('src', '');
                         }
 
-                        window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                        window.hWin.HEURIST4.msg.showMsgErr({message: file.error, error_title: 'File upload error'});
                     }else{
 
                         if(file.ulf_ID>0){ //file is registered at once and it returns ulf_ID
@@ -3438,7 +3438,7 @@ $.widget( "heurist.editing_input", {
                 }
             }
             
-            window.hWin.HEURIST4.msg.showMsgErr(msg);
+            window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'File upload error'});
         }
 
         fileHandle = null;
@@ -5050,7 +5050,7 @@ $.widget( "heurist.editing_input", {
                                                 
                                             }else{
                                                 $('#div_result').hide();
-                                                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                                                window.hWin.HEURIST4.msg.showMsgErr(response);
                                             }
                                         });
                                     },

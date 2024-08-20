@@ -339,10 +339,10 @@
          * &#[0-9]; html code
          * &#x[a-fA-F0-9]; hex code
          */
-        $regex_entities = '&(?:[a-zA-Z]+|#[0-9]+|#x[a-fA-F0-9]+);';
+        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
 
         $add_tags = function($matches) use ($is_xml) {
-            $response = $is_xml ? '<notranslate>'. $matches[0] .'</notranslate>' : '<p translate="no">'. $matches[0] .'</p>';
+            $response = $is_xml ? "<notranslate>{$matches[0]}</notranslate>" : "<p translate='no'>{$matches[0]}</p>";
             return $response;
         };
         $remove_tags = function($matches){

@@ -548,7 +548,7 @@ ul#rep_list.menu li ul {
             function onGenerate()
             {
                 if(window.showReps.isNeedSelection()){
-                    window.hWin.HEURIST4.msg.showMsgErr('You must select some records');
+                    window.hWin.HEURIST4.msg.showMsgErr({message: 'You must select some records', error_title: 'Missing records'});
                 }else{
                     
                     window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
@@ -681,7 +681,7 @@ ul#rep_list.menu li ul {
                             obj = JSON.parse(obj);
                         }
                         if (obj  &&  obj.error) {
-                            window.hWin.HEURIST4.msg.showMsgErr(obj.error);
+                            window.hWin.HEURIST4.msg.showMsgErr({message: obj.error, error_title: 'Failed to load template'});
                         }else if(obj.ok) {
                             window.showReps.showEditor(obj.ok, true);
                             if(obj.details_not_found){

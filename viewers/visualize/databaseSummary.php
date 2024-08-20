@@ -276,7 +276,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 d3.json(url, function(error, json_data) {
                     // Error check
                     if(error) {
-                        window.hWin.HEURIST4.msg.showMsgErr("Error loading JSON data: " + error.message);
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: `Error loading JSON data: ${error.message}`,
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
                     }
 
                     // Data loaded successfully!

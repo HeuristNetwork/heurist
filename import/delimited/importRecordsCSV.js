@@ -4484,323 +4484,242 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = s + '</table>';
         }
         
-        if(s!=''){
-            dlg_options['window'] = window;  //current frame
-            dlg_options['element'] = container.get(0);
-            container.html(s);
-            container.css({'overflow-x':'hidden'});
-            
-            if(container.find("#tabs_records").length>0){
-                    $("#tabs_records").tabs();
-            }
-            
-            $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
-            
-            //activate add terms buttons
-            let btn_ads = $dlg.find('.add_terms');
-            btn_ads.click(function(event){
-                
-                //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
-                
-                let ele = $(event.target);
-                let tab_idx = ele.attr('tab_id');
-                let dt_id = ele.attr('dt_id');
-                let tabs = imp_session['validation']['error'];
-                let wrong_values = tabs[tab_idx]['values_error'];
+        if(s == ''){ return; }
 
-                _importNewTerms($dlg, dt_id, wrong_values, -1, '');
-                //alert('add '+wrong_values.join(',')); 
-            });
-            
-            //activate add ALL terms buttons
-            if(btn_ads.length>1){
-                $dlg.find('.add_all_terms').show().on('click', function(event){
-                    //window.hWin.HEURIST4.msg.bringCoverallToFront($dlg);
-                    let prepared_data = [];
-                    _importNewTermsToAllFields($dlg, 0, prepared_data);
-                });
-            }
-            
+        dlg_options['window'] = window;  //current frame
+        dlg_options['element'] = container.get(0);
+        container.html(s);
+        container.css({'overflow-x':'hidden'});
+
+        if(container.find("#tabs_records").length>0){
+                $("#tabs_records").tabs();
         }
-        
-    } 
-    
-    //
-    // Import Terms
-    //
-    function _importNewTermsToAllFields($dlg, index, prepared_data){
 
+        $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+
+        const TABS = imp_session['validation']['error'];
+
+        //activate add terms buttons
         let btn_ads = $dlg.find('.add_terms');
+        btn_ads.click(function(event){
 
-        let ele = $(btn_ads[index]);
-        let tab_idx = ele.attr('tab_id');
-        let dt_id = ele.attr('dt_id');
-        let tabs = imp_session['validation']['error'];
-        let wrong_values = tabs[tab_idx]['values_error'];
-        
-        _importNewTerms($dlg, dt_id, wrong_values, -1, '', function(context, hasPeriod){
-            
-            if(context && Array.isArray(context)){
-                
-                prepared_data = prepared_data.concat(context);
-                
-                if(index<btn_ads.length-1){
-                    //gather all terms to be added
-                    index++;
-                    _importNewTermsToAllFields($dlg, index, prepared_data);
-                }else{
-                    //add all terms in prepared_data
-                    _importTerms($dlg, prepared_data, true, hasPeriod);
+            let ele = $(event.target);
+            let tab_idx = ele.attr('tab_id');
+            let dty_ID = ele.attr('dt_id');
+            let wrong_values = TABS[tab_idx]['values_error'];
+
+            let has_peroids = false;
+
+            for(const TERM of wrong_values){
+                if(TERM.indexOf('.') > 0){
+                    has_peroids = true;
+                    break;
                 }
             }
-            
+
+            _importTerms_ParentID(dty_ID, null, (trm_ParentTermID) => {
+
+                let field = [[TABS[tab_idx]['field_checked'], dty_ID, trm_ParentTermID]];
+
+                has_peroids ? _importTerms_Separator(field, $dlg, false) : _importTerms_Import(field, '', $dlg, false);
+            });
         });
         
-    }
-    
-    //
-    // add new terms
-    //
-    function _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, trm_ParentLabel, callback){
-        
-        if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
+        //activate add ALL terms buttons
+        if(btn_ads.length>1){
+            $dlg.find('.add_all_terms').show().on('click', function(event){
 
-        let fieldname = $Db.dty(dt_id, 'dty_Name');
-        
-        if(!(trm_ParentTermID>0)){
-            //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
-                                        
-            let terms = $Db.dty(dt_id, 'dty_JsonTermIDTree');
+                let has_peroids = false;
+                let fields = [];
 
-            if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
-                trm_ParentTermID = Number(terms);
-            }else{
-                //this is a set of terms - find special vocabulary  'Auto-added terms'
-                let vocabs = $Db.trm_getVocabs('enum');
-                for (let i=0; i<vocabs.length; i++){
-                    let trmID = vocabs[i];
-                    if(trmID>0)
-                        if($Db.trm(trmID,'trm_Label')=='Auto-added terms'){
-                            trm_ParentTermID = trmID;
-                            break;
-                     }
-                }
-                if(!(trm_ParentTermID>0)){ //add new vocabulary to root
-                    
-                    let request = {
-                        'a'          : 'save',
-                        'entity'     : 'defTerms',
-                        'request_id' : window.hWin.HEURIST4.util.random(),
-                        'fields'     : [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
-                        };
-                
-                    
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
+                $dlg.find('.add_terms').each((idx, button) => {
 
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            let recIDs = response.data;
-                            trm_ParentTermID = Number(recIDs[0]);
-                            _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms', callback);
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });                    
-                    
-                    return;
-                }
-            }
-        }//find parent term id
-        
-        if(trm_ParentLabel==''){
-            trm_ParentLabel = $Db.trm(trm_ParentTermID,'trm_Label');
-        }
-        
-        
-        let s;
-        if(newvalues.length>5){
-            s = newvalues.slice(0,5).join(', ') + ' and '+(newvalues.length-5)+ ' more';
-        }else{
-            s = newvalues.join(', ');
-        }
+                    let tab_idx = button.getAttribute('tab_id');
+                    let dty_ID = button.getAttribute('dt_id');
+                    let wrong_values = TABS[tab_idx]['values_error'];
 
-        if(window.hWin.HEURIST4.util.isFunction(callback)){
-                
-            _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback);
-            
-        }else{
-            //window.hWin.HEURIST4.msg.sendCoverallToBack();
-            
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Terms ' + s +' will be added to the vocabulary "'
-                + trm_ParentLabel +'"'
-                , function(){
-                    _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname);
-                }); 
-        }
-    }
-    
-    //
-    //  continue addition of new terms
-    //            
-    function _importNewTerms_continue($dlg, newvalues, trm_ParentTermID, fieldname, callback){    
-        
-        let _prepareddata = [], record;
-        
-        let skip_dup=0, skip_long=0, skip_na=0;
-
-        let hasPeriod = false;
-        
-        //list of all children for given trm_ParentTermID in lower case
-        let trm_ParentChildren = $Db.trm_TreeData(trm_ParentTermID,'labels');
-        
-        for(let i=0;i<newvalues.length;i++){
-
-            let lbl = null;
-            
-            if(!window.hWin.HEURIST4.util.isempty(newvalues[i])){
-                lbl = newvalues[i].trim();
-            }
-
-            if(!window.hWin.HEURIST4.util.isempty(lbl)){
-
-                //verify duplication in parent term and if already added
-                /*if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
-                {
-                    skip_dup++;
-                    continue;
-                }*/
-
-
-                if(lbl.indexOf('.')<0 && lbl.length>500){
-                    skip_long++;
-                    continue;
-                }
-                
-                if(lbl.indexOf('.') >= 0){
-                    hasPeriod = '.';
-                }
-
-            _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});
-                
-            }else{
-                skip_na++;
-            }
-        }//for    
-        
-        if(_prepareddata.length==0){
-            //window.hWin.HEURIST4.msg.sendCoverallToBack();
-            
-            let s = 'Nothing to import. Validation reports that among proposed terms for field "'+fieldname+'"<br>'
-                    +((skip_dup>0)?skip_dup+' already exist; ':' ')
-                    +((skip_long>0)?skip_long+' have too long label; ':' ')
-                    +((skip_na>0)?skip_na+' label is empty':'');
-            
-            setTimeout(function(){
-                window.hWin.HEURIST4.msg.showMsgErr({
-                    message: s,
-                    error_title: 'No terms imported',
-                    status: window.hWin.ResponseStatus.INVALID_REQUEST
-                });
-            }, 1000);    
-            return;
-        }
-        
-        if(window.hWin.HEURIST4.util.isFunction(callback)){
-            callback.call(this, _prepareddata, hasPeriod);
-        }else{
-            _importTerms($dlg, _prepareddata, false, hasPeriod);
-        }
-    }
-    
-    //
-    //
-    //
-    function _importTerms($dlg, _prepareddata, is_all, hasSeparator=''){
-
-        _prepareddata = JSON.stringify(_prepareddata);
-
-        //save hierarchy - label can have dots    
-        let request = {
-            'a'          : 'batch',
-            'entity'     : 'defTerms',
-            'request_id' : window.hWin.HEURIST4.util.random(),
-            'fields'     : _prepareddata,
-            'term_separator': !hasSeparator ? '' : hasSeparator
-        };
-    
-        let that = this;
-
-        if(!hasSeparator || hasSeparator == ''){
-            _importTerms_continue($dlg, request, is_all);
-        }else{
-
-            let $dlg_term_warning;
-
-            let btns = {};
-            btns['Periods as separators'] = function(){
-
-                request['term_separator'] = '.';
-                $dlg_term_warning.dialog('close');
-
-                _importTerms_continue($dlg, request, is_all);
-            };
-
-            btns['Periods as part of terms'] = function(){
-
-                request['term_separator'] = '';
-                $dlg_term_warning.dialog('close');
-
-                _importTerms_continue($dlg, request, is_all);
-            };
-
-            $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
-                'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
-                + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
-                btns, 
-                {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
-            );
-        }
-    }
-
-    function _importTerms_continue($dlg, request, is_all){
-
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-
-                    let recIDs = response.data;
-
-                    //refresh local definitions
-                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
-                        function(){
-                            let cnt = $dlg.find('.add_terms').length;
-                            let s = recIDs.length+' new term'
-                                    +((recIDs.length==1)?' was':'s were')+' imported. ';
-                            if(cnt==1 || is_all){
-
-                                $dlg.dialog('close');
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: `${s}Please repeat "Prepare" action`,
-                                    error_title: 'Terms imported'
-                                });
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: `${s}Check other "error" tabs `
-                                            +'to add missing terms for other enumeration fields. '
-                                            +'And finally close this dialog and repeat "Prepare" action',
-                                    error_title: 'Terms imported'
-                                });
+                    if(!has_peroids){
+                        for(const TERM of wrong_values){
+                            if(TERM.indexOf('.') > 0){
+                                has_peroids = true;
+                                break;
                             }
                         }
-                    );
-                                
+                    }
+
+                    fields.push([TABS[tab_idx]['field_checked'], dty_ID, null]);
+                });
+
+                let idx = 0;
+                let def_ParentTermID = null;
+
+                let _handle_callback = (trm_ParentTermID) => {
+
+                    fields[idx][2] = trm_ParentTermID;
+                    def_ParentTermID = !def_ParentTermID ? trm_ParentTermID : def_ParentTermID;
+                    idx ++;
+
+                    if(fields.length > idx){
+                        _importTerms_ParentID(fields[0][1], def_ParentTermID, _handle_callback);
+                        return;
+                    }
+
+                    has_peroids ? _importTerms_Separator(fields, $dlg, true) : _importTerms_Import(fields, '', $dlg, true);
+                };
+
+                _importTerms_ParentID(fields[0][1], null, _handle_callback);
+            });
+        }
+    } 
+
+    function _importTerms_ParentID(dty_ID, def_ParentTermID, callback){
+
+        if(typeof callback !== 'function'){
+            return false;
+        }
+
+        let trm_ParentTermID = def_ParentTermID;
+        let terms = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+
+        if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
+            trm_ParentTermID = Number(terms);
+        }else{
+            //this is a set of terms - find special vocabulary  'Auto-added terms'
+            let vocabs = $Db.trm_getVocabs('enum');
+            for (let i=0; i<vocabs.length; i++){
+                let trmID = vocabs[i];
+                if(trmID > 0 && $Db.trm(trmID,'trm_Label') == 'Auto-added terms'){
+                    trm_ParentTermID = trmID;
+                    break;
+                }
+            }
+
+            if(trm_ParentTermID <= 0){ //add new vocabulary to root
+
+                let request = {
+                    'a': 'save',
+                    'entity': 'defTerms',
+                    'request_id': window.hWin.HEURIST4.util.random(),
+                    'fields': [{trm_Label:'Auto-added terms', trm_ParentTermID:'', trm_Depth:0, trm_Domain:'enum'}]                     
+                };
+
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        let recIDs = response.data;
+                        trm_ParentTermID = Number(recIDs[0]);
+                        callback.call(this, trm_ParentTermID);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });                    
+                
+                return;
+            }
+        }
+
+        callback.call(this, trm_ParentTermID);
+    }
+    function _importTerms_Separator(fields, $dlg, is_all){
+
+        let $dlg_term_warning;
+
+        let btns = {};
+        btns['Periods as separators'] = function(){
+
+            $dlg_term_warning.dialog('close');
+
+            _importTerms_Import(fields, '.', $dlg, is_all);
+        };
+
+        btns['Periods as part of terms'] = function(){
+
+            $dlg_term_warning.dialog('close');
+
+            _importTerms_Import(fields, '', $dlg, is_all);
+        };
+
+        $dlg_term_warning = window.hWin.HEURIST4.msg.showMsgDlg(
+            'You have term(s) which contain periods (.). These are often used as separators between levels of a hierarchical term tree.<br><br>'
+            + 'Do you want to treat periods as hierarchical separators?<br>(note: will apply to ALL terms in the import which contain periods)',
+            btns, 
+            {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
+        );
+    }
+    function _importTerms_Import(fields, separator, $dlg, is_all){
+
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(fields) || fields[0].length != 3){
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'No terms to import',
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
+            return false;
+        }
+
+        let session_id = window.hWin.HEURIST4.msg.showProgress( {container:$('#progressbar_div'), interval:100, content:false});
+
+        let request = {
+            db: window.hWin.HAPI4.database,
+            session: session_id,
+            imp_ID: imp_ID,
+            action: 'import_terms',
+            fields: fields,
+            trm_Separator: separator,
+            request_id: window.hWin.HEURIST4.util.random()
+        };
+
+        const RETURN_STEP = currentStep;
+        _showStep(0);
+
+        window.hWin.HAPI4.doImportAction(request, (response) => {
+
+            _showStep(RETURN_STEP);
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let cnt = $dlg.find('.add_terms').length;
+            let added_count = response.data.success.length;
+
+            let s = `${added_count} new term${(added_count==1)?' was':'s were'} imported. `;
+
+            let error = ``;
+            if(response.data.error.length > 0){
+                error = '<strong>The following errors occurred:</strong><br><br>';
+
+                for(const fld_idx in response.data.error){
+
+                    if(!Object.hasOwn(response.data.error, fld_idx)){
+                        continue;
+                    }
+
+                    error += response.data.error[fld_idx];
+                }
+            }
+
+            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm', () => {
+
+                if(cnt == 1 || is_all){
+
+                    $dlg.dialog('close');
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `${s}Please repeat "Prepare" action.${error}`,
+                        error_title: 'Terms imported'
+                    });
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `${s}Check other "error" tabs `
+                                +'to add missing terms for other enumeration fields. '
+                                +`And finally close this dialog and repeat "Prepare" action.${error}`,
+                        error_title: 'Terms imported'
+                    });
                 }
             });
+        });
     }
-        
 
     //
     // get import line on server and show it on popup
