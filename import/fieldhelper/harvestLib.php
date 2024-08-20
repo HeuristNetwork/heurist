@@ -170,46 +170,44 @@ function getFilesInDir($system, $dir, $mediaExts, $imode) {
     global $reg_info;
 
     $all_files = scandir($dir);
-    $registered = array();
-    $non_registered = array();
 
     foreach ($all_files as $filename){
-        if(!($filename=="." || $filename==".." || is_dir($dir.$filename) || $filename=="fieldhelper.xml")){
 
-            $filename_base = $filename;
-            $filename = $dir.$filename;
-            $flleinfo = pathinfo($filename);
-            $recordNotes = null;
+        if(is_dir($dir.$filename) || $filename=="." || $filename==".." 
+            || $filename=="fieldhelper.xml" || $filename=="index.html" || $filename==".htaccess"){
+            continue;
+        }
 
-            //checks for allowed extensions
-            if(in_array(strtolower(@$flleinfo['extension']),$mediaExts))
-            {
-                if($imode==1){
+        $filename_base = $filename;
+        $filename = $dir.$filename;
+        $flleinfo = pathinfo($filename);
 
-                    $file_id = fileGetByFileName( $system, $filename );//see recordFile.php
+        //checks for allowed extensions
+        if(in_array(strtolower(@$flleinfo['extension']),$mediaExts)){
 
-                    if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
-                        //Check if this is just a thumbnail version of an image
+            if($imode==1){
 
-                        $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+                $file_id = fileGetByFileName( $system, $filename );//see recordFile.php
 
-                        if(in_array($temp_name, $reg_info['nonreg'])){
-                            continue;
-                        }
+                if($file_id <= 0 && strpos($filename, "/thumbnail/$filename_base") !== false){
+                    //Check if this is just a thumbnail version of an image
+
+                    $temp_name = str_replace("thumbnail/$filename_base", $filename_base, $filename);
+
+                    if(in_array($temp_name, $reg_info['nonreg'])){
+                        continue;
                     }
-
-                    if($file_id>0){
-                        array_push($reg_info['reg'], $filename);
-                    }else{
-                        array_push($reg_info['nonreg'], $filename);
-                    }
-
-                }else{
-                    array_push($reg_info, $filename);
                 }
+
+                if($file_id>0){
+                    array_push($reg_info['reg'], $filename);
+                }else{
+                    array_push($reg_info['nonreg'], $filename);
+                }
+
+            }else{
+                array_push($reg_info, $filename);
             }
-
-
         }
     }  //for all_files
 }
