@@ -175,6 +175,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         this.recordList.resultList('setSelected', '');
                         
                     }else if(action=='menu-file-refrec-show'){ 
+                        
+                        this._showMediaRecords();
 
                     }else if(action=='menu-file-refrec-add'){ 
                         
@@ -1212,6 +1214,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         
                     }else{
                         let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
+                        
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         ((recs.length==1)?'There is a reference':('There are '+recs.length+' references'))
                         +' from record(s) to this File.<br>You must delete the records'
@@ -1854,7 +1857,26 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }
         });
     },
+    
+    //
+    //
+    //
+    _showMediaRecords: function(){
+        
+        let ids = this.recordList ? this.recordList.resultList('getSelected', true) : [];
 
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Select some files first...', 4000);
+            return;
+        }
+
+        //let url = window.hWin.HAPI4.baseURL+"?db="+window.hWin.HAPI4.database+"&q=ids:"+ids.join(',');
+        //window.open(url, '_blank');
+    },
+    
+    //
+    //
+    //
     _createMediaRecords: function(){
 
         let that = this;
@@ -1882,9 +1904,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 
                 let counts = response.data;
                 let msg = '';
-                if(counts.new.length > 0){
-                    let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+counts.new.join(',');
-                    msg = counts.new.length + ' new media record(s) created (search <a href="window.open(\''+url+'\', \'_blank\')">here</a>)<br>';
+                if(counts['new'].length > 0){
+                    
+                    let url = window.hWin.HAPI4.baseURL+"?db="+window.hWin.HAPI4.database+"&q=ids:"+counts['new'].join(',');
+                    msg = counts['new'].length 
+                            + ' new media record(s) created (search <a href="#" onclick="window.open(\''+url+'\', \'_blank\')">here</a>)<br>';
                 }
                 if(counts.skipped > 0){
                     msg += counts.skipped + ' already have a media record<br>';
@@ -1901,6 +1925,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         });
     },
 
+    //
+    //
+    //
     _checkUserPermissions: function(level){
 
         if(!window.hWin.HAPI4.has_access(level)){
@@ -1919,22 +1946,29 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         return true;
     },
 
+    //
+    //
+    //
     contextOnClose: function(){
         return this._lastFileDetails;
     },
     
+    //
+    //
+    //
     _checkFiles: function(){
         
-                let body = $(window.hWin.document).find('body');
+        /*
+        let body = $(window.hWin.document).find('body');
 
-                let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
-                                    window.innerHeight : body.innerHeight();
+        let screen_height = window && window.innerHeight && window.innerHeight > body.innerHeight() ? 
+                            window.innerHeight : body.innerHeight();
+        let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
+        */
 
-                let opts = {height:screen_height*0.8, width:body.innerWidth()*0.8};
-
-                window.hWin.HEURIST4.msg.showDialog(
-                    `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`
-                    , opts);                
+        window.hWin.HEURIST4.msg.showDialog(
+            `${window.hWin.HAPI4.baseURL}admin/verification/longOperationInit.php?type=files&db=${window.hWin.HAPI4.database}`
+            , {height:'80%', width:'80%'} );                
     },
     
     _deleteSelected: function(){
