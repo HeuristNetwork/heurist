@@ -2645,6 +2645,7 @@ $.widget( "heurist.resultList", {
         //clear selection
         this.div_content.find('.selected').removeClass('selected');
         this.div_content.find('.selected_last').removeClass('selected_last');
+        this._lastSelectedIndex = null;    
 
         if (selection == "all") {
             this.div_content.find('.recordDiv').addClass('selected');
