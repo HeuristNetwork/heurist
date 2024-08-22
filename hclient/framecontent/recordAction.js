@@ -5,7 +5,7 @@
 * @returns {Object}
 * @see  hclient/framecontent/record for widgets
 * @see  migrated/search/actions
-* @see  record_action_help_xxxx in localization.js for description and help
+* @see  record_action_help_xxxx in localization.txt for description and help
 
 IT USES
     window.hWin.HAPI4.currentRecordset

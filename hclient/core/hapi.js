@@ -131,7 +131,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         that.iconBaseURL = that.baseURL + '?db=' + _database + '&icon=';
         that.database = _database;
 
-        // regional - global variable defined in localization.js
         if (!window.hWin.HR) {
             window.hWin.HR = that.setLocale('ENG');
         }

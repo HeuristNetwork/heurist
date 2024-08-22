@@ -57,19 +57,16 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/assets/localization/localization.js"></script>
-<script>
-    window.hWin = window;
-     //stub
-    window.hWin.HR = function(res){ return regional['ENG'][res]?regional['ENG'][res]:res; }
-</script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-<!--
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
--->
+
+<script>
+    window.hWin = window;
+     //stub
+    window.hWin.HR = function(res){ return res; }
+</script>
+
 <!-- CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
 <?php
@@ -468,8 +465,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     // init db lookup - open dropdown list on keypress in search database input
     //
     function _initControls(){
-
-        if(!window.hWin.HR){
+        
+        if(window.hWin.HAPI4){
             window.hWin.HR = window.hWin.HAPI4.setLocale('ENG');
         }
 

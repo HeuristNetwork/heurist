@@ -1251,9 +1251,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(ext_options['buttons']){
             buttons = ext_options['buttons'];
+            delete ext_options['buttons'];
         }
         if(ext_options['labels']){
             labels = ext_options['labels'];
+            delete ext_options['labels'];
         }
         
         let isPopupDlg = (ext_options.isPopupDlg || ext_options.container);
