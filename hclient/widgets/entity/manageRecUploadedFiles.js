@@ -1184,11 +1184,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             let that = this;
             
             //get full field info to update local definitions
-            let request = {
-                'a'          : 'search',
-                'entity'     : that.options.entity.entityName,
-                'details'    : 'related_records', 
-                'ulf_ID': this._currentEditID};
+            const request = {
+                'a': 'batch',
+                'entity': this.options.entity.entityName,
+                'get_media_records': this._currentEditID};
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
@@ -1940,7 +1939,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         let request = {
             'a': 'batch',
             'entity': that.options.entity.entityName,
-            'delete_selected': ids,
+            'delete_selected': ids.join(','),
             'mode': 'get'
         };
 
@@ -1949,24 +1948,23 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 const files = response.data.files;
-                let text = 'Delete the multimedia records first using "Show referencing record for selected"';
+                
+                let msg = '<br>You must delete the records or the File field values in order to be able to delete selected files/urls.'
+                        +'<br><br>Click <a href="#" id="show_referencing">here</a> '
+                        +'for records which reference selected files/urls';
+                let $dlg;
+                        
                 if(Object.keys(files).length > 0){
 
                     const keys = Object.keys(files);
-                    const cnt_in_use = response.data.cnt_in_use;
                     
-                    let $dlg;
-                    if(cnt_in_use>0){
-                        text = cnt_in_use+' files are referencing in '
-                        +(response.data.cnt_ref_recs>0?(response.data.cnt_ref_recs+' records'):'')
-                        +(response.data.cnt_ref_values>0 && response.data.cnt_ref_recs>0?' and ':'')
-                        +(response.data.cnt_ref_values>0?(response.data.cnt_ref_values+' record details'):'')
-                        +'. '+text+'<br><br>'
+                    if(response.data.cnt_in_use>0){
+                        msg = `${response.data.cnt_in_use} files are referencing in ${response.data.cnt_ref_recs} records. ${msg}<br><br>`;
                     }else{
-                        text = '';
+                        msg = '';
                     }
                     
-                    text = text + keys.length + ' file(s) are ready to delete: <br>';
+                    msg = msg + keys.length + ' file(s) are ready to delete: <br>';
 
                     let del_func = function() {
 
@@ -1979,8 +1977,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                         window.hWin.HAPI4.EntityMgr.doRequest(req, function(res){
                             if(res.status == window.hWin.ResponseStatus.OK){
+                                let text = '';
                                 if(res.data > 0){
-                                    text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
+                                     text = res.data + ' file' + (res.data > 1 ? 's' : '') + ' deleted';
                                 }
                 
                                 window.hWin.HEURIST4.msg.showMsgFlash(text, 3000);
@@ -2003,19 +2002,19 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                                 extra = '<a href="'+ name +'" target="_blank"><span class="ui-icon ui-icon-extlink"></span></a>';
                             }
 
-                            text += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
+                            msg += '<br><span class="file-line" data-fid="'+ ulf_ID +'">'+ name +'</span> ' + extra;
                         }
                     }
 
-                    text += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
+                    msg += '<br><br>The above files will be <strong>deleted and unavailable for use</strong> unless it is re-uploaded to Heurist.<br>Do you wish to proceed?';
 
-                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(text, del_func, {title: 'Deleting files'}, {default_palette_class: 'ui-heurist-admin'});
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, del_func, {title: 'Deleting files'}, {default_palette_class: 'ui-heurist-admin'});
 
                     $dlg.parent().css('min-width', '250px');
                     $dlg.find('span.file-line').css({'display': 'inline-block', 'margin-bottom': '5px', 'text-decoration': 'underline', 'cursor': 'pointer'}).on('click', function(event){
-                        let id = $(this).attr('data-fid');
+                        const id = $(this).attr('data-fid');
 
-                        let popup_opts = {
+                        const popup_opts = {
                             isdialog: true, 
                             select_mode: 'manager',
                             edit_mode: 'editonly',
@@ -2025,11 +2024,16 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             onClose: () => {}
                         };
 
-                        let $m_dlg = window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
+                        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_opts);
                     });
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgFlash('Nothing to delete. All selected files have referencing records. '+text, 3000);
+                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Nothing to delete. All selected files have referencing records.'+msg,null,
+                        {title:'Delete blocked'},
+                        {default_palette_class:that.options.default_palette_class});
                 }
+                that._on($dlg.find('#show_referencing'),{click:that._showMediaRecords});
+                
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }

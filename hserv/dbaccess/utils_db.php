@@ -334,8 +334,11 @@ use hserv\structure\ConceptCode;
     *
     * @param mixed $mysqli
     * @param mixed $query
+    * @param mixed $mode
+    *                   0 - two dimensional array of records
+    *                   1 - array of records with index from first column
     */
-    function mysql__select_assoc($mysqli, $query):array{
+    function mysql__select_assoc($mysqli, $query, $mode=1):array{
 
         $matches = array();
         if($mysqli && $query){
@@ -343,8 +346,12 @@ use hserv\structure\ConceptCode;
             $res = $mysqli->query($query);
             if ($res){
                 while ($row = $res->fetch_assoc()){
-                    $key = array_shift($row);
-                    $matches[$key] = $row;
+                    if($mode==0){
+                        $matches[] = $row;
+                    }else{
+                        $key = array_shift($row);
+                        $matches[$key] = $row;
+                    }
                 }
                 $res->close();
             }
