@@ -507,7 +507,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     let order_recent = !window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.get_prefs('recent_Records'))
                                         && that.element.find('#rb_selected').prop('checked');
 
-                    let recset = new hRecordSet(response.data);
+                    let recset = new HRecordSet(response.data);
 
                     if(order_recent){
 
