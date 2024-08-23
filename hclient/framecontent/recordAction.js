@@ -336,14 +336,22 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
                     if ($(this).find('input').is(':checked')){
                         $('#cb_whole_value').parent().hide();   
+                        $('#cb_add_value').parent().show();
                         $('#fld-1').hide();
                     }else{
                         $('#cb_whole_value').parent().show();
+                        $('#cb_add_value').parent().hide();
                         $('#fld-1').show();    
                     }
                                                             
                 }).appendTo($fieldset);
                 
+            $('<div style="padding: 0.2em; width: 100%; display: none;" class="input">'
+                +'<div class="header" style="padding-bottom: 10px;">'
+                +'<label for="cb_add_value">Insert as new value,<br><span style="font-size: smaller;">if none exist</span></label></div>'
+                +'<input id="cb_add_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
+
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<div class="header">'  // style="padding-left: 16px;"
                 +'<label for="cb_whole_value">Replace substring</label></div>'
@@ -759,6 +767,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     if($('#cb_whole_value').is(':checked')){
                         request['subs'] = 1;
                     }
+                }else{
+                    request['insert_new_values'] = $('#cb_add_value').is(':checked') ? 1 : 0;
                 }
                 request['rVal'] = getFieldValue('fld-2');
                 if(!_allow_empty_replace && window.hWin.HEURIST4.util.isempty(request['rVal'])){

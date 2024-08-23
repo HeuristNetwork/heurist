@@ -672,13 +672,13 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $params = array('siisi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_temp);
 
         $rec_url = USanitize::sanitizeURL(@$record['URL']);
-        if($rec_url){
+        if($rec_url || (array_key_exists('URL', $record) && $update_mode < 2)){
             $params[0] = $params[0].'s';
             $params[] = $rec_url;
             $query = $query.', rec_URL=?';
         }
         $rec_spad = @$record['ScratchPad'];
-        if($rec_spad){
+        if($rec_spad || (array_key_exists('ScratchPad', $record) && $update_mode < 2)){
             $params[0] = $params[0].'s';
             $params[] = $rec_spad;
             $query = $query.', rec_ScratchPad=?';

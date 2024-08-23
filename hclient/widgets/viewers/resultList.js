@@ -1788,8 +1788,9 @@ $.widget( "heurist.resultList", {
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle" '+title_font_size+'>' //  '+rectypeTitleClass+'
         +   sCount;
-        
-        if(this.options.show_url_as_link && fld('rec_URL')){
+
+        let show_as_link = rectypeID > 0 && $Db.rty(rectypeID, 'rty_ShowURLOnEditForm') != 0;
+        if(this.options.show_url_as_link && show_as_link && fld('rec_URL')){
             if(window.hWin.HEURIST4.util.isempty(fld('rec_URLErrorMessage'))){
                 html = html + '<a href="'+fld('rec_URL')+'" target="_blank">'+ recTitle_strip1 + '</a>';
             }else{

@@ -3934,7 +3934,7 @@ $.widget( "heurist.editing_input", {
         // Semantic url links, separated by semi-colons, for RecTypes, Vocab+Terms, DetailTypes
         let semantic_uri = this.options.dtID && (typeof this.options.dtID === 'string' || this.options.dtID instanceof String)
                             && this.options.dtID.indexOf('ReferenceURL') !== -1;
-        if(freetext_url || semantic_uri){
+        if($inputdiv.find('.ui-icon-extlink').length == 0 && (freetext_url || semantic_uri)){
 
             let $btn_extlink = $( '<span>', {title: 'Open URL(s) in new window'})
                 .addClass('smallicon ui-icon ui-icon-extlink')

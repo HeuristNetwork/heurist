@@ -685,6 +685,7 @@ class RecordsBatch
 
         $dtyID = $this->data['dtyID'];
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
+        $insert_new_value = false;
 
         $mysqli = $this->system->get_mysqli();
 
@@ -738,6 +739,7 @@ class RecordsBatch
             //all except file type
             //$searchClause = '1=1';
             $replace_all_occurences = true;   //search value not defined replace all
+            $insert_new_value = @$this->data['insert_new_values'] == 1;
 
             //??? why we need it if $dtyID is defined
             $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"');// OR dty_Type = "geo"
@@ -851,14 +853,15 @@ class RecordsBatch
 
                 if($get_next_row) {$row = $res->fetch_row();}
                 $get_next_row = true;
+                $inserting_value = $insert_new_value && $res->num_rows == 0;
+                
+                if(!$row || ($recID>0 && $row[1]!=$recID) ){ 
 
-                if(!$row || ($recID>0 && $row[1]!=$recID) ){
-
-                    //next record - update changed record and
+                    //next record - update changed record and 
                     if($recID>0){
 
                         if ($recDetailWasUpdated) {
-                            //only put in processed if a detail was processed,
+                            //only put in processed if a detail was processed, 
                             // obscure case when record has multiple details we record in error array also
                             array_push($processedRecIDs, $recID);
 
@@ -880,7 +883,7 @@ class RecordsBatch
                         }
                     }
 
-                    if(!$row){ //end of loop
+                    if(!$row && ($res->num_rows > 0 || !$insert_new_value)){ //end of loop
 
                         if($recID==0){
                             array_push($undefinedFieldsRecIDs, $keep_recID);
@@ -892,23 +895,22 @@ class RecordsBatch
                     $valuesToBeDeleted = array();
                 }
 
-            //foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
-                $dtlID = intval($row[0]);
-                $recID = intval($row[1]);
-
+                $dtlID = $inserting_value ? -1 : intval($row[0]);
+                $recID = $inserting_value ? $keep_recID : intval($row[1]);
+                
                 if($is_multiline){ //replace with several values (long text)
 
                     foreach($splitValues as $val){
-                        $dtl['dtl_ID']  = -1;
-                        $dtl['dtl_RecID']  = $recID;
-                        $dtl['dtl_DetailTypeID']  = $dtyID;
+                        $dtl['dtl_ID'] = -1;
+                        $dtl['dtl_RecID'] = $recID;
+                        $dtl['dtl_DetailTypeID'] = $dtyID;
                         $dtl['dtl_Value'] = $val;
                         $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                     }
                     $recDetailWasUpdated = true;
 
                 }else{
-                    $dtlVal = $row[2];
+                    $dtlVal = $inserting_value ? null : $row[2];
 
                     if($this->data['rVal']=='replaceAbsPathinCMS'){
 
@@ -937,7 +939,7 @@ class RecordsBatch
                         $dtl['dtl_Value'] = $geoType;
                         $dtl['dtl_Geo'] = $geoValue;
 
-                    }else  if($basetype=='date'){
+                    }elseif($basetype=='date'){
 
                         $dtl['dtl_Value'] = Temporal::getValueForRecDetails( $newVal, $useNewTemporalFormatInRecDetails );
 
@@ -946,22 +948,37 @@ class RecordsBatch
                     }
 
                     if(!@$this->data['debug']){
+                        
+                        if($insert_new_value){
+                            $dtl['dtl_RecID'] = $recID;
+                            $dtl['dtl_DetailTypeID'] = $dtyID;
+                        }else{
+                            unset($dtl['dtl_RecID']);
+                            unset($dtl['dtl_DetailTypeID']);
+                        }
 
                         $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
 
                         if (!is_numeric($ret)) {
                             $sqlErrors[$recID] = $ret;
-                            continue;
+
+                            if($inserting_value){
+                                break;
+                            }else{
+                                continue;
+                            }
+                        }elseif($inserting_value){
+                            array_push($processedRecIDs, $recID);
                         }
                     }
 
                     $recDetailWasUpdated = true;
 
                 }
+                
+                if($replace_all_occurences || $is_multiline){
 
-                if($replace_all_occurences || $is_multiline)
-                {
-                    if($is_multiline) {array_push($valuesToBeDeleted, intval($dtlID));}//= array_keys($valuesToBeReplaced);
+                    if($is_multiline && $dtlID > 0) array_push($valuesToBeDeleted, intval($dtlID));
 
                     while ($row = $res->fetch_row()) { //gather all old detail IDs
                         if($row[1]!=$recID){
@@ -971,6 +988,8 @@ class RecordsBatch
                     }
                     $get_next_row = false;
                 }
+
+                if($inserting_value){ break; }
 
             }//while
 
