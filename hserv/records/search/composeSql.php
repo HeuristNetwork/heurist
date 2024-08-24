@@ -116,7 +116,7 @@ VALUE
 4)  Query     "linked_to:15": [{ t:4 }, {"f:1":"Alex" } ]
 "f:10": {"any":[ {t:4}, {} ] }
 
-5) Find all records without field  "f:5":"NULL"  - TODO!!!!
+5) Find all records without field  "f:5":"NULL"  
 6) Find all records with any value in field  "f:5":""
 7) Find all records with value not equal ABC  "f:5":"-ABC"
 
@@ -2114,78 +2114,113 @@ class HPredicate {
         $this->field_type = "link";
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
+        
+        
+        if($this->isEmptyValue()){
+            //find records without reverse pointers
 
-        if($this->query){
-
-            $this->query->makeSQL();
-
-            if($this->query->where_clause && trim($this->query->where_clause)!=""){
-
-                if($not_nested){
-                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
-                    $top_query->top_limb->addTable($this->query->from_clause);
-                }else{
-                    $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
-                    $ids = mysql__select_list2($mysqli, $sub_query);
-                    if(is_array($ids) && count($ids)>0){
-                        //if(count($ids)>2000)
-                        $val = ' IN ('.implode(',',$ids).')';
-                    }else{
-                        $val = ' =0';
-                    }
-
-                    //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
-                }
-            }else{
-                return null;
+            if(strpos($this->value, '-')===0){
+                $this->negate = true;
+                $this->value = substr($this->value, 1);
             }
 
-        }else{
+            $rd = "rd".$this->qlevel;
 
-            $val = $this->getFieldValue();
-
-            if($val=='' && !$this->field_list){
-                $val = "=0";
-                //@todo  findAnyField query
-                //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
-            }
-        }
-
-        if($this->field_id==5){ //special case for relationship records
-            //find target or source linked from relation record
-
-            $where = "r$p.rec_ID=$rl.rl_TargetID "
-            ." AND $rl.rl_DetailTypeID IS NULL "
-            ." AND $rl.rl_RelationID".$val;
-
-        }elseif($this->field_id==7){ //special case for relationship records
-
-            $where = "r$p.rec_ID=$rl.rl_SourceID "
-            ." AND $rl.rl_DetailTypeID IS NULL "
-            ." AND $rl.rl_RelationID".$val;
-
-        }else{
-
+            //no pointer field exists among record details
             $field_compare = "$rl.rl_RelationID IS NULL";
             if($this->field_id){
                 $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
                 if(is_array($several_ids) && count($several_ids)>0){
 
                     if(count($several_ids)>1){
-                        $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
+                        $field_compare .= " AND $rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
                     }else{
-                        $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+                        $field_compare .= " AND $rl.rl_DetailTypeID = ".$this->field_id;
                     }
                 }
             }
+            
+            $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+            ." IN (select rl_TargetID from recLinks $rl where $field_compare)";
+                
 
-            $where = "r$p.rec_ID=$rl.rl_TargetID AND "
-            .$field_compare
-            //OLD (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
-            ." AND $rl.rl_SourceID".$val;
+            return array("where"=>$where);
+
+        }else{
+        
+
+            if($this->query){
+
+                $this->query->makeSQL();
+
+                if($this->query->where_clause && trim($this->query->where_clause)!=""){
+
+                    if($not_nested){
+                        $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
+                        $top_query->top_limb->addTable($this->query->from_clause);
+                    }else{
+                        $sub_query = 'SELECT DISTINCT rec_ID FROM '.$this->query->from_clause.' WHERE '.$this->query->where_clause;
+                        $ids = mysql__select_list2($mysqli, $sub_query);
+                        if(is_array($ids) && count($ids)>0){
+                            //if(count($ids)>2000)
+                            $val = ' IN ('.implode(',',$ids).')';
+                        }else{
+                            $val = ' =0';
+                        }
+
+                        //OLD $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                    }
+                }else{
+                    return null;
+                }
+
+            }else{
+
+                $val = $this->getFieldValue();
+
+                if($val=='' && !$this->field_list){
+                    $val = "=0";
+                    //@todo  findAnyField query
+                    //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
+                }
+            }
+
+            if($this->field_id==5){ //special case for relationship records
+                //find target or source linked from relation record
+
+                $where = "r$p.rec_ID=$rl.rl_TargetID "
+                ." AND $rl.rl_DetailTypeID IS NULL "
+                ." AND $rl.rl_RelationID".$val;
+
+            }elseif($this->field_id==7){ //special case for relationship records
+
+                $where = "r$p.rec_ID=$rl.rl_SourceID "
+                ." AND $rl.rl_DetailTypeID IS NULL "
+                ." AND $rl.rl_RelationID".$val;
+
+            }else{
+
+                $field_compare = "$rl.rl_RelationID IS NULL";
+                if($this->field_id){
+                    $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+                    if(is_array($several_ids) && count($several_ids)>0){
+
+                        if(count($several_ids)>1){
+                            $field_compare = "$rl.rl_DetailTypeID IN (".implode(',',$several_ids).')';
+                        }else{
+                            $field_compare = "$rl.rl_DetailTypeID = ".$this->field_id;
+                        }
+                    }
+                }
+
+                $where = "r$p.rec_ID=$rl.rl_TargetID AND "
+                .$field_compare
+                //OLD (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
+                ." AND $rl.rl_SourceID".$val;
+            }
+
+            return array("from"=>"recLinks ".$rl, "where"=>$where);
         }
-
-        return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
 
