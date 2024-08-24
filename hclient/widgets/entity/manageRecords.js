@@ -6841,8 +6841,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             for(let i = 0; i < rty_IDs.length; i ++){
 
                 const curr_id = rty_IDs[i];
-
-                if(that._source_def.typedefs[curr_id].commonFields[rty_cc_idx] == rty_ConceptCode){
+                
+                if(curr_id>0 && that._source_def.typedefs[curr_id]?.commonFields?.rty_cc_idx == rty_ConceptCode){
                     source_rty_id = curr_id;
                     break;
                 }

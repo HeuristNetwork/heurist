@@ -363,7 +363,7 @@ $.widget( "heurist.searchBuilder", {
     //
     // add or change selected field
     //    
-    , addFieldItem: function( code, codes, ele_id ){
+    , addFieldItem: function( code, codes, ele_id, reverse_RtyID  ){
 
         if(!codes) codes = code.split(':');
         
@@ -393,7 +393,8 @@ $.widget( "heurist.searchBuilder", {
                     rty_ID: rty_ID,
                     dty_ID: dty_ID,
                     enum_field:enum_field,
-                    language: lang
+                    language: lang,
+                    reverse_RtyID: reverse_RtyID
                 });
 
         }else{
@@ -410,6 +411,7 @@ $.widget( "heurist.searchBuilder", {
                     dty_ID: dty_ID,
                     enum_field: enum_field,
                     language: lang,
+                    reverse_RtyID: reverse_RtyID,
                     onremove: function(){
                         let id = this.element.attr('id');
                         $.each(that.field_array,function(k,item){
@@ -964,7 +966,12 @@ $.widget( "heurist.searchBuilder", {
                     
                     let ptr_fld = window.hWin.HEURIST4.util.cloneJSON(data.node.data);
                     if(ptr_fld.type=='resource'){
-                        ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';
+                        //adds as a first in the list of pointer rectype fields
+                        if(ptr_fld.isreverse){
+                            ptr_fld.title = '<span style="font-size:smaller">Source record: '+$Db.rty(ptr_fld.rtyID_local, 'rty_Name')+'</span>'; 
+                        }else{
+                            ptr_fld.title = '<span style="font-size:smaller">Target record: '+ptr_fld.name+'</span>';    
+                        }
                         ptr_fld.lazy = false;
                         data.result.unshift(ptr_fld);
                     }
@@ -1016,8 +1023,13 @@ $.widget( "heurist.searchBuilder", {
                             codes2[0] = 'any';
                             code = codes2.join(':');
 
+                            let reverse_RtyID = 0;
+                            if(data.node.data.isreverse){
+                                reverse_RtyID = data.node.data.rtyID_local;
+                            }
+                            
                             //add or replace field in builderItem
-                            that.addFieldItem( code, codes, that.select_field_for_id);
+                            that.addFieldItem( code, codes, that.select_field_for_id, reverse_RtyID);
                             that.select_field_for_id = null;
                             that.pnl_Tree.hide();
                         }else{

@@ -68,7 +68,9 @@ $.widget( "heurist.searchBuilderItem", {
         
         onselect_field: null,  //callback to select field from treeview
 
-        language: null // selected language (3 character ISO639-2 code)
+        language: null, // selected language (3 character ISO639-2 code)
+        
+        reverse_RtyID: 0  // rectord type for reverse links
     },
 
     _current_field_type:null, // type of input field
@@ -298,6 +300,12 @@ $.widget( "heurist.searchBuilderItem", {
                 }else{
                     this.label_token.hide();
                 }
+                
+            }else if(this.options.reverse_RtyID>0){
+                let lbl_text = '< '+$Db.rty(this.options.reverse_RtyID, 'rty_Name');
+                    this.element
+                        .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
+                        .text(lbl_text);
                 
             }else{
                 this.label_token.text('broken!');
@@ -650,13 +658,25 @@ Whole value = EQUAL
             ed_options['dtFields'] = null;
             
         }else if(field_type=='resource'){ 
-
-            if(ed_options['rectypeID']){
-                ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(ed_options['rectypeID'], ed_options['dtID']));
-            }else{
-                ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.dty(ed_options['dtID']));
+            
+            if(this.options.reverse_RtyID>0){
+                ed_options.dtFields = {dty_Type:'resource', 
+                            rst_DisplayName: 'AAAAA',
+                            rst_PtrFilteredIDs: ''+this.options.reverse_RtyID};
+                
+            }else {
+                let ptr_field = null;
+                if(ed_options['rectypeID']){
+                    ptr_field = $Db.rst(ed_options['rectypeID'], ed_options['dtID']);
+                }
+                if(ptr_field){
+                    ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON(ptr_field);
+                }else{
+                    ed_options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.dty(ed_options['dtID']));
+                }
+                ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
             }
-            ed_options.dtFields['rst_PtrFilteredIDs'] = $Db.dty(ed_options['dtID'], 'dty_PtrTargetRectypeIDs');
+            
             ed_options.dtFields['rst_CreateChildIfRecPtr'] = 0;
             ed_options.dtFields['rst_DefaultValue'] = '';
             ed_options.dtFields['rst_PointerMode'] = 'browseonly';
