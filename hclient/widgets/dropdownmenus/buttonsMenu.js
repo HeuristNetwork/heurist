@@ -49,7 +49,7 @@ $.widget( "heurist.buttonsMenu", {
 
         this._initMenu(()=>{
             
-            //complet intialization
+            //complete intialization 
             
             that.divMainMenuItems.menu();
 
@@ -143,6 +143,8 @@ $.widget( "heurist.buttonsMenu", {
                 const top_level = $(top_levels[i]);
                 const menuID = top_level.attr('id');
                 const menuName =  window.hWin.HR(top_level.attr('name'));
+                let menuCss =  top_level.attr('style');
+                menuCss = menuCss?` style="${menuCss}"`:'';
                 let menuLabel =  window.hWin.HR(top_level.attr('data-label'));
                 if(!menuLabel) {menuLabel = menuName;}
                 const menuTitle =  window.hWin.HR(top_level.attr('title'));
@@ -158,7 +160,7 @@ $.widget( "heurist.buttonsMenu", {
                     $(`<span class="ui-icon ${sicon}">`).appendTo(link);  //caret-1-s
                 }
 
-                this.menuBtns[menuName] = $('<li>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
+                this.menuBtns[menuName] = $('<li'+menuCss+'>').append(link).appendTo( this.divMainMenuItems ); //adds to ul
 
                 if(false && competency_level>=0){
                     this.menuBtns[menuName].addClass('heurist-competency'+competency_level);    
@@ -167,7 +169,7 @@ $.widget( "heurist.buttonsMenu", {
                     }
                 }
                 
-                if(top_level.find('li').length==0){
+                if(top_level.find('li').length==0){ //without children
                     
                     this._on( this.menuBtns[menuName], {
                         click : function(event){
