@@ -122,7 +122,7 @@ if(!defined('PDIR')){
 
                             if($trg_maj==1 && $src_min==2){
                                 $filename = $filename.'.php';
-                            }elseif($src_min==3 && $trg_sub==14){
+                            }elseif($src_min==3 && $trg_sub>0){
                                 $filename = 'DBUpgrade_1.3.0_to_1.3.14.php';
                             }else{
                                 $filename = $filename.'.sql';
@@ -134,23 +134,26 @@ if(!defined('PDIR')){
                                     include_once $filename;
                                     $rep = updateDatabseTo_v3($system);//PHP
                                 }elseif($src_min==3 && $src_sub<$trg_sub){
-                                    if($src_sub<13){
+                                    
+                                    if($src_sub<16){
                                         include_once $filename;
-                                        $rep = updateDatabseTo_v1_3_12($system);
+                                        $rep = updateDatabseTo_v1_3_16($system);
+                                        
+                                        if($rep!==false && $src_sub<14){ //for db_utils.php
+                                            $rep2 = recreateRecDetailsDateIndex($system, true, true);
+                                            if($rep2){
+                                                $rep = array_merge($rep, $rep2);
+                                            }else{
+                                                $rep = false;
+                                            }
+                                        }
+                                        
                                     }else{
                                         $rep = array('');
                                     }
-                                    if($rep!==false){ //for db_utils.php
-                                        $rep2 = recreateRecDetailsDateIndex($system, true, true);
-                                        if($rep2){
-                                            $rep = array_merge($rep, $rep2);
-                                        }else{
-                                            $rep = false;
-                                        }
-                                    }
 
                                 }else{
-                                    $rep = executeScript($dir.$filename);//SQL
+                                    $rep = executeScript($dir.$filename);//execute SQL script
                                 }
 
                                 if($rep){
@@ -161,7 +164,7 @@ if(!defined('PDIR')){
                                             print '<p>'.$msg.'</p>';
                                         }
                                     }
-                                    if($trg_min==3 && $trg_sub==14){ //to 1.3.14
+                                    if($trg_min==3 && $trg_sub>0){ //to 1.3.16
                                         print "<p>Upgraded to $trg_maj.$trg_min.$trg_sub</p>";
                                     }else{
                                         print "<p>Upgraded to $src_maj.$src_min.0</p>";
@@ -187,7 +190,7 @@ if(!defined('PDIR')){
                             }
                         }
 
-                        if( (!($trg_min==3 && $trg_sub==14)) && $src_min>$keep_minver){ //update database - set version up to date
+                        if( (!($trg_min==3 && $trg_sub>0)) && $src_min>$keep_minver){ //update database - set version up to date
                             $mysqli = $system->get_mysqli();
                             mysql__usedatabase($mysqli, HEURIST_DBNAME);
                             $query1 = "update sysIdentification set sys_dbSubVersion=$src_min, sys_dbSubSubVersion=0 where 1";

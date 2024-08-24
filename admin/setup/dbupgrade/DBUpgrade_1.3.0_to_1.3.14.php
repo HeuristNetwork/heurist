@@ -28,7 +28,8 @@
 
 use hserv\structure\ConceptCode;
 
-    function updateDatabseTo_v1_3_12($system, $dbname=null){
+
+    function updateDatabseTo_v1_3_16($system, $dbname=null){
         //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
 
         $mysqli = $system->get_mysqli();
@@ -44,7 +45,7 @@ use hserv\structure\ConceptCode;
 
         $report = array();
 
-        if(!($dbVer==1 && $dbVerSub==3 && $dbVerSubSub<13)) {return $report;}
+        if(!($dbVer==1 && $dbVerSub==3 && $dbVerSubSub<16)) {return $report;}
 
             /*
             if($dbVerSub<3){//not used
@@ -77,9 +78,9 @@ use hserv\structure\ConceptCode;
             }//for v2
             */
 
-        try{
+       try{
             
-        if($dbVerSubSub<1){
+       if($dbVerSubSub<1){
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_SemanticReferenceURL', "ALTER TABLE `defRecStructure` ADD COLUMN `rst_SemanticReferenceURL` VARCHAR( 250 ) NULL "
                     ." COMMENT 'The URI to a semantic definition or web page describing this field used within this record type' "
@@ -93,14 +94,14 @@ use hserv\structure\ConceptCode;
 
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);             
             
-        }
-        if($dbVerSubSub<2){
+       }
+       if($dbVerSubSub<2){
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_PointerMode', "ALTER TABLE `defRecStructure` "
                 ."ADD COLUMN `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'", true);             
-        }
+       }
 
-        if($dbVerSubSub<4){
+       if($dbVerSubSub<4){
             
             $query = <<<EXP
 CREATE TABLE sysWorkflowRules  (
@@ -157,6 +158,8 @@ EXP;
             
        }
 
+       if($dbVerSubSub<15){
+
        if(!array_key_exists('sys_NakalaKey', $sysValues)){ //$dbVerSubSub<9 &&
 
             list($is_added,$report[]) = alterTable($system, 'sysIdentification', 'sys_NakalaKey', "ALTER TABLE `sysIdentification` ADD COLUMN `sys_NakalaKey` TEXT default NULL COMMENT 'Nakala API key. Retrieved from Nakala website'");
@@ -187,9 +190,20 @@ EXP;
             
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'usr_ExternalAuthentication', "ALTER TABLE `sysUGrps` ADD COLUMN `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'");
             
-        }catch(Exception $exception){
+       }
+       if($dbVerSubSub<16){
+
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_WhoCanView', "ALTER TABLE `recUploadedFiles` "
+                ."ADD COLUMN `ulf_WhoCanView` enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all'", true);             
+
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_MD5Checksum', "ALTER TABLE `recUploadedFiles` "
+                ."ADD COLUMN `ulf_MD5Checksum` text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates'", true);             
+       
+       }
+            
+       }catch(Exception $exception){
             return false;
-        }
+       }
             
 
             if($dbVerSubSub<12){
@@ -201,8 +215,8 @@ EXP;
 
 
             //update version
-            if($dbVerSubSub<12){
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=12 WHERE 1');
+            if($dbVerSubSub<16){
+                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=16 WHERE 1');
             }
 
             /* date index created in upgradeDatabase.php

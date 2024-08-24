@@ -52,7 +52,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
                     +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
                     +'<li id="menu-file-refrec-show"><a href="#">Show referenced records</a></li>'
-                    +'<li id="menu-file-export-csv"><a href="#">Download CSV of file refrences</a></li>'
+                    +'<li id="menu-file-export-csv"><a href="#">Download CSV of file references</a></li>'
                     +'<li id="menu-file-refrec-add"><a href="#">Create multimedia record</a></li>'
                     +'<li id="menu-file-delete-selected"><a href="#">Delete</a></li>'
                     +'</ul>'

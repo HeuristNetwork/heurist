@@ -802,7 +802,7 @@ Temporal.isValidFormat = function ( str ) {
 //  2 - optional fields
 //  3 - error message
 Temporal.checkValidity = function ( temporal ) {
-    if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>g_version) {
+    if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>1) { //g_version=1
         return false;
     }
     let type = temporal.getType();

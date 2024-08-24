@@ -549,9 +549,6 @@ CREATE TABLE recThreadedComments (
 --
 -- Table structure for table 'recUploadedFiles'
 --
---  ulf_Visibility enum('viewable','hidden','public','pending') NULL COMMENT "Defines if the file is visible when not logged in. If public or blank then file is visible to all',
---  ulf_MD5Checksum text(32) NULL COMMENT "A checksum for the uploaded file which can be used to verify integrity and to merge duplicates",
-
 CREATE TABLE recUploadedFiles (
   ulf_ID mediumint unsigned NOT NULL auto_increment COMMENT 'A unique numeric file ID used as filename to store the data on disk and should be different ids if shared',
   ulf_OrigFileName varchar(255) NOT NULL COMMENT 'The original name of the file uploaded',
@@ -572,6 +569,8 @@ CREATE TABLE recUploadedFiles (
   ulf_FilePath varchar(1024) default NULL COMMENT 'The path where the uploaded file is stored',
   ulf_FileName varchar(512) default NULL COMMENT 'The filename for the uploaded file',
   ulf_Parameters text COMMENT 'Parameters including source (flickr,youtube...), default player etc. used to determine special processing',
+  ulf_WhoCanView enum('viewable','loginrequired') NULL COMMENT 'Defines if the file is visible when not logged in. If public or blank then file is visible to all',
+  ulf_MD5Checksum text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates',
   PRIMARY KEY  (ulf_ID),
   KEY ulf_ObfuscatedFileIDKey (ulf_ObfuscatedFileID),
   KEY ulf_Description (ulf_Description(100)),
@@ -1031,7 +1030,7 @@ CREATE TABLE usrWorkingSubsets (
   sys_dbSubSubVersion,sys_eMailImapServer,sys_eMailImapPort,
   sys_eMailImapProtocol,sys_eMailImapUsername,sys_eMailImapPassword,
   sys_UGrpsdatabase,sys_OwnerGroupID,sys_ConstraintDefaultBehavior,sys_MediaFolders)
-  VALUES (1,0,1,3,14,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
+  VALUES (1,0,1,3,16,NULL,NULL,NULL,NULL,NULL,NULL,1,'locktypetotype','uploaded_files');
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
