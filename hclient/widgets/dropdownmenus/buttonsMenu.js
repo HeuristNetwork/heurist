@@ -145,12 +145,14 @@ $.widget( "heurist.buttonsMenu", {
                 const menuName =  window.hWin.HR(top_level.attr('name'));
                 let menuCss =  top_level.attr('style');
                 menuCss = menuCss?` style="${menuCss}"`:'';
+                let linkCss =  top_level.attr('link-style');
+                if(!linkCss) {linkCss = '';}
                 let menuLabel =  window.hWin.HR(top_level.attr('data-label'));
                 if(!menuLabel) {menuLabel = menuName;}
                 const menuTitle =  window.hWin.HR(top_level.attr('title'));
                 const competency_level =  window.hWin.HR(top_level.attr('data-competency'));
 
-                let link = $(`<a id="${menuID}" href="#" style="padding-right:22px !important" title="${menuTitle}">${menuLabel}</a>`);
+                let link = $(`<a id="${menuID}" href="#" style="padding-right:22px !important;${linkCss}" title="${menuTitle}">${menuLabel}</a>`);
 
                 let sicon = top_level.attr('data-icon');
                 if(!sicon){
