@@ -180,7 +180,7 @@ if(mysql__check_dbname($db)==null){
                     downloadFileWithMetadata($system, $fileinfo, $req_params['metadata']);
 
                 }else
-                if(file_exists($filepath) && !is_dir($filepath)){
+                if(is_string($filepath) && file_exists($filepath) && !is_dir($filepath)){
 
                     //fix issue if original name does not have ext
                     if(@$req_params['embedplayer']!=1){

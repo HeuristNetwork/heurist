@@ -82,8 +82,14 @@ function doHarvest($system, $dirs_and_exts, $is_report, $imode, $allowed_system_
         }else{
 
             $dir = USanitize::sanitizePath($dir);
-            if(isPathInHeuristUploadFolder($dir, true)===false){
-                print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
+            
+            $real_path = isPathInHeuristUploadFolder($dir, true);
+            
+            if(!$real_path){
+                if($is_report){
+                    print '<div style="color:red">'.htmlspecialchars($dir).' is ignored. Folder '
+                    (($real_path==null)?'does not exist':'must be in Heurist filestore directory').'.</div>';
+                }
                 continue;
             }
 

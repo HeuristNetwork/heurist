@@ -284,8 +284,13 @@ $failed_exts = array();
                 }else{
 
                     $dir = USanitize::sanitizePath($dir);
-                    if(isPathInHeuristUploadFolder($dir, true)===false){
-                            print '<div style="color:red">'.htmlspecialchars($dir).'is ignored. Folder must be in heurist filestore directory.</div>';
+                    $real_path = isPathInHeuristUploadFolder($dir, true);
+                    if($real_path==null){
+                            //does not exist - ignore
+                            print '<div style="color:red">'.htmlspecialchars($dir).' is ignored. Folder does not exist.</div>';
+                            continue;
+                    }elseif(!$real_path){
+                            print '<div style="color:red">'.htmlspecialchars($dir).' is ignored. Folder must be in Heurist filestore directory.</div>';
                             continue;
                     }
 
@@ -311,7 +316,7 @@ $failed_exts = array();
                         }
 
                         if(!$dir || !( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
-                            print '<div style="color:red">'.htmlspecialchars($orig).'is ignored. Folder must be in heurist filestore directory.</div>';
+                            print '<div style="color:red">'.htmlspecialchars($orig).' is ignored. Folder must be in Heurist filestore directory.</div>';
                             continue;
                         }
                     }

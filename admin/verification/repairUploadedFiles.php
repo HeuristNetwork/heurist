@@ -76,7 +76,7 @@ if(@$req_params['data']){
 
             $realpath_file = isPathInHeuristUploadFolder($file);//snyk SSRF
 
-            if($realpath_file!==false && file_exists($realpath_file)){
+            if($realpath_file && file_exists($realpath_file)){
                 if(unlink($realpath_file)) {array_push($res, $file);}
             }
         }

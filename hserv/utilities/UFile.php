@@ -867,7 +867,8 @@ function folderSubs($src, $exclude=null, $full_path=true) {
 
 //------------------------------------------
 //
-// Returns false if given file is not in heurist upload folder
+// Returns false if given folder is not in heurist upload folder
+// Returns null  if given folder does not exist
 // Otherwise return real path
 //
 function isPathInHeuristUploadFolder($path, $check_existance=true){
@@ -876,7 +877,9 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
     $heurist_dir = realpath(HEURIST_FILESTORE_DIR);
     $r_path = realpath($path);
 
-    if($check_existance && !$r_path) {return false;} //does not exist
+    if($check_existance && !$r_path) { //does not exist
+        return null;
+    } 
 
     if($r_path){
         $r_path = str_replace('\\','/',$r_path);
@@ -889,10 +892,8 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
            strpos($r_path, $heurist_dir)===0){
                return $r_path;
            }
-    }else{
-        if(strpos($path, HEURIST_FILESTORE_DIR)===0){
+    }elseif(strpos($path, HEURIST_FILESTORE_DIR)===0){
             return $path;
-        }
     }
 
     return false;

@@ -989,18 +989,14 @@ function save_report_into_file($tpl_source){
             $path_parts = pathinfo($outputfile);
             $dirname = USanitize::sanitizePath((array_key_exists('dirname',$path_parts))?$path_parts['dirname']:'');
 
-            if($dirname && isPathInHeuristUploadFolder($dirname)===false){
-                $dirname = null;
-            }
-
+            $dirname = isPathInHeuristUploadFolder($dirname);
+            
             //if folder is not defined - output into generated-reports
             if(!$dirname){
                 $dirname = $system->getSysDir('generated-reports');
                 if(!folderCreate($dirname, true)){
                     $errors = 'Failed to create folder for generated reports';
                 }
-            }elseif(!file_exists($dirname)){
-                $errors = "Output folder $dirname does not exist";
             }
 
 

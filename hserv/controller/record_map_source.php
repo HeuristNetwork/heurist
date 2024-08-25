@@ -124,7 +124,7 @@
 
                     $filepath = isPathInHeuristUploadFolder($filepath);//snyk SSRF
 
-                    if ($filepath!==false && file_exists($filepath)) {
+                    if ($filepath && file_exists($filepath)) {
 
                         $ext = strtolower(substr($filepath,-4,4));
                     }else{

@@ -545,7 +545,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
         $filename = basename($to);
         $to = dirname($to);
         $to = USanitize::sanitizePath($to);
-        if(isPathInHeuristUploadFolder($to, true)===false){
+        if(!isPathInHeuristUploadFolder($to, true)){
             //$this->error = $this->get_error_message('only_heurist')
             //    .' 1)'.realpath($to).'  2) '.realpath(HEURIST_FILESTORE_DIR);
             return false;
@@ -564,7 +564,7 @@ $siz = USystem::getConfigBytes('upload_max_filesize');
 
         $filename = basename($upload_path);
         $upload_path = dirname($upload_path);
-        if(isPathInHeuristUploadFolder($upload_path, false)===false)
+        if(!isPathInHeuristUploadFolder($upload_path, false))
         //if(!(strpos($upload_path, HEURIST_FILESTORE_ROOT)===0))
         {
             $file->error = $this->get_error_message('only_heurist')
