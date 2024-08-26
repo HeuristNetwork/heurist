@@ -197,7 +197,7 @@ EXP;
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Caption', "ALTER TABLE `recUploadedFiles` "
                 ."ADD COLUMN `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`");             
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright', "ALTER TABLE `recUploadedFiles` "
-                ."ADD COLUMN `ulf_Copyright` varchar(255) 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`");  
+                ."ADD COLUMN `ulf_Copyright` varchar(255) COMMENT 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`");  
 
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyowner', "ALTER TABLE `recUploadedFiles` "
                 ."ADD COLUMN `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`");  
@@ -213,6 +213,7 @@ EXP;
             list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_MD5Checksum', "ALTER TABLE `recUploadedFiles` "
                 ."ADD COLUMN `ulf_MD5Checksum` text(32) NULL COMMENT 'A checksum for the uploaded file which can be used to verify integrity and to merge duplicates'", true);             
        
+            $report[] = 'Upgraded to 1.3.16';
        }
             
        }catch(Exception $exception){

@@ -35,6 +35,7 @@ define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/utilities/utils_db_load_script.php';
+require_once dirname(__FILE__).'/../setup/dbupgrade/DBUpgrade_1.3.0_to_1.3.14.php';
 
 global $mysqli, $databases;
 
@@ -120,7 +121,7 @@ __checkVersionDatabase();
 // Report database versions and missed tables
 //
 function __checkVersionDatabase(){
-    global $mysqli, $databases;
+    global $system, $mysqli, $databases;
 
     //if(@$_REQUEST['reset']){
     //            $query = 'UPDATE sysIdentification SET sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1';
@@ -159,6 +160,33 @@ function __checkVersionDatabase(){
                 if($has_missed){
                     print '<br>Missed: '.implode(', ',$missed);
                 }
+                
+                if(@$_REQUEST['upgrade'] && $is_old_version && $ver['sys_dbSubVersion']==3 && $ver['sys_dbSubSubVersion']>=0){
+                        $rep = updateDatabseTo_v1_3_16($system);
+                        
+                        if($rep!==false && $ver['sys_dbSubSubVersion']<14){ //for db_utils.php
+                            $rep2 = recreateRecDetailsDateIndex($system, true, true);
+                            if($rep2){
+                                $rep = array_merge($rep, $rep2);
+                            }else{
+                                $rep = false;
+                            }
+                        }
+                        if(!$rep){
+                            $error = $system->getError();
+                            if($error){
+                                print '<p style="color:red">'
+                                    .$error['message']
+                                    .'<br>'.@$error['sysmsg'].'</p>';
+                            }
+                            break;
+                        }
+                        
+                        
+                        print implode('<br>',$rep);
+                }
+                
+                
             
                 print '</div>';
             }else{
@@ -166,6 +194,7 @@ function __checkVersionDatabase(){
             }
         }
     }
+    print '<p>COMPLETED</p>'
 
 }
 
