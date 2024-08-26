@@ -1153,6 +1153,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: 'The list of databases to be checked is missing<br>'
                                 +'Please contact the Heurist team.',
+                        error_title: 'Missing database list',
                         status: window.hWin.ResponseStatus.INVALID_REQUEST
                     });
                     return false;
@@ -1177,6 +1178,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(!data || !data.early_date || !data.latest_date){
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: 'Both an earliest and latest date are required.',
+                        error_title: 'Missing dates',
                         status: window.hWin.ResponseStatus.INVALID_REQUEST
                     });
                     return false;

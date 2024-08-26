@@ -402,6 +402,7 @@ if($isLocalHost){
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: sMsg,
+                            error_title: 'Issue with database definitions',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                         if(window.hWin.HEURIST4.util.isFunction(callback)){ callback(false);}

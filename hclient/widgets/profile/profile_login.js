@@ -680,6 +680,7 @@ function doRegister( parentwin, is_guest=false ){
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'Widget "Profile edit" cannot be loaded!',
+                    error_title: 'Script loading failed',
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                 });
             }

@@ -196,6 +196,7 @@ $.widget( "heurist.profile_edit", {
                             }else{
                                 that.options.parentwin.HEURIST4.msg.showMsgErr({
                                     message: "Unexpected user data obtained from server",
+                                    error_title: 'Invalid user data',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             }

@@ -979,6 +979,7 @@ console.error('Cardinal layout widget does not have proper options');
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: `Widget ${app.widgetname} not loaded. Verify your configuration`,
+                            error_title: 'Widget loading failed',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                     }

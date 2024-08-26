@@ -150,6 +150,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             if(window.hWin.HEURIST4.util.isempty(this._tags_selection)){
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: `Need to select tags to ${mode}`,
+                    error_title: 'Missing tags',
                     status: window.hWin.ResponseStatus.INVALID_REQUEST
                 });
                 return;

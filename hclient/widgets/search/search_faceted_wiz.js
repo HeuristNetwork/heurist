@@ -1737,6 +1737,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(fieldIds.length > 0){
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: 'An error occurred while preparing your selected facets.',
+                        error_title: 'Invalid facets selected',
                         status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                     });
                 }

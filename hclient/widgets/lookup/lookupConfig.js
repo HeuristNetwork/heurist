@@ -118,6 +118,7 @@ $.widget( "heurist.lookupConfig", {
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: 'There are no available services, or the configuration file was not found or is broken',
+                error_title: 'No services',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
             });
             return;
@@ -143,7 +144,11 @@ $.widget( "heurist.lookupConfig", {
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: response,
+                        error_title: 'Failed to load HTML content',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
                 }else{
                     if(that._initControls()){
                         if(window.hWin.HEURIST4.util.isFunction(that.options.onInitFinished)){
@@ -891,6 +896,7 @@ $.widget( "heurist.lookupConfig", {
                     click: function(){
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'Due to security reasons this url cannot be provided.',
+                            error_title: 'Cannot provide URL',
                             status: window.hWin.ResponseStatus.ACTION_BLOCKED
                         });
                         return false;
@@ -1178,6 +1184,7 @@ $.widget( "heurist.lookupConfig", {
         if(nomismaServices.indexOf(type) == -1){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: `An invalid request was made in attempting to retrieve sample Nomisma records.<br>Attempting to retrieve "${type}"`,
+                error_title: 'Invalid Nomisma request',
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED
             });
             return;

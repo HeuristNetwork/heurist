@@ -401,6 +401,7 @@ if(isset($_POST['data'])) {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: "Define email field. It is mandatory",
+                            error_title: 'Missing email',
                             status: window.hWin.ResponseStatus.ACTION_BLOCKED
                         });
                         return;

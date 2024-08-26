@@ -2109,6 +2109,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: 'Widget editTranslations not loaded. Verify your configuration',
+                        error_title: 'Translation widget loading failed',
                         status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                     });
                 }

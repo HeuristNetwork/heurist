@@ -126,7 +126,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records.',
-                    error_title: 'Failed to retrieve Nakala licenses',
+                    error_title: 'Unable to retrieve Nakala licenses',
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                 });
                 window.close();
