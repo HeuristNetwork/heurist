@@ -928,7 +928,14 @@ class HLimb {
         }
         }
     }
-
+    
+    public function addPredicate($key, $value){
+        $predicate = new HPredicate($this->parent, $key, $value, count($this->limbs) );
+        
+        if($predicate->valid){
+            array_push( $this->limbs,  $predicate);
+        }
+    }
 
     public function setRelationPrefix($val){
         foreach ($this->limbs as $ind=>$limb){
@@ -1089,7 +1096,6 @@ class HPredicate {
     t, type:  record type id
     f, field:   field id
     */
-
 
     public function __construct(&$parent, $key, $value, $index_of_predicate)
     {
@@ -1654,9 +1660,25 @@ class HPredicate {
 
                     $field_name = '';
                     //$val = $this->getFieldValue();
+                    
+                    $res .= $field_id_filter;
 
                 }elseif($this->fulltext){
-                    $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';
+                    
+                    
+                    if($this->relation_prefix){
+                            $rty_id_relation = 1;
+                            if(defined('RT_RELATION')){
+                                $rty_id_relation = RT_RELATION;
+                            }
+
+                        $res = 'SELECT rec_ID FROM Records LEFT JOIN recDetails ON dtl_RecID=rec_ID AND dtl_DetailTypeID'.$field_id_filter
+                        .' WHERE rec_RecTypeID='.$rty_id_relation;
+                    }else{
+                        $res = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID';    
+                        $res .= $field_id_filter;
+                    }
+                    
                 }else{
                     $res = "EXISTS (SELECT dtl_ID FROM recDetails ".$p." WHERE $recordID=".$p."dtl_RecID AND "
                     .$p.'dtl_DetailTypeID';
@@ -1665,15 +1687,14 @@ class HPredicate {
                         $val = $this->getFieldValue();//this time it returns without negate
                         $res = ' NOT '.$res;
                     }
+                    $res .= $field_id_filter;
                 }
-
-                $res .= $field_id_filter;
 
                 if($this->fulltext){
                     //execute fulltext search query
-                    $res = $res.' AND'. ($this->negate ? ' NOT ' : ' ') .'MATCH(dtl_Value) '.$val.$field_condition;
-                    $list_ids = mysql__select_list2($mysqli, $res);
-
+                    $res2 = $res.' AND '.($this->negate ? ' NOT ' : ' ').'MATCH(dtl_Value) '.$val.$field_condition;
+                    $list_ids = mysql__select_list2($mysqli, $res2);
+                    
                     if(is_array($list_ids) && count($list_ids)>0){
                         $res = $recordID
                             .(count($list_ids)>1
@@ -3186,7 +3207,9 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                     $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
                 }
 
-                if(($this->field_type == 'freetext' || $this->field_type == 'blocktext') && intval($this->field_id) > 0){ // filter language
+                if( !($this->relation_prefix && $this->fulltext) &&
+                   ($this->field_type == 'freetext' || $this->field_type == 'blocktext') && intval($this->field_id) > 0){ // filter language
+                    
 
                     if(empty($lang)){ // default only
                         $res = $res . " AND dtl_Value NOT REGEXP '^[\w]{3}:'";
