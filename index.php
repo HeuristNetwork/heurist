@@ -182,7 +182,6 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }
 }
 
-
 define('IS_INDEX_PAGE',true);
 if(!defined('PDIR')) {define('PDIR','');}
 

@@ -110,8 +110,18 @@ class DbRecUploadedFiles extends DbEntityBase
         }
         if($needMimeType || @$this->data['details']=='full' || @$this->data['details']=='list'){
             array_push($where, "(fxm_Extension=ulf_MimeExt)");
-            array_push($from_table, 'defFileExtToMimetype');
+            array_push($from_table, ',defFileExtToMimetype');
         }
+
+        if(@$this->data['ulf_Referenced']=='yes' || @$this->data['ulf_Referenced']=='no'){
+            array_push($from_table, ' left join recDetails ON  (dtl_UploadedFileID=ulf_ID OR dtl_Value LIKE CONCAT("%",ulf_ObfuscatedFileID,"%"))');
+            if($this->data['ulf_Referenced']=='no'){
+                array_push($where,'(dtl_ID IS NULL)');
+            }else{
+                array_push($where,'(dtl_ID IS NOT NULL)');
+            }
+        }
+         
         //----- order by ------------
 
         //compose ORDER BY
@@ -140,21 +150,21 @@ class DbRecUploadedFiles extends DbEntityBase
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
 
-            $this->data['details'] = 'ulf_ID';
+            $this->data['details'] = 'DISTINCT ulf_ID';
 
         }elseif(@$this->data['details']=='name'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName';
 
         }elseif(@$this->data['details']=='list'){
 
             //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB';
             $needCalcFields = true;
 
         }elseif(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
+            $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
             $needCalcFields = true;
@@ -204,7 +214,7 @@ class DbRecUploadedFiles extends DbEntityBase
 
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
-        .' FROM '.implode(',', $from_table);
+        .' FROM '.implode('', $from_table);
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
@@ -231,65 +241,6 @@ class DbRecUploadedFiles extends DbEntityBase
 
         return $result;
 
-    }
-
-    //
-    //
-    //
-    private function _getRelatedRecords($ulf_IDs, $ids_only){
-
-            $ulf_IDs = prepareIds($ulf_IDs);
-
-            if(count($ulf_IDs)==0){
-                $res = false;
-                $query = ': file ids are not defined';
-            }else{
-
-                if(count($ulf_IDs)>1){
-                    $s = ' in ('.implode(',',$ulf_IDs).')';
-                }else{
-                    $s = '='.intval($ulf_IDs[0]);
-                }
-
-                $mysqli = $this->system->get_mysqli();
-
-                //find all related records (that refer to this file)
-                if($ids_only){
-                    $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID '.$s;
-
-                    $res = mysql__select_list2($mysqli, $query);
-
-                }else{
-                    $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID '
-                            .'FROM recDetails, Records WHERE dtl_UploadedFileID '.$s.' and dtl_RecID=rec_ID';
-                    $direct = array();
-                    $headers = array();
-
-                    $res = $mysqli->query($query);
-                    if ($res){
-                            while ($row = $res->fetch_row()) {
-                                $relation = new \stdClass();
-                                $relation->recID = intval($row[0]);//file id
-                                $relation->targetID = intval($row[1]);//record id
-                                $relation->dtID  = intval($row[2]);
-                                array_push($direct, $relation);
-                                $headers[$row[1]] = array($row[3], $row[4]);
-                            }
-                            $res->close();
-
-                            $res = array("direct"=>$direct, "headers"=>$headers);
-                    }
-                }
-            }
-
-            if($res===null || $res===false){
-                    $this->system->addError(HEURIST_DB_ERROR,
-                        'Search query error for records that use files. Query '.$query,
-                        $mysqli->error);
-                    return false;
-            }else{
-                    return $res;
-            }
     }
 
     //

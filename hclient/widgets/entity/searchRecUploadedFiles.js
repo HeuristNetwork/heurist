@@ -98,6 +98,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         //-----------------
         this.input_search_path = this.element.find('#input_search_path');
         this.input_search_type = this.element.find('#input_search_type');
+        this.input_search_referenced = this.element.find('#input_search_referenced');
         this.input_search_url =  this.element.find('#input_search_url');
 
         this.input_search_my = this.element.find('#input_search_my');
@@ -146,6 +147,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_url.val('');
         this.input_search_path.val('');
         this.input_search_type.val('');
+        this.input_search_referenced,val('');
     },
     //
     // special case to show recently added record
@@ -215,6 +217,9 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             //it does not search actually for this field  - it searches for mimetype
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                     request['fxm_MimeType'] = this.input_search_type.val();  
+            }
+            if(this.input_search_referenced.val()!='' && this.input_search_referenced.val()!='both'){
+                    request['ulf_Referenced'] = this.input_search_referenced.val();  
             }
             
             if(this.input_search_my.is(':checked') || !window.hWin.HAPI4.is_admin()){
