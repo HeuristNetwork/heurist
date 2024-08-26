@@ -1856,7 +1856,12 @@ use hserv\structure\ConceptCode;
         $list = mysql__select_list2($mysqli, "SHOW TABLES $query", 'strtolower');
 
 
-        if($mysqli->error){
+        $mysql_gone_away_error = $mysqli && $mysqli->errno==2006;
+        if($mysql_gone_away_error){
+        
+            return 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
+        
+        }elseif($mysqli->error){
 
             return $mysqli->error;
 
