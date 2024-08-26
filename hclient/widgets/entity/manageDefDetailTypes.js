@@ -2004,6 +2004,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     if(dt_type=='enum'){    
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'Please select or add a vocabulary. Vocabularies must contain at least one term.',
+                            error_title: 'Missing valid vocabulary',
                             status: window.hWin.ResponseStatus.INVALID_REQUEST
                         });
                     }else{

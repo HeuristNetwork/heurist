@@ -64,6 +64,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
             if(!(rating>=0 && rating<6)){
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'Please specify rating value',
+                    error_title: 'Missing rating',
                     status: window.hWin.ResponseStatus.INVALID_REQUEST
                 });
                 return;

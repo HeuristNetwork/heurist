@@ -2535,6 +2535,7 @@ $.widget( "heurist.svs_list", {
     _showEmbedDialog: function(svs_ID){
         window.hWin.HEURIST4.msg.showMsgErr({
             message: 'Embed is no longer supported. Please use the much more flexible standalone web page builder or the website builder, which are located under the Publish menu.',
+            error_title: 'Function no longer supported',
             status: window.hWin.ResponseStatus.ACTION_BLOCKED
         });
     },

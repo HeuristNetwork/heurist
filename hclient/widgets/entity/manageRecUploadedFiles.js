@@ -1553,6 +1553,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'An unknown error has occurred while attempting to retrieve the data types and license metadata values.<br>'
                                     +'If this problem persists, please contact the Heurist team.',
+                            error_title: 'Unable to retrieve Nakala metadata values',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                     }
@@ -1582,6 +1583,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             default:
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: `The external service "${selected_repo}" is not supported.`,
+                    error_title: 'Service not supported',
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                 });
                 break;

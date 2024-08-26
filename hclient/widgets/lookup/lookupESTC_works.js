@@ -210,6 +210,7 @@ $.widget("heurist.lookupESTC_works", $.heurist.recordAction, {
                             window.hWin.HEURIST4.msg.showMsgErr({
                                 message: 'We are having trouble performing your request on the ESTC server. '
                                         +`Impossible obtain details for selected record ${sel_Rec_ID}`,
+                                error_title: 'Issues with ESTC server',
                                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                             });
                         }else{

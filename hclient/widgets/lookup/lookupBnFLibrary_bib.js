@@ -507,6 +507,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.recordAction, {
                         + `Response field - "${field_name}"<br>`
                         + `Record field - "${$Db.rst(that.options.mapping.rty_ID, dty_id, 'rst_DisplayName')}" (<em>${$Db.dty(dty_id, 'dty_Type')}</em>)<br>`
                         + `Value to insert - "${val}"<br>`,
+                error_title: 'Saving selection canceled',
                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
             });
         }, 20000); // set timeout to 20 seconds

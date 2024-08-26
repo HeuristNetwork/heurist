@@ -388,6 +388,7 @@ function HMultiSelect(){
 							}else{
 								window.hWin.HEURIST4.msg.showMsgErr({
 									message: `An error has occurred with the selection of base field ${name} (${id})`,
+									error_title: 'Invalid base field',
 									status: window.hWin.ResponseStatus.UNKNOWN_ERROR									
 								});
 							}
@@ -418,6 +419,7 @@ function HMultiSelect(){
 								}else{
 									window.hWin.HEURIST4.msg.showMsgErr({
 										message: `An error has occurred with the selection of base field ${sel_name} (${id} => ${name})`,
+										error_title: 'Invalid base field',
 										status: window.hWin.ResponseStatus.UNKNOWN_ERROR
 									});
 								}

@@ -99,6 +99,7 @@ $.widget( "heurist.search", {
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: 'Widget searchByEntity not loaded. Verify your configuration',
+                                    error_title: 'Script loading failed',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             }

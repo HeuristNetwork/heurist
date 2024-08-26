@@ -191,6 +191,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                             
                             window.hWin.HEURIST4.msg.showMsgErr({
                                 message: sMsg,
+                                error_title: 'Request too large',
                                 status: window.hWin.ResponseStatus.ACTION_BLOCKED 
                             });    
                             
