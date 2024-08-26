@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-//print 'disabled';
-//exit;
+print 'disabled';
+exit;
 ini_set('max_execution_time', '0');
 
 
@@ -130,7 +130,7 @@ function __checkVersionDatabase(){
     //    return;
     //}
     
-    $min_version = '1.3.15';
+    $min_version = '1.3.16';
 
     foreach ($databases as $idx=>$db_name){
 
@@ -194,7 +194,7 @@ function __checkVersionDatabase(){
             }
         }
     }
-    print '<p>COMPLETED</p>'
+    print '<p>COMPLETED</p>';
 
 }
 

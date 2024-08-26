@@ -295,7 +295,7 @@
             }
 
             if(!$outputHandler){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
+                $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));
                 return false;
             }else{
                 $res = $outputHandler->output( $response, $params );
