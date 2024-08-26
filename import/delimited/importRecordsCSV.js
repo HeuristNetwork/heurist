@@ -3507,7 +3507,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
         
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
         }
         
     }
@@ -3519,7 +3522,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         currentSeqIndex = Number(currentSeqIndex);
         if(!(Number(currentSeqIndex)>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
             return;
         }
 
@@ -3772,14 +3778,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         currentSeqIndex = Number(currentSeqIndex);
         if(!(Number(currentSeqIndex)>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to select record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to select record type'),
+                error_title: 'Missing record type'
+            });
             return;
         }
         let rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
         let key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
 
         if(!(key_idx>=0)){
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('You have to define identifier field for selected record type'));
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: window.hWin.HR('You have to define identifier field for selected record type'),
+                error_title: 'Missing identifer field'
+            });
             return;
         }
         
@@ -4652,6 +4664,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(fields) || fields[0].length != 3){
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: 'No terms to import',
+                error_title: 'Invalid term data',
                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
             });
             return false;

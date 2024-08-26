@@ -787,6 +787,7 @@ if(!$has_emails || empty($emails)) {
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An unknown error has occurred with retrieving the complete list of databases, please contact the Heurist team.",
+                                    error_title: 'Unable to retrieve database list',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             } else {
@@ -839,6 +840,7 @@ if(!$has_emails || empty($emails)) {
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An unknown error has occurred with retrieving email record details, please contact the Heurist team.",
+                                    error_title: 'Unable to retrieve email details',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             } else {
@@ -949,6 +951,7 @@ if(!$has_emails || empty($emails)) {
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An unknown error has occurred with retrieving the record counts, please contact the Heurist team.",
+                                    error_title: 'Unable to retrieve record counts',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             } else {
@@ -1020,6 +1023,7 @@ if(!$has_emails || empty($emails)) {
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An unknown error has occurred with retrieving user counts, please contact the Heurist team.",
+                                    error_title: 'Unable to retrieve user count',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             } else {
@@ -1074,6 +1078,7 @@ if(!$has_emails || empty($emails)) {
                             if(window.hWin.HEURIST4.util.isempty(response.message)){
                                 window.hWin.HEURIST4.msg.showMsgErr({
                                     message: "An unknown error has occurred while attempting to authenticate the system administrator password, please contact the Heurist team.",
+                                    error_title: 'Unable to authenticate',
                                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                                 });
                             } else { // There is no error_msg

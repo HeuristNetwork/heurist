@@ -248,6 +248,7 @@ if($mode>1){
                     if(data.status && data.status != window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'An error occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            error_title: 'Unable to retrieve Nakala licenses',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                         $sel_license.parent().parent().hide();
@@ -264,6 +265,7 @@ if($mode>1){
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: 'An unknown error has occurred while attempting to retrieve the licenses for Nakala records, however the archiving process can still be completed.',
+                            error_title: 'No Nakala licenses found',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                         $sel_license.parent().parent().hide();

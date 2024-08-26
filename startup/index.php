@@ -325,7 +325,10 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             _showStep(3);
             $("#dbname").focus();
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: err_text,
+                error_title: 'Missing required user details'
+            });
         }
     }
 
@@ -384,12 +387,12 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                             _showStep(3);//back to db form
                         }
 
-                        window.hWin.HEURIST4.msg.showMsgErr(response.message, false);
+                        window.hWin.HEURIST4.msg.showMsgErr(response, false);
                     }
                 });
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            window.hWin.HEURIST4.msg.showMsgErr({message: err_text, error_title: 'Invalid database name'});
         }
 
     }

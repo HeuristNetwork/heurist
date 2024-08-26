@@ -367,6 +367,7 @@ function getDataFromServer(){
         if(error) {
             window.hWin.HEURIST4.msg.showMsgErr({
                 message: `Error loading JSON data: ${error.message}`,
+                error_title: 'Unable to load diagram',
                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
             });
         }

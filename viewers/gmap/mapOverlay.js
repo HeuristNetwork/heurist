@@ -180,12 +180,11 @@ function HMappingControls( mapping, startup_mapdocument_id ) {
                         map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
                         _loadMapDocumentById_continue();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(
-                        'Map document (ID '
-                        + current_map_document_id
-                        + ') does not exist in the database. '
-                        + 'Please email the database owner ('
-                        +window.hWin.HAPI4.sysinfo['dbowner_email']+') and ask them to correct the URL');
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message:  `Map document (ID ${current_map_document_id}) does not exist in the database. `
+                                    + `Please email the database owner (${window.hWin.HAPI4.sysinfo['dbowner_email']}) and ask them to correct the URL`,
+                            error_title: 'Invalid map document provided'
+                        });
                     }
                 
                 }else{

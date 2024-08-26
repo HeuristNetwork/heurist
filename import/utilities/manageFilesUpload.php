@@ -682,7 +682,10 @@ if(!($max_size>0)) {$max_size = 0;}
                             }}, {'yes': 'OK', 'title': 'File upload warnings'});
 
                         }else if (swarns!='') {
-                            window.hWin.HEURIST4.msg.showMsgErr(swarns);
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: swarns,
+                                error_title: 'File upload warnings'
+                            });
                         }
 
                         if(e.originalEvent.type != 'done' && data.result?.files){

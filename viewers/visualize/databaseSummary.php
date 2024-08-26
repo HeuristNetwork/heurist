@@ -278,6 +278,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     if(error) {
                         window.hWin.HEURIST4.msg.showMsgErr({
                             message: `Error loading JSON data: ${error.message}`,
+                            error_title: 'Unable to load diagram',
                             status: window.hWin.ResponseStatus.UNKNOWN_ERROR
                         });
                     }
