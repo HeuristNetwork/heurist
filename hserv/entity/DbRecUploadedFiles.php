@@ -1133,7 +1133,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $ulf_ID = fileRegister($this->system, $file); //@todo convert this function to method of this class
                 if($ulf_ID > 0){
-                    $created[] = $name . ' => Registered file as #' . $ulf_ID;
+                    $created[] = $name . ' => Indexed file as #' . $ulf_ID;
                 }else{
                     $msg = $this->system->getError();
                     $error[] = $name . ' => Unable to register file' . (is_array($msg) && array_key_exists('message', $msg) ? ', <br>' . $msg['message'] : '');

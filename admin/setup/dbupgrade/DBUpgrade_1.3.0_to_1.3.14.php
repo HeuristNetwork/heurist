@@ -30,7 +30,6 @@ use hserv\structure\ConceptCode;
 
 
     function updateDatabseTo_v1_3_16($system, $dbname=null){
-        //update sysIdentification set sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=4 where sys_ID=1
 
         $mysqli = $system->get_mysqli();
 
@@ -39,11 +38,13 @@ use hserv\structure\ConceptCode;
         }
 
         $sysValues = $system->get_system(null, true);//refresh
-        $dbVer = $system->get_system('sys_dbVersion');
-        $dbVerSub = $system->get_system('sys_dbSubVersion');
-        $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
+        $dbVer = intval($system->get_system('sys_dbVersion'));
+        $dbVerSub = intval($system->get_system('sys_dbSubVersion'));
+        $dbVerSubSub = intval($system->get_system('sys_dbSubSubVersion'));
 
         $report = array();
+        
+        $report[] = 'Db version : '.$dbVer.'.'.$dbVerSub.'.'.$dbVerSubSub;
 
         if(!($dbVer==1 && $dbVerSub==3 && $dbVerSubSub<16)) {return $report;}
 
@@ -93,12 +94,13 @@ use hserv\structure\ConceptCode;
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_Label', "ALTER TABLE `defTerms` ADD COLUMN `trm_Label` VARCHAR(250) NOT NULL COMMENT 'Human readable term used in the interface, cannot be blank'", true);
 
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_NameInOriginatingDB', "ALTER TABLE `defTerms` ADD COLUMN `trm_NameInOriginatingDB` VARCHAR(250) default NULL COMMENT 'Name (label) for this term in originating database'", true);             
-            
+            $report[] = 'Upgraded to 1.3.1';
        }
        if($dbVerSubSub<2){
 
             list($is_added,$report[]) = alterTable($system, 'defRecStructure', 'rst_PointerMode', "ALTER TABLE `defRecStructure` "
                 ."ADD COLUMN `rst_PointerMode` enum('dropdown_add','dropdown','addorbrowse','addonly','browseonly') DEFAULT 'dropdown_add' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing'", true);             
+            $report[] = 'Upgraded to 1.3.2';
        }
 
        if($dbVerSubSub<4){
@@ -118,7 +120,7 @@ UNIQUE KEY swf_StageKey (swf_RecTypeID, swf_Stage)
 ) ENGINE=InnoDB COMMENT='Describes the rules to be applied when the value of the Workflow stage field is changed to this value';
 EXP;
             list($is_created,$report[]) = createTable($system, 'sysWorkflowRules', $query, true);
-            
+            $report[] = 'Upgraded to 1.3.4';
        }
 
        if($dbVerSubSub<5){
@@ -140,11 +142,12 @@ CREATE TABLE defCalcFunctions (
 ) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields';
 EXP;
             list($is_created,$report[]) = createTable($system, 'defCalcFunctions', $query, true);
-                
+            $report[] = 'Upgraded to 1.3.5';
        }
 
        if($dbVerSubSub<6){
             list($is_added,$report[]) = alterTable($system, 'defTerms', 'trm_OrderInBranch', "ALTER TABLE `defTerms` ADD COLUMN `trm_OrderInBranch` smallint NULL Comment 'Defines sorting order of terms if non-alphabetic. Operates only within a single branch, including root'");
+            $report[] = 'Upgraded to 1.3.6';
        }
 
        if($dbVerSubSub<7){
@@ -156,6 +159,7 @@ EXP;
             $query = "UPDATE `defRecStructure` SET `rst_NonOwnerVisibility`='public' WHERE rst_ID>0";
             $res = $mysqli->query($query);
             
+            $report[] = 'Upgraded to 1.3.7';
        }
 
        if($dbVerSubSub<15){
@@ -189,6 +193,16 @@ EXP;
 
             
             list($is_added,$report[]) = alterTable($system, 'sysUGrps', 'usr_ExternalAuthentication', "ALTER TABLE `sysUGrps` ADD COLUMN `usr_ExternalAuthentication` varchar(1000) default NULL COMMENT 'JSON array with external authentication preferences'");
+
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Caption', "ALTER TABLE `recUploadedFiles` "
+                ."ADD COLUMN `ulf_Caption` varchar(255) COMMENT 'A user-entered textual name of the file or image' AFTER `ulf_Thumbnail`");             
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyright', "ALTER TABLE `recUploadedFiles` "
+                ."ADD COLUMN `ulf_Copyright` varchar(255) 'Copyright statement or a URI leading to a copyright statement. Consider using Creative Commons categories.' AFTER `ulf_Description`");  
+
+            list($is_added,$report[]) = alterTable($system, 'recUploadedFiles', 'ulf_Copyowner', "ALTER TABLE `recUploadedFiles` "
+                ."ADD COLUMN `ulf_Copyowner` varchar(255) COMMENT 'The owner of the copyright in the file ir image (person or organisation)'  AFTER `ulf_Copyright`");  
+            
+            $report[] = 'Upgraded to 1.3.15';
             
        }
        if($dbVerSubSub<16){
@@ -228,34 +242,31 @@ EXP;
             */
 
 
+            $to_be_imported = array();
+            // import IIIF Annonation field
+            if(!(ConceptCode::getDetailTypeLocalID('2-1098')>0)){
+                $to_be_imported['2-1098'] = 'Field 2-1098 "IIIF Annonation"';
+            }
             //import field 2-1080 Workflowstages
-            $report[] = importField_2_1080($system);
-
-        
-        return $report;
-    }
-    
-    //
-    // import field 2-1080 Workflowstages
-    //
-    function importField_2_1080($system){
-            //$dbVerSubSub<4 && 
-            $res = false;
-            $ret = '';
-            
             if(!(ConceptCode::getDetailTypeLocalID('2-1080')>0)){
-                $importDef = new DbsImport( $system );
-                if($importDef->doPrepare(  array(
-                'defType'=>'detailtype',
-                'databaseID'=>2,
-                'conceptCode'=>'2-1080')))
-                {
-                    $res = $importDef->doImport();
-                }
+                $to_be_imported['2-1080'] = 'Field 2-1080 "Workflow stages"';
             }
-            if($res){
-                $ret = 'Field 2-1080 "Workflow stages imported';
+
+            
+            if(!empty($to_be_imported)){
+                    $importDef = new DbsImport( $system );
+                    if($importDef->doPrepare(  array(
+                    'defType'=>'detailtype',
+                    'databaseID'=>2,
+                    'definitionID'=>array_keys($to_be_imported))))
+                    {
+                        $res = $importDef->doImport();
+                    }
+                    if($res){
+                        $report[] = 'Field 2-1098 "IIIF Annonation" and 2-1080 "Workflow stages" are imported';
+                    }
             }
-            return $ret;
+            
+        return $report;
     }
 ?>

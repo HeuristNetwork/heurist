@@ -25,8 +25,8 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-print 'disabled';
-exit;
+//print 'disabled';
+//exit;
 ini_set('max_execution_time', '0');
 
 
@@ -109,43 +109,61 @@ if(false){
     __findRDF();
 
 __getBelegContext();
-*/
 
 __fixDirectPathImages();
 
+*/
+
+__checkVersionDatabase();
+
 //
-// Report database versions
+// Report database versions and missed tables
 //
 function __checkVersionDatabase(){
     global $mysqli, $databases;
 
-    if(@$_REQUEST['reset']){
-                $query = 'UPDATE sysIdentification SET sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1';
-                $mysqli->query($query);
-        print ' Database reset to v 1.2.0<br>';
-        return;
-    }
+    //if(@$_REQUEST['reset']){
+    //            $query = 'UPDATE sysIdentification SET sys_dbSubVersion=2, sys_dbSubSubVersion=0 WHERE sys_ID=1';
+    //            $mysqli->query($query);
+    //    print ' Database reset to v 1.2.0<br>';
+    //    return;
+    //}
+    
+    $min_version = '1.3.15';
 
     foreach ($databases as $idx=>$db_name){
 
         mysql__usedatabase($mysqli, $db_name);
 
-        $query = 'SELECT sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
+        $query = 'SELECT sys_dbVersion, sys_dbSubVersion, sys_dbSubSubVersion from sysIdentification';
         $ver = mysql__select_row_assoc($mysqli, $query);
         if(!$ver){
             print htmlspecialchars($db_name.'  >>> '.$mysqli->error);
         }else{
 
-            if($ver['sys_dbSubVersion']<3){
-                print '<div style="color:red;font-weight:bold;">';
-            }elseif($ver['sys_dbSubVersion']>3){
-                //$query = 'UPDATE sysIdentification SET sys_dbSubVersion=3 WHERE sys_ID=1';
-                //$mysqli->query($query);
-                print '<div style="color:green;font-weight:bold;">';
-            }else{
-                print '<div>';
+            
+            $is_old_version = (version_compare($min_version,
+                    $ver['sys_dbVersion'].'.'
+                    .$ver['sys_dbSubVersion'].'.'
+                    .$ver['sys_dbSubSubVersion'])>0);
+                                
+            $missed = hasAllTables($mysqli); //, 'hdb_'.$db_name
+            $has_missed = (is_array($missed) && count($missed)>0);
+            if(!is_array($missed)){
+                print 'ERROR '.$missed.'  ';
             }
-            print htmlspecialchars($db_name.'  >>>  1.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']).'</div>';
+
+            if($is_old_version || $has_missed){            
+                print '<div>'.htmlspecialchars($db_name.'  >>> '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion']);
+            
+                if($has_missed){
+                    print '<br>Missed: '.implode(', ',$missed);
+                }
+            
+                print '</div>';
+            }else{
+                //print '<div>'.htmlspecialchars($db_name).': '.$ver['sys_dbVersion'].'.'.$ver['sys_dbSubVersion'].'.'.$ver['sys_dbSubSubVersion'].'</div>';
+            }
         }
     }
 
@@ -1376,8 +1394,11 @@ function __listOfAdminUsers(){
         $query = "SELECT ugr_Name, ugr_eMail, ugr_Modified FROM sysUGrps where  ugr_FirstName = 'sys' AND ugr_LastName = 'admin'";
         $vals = mysql__select_row_assoc($mysqli, $query);
         if($vals){
-            if(strpos($vals['ugr_Modified'],'2019')!==0 && $vals['ugr_Modified']<$mind) {$mind = $vals['ugr_Modified'];}
-            echo  {'<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);}//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
+            if(strpos($vals['ugr_Modified'],'2019')!==0 && $vals['ugr_Modified']<$mind)
+            {
+               $mind = $vals['ugr_Modified'];     
+            }
+            echo '<br>'.htmlspecialchars($db_name.'   '.$vals['ugr_Modified']);//.'   '.$vals['ugr_Name'].'  '.$vals['ugr_eMail'];
         }
     }
     print '<br>Earliest: '.$mind.'<br>END';

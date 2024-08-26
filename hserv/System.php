@@ -1884,7 +1884,7 @@ class System {
             }
 
             if($check_updates){
-                updateDatabaseToLatest($this);
+                //updateDatabaseToLatest($this);
             }
 
             // it is required for main page only - so call this request on index.php

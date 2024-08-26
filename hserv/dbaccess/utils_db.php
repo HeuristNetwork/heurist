@@ -1356,7 +1356,7 @@ use hserv\structure\ConceptCode;
                 if($isok){
 
                     if($json_for_record_details && $dbVerSubSub<14){
-                        $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
+                        //$mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=14 WHERE 1');
                     }
 
 
@@ -1783,7 +1783,7 @@ use hserv\structure\ConceptCode;
         $dbVerSub = $system->get_system('sys_dbSubVersion');
         $dbVerSubSub = $system->get_system('sys_dbSubSubVersion');
 
-        if($dbVer==1 && $dbVerSub==3 && $dbVerSubSub>13){
+        if(false && $dbVer==1 && $dbVerSub==3 && $dbVerSubSub>13){
 
             $report = array();
 
@@ -1831,7 +1831,7 @@ use hserv\structure\ConceptCode;
                     $report[] = 'defTrecUploadedFileserms:ulf_Caption, ulf_Copyright and ulf_Copyowner already exist';
                 }
 
-                $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=15 WHERE 1');
+                //$mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=15 WHERE 1');
             }
 
         }
@@ -1873,6 +1873,7 @@ use hserv\structure\ConceptCode;
 
     //recreated via upgrade
     //'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+    //
 
             $check_list = array(
     'defcalcfunctions','defdetailtypegroups','defdetailtypes','deffileexttomimetype',
@@ -1880,7 +1881,9 @@ use hserv\structure\ConceptCode;
     'deftranslations','defvocabularygroups','recdetails','recforwarding','records',
     'recsimilarbutnotdupes','recuploadedfiles','sysarchive','sysidentification',
     'sysugrps','sysusrgrplinks','usrbookmarks','usrrectaglinks','usrreminders',
-    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags');
+    'usrremindersblocklist','usrreportschedule','usrsavedsearches','usrtags',
+    'recdetailsdateindex','sysdashboard','sysworkflowrules','usrrecpermissions','usrworkingsubsets'
+    );
 
             $missed = array_diff($check_list, $list);
 
