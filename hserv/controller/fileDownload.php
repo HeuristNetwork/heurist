@@ -199,8 +199,8 @@ if(mysql__check_dbname($db)==null){
 
                     $is_download = (@$req_params['download']==1);
 
-                    if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles
-                                        && strpos($fileinfo['fullPath'],'file_uploads/')===0){
+                    if(!$is_download && isset($allowWebAccessUploadedFiles) && $allowWebAccessUploadedFiles)
+                    { //&& strpos($fileinfo['fullPath'],'file_uploads/')===0
 
                         //show in viewer directly
                         $direct_url = HEURIST_FILESTORE_URL.$fileinfo['fullPath'];
