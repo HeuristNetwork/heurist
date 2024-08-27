@@ -493,7 +493,7 @@ function error_WrongParam($param){
 }
 
 function redirectURL($url){
-    header('xLocation: '.$url);   
+    header('Location: '.$url);   
 }
 
 ?>
