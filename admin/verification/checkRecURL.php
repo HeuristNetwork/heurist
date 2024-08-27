@@ -46,6 +46,7 @@ if($is_included){
     require_once dirname(__FILE__).'/../../autoload.php';
 
     $verbose = (@$_REQUEST['verbose']==1);
+    $list_only = (@$_REQUEST['list']==1);
 
     $system = new hserv\System();
     if( ! $system->init(@$_REQUEST['db']) ){
@@ -72,7 +73,7 @@ if($is_included){
 <?php
 }
 
-$has_broken_url = checkURLs($system, false, $verbose);
+$has_broken_url = checkURLs($system, false, $verbose, $list_only);
 
 if(!$is_included){
     print '</div></body></html>';
@@ -100,9 +101,11 @@ function __updateRecords_lastverified($mysqli){
 // Check various sources for URLs and validate
 // $return_output {boolean} => true = return array of result, false = return true or false for whether broken URLs were found
 //
-function checkURLs($system, $return_output, $verbose=false){
+function checkURLs($system, $return_output, $verbose=false, $list_only=false){
 
-    global $is_included, $passed_rec_ids, $glb_curl_error;
+    global $is_included, $passed_rec_ids, $glb_curl_code, $glb_curl_error;
+    
+    $heurist_server_url = strtolower(HEURIST_SERVER_URL);
 
     $is_heursit_reference_index = (strcasecmp(HEURIST_DBNAME,'Heurist_Reference_Index')==0);
 
@@ -120,7 +123,7 @@ function checkURLs($system, $return_output, $verbose=false){
     }
 
     $query = 'SELECT rec_ID, rec_URL, rec_RecTypeID FROM Records WHERE (rec_URL!="") AND (rec_URL IS NOT NULL)';
-
+    
     $res = $mysqli->query($query);
     if ($res){
 
@@ -157,7 +160,15 @@ function checkURLs($system, $return_output, $verbose=false){
 */
 
             //timeout 10 seconds (default 30)
-            $data = loadRemoteURLContentWithRange($rec_url, "0-1000", true, 10);
+            if($list_only){
+                print intval($rec_id).' : <a href="'. $rec_url .'" target="_blank" rel="noopener">'.$rec_url . '</a><br>';
+                continue;
+            }
+            if(strpos(strtolower($rec_url),$heurist_server_url)===0){
+                continue; //skip same server
+            }
+                
+            $data = loadRemoteURLContentWithRange($rec_url, "0-250", true, 5);
 
             if ($data){
 
@@ -184,6 +195,16 @@ function checkURLs($system, $return_output, $verbose=false){
                     }
                 }
             }else{
+                
+                        if($glb_curl_code == HEURIST_SYSTEM_FATAL){
+                            if($return_output){
+                                return $glb_curl_error;
+                            }else{
+                                print '<p>'. $glb_curl_error . '</p>';
+                            }
+                            break;
+                        }
+                
                 $broken_cnt++;
                     //$glb_curl_error
                 $upd_query = 'UPDATE Records set rec_URLLastVerified=?, rec_URLErrorMessage=? WHERE rec_ID='.$rec_id;
@@ -264,6 +285,11 @@ function checkURLs($system, $return_output, $verbose=false){
         . 'INNER JOIN Records ON rec_ID = dtl_RecID '
         . 'WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND dtl_Value REGEXP "https?://"';
 
+        
+    if($list_only){
+        print "<h4>URLs in text fields</h4>";   
+    }
+        
     $res = $mysqli->query($query);
     if($res){
 
@@ -290,12 +316,29 @@ function checkURLs($system, $return_output, $verbose=false){
                     if($url[-1] == '.'){
                         $url = substr($url, 0, -1);
                     }
+                    
+                    if($list_only){
+                        print intval($rec_id).' : '.$dty_id.'  <a href="'. $url .'" target="_blank" rel="noopener">'.$url . '</a><br>';
+                        continue;
+                    }
+                    if(strpos(strtolower($url),$heurist_server_url)===0){
+                        continue; //skip same server
+                    }
 
-                    $data = loadRemoteURLContentWithRange($url, "0-1000", true, 10);
+                    $data = loadRemoteURLContentWithRange($url, "0-250", true, 5);
 
                     if($data){
                         $passed_cnt ++;
                     }else{
+                        
+                        if($glb_curl_code == HEURIST_SYSTEM_FATAL){
+                            if($return_output){
+                                return $glb_curl_error;
+                            }else{
+                                print '<p>'. $glb_curl_error . '</p>';
+                            }
+                            break;
+                        }
 
                         if(!array_key_exists($rec_id, $broken_field_urls)){
                             $broken_field_urls[$rec_id] = array();
@@ -328,7 +371,11 @@ function checkURLs($system, $return_output, $verbose=false){
         . 'FROM recDetails '
         . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
         . 'INNER JOIN recUploadedFiles ON ulf_ID = dtl_UploadedFileID '
-        . 'WHERE dty_Type = "file" AND ulf_ExternalFileReference != ""';
+        . 'WHERE dty_Type = "file" AND  ulf_OrigFileName NOT LIKE "_tiled%" AND ulf_ExternalFileReference != ""';
+        
+    if($list_only){
+        print "<h4>External URLs (File fields)</h4>";   
+    }
 
     $res = $mysqli->query($query);
     if($res){
@@ -338,16 +385,34 @@ function checkURLs($system, $return_output, $verbose=false){
             $rec_id = $row[0];
             $url = $row[1];
             $dty_id = $row[2];
+            $data = null;
 
             /*if($return_output){
                 $results[2]['count'] ++;
             }*/
 
-            $data = loadRemoteURLContentWithRange($url, "0-1000", true, 10);
+            if($list_only){
+                print intval($rec_id).' : '.$dty_id.'  <a href="'. $url .'" target="_blank" rel="noopener">'.$url . '</a><br>';
+                continue;
+            }
+            if(strpos(strtolower($url),$heurist_server_url)===0){
+                continue; //skip same server
+            }
+            
+            $data = loadRemoteURLContentWithRange($url, "0-250", true, 5);
 
             if($data){
                 $passed_cnt++;
             }else{
+                        if($glb_curl_code == HEURIST_SYSTEM_FATAL){
+                            if($return_output){
+                                return $glb_curl_error;
+                            }else{
+                                print '<p>'. $glb_curl_error . '</p>';
+                            }
+                            break;
+                        }
+                
                 if(!array_key_exists($rec_id, $broken_field_urls)){
                     $rec_cnt ++;
                     $broken_field_urls[$rec_id] = array();
