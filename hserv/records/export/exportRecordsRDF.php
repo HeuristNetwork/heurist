@@ -358,9 +358,9 @@ private function _setResourceProps($record, &$resource){
                     $value = $this->graph->resource($file_resource_uri);//create new or find resource
                     if($this->include_resource_file_info){
                         if(@$fileinfo['ulf_OrigFileName']){
-                            $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
-                                         strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 ||
-                                         strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
+                            $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], ULF_REMOTE) === 0 || // skip if not local file
+                                         strpos(@$fileinfo['ulf_OrigFileName'], ULF_IIIF) === 0 ||
+                                         strpos(@$fileinfo['ulf_OrigFileName'], ULF_TILED_IMAGE) === 0;
                             if(!$skip_file){
                                 $value->set('dc:title', $fileinfo['ulf_OrigFileName']);
                             }

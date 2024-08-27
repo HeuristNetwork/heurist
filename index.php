@@ -90,7 +90,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = 'xml';
     }
 
-    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
+    redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
             .(@$_REQUEST['noheader']?'&noheader=1':''));
     return;
 
@@ -100,7 +100,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     parse_str($_SERVER['QUERY_STRING'], $vars);
     $query_string = http_build_query($vars);
 
-    header('Location: hserv/controller/api.php?'.$query_string);
+    redirectURL('hserv/controller/api.php?'.$query_string);
     return;
 
 }else
@@ -111,7 +111,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
             elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
-                header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
+                redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
 }elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||

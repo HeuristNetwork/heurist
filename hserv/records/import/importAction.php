@@ -3009,7 +3009,7 @@ public static function performImport($params, $mode_output){
                                             //add to table
                                             $ulf_ID = mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf',
                                                 array("ulf_ID"=>0,
-                                                    'ulf_OrigFileName'=>'_remote',
+                                                    'ulf_OrigFileName'=>ULF_REMOTE,
                                                     'ulf_UploaderUGrpID'=> self::$system->get_user_id(),
                                                     //'ulf_ObfuscatedFileID'=>$nonce,
                                                     'ulf_ExternalFileReference'=>$r_value,

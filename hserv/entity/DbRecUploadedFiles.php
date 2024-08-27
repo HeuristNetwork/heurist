@@ -332,8 +332,8 @@ class DbRecUploadedFiles extends DbEntityBase
 
             if(@$record['ulf_ExternalFileReference']){
 
-                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0 &&
-                   strpos(@$this->records[$idx]['ulf_OrigFileName'],'_iiif')!==0 &&
+                if(strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_TILED_IMAGE)!==0 &&
+                   strpos(@$this->records[$idx]['ulf_OrigFileName'],ULF_IIIF)!==0 &&
                    strpos(@$this->records[$idx]['ulf_PreferredSource'],'iiif')!==0 &&
                    strpos(@$this->records[$idx]['ulf_PreferredSource'],'tiled')!==0)
                 {
@@ -413,7 +413,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 }
 
                                 //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif';
+                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF;
                                 //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif';
                                 $mimeType = 'json';
@@ -434,7 +434,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $this->records[$idx]['ulf_TempThumbUrl'] = $thumb_url;
 
                                 //if(!@$this->records[$idx]['ulf_OrigFileName']){
-                                $this->records[$idx]['ulf_OrigFileName'] = '_iiif_image';
+                                $this->records[$idx]['ulf_OrigFileName'] = ULF_IIIF_IMAGE;
                                 //}
                                 $this->records[$idx]['ulf_PreferredSource'] = 'iiif_image';
                                 $mimeType = 'json';
@@ -446,7 +446,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     }
 
                     if(!$this->records[$idx]['ulf_OrigFileName']){
-                        $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+                        $this->records[$idx]['ulf_OrigFileName'] = ULF_REMOTE;
                     }
                     if(!@$this->records[$idx]['ulf_PreferredSource']){
                         $this->records[$idx]['ulf_PreferredSource'] = 'external';
@@ -502,8 +502,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 if($fileExtension==null &&
                     $this->records[$idx]['ulf_PreferredSource']=='local')
-                    //$this->records[$idx]['ulf_OrigFileName'] != '_remote' &&
-                    //strpos($this->records[$idx]['ulf_OrigFileName'],'_tiled')!==0)
+                    //$this->records[$idx]['ulf_OrigFileName'] != ULF_REMOTE &&
+                    //strpos($this->records[$idx]['ulf_OrigFileName'],ULF_TILED_IMAGE)!==0)
                 {
                     //mimetype not found - try to get extension from name
                     $extension = strtolower(pathinfo($this->records[$idx]['ulf_OrigFileName'], PATHINFO_EXTENSION));
@@ -619,7 +619,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                     $file2['ulf_ID'] = $ulf_ID;
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
 
-                    if(strpos($record['ulf_OrigFileName'],'_tiled')===0 || $record['ulf_PreferredSource']=='tiled')
+                    if(strpos($record['ulf_OrigFileName'],ULF_TILED_IMAGE)===0 || $record['ulf_PreferredSource']=='iiif_image')
                     {
                         if(!@$record['ulf_ExternalFileReference']){
                             if($record['ulf_MimeExt']=='mbtiles'){
@@ -646,7 +646,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 }
             }
 
-            if( (strpos($record['ulf_OrigFileName'],'_iiif')===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
+            if( (strpos($record['ulf_OrigFileName'],ULF_IIIF)===0  || strpos($record['ulf_PreferredSource'],'iiif')===0)
                 && @$record['ulf_TempThumbUrl']){
 
                     $thumb_name = HEURIST_THUMB_DIR.'ulf_'.$this->records[$rec_idx]['ulf_ObfuscatedFileID'].'.png';
@@ -665,7 +665,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 //copy temp file from scratch to fileupload folder
                 $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
 
-                if(strpos($record['ulf_OrigFileName'],'_tiled')===0  || $record['ulf_PreferredSource']=='tiled')
+                if(strpos($record['ulf_OrigFileName'],ULF_TILED_IMAGE)===0  || $record['ulf_PreferredSource']=='tiled')
                 {
                     if($record['ulf_MimeExt']=='mbtiles'){
 
@@ -937,7 +937,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                             'ulf_ExternalFileReference' => $url,
                                             'ulf_ObfuscatedFileID' => $file_dtls[0],
                                             'ulf_MimeExt' => $file_dtls[1],
-                                            'ulf_OrigFileName' => '_remote'
+                                            'ulf_OrigFileName' => ULF_REMOTE
                                         );
                                     }
                                 }else{
@@ -968,7 +968,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                     'ulf_ExternalFileReference' => $urls,
                                     'ulf_ObfuscatedFileID' => $file_dtls[0],
                                     'ulf_MimeExt' => $file_dtls[1],
-                                    'ulf_OrigFileName' => '_remote'
+                                    'ulf_OrigFileName' => ULF_REMOTE
                                 );
                             }
                         }else{
@@ -1496,7 +1496,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 if($tiledImageStack){
                     //special case for tiled images stack
                     $path_parts = pathinfo($fields['ulf_OrigFileName']);
-                    $fields['ulf_OrigFileName'] = '_tiled@'.$path_parts['filename'];
+                    $fields['ulf_OrigFileName'] = ULF_TILED_IMAGE.'@'.$path_parts['filename'];
                     $fields['ulf_PreferredSource'] = 'tiled';
                 }else{
                     $fields['ulf_PreferredSource'] = 'local';
@@ -1605,7 +1605,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
        if($fields==null) {$fields = array();}
        $fields['ulf_PreferredSource'] = $tiledImageStack?'tiled':'external';
-       $fields['ulf_OrigFileName']    = $tiledImageStack?'_tiled@':'_remote';//or _iiif
+       $fields['ulf_OrigFileName']    = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
 
        if(!@$fields['ulf_MimeExt']){
@@ -1905,7 +1905,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
             // Check dup local file's size and checksum against each other
             $query = 'SELECT ulf_OrigFileName, count(*) AS cnt '
             . 'FROM recUploadedFiles '
-            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "_iiif%"'. $where_ids . ' '
+            . 'WHERE ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName<>"_remote" AND ulf_OrigFileName NOT LIKE "'.ULF_IIIF.'%"'. $where_ids . ' '
             . 'GROUP BY ulf_OrigFileName HAVING cnt > 1';
             $local_dups = $mysqli->query($query);
             $cnt = 0;
@@ -2225,7 +2225,7 @@ if($is_verbose) {echo 'Thumnails DONE<br>';}
                             ?$file_details['ulf_Caption']:$file_details['ulf_OrigFileName']
                     );
 
-                    if($file_details['ulf_OrigFileName'] == '_remote'){
+                    if($file_details['ulf_OrigFileName'] == ULF_REMOTE){
                         $record['URL'] = $file_details['ulf_ExternalFileReference'];
                     }
 

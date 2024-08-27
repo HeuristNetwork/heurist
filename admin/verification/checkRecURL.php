@@ -377,7 +377,7 @@ function checkURLs($system, $return_output, $verbose=false, $list_only=false){
         . 'FROM recDetails '
         . 'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID '
         . 'INNER JOIN recUploadedFiles ON ulf_ID = dtl_UploadedFileID '
-        . 'WHERE dty_Type = "file" AND  ulf_OrigFileName NOT LIKE "_tiled%" AND ulf_ExternalFileReference != ""';
+        . 'WHERE dty_Type = "file" AND  ulf_OrigFileName NOT LIKE "'.ULF_TILED_IMAGE.'%" AND ulf_ExternalFileReference != ""';
         
     if($list_only){
         print "<h4>External URLs (File fields)</h4>";   

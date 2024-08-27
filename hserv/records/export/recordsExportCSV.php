@@ -662,12 +662,12 @@ public static function output($data, $params){
                                 $vals[] = 'ulf_' . $val['file']['ulf_ObfuscatedFileID'];
 
                                 $file_ids[] = $val['file']['ulf_ID'];
-                                $file_names[] = !empty($val['file']['ulf_OrigFileName']) ? $val['file']['ulf_OrigFileName'] : '_remote';//$val['file']['ulf_ExternalFileReference']
+                                $file_names[] = !empty($val['file']['ulf_OrigFileName']) ? $val['file']['ulf_OrigFileName'] : ULF_REMOTE;//$val['file']['ulf_ExternalFileReference']
 
                                 if(!empty($val['file']['fullPath'])){
                                     $file_paths[] = $val['file']['fullPath'];
                                 }elseif(!empty($val['file']['ulf_ExternalFileReference'])){
-                                    $file_paths[] = $val['file']['ulf_ExternalFileReference'];//'_remote'
+                                    $file_paths[] = $val['file']['ulf_ExternalFileReference'];//ULF_REMOTE
                                 }else{
                                     $file_paths[] = '';
                                 }

@@ -71,7 +71,7 @@ $bib_ids = prepareIds(filter_var(@$_REQUEST['bib_ids'], FILTER_SANITIZE_STRING))
 $bib_ids_list = implode(',', $bib_ids);
 
 if ( count($bib_ids)==0 ){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
+    redirectURL(ERROR_REDIR.'&msg='.rawurlencode('Wrong parameter. List of record ids is not defined'));
     exit;
 }
 
@@ -998,6 +998,6 @@ function do_fix_dupe()
         }
     }
     //reload with flag that operation is completed
-    header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$bib_ids_list);
+    redirectURL('combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$bib_ids_list);
 }
 ?>

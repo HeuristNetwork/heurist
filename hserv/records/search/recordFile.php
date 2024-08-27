@@ -347,7 +347,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
         $query = $query
             .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
             ." and (fxm_MimeType like 'image%' OR fxm_MimeType='video/youtube' OR fxm_MimeType='video/vimeo' OR fxm_MimeType='audio/soundcloud' "
-            ." OR ulf_OrigFileName LIKE '_iiif%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
+            ." OR ulf_OrigFileName LIKE '".ULF_IIIF."%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
             .' LIMIT 1';
         $fileid = mysql__select_value($system->get_mysqli(), $query);
     }
@@ -640,7 +640,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
     if($is_local){
 
-    }elseif($external_url && strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled'){
+    }elseif($external_url && strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled'){
 
         $_tmpfile = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
         $filepath = $_tmpfile;
@@ -653,7 +653,7 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $zip = new ZipArchive();
     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
         $system->error_exit_api("Cannot create zip $file_zip_full");
-    }elseif(strpos($originalFileName,'_tiled')!==0 && $source_type!='tiled' ) {
+    }elseif(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $source_type!='tiled' ) {
         $zip->addFile($filepath, $originalFileName);
     }
 
@@ -690,9 +690,9 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
     $is_video = (strpos($mimeType,"video/")===0);// || @$params['video']
     $is_audio = (strpos($mimeType,"audio/")===0);// || @$params['audio']
-    $is_image = (strpos($mimeType,"image/")===0);
+    $is_image = (strpos($mimeType,DIR_IMAGE)===0);
     if($params && is_array($params)){
-        $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],'_iiif')===0 ||
+        $is_iiif = (strpos(@$params['var'][0]['ulf_OrigFileName'],ULF_IIIF)===0 ||
                     strpos(@$params['var'][0]['ulf_PreferredSource'],'iiif')===0);
     }
 
@@ -803,7 +803,7 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
 
         $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
                     .$system->dbname();
-        if(($iiif_type=='_iiif_image' || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
+        if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
         }else{
@@ -918,9 +918,9 @@ function getPlayerURL($mimeType, $url, $params=null){
  */
 function getWebImageCache($system, $fileinfo, $return_url=true){
 
-    $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], '_remote') === 0 || // skip if not local file
-                 strpos(@$fileinfo['ulf_OrigFileName'], '_iiif') === 0 ||
-                 strpos(@$fileinfo['ulf_OrigFileName'], '_tiled') === 0;
+    $skip_file = strpos(@$fileinfo['ulf_OrigFileName'], ULF_REMOTE) === 0 || // skip if not local file
+                 strpos(@$fileinfo['ulf_OrigFileName'], ULF_IIIF) === 0 ||
+                 strpos(@$fileinfo['ulf_OrigFileName'], ULF_TILED_IMAGE) === 0;
 
     if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
         return false;
@@ -1021,7 +1021,7 @@ function fileGetMetadata($fileinfo){
     $image = null;
     $alt_image = null;
 
-    if(strpos($originalFileName,'_tiled')!==0 && $sourceType!='tiled' && $type_media=='image'){
+    if(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $sourceType!='tiled' && $type_media=='image'){
 
         if(file_exists($filepath)){
 
@@ -1149,7 +1149,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
         elseif(@$file['ulf_ExternalFileReference']){  //remote
 
             if(@$file['ulf_OrigFileName'] &&
-                (strpos($file['ulf_OrigFileName'],'_tiled')===0 || @$file['ulf_PreferredSource']=='tiled') )  {
+                (strpos($file['ulf_OrigFileName'],ULF_TILED_IMAGE)===0 || @$file['ulf_PreferredSource']=='tiled') )  {
 
                 $img = UImage::createFromString('tiled images stack');//from string
 

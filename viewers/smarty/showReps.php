@@ -1356,7 +1356,7 @@ function smarty_function_wrap($params, &$smarty)
 
                 if($mode=="link") {
 
-                    $sname = (!$originalFileName || $originalFileName=='_remote' || strpos($originalFileName,'_iiif')===0)
+                    $sname = (!$originalFileName || $originalFileName==ULF_REMOTE || strpos($originalFileName,ULF_IIIF)===0)
                         ?$external_url:$originalFileName;
 
                     if(@$params['fancybox']){

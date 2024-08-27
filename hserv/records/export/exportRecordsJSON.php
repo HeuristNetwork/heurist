@@ -590,7 +590,7 @@ private static function _getMediaViewerData($record){
 
         foreach($info as $fileinfo){
 
-            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) {continue;}
+            if(strpos($fileinfo['ulf_OrigFileName'],ULF_TILED_IMAGE)===0) {continue;}
 
             $mimeType = $fileinfo['fxm_MimeType'];
 
@@ -601,7 +601,7 @@ private static function _getMediaViewerData($record){
             }elseif(strpos($mimeType,"audio/")===0){
                 if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
-            }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            }elseif(strpos($mimeType,DIR_IMAGE)===0 || $fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){
                 $resource_type = 'Image';
             }
 

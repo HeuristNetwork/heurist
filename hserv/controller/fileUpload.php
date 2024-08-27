@@ -175,13 +175,13 @@ if($response!=null){
         $max_file_size = intval(@$params['max_file_size']);
         if($max_file_size>0){
 // it does not work
-//            file_put_contents(HEURIST_FILESTORE_DIR.'scratch/.htaccess',
+//            file_put_contents(HEURIST_FILESTORE_DIR.DIR_SCRATCH.'.htaccess',
 //                "php_value post_max_size $max_file_size\nphp_value upload_max_filesize $max_file_size");
         }
 
         $options = array(
-                'upload_dir' => HEURIST_FILESTORE_DIR.'scratch/',
-                'upload_url' => HEURIST_FILESTORE_URL.'scratch/',
+                'upload_dir' => HEURIST_FILESTORE_DIR.DIR_SCRATCH,
+                'upload_url' => HEURIST_FILESTORE_URL.DIR_SCRATCH,
                 'max_file_size' => $max_file_size,
                 // 'unique_filename' => false,  force unique file name
                 //'image_versions' => array()
@@ -194,7 +194,7 @@ if($response!=null){
 
         $options = array(
                 'upload_dir' => HEURIST_SCRATCH_DIR,
-                'upload_url' => HEURIST_FILESTORE_URL.'scratch/', //file_uploads/
+                'upload_url' => HEURIST_FILESTORE_URL.DIR_SCRATCH, //file_uploads/
                 'unique_filename' => false,
                 'newfilename' => $new_file_name,
                 'correct_image_extensions' => true,
@@ -332,7 +332,7 @@ if($response!=null){
             }
             elseif($entity_name=="temp" && $is_autodect_csv) {
 
-                $filename = HEURIST_FILESTORE_DIR.'scratch/'.basename($file->original_name);
+                $filename = HEURIST_FILESTORE_DIR.DIR_SCRATCH.basename($file->original_name);
 
                 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                 $isKML = ($extension=='kml' || $extension=='kmz');

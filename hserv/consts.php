@@ -225,6 +225,17 @@ define('HEURIST_ALLOWED_EXT',
 .'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,'
 .'ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,mtl,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim');
 
+//special media types
+define('ULF_REMOTE','_remote');
+define('ULF_IIIF','_iiif');
+define('ULF_IIIF_IMAGE','_iiif_image');
+define('ULF_TILED_IMAGE','_tiled');
+
+//default system folders
+define('DIR_IMAGE','image/');
+define('DIR_SCRATCH','scratch/');
+
+
 /** RECORD TYPE DEFINITIONS */
 $rtDefines = array(
     // Standard core record types (HeuristCoreDefinitions: DB = 2)

@@ -15,7 +15,7 @@
                 $upload_root = $system->getFileStoreRootFolder();
                 $filestore_dir = $upload_root . basename($dbname) . '/';
                 if(file_exists($filestore_dir)){
-                    $dir = $filestore_dir.'scratch/';
+                    $dir = $filestore_dir.DIR_SCRATCH;
                     $warn = folderCreate2($dir, '', false);
                     if($warn==''){
                         define('HEURIST_SCRATCH_DIR', $dir);

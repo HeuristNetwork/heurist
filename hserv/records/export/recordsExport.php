@@ -2136,7 +2136,7 @@ private static function _getMediaViewerData($record){
 
         foreach($info as $fileinfo){
 
-            if(strpos($fileinfo['ulf_OrigFileName'],'_tiled')===0) {continue;}
+            if(strpos($fileinfo['ulf_OrigFileName'],ULF_TILED_IMAGE)===0) {continue;}
 
             $mimeType = $fileinfo['fxm_MimeType'];
 
@@ -2147,7 +2147,7 @@ private static function _getMediaViewerData($record){
             }elseif(strpos($mimeType,"audio/")===0){
                 if(strpos($mimeType,"soundcloud")>0) {continue;}
                 $resource_type = 'Sound';
-            }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+            }elseif(strpos($mimeType,DIR_IMAGE)===0 || $fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){
                 $resource_type = 'Image';
             }
 
@@ -2263,7 +2263,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
             if(strpos($mimeType,"soundcloud")>0) {continue;}
 
             $resource_type = 'Sound';
-        }elseif(strpos($mimeType,"image/")===0 || $fileinfo['ulf_OrigFileName']=='_iiif_image'){
+        }elseif(strpos($mimeType,DIR_IMAGE)===0 || $fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){
             $resource_type = 'Image';
         }
 
@@ -2282,7 +2282,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
 
         $height = 800;
         $width = 1000;
-        if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!='_iiif_image'){
+        if($resource_type=='Image' && $fileinfo['ulf_OrigFileName']!=ULF_IIIF_IMAGE){
             $img_size = getimagesize($resource_url);
             if(is_array($img_size)){
                 $width = $img_size[0];
@@ -2303,7 +2303,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
         $resource_id = '';
 
         //get iiif image parameters
-        if($fileinfo['ulf_OrigFileName']=='_iiif_image'){ //this is image info - it gets all required info from json
+        if($fileinfo['ulf_OrigFileName']==ULF_IIIF_IMAGE){ //this is image info - it gets all required info from json
 
                 $iiif_manifest = loadRemoteURLContent($fileinfo['ulf_ExternalFileReference']);//retrieve iiif image.info to be included into manifest
                 $iiif_manifest = json_decode($iiif_manifest, true);
@@ -2319,7 +2319,7 @@ public static function getIiifResource($record, $ulf_ObfuscatedFileID, $type_res
                     $mimeType = null;
                     if(is_array($profile)){
                         $mimeType = @$profile[1]['formats'][0];
-                        if($mimeType) {$mimeType = 'image/'.$mimeType;}
+                        if($mimeType) {$mimeType = DIR_IMAGE.$mimeType;}
                         $profile = @$profile[0];
                     }elseif($profile==null){
                         $profile = 'level1';
@@ -2426,7 +2426,7 @@ if($resource_id){ //this is iiif image
     $canvas_uri = $root_uri.'canvas/'.$fileid;
     $annopage_uri = $root_uri.'page/'.$fileid;
     $annotation_uri = $root_uri.'annotation/'.$fileid;
-    $image_uri = $root_uri.'image/'.$fileid.'/info.json';
+    $image_uri = $root_uri.DIR_IMAGE.$fileid.'/info.json';
 }
 
 

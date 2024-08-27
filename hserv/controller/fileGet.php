@@ -57,7 +57,7 @@ if($filename){ //download from scratch (for csv import)
         //remove slashes - prevents Local file disclosure
         $filename = USanitize::sanitizeFileName($filename, false);
 
-        $file_read = HEURIST_FILESTORE_DIR.'scratch/'.$filename;
+        $file_read = HEURIST_FILESTORE_DIR.DIR_SCRATCH.$filename;
         
         $file_read = isPathInHeuristUploadFolder( $file_read );
 
@@ -115,7 +115,7 @@ if($filename){ //download from scratch (for csv import)
                 exit;
             }
 
-            //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $original_filename);
+            //$encoded_file_name = tempnam(HEURIST_FILESTORE_DIR.DIR_SCRATCH, $original_filename);
             $res = file_put_contents($file_read, $content);
             unset($content);
             if(!$res){

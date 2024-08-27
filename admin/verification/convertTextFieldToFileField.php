@@ -79,9 +79,9 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     }
 
     $type_2 = 'external';
-    $type_ = '_remote';
+    $type_ = ULF_REMOTE;
     if($orig_db_id==2 && $orig_id==34){
-        $type_ = '_tiled@';
+        $type_ = ULF_TILED_IMAGE.'@';
         $type_2 = 'tiled';
     }
 
@@ -138,10 +138,10 @@ if( $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
                 $dtl_ID = intval($row[0]);
                 $url = $row[1];
 
-                //$ulf_ID = $entity->registerURL($url, $type_!=='_remote');
+                //$ulf_ID = $entity->registerURL($url, $type_!==ULF_REMOTE);
 
                 $nonce = addslashes(sha1($k.'.'.random_int(0,99)));
-                $ext = ($type_=='_remote') ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source
+                $ext = ($type_==ULF_REMOTE) ? recognizeMimeTypeFromURL($mysqli, $url) :'png';//@todo check preferred source
 
                 $insert_query = "insert into `$db_name`.recUploadedFiles "
                 .'(ulf_OrigFileName,ulf_ObfuscatedFileID,ulf_UploaderUGrpID,ulf_ExternalFileReference,ulf_MimeExt,ulf_PreferredSource) '

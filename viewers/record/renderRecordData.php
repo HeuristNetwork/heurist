@@ -1826,13 +1826,13 @@ function print_public_details($bib) {
                         $bd['val'] = $bd['val'].htmlspecialchars($file_description).'<br>';
                     }*/
                     $bd['val'] .= '<span class="external-link" style="vertical-align: bottom;"></span>';
-                    if(strpos($originalFileName,'_iiif')===0){
+                    if(strpos($originalFileName,ULF_IIIF)===0){
                         $bd['val'] = $bd['val'].'<img src="'.HEURIST_BASE_URL.'hclient/assets/iiif_logo.png" style="width:16px"/>';
                         $originalFileName = null;
                     }
 
 
-                    $bd['val'] .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!='_remote')
+                    $bd['val'] .= '<span>'.htmlspecialchars(($originalFileName && $originalFileName!=ULF_REMOTE)
                                         ?$originalFileName
                                         :($external_url?$external_url:$file_URL)).'</span></a> '
                             .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
@@ -1950,7 +1950,7 @@ function print_public_details($bib) {
     if(!($is_map_popup || $without_header)){
         print '<script>';
         foreach ($thumbs as $thumb) {
-            if(strpos($thumb['orig_name'], '_iiif')===0 || $thumb['mode_3d_viewer']!=''){
+            if(strpos($thumb['orig_name'], ULF_IIIF)===0 || $thumb['mode_3d_viewer']!=''){
 
                 $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
                 print $to_array.'.push({rec_ID:'.$bib['rec_ID']
@@ -1982,7 +1982,7 @@ function print_public_details($bib) {
     if($hide_images != 2){ // use/hide all thumbnails
         foreach ($thumbs as $k => $thumb) {
 
-            if(strpos($thumb['orig_name'],'_iiif')===0 || $thumb['mode_3d_viewer'] != '' ){
+            if(strpos($thumb['orig_name'],ULF_IIIF)===0 || $thumb['mode_3d_viewer'] != '' ){
 
                 if($thumb['linked'] && !$added_linked_media_cont){
                     print '<div class="thumbnail2 linked-media" style="text-align:center"></div>';
@@ -1994,7 +1994,7 @@ function print_public_details($bib) {
 
             $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
 
-            $isImageOrPdf = (strpos($thumb['mimeType'],"image/")===0 || $thumb['mimeType']=='application/pdf');
+            $isImageOrPdf = (strpos($thumb['mimeType'],DIR_IMAGE)===0 || $thumb['mimeType']=='application/pdf');
 
             if($thumb['player'] && !$is_map_popup && $isAudioVideo){
                 print '<div class="fullSize media-content" style="text-align:left;'

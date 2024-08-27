@@ -82,7 +82,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
                 .' FROM recLinks, recDetails, recUploadedFiles '
                 .' WHERE rl_SourceID='.$rec_ID
                 .' AND dtl_RecID=rl_TargetID '  //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
+                .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
 
             $row = mysql__select_row($mysqli, $query);
 
@@ -118,7 +118,7 @@ require_once dirname(__FILE__).'/../../../autoload.php';
                 $query = 'SELECT ulf_ObfuscatedFileID '
                     .' FROM recDetails, recUploadedFiles '
                     .' WHERE dtl_RecID='.$rec_ID //'AND dtl_DetailTypeID IN ('.implode(',',$file_field_types).')'
-                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="_iiif"';
+                    .' AND dtl_UploadedFileID=ulf_ID AND ulf_OrigFileName="'.ULF_IIIF.'"';
 
                 $_REQUEST['iiif'] = mysql__select_value($mysqli, $query);
             }

@@ -229,7 +229,7 @@ if(mysql__check_dbname($db)==null){
                     if(@$req_params['mode']=='url'){
 
                         //if it does not start with http - this is relative path
-                        if(strpos($originalFileName,'_tiled')===0 ||
+                        if(strpos($originalFileName,ULF_TILED_IMAGE)===0 ||
                           !(strpos($external_url,'http://')===0 || strpos($external_url,'https://')===0)){
 
                             $path = USanitize::sanitizePath( $external_url );
@@ -255,7 +255,7 @@ if(mysql__check_dbname($db)==null){
                         print json_encode($response);
 
                     }else
-                    if(strpos($originalFileName,'_tiled')===0){
+                    if(strpos($originalFileName,ULF_TILED_IMAGE)===0){
 
                         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
 

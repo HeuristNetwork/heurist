@@ -192,7 +192,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 $dirs = $dirs_checked; //$dirs2;
 
                 // add the scratch directory, which will be the default for upload of material for import
-                //array_push($dirs, HEURIST_FILESTORE_DIR.'scratch/');
+                //array_push($dirs, HEURIST_FILESTORE_DIR.DIR_SCRATCH);
                 //array_push($dirs, HEURIST_FILES_DIR);
 
                 // The defined list of file extensions for FieldHelper indexing.

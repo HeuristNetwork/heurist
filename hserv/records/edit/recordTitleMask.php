@@ -666,7 +666,7 @@ private static function __get_file_name($ulf_ID){
     if($ulf_ID>0){
         $fileinfo = fileGetFullInfo(self::$system, $ulf_ID);
         if(is_array($fileinfo) && count($fileinfo)>0){
-            return $fileinfo[0]['ulf_OrigFileName'] == '_remote' ?
+            return $fileinfo[0]['ulf_OrigFileName'] == ULF_REMOTE ?
                     $fileinfo[0]['ulf_ExternalFileReference'] : $fileinfo[0]['ulf_OrigFileName'];
             //  array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
         }

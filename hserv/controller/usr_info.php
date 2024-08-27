@@ -749,7 +749,7 @@
 
                     // File
                     $params['file'] = array(
-                        'path' => HEURIST_FILESTORE_DIR . '/scratch/'
+                        'path' => HEURIST_FILESTORE_DIR . DIR_SCRATCH
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
                         'name' => htmlspecialchars($req_params['file'][0]['original_name'])
@@ -840,7 +840,7 @@
 
                 if($res !== false){
                     // delete local file after upload
-                    fileDelete(HEURIST_FILESTORE_DIR . '/scratch/' . basename($req_params['file'][0]['name']));
+                    fileDelete(HEURIST_FILESTORE_DIR . DIR_SCRATCH . basename($req_params['file'][0]['name']));
                     fileDelete(HEURIST_FILESTORE_DIR . '/scratch/thumbnail/' . basename($req_params['file'][0]['name']));
                 }
             } else {
