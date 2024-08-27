@@ -464,7 +464,7 @@ function editCMS2(website_document){
                 {text:window.hWin.HR('Save'), 
                     click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
                 },
-                {text:window.hWin.HR('Discard'), 
+                {text:window.hWin.HR('Leave unchanged'), 
                     click: function(){
                         _toolbar_Page.hide();
                         page_was_modified = false; 
@@ -478,7 +478,8 @@ function editCMS2(website_document){
             ];            
             
             let sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
-            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, {appendTo: 'body'});
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
+                            {appendTo: 'body', default_palette_class:default_palette_class});
 
             return true;     
         }else{
@@ -530,20 +531,22 @@ function editCMS2(website_document){
         } 
         opts.rec_ID = home_page_record_id;
         
+        let was_converted_to_new_format = false;
+        
         if(supress_conversion!==true && typeof _layout_content === 'string' &&
             _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
 
                             const res = window.hWin.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
                             if(res!==false){
-                                page_was_modified = true;
+                                was_converted_to_new_format = true;
                                 _layout_content = res;
                                 
-const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which is both much easier and much more powerful than the original editor and requires an entirely new data format. Heurist converts pages automatically to the new editor.</p>'
-+'<p>If this page uses complex formatting we cannot be sure of converting correctly through this automatic process.</p>'
-+'<p>If you think this conversion is very different from your original, DO NOT hit SAVE, and open the page instead in the old web page editor (<b>Edit page content</b> or <b>Edit html source</b> links in the Publish menu) and get in touch with us (support at HeuristNetwork dot org) for help with conversion.</p>'
-+'<p>Please note the old editor will be DISCONTINUED at the end of February 2022, and we may not have time to help you at the last moment, so please contact us immediately.</p>'
+const sMsg = '<p>The internal storage format of web pages has changed for greater efficiency and stability.</p>'
++'<p>Page is converted to new format and you can modify it. In order to save, hit <b>Save</b> on page exit.</p>'
++'<p>For backward compatibility we can display, but not edit, the old format. You may therefore leave the page in the old format by hitting <b>Leave unchanged</b>.</p>'
++'<p>We recommend saving in the new format</p>';
                                 
-                                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+                                window.hWin.HEURIST4.msg.showMsg(sMsg,{title:'New format', default_palette_class: default_palette_class});
                             }
              
         }
@@ -564,6 +567,10 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                 .text( options.record_id==home_page_record_id ? window.hWin.HR('Home Page') :opts.page_name );
         
         if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
+        
+        if(was_converted_to_new_format){
+            page_was_modified = was_converted_to_new_format;
+        }
     }
 
     //
@@ -844,7 +851,7 @@ const sMsg = '<p>Heurist\'s CMS editor has been upgraded to a new system which i
                     },500);    
                 }
             },
-            default_palette_class: 'ui-heurist-publish'                                        
+            default_palette_class: default_palette_class                                        
             }
         );    
 
