@@ -250,6 +250,7 @@ $.widget( "heurist.selectMultiValues", {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             data.node.setTitle(newname);       
                             data.node.origTitle = newname;
+                            data.node.key = newname;
                             data.node.folder = true;
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

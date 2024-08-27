@@ -476,7 +476,7 @@
 
                   if($dir_name==''){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not defined or out of the root');
-                  }elseif(!is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
+                  }elseif($op!='create' && !is_dir(HEURIST_FILESTORE_DIR.$dir_name)){
                       $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder name is not a directory');
                   }else{
 
