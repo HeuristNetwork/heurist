@@ -147,7 +147,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_url.val('');
         this.input_search_path.val('');
         this.input_search_type.val('');
-        this.input_search_referenced,val('');
+        this.input_search_referenced.val('');
     },
     //
     // special case to show recently added record
