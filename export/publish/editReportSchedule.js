@@ -220,7 +220,10 @@ function ReportScheduleEditor() {
         for(let i = 0, l = fnames.length; i < l; i++){
             let fname = fnames[i];
             let el = document.getElementById(fname);
-            if( !window.hWin.HEURIST4.util.isnull(el) && fname!='rps_ID' ){
+            if( window.hWin.HEURIST4.util.isnull(el) || fname=='rps_ID' ){
+                continue;
+            }
+            
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
                     _updatedFields.push(fname);
@@ -236,7 +239,7 @@ function ReportScheduleEditor() {
                     _updatedFields = [];
                     return "mandatory";
                 }
-            }
+            
         }
 
         return "ok";

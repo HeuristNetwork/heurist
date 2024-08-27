@@ -379,9 +379,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // $Db is alias for HEURIST4.dbs, defined in hclient/core/utils_dbs.js
             if ($Db) $Db.needUpdateRtyCount = 1;
 
-            if (response.affectedRty) {
-                //clear record browse cache
-                if (window.hWin.HEURIST4.browseRecordTargets) {
+            if (response.affectedRty && window.hWin.HEURIST4.browseRecordTargets) {
+                    //clear record browse cache
+
                     let rtys = [];
                     if (Array.isArray(response.affectedRty)) {
                         rtys = response.affectedRty;
@@ -404,7 +404,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             delete window.hWin.HEURIST4.browseRecordTargets[id];
                         }
                     });
-                }
             }
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
@@ -588,7 +587,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         window.hWin.HAPI4.has_access(requiredLevel)) {
                         //verification is accepted now check for password protection
                         window.hWin.HAPI4.SystemMgr.verify_credentials(callback, -1, password_protected, password_entered);
-                    } else {
+                        return;
+                    }
+                    
                         let response = {};
                         response.sysmsg = 0;
                         response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
@@ -623,7 +624,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgErr(response, true);
                         }
 
-                    }
+                    
                 }
 
                 /**
@@ -1225,9 +1226,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             checkPresenceOfRectype: function (rty_IDs, databaseID, message, callback, force_refresh) {
 
                 if (!rty_IDs) {
-                    if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                    if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                        callback.call();   
+                    }
                     return false;
-                } else if (!Array.isArray(rty_IDs)) {
+                }
+                
+                if (!Array.isArray(rty_IDs)) {
                     rty_IDs = [rty_IDs];
                 }
 
@@ -1256,47 +1261,49 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
 
                 //by default we take Heurist_Core_Definitions id#2
-                if (!(databaseID > 0)) databaseID = 2;
+                if (!(databaseID > 0)) {
+                    databaseID = 2;   
+                }
 
                 if (message == false) {
-
+                    //downlaod unconditionally
                     window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', callback);
-
-                } else {
-
-                    let $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
-                        + '<br>'
-                        + window.hWin.HR('Click "Import" to get these definitions'),
-                        {
-                            'Import': function () {
-                                let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                                $dlg2.dialog('close');
-
-                                window.hWin.HEURIST4.msg.bringCoverallToFront();
-                                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
-
-                                //import missed record types
-                                window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', 
-                                    function (response) {
-                                        window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                        let $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
-                                        if ($dlg2.dialog('instance')) $dlg2.dialog('close');
-
-                                        if (response.status == window.hWin.ResponseStatus.OK) {
-                                            if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
-                                        } else {
-                                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                                        }
-                                    });
-
-                            },
-                            'Cancel': function () {
-                                let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                                $dlg2.dialog('close');
-                            }
-                        },
-                        window.hWin.HR('Definitions required'));
+                    return 0;
                 }
+
+                let $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(message
+                    + '<br>'
+                    + window.hWin.HR('Click "Import" to get these definitions'),
+                    {
+                        'Import': function () {
+                            let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');
+
+                            window.hWin.HEURIST4.msg.bringCoverallToFront();
+                            window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
+
+                            //import missed record types
+                            window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, false, 'rectype', 
+                                function (response) {
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                    let $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                                    if ($dlg2.dialog('instance')) $dlg2.dialog('close');
+
+                                    if (response.status == window.hWin.ResponseStatus.OK) {
+                                        if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                                    } else {
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                });
+
+                        },
+                        'Cancel': function () {
+                            let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');
+                        }
+                    },
+                    window.hWin.HR('Definitions required'));
+                
                 return 0;
             },
 
